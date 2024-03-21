@@ -44,7 +44,7 @@ scarb test
 
 ## Contributors ✨
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks goes to these wonderful people. Follow the [contributors guide](https://github.com/keep-starknet-strange/art-peace/blob/main/CONTRIBUTING.md) if you'd like to take part.
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
