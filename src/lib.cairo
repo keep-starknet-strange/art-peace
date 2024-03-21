@@ -69,19 +69,21 @@ mod ArtPeace {
 
         // TODO
         self.color_count.write(12);
-        //self.color_count.write(colors.len().try_into().unwrap());
-        //let mut i = 0;
-        //while i < colors.len() {
-        //    self.colors.write(i, *colors.at(i));
-        //    i += 1;
-        //}
+    //self.color_count.write(colors.len().try_into().unwrap());
+    //let mut i = 0;
+    //while i < colors.len() {
+    //    self.colors.write(i, *colors.at(i));
+    //    i += 1;
+    //}
     }
 
     #[abi(embed_v0)]
     impl ArtPeaceImpl of super::IArtPeace<ContractState> {
         fn place_pixel(ref self: ContractState, pos: u128, color: u8) {
             assert!(pos < self.total_pixels.read());
-            assert!(color < self.color_count.read()); // TODO: remove and consider outside range as base color?
+            assert!(
+                color < self.color_count.read()
+            ); // TODO: remove and consider outside range as base color?
             let now = starknet::get_block_timestamp();
             let caller = starknet::get_caller_address();
             // TODO: Only if the user has placed a pixel before?
