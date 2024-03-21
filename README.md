@@ -16,3 +16,19 @@ Some of the features include :
 
 ## References
 - [r/place technical document](https://www.redditinc.com/blog/how-we-built-rplace)
+
+## Build
+
+To build the project, run:
+
+```bash
+scarb build
+```
+
+## Test
+
+To test the project, run ( uses `snforge` ):
+
+```bash
+scarb test
+```
