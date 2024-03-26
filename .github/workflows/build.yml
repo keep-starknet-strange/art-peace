@@ -14,5 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: asdf-vm/actions/install@v3
-      - run: cd onchain && scarb fmt --check
-      - run: cd onchain && scarb build
+      - run: scarb fmt --check
+        working-directory: onchain
+      - run: scarb build
+        working-directory: onchain
