@@ -3,13 +3,17 @@
 
 # Scarb and Starknet Foundry
 **/target
-.snfoundry_cache/
+**/.snfoundry_cache/
 
 # Starkli
 **/account.json
 **/keystore.json
 
 # All Contributors CLI
-package.json
-yarn.lock
+./package.json
+./yarn.lock
 node_modules/
+
+# TODO
+# Frontend
+# Backend

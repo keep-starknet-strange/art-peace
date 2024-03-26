@@ -11,8 +11,8 @@ trait IArtPeace<TContractState> {
     fn get_width(self: @TContractState) -> u128;
     fn get_height(self: @TContractState) -> u128;
 
-    fn get_last_placed(self: @TContractState) -> u64;
-    fn get_user_last_placed(self: @TContractState, user: starknet::ContractAddress) -> u64;
+    fn get_last_placed_time(self: @TContractState) -> u64;
+    fn get_user_last_placed_time(self: @TContractState, user: starknet::ContractAddress) -> u64;
     fn get_time_between_pixels(self: @TContractState) -> u64;
 
     fn get_extra_pixels_count(self: @TContractState) -> u32;
@@ -28,12 +28,12 @@ mod ArtPeace {
 
     #[storage]
     struct Storage {
-        board: LegacyMap::<u128, u8>,
-        board_width: u128,
-        board_height: u128,
+        canvas: LegacyMap::<u128, u8>,
+        canvas_width: u128,
+        canvas_height: u128,
         total_pixels: u128,
         // Maps the users contract address to the last time they placed a pixel
-        user_last_placed: LegacyMap::<ContractAddress, u64>,
+        last_placed_time: LegacyMap::<ContractAddress, u64>,
         time_between_pixels: u64,
         // Maps the users contract address to the amount of extra pixels they have
         extra_pixels: LegacyMap::<ContractAddress, u32>,
@@ -59,11 +59,11 @@ mod ArtPeace {
 
     #[constructor]
     fn constructor(
-        ref self: ContractState, board_width: u128, board_height: u128, time_between_pixels: u64
+        ref self: ContractState, canvas_width: u128, canvas_height: u128, time_between_pixels: u64
     ) {
-        self.board_width.write(board_width);
-        self.board_height.write(board_height);
-        self.total_pixels.write(board_width * board_height);
+        self.canvas_width.write(canvas_width);
+        self.canvas_height.write(canvas_height);
+        self.total_pixels.write(canvas_width * canvas_height);
 
         self.time_between_pixels.write(time_between_pixels);
 
@@ -87,14 +87,14 @@ mod ArtPeace {
             let now = starknet::get_block_timestamp();
             let caller = starknet::get_caller_address();
             // TODO: Only if the user has placed a pixel before?
-            assert!(now - self.user_last_placed.read(caller) >= self.time_between_pixels.read());
-            self.board.write(pos, color);
-            self.user_last_placed.write(caller, now);
+            assert!(now - self.last_placed_time.read(caller) >= self.time_between_pixels.read());
+            self.canvas.write(pos, color);
+            self.last_placed_time.write(caller, now);
             self.emit(PixelPlaced { placed_by: caller, pos, color });
         }
 
         fn place_pixel_xy(ref self: ContractState, x: u128, y: u128, color: u8) {
-            let pos = x + y * self.board_width.read();
+            let pos = x + y * self.canvas_width.read();
             self.place_pixel(pos, color);
         }
 
@@ -110,7 +110,7 @@ mod ArtPeace {
                 let color = *colors.at(i);
                 assert!(pos < self.total_pixels.read());
                 assert!(color < self.color_count.read());
-                self.board.write(pos, color);
+                self.canvas.write(pos, color);
                 self.emit(PixelPlaced { placed_by: caller, pos, color });
                 i += 1;
             };
@@ -118,12 +118,12 @@ mod ArtPeace {
         }
 
         fn get_pixel(self: @ContractState, pos: u128) -> u8 {
-            self.board.read(pos)
+            self.canvas.read(pos)
         }
 
         fn get_pixel_xy(self: @ContractState, x: u128, y: u128) -> u8 {
-            let pos = x + y * self.board_width.read();
-            self.board.read(pos)
+            let pos = x + y * self.canvas_width.read();
+            self.canvas.read(pos)
         }
 
         fn get_total_pixels(self: @ContractState) -> u128 {
@@ -131,19 +131,19 @@ mod ArtPeace {
         }
 
         fn get_width(self: @ContractState) -> u128 {
-            self.board_width.read()
+            self.canvas_width.read()
         }
 
         fn get_height(self: @ContractState) -> u128 {
-            self.board_height.read()
+            self.canvas_height.read()
         }
 
-        fn get_last_placed(self: @ContractState) -> u64 {
-            self.user_last_placed.read(starknet::get_caller_address())
+        fn get_last_placed_time(self: @ContractState) -> u64 {
+            self.last_placed_time.read(starknet::get_caller_address())
         }
 
-        fn get_user_last_placed(self: @ContractState, user: ContractAddress) -> u64 {
-            self.user_last_placed.read(user)
+        fn get_user_last_placed_time(self: @ContractState, user: ContractAddress) -> u64 {
+            self.last_placed_time.read(user)
         }
 
         fn get_time_between_pixels(self: @ContractState) -> u64 {
