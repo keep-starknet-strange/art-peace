@@ -1,6 +1,6 @@
 <div align="center">
   <!--TODO: <img src="book/src/assets/blobstreamSnBanner.png" alt="art_canvas" height="300"/>-->
-  <h1>art/canvas</h1>
+  <h1>art/peace</h1>
 
   ***Collaborative art canvas on Starknet***
 
