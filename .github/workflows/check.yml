@@ -23,4 +23,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: asdf-vm/actions/install@v3
-      - run: snforge test
+      - run: cd onchain && snforge test
