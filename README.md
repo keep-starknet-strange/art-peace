@@ -1,5 +1,6 @@
 <div align="center">
   <img src="resources/art-peace-logo/art-peace.jpg" alt="art_canvas" height="300"/>
+
   ***Collaborative art canvas on Starknet***
 
   [![Check Workflow Status](https://github.com/keep-starknet-strange/art-peace/actions/workflows/check.yml/badge.svg)](https://github.com/keep-starknet-strange/art-peace/actions/workflows/check.yml)
