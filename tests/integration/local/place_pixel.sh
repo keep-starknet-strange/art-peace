@@ -31,21 +31,9 @@ ACCOUNT_FILE=$TMP_DIR/starknet_accounts.json
 
 sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE account add --name $ACCOUNT_NAME --address $ACCOUNT_ADDRESS --private-key $ACCOUNT_PRIVATE_KEY
 
-
-CONTRACT_DIR=$WORK_DIR/onchain
-CLASS_NAME="ArtPeace"
-
-#TODO: Issue if no declare done
-CLASS_DECLARE_RESULT=$(cd $CONTRACT_DIR && sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json declare --contract-name $CLASS_NAME | tail -n 1)
-CLASS_HASH=$(echo $CLASS_DECLARE_RESULT | jq -r '.class_hash')
-echo "Declared class \"$CLASS_NAME\" with hash $CLASS_HASH"
-
-# TODO: calldata passed as parameters
-echo "Deploying contract \"$CLASS_NAME\"..."
-echo "sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata 0x10 0x10 0x00"
-CONTRACT_DEPLOY_RESULT=$(sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata 0x10 0x10 0x00 | tail -n 1)
-CONTRACT_ADDRESS=$(echo $CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
-echo "Deployed contract \"$CLASS_NAME\" with address $CONTRACT_ADDRESS"
+#TODO: rename script and make more generic
+echo "sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME invoke --contract-address $1 --function $2 --calldata $3 $4" > $LOG_DIR/cmd.txt
+sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $1 --function $2 --calldata $3 $4 > $LOG_DIR/output.json
 
 # TODO
 # MULTICALL_TEMPLATE_DIR=$CONTRACT_DIR/tests/multicalls

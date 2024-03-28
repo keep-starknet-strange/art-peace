@@ -1,0 +1,273 @@
+[
+  {
+    "type": "impl",
+    "name": "ArtPeaceImpl",
+    "interface_name": "art_peace::IArtPeace"
+  },
+  {
+    "type": "interface",
+    "name": "art_peace::IArtPeace",
+    "items": [
+      {
+        "type": "function",
+        "name": "place_pixel",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "place_pixel_xy",
+        "inputs": [
+          {
+            "name": "x",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "y",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "place_extra_pixels",
+        "inputs": [
+          {
+            "name": "positions",
+            "type": "core::array::Array::<core::integer::u128>"
+          },
+          {
+            "name": "colors",
+            "type": "core::array::Array::<core::integer::u8>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_pixel",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u8"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_pixel_xy",
+        "inputs": [
+          {
+            "name": "x",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "y",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u8"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_total_pixels",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u128"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_width",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u128"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_height",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u128"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_last_placed_time",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_user_last_placed_time",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_time_between_pixels",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_extra_pixels_count",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_user_extra_pixels_count",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_color_count",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u8"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_colors",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::integer::u32>"
+          }
+        ],
+        "state_mutability": "view"
+      }
+    ]
+  },
+  {
+    "type": "constructor",
+    "name": "constructor",
+    "inputs": [
+      {
+        "name": "canvas_width",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "canvas_height",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "time_between_pixels",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::ArtPeace::PixelPlaced",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "placed_by",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "pos",
+        "type": "core::integer::u128",
+        "kind": "key"
+      },
+      {
+        "name": "color",
+        "type": "core::integer::u8",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::ArtPeace::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "PixelPlaced",
+        "type": "art_peace::ArtPeace::PixelPlaced",
+        "kind": "nested"
+      }
+    ]
+  }
+]

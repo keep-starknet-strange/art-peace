@@ -6,8 +6,8 @@ export const config = {
   filter: {
     events: [
       {
-        fromAddress: "0x1fb3c4d5aac055c8ccd645b652c7d6d92b5828d5dd580b1dc8c5f6ee7eaf003",
-        keys: ["0x31F8DAA2AC8DACD06AB968BAD8F97F98F63C30A86DBFCEBDD7625F589D4E7E6"],
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: ["0x2D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23"],
         includeReverted: false,
         includeTransaction: false,
         includeReceipt: false,
@@ -16,7 +16,7 @@ export const config = {
   },
   sinkType: "webhook",
   sinkOptions: {
-    targetUrl: "http://localhost:7172/consume"
+    targetUrl: "http://localhost:8080/consume"
   },
 };
 
