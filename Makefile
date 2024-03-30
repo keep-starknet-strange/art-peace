@@ -10,3 +10,7 @@ contracts-build:
 contracts-test:
 	@echo "Testing contracts..."
 	@cd onchain && scarb test
+
+integration-test-local:
+	@echo "Running integration tests..."
+	./scripts/run-local.sh

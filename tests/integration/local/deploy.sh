@@ -40,10 +40,16 @@ CLASS_DECLARE_RESULT=$(cd $CONTRACT_DIR && sncast --url $RPC_URL --accounts-file
 CLASS_HASH=$(echo $CLASS_DECLARE_RESULT | jq -r '.class_hash')
 echo "Declared class \"$CLASS_NAME\" with hash $CLASS_HASH"
 
+CANVAS_CONFIG=$WORK_DIR/configs/canvas.config.json
+WIDTH=$(jq -r '.canvas.width' $CANVAS_CONFIG)
+HEIGHT=$(jq -r '.canvas.height' $CANVAS_CONFIG)
+PLACE_DELAY=0x00
+COLOR_COUNT=$(jq -r '.colors[]' $CANVAS_CONFIG | wc -l)
+
 # TODO: calldata passed as parameters
 echo "Deploying contract \"$CLASS_NAME\"..."
-echo "sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata 0x10 0x10 0x00"
-CONTRACT_DEPLOY_RESULT=$(sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata 0x10 0x10 0x00 | tail -n 1)
+echo "sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT"
+CONTRACT_DEPLOY_RESULT=$(sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT | tail -n 1)
 CONTRACT_ADDRESS=$(echo $CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
 echo "Deployed contract \"$CLASS_NAME\" with address $CONTRACT_ADDRESS"
 

@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# This script runs the integration tests.
+
+# TODO: Host?
+RPC_HOST="127.0.0.1"
+RPC_PORT=5050
+
+RPC_URL=http://$RPC_HOST:$RPC_PORT
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+WORK_DIR=$SCRIPT_DIR/../../..
+
+#TODO: 2 seperate directories when called from the test script
+OUTPUT_DIR=$HOME/.art-peace-accounts
+TIMESTAMP=$(date +%s)
+
+# TODO: Clean option to remove old logs and state
+rm -rf $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
+
+ACCOUNTS=(0x34ba56f92265f0868c57d3fe72ecab144fc96f97954bbbc4252cef8e8a979ba 0x2939f2dc3f80cc7d620e8a86f2e69c1e187b7ff44b74056647368b5c49dc370 0x25a6c9f0c15ef30c139065096b4b8e563e6b86191fd600a4f0616df8f22fb77 0x5e627ad77c89f728f67916e9362f0723aa9d5ecf9243b87da5551345eb0d11d 0x455fb718b603f851318bed2eb7c52647d7155ded0f06b74042f0178bf810c24 0x3a7f61d0088bf64a35880a7b18f94926cc98ae2f9260df145c6416abc39f861 0x4bfd2f044f2929526538a7a68bec680f8583efa79d6c6e2b807379fa1df58d4 0x54b4d07b48421405fe906a888e17902245a11c8c1924c0603dc3c3e3adf641f 0x5c4549135a90e405681b6856a47b4269d6c6da78958360592fed61f84bdbf82 0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0)
+ACCOUNT_KEYS=(0xb137668388dbe9acdfa3bc734cc2c469 0xe8c2801d899646311100a661d32587aa 0x7b2e5d0e627be6ce12ddc6fd0f5ff2fb 0x3bce0683ea650ed0271c9dd24c923142 0x3b50445f14cdad0cfce66465332dde80 0xd34722a5d8ac9ffd6943dbb99320cbad 0xb73780f0d59c403a0c811da593cb6162 0x1cb3b5bc578f40be1f0870a351ca1283 0xce8226b9a31822c1530c153555d4b1ab 0x856c96eaa4e7c40c715ccc5dacd8bf6e)
+
+IDX=0
+while [ $IDX -lt ${#ACCOUNTS[@]} ]; do
+  ACCOUNT_ADDRESS=${ACCOUNTS[$IDX]}
+  ACCOUNT_PRIVATE_KEY=${ACCOUNT_KEYS[$IDX]}
+  ACCOUNT_NAME=art_peace_acct
+  ACCOUNT_PROFILE=starknet-devnet
+  ACCOUNT_FILE=$OUTPUT_DIR/starknet_accounts_$IDX.json
+
+  sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE account add --name $ACCOUNT_NAME --address $ACCOUNT_ADDRESS --private-key $ACCOUNT_PRIVATE_KEY
+
+  IDX=$((IDX + 1))
+done
+
+# TODO: Parse from the output

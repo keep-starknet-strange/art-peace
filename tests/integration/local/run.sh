@@ -6,6 +6,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 WORK_DIR=$SCRIPT_DIR/../../..
+CANVAS_CONFIG_FILE=$WORK_DIR/configs/canvas.config.json
 
 OUTPUT_DIR=$HOME/.art-peace-tests
 TIMESTAMP=$(date +%s)
@@ -28,6 +29,21 @@ touch $REDIS_LOG_FILE
 redis-server 2>&1 > $REDIS_LOG_FILE &
 REDIS_PID=$!
 sleep 2 # Wait for redis to start; TODO: Check if redis is actually running
+
+# Start the art-peace-db with postgres
+echo "Starting art-peace-db ..."
+dropdb art-peace-db
+createdb art-peace-db
+#TODO: Use a migration script instead of hardcoding the schema
+psql -d art-peace-db -c "CREATE TABLE Pixels (
+  address char(64) NOT NULL,
+  position integer NOT NULL,
+  color integer NOT NULL,
+  time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);"
+psql -d art-peace-db -c "CREATE INDEX address_index ON Pixels (address);"
+psql -d art-peace-db -c "CREATE INDEX position_index ON Pixels (position);"
+psql -d art-peace-db -c "CREATE INDEX time_index ON Pixels (time);"
 
 # Start the art-peace backend
 echo "Starting art-peace backend ..."
@@ -73,7 +89,7 @@ sleep 2 # Wait for indexer script to start; TODO: Check if indexer script is act
 
 # Initialize the art-peace canvas in the backend/redis
 echo "Initializing art-peace canvas ..."
-curl http://localhost:8080/initCanvas -d '{"width": 16, "height": 16}'
+curl http://localhost:8080/initCanvas -X POST
 
 # Start the art-peace frontend
 echo "Starting art-peace frontend ..."
@@ -81,7 +97,9 @@ kill $(ps aux | grep npm\ start | grep -v grep | awk '{print $2}')
 FRONTEND_LOG_FILE=$LOG_DIR/frontend.log
 touch $FRONTEND_LOG_FILE
 cd $WORK_DIR/frontend
-REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS npm start 2>&1 > $FRONTEND_LOG_FILE &
+REACT_CANVAS_CONFIG_FILE=$WORK_DIR/frontend/src/canvas.config.json
+cp $CANVAS_CONFIG_FILE $REACT_CANVAS_CONFIG_FILE #TODO: Use a symlink instead?
+REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS REACT_APP_CANVAS_CONFIG_FILE=$REACT_CANVAS_CONFIG_FILE npm start 2>&1 > $FRONTEND_LOG_FILE &
 FRONTEND_PID=$!
 sleep 2 # Wait for frontend to start; TODO: Check if frontend is actually running
 
@@ -102,3 +120,4 @@ kill $BACKEND_PID
 kill $INDEXER_PID
 kill $FRONTEND_PID
 kill $INDEXER_SCRIPT_PID
+docker system prune

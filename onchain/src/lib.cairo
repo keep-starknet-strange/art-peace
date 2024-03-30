@@ -59,7 +59,7 @@ mod ArtPeace {
 
     #[constructor]
     fn constructor(
-        ref self: ContractState, canvas_width: u128, canvas_height: u128, time_between_pixels: u64
+        ref self: ContractState, canvas_width: u128, canvas_height: u128, time_between_pixels: u64, color_count: u8,
     ) {
         self.canvas_width.write(canvas_width);
         self.canvas_height.write(canvas_height);
@@ -68,7 +68,7 @@ mod ArtPeace {
         self.time_between_pixels.write(time_between_pixels);
 
         // TODO
-        self.color_count.write(12);
+        self.color_count.write(color_count);
     //self.color_count.write(colors.len().try_into().unwrap());
     //let mut i = 0;
     //while i < colors.len() {

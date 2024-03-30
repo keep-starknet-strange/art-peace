@@ -3,18 +3,23 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 
 	"github.com/gorilla/websocket"
+	"github.com/jackc/pgx/v5"
 	"github.com/redis/go-redis/v9"
 )
 var client *redis.Client
+var pgConn *pgx.Conn
 // Vector of connections
 var connections []*websocket.Conn
+var canvasConfig map[string]interface{}
 
 // Message layout
 /*
@@ -53,6 +58,7 @@ var connections []*websocket.Conn
 }
 */
 
+// TODO: User might miss some messages between loading canvas and connecting to websocket?
 func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
   fmt.Println("Consume indexer msg")
 
@@ -73,8 +79,11 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
+  address := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[1]
+  address = address.(string)[2:]
   // Get the field data.batch[0].events[0].event.keys[2]
   posHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[2]
+  fmt.Println("Total events got: ", len(reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})))
 
   // Get the field data.batch[0].events[0].event.data[0]
   colorHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["data"].([]interface{})[0]
@@ -93,15 +102,21 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  colorBitWidth := uint(5) // TODO: Get from request || const / cmdline?
+  colorBitWidth := uint(canvasConfig["colors_bitwidth"].(float64))
   bitfieldType := "u" + strconv.Itoa(int(colorBitWidth))
   pos := uint(position) * colorBitWidth
 
+  // Set pixel in redis
   ctx := context.Background()
   err = client.BitField(ctx, "canvas", "SET", bitfieldType, pos, color).Err()
   if err != nil {
     panic(err)
   }
+
+  // Set pixel in postgres
+  // TODO: Get address from request / event info
+  fmt.Println("Inserting pixel into postgres w/ address: ", address, " position: ", position, " color: ", color)
+  _, err = pgConn.Exec(context.Background(), "INSERT INTO Pixels (address, position, color) VALUES ($1, $2, $3)", address, position, color)
 
   var message = map[string]interface{}{
     "position": position,
@@ -130,19 +145,22 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 
   // TODO: Check if canvas already exists
 
-  reqBody, err := io.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  var jsonBody map[string]uint
-  err = json.Unmarshal(reqBody, &jsonBody)
-  if err != nil {
-    panic(err)
-  }
+  // reqBody, err := io.ReadAll(r.Body)
+  // if err != nil {
+  //   panic(err)
+  // }
+  // var jsonBody map[string]uint
+  // err = json.Unmarshal(reqBody, &jsonBody)
+  // if err != nil {
+  //   panic(err)
+  // }
   // TODO: Check if width and height are valid
-  width := jsonBody["width"]
-  height := jsonBody["height"]
-  colorBitWidth := uint(5) // TODO: Get from request?
+  // TODO: Dont pass width and height, get from config
+  //width := jsonBody["width"]
+  //height := jsonBody["height"]
+  width := uint(canvasConfig["canvas"].(map[string]interface{})["width"].(float64))
+  height := uint(canvasConfig["canvas"].(map[string]interface{})["height"].(float64))
+  colorBitWidth := uint(canvasConfig["colors_bitwidth"].(float64))
   totalBitSize := width * height * colorBitWidth
   totalByteSize := (totalBitSize / 8)
   // Round up to nearest byte
@@ -151,10 +169,11 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
   }
   canvas := make([]byte, totalByteSize)
   ctx := context.Background()
-  err = client.Set(ctx, "canvas", canvas, 0).Err()
+  err := client.Set(ctx, "canvas", canvas, 0).Err()
   if err != nil {
     panic(err)
   }
+  fmt.Println("Canvas set w/ size: ", totalByteSize, "bytes", canvas, "width", width, "height", height)
 
   fmt.Println("Canvas initialized")
 }
@@ -189,7 +208,7 @@ func placePixel(w http.ResponseWriter, r *http.Request) {
   // TODO: allow x, y coordinates?
   position := jsonBody["position"]
   color := jsonBody["color"]
-  colorBitWidth := uint(5) // TODO: Get from request || const / cmdline?
+  colorBitWidth := uint(canvasConfig["colors_bitwidth"].(float64))
   bitfieldType := "u" + strconv.Itoa(int(colorBitWidth))
   pos := position * colorBitWidth
 
@@ -220,6 +239,24 @@ func getPixel(w http.ResponseWriter, r *http.Request) {
   fmt.Println("Pixel", val)
 }
 
+func getPixelInfo(w http.ResponseWriter, r *http.Request) {
+  fmt.Println("Get Pixel Info")
+
+  position := r.URL.Query().Get("position")
+  fmt.Println("Position: ", position)
+
+  // Get pixel info from postgres
+  var address string
+  err := pgConn.QueryRow(context.Background(), "SELECT address FROM Pixels WHERE position = $1 ORDER BY time DESC LIMIT 1", position).Scan(&address)
+  if err != nil {
+    fmt.Println("Error querying pixel: ", err)
+  } else {
+    fmt.Println("Pixel: ", address, position)
+  }
+  w.Header().Set("Access-Control-Allow-Origin", "*")
+  w.Write([]byte(address))
+}
+
 func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
   fmt.Println("Place Pixel")
 
@@ -245,7 +282,7 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
   }
   // Use shell / bash to ls files in directory
   shellCmd := "../tests/integration/local/place_pixel.sh"
-  position := x + y * 16 // TODO: Hardcoded for now
+  position := x + y * int(canvasConfig["canvas"].(map[string]interface{})["width"].(float64))
   fmt.Println("Running shell command: ", shellCmd, jsonBody["contract"], "place_pixel", strconv.Itoa(int(position)), jsonBody["color"])
   cmd := exec.Command(shellCmd, jsonBody["contract"], "place_pixel", strconv.Itoa(int(position)), jsonBody["color"])
   out, err := cmd.Output()
@@ -297,7 +334,38 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
   wsReader(ws)
 }
 
+/*
+{
+  "canvas": {
+    "width": 35,
+    "height": 24
+  },
+  "colors": [
+    "010001",
+    "FEFDFB",
+    "FA5310",
+    "9DAEB6",
+    "E9C69E"
+  ],
+  "colors_bitwidth": 5
+}
+*/
+
 func main() {
+  canvasConfigFilename := flag.String("canvas-config", "../configs/canvas.config.json", "Canvas config file")
+  flag.Parse()
+
+  // Load config from file passed as argument
+  canvasConfigFile, err := os.ReadFile(*canvasConfigFilename)
+  if err != nil {
+    panic(err)
+  }
+  err = json.Unmarshal(canvasConfigFile, &canvasConfig)
+  if err != nil {
+    panic(err)
+  }
+  fmt.Println("Canvas config: ", canvasConfig)
+
   // TODO: Get from env / cmd line
   client = redis.NewClient(&redis.Options{
     Addr: "localhost:6379",
@@ -305,12 +373,30 @@ func main() {
     DB: 0,
   })
 
+  // Connect to Postgres
+  pgConn, err = pgx.Connect(context.Background(), "postgresql://brandonroberts@localhost:5432/art-peace-db")
+  if err != nil {
+    panic(err)
+  }
+  defer pgConn.Close(context.Background())
+
+  var address string
+  var position uint
+  var color uint
+  err = pgConn.QueryRow(context.Background(), "SELECT address, position, color FROM Pixels WHERE position = 0 ORDER BY time DESC LIMIT 1").Scan(&address, &position, &color)
+  if err != nil {
+    fmt.Println("Error querying last pixel: ", err)
+  } else {
+    fmt.Println("Last pixel: ", address, position, color)
+  }
+
   // TODO: load test calls
   http.HandleFunc("/consume", consumeIndexerMsg)
   http.HandleFunc("/initCanvas", initCanvas)
   http.HandleFunc("/getCanvas", getCanvas)
   http.HandleFunc("/placePixel", placePixel)
   http.HandleFunc("/getPixel", getPixel)
+  http.HandleFunc("/getPixelInfo", getPixelInfo)
   http.HandleFunc("/placePixelDevnet", placePixelDevnet)
   http.HandleFunc("/ws", wsEndpoint)
 
