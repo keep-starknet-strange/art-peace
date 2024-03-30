@@ -16,7 +16,7 @@ export const config = {
   },
   sinkType: "webhook",
   sinkOptions: {
-    targetUrl: "http://localhost:8080/consume"
+    targetUrl: "http://localhost:8080/consumeIndexerMsg"
   },
 };
 

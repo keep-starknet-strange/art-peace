@@ -1,4 +1,4 @@
-module backend/art-peace-app
+module art-peace-backend
 
 go 1.21.7
 
