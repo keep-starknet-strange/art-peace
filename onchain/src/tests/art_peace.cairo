@@ -11,7 +11,9 @@ const COLOR_COUNT: u8 = 12;
 
 fn deploy_contract() -> ContractAddress {
     let contract = snf::declare("ArtPeace");
-    let calldata: Array<felt252> = array![WIDTH.into(), HEIGHT.into(), TIME_BETWEEN_PIXELS.into(), COLOR_COUNT.into()];
+    let calldata: Array<felt252> = array![
+        WIDTH.into(), HEIGHT.into(), TIME_BETWEEN_PIXELS.into(), COLOR_COUNT.into()
+    ];
     let contract_addr = contract.deploy(@calldata).unwrap();
     snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
     contract_addr
