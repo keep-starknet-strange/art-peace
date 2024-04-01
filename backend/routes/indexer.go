@@ -57,8 +57,6 @@ func InitIndexerRoutes() {
 
 // TODO: User might miss some messages between loading canvas and connecting to websocket?
 func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
-  fmt.Println("Consume indexer msg")
-
   requestBody, err := io.ReadAll(r.Body)
   if err != nil {
     fmt.Println("Error reading request body: ", err)
@@ -75,11 +73,10 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  address := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["event  s"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[1]
+  address := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[1]
   address = address.(string)[2:]
-  posHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events  "].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[2]
-  fmt.Println("Total events got: ", len(reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map  [string]interface{})["events"].([]interface{})))
-  colorHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["even  ts"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["data"].([]interface{})[0]
+  posHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[2]
+  colorHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["data"].([]interface{})[0]
 
   // Convert hex to int
   position, err := strconv.ParseInt(posHex.(string), 0, 64)
@@ -97,6 +94,8 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 
   bitfieldType := "u" + strconv.Itoa(int(backend.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
   pos := uint(position) * backend.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+
+  fmt.Println("Pixel indexed with position: ", position, " and color: ", color)
 
   // Set pixel in redis
   ctx := context.Background()

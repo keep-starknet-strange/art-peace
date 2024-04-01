@@ -1,0 +1,90 @@
+.PixelSelector {
+  font-size: min(1.2rem, 1.5vw);
+  text-shadow: 0 0 1rem rgba(255, 255, 255, 0.5);
+  /* TODO: Better ways to style this with wierd canvas colors */
+}
+
+.PixelSelector__button {
+  padding: 0 1rem;
+  border-radius: 1rem;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background-color: rgba(50, 50, 50, 0.3);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+
+  cursor: pointer;
+}
+
+.PixelSelector__button:hover {
+  background-color: rgba(50, 50, 50, 0.4);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+  transform: translateY(-0.1rem) scale(1.01);
+}
+
+.PixelSelector__button__valid:active {
+  background-color: rgba(50, 150, 50, 0.3);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+  transform: translateY(0) scale(1);
+}
+
+.PixelSelector__button__invalid:active {
+  background-color: rgba(150, 50, 50, 0.3);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+  transform: translateY(0) scale(1);
+}
+
+.PixelSelector__button__color {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  margin: 0 0.5rem;
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.4);
+}
+
+.PixelSelector__selector {
+  padding: 0.5rem;
+  border-radius: 1rem;
+
+  /* TODO: dynamic sizing and wrapping */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background-color: rgba(50, 50, 50, 0.3);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+.PixelSelector__color {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  margin: 0 0.5rem;
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.4);
+  cursor: pointer;
+}
+
+.PixelSelector__color:hover {
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.6);
+  transform: translateY(-0.2rem) scale(1.03);
+}
+
+.PixelSelector__color:active {
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.8);
+  transform: translateY(0) scale(1);
+}
+
+.PixelSelector__cancel {
+  margin: 0 0.5rem 0 1rem;
+  text-align: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.PixelSelector__cancel:hover {
+  transform: translateY(-0.2rem) scale(1.05);
+}

@@ -44,7 +44,7 @@ CANVAS_CONFIG=$WORK_DIR/configs/canvas.config.json
 WIDTH=$(jq -r '.canvas.width' $CANVAS_CONFIG)
 HEIGHT=$(jq -r '.canvas.height' $CANVAS_CONFIG)
 PLACE_DELAY=0x00
-COLOR_COUNT=$(jq -r '.colors[]' $CANVAS_CONFIG | wc -l)
+COLOR_COUNT=$(jq -r '.colors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 
 # TODO: calldata passed as parameters
 echo "Deploying contract \"$CLASS_NAME\"..."

@@ -1,6 +1,24 @@
+@font-face {
+  font-family: 'Public-Pixel';
+  src: local('Public-Pixel'), url('./fonts/PublicPixel-z84yD.ttf') format('truetype');
+}
+
+html {
+  height: 100%;
+  font-size: 62.5%;
+}
+
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  /* https://www.fontspace.com/public-pixel-font-f72305 */
+  font-family: 'Public-Pixel', sans-serif;
+  font-size: 1.6rem;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Public-Pixel', sans-serif;
 }

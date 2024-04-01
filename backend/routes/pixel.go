@@ -45,9 +45,9 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
 
   // Get pixel info from postgres
   var address string
-  err := backend.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT address FROM Pixels WHERE position = $1 OR  DER BY time DESC LIMIT 1", position).Scan(&address)
+  err := backend.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT address FROM Pixels WHERE position = $1 ORDER BY time DESC LIMIT 1", position).Scan(&address)
   if err != nil {
-    w.Write([]byte("Pixel not found"))
+    w.Write([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
   } else {
     w.Write([]byte(address))
   }
@@ -77,12 +77,11 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
   shellCmd := "../tests/integration/local/place_pixel.sh"
   position := x + y * int(backend.ArtPeaceBackend.CanvasConfig.Canvas.Width)
   cmd := exec.Command(shellCmd, jsonBody["contract"], "place_pixel", strconv.Itoa(position), jsonBody["color"])
-  out, err := cmd.Output()
+  _, err = cmd.Output()
   if err != nil {
     fmt.Println("Error executing shell command: ", err)
     panic(err)
   }
-  fmt.Println("Place Pixel command gave:", string(out))
 
   w.Header().Set("Access-Control-Allow-Origin", "*")
   w.Write([]byte("Pixel placed"))

@@ -1,0 +1,56 @@
+.Tabs {
+  width: min(100vw, 100rem);
+  height: max(3.4rem, 10%);
+  margin: min(0.4rem, 2%) 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+/* TODO: css -> scss? */
+.Tabs__logo {
+  width: min(8rem, 10vw);
+
+  pointer-events: none;
+  image-rendering: pixelated;
+  margin: 0 0.5rem;
+}
+
+.Tabs__logo:hover {
+  /* TODO: not working */
+  cursor: pointer;
+}
+
+.Tabs__tab {
+  font-size: min(1.6rem, 2vw);
+  text-shadow: 0 0 1rem #FFFFFF;
+}
+
+.Tabs__main {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.Tabs__tab:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.Tabs__tab:active {
+  font-weight: bold;
+  transform: scale(0.9);
+}
+
+.Tabs__tab--active {
+  font-weight: bold;
+  color: #9DAEB6;
+  text-decoration: underline;
+  text-shadow: 0 0 0.2rem #000000;
+}
+
+/* TODO: Canvas shadow looks different */

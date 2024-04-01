@@ -1,49 +1,55 @@
 import React, { useEffect, useState } from 'react';
-// import { connect, disconnect } from 'starknetkit'; // TODO: to starknet-react/core instead?
-import { connect } from "get-starknet";
-import { Contract } from "starknet";
-import logo from './logo.svg';
+//import { connect } from "get-starknet";
+//import { Contract } from "starknet";
 import './App.css';
 import Canvas from './Canvas.js';
+import Tabs from './Tabs.js';
+import PixelSelector from './PixelSelector.js';
 // TODO: Generate contract.abi.json
-import contractAbi from "./contract.abi.json";
+
+function usePreventZoom(scrollCheck = true, keyboardCheck = true) {
+    useEffect(() => {
+      const handleKeydown = (e) => {
+        if (
+          keyboardCheck &&
+          e.ctrlKey &&
+          (e.keyCode == "61" ||
+            e.keyCode == "107" ||
+            e.keyCode == "173" ||
+            e.keyCode == "109" ||
+            e.keyCode == "187" ||
+            e.keyCode == "189")
+        ) {
+          e.preventDefault();
+        }
+      };
+  
+      const handleWheel = (e) => {
+        if (scrollCheck && e.ctrlKey) {
+          e.preventDefault();
+        }
+      };
+  
+      document.addEventListener("keydown", handleKeydown);
+      document.addEventListener("wheel", handleWheel, { passive: false });
+  
+      return () => {
+        document.removeEventListener("keydown", handleKeydown);
+        document.removeEventListener("wheel", handleWheel);
+      };
+    }, [scrollCheck, keyboardCheck]);
+  }
 
 function App() {
-  //TODO: dynamic modal w/ next/dynamic
-      /*
-  const [account, setAccount] = useState('');
-  const [chain, setChain] = useState('');
 
-  useEffect(() => {
-    const connectToStarknet = async () => {
-      const connection = await connect();// { modalMode: "neverAsk" } );
-
-      if (connection && connection.wallet.isConnected) {
-        console.log('Connected to Starknet');
-        setAccount(connection.wallet.selectedAddress);
-        setChain(connection.wallet.chainId);
-        // TODO: set connection, provider, address, disconnect, ...
-        // TODO: more docs read
-        //setConnection(connection);
-        //setProvider(connection.account);
-        //setAddress(connection.selectedAddress);
-      } else {
-        console.log('Failed to connect to Starknet');
-      }
-        <div>{account ? <DisconnectModal /> : <ConnectModal />}</div>
-    };
-
-    connectToStarknet();
-  }, []);
-      */
+  /*
+  // TODO: Wallet integration
   const [provider, setProvider] = useState(null)
   const [address, setAddress] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
   const [chainId, setChainId] = useState(null)
-  //const [contract, setContract] = useState(null)
   // TODO: Dynamic contract address
   const contractAddress = process.env.REACT_APP_ART_PEACE_CONTRACT_ADDRESS;
-
   useEffect(() => {
     const connectToStarknet = async () => {
       try {
@@ -64,8 +70,7 @@ function App() {
         //console.log("Setting pixel", pixel_pos, pixel_color)
         //console.log(contract.populate("place_pixel", [pixel_pos, pixel_color]))
         //contract.place_pixel(pixel_pos, pixel_color).then(
-        //  (result) => console.log("Contract called", result)
-        //).catch(
+        //  (result) => console.log("Contract called", result)).catch(
         //  (error) => console.log("Contract call failed", error)
         //)
         //setContract(contract)
@@ -77,27 +82,22 @@ function App() {
 
     connectToStarknet()
   }, [])
+  */
+
+  usePreventZoom();
+
+  // TODO: use -1 for all or other state
+  // TODO: move pixel selected rhs panel
+  const [selectedColorId, setSelectedColorId] = useState(-1);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>art/peace</p>
-        <button className="App-button">Wallet</button>
-        <div>
-          {isConnected ? (
-            <div>
-              <p>Connected to Starknet</p>
-              <p>ChainId: {chainId}</p>
-              <p>Address: {address}</p>
-            </div>
-          ) : (
-            <p>Connecting to Starknet...</p>
-          )}
-        </div>
-      </header>
-      <div className="App-body">
-        <Canvas />
+      <Canvas selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} />
+      <div className="App__rhs-panel">
+      </div>
+      <div className="App__footer">
+        <PixelSelector selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} />
+        <Tabs />
       </div>
     </div>
   );

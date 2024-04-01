@@ -1,46 +1,96 @@
-.Canvas {
-  display: inline-block;
-  background-color: blue;
-  image-rendering: pixelated;
-}
+.Canvas__container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 
-.Canvas-position {
-  background-color: green;
-  margin: 10px;
-  /*margin-top: calc(10px + 5vmax);*/
-  margin-top: calc(10px + 40vmax);
-  display: inline-block;
-}
-
-.Canvas-control {
-  background-color: orange;
-  transform: scale(15, 15);
-  transform: translate(1, 1);
-  display: inline-block;
-}
-
-.color-palette {
   display: flex;
-  flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  background-color: blue;
-  padding: 1px;
-  transform: scale(1, 1);
+
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
-.color {
-  width: 2px;
-  height: 2px;
-  margin: 1px;
-  border: 1px solid black;
+.Canvas__position {
+  position: relative;
 }
 
-.color-palette-title {
-  background-color: blue;
-  color: white;
-  text-align: center;
+/*
+.Canvas__scale {
+}
+*/
+
+.Canvas {
+  background-color: #FFFFFF;
+  image-rendering: pixelated;
+  box-shadow: 0 0 0.05rem 0.01rem rgba(0, 0, 0, 0.4);
+}
+
+.Canvas__selected {
+  position: absolute;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.Canvas__selected__pixel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  top: 0;
+  left: 0;
+
+  pointer-events: none;
+  box-shadow: 0 0 .1px .1px red;
+}
+
+.Canvas__selected__menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 1.2rem 0.5rem 0.5rem 0.5rem;
+  margin: 0.5rem;
+  width: max(22rem, 25%);
+
   display: flex;
   flex-direction: column;
-  font-size: 1px;
+  justify-content: center;
+  align-content: center;
+
+  background-color: rgba(255, 255, 255, 0.6);
+  z-index: 3;
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.2);
+}
+
+.Canvas__selected__menu__item {
+  font-size: 1.2rem;
+  text-wrap: nowrap;
+  margin: 0.3rem;
+}
+
+.Canvas__selected__menu__address {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.Canvas__selected__menu__exit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.2rem;
+  margin: 0.4rem;
+  cursor: pointer;
+}
+
+.Canvas__selected__menu__exit:hover {
+  color: red;
+  transform: scale(1.2, 1.2);
+}
+
+.Canvas__selected__menu__exit:active {
+  color: red;
+  transform: scale(1, 1);
 }

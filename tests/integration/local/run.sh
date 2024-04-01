@@ -51,7 +51,7 @@ kill $(ps aux | grep go\ run\ backend.go | grep -v grep | awk '{print $2}')
 BACKEND_LOG_FILE=$LOG_DIR/backend.log
 touch $BACKEND_LOG_FILE
 cd $WORK_DIR/backend
-go run backend.go 2>&1 > $BACKEND_LOG_FILE &
+go run main.go 2>&1 > $BACKEND_LOG_FILE &
 BACKEND_PID=$!
 sleep 2 # Wait for backend to start; TODO: Check if backend is actually running
 
