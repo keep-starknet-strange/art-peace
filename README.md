@@ -52,7 +52,7 @@ To stop the run use `Ctrl-C`.
 
 ### Component Run
 
-Each component can also be run individually, check the **Components** section below for more details.
+Each component can also be run individually, check the [Components](#Components) section below for more details.
 
 ## Build
 
@@ -70,7 +70,7 @@ make build
 
 ### Component Build
 
-Use the `make build-X` command for each corresponding component `X`. See the **Components** section below for more details.
+Use the `make build-X` command for each corresponding component `X`. See the [Components](#Components) section below for more details.
 
 ## Components
 
@@ -88,7 +88,7 @@ Use the `make build-X` command for each corresponding component `X`. See the **C
 
 Its recommended to use `docker compose` when building and running, so the only dependencies would be [docker](https://docs.docker.com/desktop/) and [docker compose](https://docs.docker.com/compose/install/linux/)
 
-Howeveer, it might be worth running only certain components for development/testing sometimes. Each component has various dependencies, check [dependencies.txt](./dependencies.txt) for more details.
+However, it might be worth running only certain components for development/testing sometimes. Each component has various dependencies, check [dependencies.txt](./dependencies.txt) for more details.
 
 ## References
 
