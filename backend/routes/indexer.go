@@ -76,12 +76,19 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
   address := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[1]
   address = address.(string)[2:]
   posHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[2]
+  dayIdxHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[3]
   colorHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["data"].([]interface{})[0]
 
   // Convert hex to int
   position, err := strconv.ParseInt(posHex.(string), 0, 64)
   if err != nil {
     fmt.Println("Error converting position hex to int: ", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+  dayIdx, err := strconv.ParseInt(dayIdxHex.(string), 0, 64)
+  if err != nil {
+    fmt.Println("Error converting day index hex to int: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -105,7 +112,12 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
   }
 
   // Set pixel in postgres
-  _, err = backend.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Pixels (address, position, color) VALUES ($1, $2, $3)", address, position, color)
+  _, err = backend.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)", address, position, dayIdx, color)
+  if err != nil {
+    fmt.Println("Error inserting pixel into postgres: ", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
 
   // Send message to all connected clients
   var message = map[string]interface{}{

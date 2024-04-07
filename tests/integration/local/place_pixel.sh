@@ -2,7 +2,6 @@
 #
 # This script runs the integration tests.
 
-# TODO: Host?
 RPC_HOST="127.0.0.1"
 RPC_PORT=5050
 
@@ -34,13 +33,3 @@ sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE account add --name $ACCOUNT_
 #TODO: rename script and make more generic
 echo "sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME invoke --contract-address $1 --function $2 --calldata $3 $4" > $LOG_DIR/cmd.txt
 sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $1 --function $2 --calldata $3 $4 > $LOG_DIR/output.json
-
-# TODO
-# MULTICALL_TEMPLATE_DIR=$CONTRACT_DIR/tests/multicalls
-# 
-# HELLO_STARKNET_MULTI_TEMPLATE=$MULTICALL_TEMPLATE_DIR/HelloStarknet.toml
-# HELLO_STARKNET_MULTI=$TMP_DIR/HelloStarknet.toml
-# sed "s/\$CONTRACT_ADDRESS/$CONTRACT_ADDRESS/g" $HELLO_STARKNET_MULTI_TEMPLATE > $HELLO_STARKNET_MULTI
-# sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait multicall run --path $HELLO_STARKNET_MULTI
-# 
-# sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait call --contract-address $CONTRACT_ADDRESS --function get_balance --block-id latest

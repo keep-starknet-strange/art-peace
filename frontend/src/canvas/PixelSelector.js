@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './PixelSelector.css';
-import canvasConfig from './canvas.config.json';
+import canvasConfig from '../configs/canvas.config.json';
 
 const PixelSelector = (props) => {
 
@@ -14,6 +14,9 @@ const PixelSelector = (props) => {
   let colors = canvasConfig.colors;
   colors = colors.map(color => `#${color}FF`);
 
+  // TODO: implement extraPixels feature(s)
+  const extraPixels = 0;
+
   const getTimeTillNextPlacement = useCallback(() => {
     let timeSinceLastPlacement = Date.now() - placedTime;
     if (timeSinceLastPlacement > timeBetweenPlacements) {
@@ -22,7 +25,13 @@ const PixelSelector = (props) => {
     return Math.floor((timeBetweenPlacements - timeSinceLastPlacement) / 1000);
   }, [placedTime]);
 
-  const placePixelSelector = () => {
+  const placePixelSelector = (event) => {
+    event.preventDefault();
+    // Only work if not clicking on the cancel button
+    if (event.target.classList.contains("PixelSelector__cancel")) {
+      return;
+    }
+
     if (getTimeTillNextPlacement() === 0) {
       setSelectorMode(true);
     }
@@ -71,9 +80,20 @@ const PixelSelector = (props) => {
       </div>
     }
     { !selectorMode &&
-      <div className={"PixelSelector__button " + (getTimeTillNextPlacement() === 0 ? "PixelSelector__button__valid" : "PixelSelector__button__invalid")}onClick={placePixelSelector}>
+      <div className={"PixelSelector__button " + (getTimeTillNextPlacement() === 0 ? "PixelSelector__button__valid" : "PixelSelector__button__invalid")} onClick={placePixelSelector}>
         <p>{timeTillNextPlacement}</p>
-        {props.selectedColorId !== -1 && <div className="PixelSelector__button__color" style={{backgroundColor: colors[props.selectedColorId]}}></div>}
+        { extraPixels > 0 &&
+          <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+          <p style={{margin: "0 0.5rem"}}>|</p>
+          <p>{extraPixels} XTRA</p>
+          </div>
+        }
+        {props.selectedColorId !== -1 &&
+          <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", margin: "0 0 0 0.5rem"}}>
+            <div className="PixelSelector__button__color" style={{backgroundColor: colors[props.selectedColorId]}}></div>
+            <div className="PixelSelector__cancel" onClick={() => cancelSelector()}>x</div>
+          </div>
+        }
       </div>
     }
     </div>

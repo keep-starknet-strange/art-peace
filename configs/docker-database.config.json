@@ -1,0 +1,12 @@
+{
+  "redis": {
+    "host": "art-peace-redis-1",
+    "port": 6379
+  },
+  "postgres": {
+    "host": "art-peace-postgres-1",
+    "port": 5432,
+    "user": "art-peace-user",
+    "database": "art-peace-db"
+  }
+}

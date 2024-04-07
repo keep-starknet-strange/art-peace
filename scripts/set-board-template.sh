@@ -9,6 +9,7 @@ CANVAS_CONTRACT=$1
 TEMPLATE=$2
 X=$3
 Y=$4
+ACCOUNT_FILE=$5
 
 RPC_URL=http://localhost:5050
 
@@ -56,8 +57,11 @@ echo "Placing pixel at ($X, $Y) with color $CLOSEST_COLOR"
 # Place a pixel
 # ~/.art-peace-tests/tmp/1711605675/starknet_accounts.json
 #$(ls $HOME/.l2-place-test/tmp/*/madara-dev-account.json)
-ACCOUNT_FILE=~/.art-peace-tests/tmp/1711696003/starknet_accounts.json
 ACCOUNT_NAME=art_peace_acct
+#if [ $PLACE_COLOR -eq 0 ]; then
+#  echo "Skipping base color"
+#  exit 1
+#fi
 echo "Placing pixel at ($X, $Y) with color $PLACE_COLOR - POS: $POS"
 sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME invoke --contract-address $CANVAS_CONTRACT --function place_pixel --calldata $POS $PLACE_COLOR
 #echo "starkli invoke $CANVAS_CONTRACT place_pixel $X $Y $PLACE_COLOR --rpc $RPC_URL --account $ACCOUNT_FILE --keystore $KEYSTORE_FILE --keystore-password $KEYSTORE_PASSWORD"

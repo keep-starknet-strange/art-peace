@@ -9,8 +9,9 @@
   background-color: #FEFDFB;
 }
 
-.App__rhs-panel {
+.App__panel {
   position: fixed;
+  z-index: 100;
   right: 0;
   top: 0;
   width: max(22rem, 25%);
@@ -22,12 +23,14 @@
   align-items: center;
   justify-content: center;
 
-  z-index: 3;
-
   font-size: 1.2rem;
 }
 
 .App__footer {
+  position: fixed;
+  z-index: 101;
+  left: 0;
+  bottom: 0;
   width: 100%;
 
   display: flex;
@@ -35,6 +38,5 @@
   align-items: center;
   justify-content: center;
 
-  position: fixed;
-  bottom: 0;
+  pointer-events: none;
 }

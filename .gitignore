@@ -20,8 +20,9 @@ node_modules/
 # Development
 **/TODO
 
-# TODO
 # Frontend
+build/
+node_modules/
 
 # Backend
 art-peace-backend

@@ -1,5 +1,3 @@
-#TODO: setup all, list dependencies, etc
-
 build: backend-build frontend-build contracts-build
 test: contracts-test
 

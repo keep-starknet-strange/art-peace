@@ -1,8 +1,7 @@
 #!/bin/bash
 #
-# This script runs the integration tests.
+# This script gets the accounts for the Art Peace project's StarkNet devnet.
 
-# TODO: Host?
 RPC_HOST="127.0.0.1"
 RPC_PORT=5050
 
@@ -34,5 +33,3 @@ while [ $IDX -lt ${#ACCOUNTS[@]} ]; do
 
   IDX=$((IDX + 1))
 done
-
-# TODO: Parse from the output

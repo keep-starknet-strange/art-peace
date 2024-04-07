@@ -30,8 +30,7 @@ var DefaultDatabaseConfig = DatabaseConfig{
   Postgres: PostgresConfig{
     Host: "localhost",
     Port: 5432,
-    // TODO: Add non-hardcoded default user
-    User: "brandonroberts",
+    User: "art-peace-user",
     Database: "art-peace-db",
   },
 }
