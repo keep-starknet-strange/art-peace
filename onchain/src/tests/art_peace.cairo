@@ -102,7 +102,7 @@ fn deploy_test() {
     assert!(
         art_peace.get_total_pixels() == WIDTH * HEIGHT, "Deployed contract has wrong total pixels"
     );
-    // TODO: Other getters & asserts
+// TODO: Other getters & asserts
 }
 
 // TODO: To fuzz test

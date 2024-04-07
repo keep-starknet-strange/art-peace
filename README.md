@@ -24,24 +24,24 @@ Some of the features include :
 
 ## Running
 
-TODO: Note build and run for each modules
+### Docker ( Recommended )
 
-#### Docker ( Recommended )
-```
+```bash
 docker compose up
 ```
 
 To stop the run use `Ctrl-C`.
 
 For a complete reset of the state and rebuild of the containers use :
-```
+```bash
 # WARNING! This will clear the state (volumes) of all the DBs and the Devnet
 docker compose down --volumes
 docker compose build
 ```
 
-#### Local
-```
+### Local
+
+```bash
 # Must install all the dependencies first
 # Change the user on `configs/database.config.json` for postgres
 make integration-test-local
@@ -49,16 +49,27 @@ make integration-test-local
 
 To stop the run use `Ctrl-C`.
 
+### Module
+
+Each module can also be run individually, check the **Modules** section below for more details.
+
 ## Build
 
-TODO: Note build and run for each modules
-#### Docker ( Recommended )
-```
+### Docker ( Recommended )
+
+```bash
 docker compose build
 ```
 
-#### Local
-Use the `make X-build` command for each corresponding module `X`. See the **Modules** section below for more details.
+### Local
+
+```bash
+make build
+```
+
+### Module
+
+Use the `make build-X` command for each corresponding module `X`. See the **Modules** section below for more details.
 
 ## Modules
 
