@@ -24,7 +24,7 @@ Some of the features include :
 
 ## Running
 
-### Docker ( Recommended )
+### Docker Run ( Recommended )
 
 ```bash
 docker compose up
@@ -33,13 +33,14 @@ docker compose up
 To stop the run use `Ctrl-C`.
 
 For a complete reset of the state and rebuild of the containers use :
+
 ```bash
 # WARNING! This will clear the state (volumes) of all the DBs and the Devnet
 docker compose down --volumes
 docker compose build
 ```
 
-### Local
+### Local Run
 
 ```bash
 # Must install all the dependencies first
@@ -49,29 +50,29 @@ make integration-test-local
 
 To stop the run use `Ctrl-C`.
 
-### Module
+### Component Run
 
-Each module can also be run individually, check the **Modules** section below for more details.
+Each component can also be run individually, check the **Components** section below for more details.
 
 ## Build
 
-### Docker ( Recommended )
+### Docker Build ( Recommended )
 
 ```bash
 docker compose build
 ```
 
-### Local
+### Local Build
 
 ```bash
 make build
 ```
 
-### Module
+### Component Build
 
-Use the `make build-X` command for each corresponding module `X`. See the **Modules** section below for more details.
+Use the `make build-X` command for each corresponding component `X`. See the **Components** section below for more details.
 
-## Modules
+## Components
 
 - **Onchain:** [Starknet contract(s)](./onchain/) for trustless onchain interactions.
 - **Backend:** [Monolithic Go backend](./backend/) for managing requests, interactions, and DBs.
@@ -87,7 +88,7 @@ Use the `make build-X` command for each corresponding module `X`. See the **Modu
 
 Its recommended to use `docker compose` when building and running, so the only dependencies would be [docker](https://docs.docker.com/desktop/) and [docker compose](https://docs.docker.com/compose/install/linux/)
 
-Howeveer, it might be worth running only certain modules for development/testing sometimes. Each module has various dependencies, check [dependencies.txt](./dependencies.txt) for more details.
+Howeveer, it might be worth running only certain components for development/testing sometimes. Each component has various dependencies, check [dependencies.txt](./dependencies.txt) for more details.
 
 ## References
 
