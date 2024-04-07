@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 
@@ -54,7 +55,6 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
-  // TODO: Disable this in production
   reqBody, err := io.ReadAll(r.Body)
   if err != nil {
     panic(err)
@@ -65,7 +65,6 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
     panic(err)
   }
 
-  // TODO: Pass position instead of x, y?
   x, err := strconv.Atoi(jsonBody["x"])
   if err != nil {
     panic(err)
@@ -74,9 +73,10 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
   if err != nil {
     panic(err)
   }
-  shellCmd := "../tests/integration/local/place_pixel.sh"
+  shellCmd := backend.ArtPeaceBackend.BackendConfig.Scripts.PlacePixelDevnet
   position := x + y * int(backend.ArtPeaceBackend.CanvasConfig.Canvas.Width)
-  cmd := exec.Command(shellCmd, jsonBody["contract"], "place_pixel", strconv.Itoa(position), jsonBody["color"])
+  contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+  cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(position), jsonBody["color"])
   _, err = cmd.Output()
   if err != nil {
     fmt.Println("Error executing shell command: ", err)
@@ -98,8 +98,6 @@ func placePixelRedis(w http.ResponseWriter, r *http.Request) {
   if err != nil {
     panic(err)
   }
-  // TODO: Check if pos and color are valid
-  // TODO: allow x, y coordinates?
   position := jsonBody["position"]
   color := jsonBody["color"]
   bitfieldType := "u" + strconv.Itoa(int(backend.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))

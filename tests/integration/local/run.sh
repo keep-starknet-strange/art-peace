@@ -7,6 +7,8 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 WORK_DIR=$SCRIPT_DIR/../../..
 CANVAS_CONFIG_FILE=$WORK_DIR/configs/canvas.config.json
+DATABASE_CONFIG_FILE=$WORK_DIR/configs/database.config.json
+BACKEND_CONFIG_FILE=$WORK_DIR/configs/backend.config.json
 
 OUTPUT_DIR=$HOME/.art-peace-tests
 TIMESTAMP=$(date +%s)
@@ -32,22 +34,13 @@ sleep 2 # Wait for redis to start; TODO: Check if redis is actually running
 
 # Start the art-peace-db with postgres
 echo "Starting art-peace-db ..."
-dropdb art-peace-db
+dropdb art-peace-db -f
 createdb art-peace-db
-#TODO: Use a migration script instead of hardcoding the schema
-psql -d art-peace-db -c "CREATE TABLE Pixels (
-  address char(64) NOT NULL,
-  position integer NOT NULL,
-  color integer NOT NULL,
-  time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-);"
-psql -d art-peace-db -c "CREATE INDEX address_index ON Pixels (address);"
-psql -d art-peace-db -c "CREATE INDEX position_index ON Pixels (position);"
-psql -d art-peace-db -c "CREATE INDEX time_index ON Pixels (time);"
+psql -d art-peace-db -f $WORK_DIR/postgres/init.sql
 
 # Start the art-peace backend
 echo "Starting art-peace backend ..."
-kill $(ps aux | grep go\ run\ backend.go | grep -v grep | awk '{print $2}')
+kill $(ps aux | grep go\ run\ main.go | grep -v grep | awk '{print $2}')
 BACKEND_LOG_FILE=$LOG_DIR/backend.log
 touch $BACKEND_LOG_FILE
 cd $WORK_DIR/backend
@@ -83,6 +76,7 @@ kill $(ps aux | grep apibara\ run\ script.js | grep -v grep | awk '{print $2}')
 INDEXER_SCRIPT_LOG_FILE=$LOG_DIR/indexer_script.log
 touch $INDEXER_SCRIPT_LOG_FILE
 cd $WORK_DIR/indexer
+#TODO: apibara -> postgres automatically?
 ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS apibara run script.js --allow-env-from-env ART_PEACE_CONTRACT_ADDRESS 2>&1 > $INDEXER_SCRIPT_LOG_FILE &
 INDEXER_SCRIPT_PID=$!
 sleep 2 # Wait for indexer script to start; TODO: Check if indexer script is actually running
@@ -90,6 +84,7 @@ sleep 2 # Wait for indexer script to start; TODO: Check if indexer script is act
 # Initialize the art-peace canvas in the backend/redis
 echo "Initializing art-peace canvas ..."
 curl http://localhost:8080/initCanvas -X POST
+curl http://localhost:8080/setContractAddress -X POST -d "$ART_PEACE_CONTRACT_ADDRESS"
 
 # Start the art-peace frontend
 echo "Starting art-peace frontend ..."
@@ -97,9 +92,11 @@ kill $(ps aux | grep npm\ start | grep -v grep | awk '{print $2}')
 FRONTEND_LOG_FILE=$LOG_DIR/frontend.log
 touch $FRONTEND_LOG_FILE
 cd $WORK_DIR/frontend
-REACT_CANVAS_CONFIG_FILE=$WORK_DIR/frontend/src/canvas.config.json
+REACT_CANVAS_CONFIG_FILE=$WORK_DIR/frontend/src/configs/canvas.config.json
+REACT_BACKEND_CONFIG_FILE=$WORK_DIR/frontend/src/configs/backend.config.json
 cp $CANVAS_CONFIG_FILE $REACT_CANVAS_CONFIG_FILE #TODO: Use a symlink instead?
-REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS REACT_APP_CANVAS_CONFIG_FILE=$REACT_CANVAS_CONFIG_FILE npm start 2>&1 > $FRONTEND_LOG_FILE &
+cp $BACKEND_CONFIG_FILE $REACT_BACKEND_CONFIG_FILE
+REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS REACT_APP_CANVAS_CONFIG_FILE=$REACT_CANVAS_CONFIG_FILE REACT_APP_BACKEND_CONFIG_FILE=$REACT_BACKEND_CONFIG_FILE npm start 2>&1 > $FRONTEND_LOG_FILE &
 FRONTEND_PID=$!
 sleep 2 # Wait for frontend to start; TODO: Check if frontend is actually running
 

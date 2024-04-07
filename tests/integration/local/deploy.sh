@@ -2,7 +2,6 @@
 #
 # This script runs the integration tests.
 
-# TODO: Host?
 RPC_HOST="127.0.0.1"
 RPC_PORT=5050
 
@@ -45,11 +44,16 @@ WIDTH=$(jq -r '.canvas.width' $CANVAS_CONFIG)
 HEIGHT=$(jq -r '.canvas.height' $CANVAS_CONFIG)
 PLACE_DELAY=0x00
 COLOR_COUNT=$(jq -r '.colors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
+COLORS=$(jq -r '.colors[]' $CANVAS_CONFIG | sed 's/^/0x/')
+END_TIME=3000000000
 
+# [WIDTH, HEIGHT, TIME_BETWEEN_PIXELS, COLOR_PALLETE_LEN, COLORS, END_TIME, DAILY_QUESTS_LEN, DAILY_QUESTS, DAILY_QUESTS_LEN, MAIN_QUESTS]
+CALLDATA=$(echo -n $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT $COLORS $END_TIME 0 0)
+echo "Calldata: $CALLDATA"
 # TODO: calldata passed as parameters
 echo "Deploying contract \"$CLASS_NAME\"..."
-echo "sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT"
-CONTRACT_DEPLOY_RESULT=$(sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT | tail -n 1)
+echo "sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $CALLDATA"
+CONTRACT_DEPLOY_RESULT=$(sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $CALLDATA | tail -n 1)
 CONTRACT_ADDRESS=$(echo $CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
 echo "Deployed contract \"$CLASS_NAME\" with address $CONTRACT_ADDRESS"
 

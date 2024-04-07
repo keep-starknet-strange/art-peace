@@ -1,4 +1,4 @@
-.Tabs {
+.TabsFooter {
   width: min(100vw, 100rem);
   height: max(3.4rem, 10%);
   margin: min(0.4rem, 2%) 0;
@@ -11,42 +11,43 @@
 }
 
 /* TODO: css -> scss? */
-.Tabs__logo {
+.TabsFooter__logo {
   width: min(8rem, 10vw);
 
-  pointer-events: none;
+  pointer-events: fill;
   image-rendering: pixelated;
   margin: 0 0.5rem;
 }
 
-.Tabs__logo:hover {
+.TabsFooter__logo:hover {
   /* TODO: not working */
   cursor: pointer;
 }
 
-.Tabs__tab {
+.TabsFooter__tab {
   font-size: min(1.6rem, 2vw);
   text-shadow: 0 0 1rem #FFFFFF;
+  pointer-events: all;
 }
 
-.Tabs__main {
+.TabsFooter__main {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
 }
 
-.Tabs__tab:hover {
+.TabsFooter__tab:hover {
   cursor: pointer;
   font-weight: bold;
 }
 
-.Tabs__tab:active {
+.TabsFooter__tab:active {
   font-weight: bold;
   transform: scale(0.9);
 }
 
-.Tabs__tab--active {
+.TabsFooter__tab--active {
   font-weight: bold;
   color: #9DAEB6;
   text-decoration: underline;

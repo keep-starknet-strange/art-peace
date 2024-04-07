@@ -5,4 +5,7 @@ func InitRoutes() {
   InitCanvasRoutes()
   InitPixelRoutes()
   InitWebsocketRoutes()
+  InitTemplateRoutes()
+  InitUserRoutes()
+  InitContractRoutes()
 }

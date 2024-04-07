@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"os"
 	"strconv"
 
 	"github.com/jackc/pgx/v5"
@@ -29,7 +30,7 @@ func NewDatabases(databaseConfig *config.DatabaseConfig) *Databases {
   })
 
   // Connect to Postgres
-  postgresConnString := "postgresql://" + databaseConfig.Postgres.User + "@" + databaseConfig.Postgres.Host + ":" + strconv.Itoa(databaseConfig.Postgres.Port) + "/" + databaseConfig.Postgres.Database
+  postgresConnString := "postgresql://" + databaseConfig.Postgres.User + ":" + os.Getenv("POSTGRES_PASSWORD") + "@" + databaseConfig.Postgres.Host + ":" + strconv.Itoa(databaseConfig.Postgres.Port) + "/" + databaseConfig.Postgres.Database
   pgConn, err := pgx.Connect(context.Background(), postgresConnString)
   if err != nil {
     panic(err)

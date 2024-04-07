@@ -12,34 +12,88 @@
 
 ## Overview
 
-`art/peace` is a collaborative art game where users can place pixels on a large canvas and receive rewards for collaborating. The app will run over X days, and end with a final snapshot of the board. The goal is to give users the feeling of collectively building on a highly responsive art canvas, which they can explore, interact with, and compete on.
+`art/peace` is a collaborative art game where users can place pixels on a large shared canvas and receive rewards for collaborating to build art. The game will run over X days, and end with a final snapshot of the board. The goal is to give users the feeling of collectively building on a highly responsive art canvas, which they can explore, interact with, and compete on.
 
 Some of the features include :
 
-- **Placing Pixels** : This will be the main interaction type, where every X minutes a user will be allowed to place a pixel onto the canvas. ( on-chain interaction )
-- **Color Voting** : In addition to the base colors, there will be a vote to add new colors to the palette every day. ( on-chain interaction )
-- **Quests** : Tasks to get extra pixels to place on-top of the one every X minutes. ( on-chain interaction )
-- **Templates** : Overlayable artworks to help communities collaborate on an art piece. Bounties can be added to a template to incentivize creation. ( off-chain interaction until settling )
+- **Placing Pixels** : This will be the main user interaction, where every X minutes a user will be allowed to place a pixel onto the canvas.
+- **Quests** : Tasks to get extra pixels to place on-top of the one every X minutes.
+- **Voting** : In addition to the base colors, there will be a vote to add new colors to the palette every day.
+- **Templates** : Artwork templates used to help communities collaborate on an art piece. Bounties can be added to a template to incentivize creation.
+- **NFTs** : Mint NFTs from the canvas.
 
-## References
+## Running
 
-- [r/place technical document](https://www.redditinc.com/blog/how-we-built-rplace)
+### Docker Run ( Recommended )
+
+```bash
+docker compose up
+```
+
+To stop the run use `Ctrl-C`.
+
+For a complete reset of the state and rebuild of the containers use :
+
+```bash
+# WARNING! This will clear the state (volumes) of all the DBs and the Devnet
+docker compose down --volumes
+docker compose build
+```
+
+### Local Run
+
+```bash
+# Must install all the dependencies first
+# Change the user on `configs/database.config.json` for postgres
+make integration-test-local
+```
+
+To stop the run use `Ctrl-C`.
+
+### Component Run
+
+Each component can also be run individually, check the [Components](#Components) section below for more details.
 
 ## Build
 
-To build the project, run:
+### Docker Build ( Recommended )
 
 ```bash
-scarb build
+docker compose build
 ```
 
-## Test
-
-To test the project, run ( uses `snforge` ):
+### Local Build
 
 ```bash
-scarb test
+make build
 ```
+
+### Component Build
+
+Use the `make build-X` command for each corresponding component `X`. See the [Components](#Components) section below for more details.
+
+## Components
+
+- **Onchain:** [Starknet contract(s)](./onchain/) for trustless onchain interactions.
+- **Backend:** [Monolithic Go backend](./backend/) for managing requests, interactions, and DBs.
+- **Frontend:** [Reactjs application](./frontend/) for users to interact with.
+- **Indexer:** [Apibara indexer](./indexer/) for monitoring Starknet events and forwarding to the DBs.
+- **Postgres:** DB for storing general data used for analytics, frontend, and backend.
+- **Redis:** In memory DB used to store the compressed `Canvas` data for fast retrieval
+- **tests:** Integration tests for local, docker, ...
+
+![art/peace diagram](./docs/diagrams/art-peace-diagram.png)
+
+## Dependencies
+
+Its recommended to use `docker compose` when building and running, so the only dependencies would be [docker](https://docs.docker.com/desktop/) and [docker compose](https://docs.docker.com/compose/install/linux/)
+
+However, it might be worth running only certain components for development/testing sometimes. Each component has various dependencies, check [dependencies.txt](./dependencies.txt) for more details.
+
+## References
+
+- [Diagrams](./docs/diagrams/)
+- [r/place technical document](https://www.redditinc.com/blog/how-we-built-rplace)
 
 ## Contributors ✨
 

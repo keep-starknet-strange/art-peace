@@ -1,103 +1,49 @@
-import React, { useEffect, useState } from 'react';
-//import { connect } from "get-starknet";
-//import { Contract } from "starknet";
+import React, { useState } from 'react';
 import './App.css';
-import Canvas from './Canvas.js';
-import Tabs from './Tabs.js';
-import PixelSelector from './PixelSelector.js';
-// TODO: Generate contract.abi.json
-
-function usePreventZoom(scrollCheck = true, keyboardCheck = true) {
-    useEffect(() => {
-      const handleKeydown = (e) => {
-        if (
-          keyboardCheck &&
-          e.ctrlKey &&
-          (e.keyCode == "61" ||
-            e.keyCode == "107" ||
-            e.keyCode == "173" ||
-            e.keyCode == "109" ||
-            e.keyCode == "187" ||
-            e.keyCode == "189")
-        ) {
-          e.preventDefault();
-        }
-      };
-  
-      const handleWheel = (e) => {
-        if (scrollCheck && e.ctrlKey) {
-          e.preventDefault();
-        }
-      };
-  
-      document.addEventListener("keydown", handleKeydown);
-      document.addEventListener("wheel", handleWheel, { passive: false });
-  
-      return () => {
-        document.removeEventListener("keydown", handleKeydown);
-        document.removeEventListener("wheel", handleWheel);
-      };
-    }, [scrollCheck, keyboardCheck]);
-  }
+import Canvas from './canvas/Canvas.js';
+import PixelSelector from './canvas/PixelSelector.js';
+import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
+import TabsFooter from './tabs/TabsFooter.js';
+import TabPanel from './tabs/TabPanel.js';
+import { usePreventZoom } from './utils/Window.js';
 
 function App() {
-
-  /*
-  // TODO: Wallet integration
-  const [provider, setProvider] = useState(null)
-  const [address, setAddress] = useState(null)
-  const [isConnected, setIsConnected] = useState(false)
-  const [chainId, setChainId] = useState(null)
-  // TODO: Dynamic contract address
-  const contractAddress = process.env.REACT_APP_ART_PEACE_CONTRACT_ADDRESS;
-  useEffect(() => {
-    const connectToStarknet = async () => {
-      try {
-        const starknet = await connect()
-        //TODO: await starknet?.enable({ starknetVersion: "v4" })
-        setProvider(starknet.account)
-        setAddress(starknet.selectedAddress)
-        setIsConnected(true)
-        setChainId(starknet.chainId)
-        const contract = new Contract(contractAbi, contractAddress, starknet.account)
-        contract.get_width().then(
-          (result) => console.log("Contract called", result)
-        ).catch(
-          (error) => console.log("Contract call failed", error)
-        )
-        //const pixel_pos = Math.floor(Math.random() * 1000) % 32
-        //const pixel_color = Math.floor(Math.random() * 1000) % 10
-        //console.log("Setting pixel", pixel_pos, pixel_color)
-        //console.log(contract.populate("place_pixel", [pixel_pos, pixel_color]))
-        //contract.place_pixel(pixel_pos, pixel_color).then(
-        //  (result) => console.log("Contract called", result)).catch(
-        //  (error) => console.log("Contract call failed", error)
-        //)
-        //setContract(contract)
-        //setContract(Contract(contractAbi, contractAddress, provider))
-      } catch (error) {
-        alert(error.message)
-      }
-    }
-
-    connectToStarknet()
-  }, [])
-  */
-
   usePreventZoom();
 
-  // TODO: use -1 for all or other state
-  // TODO: move pixel selected rhs panel
+  // Pixel selection data
   const [selectedColorId, setSelectedColorId] = useState(-1);
+  const [pixelSelectedMode, setPixelSelectedMode] = useState(false);
+  const [selectedPositionX, setSelectedPositionX] = useState(null)
+  const [selectedPositionY, setSelectedPositionY] = useState(null)
+
+  const clearPixelSelection = () => {
+    setSelectedPositionX(null);
+    setSelectedPositionY(null);
+    setPixelSelectedMode(false);
+  }
+
+  const setPixelSelection = (x, y) => {
+    setSelectedPositionX(x);
+    setSelectedPositionY(y);
+    setPixelSelectedMode(true);
+  }
+
+  // Tabs
+  const tabs = ['Canvas', 'Quests', 'Vote', 'Templates', 'NFTs', 'Account'];
+  const [activeTab, setActiveTab] = useState(tabs[0]);
 
   return (
     <div className="App">
-      <Canvas selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} />
-      <div className="App__rhs-panel">
+      <Canvas selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} pixelSelectedMode={pixelSelectedMode} selectedPositionX={selectedPositionX} selectedPositionY={selectedPositionY} setPixelSelection={setPixelSelection} clearPixelSelection={clearPixelSelection} />
+      <div className="App__panel">
+        { pixelSelectedMode && (
+          <SelectedPixelPanel selectedPositionX={selectedPositionX} selectedPositionY={selectedPositionY} clearPixelSelection={clearPixelSelection} />
+        )}
+        <TabPanel activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
       <div className="App__footer">
         <PixelSelector selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} />
-        <Tabs />
+        <TabsFooter tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
     </div>
   );

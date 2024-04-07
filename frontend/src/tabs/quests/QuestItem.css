@@ -1,0 +1,78 @@
+.QuestItem {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: "title progress";
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.QuestItem__info {
+  grid-area: title;
+  margin-right: 1rem;
+}
+
+.QuestItem__title {
+  font-size: 1.3rem;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+}
+
+.QuestItem__description {
+  font-size: 0.9rem;
+  margin-left: 0.7rem;
+  padding: 0;
+}
+
+.QuestItem__progress {
+  grid-area: progress;
+  width: 100%;
+  height: 3rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.QuestItem__reward {
+  position: absolute;
+  /* Center the reward in the progress bar */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1rem;
+  color: #000;
+  text-align: center;
+}
+
+/* TODO: Steadily change color red to green as progress increases */
+.QuestItem__progression {
+  margin: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  border-radius: 0.5rem;
+  background-color: rgba(221, 85, 51, 0.9);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.QuestItem__progression--completed {
+  background-color: rgba(85, 221, 51, 0.9);
+}
+
+.QuestItem__progression--incomplete {
+  background-color: rgba(221, 85, 51, 0.9);
+}
+
+.QuestItem__progression--claim {
+  background-color: rgba(221, 221, 85, 0.9);
+  /* TODO: animate the claim button */
+}
+
+.QuestItem__progress--claim:hover {
+  transform: scale(1.05) translateY(-0.2rem);
+}
+
+.QuestItem__progress--claim:active {
+  transform: scale(0.95) translateY(0.2rem);
+}

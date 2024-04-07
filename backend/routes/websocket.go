@@ -14,7 +14,6 @@ func InitWebsocketRoutes() {
 }
 
 var upgrader = websocket.Upgrader{
-  // TODO: to config?
   ReadBufferSize:  1024,
   WriteBufferSize: 1024,
 }

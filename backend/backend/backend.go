@@ -14,20 +14,20 @@ type Backend struct {
   WSConnections []*websocket.Conn
 
   CanvasConfig *config.CanvasConfig
-  Port int
+  BackendConfig *config.BackendConfig
 }
 
 var ArtPeaceBackend *Backend
 
-func NewBackend(databases *Databases, canvasConfig *config.CanvasConfig, port int) *Backend {
+func NewBackend(databases *Databases, canvasConfig *config.CanvasConfig, backendConfig *config.BackendConfig) *Backend {
   return &Backend{
     Databases: databases,
     CanvasConfig: canvasConfig,
-    Port: port,
+    BackendConfig: backendConfig,
   }
 }
 
 func (b *Backend) Start() {
-  fmt.Println("Listening on port", b.Port)
-  http.ListenAndServe(fmt.Sprintf(":%d", b.Port), nil)
+  fmt.Println("Listening on port", b.BackendConfig.Port)
+  http.ListenAndServe(fmt.Sprintf(":%d", b.BackendConfig.Port), nil)
 }

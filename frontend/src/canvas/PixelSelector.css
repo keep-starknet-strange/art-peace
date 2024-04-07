@@ -2,6 +2,7 @@
   font-size: min(1.2rem, 1.5vw);
   text-shadow: 0 0 1rem rgba(255, 255, 255, 0.5);
   /* TODO: Better ways to style this with wierd canvas colors */
+  pointer-events: fill;
 }
 
 .PixelSelector__button {
@@ -13,26 +14,27 @@
   align-items: center;
   justify-content: center;
 
-  background-color: rgba(50, 50, 50, 0.3);
+  background-image: linear-gradient(to bottom right, rgba(50, 50, 50, 0.25), rgba(50, 50, 50, 0.5));
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
 
   cursor: pointer;
+  pointer-events: fill;
 }
 
 .PixelSelector__button:hover {
-  background-color: rgba(50, 50, 50, 0.4);
+  background-image: linear-gradient(to bottom right, rgba(50, 50, 50, 0.3), rgba(50, 50, 50, 0.6));
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
   transform: translateY(-0.1rem) scale(1.01);
 }
 
 .PixelSelector__button__valid:active {
-  background-color: rgba(50, 150, 50, 0.3);
+  background-image: linear-gradient(to bottom right, rgba(50, 150, 50, 0.25), rgba(50, 150, 50, 0.5));
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
   transform: translateY(0) scale(1);
 }
 
 .PixelSelector__button__invalid:active {
-  background-color: rgba(150, 50, 50, 0.3);
+  background-image: linear-gradient(to bottom right, rgba(150, 50, 50, 0.25), rgba(150, 50, 50, 0.5));
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
   transform: translateY(0) scale(1);
 }
@@ -55,7 +57,7 @@
   align-items: center;
   justify-content: center;
 
-  background-color: rgba(50, 50, 50, 0.3);
+  background-image: linear-gradient(to bottom right, rgba(50, 50, 50, 0.25), rgba(50, 50, 50, 0.5));
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
 }
 
@@ -66,6 +68,7 @@
   margin: 0 0.5rem;
   box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.4);
   cursor: pointer;
+  pointer-events: fill;
 }
 
 .PixelSelector__color:hover {
@@ -82,9 +85,14 @@
   margin: 0 0.5rem 0 1rem;
   text-align: center;
   cursor: pointer;
+  pointer-events: fill;
   font-size: 1.5rem;
 }
 
 .PixelSelector__cancel:hover {
   transform: translateY(-0.2rem) scale(1.05);
+}
+
+.PixelSelector__cancel:active {
+  transform: translateY(0) scale(1);
 }

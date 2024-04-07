@@ -1,0 +1,8 @@
+{
+  "host": "localhost",
+  "port": 8080,
+  "scripts": {
+    "place_pixel_devnet": "/scripts/place_pixel.sh",
+    "add_template_hash_devnet": "/scripts/add_template_hash.sh"
+  }
+}
