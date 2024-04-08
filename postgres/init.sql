@@ -41,6 +41,7 @@ CREATE TABLE Days (
 );
 CREATE INDEX days_dayIndex_index ON Days (dayIndex);
 
+-- TODO: Remove completedStatus & status from Quests?
 CREATE TABLE Quests (
   key integer NOT NULL PRIMARY KEY,
   name text NOT NULL,

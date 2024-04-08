@@ -63,7 +63,7 @@ const Canvas = props => {
     setDragStartY(e.clientY)
   }
 
-  const handlePointerUp = (e) => {
+  const handlePointerUp = () => {
     setIsDragging(false)
     setDragStartX(0)
     setDragStartY(0)
@@ -90,12 +90,12 @@ const Canvas = props => {
   const [setup, setSetup] = useState(false)
   const [pixelPlacedBy, setPixelPlacedBy] = useState("")
 
-  const draw = (ctx, imageData) => {
+  const draw = useCallback((ctx, imageData) => {
     ctx.canvas.width = width
     ctx.canvas.height = height
     ctx.putImageData(imageData, 0, 0)
     // TODO: Use image-rendering for supported browsers?
-  }
+  }, [width, height])
 
   useEffect(() => {
     if (setup) {
@@ -122,7 +122,7 @@ const Canvas = props => {
           let value = (byte >> (oneByteBitOffset - bitOffset)) & 0b11111
           dataArray.push(value)
         } else {
-          let byte = colorData[bytePos] << 8 | colorData[bytePos + 1]
+          let byte = (colorData[bytePos] << 8) | colorData[bytePos + 1]
           let value = (byte >> (twoByteBitOffset - bitOffset)) & 0b11111
           dataArray.push(value)
         }
@@ -152,7 +152,7 @@ const Canvas = props => {
       })
     }
     // TODO: Return a cleanup function to close the websocket / ...
-  }, [draw, readyState])
+  }, [readyState, sendJsonMessage, setup, colors, width, height, backendUrl, draw])
 
   useEffect(() => {
     if (lastJsonMessage) {
@@ -166,7 +166,7 @@ const Canvas = props => {
       context.fillStyle = color
       context.fillRect(x, y, 1, 1)
     }
-  }, [lastJsonMessage])
+  }, [lastJsonMessage, colors, width])
 
   const pixelSelect = useCallback((clientX, clientY) => {
     const canvas = canvasRef.current
@@ -189,17 +189,14 @@ const Canvas = props => {
     }).then(response => {
       return response.text()
     }).then(data => {
-      // TODO: not working
       // TODO: Cache pixel info & clear cache on update from websocket
       // TODO: Dont query if hover select ( until 1s after hover? )
       setPixelPlacedBy(data)
     }).catch(error => {
       console.error(error)
-      //TODO: Handle error
     });
 
-    // TODO: Create a border around the selected pixel
-  }, [props.setSelectedPositionX, props.setSelectedPositionY, props.setPixelSelectedMode, setPixelPlacedBy, width, height, props.selectedColorId, props.pixelSelectedMode, props.selectedPositionX, props.selectedPositionY])
+  }, [props, width, height, backendUrl])
 
   const pixelClicked = (e) => {
     pixelSelect(e.clientX, e.clientY)

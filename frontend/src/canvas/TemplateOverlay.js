@@ -10,8 +10,6 @@ const TemplateOverlay = props => {
   const width = props.templateWidth
   const height = templateImage.length / width
   const scaler = 8
-  const scalerFactor = 1 / scaler
-  const translater = (scaler - 1) / 2
 
   const draw = (ctx, imageData) => {
     ctx.canvas.width = width * scaler

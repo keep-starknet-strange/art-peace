@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import './Templates.css';
 import ExpandableTab from './ExpandableTab.js';
 

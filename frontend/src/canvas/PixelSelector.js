@@ -67,7 +67,7 @@ const PixelSelector = (props) => {
   }, [getTimeTillNextPlacement]);
 
   return (
-    <div className="PixelSelector">
+    <div className={"PixelSelector " + (props.getDeviceTypeInfo().isPortrait ? " PixelSelector--portrait" : "")}>
     {
       selectorMode &&
       <div className="PixelSelector__selector">
