@@ -94,6 +94,8 @@ However, it might be worth running only certain components for development/testi
 
 - [Diagrams](./docs/diagrams/)
 - [r/place technical document](https://www.redditinc.com/blog/how-we-built-rplace)
+- [Telegram](https://t.me/+rd1pvEo8T2w2ZDRh)
+- [OnlyDust](https://app.onlydust.com/p/artpeace)
 
 ## Contributors ✨
 

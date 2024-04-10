@@ -1,0 +1,32 @@
+#[derive(Drop, Copy, Serde, starknet::Store)]
+pub struct TemplateMetadata {
+    hash: felt252,
+    position: u128,
+    width: u128,
+    height: u128,
+    reward: u256,
+    reward_token: starknet::ContractAddress
+}
+
+#[starknet::interface]
+pub trait ITemplateStore<TContractState> {
+    // Returns the number of templates stored in the contract state.
+    fn get_templates_count(self: @TContractState) -> u32;
+    // Returns the template metadata stored in the contract state.
+    fn get_template(self: @TContractState, template_id: u32) -> TemplateMetadata;
+    // Returns the template image hash stored in the contract state.
+    fn get_template_hash(self: @TContractState, template_id: u32) -> felt252;
+    // Stores a new template image into the contract state w/ metadata.
+    // If the reward/token are set, then the contract escrows the reward for the template.
+    fn add_template(ref self: TContractState, template_metadata: TemplateMetadata);
+    // Returns whether the template is complete.
+    fn is_template_complete(self: @TContractState, template_id: u32) -> bool;
+}
+
+#[starknet::interface]
+pub trait ITemplateVerifier<TContractState> {
+    // Verifies the template is complete, and if so, sets the template as complete.
+    // If there was a reward escrowed, it is transferred to the builders.
+    // Passed template_image contains the full image, and is used to verify the template.
+    fn complete_template(ref self: TContractState, template_id: u32, template_image: Span<u8>);
+}

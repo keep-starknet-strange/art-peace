@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './ExpandableTab.css';
 
 const ExpandableTab = props => {
+  // TODO: Close pixel selection when expanded
   const [expanded, setExpanded] = useState(false);
 
   const MainSection = props.mainSection;

@@ -1,5 +1,9 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 use art_peace::ArtPeace::InitParams;
+use art_peace::templates::{
+    ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher,
+    ITemplateVerifierDispatcherTrait, TemplateMetadata
+};
 
 use snforge_std as snf;
 use snforge_std::{CheatTarget, ContractClassTrait};
@@ -110,6 +114,7 @@ fn deploy_test() {
 // TODO: event spy?
 // TODO: all getters & setters
 // TODO: Tests assert in code
+// TODO: Check pixel owner
 
 #[test]
 fn place_pixel_test() {
@@ -120,8 +125,8 @@ fn place_pixel_test() {
     let pos = x + y * WIDTH;
     let color = 0x5;
     art_peace.place_pixel(pos, color);
-    assert!(art_peace.get_pixel(pos) == color, "Pixel was not placed correctly at pos");
-    assert!(art_peace.get_pixel_xy(x, y) == color, "Pixel was not placed correctly at xy");
+    assert!(art_peace.get_pixel_color(pos) == color, "Pixel was not placed correctly at pos");
+    assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel was not placed correctly at xy");
 
     warp_to_next_available_time(art_peace);
     let x = 15;
@@ -129,8 +134,8 @@ fn place_pixel_test() {
     let pos = x + y * WIDTH;
     let color = 0x7;
     art_peace.place_pixel_xy(x, y, color);
-    assert!(art_peace.get_pixel_xy(x, y) == color, "Pixel xy was not placed correctly at xy");
-    assert!(art_peace.get_pixel(pos) == color, "Pixel xy was not placed correctly at pos");
+    assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel xy was not placed correctly at xy");
+    assert!(art_peace.get_pixel(pos).color == color, "Pixel xy was not placed correctly at pos");
 }
 
 #[test]
@@ -144,7 +149,7 @@ fn deploy_quest_test() {
     };
 
     assert!(
-        art_peace.get_daily_quests() == daily_quests.span(), "Daily quests were not set correctly"
+        art_peace.get_days_quests(0) == daily_quests.span(), "Daily quests were not set correctly"
     );
     assert!(
         art_peace.get_main_quests() == main_quests.span(), "Main quests were not set correctly"
@@ -206,3 +211,105 @@ fn pixel_quest_test() {
         art_peace.get_extra_pixels_count() == 30, "Extra pixels are wrong after main quest claim"
     );
 }
+
+use core::poseidon::PoseidonTrait;
+use core::hash::{HashStateTrait, HashStateExTrait};
+
+// TODO: Move to src
+fn compute_template_hash(template: Span<u8>) -> felt252 {
+    let template_len = template.len();
+    if template_len == 0 {
+        return 0;
+    }
+
+    let mut hasher = PoseidonTrait::new();
+    let mut i = 0;
+    while i < template_len {
+        hasher = hasher.update_with(*template.at(i));
+        i += 1;
+    };
+    hasher.finalize()
+}
+
+#[test]
+fn template_full_basic_test() {
+    let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
+    let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
+    let template_verifier = ITemplateVerifierDispatcher {
+        contract_address: art_peace.contract_address
+    };
+
+    assert!(template_store.get_templates_count() == 0, "Templates count is not 0");
+
+    // 2x2 template image
+    let template_image = array![1, 2, 3, 4];
+    let template_hash = compute_template_hash(template_image.span());
+    let template_metadata = TemplateMetadata {
+        hash: template_hash,
+        position: 0,
+        width: 2,
+        height: 2,
+        reward: 0,
+        reward_token: contract_address_const::<0>(),
+    };
+
+    template_store.add_template(template_metadata);
+
+    assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
+    assert!(template_store.get_template_hash(0) == template_hash, "Template hash is not correct");
+    assert!(
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (base)"
+    );
+
+    warp_to_next_available_time(art_peace);
+    let x = 0;
+    let y = 0;
+    let pos = x + y * WIDTH;
+    let color = 1;
+    art_peace.place_pixel(pos, color);
+    template_verifier.complete_template(0, template_image.span());
+    assert!(
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (1)"
+    );
+
+    warp_to_next_available_time(art_peace);
+    let x = 1;
+    let y = 0;
+    let pos = x + y * WIDTH;
+    let color = 2;
+    art_peace.place_pixel(pos, color);
+    template_verifier.complete_template(0, template_image.span());
+    assert!(
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (2)"
+    );
+
+    warp_to_next_available_time(art_peace);
+    let x = 0;
+    let y = 1;
+    let pos = x + y * WIDTH;
+    let color = 3;
+    art_peace.place_pixel(pos, color);
+    template_verifier.complete_template(0, template_image.span());
+    assert!(
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (3)"
+    );
+
+    warp_to_next_available_time(art_peace);
+    let x = 1;
+    let y = 1;
+    let pos = x + y * WIDTH;
+    let color = 4;
+    art_peace.place_pixel(pos, color);
+    template_verifier.complete_template(0, template_image.span());
+    assert!(
+        template_store.is_template_complete(0) == true,
+        "Template is not completed after it should be"
+    );
+}
+// TODO: test invalid template inputs
+
+
