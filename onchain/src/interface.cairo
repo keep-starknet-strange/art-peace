@@ -40,6 +40,9 @@ pub trait IArtPeace<TContractState> {
     fn get_end_time(self: @TContractState) -> u64;
     fn get_day(self: @TContractState) -> u32;
 
+    // Start a new day
+    fn increase_day_index(ref self: TContractState);
+
     // Get quest info
     fn get_daily_quest_count(self: @TContractState) -> core::zeroable::NonZero::<u32>;
     fn get_daily_quest(

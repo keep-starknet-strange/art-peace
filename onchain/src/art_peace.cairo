@@ -29,6 +29,7 @@ pub mod ArtPeace {
         creation_time: u64,
         end_time: u64,
         day_index: u32,
+        start_day_time: u64,
         // Map: (day_index, quest_id) -> quest contract address
         daily_quests: LegacyMap::<(u32, u32), ContractAddress>,
         main_quests_count: u32,
@@ -43,9 +44,16 @@ pub mod ArtPeace {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
+        Newday: NewDay,
         PixelPlaced: PixelPlaced,
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct NewDay {
+        #[key]
+        day_index: u32,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -71,6 +79,8 @@ pub mod ArtPeace {
         pub main_quests: Span<ContractAddress>,
     }
 
+    const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
+
     #[constructor]
     fn constructor(ref self: ContractState, init_params: InitParams) {
         self.canvas_width.write(init_params.canvas_width);
@@ -88,6 +98,7 @@ pub mod ArtPeace {
         };
 
         self.creation_time.write(starknet::get_block_timestamp());
+        self.start_day_time.write(starknet::get_block_timestamp());
         self.end_time.write(init_params.end_time);
         self.day_index.write(0);
 
@@ -244,6 +255,17 @@ pub mod ArtPeace {
 
         fn get_day(self: @ContractState) -> u32 {
             self.day_index.read()
+        }
+
+        fn increase_day_index(ref self: ContractState) {
+            let block_timestamp = starknet::get_block_timestamp();
+            let start_day_time = self.start_day_time.read();
+
+            assert(block_timestamp >= start_day_time + DAY_IN_SECONDS, 'day has not passed');
+
+            self.day_index.write(self.day_index.read() + 1);
+            self.start_day_time.write(block_timestamp);
+            self.emit(NewDay { day_index: self.day_index.read() });
         }
 
         fn get_daily_quest_count(self: @ContractState) -> core::zeroable::NonZero::<u32> {
@@ -425,3 +447,4 @@ pub mod ArtPeace {
         }
     }
 }
+
