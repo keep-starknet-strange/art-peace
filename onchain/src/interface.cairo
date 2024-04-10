@@ -40,6 +40,9 @@ pub trait IArtPeace<TContractState> {
     fn get_end_time(self: @TContractState) -> u64;
     fn get_day(self: @TContractState) -> u32;
 
+    // Start a new day
+    fn increase_day_index(ref self: TContractState);
+
     // Get quest info
     fn get_daily_quest_count(self: @TContractState) -> core::zeroable::NonZero::<u32>;
     fn get_daily_quest(
@@ -56,9 +59,6 @@ pub trait IArtPeace<TContractState> {
     fn claim_daily_quest(ref self: TContractState, day_index: u32, quest_id: u32);
     fn claim_today_quest(ref self: TContractState, quest_id: u32);
     fn claim_main_quest(ref self: TContractState, quest_id: u32);
-
-    // Start a new day
-    fn increase_day_index(ref self: TContractState);
 
     // Stats
     fn get_user_pixels_placed(self: @TContractState, user: starknet::ContractAddress) -> u32;

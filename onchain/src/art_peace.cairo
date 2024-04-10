@@ -79,7 +79,7 @@ pub mod ArtPeace {
         pub main_quests: Span<ContractAddress>,
     }
 
-    const day_time: u64 = consteval_int!(60 * 60 * 24);
+    const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 
     #[constructor]
     fn constructor(ref self: ContractState, init_params: InitParams) {
@@ -257,6 +257,17 @@ pub mod ArtPeace {
             self.day_index.read()
         }
 
+        fn increase_day_index(ref self: ContractState) {
+            let block_timestamp = starknet::get_block_timestamp();
+            let start_day_time = self.start_day_time.read();
+
+            assert(block_timestamp >= start_day_time + DAY_IN_SECONDS, 'day has not passed');
+
+            self.day_index.write(self.day_index.read() + 1);
+            self.start_day_time.write(block_timestamp);
+            self.emit(NewDay { day_index: self.day_index.read() });
+        }
+
         fn get_daily_quest_count(self: @ContractState) -> core::zeroable::NonZero::<u32> {
             // TODO: hardcoded 3 daily quests
             3
@@ -355,17 +366,6 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
-        }
-
-        fn increase_day_index(ref self: ContractState) {
-            let block_timestamp = starknet::get_block_timestamp();
-            let start_day_time = self.start_day_time.read();
-
-            assert(block_timestamp > start_day_time + day_time, 'day has not passed');
-
-            self.day_index.write(self.day_index.read() + 1);
-            self.start_day_time.write(block_timestamp);
-            self.emit(NewDay { day_index: self.day_index.read() });
         }
 
         fn get_user_pixels_placed(self: @ContractState, user: ContractAddress) -> u32 {

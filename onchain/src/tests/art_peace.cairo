@@ -5,10 +5,14 @@ use art_peace::templates::{
     ITemplateVerifierDispatcherTrait, TemplateMetadata
 };
 
+use core::poseidon::PoseidonTrait;
+use core::hash::{HashStateTrait, HashStateExTrait};
+
 use snforge_std as snf;
 use snforge_std::{CheatTarget, ContractClassTrait};
 use starknet::{ContractAddress, contract_address_const};
 
+const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 const WIDTH: u128 = 100;
 const HEIGHT: u128 = 100;
 const TIME_BETWEEN_PIXELS: u64 = 10;
@@ -96,6 +100,21 @@ fn deploy_pixel_quest_main(pixel_quest: snf::ContractClass) -> ContractAddress {
 fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     let last_time = art_peace.get_last_placed_time();
     snf::start_warp(CheatTarget::One(art_peace.contract_address), last_time + TIME_BETWEEN_PIXELS);
+}
+
+fn compute_template_hash(template: Span<u8>) -> felt252 {
+    let template_len = template.len();
+    if template_len == 0 {
+        return 0;
+    }
+
+    let mut hasher = PoseidonTrait::new();
+    let mut i = 0;
+    while i < template_len {
+        hasher = hasher.update_with(*template.at(i));
+        i += 1;
+    };
+    hasher.finalize()
 }
 
 #[test]
@@ -212,25 +231,6 @@ fn pixel_quest_test() {
     );
 }
 
-use core::poseidon::PoseidonTrait;
-use core::hash::{HashStateTrait, HashStateExTrait};
-
-// TODO: Move to src
-fn compute_template_hash(template: Span<u8>) -> felt252 {
-    let template_len = template.len();
-    if template_len == 0 {
-        return 0;
-    }
-
-    let mut hasher = PoseidonTrait::new();
-    let mut i = 0;
-    while i < template_len {
-        hasher = hasher.update_with(*template.at(i));
-        i += 1;
-    };
-    hasher.finalize()
-}
-
 #[test]
 fn template_full_basic_test() {
     let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
@@ -309,6 +309,34 @@ fn template_full_basic_test() {
         template_store.is_template_complete(0) == true,
         "Template is not completed after it should be"
     );
+}
+
+#[test]
+fn increase_day_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+
+    let current_day_index = art_peace.get_day();
+    assert!(current_day_index == 0, "day index wrongly initialized");
+
+    snf::start_warp(CheatTarget::One(art_peace_address), DAY_IN_SECONDS);
+    art_peace.increase_day_index();
+    let current_day_index = art_peace.get_day();
+    assert!(current_day_index == 1, "day index not updated");
+    snf::stop_warp(CheatTarget::One(art_peace_address));
+}
+
+#[test]
+#[should_panic(expected: ('day has not passed',))]
+fn increase_day_panic_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+
+    let current_day_index = art_peace.get_day();
+    assert!(current_day_index == 0, "day index wrongly initialized");
+
+    snf::start_warp(CheatTarget::One(art_peace_address), DAY_IN_SECONDS - 1);
+    art_peace.increase_day_index();
 }
 // TODO: test invalid template inputs
 
