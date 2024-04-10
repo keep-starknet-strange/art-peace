@@ -23,6 +23,11 @@ services:
       - --address=0.0.0.0:7171
     environment:
       - XDG_DATA_HOME=/data
+      - APIBARA_STREAM_URL=http://art-peace-apibara-1:7171
+      - TARGET_URL=http://art-peace-backend-1:8080/consumeIndexerMsg
+      - LOCALHOST_STREAM_URL=http://localhost:7171
+      - LOCALHOST_TARGET_URL=http://localhost:8080/consumeIndexerMsg
+
     volumes:
       - dna:/data
     ports:

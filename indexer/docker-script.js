@@ -1,5 +1,6 @@
 export const config = {
-  streamUrl: "http://art-peace-apibara-1:7171",
+  streamUrl:
+    Deno.env.get("APIBARA_STREAM_URL") || Deno.env.get("LOCALHOST_STREAM_URL"),
   startingBlock: 0,
   network: "starknet",
   finality: "DATA_STATUS_PENDING",
@@ -7,7 +8,9 @@ export const config = {
     events: [
       {
         fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
-        keys: ["0x2D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23"],
+        keys: [
+          "0x2D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23",
+        ],
         includeReverted: false,
         includeTransaction: false,
         includeReceipt: false,
@@ -16,7 +19,8 @@ export const config = {
   },
   sinkType: "webhook",
   sinkOptions: {
-    targetUrl: "http://art-peace-backend-1:8080/consumeIndexerMsg"
+    targetUrl:
+      Deno.env.get("SINK_TARGET_URL") || Deno.env.get("LOCALHOST_TARGET_URL"),
   },
 };
 
