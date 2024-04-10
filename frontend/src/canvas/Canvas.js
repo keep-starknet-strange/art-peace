@@ -209,14 +209,17 @@ const Canvas = props => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
       return
     }
-    const x = props.selectedPositionX
-    const y = props.selectedPositionY
+    
+    const position = props.selectedPositionX + props.selectedPositionY * width
     const colorIdx = props.selectedColorId
     let placePixelEndpoint = backendUrl + "/placePixelDevnet"
     fetch(placePixelEndpoint, {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({x: x.toString(), y: y.toString(), color: colorIdx.toString()})
+      mode: "cors",
+      method: "POST",
+      body: JSON.stringify({
+        position: position.toString(),
+        color: colorIdx.toString(),
+      }),
     }).then(response => {
       return response.text()
     }).then(data => {

@@ -65,17 +65,14 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
     panic(err)
   }
 
-  x, err := strconv.Atoi(jsonBody["x"])
+  position, err := strconv.Atoi(jsonBody["position"])
   if err != nil {
     panic(err)
   }
-  y, err := strconv.Atoi(jsonBody["y"])
-  if err != nil {
-    panic(err)
-  }
+
   shellCmd := backend.ArtPeaceBackend.BackendConfig.Scripts.PlacePixelDevnet
-  position := x + y * int(backend.ArtPeaceBackend.CanvasConfig.Canvas.Width)
   contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+  
   cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(position), jsonBody["color"])
   _, err = cmd.Output()
   if err != nil {
