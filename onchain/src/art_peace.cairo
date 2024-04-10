@@ -1,7 +1,6 @@
 #[starknet::contract]
 pub mod ArtPeace {
     use starknet::ContractAddress;
-    use starknet::info::get_block_timestamp;
     use art_peace::{IArtPeace, Pixel};
     use art_peace::quests::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::templates::component::TemplateStoreComponent;
@@ -99,6 +98,7 @@ pub mod ArtPeace {
         };
 
         self.creation_time.write(starknet::get_block_timestamp());
+        self.start_day_time.write(starknet::get_block_timestamp());
         self.end_time.write(init_params.end_time);
         self.day_index.write(0);
 
@@ -439,15 +439,15 @@ pub mod ArtPeace {
     #[generate_trait]
     impl InternatImpl of InternalTrait {
         fn increase_day_index(ref self: ContractState) {
-            let block_timestamp = get_block_timestamp();
+            let block_timestamp = starknet::get_block_timestamp();
             let start_day_time = self.start_day_time.read();
 
-            if block_timestamp > start_day_time + day_time {
-                self.day_index.write(self.day_index.read() + 1);
-                self.start_day_time.write(block_timestamp);
+            assert(block_timestamp > start_day_time + day_time, 'day has not passed');
 
-                self.emit(NewDay { day_index: self.day_index.read() });
-            }
+            self.day_index.write(self.day_index.read() + 1);
+            self.start_day_time.write(block_timestamp);
+            self.emit(NewDay { day_index: self.day_index.read() });
         }
     }
 }
+
