@@ -2,7 +2,6 @@
 pub mod ArtPeace {
     use starknet::ContractAddress;
     use starknet::info::get_block_timestamp;
-    use starknet::syscalls::get_execution_info_syscall;
     use art_peace::{IArtPeace, Pixel};
     use art_peace::quests::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::templates::component::TemplateStoreComponent;
