@@ -210,9 +210,9 @@ const Canvas = props => {
       return
     }
     
-    const position =props.selectedPositionX + props.selectedPositionY;
-    const colorIdx = props.selectedColorId;
-    let placePixelEndpoint = backendUrl + "/placePixelDevnet";
+    const position = props.selectedPositionX + props.selectedPositionY
+    const colorIdx = props.selectedColorId
+    let placePixelEndpoint = backendUrl + "/placePixelDevnet"
     fetch(placePixelEndpoint, {
       mode: "cors",
       method: "POST",
