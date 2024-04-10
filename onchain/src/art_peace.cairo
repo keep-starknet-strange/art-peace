@@ -1,6 +1,8 @@
 #[starknet::contract]
 pub mod ArtPeace {
     use starknet::ContractAddress;
+    use starknet::info::get_block_timestamp;
+    use starknet::syscalls::get_execution_info_syscall;
     use art_peace::{IArtPeace, Pixel};
     use art_peace::quests::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::templates::component::TemplateStoreComponent;
@@ -29,6 +31,7 @@ pub mod ArtPeace {
         creation_time: u64,
         end_time: u64,
         day_index: u32,
+        start_day_time: u64,
         // Map: (day_index, quest_id) -> quest contract address
         daily_quests: LegacyMap::<(u32, u32), ContractAddress>,
         main_quests_count: u32,
@@ -43,9 +46,16 @@ pub mod ArtPeace {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
+        Newday: NewDay,
         PixelPlaced: PixelPlaced,
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct NewDay {
+        #[key]
+        day_index: u32,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -70,6 +80,8 @@ pub mod ArtPeace {
         pub daily_quests: Span<ContractAddress>,
         pub main_quests: Span<ContractAddress>,
     }
+
+    const day_time: u64 = consteval_int!(60 * 60 * 24);
 
     #[constructor]
     fn constructor(ref self: ContractState, init_params: InitParams) {
@@ -421,6 +433,21 @@ pub mod ArtPeace {
                 self.templates.completed_templates.write(template_id, true);
             // TODO: Distribute rewards
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
+            }
+        }
+    }
+
+    #[generate_trait]
+    impl InternatImpl of InternalTrait {
+        fn increase_day_index(ref self: ContractState) {
+            let block_timestamp = get_block_timestamp();
+            let start_day_time = self.start_day_time.read();
+
+            if block_timestamp > start_day_time + day_time {
+                self.day_index.write(self.day_index.read() + 1);
+                self.start_day_time.write(block_timestamp);
+
+                self.emit(NewDay { day_index: self.day_index.read() });
             }
         }
     }
