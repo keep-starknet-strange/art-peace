@@ -88,8 +88,7 @@ services:
       - apibara
     volumes:
       - deployment:/deployment
-    # TODO: Fix this command
-    command: bash -c "sleep 5 && source /deployment/.env && /root/.local/share/apibara/bin/apibara run docker-script.js --allow-env-from-env ART_PEACE_CONTRACT_ADDRESS"
+    restart: on-failure
   frontend:
     build:
       dockerfile: frontend/Dockerfile
