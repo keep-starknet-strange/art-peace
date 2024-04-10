@@ -108,6 +108,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/b-j-roberts"><img src="https://avatars.githubusercontent.com/u/54774639?v=4?s=100" width="100px;" alt="Brandon R"/><br /><sub><b>Brandon R</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=b-j-roberts" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://adeyemi.vercel.app/"><img src="https://avatars.githubusercontent.com/u/47580934?v=4?s=100" width="100px;" alt="Adeyemi Gbenga"/><br /><sub><b>Adeyemi Gbenga</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=addegbenga" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
