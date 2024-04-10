@@ -1,39 +1,56 @@
 #[starknet::contract]
 pub mod ArtPeace {
     use starknet::ContractAddress;
-    use art_peace::IArtPeace;
-    use art_peace::quests::interface::{IQuestDispatcher, IQuestDispatcherTrait};
+    use art_peace::{IArtPeace, Pixel};
+    use art_peace::quests::{IQuestDispatcher, IQuestDispatcherTrait};
+    use art_peace::templates::component::TemplateStoreComponent;
+    use art_peace::templates::{ITemplateVerifier, TemplateMetadata};
+
+    component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
+
+    #[abi(embed_v0)]
+    impl TemplateStoreComponentImpl = TemplateStoreComponent::TemplateStoreImpl<ContractState>;
 
     #[storage]
     struct Storage {
-        canvas: LegacyMap::<u128, u32>,
+        canvas: LegacyMap::<u128, Pixel>,
         canvas_width: u128,
         canvas_height: u128,
         total_pixels: u128,
-        // Maps the users contract address to the last time they placed a pixel
+
+        // Map: user's address -> last time they placed a pixel
         last_placed_time: LegacyMap::<ContractAddress, u64>,
         time_between_pixels: u64,
-        // Maps the users contract address to the amount of extra pixels they have
+        // Map: user's address -> amount of extra pixels they have
         extra_pixels: LegacyMap::<ContractAddress, u32>,
-        color_count: u32,
-        color_palette: LegacyMap::<u32, u32>,
+
+        color_count: u8,
+        // Map: color index -> color value in RGBA
+        color_palette: LegacyMap::<u8, u32>,
+
         creation_time: u64,
         end_time: u64,
         day_index: u32,
-        max_days: u32,
-        // TODO: Optimize index to be a single u128?
-        // Maps the (day_index, quest_id) to the quest contract address
+
+        // Map: (day_index, quest_id) -> quest contract address
         daily_quests: LegacyMap::<(u32, u32), ContractAddress>,
         main_quests_count: u32,
+        // Map: quest index -> quest contract address
         main_quests: LegacyMap::<u32, ContractAddress>,
-        // Maps (user addr, day index) to the amount of pixels placed that day
-        user_pixels_placed: LegacyMap::<(ContractAddress, u32), u32>,
+
+        // Map: (day_index, user's address, color index) -> amount of pixels placed
+        user_pixels_placed: LegacyMap::<(u32, ContractAddress, u8), u32>,
+
+        #[substorage(v0)]
+        templates: TemplateStoreComponent::Storage,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
         PixelPlaced: PixelPlaced,
+        #[flat]
+        TemplateEvent: TemplateStoreComponent::Event,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -44,9 +61,10 @@ pub mod ArtPeace {
         pos: u128,
         #[key]
         day: u32,
-        color: u32,
+        color: u8,
     }
 
+    // TODO: Span or Array for each?
     #[derive(Drop, Serde)]
     pub struct InitParams {
         pub canvas_width: u128,
@@ -59,36 +77,27 @@ pub mod ArtPeace {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: InitParams,) {
+    fn constructor(ref self: ContractState, init_params: InitParams) {
         self.canvas_width.write(init_params.canvas_width);
         self.canvas_height.write(init_params.canvas_height);
         self.total_pixels.write(init_params.canvas_width * init_params.canvas_height);
 
         self.time_between_pixels.write(init_params.time_between_pixels);
 
-        self.color_count.write(init_params.color_palette.len());
-        let mut i = 0;
-        while i < init_params
-            .color_palette
-            .len() {
-                self.color_palette.write(i, *init_params.color_palette.at(i));
-                i += 1;
-            };
+        let color_count: u8 = init_params.color_palette.len().try_into().unwrap();
+        self.color_count.write(color_count);
+        let mut i: u8 = 0;
+        while i < color_count {
+            self.color_palette.write(i, *init_params.color_palette.at(i.into()));
+            i += 1;
+        };
 
-        // TODO: To config
-        let daily_quests_count = self.get_daily_quest_count();
         self.creation_time.write(starknet::get_block_timestamp());
         self.end_time.write(init_params.end_time);
         self.day_index.write(0);
-        // TODO: change name to quest_days?
-        let (mut days, rem_quests) = DivRem::div_rem(
-            init_params.daily_quests.len(), daily_quests_count
-        );
-        if rem_quests > 0 {
-            days += 1;
-        }
-        self.max_days.write(days);
 
+        // TODO: To config
+        let daily_quests_count = self.get_daily_quest_count();
         let mut i = 0;
         while i < init_params
             .daily_quests
@@ -110,11 +119,19 @@ pub mod ArtPeace {
 
     #[abi(embed_v0)]
     impl ArtPeaceImpl of IArtPeace<ContractState> {
-        fn get_pixel(self: @ContractState, pos: u128) -> u32 {
+        fn get_pixel(self: @ContractState, pos: u128) -> Pixel {
             self.canvas.read(pos)
         }
 
-        fn get_pixel_xy(self: @ContractState, x: u128, y: u128) -> u32 {
+        fn get_pixel_color(self: @ContractState, pos: u128) -> u8 {
+            self.canvas.read(pos).color
+        }
+
+        fn get_pixel_owner(self: @ContractState, pos: u128) -> ContractAddress {
+            self.canvas.read(pos).owner
+        }
+
+        fn get_pixel_xy(self: @ContractState, x: u128, y: u128) -> Pixel {
             let pos = x + y * self.canvas_width.read();
             self.canvas.read(pos)
         }
@@ -131,7 +148,7 @@ pub mod ArtPeace {
             self.total_pixels.read()
         }
 
-        fn place_pixel(ref self: ContractState, pos: u128, color: u32) {
+        fn place_pixel(ref self: ContractState, pos: u128, color: u8) {
             let now = starknet::get_block_timestamp();
             assert!(now <= self.end_time.read());
             assert!(pos < self.total_pixels.read());
@@ -140,21 +157,22 @@ pub mod ArtPeace {
             let caller = starknet::get_caller_address();
             // TODO: Only if the user has placed a pixel before?
             assert!(now - self.last_placed_time.read(caller) >= self.time_between_pixels.read());
-            self.canvas.write(pos, color);
+            let pixel = Pixel { color, owner: caller };
+            self.canvas.write(pos, pixel);
             self.last_placed_time.write(caller, now);
             let day = self.day_index.read();
             self
                 .user_pixels_placed
-                .write((caller, day), self.user_pixels_placed.read((caller, day)) + 1);
+                .write((day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1);
             self.emit(PixelPlaced { placed_by: caller, pos, day, color });
         }
 
-        fn place_pixel_xy(ref self: ContractState, x: u128, y: u128, color: u32) {
+        fn place_pixel_xy(ref self: ContractState, x: u128, y: u128, color: u8) {
             let pos = x + y * self.canvas_width.read();
             self.place_pixel(pos, color);
         }
 
-        fn place_extra_pixels(ref self: ContractState, positions: Array<u128>, colors: Array<u32>) {
+        fn place_extra_pixels(ref self: ContractState, positions: Array<u128>, colors: Array<u8>) {
             let now = starknet::get_block_timestamp();
             assert!(now <= self.end_time.read());
             let pixel_count = positions.len();
@@ -164,20 +182,19 @@ pub mod ArtPeace {
             assert!(pixel_count <= extra_pixels);
             let color_palette_count = self.color_count.read();
             let total_pixels = self.total_pixels.read();
+            let day = self.day_index.read();
             let mut i = 0;
             while i < pixel_count {
                 let pos = *positions.at(i);
                 let color = *colors.at(i);
                 assert!(pos < total_pixels);
                 assert!(color < color_palette_count);
-                self.canvas.write(pos, color);
+                let pixel = Pixel { color, owner: caller };
+                self.canvas.write(pos, pixel);
+                self.user_pixels_placed.write((day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1);
                 i += 1;
             };
             self.extra_pixels.write(caller, extra_pixels - pixel_count);
-            let day = self.day_index.read();
-            self
-                .user_pixels_placed
-                .write((caller, day), self.user_pixels_placed.read((caller, day)) + pixel_count);
         //TODO: to extra pixel self.emit(ExtraPixelsPlaced { placed_by: caller, positions, day, colors });
         }
 
@@ -201,7 +218,7 @@ pub mod ArtPeace {
             self.extra_pixels.read(user)
         }
 
-        fn get_color_count(self: @ContractState) -> u32 {
+        fn get_color_count(self: @ContractState) -> u8 {
             self.color_count.read()
         }
 
@@ -226,10 +243,6 @@ pub mod ArtPeace {
 
         fn get_day(self: @ContractState) -> u32 {
             self.day_index.read()
-        }
-
-        fn get_max_days(self: @ContractState) -> u32 {
-            self.max_days.read()
         }
 
         fn get_daily_quest_count(self: @ContractState) -> core::zeroable::NonZero::<u32> {
@@ -259,22 +272,6 @@ pub mod ArtPeace {
             let quest_count = self.get_daily_quest_count().into();
             while i < quest_count {
                 quests.append(self.daily_quests.read((day, i)));
-                i += 1;
-            };
-            quests.span()
-        }
-
-        fn get_daily_quests(self: @ContractState) -> Span<ContractAddress> {
-            let mut i = 0;
-            let mut quests = array![];
-            let max_days = self.max_days.read();
-            let quest_count = self.get_daily_quest_count().into();
-            while i < max_days {
-                let mut j = 0;
-                while j < quest_count {
-                    quests.append(self.daily_quests.read((i, j)));
-                    j += 1;
-                };
                 i += 1;
             };
             quests.span()
@@ -352,8 +349,13 @@ pub mod ArtPeace {
             let mut i = 0;
             let mut total = 0;
             let last_day = self.day_index.read() + 1;
+            let color_count = self.color_count.read();
             while i < last_day {
-                total += self.user_pixels_placed.read((user, i));
+                let mut j = 0;
+                while j < color_count {
+                    total += self.user_pixels_placed.read((i, user, j));
+                    j += 1;
+                };
                 i += 1;
             };
             total
@@ -362,7 +364,55 @@ pub mod ArtPeace {
         fn get_user_pixels_placed_day(
             self: @ContractState, user: ContractAddress, day: u32
         ) -> u32 {
-            self.user_pixels_placed.read((user, day))
+            let mut total = 0;
+            let color_count = self.color_count.read();
+            let mut i = 0;
+            while i < color_count {
+                total += self.user_pixels_placed.read((day, user, i));
+                i += 1;
+            };
+            total
+        }
+
+        fn get_user_pixels_placed_day_color(
+            self: @ContractState, user: ContractAddress, day: u32, color: u8
+        ) -> u32 {
+            self.user_pixels_placed.read((day, user, color))
+        }
+    }
+
+    #[abi(embed_v0)]
+    impl ArtPeaceTemplateVerifier of ITemplateVerifier<ContractState> {
+        // TODO: Check template function
+        fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
+            assert!(template_id < self.get_templates_count());
+            assert!(!self.is_template_complete(template_id));
+            // TODO: ensure template_image matches the template size & hash
+            let template_metadata: TemplateMetadata = self.get_template(template_id);
+            let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata.width.try_into().unwrap();
+            let (template_pos_y, template_pos_x) = DivRem::div_rem(template_metadata.position, non_zero_width);
+            let canvas_width = self.canvas_width.read();
+            let (mut x, mut y) = (0, 0);
+            let mut matches = 0;
+            while y < template_metadata.height {
+                x = 0;
+                while x < template_metadata.width {
+                    let pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
+                    let color = *template_image.at((x + y * template_metadata.width).try_into().unwrap());
+                    if color == self.canvas.read(pos).color {
+                        matches += 1;
+                    }
+                    x += 1;
+                };
+                y += 1;
+            };
+
+            // TODO: Allow some threshold?
+            if matches == template_metadata.width * template_metadata.height {
+                self.templates.completed_templates.write(template_id, true);
+                // TODO: Distribute rewards
+                // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
+            }
         }
     }
 }
