@@ -57,6 +57,9 @@ pub trait IArtPeace<TContractState> {
     fn claim_today_quest(ref self: TContractState, quest_id: u32);
     fn claim_main_quest(ref self: TContractState, quest_id: u32);
 
+    // Start a new day
+    fn increase_day_index(ref self: TContractState);
+
     // Stats
     fn get_user_pixels_placed(self: @TContractState, user: starknet::ContractAddress) -> u32;
     fn get_user_pixels_placed_day(

@@ -357,6 +357,17 @@ pub mod ArtPeace {
             }
         }
 
+        fn increase_day_index(ref self: ContractState) {
+            let block_timestamp = starknet::get_block_timestamp();
+            let start_day_time = self.start_day_time.read();
+
+            assert(block_timestamp > start_day_time + day_time, 'day has not passed');
+
+            self.day_index.write(self.day_index.read() + 1);
+            self.start_day_time.write(block_timestamp);
+            self.emit(NewDay { day_index: self.day_index.read() });
+        }
+
         fn get_user_pixels_placed(self: @ContractState, user: ContractAddress) -> u32 {
             let mut i = 0;
             let mut total = 0;
@@ -433,20 +444,6 @@ pub mod ArtPeace {
             // TODO: Distribute rewards
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
-        }
-    }
-
-    #[generate_trait]
-    impl InternatImpl of InternalTrait {
-        fn increase_day_index(ref self: ContractState) {
-            let block_timestamp = starknet::get_block_timestamp();
-            let start_day_time = self.start_day_time.read();
-
-            assert(block_timestamp > start_day_time + day_time, 'day has not passed');
-
-            self.day_index.write(self.day_index.read() + 1);
-            self.start_day_time.write(block_timestamp);
-            self.emit(NewDay { day_index: self.day_index.read() });
         }
     }
 }
