@@ -14,7 +14,10 @@ mod templates {
     pub mod interface;
     mod component;
 
-    use interface::{TemplateMetadata, ITemplateVerifier, ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher, ITemplateVerifierDispatcherTrait};
+    use interface::{
+        TemplateMetadata, ITemplateVerifier, ITemplateStoreDispatcher,
+        ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher, ITemplateVerifierDispatcherTrait
+    };
 }
 
 #[cfg(test)]

@@ -1,6 +1,9 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 use art_peace::ArtPeace::InitParams;
-use art_peace::templates::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher, ITemplateVerifierDispatcherTrait, TemplateMetadata};
+use art_peace::templates::{
+    ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher,
+    ITemplateVerifierDispatcherTrait, TemplateMetadata
+};
 
 use snforge_std as snf;
 use snforge_std::{CheatTarget, ContractClassTrait};
@@ -232,7 +235,9 @@ fn compute_template_hash(template: Span<u8>) -> felt252 {
 fn template_full_basic_test() {
     let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
     let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
-    let template_verifier = ITemplateVerifierDispatcher { contract_address: art_peace.contract_address };
+    let template_verifier = ITemplateVerifierDispatcher {
+        contract_address: art_peace.contract_address
+    };
 
     assert!(template_store.get_templates_count() == 0, "Templates count is not 0");
 
@@ -251,11 +256,10 @@ fn template_full_basic_test() {
     template_store.add_template(template_metadata);
 
     assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
+    assert!(template_store.get_template_hash(0) == template_hash, "Template hash is not correct");
     assert!(
-        template_store.get_template_hash(0) == template_hash, "Template hash is not correct"
-    );
-    assert!(
-        template_store.is_template_complete(0) == false, "Template is completed before it should be (base)"
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (base)"
     );
 
     warp_to_next_available_time(art_peace);
@@ -266,7 +270,8 @@ fn template_full_basic_test() {
     art_peace.place_pixel(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
-        template_store.is_template_complete(0) == false, "Template is completed before it should be (1)"
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (1)"
     );
 
     warp_to_next_available_time(art_peace);
@@ -277,7 +282,8 @@ fn template_full_basic_test() {
     art_peace.place_pixel(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
-        template_store.is_template_complete(0) == false, "Template is completed before it should be (2)"
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (2)"
     );
 
     warp_to_next_available_time(art_peace);
@@ -288,7 +294,8 @@ fn template_full_basic_test() {
     art_peace.place_pixel(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
-        template_store.is_template_complete(0) == false, "Template is completed before it should be (3)"
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (3)"
     );
 
     warp_to_next_available_time(art_peace);
@@ -299,8 +306,9 @@ fn template_full_basic_test() {
     art_peace.place_pixel(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
-        template_store.is_template_complete(0) == true, "Template is not completed after it should be"
+        template_store.is_template_complete(0) == true,
+        "Template is not completed after it should be"
     );
 }
-
 // TODO: test invalid template inputs
+

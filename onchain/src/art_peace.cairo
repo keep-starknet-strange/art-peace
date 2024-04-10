@@ -9,7 +9,8 @@ pub mod ArtPeace {
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 
     #[abi(embed_v0)]
-    impl TemplateStoreComponentImpl = TemplateStoreComponent::TemplateStoreImpl<ContractState>;
+    impl TemplateStoreComponentImpl =
+        TemplateStoreComponent::TemplateStoreImpl<ContractState>;
 
     #[storage]
     struct Storage {
@@ -17,30 +18,24 @@ pub mod ArtPeace {
         canvas_width: u128,
         canvas_height: u128,
         total_pixels: u128,
-
         // Map: user's address -> last time they placed a pixel
         last_placed_time: LegacyMap::<ContractAddress, u64>,
         time_between_pixels: u64,
         // Map: user's address -> amount of extra pixels they have
         extra_pixels: LegacyMap::<ContractAddress, u32>,
-
         color_count: u8,
         // Map: color index -> color value in RGBA
         color_palette: LegacyMap::<u8, u32>,
-
         creation_time: u64,
         end_time: u64,
         day_index: u32,
-
         // Map: (day_index, quest_id) -> quest contract address
         daily_quests: LegacyMap::<(u32, u32), ContractAddress>,
         main_quests_count: u32,
         // Map: quest index -> quest contract address
         main_quests: LegacyMap::<u32, ContractAddress>,
-
         // Map: (day_index, user's address, color index) -> amount of pixels placed
         user_pixels_placed: LegacyMap::<(u32, ContractAddress, u8), u32>,
-
         #[substorage(v0)]
         templates: TemplateStoreComponent::Storage,
     }
@@ -163,7 +158,9 @@ pub mod ArtPeace {
             let day = self.day_index.read();
             self
                 .user_pixels_placed
-                .write((day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1);
+                .write(
+                    (day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1
+                );
             self.emit(PixelPlaced { placed_by: caller, pos, day, color });
         }
 
@@ -191,7 +188,11 @@ pub mod ArtPeace {
                 assert!(color < color_palette_count);
                 let pixel = Pixel { color, owner: caller };
                 self.canvas.write(pos, pixel);
-                self.user_pixels_placed.write((day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1);
+                self
+                    .user_pixels_placed
+                    .write(
+                        (day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1
+                    );
                 i += 1;
             };
             self.extra_pixels.write(caller, extra_pixels - pixel_count);
@@ -389,29 +390,37 @@ pub mod ArtPeace {
             assert!(!self.is_template_complete(template_id));
             // TODO: ensure template_image matches the template size & hash
             let template_metadata: TemplateMetadata = self.get_template(template_id);
-            let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata.width.try_into().unwrap();
-            let (template_pos_y, template_pos_x) = DivRem::div_rem(template_metadata.position, non_zero_width);
+            let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata
+                .width
+                .try_into()
+                .unwrap();
+            let (template_pos_y, template_pos_x) = DivRem::div_rem(
+                template_metadata.position, non_zero_width
+            );
             let canvas_width = self.canvas_width.read();
             let (mut x, mut y) = (0, 0);
             let mut matches = 0;
-            while y < template_metadata.height {
-                x = 0;
-                while x < template_metadata.width {
-                    let pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
-                    let color = *template_image.at((x + y * template_metadata.width).try_into().unwrap());
-                    if color == self.canvas.read(pos).color {
-                        matches += 1;
-                    }
-                    x += 1;
+            while y < template_metadata
+                .height {
+                    x = 0;
+                    while x < template_metadata
+                        .width {
+                            let pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
+                            let color = *template_image
+                                .at((x + y * template_metadata.width).try_into().unwrap());
+                            if color == self.canvas.read(pos).color {
+                                matches += 1;
+                            }
+                            x += 1;
+                        };
+                    y += 1;
                 };
-                y += 1;
-            };
 
             // TODO: Allow some threshold?
             if matches == template_metadata.width * template_metadata.height {
                 self.templates.completed_templates.write(template_id, true);
-                // TODO: Distribute rewards
-                // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
+            // TODO: Distribute rewards
+            // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
         }
     }

@@ -29,16 +29,20 @@ mod TemplateStoreComponent {
     struct TemplateCompleted {
         #[key]
         id: u32,
-        // TODO: Users rewarded, ...
+    // TODO: Users rewarded, ...
     }
 
     #[embeddable_as(TemplateStoreImpl)]
-    impl TemplateStore<TContractState, +HasComponent<TContractState>> of ITemplateStore<ComponentState<TContractState>> {
+    impl TemplateStore<
+        TContractState, +HasComponent<TContractState>
+    > of ITemplateStore<ComponentState<TContractState>> {
         fn get_templates_count(self: @ComponentState<TContractState>) -> u32 {
             return self.templates_count.read();
         }
 
-        fn get_template(self: @ComponentState<TContractState>, template_id: u32) -> TemplateMetadata {
+        fn get_template(
+            self: @ComponentState<TContractState>, template_id: u32
+        ) -> TemplateMetadata {
             return self.templates.read(template_id);
         }
 
@@ -46,9 +50,11 @@ mod TemplateStoreComponent {
             let metadata: TemplateMetadata = self.templates.read(template_id);
             return metadata.hash;
         }
-        
+
         // TODO: Return idx of the template?
-        fn add_template(ref self: ComponentState<TContractState>, template_metadata: TemplateMetadata) {
+        fn add_template(
+            ref self: ComponentState<TContractState>, template_metadata: TemplateMetadata
+        ) {
             let template_id = self.templates_count.read();
             self.templates.write(template_id, template_metadata);
             self.templates_count.write(template_id + 1);
