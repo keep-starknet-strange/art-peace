@@ -71,9 +71,9 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
   }
 
   shellCmd := backend.ArtPeaceBackend.BackendConfig.Scripts.PlacePixelDevnet
-  computedPosition := x + y * int(backend.ArtPeaceBackend.CanvasConfig.Canvas.Width)
   contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
-  cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(computedPosition), jsonBody["color"])
+  
+  cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(position), jsonBody["color"])
   _, err = cmd.Output()
   if err != nil {
     fmt.Println("Error executing shell command: ", err)

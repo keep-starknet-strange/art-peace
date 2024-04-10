@@ -210,7 +210,7 @@ const Canvas = props => {
       return
     }
     
-    const position = props.selectedPositionX + props.selectedPositionY
+    const position = props.selectedPositionX + props.selectedPositionY * width
     const colorIdx = props.selectedColorId
     let placePixelEndpoint = backendUrl + "/placePixelDevnet"
     fetch(placePixelEndpoint, {
