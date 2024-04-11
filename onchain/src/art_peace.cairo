@@ -319,7 +319,9 @@ pub mod ArtPeace {
             quests.span()
         }
 
-        fn claim_daily_quest(ref self: ContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>) {
+        fn claim_daily_quest(
+            ref self: ContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>
+        ) {
             let now = starknet::get_block_timestamp();
             assert!(now <= self.end_time.read());
             // TODO: Only allow to claim the quest of the current day

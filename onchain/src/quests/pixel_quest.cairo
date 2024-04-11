@@ -71,7 +71,9 @@ mod PixelQuest {
             return self.reward.read();
         }
 
-        fn is_claimable(self: @ContractState, user: ContractAddress, calldata: Span<felt252>) -> bool {
+        fn is_claimable(
+            self: @ContractState, user: ContractAddress, calldata: Span<felt252>
+        ) -> bool {
             let art_peace = self.art_peace.read();
             if self.claimed.read(user) {
                 return false;

@@ -343,3 +343,5 @@ fn increase_day_panic_test() {
     art_peace.increase_day_index();
 }
 // TODO: test invalid template inputs
+
+
