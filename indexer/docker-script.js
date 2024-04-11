@@ -1,6 +1,5 @@
 export const config = {
-  streamUrl:
-    Deno.env.get("APIBARA_STREAM_URL") || Deno.env.get("LOCALHOST_STREAM_URL"),
+  streamUrl: Deno.env.get("APIBARA_STREAM_URL"),
   startingBlock: 0,
   network: "starknet",
   finality: "DATA_STATUS_PENDING",
@@ -19,8 +18,7 @@ export const config = {
   },
   sinkType: "webhook",
   sinkOptions: {
-    targetUrl:
-      Deno.env.get("SINK_TARGET_URL") || Deno.env.get("LOCALHOST_TARGET_URL"),
+    targetUrl: Deno.env.get("TARGET_URL"),
   },
 };
 
