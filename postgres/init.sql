@@ -52,6 +52,7 @@ CREATE TABLE Quests (
 );
 CREATE INDEX quests_dayIndex_index ON Quests (dayIndex);
 
+-- TODO: Add calldata field
 CREATE TABLE UserQuests (
   key integer NOT NULL PRIMARY KEY,
   userAddress char(64) NOT NULL,

@@ -21,6 +21,10 @@ fn ART_PEACE_CONTRACT() -> ContractAddress {
     contract_address_const::<'ArtPeace'>()
 }
 
+fn EMPTY_CALLDATA() -> Span<felt252> {
+    array![].span()
+}
+
 fn deploy_contract() -> ContractAddress {
     let contract = snf::declare("ArtPeace");
     let mut calldata = array![];
@@ -194,8 +198,8 @@ fn pixel_quest_test() {
     let pos = x + y * WIDTH;
     let color = 0x5;
     art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0);
-    art_peace.claim_main_quest(0);
+    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
     assert!(art_peace.get_extra_pixels_count() == 0, "Extra pixels are wrong after invalid claims");
 
     warp_to_next_available_time(art_peace);
@@ -203,8 +207,8 @@ fn pixel_quest_test() {
     let y = 25;
     let color = 0x7;
     art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0);
-    art_peace.claim_main_quest(0);
+    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
     assert!(art_peace.get_extra_pixels_count() == 0, "Extra pixels are wrong after invalid claims");
 
     warp_to_next_available_time(art_peace);
@@ -213,8 +217,8 @@ fn pixel_quest_test() {
     let pos = x + y * WIDTH;
     let color = 0x9;
     art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0);
-    art_peace.claim_main_quest(0);
+    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
     assert!(
         art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily quest claim"
     );
@@ -224,8 +228,8 @@ fn pixel_quest_test() {
     let y = 35;
     let color = 0xB;
     art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0);
-    art_peace.claim_main_quest(0);
+    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
     assert!(
         art_peace.get_extra_pixels_count() == 30, "Extra pixels are wrong after main quest claim"
     );
@@ -339,5 +343,3 @@ fn increase_day_panic_test() {
     art_peace.increase_day_index();
 }
 // TODO: test invalid template inputs
-
-

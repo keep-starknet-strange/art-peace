@@ -56,9 +56,9 @@ pub trait IArtPeace<TContractState> {
     fn get_main_quests(self: @TContractState) -> Span<starknet::ContractAddress>;
 
     // Claim quests
-    fn claim_daily_quest(ref self: TContractState, day_index: u32, quest_id: u32);
-    fn claim_today_quest(ref self: TContractState, quest_id: u32);
-    fn claim_main_quest(ref self: TContractState, quest_id: u32);
+    fn claim_daily_quest(ref self: TContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>);
+    fn claim_today_quest(ref self: TContractState, quest_id: u32, calldata: Span<felt252>);
+    fn claim_main_quest(ref self: TContractState, quest_id: u32, calldata: Span<felt252>);
 
     // Stats
     fn get_user_pixels_placed(self: @TContractState, user: starknet::ContractAddress) -> u32;
