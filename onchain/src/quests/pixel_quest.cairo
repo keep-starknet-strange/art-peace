@@ -2,7 +2,7 @@
 pub mod PixelQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::interfaces::{IQuest, IPixelQuest};
+    use art_peace::quests::interfaces::{IQuest, IPixelQuest, QuestClaimed};
 
     #[storage]
     struct Storage {
@@ -13,12 +13,6 @@ pub mod PixelQuest {
         is_daily: bool,
         // The day idx the quest can be claimed ( if daily )
         claim_day: u32,
-    }
-
-    #[derive(Drop, starknet::Event)]
-    pub struct QuestClaimed {
-        pub user: ContractAddress,
-        pub reward: u32,
     }
 
     #[event]

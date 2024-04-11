@@ -7,8 +7,7 @@ mod quests {
     pub mod interfaces;
     mod pixel_quest;
 
-    use interfaces::{IQuest, IQuestDispatcher, IQuestDispatcherTrait};
-    use pixel_quest::PixelQuest::QuestClaimed;
+    use interfaces::{IQuest, IQuestDispatcher, IQuestDispatcherTrait, QuestClaimed};
 }
 
 mod templates {

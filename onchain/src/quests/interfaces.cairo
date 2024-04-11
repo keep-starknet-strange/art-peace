@@ -1,5 +1,11 @@
 use starknet::ContractAddress;
 
+#[derive(Drop, starknet::Event)]
+pub struct QuestClaimed {
+    pub user: ContractAddress,
+    pub reward: u32,
+}
+
 #[starknet::interface]
 pub trait IQuest<TContractState> {
     // Return the reward for the quest.
