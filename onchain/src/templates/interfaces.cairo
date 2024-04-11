@@ -1,3 +1,5 @@
+use starknet::ContractAddress;
+
 #[derive(Drop, Copy, Serde, starknet::Store)]
 pub struct TemplateMetadata {
     pub hash: felt252,
@@ -18,7 +20,12 @@ pub trait ITemplateStore<TContractState> {
     fn get_template_hash(self: @TContractState, template_id: u32) -> felt252;
     // Stores a new template image into the contract state w/ metadata.
     // If the reward/token are set, then the contract escrows the reward for the template.
-    fn add_template(ref self: TContractState, template_metadata: TemplateMetadata);
+    fn add_template(
+        ref self: TContractState,
+        template_metadata: TemplateMetadata,
+        reward_token: ContractAddress,
+        reward_amount: u256
+    );
     // Returns whether the template is complete.
     fn is_template_complete(self: @TContractState, template_id: u32) -> bool;
 }
