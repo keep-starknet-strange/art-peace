@@ -89,8 +89,7 @@ pub mod TemplateStoreComponent {
             let caller_address = starknet::get_caller_address();
             let contract_address = starknet::get_contract_address();
             assert(!template_proposer.is_zero(), 'Invalid caller');
-            // Next line is commented for current test not to revert
-            // assert(!reward_token.is_zero(), 'Invalid token');
+            assert(!reward_token.is_zero(), 'Invalid token');
             let erc20_dispatcher = IERC20Dispatcher { contract_address: reward_token };
             let allowance = erc20_dispatcher.allowance(caller_address, contract_address);
             assert(allowance >= reward_amount, 'Insufficient allowance');
