@@ -319,13 +319,15 @@ pub mod ArtPeace {
             quests.span()
         }
 
-        fn claim_daily_quest(ref self: ContractState, day_index: u32, quest_id: u32) {
+        fn claim_daily_quest(
+            ref self: ContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>
+        ) {
             let now = starknet::get_block_timestamp();
             assert!(now <= self.end_time.read());
             // TODO: Only allow to claim the quest of the current day
             let quest = self.daily_quests.read((day_index, quest_id));
             let user = starknet::get_caller_address();
-            let reward = IQuestDispatcher { contract_address: quest }.claim(user);
+            let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
             if reward > 0 {
                 self
                     .extra_pixels
@@ -336,12 +338,12 @@ pub mod ArtPeace {
             }
         }
 
-        fn claim_today_quest(ref self: ContractState, quest_id: u32) {
+        fn claim_today_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
             let now = starknet::get_block_timestamp();
             assert!(now <= self.end_time.read());
             let quest = self.daily_quests.read((self.day_index.read(), quest_id));
             let user = starknet::get_caller_address();
-            let reward = IQuestDispatcher { contract_address: quest }.claim(user);
+            let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
             if reward > 0 {
                 self
                     .extra_pixels
@@ -352,12 +354,12 @@ pub mod ArtPeace {
             }
         }
 
-        fn claim_main_quest(ref self: ContractState, quest_id: u32) {
+        fn claim_main_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
             let now = starknet::get_block_timestamp();
             assert!(now <= self.end_time.read());
             let quest = self.main_quests.read(quest_id);
             let user = starknet::get_caller_address();
-            let reward = IQuestDispatcher { contract_address: quest }.claim(user);
+            let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
             if reward > 0 {
                 self
                     .extra_pixels
