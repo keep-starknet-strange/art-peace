@@ -1,6 +1,6 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 use art_peace::ArtPeace::InitParams;
-use art_peace::templates::{
+use art_peace::templates::interface::{
     ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher,
     ITemplateVerifierDispatcherTrait, TemplateMetadata
 };
@@ -53,6 +53,7 @@ fn deploy_contract() -> ContractAddress {
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, ART_PEACE_CONTRACT()).unwrap();
     snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
+
     contract_addr
 }
 
@@ -86,18 +87,21 @@ fn deploy_with_quests_contract(
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, ART_PEACE_CONTRACT()).unwrap();
     snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
+
     contract_addr
 }
 
 fn deploy_pixel_quest_daily(pixel_quest: snf::ContractClass) -> ContractAddress {
     // art_peace, reward, pixels_needed, is_daily, claim_day
     let mut calldata: Array<felt252> = array![ART_PEACE_CONTRACT().into(), 10, 3, 1, 0];
+
     pixel_quest.deploy(@calldata).unwrap()
 }
 
 fn deploy_pixel_quest_main(pixel_quest: snf::ContractClass) -> ContractAddress {
     // art_peace, reward, pixels_needed, is_daily, claim_day
     let mut calldata: Array<felt252> = array![ART_PEACE_CONTRACT().into(), 20, 4, 0, 0];
+
     pixel_quest.deploy(@calldata).unwrap()
 }
 
@@ -118,6 +122,7 @@ fn compute_template_hash(template: Span<u8>) -> felt252 {
         hasher = hasher.update_with(*template.at(i));
         i += 1;
     };
+
     hasher.finalize()
 }
 

@@ -16,3 +16,11 @@ pub trait IQuest<TContractState> {
     // Claim the quest.
     fn claim(ref self: TContractState, user: ContractAddress, calldata: Span<felt252>) -> u32;
 }
+
+#[starknet::interface]
+pub trait IPixelQuest<TContractState> {
+    fn is_claimed(self: @TContractState, user: starknet::ContractAddress) -> bool;
+    fn get_pixels_needed(self: @TContractState) -> u32;
+    fn is_daily(self: @TContractState) -> bool;
+    fn claim_day(self: @TContractState) -> u32;
+}
