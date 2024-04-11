@@ -7,12 +7,12 @@ pub mod UserNameClaimErrors {
 
 #[starknet::interface]
 pub trait IUsernameStore<TContractState> {
-    fn claimUsername(ref self: TContractState, key: felt252);
-    fn transferUsername(ref self: TContractState, key: felt252, new_Address: ContractAddress);
+    fn claim_username(ref self: TContractState, key: felt252);
+    fn transfer_username(ref self: TContractState, key: felt252, new_Address: ContractAddress);
 }
 
 #[starknet::contract]
-pub mod usernameStore {
+pub mod UsernameStore {
     use starknet::{get_caller_address, ContractAddress};
     
     use super::UserNameClaimErrors;
@@ -46,7 +46,7 @@ pub mod usernameStore {
     #[abi(embed_v0)]
     impl UsernameStore of super::IUsernameStore<ContractState> {
 
-        fn claimUsername(ref self: ContractState, key: felt252) {
+        fn claim_username(ref self: ContractState, key: felt252) {
             let mut username = self.username.read(key);
         
             if username == get_caller_address()  {
@@ -65,7 +65,7 @@ pub mod usernameStore {
             )
         }
 
-        fn transferUsername(ref self: ContractState, key: felt252, new_Address: ContractAddress) {
+        fn transfer_username(ref self: ContractState, key: felt252, new_Address: ContractAddress) {
             let usernameAddress = self.username.read(key);
             
             if usernameAddress != get_caller_address() {
