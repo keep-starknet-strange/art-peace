@@ -63,9 +63,10 @@ pub mod PixelQuest {
             self.reward.read()
         }
 
-        fn is_claimable(self: @ContractState, user: ContractAddress) -> bool {
+        fn is_claimable(
+            self: @ContractState, user: ContractAddress, calldata: Span<felt252>
+        ) -> bool {
             let art_peace = self.art_peace.read();
-
             if self.claimed.read(user) {
                 return false;
             }
@@ -77,27 +78,28 @@ pub mod PixelQuest {
                     return false;
                 }
                 let placement_count = art_peace.get_user_pixels_placed_day(user, day);
-                return placement_count >= self.pixels_needed.read();
+
+                placement_count >= self.pixels_needed.read()
             } else {
                 // Main Pixel Quest
                 let placement_count = art_peace.get_user_pixels_placed(user);
-                return placement_count >= self.pixels_needed.read();
+
+                placement_count >= self.pixels_needed.read()
             }
         }
 
-        fn claim(ref self: ContractState, user: ContractAddress) -> u32 {
+        fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
             assert(
                 get_caller_address() == self.art_peace.read().contract_address,
                 'Only ArtPeace can claim quests'
             );
-
-            if !self.is_claimable(user) {
+            if !self.is_claimable(user, calldata) {
                 return 0;
             }
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user: user, reward: reward });
+            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }
