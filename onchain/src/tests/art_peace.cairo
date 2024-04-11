@@ -262,7 +262,9 @@ fn template_full_basic_test() {
         reward_token: contract_address_const::<0>(),
     };
 
-    template_store.add_template(template_metadata);
+    let reward_token: ContractAddress = contract_address_const::<0x0>();
+
+    template_store.add_template(template_metadata, reward_token, 0);
 
     assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
     assert!(template_store.get_template_hash(0) == template_hash, "Template hash is not correct");
