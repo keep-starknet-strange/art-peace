@@ -1,17 +1,8 @@
-#[starknet::interface]
-trait IPixelQuest<TContractState> {
-    fn is_claimed(self: @TContractState, user: starknet::ContractAddress) -> bool;
-    fn get_pixels_needed(self: @TContractState) -> u32;
-    fn is_daily(self: @TContractState) -> bool;
-    fn claim_day(self: @TContractState) -> u32;
-}
-
 #[starknet::contract]
 mod PixelQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{IQuest, QuestClaimed};
-    use super::IPixelQuest;
+    use art_peace::quests::{IQuest, IPixelQuest, QuestClaimed};
 
     #[storage]
     struct Storage {
@@ -49,26 +40,26 @@ mod PixelQuest {
     #[abi(embed_v0)]
     impl PixelQuestImpl of IPixelQuest<ContractState> {
         fn is_claimed(self: @ContractState, user: ContractAddress) -> bool {
-            return self.claimed.read(user);
+            self.claimed.read(user)
         }
 
         fn get_pixels_needed(self: @ContractState) -> u32 {
-            return self.pixels_needed.read();
+            self.pixels_needed.read()
         }
 
         fn is_daily(self: @ContractState) -> bool {
-            return self.is_daily.read();
+            self.is_daily.read()
         }
 
         fn claim_day(self: @ContractState) -> u32 {
-            return self.claim_day.read();
+            self.claim_day.read()
         }
     }
 
     #[abi(embed_v0)]
     impl PixelQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
-            return self.reward.read();
+            self.reward.read()
         }
 
         fn is_claimable(
@@ -78,6 +69,7 @@ mod PixelQuest {
             if self.claimed.read(user) {
                 return false;
             }
+
             if self.is_daily.read() {
                 // Daily Pixel Quest
                 let day = art_peace.get_day();
@@ -85,11 +77,13 @@ mod PixelQuest {
                     return false;
                 }
                 let placement_count = art_peace.get_user_pixels_placed_day(user, day);
-                return placement_count >= self.pixels_needed.read();
+
+                placement_count >= self.pixels_needed.read()
             } else {
                 // Main Pixel Quest
                 let placement_count = art_peace.get_user_pixels_placed(user);
-                return placement_count >= self.pixels_needed.read();
+
+                placement_count >= self.pixels_needed.read()
             }
         }
 
@@ -105,7 +99,8 @@ mod PixelQuest {
             self.claimed.write(user, true);
             let reward = self.reward.read();
             self.emit(QuestClaimed { user, reward, calldata });
-            return reward;
+
+            reward
         }
     }
 }

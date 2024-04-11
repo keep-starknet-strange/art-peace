@@ -1,11 +1,11 @@
 #[derive(Drop, Copy, Serde, starknet::Store)]
 pub struct TemplateMetadata {
-    hash: felt252,
-    position: u128,
-    width: u128,
-    height: u128,
-    reward: u256,
-    reward_token: starknet::ContractAddress
+    pub hash: felt252,
+    pub position: u128,
+    pub width: u128,
+    pub height: u128,
+    pub reward: u256,
+    pub reward_token: starknet::ContractAddress
 }
 
 #[starknet::interface]

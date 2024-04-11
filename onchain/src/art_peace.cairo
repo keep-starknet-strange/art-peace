@@ -2,9 +2,9 @@
 pub mod ArtPeace {
     use starknet::ContractAddress;
     use art_peace::{IArtPeace, Pixel};
-    use art_peace::quests::{IQuestDispatcher, IQuestDispatcherTrait};
+    use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::templates::component::TemplateStoreComponent;
-    use art_peace::templates::{ITemplateVerifier, TemplateMetadata};
+    use art_peace::templates::interface::{ITemplateVerifier, TemplateMetadata};
 
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 
@@ -139,6 +139,7 @@ pub mod ArtPeace {
 
         fn get_pixel_xy(self: @ContractState, x: u128, y: u128) -> Pixel {
             let pos = x + y * self.canvas_width.read();
+
             self.canvas.read(pos)
         }
 
@@ -156,13 +157,13 @@ pub mod ArtPeace {
 
         fn place_pixel(ref self: ContractState, pos: u128, color: u8) {
             let now = starknet::get_block_timestamp();
-            assert!(now <= self.end_time.read());
-            assert!(pos < self.total_pixels.read());
-            assert!(color < self.color_count.read());
+            assert(now <= self.end_time.read(), '');
+            assert(pos < self.total_pixels.read(), '');
+            assert(color < self.color_count.read(), '');
             // TODO: Use sender not caller?
             let caller = starknet::get_caller_address();
             // TODO: Only if the user has placed a pixel before?
-            assert!(now - self.last_placed_time.read(caller) >= self.time_between_pixels.read());
+            assert(now - self.last_placed_time.read(caller) >= self.time_between_pixels.read(), '');
             let pixel = Pixel { color, owner: caller };
             self.canvas.write(pos, pixel);
             self.last_placed_time.write(caller, now);
@@ -182,12 +183,12 @@ pub mod ArtPeace {
 
         fn place_extra_pixels(ref self: ContractState, positions: Array<u128>, colors: Array<u8>) {
             let now = starknet::get_block_timestamp();
-            assert!(now <= self.end_time.read());
+            assert(now <= self.end_time.read(), '');
             let pixel_count = positions.len();
-            assert!(pixel_count == colors.len());
+            assert(pixel_count == colors.len(), '');
             let caller = starknet::get_caller_address();
             let extra_pixels = self.extra_pixels.read(caller);
-            assert!(pixel_count <= extra_pixels);
+            assert(pixel_count <= extra_pixels, '');
             let color_palette_count = self.color_count.read();
             let total_pixels = self.total_pixels.read();
             let day = self.day_index.read();
@@ -195,8 +196,8 @@ pub mod ArtPeace {
             while i < pixel_count {
                 let pos = *positions.at(i);
                 let color = *colors.at(i);
-                assert!(pos < total_pixels);
-                assert!(color < color_palette_count);
+                assert(pos < total_pixels, '');
+                assert(color < color_palette_count, '');
                 let pixel = Pixel { color, owner: caller };
                 self.canvas.write(pos, pixel);
                 self
@@ -242,6 +243,7 @@ pub mod ArtPeace {
                 colors.append(self.color_palette.read(i));
                 i += 1;
             };
+
             colors
         }
 
@@ -285,6 +287,7 @@ pub mod ArtPeace {
                 quests.append(self.daily_quests.read((day_index, i)));
                 i += 1;
             };
+
             quests.span()
         }
 
@@ -297,6 +300,7 @@ pub mod ArtPeace {
                 quests.append(self.daily_quests.read((day, i)));
                 i += 1;
             };
+
             quests.span()
         }
 
@@ -316,6 +320,7 @@ pub mod ArtPeace {
                 quests.append(self.main_quests.read(i));
                 i += 1;
             };
+
             quests.span()
         }
 
@@ -323,7 +328,7 @@ pub mod ArtPeace {
             ref self: ContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>
         ) {
             let now = starknet::get_block_timestamp();
-            assert!(now <= self.end_time.read());
+            assert(now <= self.end_time.read(), '');
             // TODO: Only allow to claim the quest of the current day
             let quest = self.daily_quests.read((day_index, quest_id));
             let user = starknet::get_caller_address();
@@ -340,7 +345,7 @@ pub mod ArtPeace {
 
         fn claim_today_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
             let now = starknet::get_block_timestamp();
-            assert!(now <= self.end_time.read());
+            assert(now <= self.end_time.read(), '');
             let quest = self.daily_quests.read((self.day_index.read(), quest_id));
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
@@ -356,7 +361,7 @@ pub mod ArtPeace {
 
         fn claim_main_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
             let now = starknet::get_block_timestamp();
-            assert!(now <= self.end_time.read());
+            assert(now <= self.end_time.read(), '');
             let quest = self.main_quests.read(quest_id);
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
@@ -383,6 +388,7 @@ pub mod ArtPeace {
                 };
                 i += 1;
             };
+
             total
         }
 
@@ -396,6 +402,7 @@ pub mod ArtPeace {
                 total += self.user_pixels_placed.read((day, user, i));
                 i += 1;
             };
+
             total
         }
 
@@ -410,8 +417,8 @@ pub mod ArtPeace {
     impl ArtPeaceTemplateVerifier of ITemplateVerifier<ContractState> {
         // TODO: Check template function
         fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
-            assert!(template_id < self.get_templates_count());
-            assert!(!self.is_template_complete(template_id));
+            assert(template_id < self.get_templates_count(), '');
+            assert(!self.is_template_complete(template_id), '');
             // TODO: ensure template_image matches the template size & hash
             let template_metadata: TemplateMetadata = self.get_template(template_id);
             let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata

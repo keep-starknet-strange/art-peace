@@ -4,15 +4,15 @@ use art_peace::ArtPeace;
 use interface::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel};
 
 mod quests {
-    pub mod interface;
-    mod pixel_quest;
+    pub mod interfaces;
+    pub mod pixel_quest;
 
-    use interface::{IQuest, QuestClaimed, IQuestDispatcher, IQuestDispatcherTrait};
+    use interfaces::{IQuest, IPixelQuest, QuestClaimed, IQuestDispatcher, IQuestDispatcherTrait};
 }
 
 mod templates {
     pub mod interface;
-    mod component;
+    pub mod component;
 
     use interface::{
         TemplateMetadata, ITemplateVerifier, ITemplateStoreDispatcher,
