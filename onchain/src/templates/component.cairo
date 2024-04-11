@@ -1,6 +1,6 @@
 #[starknet::component]
-mod TemplateStoreComponent {
-    use art_peace::templates::interface::{ITemplateStore, TemplateMetadata};
+pub mod TemplateStoreComponent {
+    use art_peace::templates::interfaces::{ITemplateStore, TemplateMetadata};
 
     #[storage]
     struct Storage {
@@ -13,7 +13,7 @@ mod TemplateStoreComponent {
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
+    pub enum Event {
         TemplateAdded: TemplateAdded,
         TemplateCompleted: TemplateCompleted,
     }
@@ -37,18 +37,19 @@ mod TemplateStoreComponent {
         TContractState, +HasComponent<TContractState>
     > of ITemplateStore<ComponentState<TContractState>> {
         fn get_templates_count(self: @ComponentState<TContractState>) -> u32 {
-            return self.templates_count.read();
+            self.templates_count.read()
         }
 
         fn get_template(
             self: @ComponentState<TContractState>, template_id: u32
         ) -> TemplateMetadata {
-            return self.templates.read(template_id);
+            self.templates.read(template_id)
         }
 
         fn get_template_hash(self: @ComponentState<TContractState>, template_id: u32) -> felt252 {
             let metadata: TemplateMetadata = self.templates.read(template_id);
-            return metadata.hash;
+
+            metadata.hash
         }
 
         // TODO: Return idx of the template?
@@ -62,7 +63,7 @@ mod TemplateStoreComponent {
         }
 
         fn is_template_complete(self: @ComponentState<TContractState>, template_id: u32) -> bool {
-            return self.completed_templates.read(template_id);
+            self.completed_templates.read(template_id)
         }
     }
 }

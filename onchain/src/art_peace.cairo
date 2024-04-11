@@ -1,10 +1,11 @@
 #[starknet::contract]
 pub mod ArtPeace {
     use starknet::ContractAddress;
+
     use art_peace::{IArtPeace, Pixel};
-    use art_peace::quests::{IQuestDispatcher, IQuestDispatcherTrait};
+    use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::templates::component::TemplateStoreComponent;
-    use art_peace::templates::{ITemplateVerifier, TemplateMetadata};
+    use art_peace::templates::interfaces::{ITemplateVerifier, TemplateMetadata};
 
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 
@@ -242,6 +243,7 @@ pub mod ArtPeace {
                 colors.append(self.color_palette.read(i));
                 i += 1;
             };
+
             colors
         }
 
@@ -285,6 +287,7 @@ pub mod ArtPeace {
                 quests.append(self.daily_quests.read((day_index, i)));
                 i += 1;
             };
+
             quests.span()
         }
 
@@ -297,6 +300,7 @@ pub mod ArtPeace {
                 quests.append(self.daily_quests.read((day, i)));
                 i += 1;
             };
+
             quests.span()
         }
 
@@ -316,6 +320,7 @@ pub mod ArtPeace {
                 quests.append(self.main_quests.read(i));
                 i += 1;
             };
+
             quests.span()
         }
 
@@ -381,6 +386,7 @@ pub mod ArtPeace {
                 };
                 i += 1;
             };
+
             total
         }
 
@@ -394,6 +400,7 @@ pub mod ArtPeace {
                 total += self.user_pixels_placed.read((day, user, i));
                 i += 1;
             };
+
             total
         }
 

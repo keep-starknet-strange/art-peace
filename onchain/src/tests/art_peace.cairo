@@ -1,6 +1,6 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 use art_peace::ArtPeace::InitParams;
-use art_peace::templates::{
+use art_peace::templates::interfaces::{
     ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher,
     ITemplateVerifierDispatcherTrait, TemplateMetadata
 };

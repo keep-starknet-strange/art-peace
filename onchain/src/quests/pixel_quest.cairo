@@ -1,17 +1,8 @@
-#[starknet::interface]
-trait IPixelQuest<TContractState> {
-    fn is_claimed(self: @TContractState, user: starknet::ContractAddress) -> bool;
-    fn get_pixels_needed(self: @TContractState) -> u32;
-    fn is_daily(self: @TContractState) -> bool;
-    fn claim_day(self: @TContractState) -> u32;
-}
-
 #[starknet::contract]
-mod PixelQuest {
+pub mod PixelQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{IQuest, QuestClaimed};
-    use super::IPixelQuest;
+    use art_peace::quests::interfaces::{IQuest, IPixelQuest};
 
     #[storage]
     struct Storage {
@@ -22,6 +13,12 @@ mod PixelQuest {
         is_daily: bool,
         // The day idx the quest can be claimed ( if daily )
         claim_day: u32,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct QuestClaimed {
+        pub user: ContractAddress,
+        pub reward: u32,
     }
 
     #[event]
@@ -49,19 +46,19 @@ mod PixelQuest {
     #[abi(embed_v0)]
     impl PixelQuestImpl of IPixelQuest<ContractState> {
         fn is_claimed(self: @ContractState, user: ContractAddress) -> bool {
-            return self.claimed.read(user);
+            self.claimed.read(user)
         }
 
         fn get_pixels_needed(self: @ContractState) -> u32 {
-            return self.pixels_needed.read();
+            self.pixels_needed.read()
         }
 
         fn is_daily(self: @ContractState) -> bool {
-            return self.is_daily.read();
+            self.is_daily.read()
         }
 
         fn claim_day(self: @ContractState) -> u32 {
-            return self.claim_day.read();
+            self.claim_day.read()
         }
     }
 
@@ -69,14 +66,16 @@ mod PixelQuest {
     #[abi(embed_v0)]
     impl PixelQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
-            return self.reward.read();
+            self.reward.read()
         }
 
         fn is_claimable(self: @ContractState, user: ContractAddress) -> bool {
             let art_peace = self.art_peace.read();
+
             if self.claimed.read(user) {
                 return false;
             }
+
             if self.is_daily.read() {
                 // Daily Pixel Quest
                 let day = art_peace.get_day();
@@ -97,6 +96,7 @@ mod PixelQuest {
                 get_caller_address() == self.art_peace.read().contract_address,
                 'Only ArtPeace can claim quests'
             );
+
             if !self.is_claimable(user) {
                 return 0;
             }
@@ -104,7 +104,8 @@ mod PixelQuest {
             self.claimed.write(user, true);
             let reward = self.reward.read();
             self.emit(QuestClaimed { user: user, reward: reward });
-            return reward;
+
+            reward
         }
     }
 }

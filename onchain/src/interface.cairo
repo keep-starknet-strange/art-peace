@@ -1,9 +1,9 @@
 #[derive(Drop, Serde, starknet::Store)]
 pub struct Pixel {
     // Color index in the palette
-    color: u8,
+    pub color: u8,
     // The person that placed the pixel
-    owner: starknet::ContractAddress,
+    pub owner: starknet::ContractAddress,
 }
 
 // TODO: Tests for all
