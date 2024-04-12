@@ -19,13 +19,13 @@ mod tests {
     use starknet::testing::{claim_username, transfer_username};
 
     fn USERNAME_STORE_CONTRACT() -> ContractAddress {
-    contract_address_const::<'UsernameStores'>()
+    contract_address_const::<'UsernameStore'>()
 }
 
        // Deploy the contract and return its dispatcher.
     fn deploy() -> ContractAddress {
         // Set up constructor arguments.
-        let contract = snf::declare('UsernameStores');
+        let contract = snf::declare('UsernameStore');
 
 
         let contract_addr = contract.deploy_at(@calldata, USERNAME_STORE_CONTRACT()).unwrap();
