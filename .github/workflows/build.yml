@@ -18,3 +18,6 @@ jobs:
         working-directory: onchain
       - run: scarb build
         working-directory: onchain
+      - name: go formatting ( gofmt -s -w . )
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+        working-directory: backend
