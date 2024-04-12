@@ -23,4 +23,6 @@ pub trait IPixelQuest<TContractState> {
     fn get_pixels_needed(self: @TContractState) -> u32;
     fn is_daily(self: @TContractState) -> bool;
     fn claim_day(self: @TContractState) -> u32;
+    fn is_color(self: @TContractState) -> bool;
+    fn color(self: @TContractState) -> u8;
 }

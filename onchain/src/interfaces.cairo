@@ -62,10 +62,16 @@ pub trait IArtPeace<TContractState> {
     fn claim_today_quest(ref self: TContractState, quest_id: u32, calldata: Span<felt252>);
     fn claim_main_quest(ref self: TContractState, quest_id: u32, calldata: Span<felt252>);
 
+    // NFT info
+    fn get_nft_contract(self: @TContractState) -> starknet::ContractAddress;
+
     // Stats
     fn get_user_pixels_placed(self: @TContractState, user: starknet::ContractAddress) -> u32;
     fn get_user_pixels_placed_day(
         self: @TContractState, user: starknet::ContractAddress, day: u32
+    ) -> u32;
+    fn get_user_pixels_placed_color(
+        self: @TContractState, user: starknet::ContractAddress, color: u8
     ) -> u32;
     fn get_user_pixels_placed_day_color(
         self: @TContractState, user: starknet::ContractAddress, day: u32, color: u8

@@ -1,6 +1,6 @@
 #[starknet::component]
 pub mod TemplateStoreComponent {
-    use art_peace::templates::interface::{ITemplateStore, TemplateMetadata};
+    use art_peace::templates::interfaces::{ITemplateStore, TemplateMetadata};
 
     #[storage]
     struct Storage {
