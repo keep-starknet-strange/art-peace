@@ -1,4 +1,4 @@
-FROM golang:1.21.7-alpine
+FROM golang:1.22.2-alpine
 # TODO: Add psql to the image?
 # TODO: depends on in docker compose?
 
