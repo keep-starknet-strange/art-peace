@@ -38,6 +38,7 @@ function App() {
   const [pixelSelectedMode, setPixelSelectedMode] = useState(false);
   const [selectedPositionX, setSelectedPositionX] = useState(null)
   const [selectedPositionY, setSelectedPositionY] = useState(null)
+  const [pixelPlacedBy, setPixelPlacedBy] = useState("");
 
   const clearPixelSelection = () => {
     setSelectedPositionX(null);
@@ -57,13 +58,13 @@ function App() {
 
   return (
     <div className="App">
-      <Canvas selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} pixelSelectedMode={pixelSelectedMode} selectedPositionX={selectedPositionX} selectedPositionY={selectedPositionY} setPixelSelection={setPixelSelection} clearPixelSelection={clearPixelSelection} />
+      <Canvas selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} pixelSelectedMode={pixelSelectedMode} selectedPositionX={selectedPositionX} selectedPositionY={selectedPositionY} setPixelSelection={setPixelSelection} clearPixelSelection={clearPixelSelection} setPixelPlacedBy={setPixelPlacedBy} />
       { !isDesktopOrLaptop && (
         <img src={logo} alt="logo" className="App__logo--mobile" />
       )}
       <div className={"App__panel " + (isTabletOrMobile ? "App__panel--tablet " : " ") + (isPortrait ? "App__panel--portrait " : " ")}>
         { (!isPortrait ? pixelSelectedMode : pixelSelectedMode && activeTab === tabs[0]) && (
-          <SelectedPixelPanel selectedPositionX={selectedPositionX} selectedPositionY={selectedPositionY} clearPixelSelection={clearPixelSelection} />
+          <SelectedPixelPanel selectedPositionX={selectedPositionX} selectedPositionY={selectedPositionY} clearPixelSelection={clearPixelSelection} pixelPlacedBy={pixelPlacedBy} />
         )}
         <TabPanel activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} />
       </div>
