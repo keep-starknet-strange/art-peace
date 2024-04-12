@@ -10,8 +10,8 @@
 **/keystore.json
 
 # All Contributors CLI
-./package.json
-./yarn.lock
+/package.json
+/yarn.lock
 node_modules/
 
 # Redis

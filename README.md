@@ -94,6 +94,8 @@ However, it might be worth running only certain components for development/testi
 
 - [Diagrams](./docs/diagrams/)
 - [r/place technical document](https://www.redditinc.com/blog/how-we-built-rplace)
+- [Telegram](https://t.me/+rd1pvEo8T2w2ZDRh)
+- [OnlyDust](https://app.onlydust.com/p/artpeace)
 
 ## Contributors ✨
 
@@ -106,6 +108,8 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/b-j-roberts"><img src="https://avatars.githubusercontent.com/u/54774639?v=4?s=100" width="100px;" alt="Brandon R"/><br /><sub><b>Brandon R</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=b-j-roberts" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://adeyemi.vercel.app/"><img src="https://avatars.githubusercontent.com/u/47580934?v=4?s=100" width="100px;" alt="Adeyemi Gbenga"/><br /><sub><b>Adeyemi Gbenga</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=addegbenga" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://nodeguardians.io/character/98995858fd55"><img src="https://avatars.githubusercontent.com/u/122918260?v=4?s=100" width="100px;" alt="Tristan"/><br /><sub><b>Tristan</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=TAdev0" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>

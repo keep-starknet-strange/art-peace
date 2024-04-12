@@ -14,7 +14,7 @@
   z-index: 100;
   right: 0;
   top: 0;
-  width: max(22rem, 25%);
+  width: max(25rem, 30%);
   margin: 0.5rem;
   padding: 0;
 
@@ -24,6 +24,14 @@
   justify-content: center;
 
   font-size: 1.2rem;
+}
+
+.App__panel--tablet {
+  width: max(28rem, 40%);
+}
+
+.App__panel--portrait {
+  width: max(28rem, 60%);
 }
 
 .App__footer {
@@ -39,4 +47,13 @@
   justify-content: center;
 
   pointer-events: none;
+}
+
+.App__logo--mobile {
+  position: fixed;
+  z-index: 99;
+  left: 1rem;
+  top: 1rem;
+  width: min(8rem, 15%);
+  image-rendering: pixelated;
 }

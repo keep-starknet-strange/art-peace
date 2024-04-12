@@ -12,7 +12,7 @@
 
 /* TODO: css -> scss? */
 .TabsFooter__logo {
-  width: min(8rem, 10vw);
+  width: 10rem;
 
   pointer-events: fill;
   image-rendering: pixelated;
@@ -25,9 +25,20 @@
 }
 
 .TabsFooter__tab {
-  font-size: min(1.6rem, 2vw);
+  font-size: min(1.6rem, 1.6vw);
   text-shadow: 0 0 1rem #FFFFFF;
   pointer-events: all;
+  padding: 2rem 0;
+}
+
+.TabsFooter__tab--portrait {
+  font-size: min(2rem, 2.2vw);
+  text-shadow: 0 0 1rem #FFFFFF;
+  pointer-events: all;
+  padding: 1.6rem 0.4rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.6));
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.2);
 }
 
 .TabsFooter__main {

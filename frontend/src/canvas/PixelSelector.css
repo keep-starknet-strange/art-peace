@@ -5,6 +5,11 @@
   pointer-events: fill;
 }
 
+.PixelSelector--portrait {
+  font-size: min(1.4rem, 3vw);
+  margin: 1rem;
+}
+
 .PixelSelector__button {
   padding: 0 1rem;
   border-radius: 1rem;
@@ -14,6 +19,7 @@
   align-items: center;
   justify-content: center;
 
+  /* TODO: style this better? */
   background-image: linear-gradient(to bottom right, rgba(50, 50, 50, 0.25), rgba(50, 50, 50, 0.5));
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
 

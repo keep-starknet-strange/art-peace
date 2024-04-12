@@ -9,7 +9,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/instal
 RUN curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | bash
 # TODO: Source not working properly & requiring manual /root/.local/bin/ paths
 RUN source /root/.profile
-RUN /bin/bash /root/.local/bin/snfoundryup --version 0.20.0
+RUN /bin/bash /root/.local/bin/snfoundryup --version 0.21.0
 
 # Copy over the configs
 WORKDIR /configs

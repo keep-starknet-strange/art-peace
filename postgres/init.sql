@@ -41,6 +41,7 @@ CREATE TABLE Days (
 );
 CREATE INDEX days_dayIndex_index ON Days (dayIndex);
 
+-- TODO: Remove completedStatus & status from Quests?
 CREATE TABLE Quests (
   key integer NOT NULL PRIMARY KEY,
   name text NOT NULL,
@@ -51,6 +52,7 @@ CREATE TABLE Quests (
 );
 CREATE INDEX quests_dayIndex_index ON Quests (dayIndex);
 
+-- TODO: Add calldata field
 CREATE TABLE UserQuests (
   key integer NOT NULL PRIMARY KEY,
   userAddress char(64) NOT NULL,
