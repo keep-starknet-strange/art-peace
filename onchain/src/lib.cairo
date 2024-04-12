@@ -1,7 +1,7 @@
 pub mod art_peace;
-pub mod interface;
+pub mod interfaces;
 use art_peace::ArtPeace;
-use interface::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel};
+use interfaces::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel};
 
 mod quests {
     pub mod interfaces;
@@ -11,12 +11,25 @@ mod quests {
 }
 
 mod templates {
-    pub mod interface;
+    pub mod interfaces;
     pub mod component;
 
-    use interface::{
+    use interfaces::{
         TemplateMetadata, ITemplateVerifier, ITemplateStoreDispatcher,
         ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher, ITemplateVerifierDispatcherTrait
+    };
+}
+
+mod nfts {
+    pub mod interfaces;
+    pub mod component;
+    mod canvas_nft;
+
+    use interfaces::{
+        NFTMintParams, NFTMetadata, IArtPeaceNFTMinter, ICanvasNFTStoreDispatcher,
+        ICanvasNFTStoreDispatcherTrait, IArtPeaceNFTMinterDispatcher,
+        IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTAdditional, ICanvasNFTAdditionalDispatcher,
+        ICanvasNFTAdditionalDispatcherTrait
     };
 }
 
