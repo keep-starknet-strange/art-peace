@@ -10,24 +10,24 @@ import (
 )
 
 type Backend struct {
-  Databases *Databases
-  WSConnections []*websocket.Conn
+	Databases     *Databases
+	WSConnections []*websocket.Conn
 
-  CanvasConfig *config.CanvasConfig
-  BackendConfig *config.BackendConfig
+	CanvasConfig  *config.CanvasConfig
+	BackendConfig *config.BackendConfig
 }
 
 var ArtPeaceBackend *Backend
 
 func NewBackend(databases *Databases, canvasConfig *config.CanvasConfig, backendConfig *config.BackendConfig) *Backend {
-  return &Backend{
-    Databases: databases,
-    CanvasConfig: canvasConfig,
-    BackendConfig: backendConfig,
-  }
+	return &Backend{
+		Databases:     databases,
+		CanvasConfig:  canvasConfig,
+		BackendConfig: backendConfig,
+	}
 }
 
 func (b *Backend) Start() {
-  fmt.Println("Listening on port", b.BackendConfig.Port)
-  http.ListenAndServe(fmt.Sprintf(":%d", b.BackendConfig.Port), nil)
+	fmt.Println("Listening on port", b.BackendConfig.Port)
+	http.ListenAndServe(fmt.Sprintf(":%d", b.BackendConfig.Port), nil)
 }
