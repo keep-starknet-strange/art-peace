@@ -190,7 +190,6 @@ const Canvas = props => {
     }).then(data => {
       // TODO: Cache pixel info & clear cache on update from websocket
       // TODO: Dont query if hover select ( until 1s after hover? )
-      console.log('pixel placed by data is => ', data);
       props.setPixelPlacedBy(data)
     }).catch(error => {
       console.error(error)
