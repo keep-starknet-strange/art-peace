@@ -11,7 +11,7 @@ import (
 func main() {
 	canvasConfigFilename := flag.String("canvas-config", config.DefaultCanvasConfigPath, "Canvas config file")
 	databaseConfigFilename := flag.String("database-config", config.DefaultDatabaseConfigPath, "Database config file")
-  backendConfigFilename := flag.String("backend-config", config.DefaultBackendConfigPath, "Backend config file")
+	backendConfigFilename := flag.String("backend-config", config.DefaultBackendConfigPath, "Backend config file")
 	flag.Parse()
 
 	canvasConfig, err := config.LoadCanvasConfig(*canvasConfigFilename)
@@ -24,16 +24,16 @@ func main() {
 		panic(err)
 	}
 
-  backendConfig, err := config.LoadBackendConfig(*backendConfigFilename)
-  if err != nil {
-    panic(err)
-  }
+	backendConfig, err := config.LoadBackendConfig(*backendConfigFilename)
+	if err != nil {
+		panic(err)
+	}
 
-  databases := backend.NewDatabases(databaseConfig)
+	databases := backend.NewDatabases(databaseConfig)
 	defer databases.Close()
 
-  routes.InitRoutes()
+	routes.InitRoutes()
 
-  backend.ArtPeaceBackend = backend.NewBackend(databases, canvasConfig, backendConfig)
-  backend.ArtPeaceBackend.Start()
+	backend.ArtPeaceBackend = backend.NewBackend(databases, canvasConfig, backendConfig)
+	backend.ArtPeaceBackend.Start()
 }
