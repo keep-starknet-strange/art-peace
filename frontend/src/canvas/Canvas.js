@@ -88,7 +88,6 @@ const Canvas = props => {
   }, [])
 
   const [setup, setSetup] = useState(false)
-  const [pixelPlacedBy, setPixelPlacedBy] = useState("")
 
   const draw = useCallback((ctx, imageData) => {
     ctx.canvas.width = width
@@ -191,7 +190,8 @@ const Canvas = props => {
     }).then(data => {
       // TODO: Cache pixel info & clear cache on update from websocket
       // TODO: Dont query if hover select ( until 1s after hover? )
-      setPixelPlacedBy(data)
+      console.log('pixel placed by data is => ', data);
+      props.setPixelPlacedBy(data)
     }).catch(error => {
       console.error(error)
     });
