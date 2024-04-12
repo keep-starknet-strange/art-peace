@@ -1,4 +1,4 @@
-package backend
+package core
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"art-peace-backend/config"
+	"github.com/keep-starknet-strange/art-peace/backend/config"
 )
 
 type Backend struct {

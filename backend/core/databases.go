@@ -1,4 +1,4 @@
-package backend
+package core
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/redis/go-redis/v9"
 
-	"art-peace-backend/config"
+	"github.com/keep-starknet-strange/art-peace/backend/config"
 )
 
 type Databases struct {

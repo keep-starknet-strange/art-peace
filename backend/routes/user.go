@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"art-peace-backend/backend"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func InitUserRoutes() {
@@ -15,7 +15,7 @@ func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 	user := r.URL.Query().Get("address")
 
 	var available string
-	err := backend.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT available FROM ExtraPixels WHERE address = $1", user).Scan(&available)
+	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT available FROM ExtraPixels WHERE address = $1", user).Scan(&available)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))

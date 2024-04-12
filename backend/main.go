@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 
-	"art-peace-backend/backend"
-	"art-peace-backend/config"
-	"art-peace-backend/routes"
+	"github.com/keep-starknet-strange/art-peace/backend/config"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
+	"github.com/keep-starknet-strange/art-peace/backend/routes"
 )
 
 func main() {
@@ -29,11 +29,11 @@ func main() {
 		panic(err)
 	}
 
-	databases := backend.NewDatabases(databaseConfig)
+	databases := core.NewDatabases(databaseConfig)
 	defer databases.Close()
 
 	routes.InitRoutes()
 
-	backend.ArtPeaceBackend = backend.NewBackend(databases, canvasConfig, backendConfig)
-	backend.ArtPeaceBackend.Start()
+	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig)
+	core.ArtPeaceBackend.Start()
 }

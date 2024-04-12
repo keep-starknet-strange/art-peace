@@ -12,7 +12,7 @@ import (
 	"github.com/NethermindEth/juno/core/crypto"
 	"github.com/NethermindEth/juno/core/felt"
 
-	"art-peace-backend/backend"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func InitTemplateRoutes() {
@@ -105,7 +105,7 @@ func addTemplateHashDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Create this script
-	shellCmd := backend.ArtPeaceBackend.BackendConfig.Scripts.AddTemplateHashDevnet
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.AddTemplateHashDevnet
 	// TODO: remove contract from jsonBody
 	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
 	cmd := exec.Command(shellCmd, contract, "add_template", jsonBody["hash"])

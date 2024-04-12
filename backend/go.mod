@@ -1,4 +1,4 @@
-module art-peace-backend
+module github.com/keep-starknet-strange/art-peace/backend
 
 go 1.22.0
 

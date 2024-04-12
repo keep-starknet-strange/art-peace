@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"art-peace-backend/backend"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func InitIndexerRoutes() {
@@ -99,20 +99,20 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bitfieldType := "u" + strconv.Itoa(int(backend.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
-	pos := uint(position) * backend.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
+	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 
 	fmt.Println("Pixel indexed with position: ", position, " and color: ", color)
 
 	// Set pixel in redis
 	ctx := context.Background()
-	err = backend.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "SET", bitfieldType, pos, color).Err()
+	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "SET", bitfieldType, pos, color).Err()
 	if err != nil {
 		panic(err)
 	}
 
 	// Set pixel in postgres
-	_, err = backend.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)", address, position, dayIdx, color)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)", address, position, dayIdx, color)
 	if err != nil {
 		fmt.Println("Error inserting pixel into postgres: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -130,13 +130,13 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	for idx, conn := range backend.ArtPeaceBackend.WSConnections {
+	for idx, conn := range core.ArtPeaceBackend.WSConnections {
 		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
 			fmt.Println(err)
 			// TODO: Should we always remove connection?
 			// Remove connection
 			conn.Close()
-			backend.ArtPeaceBackend.WSConnections = append(backend.ArtPeaceBackend.WSConnections[:idx], backend.ArtPeaceBackend.WSConnections[idx+1:]...)
+			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
 		}
 	}
 }

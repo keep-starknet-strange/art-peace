@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"art-peace-backend/backend"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func InitWebsocketRoutes() {
@@ -39,6 +39,6 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("Client Connected")
-	backend.ArtPeaceBackend.WSConnections = append(backend.ArtPeaceBackend.WSConnections, ws)
+	core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections, ws)
 	wsReader(ws)
 }
