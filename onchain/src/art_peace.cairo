@@ -3,7 +3,10 @@ pub mod ArtPeace {
     use starknet::ContractAddress;
     use art_peace::{IArtPeace, Pixel};
     use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
-    use art_peace::nfts::interfaces::{IArtPeaceNFTMinter, NFTMetadata, NFTMintParams, ICanvasNFTAdditionalDispatcher, ICanvasNFTAdditionalDispatcherTrait};
+    use art_peace::nfts::interfaces::{
+        IArtPeaceNFTMinter, NFTMetadata, NFTMintParams, ICanvasNFTAdditionalDispatcher,
+        ICanvasNFTAdditionalDispatcherTrait
+    };
     use art_peace::templates::component::TemplateStoreComponent;
     use art_peace::templates::interfaces::{ITemplateVerifier, ITemplateStore, TemplateMetadata};
 
@@ -437,9 +440,7 @@ pub mod ArtPeace {
 
     #[abi(embed_v0)]
     impl ArtPeaceNFTMinter of IArtPeaceNFTMinter<ContractState> {
-        fn mint_nft(
-            self: @ContractState, mint_params: NFTMintParams
-        ) {
+        fn mint_nft(self: @ContractState, mint_params: NFTMintParams) {
             let metadata = NFTMetadata {
                 position: mint_params.position,
                 width: mint_params.width,
@@ -448,9 +449,8 @@ pub mod ArtPeace {
                 block_number: starknet::get_block_number(),
                 minter: starknet::get_caller_address(),
             };
-            ICanvasNFTAdditionalDispatcher {
-                contract_address: self.nft_contract.read(),
-            }.mint(metadata, starknet::get_caller_address());
+            ICanvasNFTAdditionalDispatcher { contract_address: self.nft_contract.read(), }
+                .mint(metadata, starknet::get_caller_address());
         }
     }
 

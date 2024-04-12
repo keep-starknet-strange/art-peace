@@ -26,7 +26,10 @@ mod nfts {
     mod canvas_nft;
 
     use interfaces::{
-        NFTMintParams, NFTMetadata, IArtPeaceNFTMinter, ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait, IArtPeaceNFTMinterDispatcher, IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTAdditional, ICanvasNFTAdditionalDispatcher, ICanvasNFTAdditionalDispatcherTrait
+        NFTMintParams, NFTMetadata, IArtPeaceNFTMinter, ICanvasNFTStoreDispatcher,
+        ICanvasNFTStoreDispatcherTrait, IArtPeaceNFTMinterDispatcher,
+        IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTAdditional, ICanvasNFTAdditionalDispatcher,
+        ICanvasNFTAdditionalDispatcherTrait
     };
 }
 

@@ -17,7 +17,8 @@ mod CanvasNFT {
     #[abi(embed_v0)]
     impl SRC5Impl = SRC5Component::SRC5Impl<ContractState>;
     #[abi(embed_v0)]
-    impl CanvasNFTStoreImpl = CanvasNFTStoreComponent::CanvasNFTStoreImpl<ContractState>;
+    impl CanvasNFTStoreImpl =
+        CanvasNFTStoreComponent::CanvasNFTStoreImpl<ContractState>;
 
     impl InternalImpl = ERC721Component::InternalImpl<ContractState>;
 
@@ -44,7 +45,9 @@ mod CanvasNFT {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, name: ByteArray, symbol: ByteArray, art_peace_addr: ContractAddress) {
+    fn constructor(
+        ref self: ContractState, name: ByteArray, symbol: ByteArray, art_peace_addr: ContractAddress
+    ) {
         self.art_peace.write(art_peace_addr);
         let base_uri = format!("{:?}", art_peace_addr);
         self.erc721.initializer(name, symbol, base_uri);
@@ -53,12 +56,15 @@ mod CanvasNFT {
     #[abi(embed_v0)]
     impl CanvasNFTAdditional of ICanvasNFTAdditional<ContractState> {
         fn mint(ref self: ContractState, metadata: NFTMetadata, receiver: ContractAddress) {
-            assert(self.art_peace.read() == starknet::get_caller_address(), 'Only ArtPeace contract can mint');
+            assert(
+                self.art_peace.read() == starknet::get_caller_address(),
+                'Only ArtPeace contract can mint'
+            );
             let token_id = self.nfts.get_nfts_count();
             self.nfts.nfts_data.write(token_id, metadata);
             self.erc721._mint(receiver, token_id);
             self.nfts.nfts_count.write(token_id + 1);
-            // TODO: self.emit(Event::NFTEvent::CanvasNFTMinted { token_id, metadata });
+        // TODO: self.emit(Event::NFTEvent::CanvasNFTMinted { token_id, metadata });
         }
     }
 }

@@ -1,7 +1,10 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 use art_peace::ArtPeace::InitParams;
 use art_peace::quests::pixel_quest::PixelQuest::PixelQuestInitParams;
-use art_peace::nfts::interfaces::{IArtPeaceNFTMinterDispatcher, IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait, NFTMintParams, NFTMetadata};
+use art_peace::nfts::interfaces::{
+    IArtPeaceNFTMinterDispatcher, IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTStoreDispatcher,
+    ICanvasNFTStoreDispatcherTrait, NFTMintParams, NFTMetadata
+};
 use art_peace::templates::interfaces::{
     ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher,
     ITemplateVerifierDispatcherTrait, TemplateMetadata
@@ -469,17 +472,11 @@ fn increase_day_panic_test() {
 #[test]
 fn nft_mint_test() {
     let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
-    let nft_minter = IArtPeaceNFTMinterDispatcher {
-        contract_address: art_peace.contract_address
-    };
+    let nft_minter = IArtPeaceNFTMinterDispatcher { contract_address: art_peace.contract_address };
     let nft_store = ICanvasNFTStoreDispatcher { contract_address: NFT_CONTRACT() };
     let nft = IERC721Dispatcher { contract_address: NFT_CONTRACT() };
 
-    let mint_params = NFTMintParams {
-        position: 10,
-        width: 16,
-        height: 16,
-    };
+    let mint_params = NFTMintParams { position: 10, width: 16, height: 16, };
     snf::start_prank(CheatTarget::One(nft_minter.contract_address), PLAYER1());
     nft_minter.mint_nft(mint_params);
     snf::stop_prank(CheatTarget::One(nft_minter.contract_address));

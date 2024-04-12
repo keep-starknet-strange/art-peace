@@ -34,7 +34,9 @@ pub mod CanvasNFTStoreComponent {
             return self.nfts_data.read(token_id);
         }
 
-        fn get_nft_minter(self: @ComponentState<TContractState>, token_id: u256) -> starknet::ContractAddress {
+        fn get_nft_minter(
+            self: @ComponentState<TContractState>, token_id: u256
+        ) -> starknet::ContractAddress {
             let metadata: NFTMetadata = self.nfts_data.read(token_id);
             return metadata.minter;
         }
