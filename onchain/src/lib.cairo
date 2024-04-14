@@ -2,7 +2,7 @@ pub mod art_peace;
 pub mod username_store;
 pub mod interface;
 use art_peace::ArtPeace;
-use interface::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
+use interface::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel};
 use username_store::UsernameStore;
 
 

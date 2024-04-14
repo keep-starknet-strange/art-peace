@@ -2,6 +2,8 @@ use username_store::UsernameStore;
 use username_store::{IUsernameStoreDispatcher, IUsernameStoreDispatcherTrait};
 use username::UserNameClaimErrors;
 
+use starknet::{ContractAddress};
+use snforge_std::{declare, cheatcodes::contract_class::ContractClassTrait};
 
 
 #[cfg(test)]
@@ -16,54 +18,52 @@ mod tests {
     use starknet::{ContractAddress, contract_address_const};
 
      // Use starknet test utils to fake the transaction context.
-    use starknet::testing::{claim_username, transfer_username};
+    // use starknet::testing::{claim_username, transfer_username};
 
-    fn USERNAME_STORE_CONTRACT() -> ContractAddress {
-    contract_address_const::<'UsernameStore'>()
-}
-
-       // Deploy the contract and return its dispatcher.
-    fn deploy() -> ContractAddress {
-        // Set up constructor arguments.
-        let contract = snf::declare('UsernameStore');
-
-
-        let contract_addr = contract.deploy_at(@calldata, USERNAME_STORE_CONTRACT()).unwrap();
-
-        contract_addr
+    // Deploy the contract and return its dispatcher.
+    fn deploy_contract() -> ContractAddress {
+        let contract = declare("UsernameStore");
+        //  contract.deploy().unwrap();
+        return contract.deploy(@ArrayTrait::new()).unwrap();
     }
 
-
-    #[test]
+  
+   #[test]
     #[available_gas(2000000000)]
-    fn test_claimUsername() {
+    fn check_claimed_username(){
+        // deploy the contract
+        let contract_address = deploy_contract();
+        let dispatcher = IUsernameStoreDispatcher { contract_address };
 
-        // Fake the caller address to address 1
-        let owner = contract_address_const::<1>();
-        claim_username(owner, 'demo_name');
+        // call the claimed username
+        let claim_username = dispatcher.claim_username('demo_name')
+        
+        let original_owner = contract_address_const::<0>();
 
-        let contract = deploy(10);
-         assert(contract_state.username.read('transfer_username(&contract_state, "demo_name", new_address)') == get_caller_address(), 'Test case 1 failed: Username not claimed correctly');
+        assert(contract_state.usernames.read('demo_name') == original_owner, Errors::NOT_EQUAL);
 
-       
-         assert(core::panic_with_felt252(UserNameClaimErrors::USERNAME_CLAIMED), 'Test case 2 failed: Username claimed erroneously');
-   
     }
+
 
     #[test]
     #[available_gas(2000000000)]
     fn test_transfer_username() {
+        // deploy the contract
+        let contract_address = deploy_contract();
+        let dispatcher = IUsernameStoreDispatcher { contract_address };
+
+        // call the claimed username
+        let claim_username = dispatcher.claim_username('demo_name')
 
         // Fake the caller address to address 1
-        let original_owner = contract_address_const::<1>();
-        let new_owner = contract_address_const::<2>();
+        let original_owner = contract_address_const::<0>();
 
-        transfer_username(&contract_state, 'demo_name', new_address);
+        let new_owner = contract_address_const::<1>();
 
-        let contract = deploy(10);
-        assert(contract_state.username.read('demo_name') == new_owner, "Test case 1 failed: Username not transferred correctly");
-    
-        assert(contract_state.username.read('demo_name') == original_owner, "Test case 1 failed: Username not transferred correctly");
+        dispatcher.transfer_usernames('demo_name', new_owner);
+
+        
+        assert(contract_state.usernames.read('demo_name') == new_owner, "Test case 1 failed: Username not transferred correctly");
     
   
     }
