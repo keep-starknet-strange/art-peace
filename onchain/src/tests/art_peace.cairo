@@ -514,6 +514,7 @@ fn deposit_reward_test() {
 
     template_store.add_template(template_metadata);
 }
+
 // TODO: test invalid template inputs
 
 // TODO: Deploy test for nft that checks name, symbol, uri, etc.
