@@ -63,7 +63,7 @@ pub mod TemplateStoreComponent {
             self.templates.write(template_id, template_metadata);
             self.templates_count.write(template_id + 1);
             self
-                ._deposit(
+                .deposit(
                     get_caller_address(), template_metadata.reward_token, template_metadata.reward
                 );
             self.emit(TemplateAdded { id: template_id, metadata: template_metadata });
@@ -78,7 +78,7 @@ pub mod TemplateStoreComponent {
     impl InternalImpl<
         TContractState, +HasComponent<TContractState>
     > of InternalTrait<TContractState> {
-        fn _deposit(
+        fn deposit(
             ref self: ComponentState<TContractState>,
             template_proposer: ContractAddress,
             reward_token: ContractAddress,
