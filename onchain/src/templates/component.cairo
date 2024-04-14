@@ -1,6 +1,9 @@
 #[starknet::component]
 pub mod TemplateStoreComponent {
     use art_peace::templates::interfaces::{ITemplateStore, TemplateMetadata};
+    use core::num::traits::Zero;
+    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use starknet::ContractAddress;
 
     #[storage]
     struct Storage {
@@ -59,11 +62,40 @@ pub mod TemplateStoreComponent {
             let template_id = self.templates_count.read();
             self.templates.write(template_id, template_metadata);
             self.templates_count.write(template_id + 1);
+            self
+                ._deposit(
+                    starknet::get_caller_address(),
+                    template_metadata.reward_token,
+                    template_metadata.reward
+                );
             self.emit(TemplateAdded { id: template_id, metadata: template_metadata });
         }
 
         fn is_template_complete(self: @ComponentState<TContractState>, template_id: u32) -> bool {
             self.completed_templates.read(template_id)
+        }
+    }
+
+    #[generate_trait]
+    impl InternalImpl<
+        TContractState, +HasComponent<TContractState>
+    > of InternalTrait<TContractState> {
+        fn _deposit(
+            ref self: ComponentState<TContractState>,
+            template_proposer: ContractAddress,
+            reward_token: ContractAddress,
+            reward_amount: u256
+        ) {
+            let caller_address = starknet::get_caller_address();
+            let contract_address = starknet::get_contract_address();
+            assert(!template_proposer.is_zero(), 'Invalid caller');
+            assert(!reward_token.is_zero(), 'Invalid token');
+            let erc20_dispatcher = IERC20Dispatcher { contract_address: reward_token };
+            let allowance = erc20_dispatcher.allowance(caller_address, contract_address);
+            assert(allowance >= reward_amount, 'Insufficient allowance');
+            let success = erc20_dispatcher
+                .transfer_from(caller_address, contract_address, reward_amount);
+            assert(success, 'Transfer failed');
         }
     }
 }
