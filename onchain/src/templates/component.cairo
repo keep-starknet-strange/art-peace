@@ -59,15 +59,17 @@ pub mod TemplateStoreComponent {
 
         // TODO: Return idx of the template?
         fn add_template(
-            ref self: ComponentState<TContractState>,
-            template_metadata: TemplateMetadata,
-            reward_token: ContractAddress,
-            reward_amount: u256
+            ref self: ComponentState<TContractState>, template_metadata: TemplateMetadata,
         ) {
             let template_id = self.templates_count.read();
             self.templates.write(template_id, template_metadata);
             self.templates_count.write(template_id + 1);
-            self._deposit(starknet::get_caller_address(), reward_token, reward_amount);
+            self
+                ._deposit(
+                    starknet::get_caller_address(),
+                    template_metadata.reward_token,
+                    template_metadata.reward
+                );
             self.emit(TemplateAdded { id: template_id, metadata: template_metadata });
         }
 
