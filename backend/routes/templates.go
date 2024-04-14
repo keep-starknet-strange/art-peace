@@ -93,7 +93,12 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 }
 
 func addTemplateHashDevnet(w http.ResponseWriter, r *http.Request) {
-	// TODO: Disable this in production
+	// Disable this in production
+	if core.ArtPeaceBackend.BackendConfig.Production {
+		http.Error(w, "Not available in production", http.StatusNotImplemented)
+		return
+	}
+
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		panic(err)

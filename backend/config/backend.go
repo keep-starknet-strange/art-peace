@@ -11,9 +11,10 @@ type BackendScriptsConfig struct {
 }
 
 type BackendConfig struct {
-	Host    string               `json:"host"`
-	Port    int                  `json:"port"`
-	Scripts BackendScriptsConfig `json:"scripts"`
+	Host       string               `json:"host"`
+	Port       int                  `json:"port"`
+	Scripts    BackendScriptsConfig `json:"scripts"`
+	Production bool                 `json:"production"`
 }
 
 var DefaultBackendConfig = BackendConfig{
