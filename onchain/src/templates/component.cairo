@@ -3,7 +3,7 @@ pub mod TemplateStoreComponent {
     use art_peace::templates::interfaces::{ITemplateStore, TemplateMetadata};
     use core::num::traits::Zero;
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
-    use starknet::ContractAddress;
+    use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {
@@ -64,9 +64,7 @@ pub mod TemplateStoreComponent {
             self.templates_count.write(template_id + 1);
             self
                 ._deposit(
-                    starknet::get_caller_address(),
-                    template_metadata.reward_token,
-                    template_metadata.reward
+                    get_caller_address(), template_metadata.reward_token, template_metadata.reward
                 );
             self.emit(TemplateAdded { id: template_id, metadata: template_metadata });
         }
@@ -86,7 +84,7 @@ pub mod TemplateStoreComponent {
             reward_token: ContractAddress,
             reward_amount: u256
         ) {
-            let caller_address = starknet::get_caller_address();
+            let caller_address = get_caller_address();
             let contract_address = starknet::get_contract_address();
             assert(!template_proposer.is_zero(), 'Invalid caller');
             assert(!reward_token.is_zero(), 'Invalid token');
