@@ -1,6 +1,10 @@
 #[starknet::component]
 pub mod TemplateStoreComponent {
+    use core::num::traits::Zero;
+    use starknet::ContractAddress;
+
     use art_peace::templates::interfaces::{ITemplateStore, TemplateMetadata};
+    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 
     #[storage]
     struct Storage {
@@ -54,15 +58,17 @@ pub mod TemplateStoreComponent {
 
         // TODO: Return idx of the template?
         fn add_template(
-            ref self: ComponentState<TContractState>,
-            template_metadata: TemplateMetadata,
-            reward_token: ContractAddress,
-            reward_amount: u256
+            ref self: ComponentState<TContractState>, template_metadata: TemplateMetadata,
         ) {
             let template_id = self.templates_count.read();
             self.templates.write(template_id, template_metadata);
             self.templates_count.write(template_id + 1);
-            self._deposit(starknet::get_caller_address(), reward_token, reward_amount);
+            self
+                ._deposit(
+                    starknet::get_caller_address(),
+                    template_metadata.reward_token,
+                    template_metadata.reward
+                );
             self.emit(TemplateAdded { id: template_id, metadata: template_metadata });
         }
 

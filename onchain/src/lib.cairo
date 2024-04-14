@@ -33,7 +33,12 @@ mod nfts {
     };
 }
 
+mod mocks {
+    pub mod erc20_mock;
+}
+
 #[cfg(test)]
 mod tests {
     mod art_peace;
+    mod utils;
 }
