@@ -39,6 +39,6 @@ mod mocks {
 
 #[cfg(test)]
 mod tests {
-    pub(crate) mod art_peace;
+    mod art_peace;
     pub(crate) mod utils;
 }
