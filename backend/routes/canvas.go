@@ -5,41 +5,40 @@ import (
 	"fmt"
 	"net/http"
 
-	"art-peace-backend/backend"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func InitCanvasRoutes() {
-  http.HandleFunc("/initCanvas", initCanvas)
-  http.HandleFunc("/getCanvas", getCanvas)
+	http.HandleFunc("/initCanvas", initCanvas)
+	http.HandleFunc("/getCanvas", getCanvas)
 }
 
 func initCanvas(w http.ResponseWriter, r *http.Request) {
-  // TODO: Check if canvas already exists
-  totalBitSize := backend.ArtPeaceBackend.CanvasConfig.Canvas.Width * backend.ArtPeaceBackend.CanvasConfig.Canvas.Height * backend.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
-  totalByteSize := (totalBitSize / 8)
-  if totalBitSize % 8 != 0 {
-    // Round up to nearest byte
-    totalByteSize += 1
-  }
+	// TODO: Check if canvas already exists
+	totalBitSize := core.ArtPeaceBackend.CanvasConfig.Canvas.Width * core.ArtPeaceBackend.CanvasConfig.Canvas.Height * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+	totalByteSize := (totalBitSize / 8)
+	if totalBitSize%8 != 0 {
+		// Round up to nearest byte
+		totalByteSize += 1
+	}
 
-  canvas := make([]byte, totalByteSize)
-  ctx := context.Background()
-  err := backend.ArtPeaceBackend.Databases.Redis.Set(ctx, "canvas", canvas, 0).Err()
-  if err != nil {
-    panic(err)
-  }
+	canvas := make([]byte, totalByteSize)
+	ctx := context.Background()
+	err := core.ArtPeaceBackend.Databases.Redis.Set(ctx, "canvas", canvas, 0).Err()
+	if err != nil {
+		panic(err)
+	}
 
-  fmt.Println("Canvas initialized")
+	fmt.Println("Canvas initialized")
 }
 
-
 func getCanvas(w http.ResponseWriter, r *http.Request) {
-  ctx := context.Background()
-  val, err := backend.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
-  if err != nil {
-    panic(err)
-  }
+	ctx := context.Background()
+	val, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
+	if err != nil {
+		panic(err)
+	}
 
-  w.Header().Set("Access-Control-Allow-Origin", "*")
-  w.Write([]byte(val))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte(val))
 }

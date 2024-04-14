@@ -3,8 +3,12 @@ pub mod ArtPeace {
     use starknet::ContractAddress;
     use art_peace::{IArtPeace, Pixel};
     use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
+    use art_peace::nfts::interfaces::{
+        IArtPeaceNFTMinter, NFTMetadata, NFTMintParams, ICanvasNFTAdditionalDispatcher,
+        ICanvasNFTAdditionalDispatcherTrait
+    };
     use art_peace::templates::component::TemplateStoreComponent;
-    use art_peace::templates::interface::{ITemplateVerifier, TemplateMetadata};
+    use art_peace::templates::interfaces::{ITemplateVerifier, ITemplateStore, TemplateMetadata};
 
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 
@@ -35,6 +39,7 @@ pub mod ArtPeace {
         main_quests_count: u32,
         // Map: quest index -> quest contract address
         main_quests: LegacyMap::<u32, ContractAddress>,
+        nft_contract: ContractAddress,
         // Map: (day_index, user's address, color index) -> amount of pixels placed
         user_pixels_placed: LegacyMap::<(u32, ContractAddress, u8), u32>,
         #[substorage(v0)]
@@ -77,6 +82,7 @@ pub mod ArtPeace {
         pub end_time: u64,
         pub daily_quests: Span<ContractAddress>,
         pub main_quests: Span<ContractAddress>,
+        pub nft_contract: ContractAddress,
     }
 
     const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
@@ -121,6 +127,8 @@ pub mod ArtPeace {
                 self.main_quests.write(i, *init_params.main_quests.at(i));
                 i += 1;
             };
+
+        self.nft_contract.write(init_params.nft_contract);
     }
 
     #[abi(embed_v0)]
@@ -375,6 +383,10 @@ pub mod ArtPeace {
             }
         }
 
+        fn get_nft_contract(self: @ContractState) -> ContractAddress {
+            self.nft_contract.read()
+        }
+
         fn get_user_pixels_placed(self: @ContractState, user: ContractAddress) -> u32 {
             let mut i = 0;
             let mut total = 0;
@@ -406,12 +418,42 @@ pub mod ArtPeace {
             total
         }
 
+        fn get_user_pixels_placed_color(
+            self: @ContractState, user: ContractAddress, color: u8
+        ) -> u32 {
+            let mut total = 0;
+            let last_day = self.day_index.read() + 1;
+            let mut i = 0;
+            while i < last_day {
+                total += self.user_pixels_placed.read((i, user, color));
+                i += 1;
+            };
+            total
+        }
+
         fn get_user_pixels_placed_day_color(
             self: @ContractState, user: ContractAddress, day: u32, color: u8
         ) -> u32 {
             self.user_pixels_placed.read((day, user, color))
         }
     }
+
+    #[abi(embed_v0)]
+    impl ArtPeaceNFTMinter of IArtPeaceNFTMinter<ContractState> {
+        fn mint_nft(self: @ContractState, mint_params: NFTMintParams) {
+            let metadata = NFTMetadata {
+                position: mint_params.position,
+                width: mint_params.width,
+                height: mint_params.height,
+                image_hash: 0, // TODO
+                block_number: starknet::get_block_number(),
+                minter: starknet::get_caller_address(),
+            };
+            ICanvasNFTAdditionalDispatcher { contract_address: self.nft_contract.read(), }
+                .mint(metadata, starknet::get_caller_address());
+        }
+    }
+
 
     #[abi(embed_v0)]
     impl ArtPeaceTemplateVerifier of ITemplateVerifier<ContractState> {
@@ -439,6 +481,7 @@ pub mod ArtPeace {
                             let pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
                             let color = *template_image
                                 .at((x + y * template_metadata.width).try_into().unwrap());
+                            // TODO: Check if the color is transparent
                             if color == self.canvas.read(pos).color {
                                 matches += 1;
                             }

@@ -17,7 +17,7 @@
 
 .SelectedPixelPanel__item {
   font-size: 1.2rem;
-  text-wrap: nowrap;
+  white-space: nowrap;
   margin: 0.3rem;
 }
 

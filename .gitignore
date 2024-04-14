@@ -25,4 +25,4 @@ build/
 node_modules/
 
 # Backend
-art-peace-backend
+/backend/backend
