@@ -62,10 +62,11 @@ pub mod TemplateStoreComponent {
             let template_id = self.templates_count.read();
             self.templates.write(template_id, template_metadata);
             self.templates_count.write(template_id + 1);
-            self
-                .deposit(
-                    get_caller_address(), template_metadata.reward_token, template_metadata.reward
-                );
+
+            if !template_metadata.reward_token.is_zero() && template_metadata.reward != 0 {
+                self.deposit(template_metadata.reward_token, template_metadata.reward);
+            }
+
             self.emit(TemplateAdded { id: template_id, metadata: template_metadata });
         }
 
@@ -80,17 +81,17 @@ pub mod TemplateStoreComponent {
     > of InternalTrait<TContractState> {
         fn deposit(
             ref self: ComponentState<TContractState>,
-            template_proposer: ContractAddress,
             reward_token: ContractAddress,
             reward_amount: u256
         ) {
             let caller_address = get_caller_address();
             let contract_address = starknet::get_contract_address();
-            assert(!template_proposer.is_zero(), 'Invalid caller');
-            assert(!reward_token.is_zero(), 'Invalid token');
+            assert(!get_caller_address().is_zero(), 'Invalid caller');
+
             let erc20_dispatcher = IERC20Dispatcher { contract_address: reward_token };
             let allowance = erc20_dispatcher.allowance(caller_address, contract_address);
             assert(allowance >= reward_amount, 'Insufficient allowance');
+
             let success = erc20_dispatcher
                 .transfer_from(caller_address, contract_address, reward_amount);
             assert(success, 'Transfer failed');
