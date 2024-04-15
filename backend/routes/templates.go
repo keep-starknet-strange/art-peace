@@ -18,7 +18,9 @@ import (
 func InitTemplateRoutes() {
 	http.HandleFunc("/addTemplateImg", addTemplateImg)
 	http.HandleFunc("/addTemplateData", addTemplateData)
-	http.HandleFunc("/addTemplateHashDevnet", addTemplateHashDevnet)
+	if !core.ArtPeaceBackend.BackendConfig.Production {
+		http.HandleFunc("/addTemplateHashDevnet", addTemplateHashDevnet)
+	}
 }
 
 // TODO: Add specific location for template images
