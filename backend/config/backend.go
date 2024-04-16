@@ -24,7 +24,7 @@ var DefaultBackendConfig = BackendConfig{
 		PlacePixelDevnet:      "../scripts/place_pixel.sh",
 		AddTemplateHashDevnet: "../scripts/add_template_hash.sh",
 	},
-  Production: false,
+	Production: false,
 }
 
 var DefaultBackendConfigPath = "../configs/backend.config.json"
