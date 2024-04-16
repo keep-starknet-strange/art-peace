@@ -8,10 +8,8 @@
 }
 
 .Account__wrap {
-  word-wrap: break-word;
-  width: 100%;
-  padding-right: 90px;
-  line-height: 1.2;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .Account__list {
@@ -41,11 +39,26 @@
 
 .Account__button {
   background-color: black;
-  color: #EFEFEF;
+  color: #efefef;
   border: 1px solid black;
-  margin-top: 6px;
-  padding: 8px 16px;
-  font-size: 10px;
   text-transform: uppercase;
   cursor: pointer;
+  border-radius: 6px;
+}
+
+.Account__button--edit {
+  padding: 2px 8px;
+  font-size: 8px;
+}
+
+.Account__button--submit {
+  padding: 8px 16px;
+  font-size: 10px;
+}
+
+.Account__user {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  width: 100%;
 }
