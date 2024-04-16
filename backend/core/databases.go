@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/keep-starknet-strange/art-peace/backend/config"
@@ -15,7 +15,7 @@ type Databases struct {
 	DatabaseConfig *config.DatabaseConfig
 
 	Redis    *redis.Client
-	Postgres *pgx.Conn
+	Postgres *pgxpool.Pool
 }
 
 func NewDatabases(databaseConfig *config.DatabaseConfig) *Databases {
@@ -31,16 +31,17 @@ func NewDatabases(databaseConfig *config.DatabaseConfig) *Databases {
 
 	// Connect to Postgres
 	postgresConnString := "postgresql://" + databaseConfig.Postgres.User + ":" + os.Getenv("POSTGRES_PASSWORD") + "@" + databaseConfig.Postgres.Host + ":" + strconv.Itoa(databaseConfig.Postgres.Port) + "/" + databaseConfig.Postgres.Database
-	pgConn, err := pgx.Connect(context.Background(), postgresConnString)
+  // TODO: crd_audit?sslmode=disable
+	pgPool, err := pgxpool.New(context.Background(), postgresConnString)
 	if err != nil {
 		panic(err)
 	}
-	d.Postgres = pgConn
+	d.Postgres = pgPool
 
 	return d
 }
 
 func (d *Databases) Close() {
 	d.Redis.Close()
-	d.Postgres.Close(context.Background())
+	d.Postgres.Close()
 }

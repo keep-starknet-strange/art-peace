@@ -11,6 +11,7 @@ import (
 
 type Backend struct {
 	Databases     *Databases
+  // TODO: Is this thread safe?
 	WSConnections []*websocket.Conn
 
 	CanvasConfig  *config.CanvasConfig
