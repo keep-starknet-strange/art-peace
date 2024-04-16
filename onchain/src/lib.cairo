@@ -36,6 +36,7 @@ mod nfts {
     };
 }
 
+
 mod mocks {
     pub mod erc20_mock;
 }
@@ -43,6 +44,7 @@ mod mocks {
 #[cfg(test)]
 mod tests {
     mod art_peace;
-    mod username_store;
+    pub mod username_store;
     pub(crate) mod utils;
 }
+
