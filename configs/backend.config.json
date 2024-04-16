@@ -5,5 +5,10 @@
     "place_pixel_devnet": "../tests/integration/local/place_pixel.sh",
     "add_template_hash_devnet": "../tests/integration/local/add_template_hash.sh"
   },
-  "production": false
+  "production": false,
+  "WebSocket": {
+    "ReadBufferSize": 1024,
+    "WriteBufferSize": 1024,
+    "EnableCompression": true
+  }
 }
