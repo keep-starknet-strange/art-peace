@@ -58,8 +58,8 @@ CONTRACT_ADDRESS=$(echo $CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
 echo "Deployed contract \"$CLASS_NAME\" with address $CONTRACT_ADDRESS"
 
 # TODO: Remove these lines?
-echo "ART_PEACE_CONTRACT_ADDRESS=$CONTRACT_ADDRESS" > /deployment/.env
-echo "REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$CONTRACT_ADDRESS" >> /deployment/.env
+echo "ART_PEACE_CONTRACT_ADDRESS=$CONTRACT_ADDRESS" > /configs/configs.env
+echo "REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$CONTRACT_ADDRESS" >> /configs/configs.env
 
 # TODO
 # MULTICALL_TEMPLATE_DIR=$CONTRACT_DIR/tests/multicalls

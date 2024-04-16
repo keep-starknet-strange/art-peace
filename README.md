@@ -44,6 +44,7 @@ docker compose build
 
 ```bash
 # Must install all the dependencies first
+# Use npm install inside the `frontend` directory
 # Change the user on `configs/database.config.json` for postgres
 make integration-test-local
 ```
