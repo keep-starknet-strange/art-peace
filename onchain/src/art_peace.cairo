@@ -42,6 +42,8 @@ pub mod ArtPeace {
         nft_contract: ContractAddress,
         // Map: (day_index, user's address, color index) -> amount of pixels placed
         user_pixels_placed: LegacyMap::<(u32, ContractAddress, u8), u32>,
+        // Map: (day_index, user) -> if Voted
+        voted: LegacyMap::<(u32, ContractAddress), bool>,
         #[substorage(v0)]
         templates: TemplateStoreComponent::Storage,
     }
@@ -51,6 +53,7 @@ pub mod ArtPeace {
     enum Event {
         Newday: NewDay,
         PixelPlaced: PixelPlaced,
+        voted: Voted,
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
     }
@@ -71,6 +74,14 @@ pub mod ArtPeace {
         day: u32,
         color: u8,
     }
+    #[derive(Drop, starknet::Event)]
+    struct Voted {
+        #[key]
+        day: u32,
+        #[key]
+        user: ContractAddress,
+    }
+
 
     // TODO: Span or Array for each?
     #[derive(Drop, Serde)]
