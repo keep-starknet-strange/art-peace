@@ -9,6 +9,7 @@ import (
 
 func InitUserRoutes() {
 	http.HandleFunc("/getExtraPixels", getExtraPixels)
+	http.HandleFunc("/getUsername", getUsername)
 }
 
 func getExtraPixels(w http.ResponseWriter, r *http.Request) {
@@ -25,4 +26,21 @@ func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(available))
+}
+
+
+func getUsername(w http.ResponseWriter, r *http.Request) {
+    address := r.URL.Query().Get("address")
+
+    var name string
+    err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT name FROM Users WHERE address = $1", address).Scan(&name)
+    if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte(err.Error()))
+        return
+    }
+
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(name))
 }
