@@ -3,6 +3,7 @@ pub mod interfaces;
 use art_peace::ArtPeace;
 use interfaces::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel};
 
+
 mod quests {
     pub mod interfaces;
     pub mod pixel_quest;
@@ -33,6 +34,14 @@ mod nfts {
     };
 }
 
+mod username_store {
+    pub mod interfaces;
+    pub mod username_store;
+
+    use interfaces::{IUsernameStore, IUsernameStoreDispatcher, IUsernameStoreDispatcherTrait};
+    use username_store::UsernameStore;
+}
+
 mod mocks {
     pub mod erc20_mock;
 }
@@ -40,5 +49,7 @@ mod mocks {
 #[cfg(test)]
 mod tests {
     mod art_peace;
+    mod username_store;
     pub(crate) mod utils;
 }
+
