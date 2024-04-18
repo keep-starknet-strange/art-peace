@@ -1,10 +1,14 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/color"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"os"
 	"os/exec"
@@ -35,10 +39,58 @@ func hashTemplateImage(pixelData []byte) string {
 	return hash.String()
 }
 
-func imageToPixelData(imageData []byte) []byte {
-	// TODO: Convert image data to pixel data using approximation
-	//       Output should be a byte array with color indexes
-	return []byte{0, 1, 1, 2, 2, 3}
+func imageToPixelData(imageData []byte) ([]byte, error) {
+	img, _, err := image.Decode(bytes.NewReader(imageData))
+	if err != nil {
+		return nil, err
+	}
+
+	palette := []color.Color{
+		color.RGBA{0x00, 0x00, 0x00, 0xFF}, // Black
+		color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, // White
+		color.RGBA{0xFF, 0x00, 0x00, 0xFF}, // Red
+		color.RGBA{0x00, 0xFF, 0x00, 0xFF}, // Green
+		color.RGBA{0x00, 0x00, 0xFF, 0xFF}, // Blue
+		color.RGBA{0xFF, 0xFF, 0x00, 0xFF}, // Yellow
+		color.RGBA{0xFF, 0x00, 0xFF, 0xFF}, // Magenta
+		color.RGBA{0x00, 0xFF, 0xFF, 0xFF}, // Cyan
+	}
+
+	bounds := img.Bounds()
+	width, height := bounds.Max.X, bounds.Max.Y
+	pixelData := make([]byte, width*height)
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			rgba := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
+			if rgba.A < 128 { // Consider pixels with less than 50% opacity as transparent
+				pixelData[y*width+x] = 0xFF
+			} else {
+				closestIndex := findClosestColor(rgba, palette)
+				pixelData[y*width+x] = byte(closestIndex)
+			}
+		}
+	}
+
+	return pixelData, nil
+}
+
+func findClosestColor(target color.RGBA, palette []color.Color) int {
+	minDistance := math.MaxFloat64
+	closestIndex := 0
+	for i, c := range palette {
+		r, g, b, _ := c.RGBA()
+		distance := colorDistance(target, color.RGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> 8), 255})
+		if distance < minDistance {
+			minDistance = distance
+			closestIndex = i
+		}
+	}
+	return closestIndex
+}
+
+func colorDistance(c1, c2 color.RGBA) float64 {
+	return math.Sqrt(float64((c1.R-c2.R)*(c1.R-c2.R) + (c1.G-c2.G)*(c1.G-c2.G) + (c1.B-c2.B)*(c1.B-c2.B)))
 }
 
 func addTemplateImg(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +119,10 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	imageData := imageToPixelData(fileBytes)
+	imageData, err := imageToPixelData(fileBytes)
+	if err != nil {
+		panic(err)
+	}
 	hash := hashTemplateImage(imageData)
 	// TODO: Store image hash and pixel data in postgres database
 
