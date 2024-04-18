@@ -39,7 +39,6 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-
 func getCanvas(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	val, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
