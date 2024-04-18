@@ -15,7 +15,7 @@ func InitCanvasRoutes() {
 
 func initCanvas(w http.ResponseWriter, r *http.Request) {
 	// Check if the 'canvas' property exists in core.ArtPeaceBackend.CanvasConfig
-	if core.ArtPeaceBackend.CanvasConfig != nil && core.ArtPeaceBackend.CanvasConfig.Canvas != nil {
+	if core.ArtPeaceBackend.CanvasConfig != nil && core.ArtPeaceBackend.CanvasConfig.Canvas != nil && core.ArtPeaceBackend.Databases.Redis.Exists(context.Background(), "canvas").Val() == 0 {
 		// Calculate totalByteSize
 		totalBitSize := core.ArtPeaceBackend.CanvasConfig.Canvas.Width * core.ArtPeaceBackend.CanvasConfig.Canvas.Height * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 		totalByteSize := (totalBitSize / 8)
