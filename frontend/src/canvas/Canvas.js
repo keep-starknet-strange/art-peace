@@ -11,6 +11,11 @@ const Canvas = props => {
   //TODO: Pressing "Canvas" resets the view / positioning
   //TODO: Way to configure tick rates to give smooth xp for all users
 
+  //Todo: Make this dynamic
+  const minScale = 1;
+  const maxScale = 40;
+
+
   const canvasRef = useRef(null)
   const canvasPositionRef = useRef(null)
   const canvasScaleRef = useRef(null)
@@ -32,7 +37,7 @@ const Canvas = props => {
   // TODO: Weird positioning behavior when clicking into devtools
   useEffect(() => {
     const canvas = select(canvasPositionRef.current)
-    const Dzoom = zoom().on("zoom", zoomHandler)
+    const Dzoom = zoom().scaleExtent([minScale, maxScale]).on("zoom", zoomHandler)
 
     // Set default zoom level and center the canvas
     canvas
