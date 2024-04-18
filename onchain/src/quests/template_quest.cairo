@@ -9,7 +9,7 @@ pub mod TemplateQuest {
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
     use art_peace::quests::{IQuest, QuestClaimed};
 
-       #[storage]
+    #[storage]
     struct Storage {
         art_peace: IArtPeaceDispatcher,
         reward: u32,
@@ -31,8 +31,10 @@ pub mod TemplateQuest {
             if self.claimed.read(user) {
                 return false;
             }
-            
-            let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
+
+            let template_store = ITemplateStoreDispatcher { 
+                contract_address: art_peace.contract_address
+            };
 
             let template_id = calldata[0];
 
