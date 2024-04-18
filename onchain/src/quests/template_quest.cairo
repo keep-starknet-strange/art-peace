@@ -14,6 +14,23 @@ pub mod TemplateQuest {
         art_peace: IArtPeaceDispatcher,
         reward: u32,
         claimed: LegacyMap<ContractAddress, bool>,
+        template_store: ITemplateStoreDispatcher
+    }
+
+    #[derive(Drop, Serde)]
+    pub struct TemplateQuestInitParams {
+        pub art_peace: ContractAddress,
+        pub reward: u32,
+        pub template_store: ContractAddress
+    }
+
+    #[constructor]
+    fn constructor(ref self: ContractState, init_params: TemplateQuestInitParams,) {
+        self.art_peace.write(IArtPeaceDispatcher { contract_address: init_params.art_peace });
+        self.reward.write(init_params.reward);
+        self
+            .template_store
+            .write(ITemplateStoreDispatcher { contract_address: init_params.template_store });
     }
 
 
@@ -32,20 +49,15 @@ pub mod TemplateQuest {
                 return false;
             }
 
-            let template_store = ITemplateStoreDispatcher { 
-                contract_address: art_peace.contract_address
-            };
-
             let template_id = calldata[0];
 
-            let template = template_store.get_template(template_id);
+            let template = self.template_store.get_template(template_id);
 
             if template.creator != user {
                 return false;
             }
 
             return true;
-         
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
@@ -65,5 +77,4 @@ pub mod TemplateQuest {
             reward
         }
     }
-
 }
