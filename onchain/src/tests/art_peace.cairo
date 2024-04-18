@@ -21,7 +21,7 @@ use openzeppelin::token::erc721::interface::{IERC721Dispatcher, IERC721Dispatche
 use snforge_std as snf;
 use snforge_std::{CheatTarget, ContractClassTrait};
 
-use starknet::{ContractAddress, contract_address_const, get_contract_address};
+use starknet::{ContractAddress, contract_address_const, get_contract_address, get_caller_address};
 
 const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 const WIDTH: u128 = 100;
@@ -402,7 +402,7 @@ fn template_full_basic_test() {
     let template_image = array![1, 2, 3, 4];
     let template_hash = compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
-        hash: template_hash, position: 0, width: 2, height: 2, reward: 0, reward_token: erc20_mock,
+        hash: template_hash, position: 0, width: 2, height: 2, reward: 0, reward_token: erc20_mock, creator: get_caller_address()
     };
 
     template_store.add_template(template_metadata);
@@ -550,6 +550,7 @@ fn deposit_reward_test() {
         height: 2,
         reward: reward_amount,
         reward_token: erc20_mock,
+        creator: get_caller_address(),
     };
 
     IERC20Dispatcher { contract_address: erc20_mock }.approve(art_peace_address, reward_amount);
