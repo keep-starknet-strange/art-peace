@@ -41,28 +41,44 @@ CREATE TABLE Days (
 );
 CREATE INDEX days_dayIndex_index ON Days (dayIndex);
 
--- TODO: Remove completedStatus & status from Quests?
-CREATE TABLE Quests (
+CREATE TABLE DailyQuests (
   key integer NOT NULL PRIMARY KEY,
   name text NOT NULL,
   description text NOT NULL,
   reward integer NOT NULL,
-  dayIndex integer NOT NULL,
-  completedStatus integer NOT NULL
+  dayIndex integer NOT NULL
 );
-CREATE INDEX quests_dayIndex_index ON Quests (dayIndex);
+CREATE INDEX dailyQuests_dayIndex_index ON DailyQuests (dayIndex);
 
 -- TODO: Add calldata field
-CREATE TABLE UserQuests (
+-- Table for storing the daily quests that the user has completed
+CREATE TABLE UserDailyQuests (
   key integer NOT NULL PRIMARY KEY,
   userAddress char(64) NOT NULL,
   questKey integer NOT NULL,
-  status integer NOT NULL,
   completed boolean NOT NULL,
   completedAt timestamp
 );
-CREATE INDEX userQuests_userAddress_index ON UserQuests (userAddress);
-CREATE INDEX userQuests_questKey_index ON UserQuests (questKey);
+CREATE INDEX userDailyQuests_userAddress_index ON UserDailyQuests (userAddress);
+CREATE INDEX userDailyQuests_questKey_index ON UserDailyQuests (questKey);
+
+CREATE TABLE MainQuests (
+  key integer NOT NULL PRIMARY KEY,
+  name text NOT NULL,
+  description text NOT NULL,
+  reward integer NOT NULL
+);
+
+-- Table for storing the main quests that the user has completed
+CREATE TABLE UserMainQuests (
+  key integer NOT NULL PRIMARY KEY,
+  userAddress char(64) NOT NULL,
+  questKey integer NOT NULL,
+  completed boolean NOT NULL,
+  completedAt timestamp
+);
+CREATE INDEX userMainQuests_userAddress_index ON UserMainQuests (userAddress);
+CREATE INDEX userMainQuests_questKey_index ON UserMainQuests (questKey);
 
 CREATE TABLE Colors (
   key integer NOT NULL PRIMARY KEY,
