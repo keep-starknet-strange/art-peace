@@ -11,11 +11,11 @@ import (
 )
 
 type Colors struct {
-	Key string json:"key"
-	Hex string json:"hex"
+	Key string `json:"key"`
+	Hex string `json:"hex"`
 }
 
-func InitColorsRoute() {
+func InitColorsRoutes() {
 	http.HandleFunc("/get-colors", GetAllColors)
 	http.HandleFunc("/get-color", GetSingleColor)
 }
