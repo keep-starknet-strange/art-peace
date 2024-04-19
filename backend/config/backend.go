@@ -1,7 +1,9 @@
 package config
 
+
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -15,6 +17,12 @@ type BackendConfig struct {
 	Port       int                  `json:"port"`
 	Scripts    BackendScriptsConfig `json:"scripts"`
 	Production bool                 `json:"production"`
+}
+
+type WebSocketConfig struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
+	Path string `json:"path"`
 }
 
 var DefaultBackendConfig = BackendConfig{
@@ -44,4 +52,27 @@ func LoadBackendConfig(backendConfigPath string) (*BackendConfig, error) {
 	}
 
 	return &config, nil
+}
+
+
+
+func main () {
+	file, err := os.Open("backend.config.json")
+	if err != nil {
+		fmt.Println("Error opening config file:", err)
+		return
+	}
+	defer file.Close()
+
+	var config WebSocketConfig
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		fmt.Println("Error decoding config file:", err)
+		return
+	}
+
+	fmt.Println("WebSocket Host:", config.Host)
+	fmt.Println("WebSocket Port:", config.Port)
+	fmt.Println("WebSocket Path:", config.Path)
 }
