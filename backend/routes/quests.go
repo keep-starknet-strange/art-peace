@@ -9,7 +9,7 @@ import (
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-// Quest represents the structure for both Daily and Main Quests data
+// the Quest struct will represent the structure for both Daily and Main Quests data
 type Quest struct {
 	Key         int    `json:"key"`
 	Name        string `json:"name"`
@@ -23,11 +23,13 @@ func InitQuestsRoutes() {
 	http.HandleFunc("/main-quests", GetMainQuests)
 }
 
+// Query dailyQuests
 func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests ORDER BY dayIndex ASC`
 	handleQuestQuery(w, r, query)
 }
 
+// Query mainQuest
 func GetMainQuests(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT key, name, description, reward FROM MainQuests`
 	handleQuestQuery(w, r, query)
@@ -63,7 +65,7 @@ func handleQuestQuery(w http.ResponseWriter, r *http.Request, query string) {
 	}
 }
 
-// setupCORS sets the required headers for CORS and handles pre-flight requests
+// CORS setup
 func setupCORS(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == "OPTIONS" {
@@ -72,4 +74,3 @@ func setupCORS(w *http.ResponseWriter, r *http.Request) {
 		(*w).WriteHeader(http.StatusOK)
 	}
 }
-
