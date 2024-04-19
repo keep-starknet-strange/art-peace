@@ -1,26 +1,27 @@
-import React, { useCallback, useRef, useEffect, useState } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
-import "./Canvas.css";
+
+import React, { useCallback, useRef, useEffect, useState } from 'react'
+import { select, zoom, zoomIdentity } from "d3"
+import useWebSocket, { ReadyState } from 'react-use-websocket'
+import './Canvas.css';
 // import TemplateOverlay from './TemplateOverlay.js';
 import canvasConfig from "../configs/canvas.config.json";
 import backendConfig from "../configs/backend.config.json";
 
-const Canvas = (props) => {
-  const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port;
-  // TODO: Pressing "Canvas" resets the view / positioning
 
-  const [canvasPositionX, setCanvasPositionX] = useState(0);
-  const [canvasPositionY, setCanvasPositionY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStartX, setDragStartX] = useState(0);
-  const [dragStartY, setDragStartY] = useState(0);
-
-  const [canvasScale, setCanvasScale] = useState(6);
-  const minScale = 1; // TODO: To config
-  const maxScale = 40;
+const Canvas = props => {
+  const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port
+  //TODO: Pressing "Canvas" resets the view / positioning
   //TODO: Way to configure tick rates to give smooth xp for all users
 
-  const canvasRef = useRef(null);
+  //Todo: Make this dynamic
+  const minScale = 1;
+  const maxScale = 40;
+
+
+  const canvasRef = useRef(null)
+  const canvasPositionRef = useRef(null)
+  const canvasScaleRef = useRef(null)
+
 
   // Read canvas config from environment variable file json
   const width = canvasConfig.canvas.width;
@@ -65,61 +66,38 @@ const Canvas = (props) => {
     {
       share: false,
       shouldReconnect: () => true,
-    }
-  );
+
+    },
+  )
 
   // TODO: Weird positioning behavior when clicking into devtools
-
-  // Handle wheel event for zooming
-  const handleWheel = (e) => {
-    let newScale = canvasScale;
-    if (e.deltaY < 0) {
-      newScale = Math.min(maxScale, newScale + 0.2);
-    } else {
-      newScale = Math.max(minScale, newScale - 0.2);
-    }
-    // TODO: Smart positioning of canvas zoom ( zoom to center of mouse pointer )
-    //let newCanvasPositionX = canvasPositionX
-    //let newCanvasPositionY = canvasPositionY
-    //const canvasOriginX = canvasPositionX + width / 2
-    //const canvasOriginY = canvasPositionY + height / 2
-    //setCanvasPositionX(newCanvasPositionX)
-    //setCanvasPositionY(newCanvasPositionY)
-
-    setCanvasScale(newScale);
-  };
-
-  const handlePointerDown = (e) => {
-    setIsDragging(true);
-    setDragStartX(e.clientX);
-    setDragStartY(e.clientY);
-  };
-
-  const handlePointerUp = () => {
-    setIsDragging(false);
-    setDragStartX(0);
-    setDragStartY(0);
-  };
-
-  const handlePointerMove = (e) => {
-    if (isDragging) {
-      // TODO: Prevent dragging outside of canvas container
-      setCanvasPositionX(canvasPositionX + e.clientX - dragStartX);
-      setCanvasPositionY(canvasPositionY + e.clientY - dragStartY);
-      setDragStartX(e.clientX);
-      setDragStartY(e.clientY);
-    }
-  };
-
   useEffect(() => {
-    document.addEventListener("pointerup", handlePointerUp);
+    const canvas = select(canvasPositionRef.current)
+    const Dzoom = zoom().scaleExtent([minScale, maxScale]).on("zoom", zoomHandler)
+
+    // Set default zoom level and center the canvas
+    canvas
+      .call(Dzoom)
+      .call(Dzoom.transform, zoomIdentity.translate(0, 0).scale(4))
 
     return () => {
-      document.removeEventListener("pointerup", handlePointerUp);
+      canvas.on(".zoom", null); // Clean up zoom event listeners
     };
   }, []);
 
-  const [setup, setSetup] = useState(false);
+  const zoomHandler = (event) => {
+    const ele = canvasScaleRef.current
+    const {
+      k: newScale,
+      x: newCanvasPositionX,
+      y: newCanvasPositionY,
+    } = event.transform;
+    const transformValue = `translate(${newCanvasPositionX}px, ${newCanvasPositionY}px) scale(${newScale})`
+    ele.style.transform = transformValue
+  }
+
+  const [setup, setSetup] = useState(false)
+
 
   const draw = useCallback(
     (ctx, imageData) => {
@@ -135,33 +113,31 @@ const Canvas = (props) => {
     if (setup) {
       return;
     }
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
+    const canvas = canvasRef.current
+    const context = canvas.getContext('2d')
 
-    let getCanvasEndpoint = backendUrl + "/getCanvas";
-    fetch(getCanvasEndpoint, { mode: "cors" })
-      .then((response) => {
-        return response.arrayBuffer();
-      })
-      .then((data) => {
-        let colorData = new Uint8Array(data, 0, data.byteLength);
-        let dataArray = [];
-        // TODO: Think about edge cases
-        let bitwidth = canvasConfig.colors_bitwidth;
-        let oneByteBitOffset = 8 - bitwidth;
-        let twoByteBitOffset = 16 - bitwidth;
-        for (let bitPos = 0; bitPos < data.byteLength * 8; bitPos += bitwidth) {
-          let bytePos = Math.floor(bitPos / 8);
-          let bitOffset = bitPos % 8;
-          if (bitOffset <= oneByteBitOffset) {
-            let byte = colorData[bytePos];
-            let value = (byte >> (oneByteBitOffset - bitOffset)) & 0b11111;
-            dataArray.push(value);
-          } else {
-            let byte = (colorData[bytePos] << 8) | colorData[bytePos + 1];
-            let value = (byte >> (twoByteBitOffset - bitOffset)) & 0b11111;
-            dataArray.push(value);
-          }
+    let getCanvasEndpoint = backendUrl + "/getCanvas"
+    fetch(getCanvasEndpoint, { mode: 'cors' }).then(response => {
+      return response.arrayBuffer()
+    }).then(data => {
+      let colorData = new Uint8Array(data, 0, data.byteLength)
+      let dataArray = []
+      // TODO: Think about edge cases
+      let bitwidth = canvasConfig.colors_bitwidth
+      let oneByteBitOffset = 8 - bitwidth
+      let twoByteBitOffset = 16 - bitwidth
+      for (let bitPos = 0; bitPos < data.byteLength * 8; bitPos += bitwidth) {
+        let bytePos = Math.floor(bitPos / 8)
+        let bitOffset = bitPos % 8
+        if (bitOffset <= oneByteBitOffset) {
+          let byte = colorData[bytePos]
+          let value = (byte >> (oneByteBitOffset - bitOffset)) & 0b11111
+          dataArray.push(value)
+        } else {
+          let byte = (colorData[bytePos] << 8) | colorData[bytePos + 1]
+          let value = (byte >> (twoByteBitOffset - bitOffset)) & 0b11111
+          dataArray.push(value)
+
         }
         let imageDataArray = [];
         for (let i = 0; i < dataArray.length; i++) {
@@ -268,9 +244,11 @@ const Canvas = (props) => {
       return;
     }
 
-    const position = props.selectedPositionX + props.selectedPositionY * width;
-    const colorIdx = props.selectedColorId;
-    let placePixelEndpoint = backendUrl + "/placePixelDevnet";
+
+    const position = props.selectedPositionX + props.selectedPositionY * width
+    const colorIdx = props.selectedColorId
+    let placePixelEndpoint = backendUrl + "/placePixelDevnet"
+
     fetch(placePixelEndpoint, {
       mode: "cors",
       method: "POST",
@@ -292,7 +270,9 @@ const Canvas = (props) => {
     props.clearPixelSelection();
     props.setSelectedColorId(-1);
     // TODO: Optimistic update
-  };
+
+
+  }
 
   // TODO: Deselect pixel when clicking outside of color palette or pixel
   // TODO: Show small position vec in bottom right corner of canvas
@@ -382,37 +362,14 @@ const Canvas = (props) => {
 
   // TODO: both place options
   return (
-    <div
-      className="Canvas__container"
-      onWheel={handleWheel}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-    >
-      <div
-        className="Canvas__position"
-        style={{
-          transform: `translate(${canvasPositionX}px, ${canvasPositionY}px )`,
-        }}
-      >
-        <div
-          className="Canvas__scale"
-          style={{ transform: `scale(${canvasScale})` }}
-        >
+
+    <div className="Canvas__container">
+      <div ref={canvasPositionRef} className="Canvas__position">
+        <div ref={canvasScaleRef} className="Canvas__scale">
           {props.pixelSelectedMode && (
-            <div
-              className="Canvas__selected"
-              style={{
-                left: props.selectedPositionX,
-                top: props.selectedPositionY,
-              }}
-            >
-              <div
-                className="Canvas__selected__pixel"
-                style={{
-                  backgroundColor: getSelectorsColor(),
-                  boxShadow: `0 0 .2px .1px ${getSelectorsColorInverse()} inset`,
-                }}
-              ></div>
+            <div className="Canvas__selected" style={{ left: props.selectedPositionX, top: props.selectedPositionY }}>
+              <div className="Canvas__selected__pixel" style={{ backgroundColor: getSelectorsColor(), boxShadow: `0 0 .2px .1px ${getSelectorsColorInverse()} inset` }}></div>
+
             </div>
           )}
           <canvas ref={canvasRef} className="Canvas" onClick={pixelClicked} />
@@ -421,5 +378,6 @@ const Canvas = (props) => {
     </div>
   );
 };
+
 
 export default Canvas;

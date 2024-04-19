@@ -114,6 +114,10 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Ayoazeez26"><img src="https://avatars.githubusercontent.com/u/44169294?v=4?s=100" width="100px;" alt="Abdulhakeem Abdulazeez Ayodeji"/><br /><sub><b>Abdulhakeem Abdulazeez Ayodeji</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Ayoazeez26" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tekkac"><img src="https://avatars.githubusercontent.com/u/98529704?v=4?s=100" width="100px;" alt="Trunks @ Carbonable"/><br /><sub><b>Trunks @ Carbonable</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=tekkac" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ptisserand"><img src="https://avatars.githubusercontent.com/u/544314?v=4?s=100" width="100px;" alt="ptisserand"/><br /><sub><b>ptisserand</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=ptisserand" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://mubarak23.github.io/"><img src="https://avatars.githubusercontent.com/u/7858376?v=4?s=100" width="100px;" alt="Mubarak Muhammad Aminu"/><br /><sub><b>Mubarak Muhammad Aminu</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=mubarak23" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/thomas192"><img src="https://avatars.githubusercontent.com/u/65908739?v=4?s=100" width="100px;" alt="0xK2"/><br /><sub><b>0xK2</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=thomas192" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
