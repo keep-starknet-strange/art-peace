@@ -40,15 +40,15 @@ const Canvas = (props) => {
         let colorData = new Uint8Array(data, 0, data.byteLength);
         console.log(colorData);
 
-        // Convert ArrayBuffer to base-10 array
-        // const base10Array = [];
-        // const view = new Uint8Array(data);
-        // for (let i = 0; i < view.length; i++) {
-        //   base10Array.push(view[i]);
-        // }
+       // Convert ArrayBuffer to base-10 array
+        const base10Array = [];
+        const view = new Uint8Array(data);
+        for (let i = 0; i < view.length; i++) {
+          base10Array.push(view[i]);
+        }
 
-        // setColors(base10Array);
-        // console.log(base10Array)
+        setColors(base10Array);
+        console.log(base10Array)
       })
       .catch((error) => {
         console.error(error);
