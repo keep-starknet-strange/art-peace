@@ -55,8 +55,8 @@ func InitIndexerRoutes() {
 }
 */
 
+// TODO: User might miss some messages between loading canvas and connecting to websocket?
 func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
-	// Read request body
 	requestBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println("Error reading request body: ", err)
@@ -65,223 +65,78 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Parse message fully, check block status, number, ...
-	var reqBody map[string]interface{}
-	if err := json.Unmarshal(requestBody, &reqBody); err != nil {
+	reqBody := map[string]interface{}{}
+	err = json.Unmarshal(requestBody, &reqBody)
+	if err != nil {
 		fmt.Println("Error unmarshalling request body: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// Extract necessary fields from the request body
-	data, ok := reqBody["data"].(map[string]interface{})
-	if !ok {
-		handleError(w, "Invalid request format (missing 'data' field)", http.StatusBadRequest)
-		return
-	}
+	address := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[1]
+	address = address.(string)[2:]
+	posHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[2]
+	dayIdxHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[3]
+	colorHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["data"].([]interface{})[0]
 
-	batch, ok := data["batch"].([]interface{})
-	if !ok || len(batch) == 0 {
-		handleError(w, "Invalid request format (missing or empty 'batch' array)", http.StatusBadRequest)
-		return
-	}
-
-	event, ok := batch[0].(map[string]interface{})["events"].([]interface{})
-	if !ok || len(event) == 0 {
-		handleError(w, "Invalid request format (missing or empty 'events' array)", http.StatusBadRequest)
-		return
-	}
-
-	eventData, ok := event[0].(map[string]interface{})
-	if !ok {
-		handleError(w, "Invalid event format (missing 'event' object)", http.StatusBadRequest)
-		return
-	}
-
-	keys, ok := eventData["keys"].([]interface{})
-	if !ok || len(keys) < 4 {
-		handleError(w, "Invalid event format (missing or incomplete 'keys' array)", http.StatusBadRequest)
-		return
-	}
-
-	// Extract and validate address, position, day index, and color
-	address := getStringValue(keys, 1)
-	posHex := getStringValue(keys, 2)
-	dayIdxHex := getStringValue(keys, 3)
-	colorHex := getStringValue(eventData["data"], 0)
-
-	position, err := strconv.ParseInt(posHex, 0, 64)
+	// Convert hex to int
+	position, err := strconv.ParseInt(posHex.(string), 0, 64)
 	if err != nil {
-		handleError(w, "Error converting position hex to int", http.StatusBadRequest)
+		fmt.Println("Error converting position hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
+	dayIdx, err := strconv.ParseInt(dayIdxHex.(string), 0, 64)
 	if err != nil {
-		handleError(w, "Error converting day index hex to int", http.StatusBadRequest)
+		fmt.Println("Error converting day index hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	color, err := strconv.ParseInt(colorHex, 0, 64)
+	color, err := strconv.ParseInt(colorHex.(string), 0, 64)
 	if err != nil {
-		handleError(w, "Error converting color hex to int", http.StatusBadRequest)
-		return
-	}
-
-	// Validate position and color
-	if position < 0 || position >= int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width*core.ArtPeaceBackend.CanvasConfig.Canvas.Height) {
-		handleError(w, "Invalid position value", http.StatusBadRequest)
-		return
-	}
-
-	if color < 0 || color >= (1 << core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth) {
-		handleError(w, "Invalid color value", http.StatusBadRequest)
+		fmt.Println("Error converting color hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 
-	// Set pixel in Redis
+	fmt.Println("Pixel indexed with position: ", position, " and color: ", color)
+
+	// Set pixel in redis
 	ctx := context.Background()
-	if err := core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "SET", bitfieldType, pos, color).Err(); err != nil {
-		handleError(w, "Failed to set pixel in Redis", http.StatusInternalServerError)
-		return
-	}
-
-	// Set pixel in PostgreSQL
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(),
-		"INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)",
-		address, position, dayIdx, color)
+	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "SET", bitfieldType, pos, color).Err()
 	if err != nil {
-		handleError(w, "Failed to insert pixel into PostgreSQL", http.StatusInternalServerError)
+		panic(err)
+	}
+
+	// Set pixel in postgres
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)", address, position, dayIdx, color)
+	if err != nil {
+		fmt.Println("Error inserting pixel into postgres: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// Send message to all connected WebSocket clients
-	message := map[string]interface{}{
+	// Send message to all connected clients
+	var message = map[string]interface{}{
 		"position": position,
 		"color":    color,
 	}
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
-		handleError(w, "Failed to marshal message", http.StatusInternalServerError)
+		fmt.Println("Error marshalling message: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	for idx, conn := range core.ArtPeaceBackend.WSConnections {
 		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
-			fmt.Println("Error sending message to WebSocket client:", err)
+			fmt.Println(err)
 			// TODO: Should we always remove connection?
 			// Remove connection
-			// Remove disconnected WebSocket client from connections slice
 			conn.Close()
 			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
 		}
 	}
-
-	// Respond with success
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "Pixel placed"}`))
 }
-
-func getStringValue(arr interface{}, idx int) string {
-	if slice, ok := arr.([]interface{}); ok && len(slice) > idx {
-		if str, ok := slice[idx].(string); ok {
-			return str
-		}
-	}
-	return ""
-}
-
-func handleError(w http.ResponseWriter, errMsg string, statusCode int) {
-	fmt.Println(errMsg)
-	w.WriteHeader(statusCode)
-	w.Write([]byte(`{"error": "` + errMsg + `"}`))
-}
-
-// // TODO: User might miss some messages between loading canvas and connecting to websocket?
-// func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
-// 	requestBody, err := io.ReadAll(r.Body)
-// 	if err != nil {
-// 		fmt.Println("Error reading request body: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// TODO: Parse message fully, check block status, number, ...
-// 	reqBody := map[string]interface{}{}
-// 	err = json.Unmarshal(requestBody, &reqBody)
-// 	if err != nil {
-// 		fmt.Println("Error unmarshalling request body: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	address := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[1]
-// 	address = address.(string)[2:]
-// 	posHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[2]
-// 	dayIdxHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[3]
-// 	colorHex := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})[0].(map[string]interface{})["event"].(map[string]interface{})["data"].([]interface{})[0]
-
-// 	// Convert hex to int
-// 	position, err := strconv.ParseInt(posHex.(string), 0, 64)
-// 	if err != nil {
-// 		fmt.Println("Error converting position hex to int: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-// 	dayIdx, err := strconv.ParseInt(dayIdxHex.(string), 0, 64)
-// 	if err != nil {
-// 		fmt.Println("Error converting day index hex to int: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-// 	color, err := strconv.ParseInt(colorHex.(string), 0, 64)
-// 	if err != nil {
-// 		fmt.Println("Error converting color hex to int: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
-// 	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
-
-// 	fmt.Println("Pixel indexed with position: ", position, " and color: ", color)
-
-// 	// Set pixel in redis
-// 	ctx := context.Background()
-// 	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "SET", bitfieldType, pos, color).Err()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	// Set pixel in postgres
-// 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)", address, position, dayIdx, color)
-// 	if err != nil {
-// 		fmt.Println("Error inserting pixel into postgres: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Send message to all connected clients
-// 	var message = map[string]interface{}{
-// 		"position": position,
-// 		"color":    color,
-// 	}
-// 	messageBytes, err := json.Marshal(message)
-// 	if err != nil {
-// 		fmt.Println("Error marshalling message: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-// 	for idx, conn := range core.ArtPeaceBackend.WSConnections {
-// 		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
-// 			fmt.Println(err)
-// 			// TODO: Should we always remove connection?
-// 			// Remove connection
-// 			conn.Close()
-// 			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
-// 		}
-// 	}
-// }
