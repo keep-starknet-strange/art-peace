@@ -16,7 +16,9 @@ import (
 func InitPixelRoutes() {
 	http.HandleFunc("/getPixel", getPixel)
 	http.HandleFunc("/getPixelInfo", getPixelInfo)
-	http.HandleFunc("/placePixelDevnet", placePixelDevnet)
+	if !core.ArtPeaceBackend.BackendConfig.Production {
+		http.HandleFunc("/placePixelDevnet", placePixelDevnet)
+	}
 	http.HandleFunc("/placePixelRedis", placePixelRedis)
 }
 
@@ -68,12 +70,17 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Failed to read request body", http.StatusInternalServerError)
         return
     }
+	// Disable this in production
+	if core.ArtPeaceBackend.BackendConfig.Production {
+		http.Error(w, "Not available in production", http.StatusNotImplemented)
+		return
+	}
 
-    var jsonBody map[string]string
-    if err := json.Unmarshal(reqBody, &jsonBody); err != nil {
-        http.Error(w, "Invalid JSON format", http.StatusBadRequest)
-        return
-    }
+	var jsonBody map[string]string
+	err = json.Unmarshal(reqBody, &jsonBody)
+	if err != nil {
+		panic(err)
+	}
 
     positionStr := jsonBody["position"]
     position, err := strconv.Atoi(positionStr)

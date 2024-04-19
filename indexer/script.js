@@ -1,5 +1,5 @@
 export const config = {
-  streamUrl: "http://localhost:7171",
+  streamUrl: Deno.env.get("APIBARA_STREAM_URL"),
   startingBlock: 0,
   network: "starknet",
   finality: "DATA_STATUS_PENDING",
@@ -7,7 +7,9 @@ export const config = {
     events: [
       {
         fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
-        keys: ["0x2D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23"],
+        keys: [
+          "0x2D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23",
+        ],
         includeReverted: false,
         includeTransaction: false,
         includeReceipt: false,
@@ -16,7 +18,7 @@ export const config = {
   },
   sinkType: "webhook",
   sinkOptions: {
-    targetUrl: "http://localhost:8080/consumeIndexerMsg"
+    targetUrl: Deno.env.get("BACKEND_TARGET_URL"),
   },
 };
 

@@ -54,6 +54,9 @@ func InitIndexerRoutes() {
   }
 }
 */
+
+// TODO: User might miss some messages between loading canvas and connecting to websocket?
+// TODO: Check thread safety of these things
 func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 	// Read request body
 	requestBody, err := io.ReadAll(r.Body)

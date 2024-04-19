@@ -3,6 +3,8 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"image"
+	_ "image/png"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -18,7 +20,9 @@ import (
 func InitTemplateRoutes() {
 	http.HandleFunc("/addTemplateImg", addTemplateImg)
 	http.HandleFunc("/addTemplateData", addTemplateData)
-	http.HandleFunc("/addTemplateHashDevnet", addTemplateHashDevnet)
+	if !core.ArtPeaceBackend.BackendConfig.Production {
+		http.HandleFunc("/addTemplateHashDevnet", addTemplateHashDevnet)
+	}
 }
 
 // TODO: Add specific location for template images
@@ -40,8 +44,6 @@ func imageToPixelData(imageData []byte) []byte {
 }
 
 func addTemplateImg(w http.ResponseWriter, r *http.Request) {
-	// TODO: Limit file size / proportions between 5x5 and 64x64
-	// Passed like this curl -F "image=@art-peace-low-res-goose.jpg" http://localhost:8080/addTemplateImg
 	file, _, err := r.FormFile("image")
 	if err != nil {
 		panic(err)
@@ -55,6 +57,19 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer tempFile.Close()
+
+	// Decode the image to check dimensions
+	img, format, err := image.Decode(file)
+	if err != nil {
+		http.Error(w, "Failed to decode the image: "+err.Error()+" - format: "+format, http.StatusBadRequest)
+		return
+	}
+	bounds := img.Bounds()
+	width, height := bounds.Max.X-bounds.Min.X, bounds.Max.Y-bounds.Min.Y
+	if width < 5 || width > 50 || height < 5 || height > 50 {
+		http.Error(w, fmt.Sprintf("Image dimensions out of allowed range (5x5 to 50x50). Uploaded image size: %dx%d", width, height), http.StatusBadRequest)
+		return
+	}
 
 	// Read all data from the uploaded file and write it to the temporary file
 	fileBytes, err := ioutil.ReadAll(file)
@@ -93,7 +108,12 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 }
 
 func addTemplateHashDevnet(w http.ResponseWriter, r *http.Request) {
-	// TODO: Disable this in production
+	// Disable this in production
+	if core.ArtPeaceBackend.BackendConfig.Production {
+		http.Error(w, "Not available in production", http.StatusNotImplemented)
+		return
+	}
+
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		panic(err)

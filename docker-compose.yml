@@ -54,7 +54,7 @@ services:
     environment:
       - SCARB=/root/.local/bin/scarb
     volumes:
-      - deployment:/deployment
+      - configs:/configs
   apibara:
     image: quay.io/apibara/starknet:1.5.0
     command:
@@ -86,8 +86,11 @@ services:
     links:
       - backend
       - apibara
+    environment:
+      - APIBARA_STREAM_URL=http://art-peace-apibara-1:7171
+      - BACKEND_TARGET_URL=http://art-peace-backend-1:8080/consumeIndexerMsg
     volumes:
-      - deployment:/deployment
+      - configs:/configs
     restart: on-failure
   frontend:
     build:
@@ -102,7 +105,7 @@ services:
       - backend
       - devnet
     volumes:
-      - deployment:/deployment
+      - configs:/configs
       - ./frontend/package.json:/app/package.json
       - ./frontend/package-lock.json:/app/package-lock.json
       - ./frontend/public/:/app/public
@@ -113,4 +116,4 @@ volumes:
   postgres:
   devnet:
   apibara:
-  deployment:
+  configs:
