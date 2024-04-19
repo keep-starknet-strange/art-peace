@@ -11,10 +11,9 @@ pub mod TemplateQuest {
 
     #[storage]
     struct Storage {
-        art_peace: IArtPeaceDispatcher,
+        art_peace: ContractAddress,
         reward: u32,
         claimed: LegacyMap<ContractAddress, bool>,
-        template_store: ITemplateStoreDispatcher
     }
 
     #[derive(Drop, Serde)]
