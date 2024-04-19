@@ -28,19 +28,18 @@ func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(available))
 }
 
-
 func getUsername(w http.ResponseWriter, r *http.Request) {
-    address := r.URL.Query().Get("address")
+	address := r.URL.Query().Get("address")
 
-    var name string
-    err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT name FROM Users WHERE address = $1", address).Scan(&name)
-    if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte(err.Error()))
-        return
-    }
+	var name string
+	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT name FROM Users WHERE address = $1", address).Scan(&name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte(name))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(name))
 }
