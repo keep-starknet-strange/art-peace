@@ -25,7 +25,7 @@ const Canvas = (props) => {
   // Read canvas config from environment variable file json
   const width = canvasConfig.canvas.width;
   const height = canvasConfig.canvas.height;
-  // const colors = canvasConfig.colors
+  const staticColors = canvasConfig.colors;
 
   const [colors, setColors] = useState({});
 
@@ -36,11 +36,11 @@ const Canvas = (props) => {
         return response;
       })
       .then((data) => {
-        console.log(data.body)
+        console.log(data.body);
         let colorData = new Uint8Array(data, 0, data.byteLength);
         console.log(colorData);
 
-       // Convert ArrayBuffer to base-10 array
+        // Convert ArrayBuffer to base-10 array
         const base10Array = [];
         const view = new Uint8Array(data);
         for (let i = 0; i < view.length; i++) {
@@ -48,9 +48,10 @@ const Canvas = (props) => {
         }
 
         setColors(base10Array);
-        console.log(base10Array)
+        console.log(base10Array);
       })
       .catch((error) => {
+        setColors(staticColors);
         console.error(error);
       });
 
