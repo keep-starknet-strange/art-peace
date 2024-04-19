@@ -21,16 +21,12 @@ pub mod TemplateQuest {
     pub struct TemplateQuestInitParams {
         pub art_peace: ContractAddress,
         pub reward: u32,
-        pub template_store: ContractAddress
     }
 
     #[constructor]
     fn constructor(ref self: ContractState, init_params: TemplateQuestInitParams,) {
-        self.art_peace.write(IArtPeaceDispatcher { contract_address: init_params.art_peace });
         self.reward.write(init_params.reward);
-        self
-            .template_store
-            .write(ITemplateStoreDispatcher { contract_address: init_params.template_store });
+        self.art_peace.write(ITemplateStoreDispatcher { contract_address: init_params.art_peace });
     }
 
 
@@ -51,7 +47,7 @@ pub mod TemplateQuest {
 
             let template_id = calldata[0];
 
-            let template = self.template_store.get_template(template_id);
+            let template = self.art_peace.get_template(template_id);
 
             if template.creator != user {
                 return false;
