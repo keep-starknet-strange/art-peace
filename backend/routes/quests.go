@@ -19,8 +19,8 @@ type Quest struct {
 }
 
 func InitQuestsRoutes() {
-	http.HandleFunc("/dailyQuests", GetDailyQuests)
-	http.HandleFunc("/mainQuests", GetMainQuests)
+	http.HandleFunc("/getDailyQuests", GetDailyQuests)
+	http.HandleFunc("/getMainQuests", GetMainQuests)
 }
 
 // Query dailyQuests
