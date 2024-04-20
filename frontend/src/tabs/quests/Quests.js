@@ -33,7 +33,7 @@ const [mainQuests, setMainQuests] = useState([]);
 
 
 
-  const dailyQuests = [
+  const localDailyQuests = [
     {
       title: "Place 10 pixels",
       description: "Add 10 pixels on the canvas",
@@ -54,7 +54,7 @@ const [mainQuests, setMainQuests] = useState([]);
     },
   ];
 
-  const mainQuests = [
+  const localMainQuests = [
     {
       title: "Tweet #art/peace",
       description: "Tweet about art/peace using the hashtag & addr",
