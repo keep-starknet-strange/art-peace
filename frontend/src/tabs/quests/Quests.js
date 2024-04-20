@@ -1,13 +1,38 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./Quests.css";
 import BasicTab from "../BasicTab.js";
 import QuestItem from "./QuestItem.js";
 
 const Quests = (props) => {
+const [dailyQuests, setDailyQuests] = useState([]);
+const [mainQuests, setMainQuests] = useState([]);
+
+  useEffect(() => {
+    const fetchQuests = async () => {
+      try {
+        // Fetching daily quests from backend
+        const dailyResponse = await fetch('http://localhost:8080/getDailyQuests');
+        const dailyData = await dailyResponse.json();
+        setDailyQuests(dailyData);
+
+        // Fetching main quests from backend
+        const mainResponse = await fetch('http://localhost:8080/getMainQuests');
+        const mainData = await mainResponse.json();
+        setMainQuests(mainData);
+      } catch (error) {
+        console.error('Failed to fetch quests', error);
+      }
+    };
+
+    fetchQuests();
+  }, []);
   // TODO: Main quests should be scrollable
   // TODO: Main quests should be moved to the bottom on complete
   // TODO: Pull quests from backend
   // TODO: Links in descriptions
+
+
+
   const dailyQuests = [
     {
       title: "Place 10 pixels",
