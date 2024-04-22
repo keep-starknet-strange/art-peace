@@ -28,3 +28,20 @@ fn test_get_reward() {
 
     assert(current_reward == test_reward, 'Reward Not set');
 }
+
+
+fn SINGLE_CALLDATA() -> Span<felt252> {
+    array![1].span()
+}
+
+#[test]
+fn test_is_claimable() {
+    let contract_address = deploy_contract();
+    let dispatcher = IQuestDispatcher { contract_address };
+    let test_is_claim = dispatcher.is_claimable(contract_address_const::<1>(), SINGLE_CALLDATA());
+
+    let is_claim = false;
+
+    assert(is_claim == test_is_claim, 'Template not claim');
+}
+
