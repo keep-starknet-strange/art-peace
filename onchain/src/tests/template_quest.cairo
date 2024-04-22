@@ -45,3 +45,15 @@ fn test_is_claimable() {
     assert(is_claim == test_is_claim, 'Template not claim');
 }
 
+
+#[test]
+fn test_claim() {
+    let contract_address = deploy_contract();
+    let dispatcher = IQuestDispatcher { contract_address };
+    let test_claim_reward = dispatcher.claim(contract_address_const::<1>(), SINGLE_CALLDATA());
+
+    let claim_reward = 18;
+
+    assert(claim_reward != test_claim_reward, 'Template Reward not Claim');
+}
+

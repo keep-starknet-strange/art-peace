@@ -77,11 +77,10 @@ pub mod TemplateQuest {
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
-            assert(
-                get_caller_address() == self.art_peace.read().contract_address,
-                'Only ArtPeace can claim quests'
-            );
-            // TODO: should we revert if the quest is not claimable?
+            if get_caller_address() != self.art_peace.read().contract_address {
+                return 0;
+            }
+
             if !self.is_claimable(user, calldata) {
                 return 0;
             }
