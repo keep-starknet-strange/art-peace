@@ -16,10 +16,10 @@ pub mod CanvasNFTStoreComponent {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct CanvasNFTMinted {
+    pub struct CanvasNFTMinted {
         #[key]
-        token_id: u256,
-        metadata: NFTMetadata,
+        pub token_id: u256,
+        pub metadata: NFTMetadata,
     }
 
     #[embeddable_as(CanvasNFTStoreImpl)]

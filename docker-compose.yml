@@ -83,6 +83,8 @@ services:
     depends_on:
       deployer:
         condition: service_completed_successfully
+      apibara:
+        condition: service_started
     links:
       - backend
       - apibara

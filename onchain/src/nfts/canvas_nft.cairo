@@ -4,6 +4,7 @@ mod CanvasNFT {
     use openzeppelin::introspection::src5::SRC5Component;
     use starknet::ContractAddress;
     use art_peace::nfts::component::CanvasNFTStoreComponent;
+    use art_peace::nfts::component::CanvasNFTStoreComponent::CanvasNFTMinted;
     use art_peace::nfts::{ICanvasNFTAdditional, NFTMetadata};
 
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);
@@ -46,15 +47,23 @@ mod CanvasNFT {
 
     #[constructor]
     fn constructor(
-        ref self: ContractState, name: ByteArray, symbol: ByteArray, art_peace_addr: ContractAddress
+        ref self: ContractState, name: ByteArray, symbol: ByteArray
     ) {
-        self.art_peace.write(art_peace_addr);
-        let base_uri = format!("{:?}", art_peace_addr);
+        let base_uri = "test"; // TODO: change to real base uri
         self.erc721.initializer(name, symbol, base_uri);
     }
 
     #[abi(embed_v0)]
     impl CanvasNFTAdditional of ICanvasNFTAdditional<ContractState> {
+        fn set_canvas_contract(ref self: ContractState, canvas_contract: ContractAddress) {
+            let zero_address = starknet::contract_address_const::<0>();
+            assert(
+                self.art_peace.read() == zero_address,
+                'ArtPeace contract already set'
+            );
+            self.art_peace.write(canvas_contract);
+        }
+
         fn mint(ref self: ContractState, metadata: NFTMetadata, receiver: ContractAddress) {
             assert(
                 self.art_peace.read() == starknet::get_caller_address(),
@@ -64,7 +73,7 @@ mod CanvasNFT {
             self.nfts.nfts_data.write(token_id, metadata);
             self.erc721._mint(receiver, token_id);
             self.nfts.nfts_count.write(token_id + 1);
-        // TODO: self.emit(Event::NFTEvent::CanvasNFTMinted { token_id, metadata });
+            self.nfts.emit(CanvasNFTMinted { token_id, metadata });
         }
     }
 }

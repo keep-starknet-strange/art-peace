@@ -7,7 +7,9 @@ import (
 
 type BackendScriptsConfig struct {
 	PlacePixelDevnet      string `json:"place_pixel_devnet"`
-	AddTemplateHashDevnet string `json:"add_template_hash_devnet"`
+  PlaceExtraPixelsDevnet string `json:"place_extra_pixels_devnet"`
+	AddTemplateDevnet string `json:"add_template_devnet"`
+  MintNFTDevnet         string `json:"mint_nft_devnet"`
 }
 
 type BackendConfig struct {
@@ -21,7 +23,9 @@ var DefaultBackendConfig = BackendConfig{
 	Port: 8080,
 	Scripts: BackendScriptsConfig{
 		PlacePixelDevnet:      "../scripts/place_pixel.sh",
-		AddTemplateHashDevnet: "../scripts/add_template_hash.sh",
+    PlaceExtraPixelsDevnet: "../scripts/place_extra_pixels.sh",
+		AddTemplateDevnet: "../scripts/add_template.sh",
+    MintNFTDevnet:         "../scripts/mint_nft.sh",
 	},
 }
 

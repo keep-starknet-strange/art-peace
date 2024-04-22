@@ -73,7 +73,6 @@ fn deploy_contract() -> ContractAddress {
         end_time: 1000000,
         daily_quests: array![].span(),
         main_quests: array![].span(),
-        nft_contract: NFT_CONTRACT(),
     }
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, ART_PEACE_CONTRACT()).unwrap();
@@ -110,7 +109,6 @@ fn deploy_with_quests_contract(
         end_time: 1000000,
         daily_quests: daily_quests,
         main_quests: main_quests,
-        nft_contract: NFT_CONTRACT(),
     }
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, ART_PEACE_CONTRACT()).unwrap();
@@ -186,7 +184,6 @@ fn deploy_nft_contract() -> ContractAddress {
     let symbol: ByteArray = "A/P";
     name.serialize(ref calldata);
     symbol.serialize(ref calldata);
-    calldata.append(ART_PEACE_CONTRACT().into());
     contract.deploy_at(@calldata, NFT_CONTRACT()).unwrap()
 }
 
@@ -475,6 +472,7 @@ fn nft_mint_test() {
     let nft_minter = IArtPeaceNFTMinterDispatcher { contract_address: art_peace.contract_address };
     let nft_store = ICanvasNFTStoreDispatcher { contract_address: NFT_CONTRACT() };
     let nft = IERC721Dispatcher { contract_address: NFT_CONTRACT() };
+    nft_minter.add_nft_contract(NFT_CONTRACT());
 
     let mint_params = NFTMintParams { position: 10, width: 16, height: 16, };
     snf::start_prank(CheatTarget::One(nft_minter.contract_address), PLAYER1());
