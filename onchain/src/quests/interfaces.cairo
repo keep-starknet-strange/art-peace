@@ -26,3 +26,25 @@ pub trait IPixelQuest<TContractState> {
     fn is_color(self: @TContractState) -> bool;
     fn color(self: @TContractState) -> u8;
 }
+
+#[starknet::interface]
+pub trait IUnruggableQuest<TContractState> {
+    fn is_claimed(self: @TContractState, user: starknet::ContractAddress) -> bool;
+}
+
+#[starknet::interface]
+pub trait IUnruggableMemecoin<TState> {
+    // ************************************
+    // * Ownership
+    // ************************************
+    fn owner(self: @TState) -> ContractAddress;
+
+    // ************************************
+    // * Additional functions
+    // ************************************
+    /// Checks whether token has launched
+    ///
+    /// # Returns
+    ///     bool: whether token has launched
+    fn is_launched(self: @TState) -> bool;
+}
