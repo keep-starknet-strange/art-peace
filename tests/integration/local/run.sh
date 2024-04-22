@@ -77,7 +77,12 @@ INDEXER_SCRIPT_LOG_FILE=$LOG_DIR/indexer_script.log
 touch $INDEXER_SCRIPT_LOG_FILE
 cd $WORK_DIR/indexer
 #TODO: apibara -> postgres automatically?
-ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS apibara run script.js --allow-env-from-env ART_PEACE_CONTRACT_ADDRESS 2>&1 > $INDEXER_SCRIPT_LOG_FILE &
+rm -f $TMP_DIR/indexer.env
+touch $TMP_DIR/indexer.env
+echo "ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> $TMP_DIR/indexer.env
+echo "APIBARA_STREAM_URL=http://localhost:7171" >> $TMP_DIR/indexer.env
+echo "BACKEND_TARGET_URL=http://localhost:8080/consumeIndexerMsg" >> $TMP_DIR/indexer.env
+apibara run script.js --allow-env $TMP_DIR/indexer.env 2>&1 > $INDEXER_SCRIPT_LOG_FILE &
 INDEXER_SCRIPT_PID=$!
 sleep 2 # Wait for indexer script to start; TODO: Check if indexer script is actually running
 
@@ -85,6 +90,8 @@ sleep 2 # Wait for indexer script to start; TODO: Check if indexer script is act
 echo "Initializing art-peace canvas ..."
 curl http://localhost:8080/initCanvas -X POST
 curl http://localhost:8080/setContractAddress -X POST -d "$ART_PEACE_CONTRACT_ADDRESS"
+COLORS=$(cat $CANVAS_CONFIG_FILE | jq -r '.colors | map("\"\(.)\"") | join(",")')
+curl http://localhost:8080/init-colors -X POST -d "[$COLORS]"
 
 # Start the art-peace frontend
 echo "Starting art-peace frontend ..."
@@ -96,7 +103,7 @@ REACT_CANVAS_CONFIG_FILE=$WORK_DIR/frontend/src/configs/canvas.config.json
 REACT_BACKEND_CONFIG_FILE=$WORK_DIR/frontend/src/configs/backend.config.json
 cp $CANVAS_CONFIG_FILE $REACT_CANVAS_CONFIG_FILE #TODO: Use a symlink instead?
 cp $BACKEND_CONFIG_FILE $REACT_BACKEND_CONFIG_FILE
-REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS REACT_APP_CANVAS_CONFIG_FILE=$REACT_CANVAS_CONFIG_FILE REACT_APP_BACKEND_CONFIG_FILE=$REACT_BACKEND_CONFIG_FILE npm start 2>&1 > $FRONTEND_LOG_FILE &
+npm start 2>&1 > $FRONTEND_LOG_FILE &
 FRONTEND_PID=$!
 sleep 2 # Wait for frontend to start; TODO: Check if frontend is actually running
 

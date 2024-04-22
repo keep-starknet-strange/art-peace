@@ -80,10 +80,10 @@ echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --acc
 /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function add_nft_contract --calldata $NFT_CONTRACT_ADDRESS
 
 # TODO: Remove these lines?
-echo "ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" > /deployment/.env
-echo "REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> /deployment/.env
-echo "NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /deployment/.env
-echo "REACT_APP_NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /deployment/.env
+echo "ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" > /configs/.env
+echo "REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> /configs/.env
+echo "NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /configs/.env
+echo "REACT_APP_NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /configs/.env
 
 # TODO
 # MULTICALL_TEMPLATE_DIR=$CONTRACT_DIR/tests/multicalls

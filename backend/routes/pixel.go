@@ -16,8 +16,10 @@ import (
 func InitPixelRoutes() {
 	http.HandleFunc("/getPixel", getPixel)
 	http.HandleFunc("/getPixelInfo", getPixelInfo)
-	http.HandleFunc("/placePixelDevnet", placePixelDevnet)
-	http.HandleFunc("/placeExtraPixelsDevnet", placeExtraPixelsDevnet)
+	if !core.ArtPeaceBackend.BackendConfig.Production {
+		http.HandleFunc("/placePixelDevnet", placePixelDevnet)
+	  http.HandleFunc("/placeExtraPixelsDevnet", placeExtraPixelsDevnet)
+	}
 	http.HandleFunc("/placePixelRedis", placePixelRedis)
 }
 
@@ -56,6 +58,12 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if core.ArtPeaceBackend.BackendConfig.Production {
+		http.Error(w, "Not available in production", http.StatusNotImplemented)
+		return
+	}
+
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		panic(err)

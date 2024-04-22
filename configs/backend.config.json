@@ -5,5 +5,6 @@
     "place_pixel_devnet": "../tests/integration/local/place_pixel.sh",
     "place_extra_pixels_devnet": "../tests/integration/local/place_extra_pixels.sh",
     "add_template_hash_devnet": "../tests/integration/local/add_template_hash.sh"
-  }
+  },
+  "production": false
 }

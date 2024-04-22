@@ -11,42 +11,12 @@ const Voting = props => {
   const [votes, setVotes] = useState(colorVotes);
   const [userVote, setUserVote] = useState(-1);
   // TODO: Pull from API
-  const timeTillVote = '05:14:23';
-  const [time, setTime] = useState(timeTillVote);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(time => {
-        let timeSplit = time.split(':');
-        let hours = parseInt(timeSplit[0]);
-        let minutes = parseInt(timeSplit[1]);
-        let seconds = parseInt(timeSplit[2]);
-        if (seconds === 0) {
-          if (minutes === 0) {
-            if (hours === 0) {
-              return '00:00:00';
-            }
-            hours--;
-            minutes = 59;
-            seconds = 59;
-          } else {
-            minutes--;
-            seconds = 59;
-          }
-        } else {
-          seconds--;
-        }
-        return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [time]);
 
   return (
     <BasicTab title="Voting">
       <h2 className="Voting__header">Color Vote</h2>
       <p className="Voting__description">Vote for a new palette color.</p>
-      <p className="Voting__description">Vote closes: {time}</p>
+      <p className="Voting__description">Vote closes: {props.timeLeftInDay}</p>
       <div className="Voting__colors">
         <div className="Voting__colors__item" style={{marginTop: "1.5rem"}}>
           <div style={{gridArea: "vote"}}>Vote</div>

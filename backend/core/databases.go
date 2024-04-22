@@ -31,6 +31,7 @@ func NewDatabases(databaseConfig *config.DatabaseConfig) *Databases {
 
 	// Connect to Postgres
 	postgresConnString := "postgresql://" + databaseConfig.Postgres.User + ":" + os.Getenv("POSTGRES_PASSWORD") + "@" + databaseConfig.Postgres.Host + ":" + strconv.Itoa(databaseConfig.Postgres.Port) + "/" + databaseConfig.Postgres.Database
+	// TODO: crd_audit?sslmode=disable
 	pgPool, err := pgxpool.New(context.Background(), postgresConnString)
 	if err != nil {
 		panic(err)

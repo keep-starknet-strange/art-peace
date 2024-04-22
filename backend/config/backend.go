@@ -13,9 +13,10 @@ type BackendScriptsConfig struct {
 }
 
 type BackendConfig struct {
-	Host    string               `json:"host"`
-	Port    int                  `json:"port"`
-	Scripts BackendScriptsConfig `json:"scripts"`
+	Host       string               `json:"host"`
+	Port       int                  `json:"port"`
+	Scripts    BackendScriptsConfig `json:"scripts"`
+	Production bool                 `json:"production"`
 }
 
 var DefaultBackendConfig = BackendConfig{
@@ -27,6 +28,7 @@ var DefaultBackendConfig = BackendConfig{
 		AddTemplateDevnet:      "../scripts/add_template.sh",
 		MintNFTDevnet:          "../scripts/mint_nft.sh",
 	},
+	Production: false,
 }
 
 var DefaultBackendConfigPath = "../configs/backend.config.json"

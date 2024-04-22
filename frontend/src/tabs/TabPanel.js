@@ -9,12 +9,20 @@ import Account from './Account.js';
 
 const TabPanel = props => {
   return (
-    <div className='TabPanel'>
-      { props.activeTab === 'Quests' && <Quests /> }
-      { props.activeTab === 'Vote' && <Voting /> }
-      { props.activeTab === 'Templates' && <Templates setTemplateCreationMode={props.setTemplateCreationMode} setTemplateImage={props.setTemplateImage} setTemplateColorIds={props.setTemplateColorIds} /> }
-      { props.activeTab === 'NFTs' && <NFTs nftSelectionMode={props.nftSelectionMode} setNftSelectionMode={props.setNftSelectionMode} /> }
-      { props.activeTab === 'Account' && <Account /> }
+    <div className="TabPanel">
+      {props.activeTab === "Quests" && (
+        <Quests timeLeftInDay={props.timeLeftInDay} />
+      )}
+      {props.activeTab === "Vote" && (
+        <Voting timeLeftInDay={props.timeLeftInDay} />
+      )}
+      {props.activeTab === "Templates" && (
+        <Templates setTemplateCreationMode={props.setTemplateCreationMode} setTemplateImage={props.setTemplateImage} setTemplateColorIds={props.setTemplateColorIds} />
+      )}
+      {props.activeTab === "NFTs" && (
+        <NFTs nftSelectionMode={props.nftSelectionMode} setNftSelectionMode={props.setNftSelectionMode} />
+      )}
+      {props.activeTab === "Account" && <Account />}
     </div>
   );
 }

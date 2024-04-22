@@ -1,108 +1,120 @@
+
 import React, { useCallback, useRef, useEffect, useState } from 'react'
+import { select, zoom, zoomIdentity } from "d3"
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 import './Canvas.css';
 // import TemplateOverlay from './TemplateOverlay.js';
-import canvasConfig from "../configs/canvas.config.json"
-import backendConfig from "../configs/backend.config.json"
+import canvasConfig from "../configs/canvas.config.json";
+import backendConfig from "../configs/backend.config.json";
+
 
 const Canvas = props => {
   const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port
-  // TODO: Pressing "Canvas" resets the view / positioning
-
-  const [canvasPositionX, setCanvasPositionX] = useState(0)
-  const [canvasPositionY, setCanvasPositionY] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStartX, setDragStartX] = useState(0)
-  const [dragStartY, setDragStartY] = useState(0)
-
-  const [canvasScale, setCanvasScale] = useState(6)
-  const minScale = 1 // TODO: To config
-  const maxScale = 40
+  //TODO: Pressing "Canvas" resets the view / positioning
   //TODO: Way to configure tick rates to give smooth xp for all users
-  
-  // Read canvas config from environment variable file json
-  const width = canvasConfig.canvas.width
-  const height = canvasConfig.canvas.height
-  const colors = canvasConfig.colors
 
-  const WS_URL = "ws://" + backendConfig.host + ":" + backendConfig.port + "/ws"
+  //Todo: Make this dynamic
+  const minScale = 1;
+  const maxScale = 40;
+
+
+  const canvasRef = useRef(null)
+  const canvasPositionRef = useRef(null)
+  const canvasScaleRef = useRef(null)
+
+
+  // Read canvas config from environment variable file json
+  const width = canvasConfig.canvas.width;
+  const height = canvasConfig.canvas.height;
+  const staticColors = canvasConfig.colors;
+
+  const [colors, setColors] = useState([]);
+  const [setupColors, setSetupColors] = useState(false);
+
+  useEffect(() => {
+    if (setupColors) {
+      return;
+    }
+    let getColorsEndpoint = backendUrl + "/get-colors";
+    fetch(getColorsEndpoint, { mode: "cors" }).then((response) => {
+      response.json().then((data) => {
+        let colors = [];
+        for (let i = 0; i < data.length; i++) {
+          colors.push(data[i].hex);
+        }
+        setColors(colors);
+        setSetupColors(true);
+      }).catch((error) => {
+        setColors(staticColors);
+        setSetupColors(true);
+        console.error(error);
+      });
+    });
+    // TODO: Return a cleanup function to close the websocket / ...
+  }, [colors, backendUrl, staticColors, setupColors, setColors]);
+
+  const WS_URL =
+    "ws://" + backendConfig.host + ":" + backendConfig.port + "/ws";
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(
     WS_URL,
     {
       share: false,
       shouldReconnect: () => true,
+
     },
   )
-  
+
   // TODO: Weird positioning behavior when clicking into devtools
-
-  // Handle wheel event for zooming
-  const handleWheel = (e) => {
-    let newScale = canvasScale
-    if (e.deltaY < 0) {
-      newScale = Math.min(maxScale, newScale + 0.2)
-    } else {
-      newScale = Math.max(minScale, newScale - 0.2)
-    }
-    // TODO: Smart positioning of canvas zoom ( zoom to center of mouse pointer )
-    //let newCanvasPositionX = canvasPositionX
-    //let newCanvasPositionY = canvasPositionY
-    //const canvasOriginX = canvasPositionX + width / 2
-    //const canvasOriginY = canvasPositionY + height / 2
-    //setCanvasPositionX(newCanvasPositionX)
-    //setCanvasPositionY(newCanvasPositionY)
-
-    setCanvasScale(newScale)
-  }
-
-  const handlePointerDown = (e) => {
-    setIsDragging(true)
-    setDragStartX(e.clientX)
-    setDragStartY(e.clientY)
-  }
-
-  const handlePointerUp = () => {
-    setIsDragging(false)
-    setDragStartX(0)
-    setDragStartY(0)
-  }
-
-  const handlePointerMove = (e) => {
-    if (isDragging) {
-      // TODO: Prevent dragging outside of canvas container
-      setCanvasPositionX(canvasPositionX + e.clientX - dragStartX)
-      setCanvasPositionY(canvasPositionY + e.clientY - dragStartY)
-      setDragStartX(e.clientX)
-      setDragStartY(e.clientY)
-    }
-  }
-
   useEffect(() => {
-    document.addEventListener('pointerup', handlePointerUp)
+    const canvas = select(canvasPositionRef.current)
+    const Dzoom = zoom().scaleExtent([minScale, maxScale]).on("zoom", zoomHandler)
+
+    // Set default zoom level and center the canvas
+    canvas
+      .call(Dzoom)
+      .call(Dzoom.transform, zoomIdentity.translate(0, 0).scale(4))
 
     return () => {
-      document.removeEventListener('pointerup', handlePointerUp)
-    }
-  }, [])
+      canvas.on(".zoom", null); // Clean up zoom event listeners
+    };
+  }, []);
+
+  const zoomHandler = (event) => {
+    const ele = canvasScaleRef.current
+    const {
+      k: newScale,
+      x: newCanvasPositionX,
+      y: newCanvasPositionY,
+    } = event.transform;
+    const transformValue = `translate(${newCanvasPositionX}px, ${newCanvasPositionY}px) scale(${newScale})`
+    ele.style.transform = transformValue
+  }
 
   const [setup, setSetup] = useState(false)
 
-  const draw = useCallback((ctx, imageData) => {
-    ctx.canvas.width = width
-    ctx.canvas.height = height
-    ctx.putImageData(imageData, 0, 0)
-    // TODO: Use image-rendering for supported browsers?
-  }, [width, height])
+
+  const draw = useCallback(
+    (ctx, imageData) => {
+      ctx.canvas.width = width;
+      ctx.canvas.height = height;
+      ctx.putImageData(imageData, 0, 0);
+      // TODO: Use image-rendering for supported browsers?
+    },
+    [width, height]
+  );
 
   useEffect(() => {
+    if (!setupColors) {
+      return;
+    }
     if (setup) {
-      return
+      return;
     }
     const canvas = props.canvasRef.current
     const context = canvas.getContext('2d')
 
     let getCanvasEndpoint = backendUrl + "/getCanvas"
-    fetch(getCanvasEndpoint, {mode: 'cors'}).then(response => {
+    fetch(getCanvasEndpoint, { mode: 'cors' }).then(response => {
       return response.arrayBuffer()
     }).then(data => {
       let colorData = new Uint8Array(data, 0, data.byteLength)
@@ -124,32 +136,42 @@ const Canvas = props => {
           dataArray.push(value)
         }
       }
-      let imageDataArray = []
+      let imageDataArray = [];
       for (let i = 0; i < dataArray.length; i++) {
-        const color = "#" + colors[dataArray[i]] + "FF"
-        const [r, g, b, a] = color.match(/\w\w/g).map(x => parseInt(x, 16))
-        imageDataArray.push(r, g, b, a)
+        const color = "#" + colors[dataArray[i]] + "FF";
+        const [r, g, b, a] = color.match(/\w\w/g).map((x) => parseInt(x, 16));
+        imageDataArray.push(r, g, b, a);
       }
-      const uint8ClampedArray = new Uint8ClampedArray(imageDataArray)
-      const imageData = new ImageData(uint8ClampedArray, width, height)
-      draw(context, imageData)
-      setSetup(true)
-    }).catch(error => {
+      const uint8ClampedArray = new Uint8ClampedArray(imageDataArray);
+      const imageData = new ImageData(uint8ClampedArray, width, height);
+      draw(context, imageData);
+      setSetup(true);
+    }).catch((error) => {
       //TODO: Notifiy user of error
-      console.error(error)
+      console.error(error);
     });
 
-    console.log("Connect to websocket")
+    console.log("Connect to websocket");
     if (readyState === ReadyState.OPEN) {
       sendJsonMessage({
         event: "subscribe",
         data: {
           channel: "general",
         },
-      })
+      });
     }
     // TODO: Return a cleanup function to close the websocket / ...
-  }, [readyState, sendJsonMessage, setup, colors, width, height, backendUrl, draw])
+  }, [
+    readyState,
+    sendJsonMessage,
+    setup,
+    colors,
+    width,
+    height,
+    backendUrl,
+    draw,
+    setupColors,
+  ]);
 
   const colorPixel = useCallback((position, color) => {
     const canvas = props.canvasRef.current
@@ -193,21 +215,26 @@ const Canvas = props => {
     }
     props.setPixelSelection(x, y)
 
-    const position = y * width + x
-    let getPixelInfoEndpoint = backendUrl + "/getPixelInfo?position=" + position.toString()
+    const position = y * width + x;
+    let getPixelInfoEndpoint =
+      backendUrl + "/getPixelInfo?position=" + position.toString();
     fetch(getPixelInfoEndpoint, {
-      mode: 'cors'
-    }).then(response => {
-      return response.text()
-    }).then(data => {
-      // TODO: Cache pixel info & clear cache on update from websocket
-      // TODO: Dont query if hover select ( until 1s after hover? )
-      props.setPixelPlacedBy(data)
-    }).catch(error => {
-      console.error(error)
-    });
-
-  }, [props, width, height, backendUrl])
+      mode: "cors",
+    })
+      .then((response) => {
+        return response.text();
+      })
+      .then((data) => {
+        // TODO: Cache pixel info & clear cache on update from websocket
+        // TODO: Dont query if hover select ( until 1s after hover? )
+        props.setPixelPlacedBy(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    },
+    [props, width, height, backendUrl]
+  );
 
   const pixelClicked = (e) => {
     if (props.nftSelectionMode) {
@@ -303,53 +330,21 @@ const Canvas = props => {
 
       let templatePosition = x + y * width
       // TODO: Template preview
-      // TODO: Upload template / ask for template name, reward, ...
-      //let addTemplateEndpoint = backendUrl + "/add-template-devnet"
-      //let template = new Image()
-      //// Read templateImage as data url
-      //template.src = props.templateImage
-      //template.onload = function() {
-      //  // TODO: Refactor this
-      //  let templateWidth = this.width
-      //  let templateHeight = this.height
-      //  let templateHash = "0" // TODO
-      //  let templateReward = "0" // TODO
-      //  let templateRewardToken = "0" // TODO
-      //  fetch(addTemplateEndpoint, {
-      //    mode: "cors",
-      //    method: "POST",
-      //    body: JSON.stringify({
-      //      position: templatePosition.toString(),
-      //      width: templateWidth.toString(),
-      //      height: templateHeight.toString(),
-      //      hash: templateHash,
-      //      reward: templateReward,
-      //      rewardToken: templateRewardToken,
-      //    }),
-      //  }).then(response => {
-      //    return response.text()
-      //  }).then(data => {
-      //    console.log(data)
-      //  }).catch(error => {
-      //    console.error("Error adding template")
-      //    console.error(error)
-      //  });
 
-        props.setTemplateImagePositionX(x)
-        props.setTemplateImagePositionY(y)
-        props.setTemplateImagePosition(templatePosition)
-        props.setTemplatePlacedMode(true)
-        props.setTemplateCreationMode(false)
-      // }
+      props.setTemplateImagePositionX(x)
+      props.setTemplateImagePositionY(y)
+      props.setTemplateImagePosition(templatePosition)
+      props.setTemplatePlacedMode(true)
+      props.setTemplateCreationMode(false)
       return
     }
 
     pixelSelect(e.clientX, e.clientY)
     if (props.selectedColorId === -1) {
-      return
+      return;
     }
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
-      return
+      return;
     }
 
     if (props.extraPixels > 0) {
@@ -367,6 +362,7 @@ const Canvas = props => {
     const position = props.selectedPositionX + props.selectedPositionY * width
     const colorIdx = props.selectedColorId
     let placePixelEndpoint = backendUrl + "/placePixelDevnet"
+
     fetch(placePixelEndpoint, {
       mode: "cors",
       method: "POST",
@@ -374,53 +370,88 @@ const Canvas = props => {
         position: position.toString(),
         color: colorIdx.toString(),
       }),
-    }).then(response => {
-      return response.text()
-    }).then(data => {
-      console.log(data)
-    }).catch(error => {
-      console.error("Error placing pixel")
-      console.error(error)
-    });
-    props.clearPixelSelection()
-    props.setSelectedColorId(-1)
+    })
+      .then((response) => {
+        return response.text();
+      })
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error placing pixel");
+        console.error(error);
+      });
+    props.clearPixelSelection();
+    props.setSelectedColorId(-1);
     // TODO: Optimistic update
+
+
   }
-  
+
   // TODO: Deselect pixel when clicking outside of color palette or pixel
   // TODO: Show small position vec in bottom right corner of canvas
   const getSelectedColor = () => {
-    console.log(props.selectedColorId, props.selectedPositionX, props.selectedPositionY)
+    console.log(
+      props.selectedColorId,
+      props.selectedPositionX,
+      props.selectedPositionY
+    );
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
-      return null
+      return null;
     }
     if (props.selectedColorId === -1) {
-      return null
+      return null;
     }
-    return "#" + colors[props.selectedColorId] + "FF"
-  }
+    return "#" + colors[props.selectedColorId] + "FF";
+  };
 
   const getSelectorsColor = () => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
-      return null
+      return null;
     }
     if (props.selectedColorId === -1) {
-      let color = props.canvasRef.current.getContext('2d').getImageData(props.selectedPositionX, props.selectedPositionY, 1, 1).data
-      return "#" + color[0].toString(16).padStart(2, '0') + color[1].toString(16).padStart(2, '0') + color[2].toString(16).padStart(2, '0') + color[3].toString(16).padStart(2, '0')
+      let color = canvasRef.current
+        .getContext("2d")
+        .getImageData(
+          props.selectedPositionX,
+          props.selectedPositionY,
+          1,
+          1
+        ).data;
+      return (
+        "#" +
+        color[0].toString(16).padStart(2, "0") +
+        color[1].toString(16).padStart(2, "0") +
+        color[2].toString(16).padStart(2, "0") +
+        color[3].toString(16).padStart(2, "0")
+      );
     }
-    return "#" + colors[props.selectedColorId] + "FF"
-  }
+    return "#" + colors[props.selectedColorId] + "FF";
+  };
 
   const getSelectorsColorInverse = () => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
-      return null
+      return null;
     }
     if (props.selectedColorId === -1) {
-      let color = props.canvasRef.current.getContext('2d').getImageData(props.selectedPositionX, props.selectedPositionY, 1, 1).data
-      return "#" + (255 - color[0]).toString(16).padStart(2, '0') + (255 - color[1]).toString(16).padStart(2, '0') + (255 - color[2]).toString(16).padStart(2, '0') + color[3].toString(16).padStart(2, '0')
+      let color = canvasRef.current
+        .getContext("2d")
+        .getImageData(
+          props.selectedPositionX,
+          props.selectedPositionY,
+          1,
+          1
+        ).data;
+      return (
+        "#" +
+        (255 - color[0]).toString(16).padStart(2, "0") +
+        (255 - color[1]).toString(16).padStart(2, "0") +
+        (255 - color[2]).toString(16).padStart(2, "0") +
+        color[3].toString(16).padStart(2, "0")
+      );
     }
-    return "#" + colors[props.selectedColorId] + "FF"
-  }
+    return "#" + colors[props.selectedColorId] + "FF";
+  };
 
   // TODO
   //const templateImage = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 4, 3]
@@ -503,9 +534,9 @@ const Canvas = props => {
       }
 
       if (props.selectedColorId === -1) {
-        return
+        return;
       }
-      pixelSelect(e.clientX, e.clientY)
+      pixelSelect(e.clientX, e.clientY);
     };
     window.addEventListener("mousemove", setFromEvent);
 
@@ -516,12 +547,14 @@ const Canvas = props => {
 
   // TODO: both place options
   return (
-    <div className="Canvas__container" onWheel={handleWheel} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove}>
-      <div className="Canvas__position" style={{transform: `translate(${canvasPositionX}px, ${canvasPositionY}px )`}}>
-        <div className="Canvas__scale" style={{transform: `scale(${canvasScale})`}}>
-          { props.pixelSelectedMode && (
-            <div className="Canvas__selected" style={{left: props.selectedPositionX, top: props.selectedPositionY}}>
-              <div className="Canvas__selected__pixel" style={{backgroundColor: getSelectorsColor(), boxShadow: `0 0 .2px .1px ${getSelectorsColorInverse()} inset`}}></div>
+
+    <div className="Canvas__container">
+      <div ref={canvasPositionRef} className="Canvas__position">
+        <div ref={canvasScaleRef} className="Canvas__scale">
+          {props.pixelSelectedMode && (
+            <div className="Canvas__selected" style={{ left: props.selectedPositionX, top: props.selectedPositionY }}>
+              <div className="Canvas__selected__pixel" style={{ backgroundColor: getSelectorsColor(), boxShadow: `0 0 .2px .1px ${getSelectorsColorInverse()} inset` }}></div>
+
             </div>
           )}
           <canvas ref={props.canvasRef} className="Canvas" onClick={pixelClicked}/>
@@ -539,6 +572,6 @@ const Canvas = props => {
       </div>
     </div>
   );
-}
+};
 
-export default Canvas
+export default Canvas;

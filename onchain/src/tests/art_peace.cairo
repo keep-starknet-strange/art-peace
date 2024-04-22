@@ -1,6 +1,8 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 use art_peace::ArtPeace::InitParams;
 use art_peace::quests::pixel_quest::PixelQuest::PixelQuestInitParams;
+use art_peace::mocks::erc20_mock::SnakeERC20Mock;
+use art_peace::tests::utils;
 use art_peace::nfts::interfaces::{
     IArtPeaceNFTMinterDispatcher, IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTStoreDispatcher,
     ICanvasNFTStoreDispatcherTrait, NFTMintParams, NFTMetadata
@@ -13,10 +15,13 @@ use art_peace::templates::interfaces::{
 use core::poseidon::PoseidonTrait;
 use core::hash::{HashStateTrait, HashStateExTrait};
 
+use openzeppelin::token::erc20::interface::{IERC20, IERC20Dispatcher, IERC20DispatcherTrait};
 use openzeppelin::token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
+
 use snforge_std as snf;
 use snforge_std::{CheatTarget, ContractClassTrait};
-use starknet::{ContractAddress, contract_address_const};
+
+use starknet::{ContractAddress, contract_address_const, get_contract_address};
 
 const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 const WIDTH: u128 = 100;
@@ -25,6 +30,10 @@ const TIME_BETWEEN_PIXELS: u64 = 10;
 
 fn ART_PEACE_CONTRACT() -> ContractAddress {
     contract_address_const::<'ArtPeace'>()
+}
+
+fn ERC20_MOCK_CONTRACT() -> ContractAddress {
+    contract_address_const::<'erc20mock'>()
 }
 
 fn EMPTY_CALLDATA() -> Span<felt252> {
@@ -185,6 +194,25 @@ fn deploy_nft_contract() -> ContractAddress {
     name.serialize(ref calldata);
     symbol.serialize(ref calldata);
     contract.deploy_at(@calldata, NFT_CONTRACT()).unwrap()
+}
+
+
+fn deploy_erc20_mock() -> ContractAddress {
+    let contract = snf::declare("SnakeERC20Mock");
+    let name: ByteArray = "erc20 mock";
+    let symbol: ByteArray = "ERC20MOCK";
+    let initial_supply: u256 = 10 * utils::pow_256(10, 18);
+    let recipient: ContractAddress = get_contract_address();
+
+    let mut calldata: Array<felt252> = array![];
+    Serde::serialize(@name, ref calldata);
+    Serde::serialize(@symbol, ref calldata);
+    Serde::serialize(@initial_supply, ref calldata);
+    Serde::serialize(@recipient, ref calldata);
+
+    let contract_addr = contract.deploy_at(@calldata, ERC20_MOCK_CONTRACT()).unwrap();
+
+    contract_addr
 }
 
 fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
@@ -365,16 +393,13 @@ fn template_full_basic_test() {
 
     assert!(template_store.get_templates_count() == 0, "Templates count is not 0");
 
+    let erc20_mock: ContractAddress = deploy_erc20_mock();
+
     // 2x2 template image
     let template_image = array![1, 2, 3, 4];
     let template_hash = compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
-        hash: template_hash,
-        position: 0,
-        width: 2,
-        height: 2,
-        reward: 0,
-        reward_token: contract_address_const::<0>(),
+        hash: template_hash, position: 0, width: 2, height: 2, reward: 0, reward_token: erc20_mock,
     };
 
     template_store.add_template(template_metadata);
@@ -502,4 +527,37 @@ fn nft_mint_test() {
     assert!(nft.owner_of(0) == PLAYER2(), "NFT owner is not correct after transfer");
     assert!(nft.balance_of(PLAYER1()) == 0, "NFT balance is not correct after transfer");
     assert!(nft.balance_of(PLAYER2()) == 1, "NFT balance is not correct after transfer");
+}
+
+#[test]
+fn deposit_reward_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+    let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
+
+    let erc20_mock: ContractAddress = deploy_erc20_mock();
+    let reward_amount: u256 = 1 * utils::pow_256(10, 18);
+
+    // 2x2 template image
+    let template_image = array![1, 2, 3, 4];
+    let template_hash = compute_template_hash(template_image.span());
+    let template_metadata = TemplateMetadata {
+        hash: template_hash,
+        position: 0,
+        width: 2,
+        height: 2,
+        reward: reward_amount,
+        reward_token: erc20_mock,
+    };
+
+    IERC20Dispatcher { contract_address: erc20_mock }.approve(art_peace_address, reward_amount);
+
+    template_store.add_template(template_metadata);
+
+    let art_peace_token_balance = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(art_peace_address);
+
+    assert!(
+        art_peace_token_balance == reward_amount, "reward wrongly distributed when adding template"
+    );
 }
