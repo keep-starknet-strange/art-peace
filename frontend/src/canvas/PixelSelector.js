@@ -1,9 +1,10 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './PixelSelector.css';
 import canvasConfig from '../configs/canvas.config.json';
+import backendConfig from '../configs/backend.config.json';
 
 const PixelSelector = (props) => {
-
+  const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port;
   const [placedTime, setPlacedTime] = useState(0);
   const [timeTillNextPlacement, setTimeTillNextPlacement] = useState("XX:XX"); // TODO: get from server on init
   // TODO: Animation for swapping selectorMode
@@ -11,11 +12,36 @@ const PixelSelector = (props) => {
 
   const timeBetweenPlacements = 5000; // 5 seconds TODO: make this a config
   const updateInterval = 200; // 200ms
-  let colors = canvasConfig.colors;
-  colors = colors.map(color => `#${color}FF`);
+  let staticColors = canvasConfig.colors;
+  staticColors = staticColors.map(color => `#${color}FF`);
+
+  const [colors, setColors] = useState([]);
+  const [isSetup, setIsSetup] = useState(false);
+
+  useEffect(() => {
+    if (isSetup) {
+      return;
+    }
+    let getColorsEndpoint = backendUrl + "/get-colors";
+    fetch(getColorsEndpoint, { mode: "cors" }).then((response) => {
+      response.json().then((data) => {
+        let colors = [];
+        for (let i = 0; i < data.length; i++) {
+          colors.push(data[i].hex);
+        }
+        colors = colors.map(color => `#${color}FF`);
+        setColors(colors);
+        setIsSetup(true);
+      }).catch((error) => {
+        setColors(staticColors);
+        setIsSetup(true);
+        console.error(error);
+      });
+    });
+    // TODO: Return a cleanup function to close the websocket / ...
+  }, [colors, backendUrl, staticColors, setColors, setIsSetup, isSetup]);
 
   // TODO: implement extraPixels feature(s)
-  const extraPixels = 0;
 
   const getTimeTillNextPlacement = useCallback(() => {
     let timeSinceLastPlacement = Date.now() - placedTime;
@@ -82,10 +108,10 @@ const PixelSelector = (props) => {
     { !selectorMode &&
       <div className={"PixelSelector__button " + (getTimeTillNextPlacement() === 0 ? "PixelSelector__button__valid" : "PixelSelector__button__invalid")} onClick={placePixelSelector}>
         <p>{timeTillNextPlacement}</p>
-        { extraPixels > 0 &&
+        { props.extraPixels > 0 &&
           <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
           <p style={{margin: "0 0.5rem"}}>|</p>
-          <p>{extraPixels} XTRA</p>
+          <p>{props.extraPixels - props.extraPixelsUsed} XTRA</p>
           </div>
         }
         {props.selectedColorId !== -1 &&

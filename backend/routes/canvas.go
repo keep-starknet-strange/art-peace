@@ -14,22 +14,26 @@ func InitCanvasRoutes() {
 }
 
 func initCanvas(w http.ResponseWriter, r *http.Request) {
-	// TODO: Check if canvas already exists
-	totalBitSize := core.ArtPeaceBackend.CanvasConfig.Canvas.Width * core.ArtPeaceBackend.CanvasConfig.Canvas.Height * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
-	totalByteSize := (totalBitSize / 8)
-	if totalBitSize%8 != 0 {
-		// Round up to nearest byte
-		totalByteSize += 1
-	}
+	if core.ArtPeaceBackend.Databases.Redis.Exists(context.Background(), "canvas").Val() == 0 {
+		totalBitSize := core.ArtPeaceBackend.CanvasConfig.Canvas.Width * core.ArtPeaceBackend.CanvasConfig.Canvas.Height * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+		totalByteSize := (totalBitSize / 8)
+		if totalBitSize%8 != 0 {
+			// Round up to nearest byte
+			totalByteSize += 1
+		}
 
-	canvas := make([]byte, totalByteSize)
-	ctx := context.Background()
-	err := core.ArtPeaceBackend.Databases.Redis.Set(ctx, "canvas", canvas, 0).Err()
-	if err != nil {
-		panic(err)
-	}
+		// Create canvas
+		canvas := make([]byte, totalByteSize)
+		ctx := context.Background()
+		err := core.ArtPeaceBackend.Databases.Redis.Set(ctx, "canvas", canvas, 0).Err()
+		if err != nil {
+			panic(err)
+		}
 
-	fmt.Println("Canvas initialized")
+		fmt.Println("Canvas initialized")
+	} else {
+		fmt.Println("Canvas already initialized")
+	}
 }
 
 func getCanvas(w http.ResponseWriter, r *http.Request) {
