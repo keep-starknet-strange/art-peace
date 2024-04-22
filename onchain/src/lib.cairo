@@ -7,6 +7,7 @@ use interfaces::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel
 mod quests {
     pub mod interfaces;
     pub mod pixel_quest;
+    pub mod template_quest;
 
     use interfaces::{IQuest, IPixelQuest, QuestClaimed, IQuestDispatcher, IQuestDispatcherTrait};
 }
@@ -50,6 +51,7 @@ mod mocks {
 mod tests {
     mod art_peace;
     mod username_store;
+    mod template_quest;
     pub(crate) mod utils;
 }
 

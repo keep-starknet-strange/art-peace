@@ -3,6 +3,8 @@ use art_peace::templates::interfaces::{
     ITemplateVerifierDispatcherTrait, TemplateMetadata
 };
 
+use core::array::Span;
+use core::traits::{TryInto, Into};
 
 #[starknet::contract]
 pub mod TemplateQuest {
@@ -43,7 +45,7 @@ pub mod TemplateQuest {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: TemplateQuestInitParams,) {
+    fn constructor(ref self: ContractState, init_params: TemplateQuestInitParams) {
         self.reward.write(init_params.reward);
         self.art_peace.write(IArtPeaceDispatcher { contract_address: init_params.art_peace });
     }
@@ -57,13 +59,11 @@ pub mod TemplateQuest {
         fn is_claimable(
             self: @ContractState, user: ContractAddress, calldata: Span<felt252>
         ) -> bool {
-            //  let art_peace = self.art_peace.read();
-
             if self.claimed.read(user) {
                 return false;
             }
 
-            let template_id_felt = calldata[0];
+            let template_id_felt = *calldata.at(0);
 
             let template_id: u32 = template_id_felt.try_into().unwrap();
 
