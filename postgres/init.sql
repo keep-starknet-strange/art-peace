@@ -80,8 +80,10 @@ CREATE TABLE UserMainQuests (
 CREATE INDEX userMainQuests_userAddress_index ON UserMainQuests (userAddress);
 CREATE INDEX userMainQuests_questKey_index ON UserMainQuests (questKey);
 
+-- TODO: key to color_idx
 CREATE TABLE Colors (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   hex text NOT NULL
 );
 

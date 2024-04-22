@@ -9,4 +9,5 @@ func InitRoutes() {
 	InitUserRoutes()
 	InitContractRoutes()
 	InitQuestsRoutes()
+	InitColorsRoutes()
 }

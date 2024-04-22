@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMediaQuery } from 'react-responsive'
 import './App.css';
 import Canvas from './canvas/Canvas.js';
@@ -52,6 +52,31 @@ function App() {
     setPixelSelectedMode(true);
   }
 
+  const [timeLeftInDay, setTimeLeftInDay] = useState('');
+  const startTime = "15:00";
+  const [hours, minutes] = startTime.split(":");
+  
+  
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const nextDayStart = new Date(now);
+      nextDayStart.setDate(now.getDate() + 1);
+      nextDayStart.setUTCHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const difference = nextDayStart - now;
+      const hoursFinal = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutesFinal = Math.floor((difference / 1000 / 60) % 60);
+      const secondsFinal = Math.floor((difference / 1000) % 60);
+
+      const formattedTimeLeft = `${hoursFinal.toString().padStart(2, '0')}:${minutesFinal.toString().padStart(2, '0')}:${secondsFinal.toString().padStart(2, '0')}`;
+      setTimeLeftInDay(formattedTimeLeft);
+    };
+
+    const interval = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(interval);
+  })
+
   // Tabs
   const tabs = ['Canvas', 'Quests', 'Vote', 'Templates', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -66,7 +91,7 @@ function App() {
         { (!isPortrait ? pixelSelectedMode : pixelSelectedMode && activeTab === tabs[0]) && (
           <SelectedPixelPanel selectedPositionX={selectedPositionX} selectedPositionY={selectedPositionY} clearPixelSelection={clearPixelSelection} pixelPlacedBy={pixelPlacedBy} />
         )}
-        <TabPanel activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} />
+        <TabPanel activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} timeLeftInDay={timeLeftInDay} />
       </div>
       <div className="App__footer">
         <PixelSelector selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} getDeviceTypeInfo={getDeviceTypeInfo} />
