@@ -19,7 +19,7 @@ type Colors struct {
 func InitColorsRoutes() {
 	http.HandleFunc("/get-colors", GetAllColors)
 	http.HandleFunc("/get-color", GetSingleColor)
-  http.HandleFunc("/init-colors", InitColors)
+	http.HandleFunc("/init-colors", InitColors)
 }
 
 func GetAllColors(w http.ResponseWriter, r *http.Request) {
@@ -96,32 +96,32 @@ func GetSingleColor(w http.ResponseWriter, r *http.Request) {
 }
 
 func InitColors(w http.ResponseWriter, r *http.Request) {
-  // TODO: Add authentication and/or check if colors already exist
-  reqBody, err := io.ReadAll(r.Body)
-  if err != nil {
-    w.WriteHeader(http.StatusBadRequest)
-    w.Write([]byte(err.Error()))
-    return
-  }
+	// TODO: Add authentication and/or check if colors already exist
+	reqBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
-  var colors []string
-  err = json.Unmarshal(reqBody, &colors)
-  if err != nil {
-    w.WriteHeader(http.StatusBadRequest)
-    w.Write([]byte(err.Error()))
-    return
-  }
+	var colors []string
+	err = json.Unmarshal(reqBody, &colors)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
-  for _, color := range colors {
-  	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO colors (hex) VALUES ($1)", color)
-    if err != nil {
-      w.WriteHeader(http.StatusInternalServerError)
-      w.Write([]byte(err.Error()))
-      return
-    }
-  }
+	for _, color := range colors {
+		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO colors (hex) VALUES ($1)", color)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+	}
 
-  w.WriteHeader(http.StatusOK)
-  w.Write([]byte("Colors initialized"))
-  fmt.Println("Colors initialized")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Colors initialized"))
+	fmt.Println("Colors initialized")
 }
