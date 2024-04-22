@@ -399,7 +399,13 @@ fn template_full_basic_test() {
     let template_image = array![1, 2, 3, 4];
     let template_hash = compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
-        hash: template_hash, position: 0, width: 2, height: 2, reward: 0, reward_token: erc20_mock,
+        name: 'test',
+        hash: template_hash,
+        position: 0,
+        width: 2,
+        height: 2,
+        reward: 0,
+        reward_token: erc20_mock,
     };
 
     template_store.add_template(template_metadata);
@@ -542,6 +548,7 @@ fn deposit_reward_test() {
     let template_image = array![1, 2, 3, 4];
     let template_hash = compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
+        name: 'test',
         hash: template_hash,
         position: 0,
         width: 2,
