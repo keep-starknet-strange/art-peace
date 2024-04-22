@@ -110,7 +110,7 @@ const Canvas = props => {
     if (setup) {
       return;
     }
-    const canvas = canvasRef.current
+    const canvas = props.canvasRef.current
     const context = canvas.getContext('2d')
 
     let getCanvasEndpoint = backendUrl + "/getCanvas"
@@ -173,67 +173,173 @@ const Canvas = props => {
     setupColors,
   ]);
 
+  const colorPixel = useCallback((position, color) => {
+    const canvas = props.canvasRef.current
+    const context = canvas.getContext('2d')
+    const x = position % width
+    const y = Math.floor(position / width)
+    const colorIdx = color
+    const colorHex = "#" + colors[colorIdx] + "FF"
+    context.fillStyle = colorHex
+    context.fillRect(x, y, 1, 1)
+  }, [colors, width])
+
+  const colorExtraPixel = useCallback((position, color) => {
+    const canvas = props.extraCanvasRef.current
+    const context = canvas.getContext('2d')
+    const x = position % width
+    const y = Math.floor(position / width)
+    const colorIdx = color
+    const colorHex = "#" + colors[colorIdx] + "FF"
+    context.fillStyle = colorHex
+    context.fillRect(x, y, 1, 1)
+  }, [colors, width])
+
   useEffect(() => {
     if (lastJsonMessage) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
-      const x = lastJsonMessage.position % width;
-      const y = Math.floor(lastJsonMessage.position / width);
-      const colorIdx = lastJsonMessage.color;
-      const color = "#" + colors[colorIdx] + "FF";
-      //const [r, g, b, a] = color.match(/\w\w/g).map(x => parseInt(x, 16))
-      context.fillStyle = color;
-      context.fillRect(x, y, 1, 1);
+      colorPixel(lastJsonMessage.position, lastJsonMessage.color)
     }
-  }, [lastJsonMessage, colors, width]);
+  }, [lastJsonMessage, colorPixel])
 
-  const pixelSelect = useCallback(
-    (clientX, clientY) => {
-      const canvas = canvasRef.current;
-      const rect = canvas.getBoundingClientRect();
-      const x = Math.floor(
-        ((clientX - rect.left) / (rect.right - rect.left)) * width
-      );
-      const y = Math.floor(
-        ((clientY - rect.top) / (rect.bottom - rect.top)) * height
-      );
-      if (
-        props.selectedColorId === -1 &&
-        props.pixelSelectedMode &&
-        props.selectedPositionX === x &&
-        props.selectedPositionY === y
-      ) {
-        props.clearPixelSelection();
-        return;
-      }
-      if (x < 0 || x >= width || y < 0 || y >= height) {
-        return;
-      }
-      props.setPixelSelection(x, y);
+  const pixelSelect = useCallback((clientX, clientY) => {
+    const canvas = props.canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    const x = Math.floor((clientX - rect.left) / (rect.right - rect.left) * width)
+    const y = Math.floor((clientY - rect.top) / (rect.bottom - rect.top) * height)
+    if (props.selectedColorId === -1 && props.pixelSelectedMode && props.selectedPositionX === x && props.selectedPositionY === y) {
+      props.clearPixelSelection()
+      return
+    }
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      return
+    }
+    props.setPixelSelection(x, y)
 
-      const position = y * width + x;
-      let getPixelInfoEndpoint =
-        backendUrl + "/getPixelInfo?position=" + position.toString();
-      fetch(getPixelInfoEndpoint, {
-        mode: "cors",
+    const position = y * width + x;
+    let getPixelInfoEndpoint =
+      backendUrl + "/getPixelInfo?position=" + position.toString();
+    fetch(getPixelInfoEndpoint, {
+      mode: "cors",
+    })
+      .then((response) => {
+        return response.text();
       })
-        .then((response) => {
-          return response.text();
-        })
-        .then((data) => {
-          // TODO: Cache pixel info & clear cache on update from websocket
-          // TODO: Dont query if hover select ( until 1s after hover? )
-          props.setPixelPlacedBy(data);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      .then((data) => {
+        // TODO: Cache pixel info & clear cache on update from websocket
+        // TODO: Dont query if hover select ( until 1s after hover? )
+        props.setPixelPlacedBy(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     },
     [props, width, height, backendUrl]
   );
 
   const pixelClicked = (e) => {
-    pixelSelect(e.clientX, e.clientY);
+    if (props.nftSelectionMode) {
+      if (!nftSelectionStarted) {
+        const canvas = props.canvasRef.current
+        const rect = canvas.getBoundingClientRect()
+        const x = Math.floor((e.clientX - rect.left) / (rect.right - rect.left) * width)
+        const y = Math.floor((e.clientY - rect.top) / (rect.bottom - rect.top) * height)
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+          return
+        }
+        setNftSelectionStartX(x)
+        setNftSelectionStartY(y)
+        setNftSelectionEndX(x+1)
+        setNftSelectionEndY(y+1)
+        setNftSelectionPositionX(x)
+        setNftSelectionPositionY(y)
+        setNftSelectionWidth(1)
+        setNftSelectionHeight(1)
+        setNftSelectionStarted(true)
+        return
+      } else {
+        const canvas = props.canvasRef.current
+        const rect = canvas.getBoundingClientRect()
+        const x = Math.floor((e.clientX - rect.left) / (rect.right - rect.left) * width)
+        const y = Math.floor((e.clientY - rect.top) / (rect.bottom - rect.top) * height)
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+          return
+        }
+        setNftSelectionEndX(x+1)
+        setNftSelectionEndY(y+1)
+        if (nftSelectionEndX <= nftSelectionStartX) {
+          setNftSelectionPositionX(nftSelectionEndX - 1)
+          setNftSelectionWidth(nftSelectionStartX - nftSelectionEndX + 1)
+        } else {
+          setNftSelectionPositionX(nftSelectionStartX)
+          setNftSelectionWidth(nftSelectionEndX - nftSelectionStartX)
+        }
+        if (nftSelectionEndY <= nftSelectionStartY) {
+          setNftSelectionPositionY(nftSelectionEndY - 1)
+          setNftSelectionHeight(nftSelectionStartY - nftSelectionEndY + 1)
+        } else {
+          setNftSelectionPositionY(nftSelectionStartY)
+          setNftSelectionHeight(nftSelectionEndY - nftSelectionStartY)
+        }
+        console.log("Making NFT with position: ", nftSelectionPositionX, nftSelectionPositionY, nftSelectionWidth, nftSelectionHeight)
+
+        // Mint NFT
+        let mintNFTEndpoint = backendUrl + "/mint-nft-devnet"
+        let nftPosition = nftSelectionPositionX + nftSelectionPositionY * width 
+        let nftWidth = nftSelectionWidth
+        let nftHeight = nftSelectionHeight
+        fetch(mintNFTEndpoint, {
+          mode: "cors",
+          method: "POST",
+          body: JSON.stringify({
+            position: nftPosition.toString(),
+            width: nftWidth.toString(),
+            height: nftHeight.toString(),
+          }),
+        }).then(response => {
+          return response.text()
+        }).then(data => {
+          console.log(data)
+        }).catch(error => {
+          console.error("Error minting nft")
+          console.error(error)
+        });
+
+        setNftSelectionStarted(false)
+        setNftSelectionPositionX(-1)
+        setNftSelectionPositionY(-1)
+        setNftSelectionWidth(0)
+        setNftSelectionHeight(0)
+        setNftSelectionStartX(0)
+        setNftSelectionStartY(0)
+        setNftSelectionEndX(0)
+        setNftSelectionEndY(0)
+        props.setNftSelectionMode(false)
+
+        return
+      }
+    }
+
+    if (props.templateCreationMode) {
+      const canvas = props.canvasRef.current
+      const rect = canvas.getBoundingClientRect()
+      const x = Math.floor((e.clientX - rect.left) / (rect.right - rect.left) * width)
+      const y = Math.floor((e.clientY - rect.top) / (rect.bottom - rect.top) * height)
+      if (x < 0 || x >= width || y < 0 || y >= height) {
+        return
+      }
+
+      let templatePosition = x + y * width
+      // TODO: Template preview
+
+      props.setTemplateImagePositionX(x)
+      props.setTemplateImagePositionY(y)
+      props.setTemplateImagePosition(templatePosition)
+      props.setTemplatePlacedMode(true)
+      props.setTemplateCreationMode(false)
+      return
+    }
+
+    pixelSelect(e.clientX, e.clientY)
     if (props.selectedColorId === -1) {
       return;
     }
@@ -241,7 +347,18 @@ const Canvas = props => {
       return;
     }
 
-
+    if (props.extraPixels > 0) {
+      // TODO: allow overwrite on all pixels used
+      if (props.extraPixelsUsed < props.extraPixels) {
+        props.addExtraPixel(props.selectedPositionX, props.selectedPositionY)
+        colorExtraPixel(props.selectedPositionX + props.selectedPositionY * width, props.selectedColorId)
+        return
+      } else {
+        // TODO: Notify user of no more extra pixels
+        return
+      }
+    }
+    
     const position = props.selectedPositionX + props.selectedPositionY * width
     const colorIdx = props.selectedColorId
     let placePixelEndpoint = backendUrl + "/placePixelDevnet"
@@ -336,8 +453,86 @@ const Canvas = props => {
     return "#" + colors[props.selectedColorId] + "FF";
   };
 
+  // TODO
+  //const templateImage = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 4, 3]
+  //const templateWidth = 4
+  //const templatePositionX = 13
+  //const templatePositionY = 13
+  //<TemplateOverlay templateImage={templateImage} templateWidth={templateWidth} templatePositionX={templatePositionX} templatePositionY={templatePositionY} colors={colors} />
+
+  // TODO
+  // TODO: setup nft selection mode func w/ stop pixel selection
+  const [nftSelectionPositionX, setNftSelectionPositionX] = useState(-1)
+  const [nftSelectionPositionY, setNftSelectionPositionY] = useState(-1)
+  const [nftSelectionWidth, setNftSelectionWidth] = useState(0)
+  const [nftSelectionHeight, setNftSelectionHeight] = useState(0)
+  const [nftSelectionStartX, setNftSelectionStartX] = useState(0)
+  const [nftSelectionStartY, setNftSelectionStartY] = useState(0)
+  const [nftSelectionEndX, setNftSelectionEndX] = useState(0)
+  const [nftSelectionEndY, setNftSelectionEndY] = useState(0)
+  const [nftSelectionStarted, setNftSelectionStarted] = useState(false)
+
   useEffect(() => {
     const setFromEvent = (e) => {
+      if (props.nftSelectionMode) {
+        if (!nftSelectionStarted) {
+          const canvas = props.canvasRef.current
+          const rect = canvas.getBoundingClientRect()
+          const x = Math.floor((e.clientX - rect.left) / (rect.right - rect.left) * width)
+          const y = Math.floor((e.clientY - rect.top) / (rect.bottom - rect.top) * height)
+          if (x < 0 || x >= width || y < 0 || y >= height) {
+            return
+          }
+          setNftSelectionStartX(x)
+          setNftSelectionStartY(y)
+          setNftSelectionEndX(x+1)
+          setNftSelectionEndY(y+1)
+          setNftSelectionPositionX(x)
+          setNftSelectionPositionY(y)
+          setNftSelectionWidth(1)
+          setNftSelectionHeight(1)
+          return
+        } else {
+          const canvas = props.canvasRef.current
+          const rect = canvas.getBoundingClientRect()
+          const x = Math.floor((e.clientX - rect.left) / (rect.right - rect.left) * width)
+          const y = Math.floor((e.clientY - rect.top) / (rect.bottom - rect.top) * height)
+          if (x < 0 || x >= width || y < 0 || y >= height) {
+            return
+          }
+          setNftSelectionEndX(x+1)
+          setNftSelectionEndY(y+1)
+          if (nftSelectionEndX <= nftSelectionStartX) {
+            setNftSelectionPositionX(nftSelectionEndX - 1)
+            setNftSelectionWidth(nftSelectionStartX - nftSelectionEndX + 1)
+          } else {
+            setNftSelectionPositionX(nftSelectionStartX)
+            setNftSelectionWidth(nftSelectionEndX - nftSelectionStartX)
+          }
+          if (nftSelectionEndY <= nftSelectionStartY) {
+            setNftSelectionPositionY(nftSelectionEndY - 1)
+            setNftSelectionHeight(nftSelectionStartY - nftSelectionEndY + 1)
+          } else {
+            setNftSelectionPositionY(nftSelectionStartY)
+            setNftSelectionHeight(nftSelectionEndY - nftSelectionStartY)
+          }
+          return
+        }
+      }
+      if (props.templateCreationMode) {
+        const canvas = props.canvasRef.current
+        const rect = canvas.getBoundingClientRect()
+        const x = Math.floor((e.clientX - rect.left) / (rect.right - rect.left) * width)
+        const y = Math.floor((e.clientY - rect.top) / (rect.bottom - rect.top) * height)
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+          return
+        }
+        // TODO: Stop template overflows
+        props.setTemplateImagePositionX(x)
+        props.setTemplateImagePositionY(y)
+        return
+      }
+
       if (props.selectedColorId === -1) {
         return;
       }
@@ -348,14 +543,7 @@ const Canvas = props => {
     return () => {
       window.removeEventListener("mousemove", setFromEvent);
     };
-  }, [props.selectedColorId, pixelSelect]);
-
-  // TODO
-  //const templateImage = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 4, 3]
-  //const templateWidth = 4
-  //const templatePositionX = 13
-  //const templatePositionY = 13
-  //<TemplateOverlay templateImage={templateImage} templateWidth={templateWidth} templatePositionX={templatePositionX} templatePositionY={templatePositionY} colors={colors} />
+  }, [props.selectedColorId, pixelSelect, props.nftSelectionMode, nftSelectionStarted, nftSelectionPositionX, nftSelectionPositionY, nftSelectionWidth, nftSelectionHeight, height, width, props.canvasRef, nftSelectionEndX, nftSelectionEndY, nftSelectionStartX, nftSelectionStartY]);
 
   // TODO: both place options
   return (
@@ -369,12 +557,21 @@ const Canvas = props => {
 
             </div>
           )}
-          <canvas ref={canvasRef} className="Canvas" onClick={pixelClicked} />
+          <canvas ref={props.canvasRef} className="Canvas" onClick={pixelClicked}/>
+          { props.extraPixels > 0 && (
+            <canvas ref={props.extraCanvasRef} className="Canvas__extras" onClick={pixelClicked} width={width} height={height} />
+          )}
+          { props.nftSelectionMode && (
+            <div className="Canvas__nftSelection" style={{left: nftSelectionPositionX, top: nftSelectionPositionY, width: nftSelectionWidth, height: nftSelectionHeight, pointerEvents: 'none', display: (nftSelectionWidth === 0 && nftSelectionHeight== 0 ? 'none' : 'block')}}>
+            </div>
+          )}
+          { (props.templateCreationMode || props.templatePlacedMode) && (
+            <img src={props.templateImage} alt="Template" className="Canvas__template" style={{top: props.templateImagePositionY, left: props.templateImagePositionX, pointerEvents: 'none'}} />
+          )}
         </div>
       </div>
     </div>
   );
 };
-
 
 export default Canvas;

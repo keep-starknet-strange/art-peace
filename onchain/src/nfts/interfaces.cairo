@@ -5,7 +5,7 @@ pub struct NFTMintParams {
     pub height: u128,
 }
 
-#[derive(Drop, Serde, PartialEq, starknet::Store)]
+#[derive(Drop, Copy, Serde, PartialEq, starknet::Store)]
 pub struct NFTMetadata {
     pub position: u128,
     pub width: u128,
@@ -28,12 +28,16 @@ pub trait ICanvasNFTStore<TContractState> {
 
 #[starknet::interface]
 pub trait ICanvasNFTAdditional<TContractState> {
+    // Sets up the contract addresses
+    fn set_canvas_contract(ref self: TContractState, canvas_contract: starknet::ContractAddress);
     // Mint a new NFT called by the ArtPeaceNFTMinter contract.
     fn mint(ref self: TContractState, metadata: NFTMetadata, receiver: starknet::ContractAddress);
 }
 
 #[starknet::interface]
 pub trait IArtPeaceNFTMinter<TContractState> {
+    // Sets up the contract addresses
+    fn add_nft_contract(ref self: TContractState, nft_contract: starknet::ContractAddress);
     // Mints a new NFT from the canvas using init params, and returns the token ID.
     fn mint_nft(self: @TContractState, mint_params: NFTMintParams);
 }

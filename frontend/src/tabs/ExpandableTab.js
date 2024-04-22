@@ -7,6 +7,7 @@ const ExpandableTab = props => {
 
   const MainSection = props.mainSection;
   const ExpandedSection = props.expandedSection;
+  const { ...rest } = props;
 
   // TODO: Add close button that switches to canvas
   // TODO: Add expand/collapse feature
@@ -15,8 +16,8 @@ const ExpandableTab = props => {
     <div className={'ExpandableTab' + (expanded ? ' ExpandableTab--expanded' : '')}>
       <h1 className='ExpandableTab__title'>{props.title}</h1>
       <div className='ExpandableTab__content'>
-        <MainSection />
-        {expanded && <ExpandedSection />}
+        <MainSection {...rest} />
+        {expanded && <ExpandedSection {...rest} />}
       </div>
       <div className='ExpandableTab__hamburger' onClick={() => setExpanded(!expanded)}></div>
     </div>

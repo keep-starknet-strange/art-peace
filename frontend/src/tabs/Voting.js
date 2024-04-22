@@ -23,7 +23,7 @@ const Voting = props => {
           <div style={{gridArea: "color"}}>Color</div>
           <div style={{gridArea: "votes"}}>Count</div>
         </div>
-        <div style={{height: '52vh', overflow: 'scroll'}}>
+        <div style={{height: '41vh', overflow: 'scroll'}}>
         {colors.map((color, index) => (
           <div key={index} className="Voting__colors__item">
             <div className="Voting__colors__item__vote" onClick={() => {

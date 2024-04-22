@@ -25,6 +25,14 @@
   box-shadow: 0 0 0.05rem 0.01rem rgba(0, 0, 0, 0.4);
 }
 
+.Canvas__extras {
+  position: absolute;
+  left: 0;
+  z-index: 3;
+  background-color: rgba(0, 0, 0, 0);
+  image-rendering: pixelated;
+}
+
 .Canvas__selected {
   position: absolute;
   z-index: 4;
@@ -43,4 +51,23 @@
   left: 0;
 
   pointer-events: none;
+}
+
+.Canvas__nftSelection {
+  position: absolute;
+  z-index: 5;
+
+  background-color: rgba(0, 0, 0, 0);
+  outline: 0.1px solid rgba(255, 0, 0, 0.5);
+}
+
+.Canvas__template {
+  position: absolute;
+  z-index: 6;
+
+  background-color: rgba(0, 0, 0, 0);
+  image-rendering: pixelated;
+  opacity: 0.5;
+
+  outline: 0.1px solid rgba(255, 0, 0, 0.5);
 }
