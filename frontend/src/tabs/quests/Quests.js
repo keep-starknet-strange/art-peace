@@ -56,7 +56,7 @@ const Quests = props => {
       <div style={{height: '70vh', overflowY: 'scroll'}}>
         <div style={{display: 'flex', alignItems: 'center'}}>
           <h2 className="Quests__item__header">Dailys</h2>
-          <p style={{fontSize: "1rem", marginLeft: "1rem"}}>XX:XX:XX</p>
+          <p style={{fontSize: "1rem", marginLeft: "1rem"}}>{props.timeLeftInDay}</p>
         </div>
         {dailyQuests.map((quest, index) => (
           <QuestItem key={index} title={quest.title} description={quest.description} reward={quest.reward} status={quest.status} />
