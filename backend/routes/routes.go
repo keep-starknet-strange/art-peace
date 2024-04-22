@@ -8,5 +8,6 @@ func InitRoutes() {
 	InitTemplateRoutes()
 	InitUserRoutes()
 	InitContractRoutes()
+	InitQuestsRoutes()
 	InitColorsRoutes()
 }
