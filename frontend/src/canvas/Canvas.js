@@ -28,36 +28,30 @@ const Canvas = props => {
   const height = canvasConfig.canvas.height;
   const staticColors = canvasConfig.colors;
 
-  const [colors, setColors] = useState({});
+  const [colors, setColors] = useState([]);
+  const [setupColors, setSetupColors] = useState(false);
 
   useEffect(() => {
+    if (setupColors) {
+      return;
+    }
     let getColorsEndpoint = backendUrl + "/get-colors";
-    fetch(getColorsEndpoint, { mode: "cors" })
-      .then((response) => {
-        return response;
-      })
-      .then((data) => {
-        console.log(data.body);
-        let colorData = new Uint8Array(data, 0, data.byteLength);
-        console.log(colorData);
-
-        // Convert ArrayBuffer to base-10 array
-        const base10Array = [];
-        const view = new Uint8Array(data);
-        for (let i = 0; i < view.length; i++) {
-          base10Array.push(view[i]);
+    fetch(getColorsEndpoint, { mode: "cors" }).then((response) => {
+      response.json().then((data) => {
+        let colors = [];
+        for (let i = 0; i < data.length; i++) {
+          colors.push(data[i].hex);
         }
-
-        setColors(base10Array);
-        console.log(base10Array);
-      })
-      .catch((error) => {
+        setColors(colors);
+        setSetupColors(true);
+      }).catch((error) => {
         setColors(staticColors);
+        setSetupColors(true);
         console.error(error);
       });
-
+    });
     // TODO: Return a cleanup function to close the websocket / ...
-  }, [colors, backendUrl]);
+  }, [colors, backendUrl, staticColors, setupColors, setColors]);
 
   const WS_URL =
     "ws://" + backendConfig.host + ":" + backendConfig.port + "/ws";
@@ -110,6 +104,9 @@ const Canvas = props => {
   );
 
   useEffect(() => {
+    if (!setupColors) {
+      return;
+    }
     if (setup) {
       return;
     }
@@ -137,23 +134,22 @@ const Canvas = props => {
           let byte = (colorData[bytePos] << 8) | colorData[bytePos + 1]
           let value = (byte >> (twoByteBitOffset - bitOffset)) & 0b11111
           dataArray.push(value)
-
         }
-        let imageDataArray = [];
-        for (let i = 0; i < dataArray.length; i++) {
-          const color = "#" + colors[dataArray[i]] + "FF";
-          const [r, g, b, a] = color.match(/\w\w/g).map((x) => parseInt(x, 16));
-          imageDataArray.push(r, g, b, a);
-        }
-        const uint8ClampedArray = new Uint8ClampedArray(imageDataArray);
-        const imageData = new ImageData(uint8ClampedArray, width, height);
-        draw(context, imageData);
-        setSetup(true);
-      })
-      .catch((error) => {
-        //TODO: Notifiy user of error
-        console.error(error);
-      });
+      }
+      let imageDataArray = [];
+      for (let i = 0; i < dataArray.length; i++) {
+        const color = "#" + colors[dataArray[i]] + "FF";
+        const [r, g, b, a] = color.match(/\w\w/g).map((x) => parseInt(x, 16));
+        imageDataArray.push(r, g, b, a);
+      }
+      const uint8ClampedArray = new Uint8ClampedArray(imageDataArray);
+      const imageData = new ImageData(uint8ClampedArray, width, height);
+      draw(context, imageData);
+      setSetup(true);
+    }).catch((error) => {
+      //TODO: Notifiy user of error
+      console.error(error);
+    });
 
     console.log("Connect to websocket");
     if (readyState === ReadyState.OPEN) {
@@ -174,6 +170,7 @@ const Canvas = props => {
     height,
     backendUrl,
     draw,
+    setupColors,
   ]);
 
   useEffect(() => {

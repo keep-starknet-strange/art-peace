@@ -3,6 +3,8 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -11,19 +13,19 @@ import (
 )
 
 type Colors struct {
-	Key string `json:"key"`
 	Hex string `json:"hex"`
 }
 
 func InitColorsRoutes() {
 	http.HandleFunc("/get-colors", GetAllColors)
 	http.HandleFunc("/get-color", GetSingleColor)
+  http.HandleFunc("/init-colors", InitColors)
 }
 
 func GetAllColors(w http.ResponseWriter, r *http.Request) {
 
 	var colors []Colors
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM colors")
+	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT hex FROM colors")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -34,7 +36,7 @@ func GetAllColors(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var c Colors
-		err := rows.Scan(&c.Key, &c.Hex)
+		err := rows.Scan(&c.Hex)
 		if err != nil {
 			log.Fatalf("Scan failed: %v\n", err)
 		}
@@ -67,8 +69,8 @@ func GetSingleColor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var c Colors
-	row := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT key, hex FROM colors WHERE key = $1", colorKey)
-	err := row.Scan(&c.Key, &c.Hex)
+	row := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT hex FROM colors WHERE key = $1", colorKey)
+	err := row.Scan(&c.Hex)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
@@ -91,4 +93,35 @@ func GetSingleColor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte(out))
+}
+
+func InitColors(w http.ResponseWriter, r *http.Request) {
+  // TODO: Add authentication and/or check if colors already exist
+  reqBody, err := io.ReadAll(r.Body)
+  if err != nil {
+    w.WriteHeader(http.StatusBadRequest)
+    w.Write([]byte(err.Error()))
+    return
+  }
+
+  var colors []string
+  err = json.Unmarshal(reqBody, &colors)
+  if err != nil {
+    w.WriteHeader(http.StatusBadRequest)
+    w.Write([]byte(err.Error()))
+    return
+  }
+
+  for _, color := range colors {
+  	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO colors (hex) VALUES ($1)", color)
+    if err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+      w.Write([]byte(err.Error()))
+      return
+    }
+  }
+
+  w.WriteHeader(http.StatusOK)
+  w.Write([]byte("Colors initialized"))
+  fmt.Println("Colors initialized")
 }
