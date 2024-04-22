@@ -407,7 +407,6 @@ fn template_full_basic_test() {
         reward: 0,
         reward_token: erc20_mock,
         creator: get_caller_address()
-
     };
 
     template_store.add_template(template_metadata);
