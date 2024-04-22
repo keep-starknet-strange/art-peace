@@ -4,8 +4,8 @@ import BasicTab from "../BasicTab.js";
 import QuestItem from "./QuestItem.js";
 
 const Quests = (props) => {
-const [dailyQuests, setDailyQuests] = useState([]);
-const [mainQuests, setMainQuests] = useState([]);
+  const [dailyQuests, setDailyQuests] = useState([]);
+  const [mainQuests, setMainQuests] = useState([]);
 
   useEffect(() => {
     const fetchQuests = async () => {
@@ -76,6 +76,7 @@ const [mainQuests, setMainQuests] = useState([]);
   ];
 
   const sortByCompleted = (arr) => {
+    if (!arr) return [];
     const newArray = [];
     for (let i = 0; i < arr.length; i++) {
       if (arr[i].status == "completed") {
@@ -104,9 +105,27 @@ const [mainQuests, setMainQuests] = useState([]);
             status={quest.status}
           />
         ))}
+        {sortByCompleted(localDailyQuests).map((quest, index) => (
+          <QuestItem
+            key={index}
+            title={quest.title}
+            description={quest.description}
+            reward={quest.reward}
+            status={quest.status}
+          />
+        ))}
 
         <h2 className="Quests__item__header">Main</h2>
         {sortByCompleted(mainQuests).map((quest, index) => (
+          <QuestItem
+            key={index}
+            title={quest.title}
+            description={quest.description}
+            reward={quest.reward}
+            status={quest.status}
+          />
+        ))}
+        {sortByCompleted(localMainQuests).map((quest, index) => (
           <QuestItem
             key={index}
             title={quest.title}
