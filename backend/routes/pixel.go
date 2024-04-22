@@ -18,7 +18,7 @@ func InitPixelRoutes() {
 	http.HandleFunc("/getPixelInfo", getPixelInfo)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/placePixelDevnet", placePixelDevnet)
-	  http.HandleFunc("/placeExtraPixelsDevnet", placeExtraPixelsDevnet)
+		http.HandleFunc("/placeExtraPixelsDevnet", placeExtraPixelsDevnet)
 	}
 	http.HandleFunc("/placePixelRedis", placePixelRedis)
 }
