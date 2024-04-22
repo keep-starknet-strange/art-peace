@@ -11,7 +11,8 @@ mod quests {
 
     use interfaces::{
         IQuest, IPixelQuest, IUnruggableQuest, QuestClaimed, IQuestDispatcher,
-        IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher, IUnruggableMemecoinDispatcherTrait
+        IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher,
+        IUnruggableMemecoinDispatcherTrait
     };
 }
 
@@ -47,7 +48,8 @@ mod username_store {
 }
 
 mod mocks {
-    pub mod erc20_mock;
+    pub(crate) mod erc20_mock;
+    pub(crate) mod unruggable_token;
 }
 
 #[cfg(test)]
