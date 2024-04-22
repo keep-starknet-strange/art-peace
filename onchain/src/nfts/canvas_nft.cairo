@@ -46,9 +46,7 @@ mod CanvasNFT {
     }
 
     #[constructor]
-    fn constructor(
-        ref self: ContractState, name: ByteArray, symbol: ByteArray
-    ) {
+    fn constructor(ref self: ContractState, name: ByteArray, symbol: ByteArray) {
         let base_uri = "test"; // TODO: change to real base uri
         self.erc721.initializer(name, symbol, base_uri);
     }
@@ -57,10 +55,7 @@ mod CanvasNFT {
     impl CanvasNFTAdditional of ICanvasNFTAdditional<ContractState> {
         fn set_canvas_contract(ref self: ContractState, canvas_contract: ContractAddress) {
             let zero_address = starknet::contract_address_const::<0>();
-            assert(
-                self.art_peace.read() == zero_address,
-                'ArtPeace contract already set'
-            );
+            assert(self.art_peace.read() == zero_address, 'ArtPeace contract already set');
             self.art_peace.write(canvas_contract);
         }
 

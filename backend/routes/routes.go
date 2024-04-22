@@ -8,5 +8,5 @@ func InitRoutes() {
 	InitTemplateRoutes()
 	InitUserRoutes()
 	InitContractRoutes()
-  InitNFTRoutes()
+	InitNFTRoutes()
 }

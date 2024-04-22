@@ -108,7 +108,9 @@ pub mod ArtPeace {
         self.day_index.write(0);
 
         // TODO: Dev only - remove
-        let test_address = starknet::contract_address_const::<0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0>();
+        let test_address = starknet::contract_address_const::<
+            0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
+        >();
         self.extra_pixels.write(test_address, 1000);
 
         // TODO: To config
@@ -172,7 +174,10 @@ pub mod ArtPeace {
             // TODO: Use sender not caller?
             let caller = starknet::get_caller_address();
             // TODO: Only if the user has placed a pixel before?
-            assert(now - self.last_placed_time.read(caller) >= self.time_between_pixels.read(), 'Pixel not available');
+            assert(
+                now - self.last_placed_time.read(caller) >= self.time_between_pixels.read(),
+                'Pixel not available'
+            );
             let pixel = Pixel { color, owner: caller };
             self.canvas.write(pos, pixel);
             self.last_placed_time.write(caller, now);

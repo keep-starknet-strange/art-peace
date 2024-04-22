@@ -17,7 +17,7 @@ func InitPixelRoutes() {
 	http.HandleFunc("/getPixel", getPixel)
 	http.HandleFunc("/getPixelInfo", getPixelInfo)
 	http.HandleFunc("/placePixelDevnet", placePixelDevnet)
-  http.HandleFunc("/placeExtraPixelsDevnet", placeExtraPixelsDevnet)
+	http.HandleFunc("/placeExtraPixelsDevnet", placeExtraPixelsDevnet)
 	http.HandleFunc("/placePixelRedis", placePixelRedis)
 }
 
@@ -86,47 +86,47 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
 }
 
 func placeExtraPixelsDevnet(w http.ResponseWriter, r *http.Request) {
-  // TODO: Disable in production
-  reqBody, err := io.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  // TODO: Pixel position instead of x, y
-  // Json data format:
-  /*
-  {
-    "extraPixels": [
-      { "x": 0, "y": 0, "colorId": 1 },
-      { "x": 1, "y": 0, "colorId": 2 },
-    ]
-  }
-  */
-  var jsonBody map[string][]map[string]int
-  err = json.Unmarshal(reqBody, &jsonBody)
-  if err != nil {
-    panic(err)
-  }
+	// TODO: Disable in production
+	reqBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	// TODO: Pixel position instead of x, y
+	// Json data format:
+	/*
+	  {
+	    "extraPixels": [
+	      { "x": 0, "y": 0, "colorId": 1 },
+	      { "x": 1, "y": 0, "colorId": 2 },
+	    ]
+	  }
+	*/
+	var jsonBody map[string][]map[string]int
+	err = json.Unmarshal(reqBody, &jsonBody)
+	if err != nil {
+		panic(err)
+	}
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.PlaceExtraPixelsDevnet
-  contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.PlaceExtraPixelsDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
 
-  positions := strconv.Itoa(len(jsonBody["extraPixels"]))
-  colors := strconv.Itoa(len(jsonBody["extraPixels"]))
-  for _, pixel := range jsonBody["extraPixels"] {
-    pos := pixel["x"] + pixel["y"] * int(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
-    positions += " " + strconv.Itoa(pos)
-    colors += " " + strconv.Itoa(pixel["colorId"])
-  }
+	positions := strconv.Itoa(len(jsonBody["extraPixels"]))
+	colors := strconv.Itoa(len(jsonBody["extraPixels"]))
+	for _, pixel := range jsonBody["extraPixels"] {
+		pos := pixel["x"] + pixel["y"]*int(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
+		positions += " " + strconv.Itoa(pos)
+		colors += " " + strconv.Itoa(pixel["colorId"])
+	}
 
-  cmd := exec.Command(shellCmd, contract, "place_extra_pixels", positions, colors)
-  _, err = cmd.Output()
-  if err != nil {
-    fmt.Println("Error executing shell command: ", err)
-    panic(err)
-  }
+	cmd := exec.Command(shellCmd, contract, "place_extra_pixels", positions, colors)
+	_, err = cmd.Output()
+	if err != nil {
+		fmt.Println("Error executing shell command: ", err)
+		panic(err)
+	}
 
-  w.Header().Set("Access-Control-Allow-Origin", "*")
-  w.Write([]byte("Extra pixels placed"))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte("Extra pixels placed"))
 }
 
 func placePixelRedis(w http.ResponseWriter, r *http.Request) {
