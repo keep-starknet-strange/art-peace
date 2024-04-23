@@ -81,6 +81,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "fishonamos",
+      "name": "Fishon Amos",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43862685?v=4",
+      "profile": "https://fishonsnote.medium.com/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
