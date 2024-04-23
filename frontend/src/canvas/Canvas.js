@@ -18,7 +18,6 @@ const Canvas = props => {
   const maxScale = 40;
 
 
-  const canvasRef = useRef(null)
   const canvasPositionRef = useRef(null)
   const canvasScaleRef = useRef(null)
 
@@ -410,7 +409,7 @@ const Canvas = props => {
       return null;
     }
     if (props.selectedColorId === -1) {
-      let color = canvasRef.current
+      let color = props.canvasRef.current
         .getContext("2d")
         .getImageData(
           props.selectedPositionX,
@@ -434,7 +433,7 @@ const Canvas = props => {
       return null;
     }
     if (props.selectedColorId === -1) {
-      let color = canvasRef.current
+      let color = props.canvasRef.current
         .getContext("2d")
         .getImageData(
           props.selectedPositionX,
@@ -543,7 +542,7 @@ const Canvas = props => {
     return () => {
       window.removeEventListener("mousemove", setFromEvent);
     };
-  }, [props.selectedColorId, pixelSelect, props.nftSelectionMode, nftSelectionStarted, nftSelectionPositionX, nftSelectionPositionY, nftSelectionWidth, nftSelectionHeight, height, width, props.canvasRef, nftSelectionEndX, nftSelectionEndY, nftSelectionStartX, nftSelectionStartY]);
+  }, [props.selectedColorId, pixelSelect, props.nftSelectionMode, nftSelectionStarted, nftSelectionPositionX, nftSelectionPositionY, nftSelectionWidth, nftSelectionHeight, height, width, props.canvasRef, nftSelectionEndX, nftSelectionEndY, nftSelectionStartX, nftSelectionStartY, props]);
 
   // TODO: both place options
   return (
