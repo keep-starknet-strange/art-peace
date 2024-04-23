@@ -1,0 +1,56 @@
+.Text__large {
+  font-size: 1.6rem;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.Button__primary {
+  margin: 0.2rem;
+  padding: 0.5rem 1rem;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.8));
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+
+  cursor: pointer;
+  pointer-events: fill;
+  transition: 0.2s;
+}
+
+.Button__primary:hover {
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9));
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.4);
+  transform: scale(1.05) translateY(-0.1rem);
+}
+
+.Button__primary:active {
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.8));
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
+  transform: scale(1) translateY(0);
+}
+
+.Button__close {
+  margin: 0;
+  padding: 0.5rem;
+
+  text-align: center;
+  cursor: pointer;
+  pointer-events: fill;
+  font-size: 1.5rem;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.Button__close:hover {
+  transform: translateY(-0.2rem) scale(1.05);
+  color: rgba(200, 0, 0, 0.9);
+}
+
+.Button__close:active {
+  transform: translateY(0) scale(1);
+  color: rgba(200, 0, 0, 0.9);
+}

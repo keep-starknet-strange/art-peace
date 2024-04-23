@@ -1,13 +1,12 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './PixelSelector.css';
+import {backendUrl} from '../utils/Consts.js';
+import '../utils/Styles.css';
 import canvasConfig from '../configs/canvas.config.json';
-import backendConfig from '../configs/backend.config.json';
 
 const PixelSelector = (props) => {
-  const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port;
-  const [placedTime, setPlacedTime] = useState(0);
+  const [lastPlacedTime, setLastPlacedTime] = useState(0);
   const [timeTillNextPlacement, setTimeTillNextPlacement] = useState("XX:XX"); // TODO: get from server on init
-  // TODO: Animation for swapping selectorMode
   const [selectorMode, setSelectorMode] = useState(false);
 
   const timeBetweenPlacements = 5000; // 5 seconds TODO: make this a config
@@ -41,17 +40,25 @@ const PixelSelector = (props) => {
     // TODO: Return a cleanup function to close the websocket / ...
   }, [colors, backendUrl, staticColors, setColors, setIsSetup, isSetup]);
 
-  // TODO: implement extraPixels feature(s)
+  const [pixelAvailable, setPixelAvailable] = useState(false);
+  useEffect(() => {
+    if (props.extraPixels > 0) {
+      setPixelAvailable(props.extraPixels - props.extraPixelsUsed > 0);
+      return;
+    }
+    let timeSinceLastPlacement = Date.now() - lastPlacedTime;
+    setPixelAvailable(timeSinceLastPlacement > timeBetweenPlacements);
+  }, [lastPlacedTime, timeBetweenPlacements, props.extraPixels, props.extraPixelsUsed]);
 
   const getTimeTillNextPlacement = useCallback(() => {
-    let timeSinceLastPlacement = Date.now() - placedTime;
+    let timeSinceLastPlacement = Date.now() - lastPlacedTime;
     if (timeSinceLastPlacement > timeBetweenPlacements) {
       return 0;
     }
     return Math.floor((timeBetweenPlacements - timeSinceLastPlacement) / 1000);
-  }, [placedTime]);
+  }, [lastPlacedTime]);
 
-  const placePixelSelector = (event) => {
+  const toSelectorMode = (event) => {
     event.preventDefault();
     // Only work if not clicking on the cancel button
     if (event.target.classList.contains("PixelSelector__cancel")) {
@@ -63,8 +70,8 @@ const PixelSelector = (props) => {
     }
   }
 
-  const selectColor = (color) => {
-    props.setSelectedColorId(colors.indexOf(color));
+  const selectColor = (idx) => {
+    props.setSelectedColorId(idx);
     setSelectorMode(false);
   }
 
@@ -72,8 +79,6 @@ const PixelSelector = (props) => {
     props.setSelectedColorId(-1);
     setSelectorMode(false);
   }
-
-  // TODO: setPlacedTime(Date.now());
 
   useEffect(() => {
     const getPlacementText = () => {
@@ -93,31 +98,31 @@ const PixelSelector = (props) => {
   }, [getTimeTillNextPlacement]);
 
   return (
-    <div className={"PixelSelector " + (props.getDeviceTypeInfo().isPortrait ? " PixelSelector--portrait" : "")}>
+    <div className="PixelSelector">
     {
       selectorMode &&
       <div className="PixelSelector__selector">
           {colors.map((color, idx) => {
             return (
-              <div className="PixelSelector__color" key={idx} style={{backgroundColor: color}} onClick={() => selectColor(color)}></div>
+              <div className="PixelSelector__color PixelSelector__color__selectable" key={idx} style={{backgroundColor: color}} onClick={() => selectColor(idx)}></div>
             )
           })}
-          <div className="PixelSelector__cancel" onClick={() => cancelSelector()}>x</div>
+          <div className="Button__close" onClick={() => cancelSelector()}>x</div>
       </div>
     }
     { !selectorMode &&
-      <div className={"PixelSelector__button " + (getTimeTillNextPlacement() === 0 ? "PixelSelector__button__valid" : "PixelSelector__button__invalid")} onClick={placePixelSelector}>
-        <p>{timeTillNextPlacement}</p>
+      <div className={"Button__primary Text__large " + (pixelAvailable ? "PixelSelector__button--valid" : "PixelSelector__button--invalid")} onClick={toSelectorMode}>
+        <p className="PixelSelector__text">{timeTillNextPlacement}</p>
         { props.extraPixels > 0 &&
-          <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
-          <p style={{margin: "0 0.5rem"}}>|</p>
-          <p>{props.extraPixels - props.extraPixelsUsed} XTRA</p>
+          <div className="PixelSelector__extras">
+            <p style={{margin: "0 0.5rem"}}>|</p>
+            <p className="PixelSelector__text">{props.extraPixels - props.extraPixelsUsed} XTRA</p>
           </div>
         }
         {props.selectedColorId !== -1 &&
           <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", margin: "0 0 0 0.5rem"}}>
-            <div className="PixelSelector__button__color" style={{backgroundColor: colors[props.selectedColorId]}}></div>
-            <div className="PixelSelector__cancel" onClick={() => cancelSelector()}>x</div>
+            <div className="PixelSelector__color" style={{backgroundColor: colors[props.selectedColorId]}}></div>
+            <div className="Button__close" style={{marginLeft: '1rem'}} onClick={() => cancelSelector()}>x</div>
           </div>
         }
       </div>

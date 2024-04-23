@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive'
 import './App.css';
 import Canvas from './canvas/Canvas.js';
-import PixelSelector from './canvas/PixelSelector.js';
 import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
 import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
 import TemplateBuilderPanel from './canvas/TemplateBuilderPanel.js';
-import TabsFooter from './tabs/TabsFooter.js';
+import PixelSelector from './footer/PixelSelector.js';
+import TabsFooter from './footer/TabsFooter.js';
 import TabPanel from './tabs/TabPanel.js';
 import { usePreventZoom } from './utils/Window.js';
 import logo from './resources/logo.png';
@@ -141,7 +141,7 @@ function App() {
   })
 
   // Tabs
-  const tabs = ['Canvas', 'Quests', 'Vote', 'Templates', 'NFTs', 'Account'];
+  const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
 
   return (

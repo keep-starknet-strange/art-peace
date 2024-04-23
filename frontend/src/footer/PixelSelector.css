@@ -1,0 +1,65 @@
+.PixelSelector {
+  margin: 0;
+  padding: 0;
+}
+
+.PixelSelector__button--valid:active {
+  background: linear-gradient(to bottom right, rgba(100, 255, 100, 0.6), rgba(100, 255, 100, 0.8)) !important;
+}
+
+.PixelSelector__button--invalid:active {
+  background: linear-gradient(to bottom right, rgba(255, 100, 100, 0.6), rgba(255, 100, 100, 0.8)) !important;
+}
+
+.PixelSelector__text {
+  margin: 0;
+  padding: 0;
+}
+
+.PixelSelector__extras {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.PixelSelector__color {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 1rem;
+  margin: 0 0.5rem;
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.4);
+  border: 0.1rem solid rgba(0, 0, 0, 0.3);
+}
+
+.PixelSelector__selector {
+  margin: 0.2rem;
+  padding: 0.5rem 1rem;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.8));
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+
+  pointer-events: fill;
+}
+
+.PixelSelector__color__selectable {
+  cursor: pointer;
+  pointer-events: fill;
+}
+
+.PixelSelector__color__selectable:hover {
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.6);
+  transform: translateY(-0.2rem) scale(1.03);
+}
+
+.PixelSelector__color__selectable:active {
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.8);
+  transform: translateY(0) scale(1);
+}

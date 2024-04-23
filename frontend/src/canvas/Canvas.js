@@ -122,7 +122,8 @@ const Canvas = props => {
       let bitwidth = canvasConfig.colors_bitwidth
       let oneByteBitOffset = 8 - bitwidth
       let twoByteBitOffset = 16 - bitwidth
-      for (let bitPos = 0; bitPos < data.byteLength * 8; bitPos += bitwidth) {
+      let canvasBits = width * height * bitwidth
+      for (let bitPos = 0; bitPos < canvasBits; bitPos += bitwidth) {
         let bytePos = Math.floor(bitPos / 8)
         let bitOffset = bitPos % 8
         if (bitOffset <= oneByteBitOffset) {
