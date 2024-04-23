@@ -31,6 +31,7 @@ touch $REDIS_LOG_FILE
 redis-server 2>&1 > $REDIS_LOG_FILE &
 REDIS_PID=$!
 sleep 2 # Wait for redis to start; TODO: Check if redis is actually running
+redis-cli del canvas
 
 # Start the art-peace-db with postgres
 echo "Starting art-peace-db ..."
