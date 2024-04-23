@@ -3,9 +3,9 @@ package routes
 import (
 	"context"
 	"net/http"
-	"github.com/keep-starknet-strange/art-peace/backend/core"
-	"fmt"
 	"strconv"
+
+	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func InitUserRoutes() {
@@ -46,24 +46,23 @@ func getUsername(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(name))
 }
 
-
 func getPixelCount(w http.ResponseWriter, r *http.Request) {
-    userAddress := r.URL.Query().Get("address")
-    if userAddress == "" {
-        http.Error(w, "Missing address parameter", http.StatusBadRequest)
-        return
-    }
+	userAddress := r.URL.Query().Get("address")
+	if userAddress == "" {
+		http.Error(w, "Missing address parameter", http.StatusBadRequest)
+		return
+	}
 
-    var count int
-    query := "SELECT COUNT(*) FROM Pixels WHERE address = $1"
-    err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), query, userAddress).Scan(&count)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+	var count int
+	query := "SELECT COUNT(*) FROM Pixels WHERE address = $1"
+	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), query, userAddress).Scan(&count)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte(strconv.Itoa(count)))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(strconv.Itoa(count)))
 }

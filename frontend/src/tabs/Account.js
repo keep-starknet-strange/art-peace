@@ -3,11 +3,12 @@ import "./Account.css";
 import BasicTab from "./BasicTab.js";
 
 const Account = (props) => {
-  // TODO: Create the account tab w/ wallet address, username, pixel info, top X % users ( pixels placed? ), ...
   const [username, setUsername] = useState("");
-  const [pixelCount, setPixelCount] = useState(2572);
+  const [pixelCount, setPixelCount] = useState(0); // Set initial pixel count to 0
   const [accountRank, setAccountRank] = useState("");
   const [isUsernameSaved, saveUsername] = useState(false);
+
+  const userAddress = "0x0000000000000000000000000000000000000000000000000000000000000000"; // This should ideally come from props or context
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -17,9 +18,24 @@ const Account = (props) => {
 
   const editUsername = (e) => {
     saveUsername(false);
-  }
+  };
 
   useEffect(() => {
+    const fetchPixelCount = async () => {
+      const response = await fetch(`http://localhost:8080/getPixelCount?address=${userAddress}`);
+      if (response.ok) {
+        const count = await response.text();
+        setPixelCount(parseInt(count, 10));
+      } else {
+        console.error('Failed to fetch pixel count:', await response.text());
+      }
+    };
+
+    fetchPixelCount();
+  }, [userAddress]); // Fetch pixel count when userAddress changes
+
+  useEffect(() => {
+    // Update rank based on pixel count
     if (pixelCount >= 5000) {
       setAccountRank("Champion");
     } else if (pixelCount >= 3000) {
@@ -31,14 +47,13 @@ const Account = (props) => {
     } else {
       setAccountRank("Bronze");
     }
-  });
+  }, [pixelCount]); // Recalculate rank when pixel count changes
+
   return (
     <BasicTab title="Account">
       <div className="Account__flex">
         <p>Address:</p>
-        <p className="Account__wrap">
-          0x0000000000000000000000000000000000000000000000000000000000000000
-        </p>
+        <p className="Account__wrap">{userAddress}</p>
       </div>
       <div className="Account__flex Account__flex--center">
         <p>Username:</p>
