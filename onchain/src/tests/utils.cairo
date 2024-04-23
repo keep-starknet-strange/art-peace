@@ -1,4 +1,33 @@
 use core::num::traits::Zero;
+use starknet::{ContractAddress, contract_address_const};
+
+pub(crate) fn ART_PEACE_CONTRACT() -> ContractAddress {
+    contract_address_const::<'ArtPeace'>()
+}
+
+pub(crate) fn ERC20_MOCK_CONTRACT() -> ContractAddress {
+    contract_address_const::<'erc20mock'>()
+}
+
+pub(crate) fn EMPTY_CALLDATA() -> Span<felt252> {
+    array![].span()
+}
+
+pub(crate) fn EMPTY_QUEST_CONTRACT() -> ContractAddress {
+    contract_address_const::<'EmptyQuest'>()
+}
+
+pub(crate) fn NFT_CONTRACT() -> ContractAddress {
+    contract_address_const::<'CanvasNFT'>()
+}
+
+pub(crate) fn PLAYER1() -> ContractAddress {
+    contract_address_const::<'Player1'>()
+}
+
+pub(crate) fn PLAYER2() -> ContractAddress {
+    contract_address_const::<'Player2'>()
+}
 
 // Math
 pub(crate) fn pow_256(self: u256, mut exponent: u8) -> u256 {

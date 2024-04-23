@@ -1,39 +1,19 @@
-use art_peace::templates::interfaces::{
-    ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher,
-    ITemplateVerifierDispatcherTrait, TemplateMetadata
-};
-
-use core::array::Span;
-use core::traits::{TryInto, Into};
-
 #[starknet::contract]
 pub mod TemplateQuest {
     use starknet::{ContractAddress, get_caller_address};
-    use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
+    use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
     use art_peace::quests::{IQuest, QuestClaimed};
-    use art_peace::templates::component::TemplateStoreComponent;
-
-    // Declare the component
-    component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
-
-    #[abi(embed_v0)]
-    impl TemplateStoreComponentImpl =
-        TemplateStoreComponent::TemplateStoreImpl<ContractState>;
 
     #[storage]
     struct Storage {
-        art_peace: IArtPeaceDispatcher,
+        art_peace: ContractAddress,
         reward: u32,
         claimed: LegacyMap<ContractAddress, bool>,
-        #[substorage(v0)]
-        templates: TemplateStoreComponent::Storage,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        #[flat]
-        TemplateEvent: TemplateStoreComponent::Event,
         QuestClaimed: QuestClaimed,
     }
 
@@ -46,8 +26,8 @@ pub mod TemplateQuest {
 
     #[constructor]
     fn constructor(ref self: ContractState, init_params: TemplateQuestInitParams) {
+        self.art_peace.write(init_params.art_peace);
         self.reward.write(init_params.reward);
-        self.art_peace.write(IArtPeaceDispatcher { contract_address: init_params.art_peace });
     }
 
     #[abi(embed_v0)]
@@ -64,10 +44,12 @@ pub mod TemplateQuest {
             }
 
             let template_id_felt = *calldata.at(0);
-
             let template_id: u32 = template_id_felt.try_into().unwrap();
 
-            let template = self.templates.get_template(template_id);
+            let template_store = ITemplateStoreDispatcher {
+                contract_address: self.art_peace.read()
+            };
+            let template = template_store.get_template(template_id);
 
             if template.creator != user {
                 return false;
@@ -77,7 +59,7 @@ pub mod TemplateQuest {
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
-            if get_caller_address() != self.art_peace.read().contract_address {
+            if get_caller_address() != self.art_peace.read() {
                 return 0;
             }
 

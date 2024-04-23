@@ -28,34 +28,6 @@ const WIDTH: u128 = 100;
 const HEIGHT: u128 = 100;
 const TIME_BETWEEN_PIXELS: u64 = 10;
 
-fn ART_PEACE_CONTRACT() -> ContractAddress {
-    contract_address_const::<'ArtPeace'>()
-}
-
-fn ERC20_MOCK_CONTRACT() -> ContractAddress {
-    contract_address_const::<'erc20mock'>()
-}
-
-fn EMPTY_CALLDATA() -> Span<felt252> {
-    array![].span()
-}
-
-fn EMPTY_QUEST_CONTRACT() -> ContractAddress {
-    contract_address_const::<'EmptyQuest'>()
-}
-
-fn NFT_CONTRACT() -> ContractAddress {
-    contract_address_const::<'CanvasNFT'>()
-}
-
-fn PLAYER1() -> ContractAddress {
-    contract_address_const::<'Player1'>()
-}
-
-fn PLAYER2() -> ContractAddress {
-    contract_address_const::<'Player2'>()
-}
-
 fn deploy_contract() -> ContractAddress {
     deploy_nft_contract();
 
@@ -84,13 +56,13 @@ fn deploy_contract() -> ContractAddress {
         main_quests: array![].span(),
     }
         .serialize(ref calldata);
-    let contract_addr = contract.deploy_at(@calldata, ART_PEACE_CONTRACT()).unwrap();
+    let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
     snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
 
     contract_addr
 }
 
-fn deploy_with_quests_contract(
+pub fn deploy_with_quests_contract(
     daily_quests: Span<ContractAddress>, main_quests: Span<ContractAddress>
 ) -> ContractAddress {
     deploy_nft_contract();
@@ -120,7 +92,7 @@ fn deploy_with_quests_contract(
         main_quests: main_quests,
     }
         .serialize(ref calldata);
-    let contract_addr = contract.deploy_at(@calldata, ART_PEACE_CONTRACT()).unwrap();
+    let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
     snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
 
     contract_addr
@@ -129,7 +101,7 @@ fn deploy_with_quests_contract(
 fn deploy_pixel_quests_daily(pixel_quest: snf::ContractClass) -> Array<ContractAddress> {
     let mut daily_pixel_calldata = array![];
     PixelQuestInitParams {
-        art_peace: ART_PEACE_CONTRACT(),
+        art_peace: utils::ART_PEACE_CONTRACT(),
         reward: 10,
         pixels_needed: 3,
         is_daily: true,
@@ -142,7 +114,7 @@ fn deploy_pixel_quests_daily(pixel_quest: snf::ContractClass) -> Array<ContractA
 
     let mut daily_color_calldata = array![];
     PixelQuestInitParams {
-        art_peace: ART_PEACE_CONTRACT(),
+        art_peace: utils::ART_PEACE_CONTRACT(),
         reward: 10,
         pixels_needed: 3,
         is_daily: true,
@@ -153,13 +125,13 @@ fn deploy_pixel_quests_daily(pixel_quest: snf::ContractClass) -> Array<ContractA
         .serialize(ref daily_color_calldata);
     let daily_color_quest = pixel_quest.deploy(@daily_color_calldata).unwrap();
 
-    array![daily_pixel_quest, daily_color_quest, EMPTY_QUEST_CONTRACT()]
+    array![daily_pixel_quest, daily_color_quest, utils::EMPTY_QUEST_CONTRACT()]
 }
 
 fn deploy_pixel_quests_main(pixel_quest: snf::ContractClass) -> Array<ContractAddress> {
     let mut main_pixel_calldata = array![];
     PixelQuestInitParams {
-        art_peace: ART_PEACE_CONTRACT(),
+        art_peace: utils::ART_PEACE_CONTRACT(),
         reward: 20,
         pixels_needed: 4,
         is_daily: false,
@@ -172,7 +144,7 @@ fn deploy_pixel_quests_main(pixel_quest: snf::ContractClass) -> Array<ContractAd
 
     let mut main_color_calldata = array![];
     PixelQuestInitParams {
-        art_peace: ART_PEACE_CONTRACT(),
+        art_peace: utils::ART_PEACE_CONTRACT(),
         reward: 20,
         pixels_needed: 4,
         is_daily: false,
@@ -193,7 +165,7 @@ fn deploy_nft_contract() -> ContractAddress {
     let symbol: ByteArray = "A/P";
     name.serialize(ref calldata);
     symbol.serialize(ref calldata);
-    contract.deploy_at(@calldata, NFT_CONTRACT()).unwrap()
+    contract.deploy_at(@calldata, utils::NFT_CONTRACT()).unwrap()
 }
 
 
@@ -210,7 +182,7 @@ fn deploy_erc20_mock() -> ContractAddress {
     Serde::serialize(@initial_supply, ref calldata);
     Serde::serialize(@recipient, ref calldata);
 
-    let contract_addr = contract.deploy_at(@calldata, ERC20_MOCK_CONTRACT()).unwrap();
+    let contract_addr = contract.deploy_at(@calldata, utils::ERC20_MOCK_CONTRACT()).unwrap();
 
     contract_addr
 }
@@ -311,10 +283,10 @@ fn pixel_quests_test() {
     let pos = x + y * WIDTH;
     let color = 0x5;
     art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
     assert!(art_peace.get_extra_pixels_count() == 0, "Extra pixels are wrong after invalid claims");
 
     warp_to_next_available_time(art_peace);
@@ -322,10 +294,10 @@ fn pixel_quests_test() {
     let y = 25;
     let color = 0x1;
     art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
     assert!(art_peace.get_extra_pixels_count() == 0, "Extra pixels are wrong after invalid claims");
 
     warp_to_next_available_time(art_peace);
@@ -334,10 +306,10 @@ fn pixel_quests_test() {
     let pos = x + y * WIDTH;
     let color = 0x9;
     art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
     assert!(
         art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily quest 1 claim"
     );
@@ -347,10 +319,10 @@ fn pixel_quests_test() {
     let y = 35;
     let color = 0x1;
     art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
     assert!(
         art_peace.get_extra_pixels_count() == 30, "Extra pixels are wrong after main quest 1 claim"
     );
@@ -361,10 +333,10 @@ fn pixel_quests_test() {
     let pos = x + y * WIDTH;
     let color = 0x1;
     art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
     assert!(
         art_peace.get_extra_pixels_count() == 40, "Extra pixels are wrong after daily quest 2 claim"
     );
@@ -374,10 +346,10 @@ fn pixel_quests_test() {
     let y = 45;
     let color = 0x1;
     art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
     assert!(
         art_peace.get_extra_pixels_count() == 60, "Extra pixels are wrong after main quest 2 claim"
     );
@@ -502,12 +474,12 @@ fn increase_day_panic_test() {
 fn nft_mint_test() {
     let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
     let nft_minter = IArtPeaceNFTMinterDispatcher { contract_address: art_peace.contract_address };
-    let nft_store = ICanvasNFTStoreDispatcher { contract_address: NFT_CONTRACT() };
-    let nft = IERC721Dispatcher { contract_address: NFT_CONTRACT() };
-    nft_minter.add_nft_contract(NFT_CONTRACT());
+    let nft_store = ICanvasNFTStoreDispatcher { contract_address: utils::NFT_CONTRACT() };
+    let nft = IERC721Dispatcher { contract_address: utils::NFT_CONTRACT() };
+    nft_minter.add_nft_contract(utils::NFT_CONTRACT());
 
     let mint_params = NFTMintParams { position: 10, width: 16, height: 16, };
-    snf::start_prank(CheatTarget::One(nft_minter.contract_address), PLAYER1());
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::PLAYER1());
     nft_minter.mint_nft(mint_params);
     snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
 
@@ -517,23 +489,23 @@ fn nft_mint_test() {
         height: 16,
         image_hash: 0,
         block_number: 2000, // TODO
-        minter: PLAYER1(),
+        minter: utils::PLAYER1(),
     };
     let nft_metadata = nft_store.get_nft_metadata(0);
 
     assert!(nft_store.get_nfts_count() == 1, "NFTs count is not 1");
     assert!(nft_metadata == expected_metadata, "NFT metadata is not correct");
-    assert!(nft.owner_of(0) == PLAYER1(), "NFT owner is not correct");
-    assert!(nft.balance_of(PLAYER1()) == 1, "NFT balance is not correct");
-    assert!(nft.balance_of(PLAYER2()) == 0, "NFT balance is not correct");
+    assert!(nft.owner_of(0) == utils::PLAYER1(), "NFT owner is not correct");
+    assert!(nft.balance_of(utils::PLAYER1()) == 1, "NFT balance is not correct");
+    assert!(nft.balance_of(utils::PLAYER2()) == 0, "NFT balance is not correct");
 
-    snf::start_prank(CheatTarget::One(nft.contract_address), PLAYER1());
-    nft.transfer_from(PLAYER1(), PLAYER2(), 0);
+    snf::start_prank(CheatTarget::One(nft.contract_address), utils::PLAYER1());
+    nft.transfer_from(utils::PLAYER1(), utils::PLAYER2(), 0);
     snf::stop_prank(CheatTarget::One(nft.contract_address));
 
-    assert!(nft.owner_of(0) == PLAYER2(), "NFT owner is not correct after transfer");
-    assert!(nft.balance_of(PLAYER1()) == 0, "NFT balance is not correct after transfer");
-    assert!(nft.balance_of(PLAYER2()) == 1, "NFT balance is not correct after transfer");
+    assert!(nft.owner_of(0) == utils::PLAYER2(), "NFT owner is not correct after transfer");
+    assert!(nft.balance_of(utils::PLAYER1()) == 0, "NFT balance is not correct after transfer");
+    assert!(nft.balance_of(utils::PLAYER2()) == 1, "NFT balance is not correct after transfer");
 }
 
 #[test]
