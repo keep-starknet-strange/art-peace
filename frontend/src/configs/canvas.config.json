@@ -1,7 +1,7 @@
 {
   "canvas": {
-    "width": 35,
-    "height": 24
+    "width": 256,
+    "height": 256
   },
   "colors": [
     "010001",

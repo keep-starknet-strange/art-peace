@@ -42,7 +42,6 @@ const PixelSelector = (props) => {
   }, [colors, backendUrl, staticColors, setColors, setIsSetup, isSetup]);
 
   // TODO: implement extraPixels feature(s)
-  const extraPixels = 0;
 
   const getTimeTillNextPlacement = useCallback(() => {
     let timeSinceLastPlacement = Date.now() - placedTime;
@@ -109,10 +108,10 @@ const PixelSelector = (props) => {
     { !selectorMode &&
       <div className={"PixelSelector__button " + (getTimeTillNextPlacement() === 0 ? "PixelSelector__button__valid" : "PixelSelector__button__invalid")} onClick={placePixelSelector}>
         <p>{timeTillNextPlacement}</p>
-        { extraPixels > 0 &&
+        { props.extraPixels > 0 &&
           <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
           <p style={{margin: "0 0.5rem"}}>|</p>
-          <p>{extraPixels} XTRA</p>
+          <p>{props.extraPixels - props.extraPixelsUsed} XTRA</p>
           </div>
         }
         {props.selectedColorId !== -1 &&

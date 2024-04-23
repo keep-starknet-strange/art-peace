@@ -93,6 +93,8 @@ const Quests = (props) => {
     <BasicTab title="Quests">
       <div style={{ height: "70vh", overflowY: "scroll" }}>
         <div style={{ display: "flex", alignItems: "center" }}>
+      <div style={{height: '55vh', overflowY: 'scroll'}}>
+        <div style={{display: 'flex', alignItems: 'center'}}>
           <h2 className="Quests__item__header">Dailys</h2>
           <p style={{fontSize: "1rem", marginLeft: "1rem"}}>{props.timeLeftInDay}</p>
         </div>

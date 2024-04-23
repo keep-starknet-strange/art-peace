@@ -8,6 +8,7 @@ func InitRoutes() {
 	InitTemplateRoutes()
 	InitUserRoutes()
 	InitContractRoutes()
+	InitNFTRoutes()
 	InitQuestsRoutes()
 	InitColorsRoutes()
 }

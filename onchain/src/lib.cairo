@@ -7,8 +7,14 @@ use interfaces::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel
 mod quests {
     pub mod interfaces;
     pub mod pixel_quest;
+    pub mod template_quest;
+    pub mod unruggable_quest;
 
-    use interfaces::{IQuest, IPixelQuest, QuestClaimed, IQuestDispatcher, IQuestDispatcherTrait};
+    use interfaces::{
+        IQuest, IPixelQuest, IUnruggableQuest, QuestClaimed, IQuestDispatcher,
+        IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher,
+        IUnruggableMemecoinDispatcherTrait
+    };
 }
 
 mod templates {
@@ -43,13 +49,15 @@ mod username_store {
 }
 
 mod mocks {
-    pub mod erc20_mock;
+    pub(crate) mod erc20_mock;
+    pub(crate) mod unruggable_token;
 }
 
 #[cfg(test)]
 mod tests {
     mod art_peace;
     mod username_store;
+    mod template_quest;
     pub(crate) mod utils;
 }
 
