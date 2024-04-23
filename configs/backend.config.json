@@ -7,5 +7,13 @@
     "add_template_devnet": "../tests/integration/local/add_template.sh",
     "mint_nft_devnet": "../tests/integration/local/mint_nft.sh"
   },
-  "production": false
+  "production": false,
+  "WebSocket": {
+    "Upgrader": {
+      "ReadBufferSize": 1024,
+      "WriteBufferSize": 1024
+    }
+  }
 }
+
+
