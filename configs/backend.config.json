@@ -9,10 +9,9 @@
   },
   "production": false,
   "WebSocket": {
-    "Upgrader": {
       "ReadBufferSize": 1024,
       "WriteBufferSize": 1024
-    }
+    
   }
 }
 
