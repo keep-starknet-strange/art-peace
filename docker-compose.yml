@@ -107,11 +107,11 @@ services:
       - backend
       - devnet
     volumes:
-      - configs:/configs
       - ./frontend/package.json:/app/package.json
       - ./frontend/package-lock.json:/app/package-lock.json
       - ./frontend/public/:/app/public
       - ./frontend/src:/app/src
+      - configs:/app/src/configs
 
 volumes:
   redis:
