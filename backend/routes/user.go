@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"net/http"
-
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
@@ -29,6 +28,7 @@ func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUsername(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	address := r.URL.Query().Get("address")
 
 	var name string
@@ -39,7 +39,6 @@ func getUsername(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(name))
 }
