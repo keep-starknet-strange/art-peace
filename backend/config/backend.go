@@ -12,12 +12,25 @@ type BackendScriptsConfig struct {
 	MintNFTDevnet          string `json:"mint_nft_devnet"`
 }
 
-type BackendConfig struct {
-	Host       string               `json:"host"`
-	Port       int                  `json:"port"`
+// type BackendConfig struct {
+// 	Host       string               `json:"host"`
+// 	Port       int                  `json:"port"`
+// 	Scripts    BackendScriptsConfig `json:"scripts"`
+// 	Production bool                 `json:"production"`
+// 	WebSocket  WebSocketConfig   `json:"webSocket"
+// }
+type WebSocketConfig struct {
+	ReadBufferSize  int `json:"readBufferSize"`
+	WriteBufferSize int `json:"writeBufferSize"`
+   }
+   
+   type BackendConfig struct {
+	Host       string            `json:"host"`
+	Port       int               `json:"port"`
 	Scripts    BackendScriptsConfig `json:"scripts"`
-	Production bool                 `json:"production"`
-}
+	Production bool              `json:"production"`
+	WebSocket  WebSocketConfig   `json:"webSocket"`
+   }
 
 var DefaultBackendConfig = BackendConfig{
 	Host: "localhost",

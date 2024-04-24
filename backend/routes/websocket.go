@@ -57,24 +57,26 @@ func wsReader(conn *websocket.Conn) {
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
-	config, err := LoadConfig()
+    _, err := LoadConfig()
 
-	if err != nil {
-		log.Fatal("Error loading config file: ", err)
-	}
+    if err != nil {
+        log.Fatal("Error loading config file: ", err)
+    }
 
-	upgrader := websocket.Upgrader{
-		ReadBufferSize:  config.WebSocket.ReadBufferSize,
-		WriteBufferSize: config.WebSocket.WriteBufferSize,
-	}
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+    upgrader := websocket.Upgrader{
+        // ReadBufferSize:  core.ArtPeaceBackend.WebSocket.ReadBufferSize,
+		ReadBufferSize: core.ArtPeaceBackend.BackendConfig.WebSocket.ReadBufferSize,
+        WriteBufferSize: core.ArtPeaceBackend.BackendConfig.WebSocket.WriteBufferSize,
+    }
+    upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		fmt.Println(err)
-	}
+    ws, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
 
-	fmt.Println("Client Connected")
-	core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections, ws)
-	wsReader(ws)
+    fmt.Println("Client Connected")
+    core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections, ws)
+    wsReader(ws)
 }
