@@ -57,8 +57,9 @@ function App() {
   const [extraPixelsData, setExtraPixelsData] = useState([]);
 
   useEffect(() => {
-    let getExtraPixelsEndpoint = `${backendUrl}/getExtraPixels`;
-    fetch(getExtraPixelsEndpoint, { mode: "no-cors" }).then((response) => {
+    const address = 0;
+    let getExtraPixelsEndpoint = `${backendUrl}/getExtraPixels?address=${address}`;
+    fetch(getExtraPixelsEndpoint, { mode: "cors" }).then((response) => {
       response
         .json()
         .then((data) => {
