@@ -33,6 +33,12 @@ type NFTData struct {
 	Minter      string `json:"minter"`
 }
 
+type NFTLikes struct {
+	nftkey	int 			`json:"position"`
+	liker 	string 		`json:"height"`
+}
+
+
 func getNFT(w http.ResponseWriter, r *http.Request) {
 	tokenId := r.URL.Query().Get("tokenId")
 
@@ -194,4 +200,60 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write([]byte("Minted NFT on devnet"))
+}
+
+func LikeNFT(w http.ResponseWriter, r *http.Request) {
+	nftkey := r.URL.Query().Get("nft_key")
+	userAddress := r.URL.Query().Get("user_address")
+
+	// check if the user has like the nft 
+
+	var nftlike NFTLikes
+	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nftlikes WHERE nft_key = $1 AND user_address = $2", nftkey, userAddress)
+	
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	defer rows.Close()
+
+	err = rows.Scan(&nftlike.nftkey, &nftlike.liker)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	out, err := json.Marshal(nftlike)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	if out {
+			w.Write([]byte(out))
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("NFT Like By User"))
+			fmt.Println("NFT Like By User")
+			return 
+	}
+
+
+	 //  new like for nft 
+		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO nftlikes (nft_key) (user_address) VALUES ($1) ($2)", nftkey, userAddress)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("NFT Like By User"))
+	fmt.Println("NFT Like By User")
 }
