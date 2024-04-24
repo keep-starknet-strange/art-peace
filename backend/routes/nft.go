@@ -252,8 +252,63 @@ func LikeNFT(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("NFT Like By User"))
 	fmt.Println("NFT Like By User")
+}
+
+
+func UnlikeNft(w http.ResponseWriter, r *http.Request) {
+	nftkey := r.URL.Query().Get("nft_key")
+	userAddress := r.URL.Query().Get("user_address")
+
+	// check if the user has like the nft 
+
+	var nftlike NFTLikes
+	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nftlikes WHERE nft_key = $1 AND user_address = $2", nftkey, userAddress)
+	
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	defer rows.Close()
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	out, err := json.Marshal(nftlike)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	if out {
+		// delete the like 
+		rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nft_key = $1 AND user_address = $2", nftkey, userAddress)
+	
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		defer rows.Close()
+
+		w.Write([]byte(out))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("NFT Unlike By User"))
+		fmt.Println("NFT Unlike By User")
+		return 
+
+	}
+
+	w.Write([]byte(out))
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Cannot Unlike an NFT You did not Like"))
+	fmt.Println("Cannot Unlike an NFT You did not Like")
+	return 
+
 }
