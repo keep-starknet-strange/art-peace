@@ -91,7 +91,6 @@ const Quests = (props) => {
   // TODO: Icons for each tab?
   return (
     <BasicTab title="Quests">
-        <div style={{ display: "flex", alignItems: "center" }}>
       <div style={{height: '55vh', overflowY: 'scroll'}}>
         <div style={{display: 'flex', alignItems: 'center'}}>
           <h2 className="Quests__item__header">Dailys</h2>

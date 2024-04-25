@@ -2,16 +2,18 @@ package routes
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"github.com/keep-starknet-strange/art-peace/backend/core"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
+
+	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func InitUserRoutes() {
 	http.HandleFunc("/getExtraPixels", getExtraPixels)
 	http.HandleFunc("/getUsername", getUsername)
-	http.HandleFunc("/getPixelCount", getPixelCount) // new route
+	http.HandleFunc("/getPixelCount", getPixelCount)
 }
 
 func setCommonHeaders(w http.ResponseWriter) {
@@ -26,8 +28,8 @@ func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 	var available string
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT available FROM ExtraPixels WHERE address = $1", user).Scan(&available)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusOK) // Change to 200 OK since it's not an error state
+		if err == pgx.ErrNoRows {
+			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{"available": 0}`))
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -47,7 +49,7 @@ func getUsername(w http.ResponseWriter, r *http.Request) {
 	var name string
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT name FROM Users WHERE address = $1", address).Scan(&name)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == pgx.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(`{"error": "Username not found"}`))
 		} else {
@@ -74,9 +76,9 @@ func getPixelCount(w http.ResponseWriter, r *http.Request) {
 	query := "SELECT COUNT(*) FROM Pixels WHERE address = $1"
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), query, userAddress).Scan(&count)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == pgx.ErrNoRows {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"available": 0}`))
+			w.Write([]byte(`{"count": 0}`))
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "Internal server error"}`))

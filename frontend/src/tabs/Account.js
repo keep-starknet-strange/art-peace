@@ -3,36 +3,36 @@ import "./Account.css";
 import BasicTab from "./BasicTab.js";
 
 const Account = (props) => {
-const [username, setUsername] = useState("");
-const [pixelCount, setPixelCount] = useState(0); // Set initial pixel count to 0
-const [accountRank, setAccountRank] = useState("");
-const [isUsernameSaved, saveUsername] = useState(false);
-
-const userAddress = "0x0000000000000000000000000000000000000000000000000000000000000000"; // This should ideally come from props or context
-
-const handleSubmit = (event) => {
+  const [username, setUsername] = useState("");
+  const [pixelCount, setPixelCount] = useState(0);
+  const [accountRank, setAccountRank] = useState("");
+  const [isUsernameSaved, saveUsername] = useState(false);
+  
+  const userAddress = "0x0000000000000000000000000000000000000000000000000000000000000000";
+  
+  const handleSubmit = (event) => {
     event.preventDefault();
     setUsername(username);
     saveUsername(true);
   };
-
-const editUsername = (e) => {
+  
+  const editUsername = (e) => {
     saveUsername(false);
   };
-
-useEffect(() => {
+  
+  useEffect(() => {
     const fetchPixelCount = async () => {
       const response = await fetch(`http://localhost:8080/getPixelCount?address=${userAddress}`);
       if (response.ok) {
         const data = await response.json();
-        setPixelCount(data.count); // Adjusted to handle JSON response
+        setPixelCount(data.count);
       } else {
         console.error('Failed to fetch pixel count:', await response.text());
       }
     };
 
     fetchPixelCount();
-  }, [userAddress]); // Fetch pixel count when userAddress changes
+  }, [userAddress]);
 
   useEffect(() => {
     // Update rank based on pixel count
@@ -47,7 +47,7 @@ useEffect(() => {
     } else {
       setAccountRank("Bronze");
     }
-  }, [pixelCount]); // Recalculate rank when pixel count changes
+  }, [pixelCount]);
 
   return (
     <BasicTab title="Account">
