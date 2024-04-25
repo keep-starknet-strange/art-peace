@@ -7,5 +7,9 @@
     "add_template_devnet": "/scripts/add_template.sh",
     "mint_nft_devnet": "/scripts/mint_nft.sh"
   },
-  "production": false
+  "production": false,
+  "websocket": {
+      "read_buffer_size": 1024,
+      "write_buffer_size": 1024
+  }
 }
