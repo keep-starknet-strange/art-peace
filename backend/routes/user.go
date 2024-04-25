@@ -13,6 +13,7 @@ func InitUserRoutes() {
 }
 
 func getExtraPixels(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	user := r.URL.Query().Get("address")
 
 	var available string
