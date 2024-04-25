@@ -1,0 +1,123 @@
+.ExtraPixelsPanel {
+  position: relative;
+  width: 100%;
+  margin-bottom: 0.5rem;
+
+  display: flex;
+  flex-direction: column;
+
+  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.4));
+  z-index: 100;
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.2);
+}
+
+.ExtraPixelsPanel__header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.2rem 0.2rem;
+  margin: 0 0.5rem;
+}
+
+.ExtraPixelsPanel__title {
+  font-size: 1.2rem;
+}
+
+.ExtraPixelsPanel__submit {
+  margin-right: 2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.4);
+  cursor: pointer;
+}
+
+.ExtraPixelsPanel__submit:hover {
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.6);
+  transform: translateY(-0.2rem) scale(1.03);
+}
+
+.ExtraPixelsPanel__submit:active {
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.8);
+  transform: translateY(0) scale(1);
+}
+
+.ExtraPixelsPanel__pixels {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 0.5rem;
+  overflow-x: scroll;
+  flex-wrap: nowrap;
+  padding: 0.2rem 0;
+}
+
+.ExtraPixelsPanel__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0.5rem;
+}
+
+.ExtraPixelsPanel__bubble {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  margin: 0;
+  border-radius: 1rem;
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.4);
+  cursor: pointer;
+  pointer-events: fill;
+}
+
+.ExtraPixelsPanel__bubble:hover {
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.6);
+  transform: translateY(-0.2rem) scale(1.03);
+}
+
+.ExtraPixelsPanel__bubble:active {
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.8);
+  transform: translateY(0) scale(1);
+}
+
+.ExtraPixelsPanel__bubble__remove {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  display: none;
+}
+
+.ExtraPixelsPanel__bubble:hover .ExtraPixelsPanel__bubble__remove {
+  display: block;
+  color: red;
+}
+
+.ExtraPixelsPanel__id {
+  font-size: 0.8rem;
+}
+
+.ExtraPixelsPanel__exit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.2rem;
+  margin: 0.6rem;
+  cursor: pointer;
+}
+
+.ExtraPixelsPanel__exit:hover {
+  color: red;
+  transform: scale(1.2, 1.2);
+}
+
+.ExtraPixelsPanel__exit:active {
+  color: red;
+  transform: scale(1, 1);
+}

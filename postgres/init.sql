@@ -80,8 +80,10 @@ CREATE TABLE UserMainQuests (
 CREATE INDEX userMainQuests_userAddress_index ON UserMainQuests (userAddress);
 CREATE INDEX userMainQuests_questKey_index ON UserMainQuests (questKey);
 
+-- TODO: key to color_idx
 CREATE TABLE Colors (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   hex text NOT NULL
 );
 
@@ -107,5 +109,18 @@ CREATE TABLE Templates (
   width integer NOT NULL,
   height integer NOT NULL,
   position integer NOT NULL,
-  data bytea NOT NULL
+  reward integer NOT NULL,
+  rewardToken char(64) NOT NULL
+--  ,data bytea NOT NULL
+);
+
+-- TODO: Owner & change on transfer
+CREATE TABLE NFTs (
+  key integer NOT NULL PRIMARY KEY,
+  position integer NOT NULL,
+  width integer NOT NULL,
+  height integer NOT NULL,
+  imageHash text NOT NULL,
+  blockNumber integer NOT NULL,
+  minter char(64) NOT NULL
 );

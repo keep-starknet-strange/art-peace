@@ -2,10 +2,15 @@ package routes
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/color"
+	"image/png"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/websocket"
@@ -55,10 +60,15 @@ func InitIndexerRoutes() {
 }
 */
 
+const (
+	pixelPlacedEvent   = "0x02d7b50ebf415606d77c7e7842546fc13f8acfbfd16f7bcf2bc2d08f54114c23"
+	nftMintedEvent     = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
+	templateAddedEvent = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
+)
+
 // TODO: User might miss some messages between loading canvas and connecting to websocket?
 // TODO: Check thread safety of these things
 func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
-	// Read request body
 	requestBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println("Error reading request body: ", err)
@@ -66,137 +76,356 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Unmarshal JSON body
 	// TODO: Parse message fully, check block status, number, ...
-	var reqBody map[string]interface{}
-	if err := json.Unmarshal(requestBody, &reqBody); err != nil {
+	reqBody := map[string]interface{}{}
+	err = json.Unmarshal(requestBody, &reqBody)
+	if err != nil {
 		fmt.Println("Error unmarshalling request body: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// Extract necessary fields from the request body
-	data, ok := reqBody["data"].(map[string]interface{})
-	if !ok {
-		handleError(w, "Invalid request format (missing 'data' field)", http.StatusBadRequest)
-		return
+	events := reqBody["data"].(map[string]interface{})["batch"].([]interface{})[0].(map[string]interface{})["events"].([]interface{})
+
+	for _, event := range events {
+		eventKey := event.(map[string]interface{})["event"].(map[string]interface{})["keys"].([]interface{})[0].(string)
+		if eventKey == pixelPlacedEvent {
+			processPixelPlacedEvent(event.(map[string]interface{}), w)
+		} else if eventKey == nftMintedEvent {
+			processNFTMintedEvent(event.(map[string]interface{}), w)
+		} else if eventKey == templateAddedEvent {
+			processTemplateAddedEvent(event.(map[string]interface{}), w)
+		} else {
+			fmt.Println("Unknown event key: ", eventKey)
+		}
 	}
+}
 
-	batch, ok := data["batch"].([]interface{})
-	if !ok || len(batch) == 0 {
-		handleError(w, "Invalid request format (missing or empty 'batch' array)", http.StatusBadRequest)
-		return
-	}
+func processPixelPlacedEvent(event map[string]interface{}, w http.ResponseWriter) {
+	address := event["event"].(map[string]interface{})["keys"].([]interface{})[1]
+	address = address.(string)[2:]
+	posHex := event["event"].(map[string]interface{})["keys"].([]interface{})[2]
+	dayIdxHex := event["event"].(map[string]interface{})["keys"].([]interface{})[3]
+	colorHex := event["event"].(map[string]interface{})["data"].([]interface{})[0]
 
-	event, ok := batch[0].(map[string]interface{})["events"].([]interface{})
-	if !ok || len(event) == 0 {
-		handleError(w, "Invalid request format (missing or empty 'events' array)", http.StatusBadRequest)
-		return
-	}
-
-	eventData, ok := event[0].(map[string]interface{})
-	if !ok {
-		handleError(w, "Invalid event format (missing 'event' object)", http.StatusBadRequest)
-		return
-	}
-
-	keys, ok := eventData["keys"].([]interface{})
-	if !ok || len(keys) < 4 {
-		handleError(w, "Invalid event format (missing or incomplete 'keys' array)", http.StatusBadRequest)
-		return
-	}
-
-	// Extract and validate address, position, day index, and color
-	address := getStringValue(keys, 1)
-	posHex := getStringValue(keys, 2)
-	dayIdxHex := getStringValue(keys, 3)
-	colorHex := getStringValue(eventData["data"], 0)
-
-	position, err := strconv.ParseInt(posHex, 0, 64)
+	// Convert hex to int
+	position, err := strconv.ParseInt(posHex.(string), 0, 64)
 	if err != nil {
-		handleError(w, "Error converting position hex to int", http.StatusBadRequest)
+		fmt.Println("Error converting position hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	//validate position
+	maxPosition := int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width) * int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Height)
 
-	dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
+	// Perform comparison with maxPosition
+	if position < 0 || position >= maxPosition {
+    http.Error(w, "Position out of range", http.StatusBadRequest)
+    return
+	}
+
+	dayIdx, err := strconv.ParseInt(dayIdxHex.(string), 0, 64)
 	if err != nil {
-		handleError(w, "Error converting day index hex to int", http.StatusBadRequest)
+		fmt.Println("Error converting day index hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	color, err := strconv.ParseInt(colorHex, 0, 64)
+	color, err := strconv.ParseInt(colorHex.(string), 0, 64)
 	if err != nil {
-		handleError(w, "Error converting color hex to int", http.StatusBadRequest)
+		fmt.Println("Error converting color hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	// Validate position and color
-	if position < 0 || position >= int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width*core.ArtPeaceBackend.CanvasConfig.Canvas.Height) {
-		handleError(w, "Invalid position value", http.StatusBadRequest)
-		return
-	}
-
-	if color < 0 || color >= (1 << core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth) {
-		handleError(w, "Invalid color value", http.StatusBadRequest)
-		return
-	}
+	//validate color
+	colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
+    if int(color) < 0 || int(color) >= colorsLength {
+    http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
+    return
+    }
 
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 
-	// Set pixel in Redis
+	fmt.Println("Pixel indexed with position: ", position, " and color: ", color)
+
+	// Set pixel in redis
 	ctx := context.Background()
-	if err := core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "SET", bitfieldType, pos, color).Err(); err != nil {
-		handleError(w, "Failed to set pixel in Redis", http.StatusInternalServerError)
-		return
-	}
-
-	// Set pixel in PostgreSQL
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(),
-		"INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)",
-		address, position, dayIdx, color)
+	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "SET", bitfieldType, pos, color).Err()
 	if err != nil {
-		handleError(w, "Failed to insert pixel into PostgreSQL", http.StatusInternalServerError)
+		panic(err)
+	}
+
+	// Set pixel in postgres
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)", address, position, dayIdx, color)
+	if err != nil {
+		fmt.Println("Error inserting pixel into postgres: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// Send message to all connected WebSocket clients
-	message := map[string]interface{}{
+	// Send message to all connected clients
+	var message = map[string]interface{}{
 		"position": position,
 		"color":    color,
 	}
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
-		handleError(w, "Failed to marshal message", http.StatusInternalServerError)
+		fmt.Println("Error marshalling message: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	for idx, conn := range core.ArtPeaceBackend.WSConnections {
 		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
-			fmt.Println("Error sending message to WebSocket client:", err)
-			// Remove disconnected WebSocket client from connections slice
+			fmt.Println(err)
+			// TODO: Should we always remove connection?
+			// Remove connection
 			conn.Close()
 			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
 		}
 	}
-
-	// Respond with success
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "Pixel placed"}`))
 }
 
-func getStringValue(arr interface{}, idx int) string {
-	if slice, ok := arr.([]interface{}); ok && len(slice) > idx {
-		if str, ok := slice[idx].(string); ok {
-			return str
+/*
+indexer-1   | [
+indexer-1   |   [Object: null prototype] {
+indexer-1   |     event: [Object: null prototype] {
+indexer-1   |       fromAddress: "0x07163dbc0d5dc7e65c8fb9697dbd778e70fa9fef66f12a018a69751eb53fec5a",
+indexer-1   |       keys: [
+indexer-1   |         "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f",
+indexer-1   |         "0x0000000000000000000000000000000000000000000000000000000000000000",
+indexer-1   |         "0x0000000000000000000000000000000000000000000000000000000000000000"
+indexer-1   |       ],
+indexer-1   |       data: [
+indexer-1   |         "0x0000000000000000000000000000000000000000000000000000000000000091",
+indexer-1   |         "0x000000000000000000000000000000000000000000000000000000000000000e",
+indexer-1   |         "0x000000000000000000000000000000000000000000000000000000000000000d",
+indexer-1   |         "0x0000000000000000000000000000000000000000000000000000000000000000",
+indexer-1   |         "0x0000000000000000000000000000000000000000000000000000000000000006",
+indexer-1   |         "0x0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0"
+indexer-1   |       ],
+indexer-1   |       index: "1"
+indexer-1   |     }
+indexer-1   |   }
+indexer-1   | ]
+*/
+
+func processNFTMintedEvent(event map[string]interface{}, w http.ResponseWriter) {
+	// TODO: combine high and low token ids
+	tokenIdLowHex := event["event"].(map[string]interface{})["keys"].([]interface{})[1]
+	tokenIdHighHex := event["event"].(map[string]interface{})["keys"].([]interface{})[2]
+
+	positionHex := event["event"].(map[string]interface{})["data"].([]interface{})[0]
+	widthHex := event["event"].(map[string]interface{})["data"].([]interface{})[1]
+	heightHex := event["event"].(map[string]interface{})["data"].([]interface{})[2]
+	imageHashHex := event["event"].(map[string]interface{})["data"].([]interface{})[3]
+	blockNumberHex := event["event"].(map[string]interface{})["data"].([]interface{})[4]
+	minterHex := event["event"].(map[string]interface{})["data"].([]interface{})[5]
+
+	fmt.Println("NFT minted with token id low: ", tokenIdLowHex, " and token id high: ", tokenIdHighHex)
+
+	tokenId, err := strconv.ParseInt(tokenIdLowHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting token id low hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	position, err := strconv.ParseInt(positionHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting position hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	width, err := strconv.ParseInt(widthHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting width hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	height, err := strconv.ParseInt(heightHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting height hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	blockNumber, err := strconv.ParseInt(blockNumberHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting block number hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	minter := minterHex.(string)[2:]
+
+	fmt.Println("NFT minted with position: ", position, " width: ", width, " height: ", height, " image hash: ", imageHashHex, " block number: ", blockNumber, " minter: ", minter, "tokenId", tokenId)
+	// Set NFT in postgres
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (key, position, width, height, imageHash, blockNumber, minter) VALUES ($1, $2, $3, $4, $5, $6, $7)", tokenId, position, width, height, imageHashHex, blockNumber, minter)
+	if err != nil {
+		fmt.Println("Error inserting NFT into postgres: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// TODO: get image from canvas through starknet rpc? What to do about pending transactions?
+
+	// Load image from redis
+	ctx := context.Background()
+	// TODO: Better way to get image
+	canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
+	if err != nil {
+		panic(err)
+	}
+
+	colorPaletteHex := core.ArtPeaceBackend.CanvasConfig.Colors
+	colorPalette := make([]color.RGBA, len(colorPaletteHex))
+	for idx, colorHex := range colorPaletteHex {
+		r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
+		if err != nil {
+			fmt.Println("Error converting red hex to int: ", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		g, err := strconv.ParseInt(colorHex[2:4], 16, 64)
+		if err != nil {
+			fmt.Println("Error converting green hex to int: ", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		b, err := strconv.ParseInt(colorHex[4:6], 16, 64)
+		if err != nil {
+			fmt.Println("Error converting blue hex to int: ", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
+	}
+	bitWidth := int64(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth)
+	startX := int64(position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width))
+	startY := int64(position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width))
+	oneByteBitOffset := int64(8 - bitWidth)
+	twoByteBitOffset := int64(16 - bitWidth)
+	generatedImage := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
+	for y := startY; y < startY+height; y++ {
+		for x := startX; x < startX+width; x++ {
+			pos := y*int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width) + x
+			bitPos := pos * bitWidth
+			bytePos := bitPos / 8
+			bitOffset := bitPos % 8
+			if bitOffset <= oneByteBitOffset {
+				colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
+				generatedImage.Set(int(x-startX), int(y-startY), colorPalette[colorIdx])
+			} else {
+				colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
+				generatedImage.Set(int(x-startX), int(y-startY), colorPalette[colorIdx])
+			}
 		}
 	}
-	return ""
+
+	// TODO: Path to save image
+	// Save image to disk
+	filename := fmt.Sprintf("nft-%d.png", tokenId)
+	file, err := os.Create(filename)
+	if err != nil {
+		fmt.Println("Error creating file: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	err = png.Encode(file, generatedImage)
+	if err != nil {
+		fmt.Println("Error encoding image: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte("NFT minted"))
 }
 
-func handleError(w http.ResponseWriter, errMsg string, statusCode int) {
-	fmt.Println(errMsg)
-	w.WriteHeader(statusCode)
-	w.Write([]byte(`{"error": "` + errMsg + `"}`))
+func processTemplateAddedEvent(event map[string]interface{}, w http.ResponseWriter) {
+	templateIdHex := event["event"].(map[string]interface{})["keys"].([]interface{})[1]
+	templateHashHex := event["event"].(map[string]interface{})["data"].([]interface{})[0]
+	templateNameHex := event["event"].(map[string]interface{})["data"].([]interface{})[1]
+	templatePositionHex := event["event"].(map[string]interface{})["data"].([]interface{})[2]
+	templateWidthHex := event["event"].(map[string]interface{})["data"].([]interface{})[3]
+	templateHeightHex := event["event"].(map[string]interface{})["data"].([]interface{})[4]
+	// TODO: Combine low and high token ids
+	templateRewardHighHex := event["event"].(map[string]interface{})["data"].([]interface{})[5]
+	templateRewardLowHex := event["event"].(map[string]interface{})["data"].([]interface{})[6]
+	templateRewardTokenHex := event["event"].(map[string]interface{})["data"].([]interface{})[7]
+
+	fmt.Println("Template added with template id: ", templateIdHex, " template hash: ", templateHashHex, "reward: ", templateRewardLowHex, templateRewardHighHex, "name:", templateNameHex)
+
+	templateId, err := strconv.ParseInt(templateIdHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting template id hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Parse template name hex as bytes encoded in utf-8
+	decodedName, err := hex.DecodeString(templateNameHex.(string)[2:])
+	if err != nil {
+		fmt.Println("Error decoding template name hex: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// Trim off 0s at the start
+	trimmedName := []byte{}
+	trimming := true
+	for _, b := range decodedName {
+		if b == 0 && trimming {
+			continue
+		}
+		trimming = false
+		trimmedName = append(trimmedName, b)
+	}
+	templateName := string(trimmedName)
+
+	templatePosition, err := strconv.ParseInt(templatePositionHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting template position hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	templateWidth, err := strconv.ParseInt(templateWidthHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting template width hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	templateHeight, err := strconv.ParseInt(templateHeightHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting template height hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	templateReward, err := strconv.ParseInt(templateRewardLowHex.(string), 0, 64)
+	if err != nil {
+		fmt.Println("Error converting template reward hex to int: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	templateRewardToken := templateRewardTokenHex.(string)[2:]
+
+	// Add template to postgres
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Templates (key, name, hash, position, width, height, reward, rewardToken) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", templateId, templateName, templateHashHex, templatePosition, templateWidth, templateHeight, templateReward, templateRewardToken)
+	if err != nil {
+		fmt.Println("Error inserting template into postgres: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte("Template added"))
 }
