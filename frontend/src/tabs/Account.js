@@ -5,25 +5,25 @@ import backendConfig from "../configs/backend.config.json";
 
 const Account = (props) => {
   const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port;
-  const getUsernameUrl = `${backendUrl}/getUsername?address=${address}`;
-  const address = 0
-  // TODO: Create the account tab w/ wallet address, username, pixel info, top X % users ( pixels placed? ), ...
   const [username, setUsername] = useState("");
-  const [pixelCount, setPixelCount] = useState(2572);
+  const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState("");
   const [isUsernameSaved, saveUsername] = useState(false);
-
+  
+  const userAddress = "0x0000000000000000000000000000000000000000000000000000000000000000";
+  
   const handleSubmit = (event) => {
     event.preventDefault();
     setUsername(username);
     saveUsername(true);
   };
-
+  
   const editUsername = (e) => {
     saveUsername(false);
   };
 
   useEffect(() => {
+    const getUsernameUrl = `${backendUrl}/getUsername?address=${userAddress}`;
     fetch(getUsernameUrl, {mode: "cors"})
       .then(res => {
         if (!res.ok) {
@@ -40,6 +40,24 @@ const Account = (props) => {
         saveUsername(false)
       });
 
+  
+  useEffect(() => {
+    const fetchPixelCount = async () => {
+      const getPixelCountUrl = `${backendUrl}/getPixelCount?address=${userAddress}`;
+      const response = await fetch(getPixelCountUrl, {mode: "cors"});
+      if (response.ok) {
+        const data = await response.json();
+        setPixelCount(data.count);
+      } else {
+        console.error('Failed to fetch pixel count:', await response.text());
+      }
+    };
+
+    fetchPixelCount();
+  }, [userAddress]);
+
+  useEffect(() => {
+    // Update rank based on pixel count
     if (pixelCount >= 5000) {
       setAccountRank("Champion");
     } else if (pixelCount >= 3000) {
@@ -51,16 +69,14 @@ const Account = (props) => {
     } else {
       setAccountRank("Bronze");
     }
-  }, [pixelCount, getUsernameUrl]);
+  }, [pixelCount]);
 
   return (
     <BasicTab title="Account">
       <div className="Account__flex">
         <p>Address:</p>
-        <p className="Account__wrap">
-          0x0000000000000000000000000
-        </p>
-      </div> 
+        <p className="Account__wrap">{userAddress}</p>
+      </div>
       <div className="Account__flex Account__flex--center">
         <p>Username:</p>
         {isUsernameSaved ? (
