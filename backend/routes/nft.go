@@ -6,14 +6,14 @@ import (
 	"encoding/json"
 	// "io/ioutil"
 	"fmt"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
+	"github.com/pkg/errors"
 	"io"
+	"log"
 	"net/http"
 	"os"
-	"log"
 	"os/exec"
 	"strconv"
-	"github.com/pkg/errors"
-	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func InitNFTRoutes() {
@@ -39,12 +39,10 @@ type NFTData struct {
 	Minter      string `json:"minter"`
 }
 
-
 type NFTLikesRequest struct {
 	NFTKey      int    `json:"nftkey"`
 	UserAddress string `json:"useraddress"`
 }
-
 
 func getNFT(w http.ResponseWriter, r *http.Request) {
 	tokenId := r.URL.Query().Get("tokenId")
@@ -254,8 +252,6 @@ func LikeNFT(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("NFT Already Liked By User"))
 }
 
-
-
 func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -275,82 +271,78 @@ func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Received request: %+v", nftlikeReq)
 
-
-	// check if the user has like the nft 
+	// check if the user has like the nft
 	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
-	
+
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	defer rows.Close()
-	
+
 	if !rows.Next() { // No rows returned, user hasn't liked the NFT yet
 
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Cannot Unlike an NFT You did not Like"))
-			fmt.Println("Cannot Unlike an NFT You did not Like")
-			return 
-
-  }
-
-		// delete the like here  
-		_, err = core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
-	
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("NFT Unlike By User"))
-		fmt.Println("NFT Unlike By User")
+		w.Write([]byte("Cannot Unlike an NFT You did not Like"))
+		fmt.Println("Cannot Unlike an NFT You did not Like")
 		return
+
+	}
+
+	// delete the like here
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("NFT Unlike By User"))
+	fmt.Println("NFT Unlike By User")
+	return
 
 }
 
 func getNftlikeCounts(w http.ResponseWriter, r *http.Request) {
- 
+
 	nftkey := r.URL.Query().Get("nft_key")
- 
- // check nftkey is not empty
 
- if nftkey == "" {
+	// check nftkey is not empty
+
+	if nftkey == "" {
 		http.Error(w, `{"error": "Missing nft key parameter"}`,
-		http.StatusBadRequest)
-		return 
- }
-
-w.Header().Set("Access-Control-Allow-Origin", "*")
-w.Header().Set("Content-Type", "application/json")
-w.WriteHeader(http.StatusOK)
-
-log.Printf("nftKey: %d", nftkey)
-
-var count int
- 
-err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT COUNT(*) FROM nftlikes WHERE nftKey = $1", nftkey).Scan(&count)
-
-
-if err != nil {
-
-	if err ==  sql.ErrNoRows {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"error": "No Like for this NFT"}`))
-		return 
+			http.StatusBadRequest)
+		return
 	}
 
-  w.WriteHeader(http.StatusInternalServerError)
-  w.Write([]byte(err.Error()))
-  return
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
- }
+	log.Printf("nftKey: %d", nftkey)
 
- 
-w.WriteHeader(http.StatusOK)
-w.Write([]byte(strconv.Itoa(count)))
-return
- 
+	var count int
+
+	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT COUNT(*) FROM nftlikes WHERE nftKey = $1", nftkey).Scan(&count)
+
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`{"error": "No Like for this NFT"}`))
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(strconv.Itoa(count)))
+	return
 
 }
