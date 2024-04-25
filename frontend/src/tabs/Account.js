@@ -3,23 +3,39 @@ import "./Account.css";
 import BasicTab from "./BasicTab.js";
 
 const Account = (props) => {
-  // TODO: Create the account tab w/ wallet address, username, pixel info, top X % users ( pixels placed? ), ...
   const [username, setUsername] = useState("");
-  const [pixelCount, setPixelCount] = useState(2572);
+  const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState("");
   const [isUsernameSaved, saveUsername] = useState(false);
-
+  
+  const userAddress = "0x0000000000000000000000000000000000000000000000000000000000000000";
+  
   const handleSubmit = (event) => {
     event.preventDefault();
     setUsername(username);
     saveUsername(true);
   };
-
+  
   const editUsername = (e) => {
     saveUsername(false);
-  }
+  };
+  
+  useEffect(() => {
+    const fetchPixelCount = async () => {
+      const response = await fetch(`http://localhost:8080/getPixelCount?address=${userAddress}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPixelCount(data.count);
+      } else {
+        console.error('Failed to fetch pixel count:', await response.text());
+      }
+    };
+
+    fetchPixelCount();
+  }, [userAddress]);
 
   useEffect(() => {
+    // Update rank based on pixel count
     if (pixelCount >= 5000) {
       setAccountRank("Champion");
     } else if (pixelCount >= 3000) {
@@ -31,14 +47,13 @@ const Account = (props) => {
     } else {
       setAccountRank("Bronze");
     }
-  });
+  }, [pixelCount]);
+
   return (
     <BasicTab title="Account">
       <div className="Account__flex">
         <p>Address:</p>
-        <p className="Account__wrap">
-          0x0000000000000000000000000000000000000000000000000000000000000000
-        </p>
+        <p className="Account__wrap">{userAddress}</p>
       </div>
       <div className="Account__flex Account__flex--center">
         <p>Username:</p>
