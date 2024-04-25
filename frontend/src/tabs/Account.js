@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./Account.css";
 import BasicTab from "./BasicTab.js";
+import backendConfig from "../configs/backend.config.json";
 
 const Account = (props) => {
+  const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port;
   const [username, setUsername] = useState("");
   const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState("");
@@ -19,10 +21,36 @@ const Account = (props) => {
   const editUsername = (e) => {
     saveUsername(false);
   };
+
+  useEffect(() => {
+    const getUsernameUrl = `${backendUrl}/getUsername?address=${userAddress}`;
+    fetch(getUsernameUrl, {mode: "cors"})
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch username');
+          
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data.username === null || data.username === "") {
+          setUsername("");
+          saveUsername(false);
+        } else {
+          setUsername(data.username);
+          saveUsername(true);
+        }
+      })
+      .catch(error => { 
+        console.error('Failed to fetch username:', error);
+      });
+  }, [userAddress]);
+
   
   useEffect(() => {
     const fetchPixelCount = async () => {
-      const response = await fetch(`http://localhost:8080/getPixelCount?address=${userAddress}`);
+      const getPixelCountUrl = `${backendUrl}/getPixelCount?address=${userAddress}`;
+      const response = await fetch(getPixelCountUrl, {mode: "cors"});
       if (response.ok) {
         const data = await response.json();
         setPixelCount(data.count);
@@ -60,7 +88,11 @@ const Account = (props) => {
         {isUsernameSaved ? (
           <div className="Account__user">
             <p>{username}</p>
-            <button className="Account__button Account__button--edit" type="button" onClick={editUsername}>
+            <button
+              className="Account__button Account__button--edit"
+              type="button"
+              onClick={editUsername}
+            >
               edit
             </button>
           </div>
@@ -75,7 +107,10 @@ const Account = (props) => {
                 onChange={(e) => setUsername(e.target.value)}
               />
             </label>
-            <button className="Account__button Account__button--submit" type="submit">
+            <button
+              className="Account__button Account__button--submit"
+              type="submit"
+            >
               update
             </button>
           </form>
