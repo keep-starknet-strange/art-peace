@@ -65,16 +65,17 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
-    reqBody, err := io.ReadAll(r.Body)
-    if err != nil {
-        http.Error(w, "Failed to read request body", http.StatusInternalServerError)
-        return
-    }
 	// Disable this in production
 	if core.ArtPeaceBackend.BackendConfig.Production {
 		http.Error(w, "Not available in production", http.StatusNotImplemented)
 		return
 	}
+
+     reqBody, err := io.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+        return
+    }
 
 	var jsonBody map[string]string
 	err = json.Unmarshal(reqBody, &jsonBody)
@@ -89,7 +90,12 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    color := jsonBody["color"]
+    colorStr := jsonBody["color"]
+    color, err := strconv.Atoi(colorStr)
+    if err != nil {
+        http.Error(w, "Invalid color parameter", http.StatusBadRequest)
+        return
+    }
 
     // Validate position range
     if position < 0 || position >= int(core.ArtPeaceBackend.CanvasConfig.Canvas.Width*core.ArtPeaceBackend.CanvasConfig.Canvas.Height) {
@@ -98,16 +104,16 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
     }
 
     // Validate color format (e.g., validate against allowed colors)
-    // Example: check if color is a valid hex color code
-    if !isValidHexColor(color) {
-        http.Error(w, "Invalid color format", http.StatusBadRequest)
+    colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
+   if color < 0 || color > colorsLength {
+        http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
         return
     }
 
     shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.PlacePixelDevnet
     contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
 
-    cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(position), color)
+    cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(position), colorStr)
     _, err = cmd.Output()
     if err != nil {
         fmt.Println("Error executing shell command: ", err)
@@ -146,7 +152,8 @@ func placePixelRedis(w http.ResponseWriter, r *http.Request) {
     }
 
     // Validate color range (e.g., ensure color value fits within bit width)
-    if color >= (1 << core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth) {
+    colorsLength := uint(len(core.ArtPeaceBackend.CanvasConfig.Colors)) 
+    if color >= colorsLength {
         http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
         return
     }
@@ -163,10 +170,4 @@ func placePixelRedis(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Access-Control-Allow-Origin", "*")
     w.Write([]byte("Pixel placed"))
-}
-
-// Helper function to validate hex color format
-func isValidHexColor(color string) bool {
-    _, err := strconv.ParseUint(color[1:], 16, 32) // Skip '#' character
-    return err == nil && len(color) == 7          // Check if it's a valid hex color (#RRGGBB)
 }
