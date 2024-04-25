@@ -120,8 +120,8 @@ func processPixelPlacedEvent(event map[string]interface{}, w http.ResponseWriter
 
 	// Perform comparison with maxPosition
 	if position < 0 || position >= maxPosition {
-    http.Error(w, "Position out of range", http.StatusBadRequest)
-    return
+		http.Error(w, "Position out of range", http.StatusBadRequest)
+		return
 	}
 
 	dayIdx, err := strconv.ParseInt(dayIdxHex.(string), 0, 64)
@@ -138,10 +138,10 @@ func processPixelPlacedEvent(event map[string]interface{}, w http.ResponseWriter
 	}
 	//validate color
 	colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
-    if int(color) < 0 || int(color) >= colorsLength {
-    http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
-    return
-    }
+	if int(color) < 0 || int(color) >= colorsLength {
+		http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
+		return
+	}
 
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
