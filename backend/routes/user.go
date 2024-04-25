@@ -27,9 +27,14 @@ func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT available FROM ExtraPixels WHERE address = $1", user).Scan(&available)
 	if err != nil {
 		if err == sql.ErrNoRows {
-    w.WriteHeader(http.StatusOK) // Change to 200 OK since it's not an error state
-    w.Write([]byte(`{"available": 0}`))
-}
+			w.WriteHeader(http.StatusOK) // Change to 200 OK since it's not an error state
+			w.Write([]byte(`{"available": 0}`))
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "Internal server error"}`))
+		}
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf(`{"available": "%s"}`, available)))
@@ -45,10 +50,10 @@ func getUsername(w http.ResponseWriter, r *http.Request) {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(`{"error": "Username not found"}`))
-			return
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "Internal server error"}`))
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Internal server error"}`))
 		return
 	}
 
@@ -72,10 +77,10 @@ func getPixelCount(w http.ResponseWriter, r *http.Request) {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{"available": 0}`))
-			return
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "Internal server error"}`))
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Internal server error"}`))
 		return
 	}
 
