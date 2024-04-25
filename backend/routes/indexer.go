@@ -115,6 +115,15 @@ func processPixelPlacedEvent(event map[string]interface{}, w http.ResponseWriter
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	//validate position
+	maxPosition := int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width) * int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Height)
+
+	// Perform comparison with maxPosition
+	if position < 0 || position >= maxPosition {
+		http.Error(w, "Position out of range", http.StatusBadRequest)
+		return
+	}
+
 	dayIdx, err := strconv.ParseInt(dayIdxHex.(string), 0, 64)
 	if err != nil {
 		fmt.Println("Error converting day index hex to int: ", err)
@@ -125,6 +134,12 @@ func processPixelPlacedEvent(event map[string]interface{}, w http.ResponseWriter
 	if err != nil {
 		fmt.Println("Error converting color hex to int: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	//validate color
+	colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
+	if int(color) < 0 || int(color) >= colorsLength {
+		http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
 		return
 	}
 
