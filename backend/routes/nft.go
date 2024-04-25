@@ -2,14 +2,17 @@ package routes
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	// "io/ioutil"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"log"
 	"os/exec"
 	"strconv"
-
+	"github.com/pkg/errors"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
@@ -17,6 +20,7 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-nft", getNFT)
 	http.HandleFunc("/get-nfts", getNFTs)
 	http.HandleFunc("/get-my-nfts", getMyNFTs)
+	http.HandleFunc("/get-nft-like-counts", getNftlikeCounts)
 	http.HandleFunc("/like-nft", LikeNFT)
 	http.HandleFunc("/unlike-nft", UnLikeNFT)
 	http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
@@ -35,9 +39,10 @@ type NFTData struct {
 	Minter      string `json:"minter"`
 }
 
-type NFTLikes struct {
-	nftkey	int 			`json:"nftkey"`
-	useraddress 	string 		`json:"useraddress"`
+
+type NFTLikesRequest struct {
+	NFTKey      int    `json:"nftkey"`
+	UserAddress string `json:"useraddress"`
 }
 
 
@@ -204,84 +209,75 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Minted NFT on devnet"))
 }
 
-
 func LikeNFT(w http.ResponseWriter, r *http.Request) {
-
-	reqBody, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	var nftlike NFTLikes
-		err = json.Unmarshal(reqBody, &nftlike)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	// check if the user has like the nft 
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
-	 rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlike.nftkey, nftlike.useraddress)
-    
-	 if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte(err.Error()))
-        return
-    }
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
+	var nftlikeReq NFTLikesRequest
+	err := json.NewDecoder(r.Body).Decode(&nftlikeReq)
+	if err != nil {
+		http.Error(w, errors.Wrap(err, "error decoding JSON").Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("Received request: %+v", nftlikeReq)
+
+	// Check if the user has already liked the NFT
+	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
+	if err != nil {
+		http.Error(w, errors.Wrap(err, "error querying database").Error(), http.StatusInternalServerError)
+		return
+	}
 	defer rows.Close()
-	
-	 if !rows.Next() { // No rows returned, user hasn't liked the NFT yet
 
-        _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlike.nftkey, nftlike.useraddress)
-        if err != nil {
-            w.WriteHeader(http.StatusInternalServerError)
-            w.Write([]byte(err.Error()))
-            return
-        }
+	if !rows.Next() {
+		// No rows returned, user hasn't liked the NFT yet
+		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
+		if err != nil {
+			http.Error(w, errors.Wrap(err, "error inserting into database").Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("NFT Liked By User")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("NFT Liked By User"))
+		return
+	}
 
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte("NFT Liked By User"))
-        fmt.Println("NFT Liked By User")
-        return
-  }
-
-	 // User has already liked the NFT
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("NFT Already Liked By User"))
-    fmt.Println("NFT Already Liked By User")
-
-
+	// User has already liked the NFT
+	fmt.Println("NFT Already Liked By User")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("NFT Already Liked By User"))
 }
+
 
 
 func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 
-	reqBody, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var nftlike NFTLikes
-	err = json.Unmarshal(reqBody, &nftlike)
-	
+	var nftlikeReq NFTLikesRequest
+	err := json.NewDecoder(r.Body).Decode(&nftlikeReq)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		http.Error(w, errors.Wrap(err, "error decoding JSON").Error(), http.StatusBadRequest)
 		return
 	}
+
+	log.Printf("Received request: %+v", nftlikeReq)
+
 
 	// check if the user has like the nft 
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlike.nftkey, nftlike.useraddress)
+	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 	
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -299,7 +295,7 @@ func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
   }
 
 		// delete the like here  
-		_, err = core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlike.nftkey, nftlike.useraddress)
+		_, err = core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 	
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -314,3 +310,47 @@ func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func getNftlikeCounts(w http.ResponseWriter, r *http.Request) {
+ 
+	nftkey := r.URL.Query().Get("nft_key")
+ 
+ // check nftkey is not empty
+
+ if nftkey == "" {
+		http.Error(w, `{"error": "Missing nft key parameter"}`,
+		http.StatusBadRequest)
+		return 
+ }
+
+w.Header().Set("Access-Control-Allow-Origin", "*")
+w.Header().Set("Content-Type", "application/json")
+w.WriteHeader(http.StatusOK)
+
+log.Printf("nftKey: %d", nftkey)
+
+var count int
+ 
+err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT COUNT(*) FROM nftlikes WHERE nftKey = $1", nftkey).Scan(&count)
+
+
+if err != nil {
+
+	if err ==  sql.ErrNoRows {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"error": "No Like for this NFT"}`))
+		return 
+	}
+
+  w.WriteHeader(http.StatusInternalServerError)
+  w.Write([]byte(err.Error()))
+  return
+
+ }
+
+ 
+w.WriteHeader(http.StatusOK)
+w.Write([]byte(strconv.Itoa(count)))
+return
+ 
+
+}

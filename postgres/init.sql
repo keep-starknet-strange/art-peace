@@ -126,7 +126,8 @@ CREATE TABLE NFTs (
 );
 
 CREATE TABLE NFTLikes (
-  nftKey integer NOT NULL PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
+  nftKey integer NOT NULL,
   liker char(64) NOT NULL,
   time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
