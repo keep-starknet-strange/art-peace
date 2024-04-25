@@ -33,12 +33,18 @@ const Account = (props) => {
         return res.json();
       })
       .then(data => {
-        setUsername(data.username);
-        saveUsername(true);
+        if (data.username === null || data.username === "") {
+          setUsername("");
+          saveUsername(false);
+        } else {
+          setUsername(data.username);
+          saveUsername(true);
+        }
       })
       .catch(error => { 
-        saveUsername(false)
+        console.error('Failed to fetch username:', error);
       });
+  }, [userAddress]);
 
   
   useEffect(() => {

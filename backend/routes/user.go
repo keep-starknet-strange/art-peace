@@ -50,8 +50,8 @@ func getUsername(w http.ResponseWriter, r *http.Request) {
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT name FROM Users WHERE address = $1", address).Scan(&name)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(`{"error": "Username not found"}`))
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"username": ""}`))
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "Internal server error"}`))
