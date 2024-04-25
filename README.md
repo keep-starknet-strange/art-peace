@@ -122,6 +122,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Xaxxoo"><img src="https://avatars.githubusercontent.com/u/51526246?v=4?s=100" width="100px;" alt="Xaxxoo"/><br /><sub><b>Xaxxoo</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Xaxxoo" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/manoahLinks"><img src="https://avatars.githubusercontent.com/u/100848212?v=4?s=100" width="100px;" alt="Mano.dev"/><br /><sub><b>Mano.dev</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=manoahLinks" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Otaiki1"><img src="https://avatars.githubusercontent.com/u/38711713?v=4?s=100" width="100px;" alt="Abdulsamad sadiq"/><br /><sub><b>Abdulsamad sadiq</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Otaiki1" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/raizo07"><img src="https://avatars.githubusercontent.com/u/81079370?v=4?s=100" width="100px;" alt="Agada Gabriel"/><br /><sub><b>Agada Gabriel</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=raizo07" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
