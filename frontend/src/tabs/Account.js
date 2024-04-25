@@ -5,7 +5,8 @@ import backendConfig from "../configs/backend.config.json";
 
 const Account = (props) => {
   const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port;
-  const getUsernameUrl = backendUrl + "/getUsername";
+  const getUsernameUrl = `${backendUrl}/getUsername?address=${address}`;
+  const address = 0
   // TODO: Create the account tab w/ wallet address, username, pixel info, top X % users ( pixels placed? ), ...
   const [username, setUsername] = useState("");
   const [pixelCount, setPixelCount] = useState(2572);
@@ -23,7 +24,7 @@ const Account = (props) => {
   };
 
   useEffect(() => {
-    fetch(getUsernameUrl, {mode: "no-cors"})
+    fetch(getUsernameUrl, {mode: "cors"})
       .then(res => {
         if (!res.ok) {
           throw new Error('Failed to fetch username');
