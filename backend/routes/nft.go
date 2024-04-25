@@ -17,6 +17,8 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-nft", getNFT)
 	http.HandleFunc("/get-nfts", getNFTs)
 	http.HandleFunc("/get-my-nfts", getMyNFTs)
+	http.HandleFunc("/like-nft", LikeNFT)
+	http.HandleFunc("/unlike-nft", UnLikeNFT)
 	http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
 	// Create a static file server for the nft images
 	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("."))))
@@ -34,8 +36,8 @@ type NFTData struct {
 }
 
 type NFTLikes struct {
-	nftkey	int 			`json:"position"`
-	liker 	string 		`json:"height"`
+	nftkey	int 			`json:"nftkey"`
+	useraddress 	string 		`json:"useraddress"`
 }
 
 
@@ -202,113 +204,113 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Minted NFT on devnet"))
 }
 
-func LikeNFT(w http.ResponseWriter, r *http.Request) {
-	nftkey := r.URL.Query().Get("nft_key")
-	userAddress := r.URL.Query().Get("user_address")
 
-	// check if the user has like the nft 
+func LikeNFT(w http.ResponseWriter, r *http.Request) {
+
+	reqBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
 	var nftlike NFTLikes
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nftlikes WHERE nft_key = $1 AND user_address = $2", nftkey, userAddress)
-	
+		err = json.Unmarshal(reqBody, &nftlike)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	defer rows.Close()
 
-	err = rows.Scan(&nftlike.nftkey, &nftlike.liker)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
+	// check if the user has like the nft 
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	out, err := json.Marshal(nftlike)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
+	 rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlike.nftkey, nftlike.useraddress)
+    
+	 if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte(err.Error()))
+        return
+    }
 
-	if out {
-			w.Write([]byte(out))
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("NFT Like By User"))
-			fmt.Println("NFT Like By User")
-			return 
-	}
+	defer rows.Close()
+	
+	 if !rows.Next() { // No rows returned, user hasn't liked the NFT yet
+
+        _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlike.nftkey, nftlike.useraddress)
+        if err != nil {
+            w.WriteHeader(http.StatusInternalServerError)
+            w.Write([]byte(err.Error()))
+            return
+        }
+
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("NFT Liked By User"))
+        fmt.Println("NFT Liked By User")
+        return
+  }
+
+	 // User has already liked the NFT
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("NFT Already Liked By User"))
+    fmt.Println("NFT Already Liked By User")
 
 
-	 //  new like for nft 
-		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO nftlikes (nft_key) (user_address) VALUES ($1) ($2)", nftkey, userAddress)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("NFT Like By User"))
-	fmt.Println("NFT Like By User")
 }
 
 
-func UnlikeNft(w http.ResponseWriter, r *http.Request) {
-	nftkey := r.URL.Query().Get("nft_key")
-	userAddress := r.URL.Query().Get("user_address")
+func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 
-	// check if the user has like the nft 
-
-	var nftlike NFTLikes
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nftlikes WHERE nft_key = $1 AND user_address = $2", nftkey, userAddress)
-	
+	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	defer rows.Close()
 
+	var nftlike NFTLikes
+	err = json.Unmarshal(reqBody, &nftlike)
+	
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// check if the user has like the nft 
+	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlike.nftkey, nftlike.useraddress)
+	
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	out, err := json.Marshal(nftlike)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
+	defer rows.Close()
+	
+	if !rows.Next() { // No rows returned, user hasn't liked the NFT yet
 
-	if out {
-		// delete the like 
-		rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nft_key = $1 AND user_address = $2", nftkey, userAddress)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Cannot Unlike an NFT You did not Like"))
+			fmt.Println("Cannot Unlike an NFT You did not Like")
+			return 
+
+  }
+
+		// delete the like here  
+		_, err = core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlike.nftkey, nftlike.useraddress)
 	
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
 		}
-		defer rows.Close()
 
-		w.Write([]byte(out))
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("NFT Unlike By User"))
 		fmt.Println("NFT Unlike By User")
-		return 
-
-	}
-
-	w.Write([]byte(out))
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Cannot Unlike an NFT You did not Like"))
-	fmt.Println("Cannot Unlike an NFT You did not Like")
-	return 
+		return
 
 }
+
