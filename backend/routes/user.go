@@ -27,14 +27,9 @@ func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT available FROM ExtraPixels WHERE address = $1", user).Scan(&available)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(`{"error": "No extra pixels found for this address"}`))
-			return
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Internal server error"}`))
-		return
-	}
+    w.WriteHeader(http.StatusOK) // Change to 200 OK since it's not an error state
+    w.Write([]byte(`{"available": 0}`))
+}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf(`{"available": "%s"}`, available)))
@@ -75,8 +70,8 @@ func getPixelCount(w http.ResponseWriter, r *http.Request) {
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), query, userAddress).Scan(&count)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(`{"error": "No pixels found for this address"}`))
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"available": 0}`))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
