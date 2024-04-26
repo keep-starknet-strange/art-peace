@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -19,9 +20,11 @@ type Quest struct {
 }
 
 func InitQuestsRoutes() {
- 	http.HandleFunc("/get-daily-duests", GetDailyQuests)
+	http.HandleFunc("/get-daily-duests", GetDailyQuests)
 	http.HandleFunc("/get-main-quests", GetMainQuests)
 	http.HandleFunc("/get-todays-quests", getTodaysQuests)
+	http.HandleFunc("/get-completed-daily-quests", GetCompletedDailyQuests)
+	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
 }
 
 // Query dailyQuests
@@ -39,6 +42,28 @@ func GetMainQuests(w http.ResponseWriter, r *http.Request) {
 // Get today's quests based on the current day index.
 func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE dayIndex = (SELECT MAX(dayIndex) FROM Days)`
+	handleQuestQuery(w, r, query)
+}
+
+func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
+	userAddress := r.URL.Query().Get("address")
+	if userAddress == "" {
+		http.Error(w, `{"error": "Missing address parameter"}`, http.StatusBadRequest)
+		return
+	}
+
+	query := fmt.Sprintf(`SELECT key, name, description, reward FROM MainQuests WHERE key = (SELECT questKey FROM UserMainQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
+	handleQuestQuery(w, r, query)
+}
+
+func GetCompletedDailyQuests(w http.ResponseWriter, r *http.Request) {
+	userAddress := r.URL.Query().Get("address")
+	if userAddress == "" {
+		http.Error(w, `{"error": "Missing address parameter"}`, http.StatusBadRequest)
+		return
+	}
+
+	query := fmt.Sprintf(`SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserDailyQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
 	handleQuestQuery(w, r, query)
 }
 
