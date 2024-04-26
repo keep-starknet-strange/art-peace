@@ -19,7 +19,7 @@ import (
 )
 
 func InitIndexerRoutes() {
-	http.HandleFunc("/consumeIndexerMsg", consumeIndexerMsg)
+	http.HandleFunc("/consume-indexer-msg", consumeIndexerMsg)
 }
 
 // TODO: Clean up
