@@ -100,14 +100,18 @@ func getLastPlacedPixel(w http.ResponseWriter, r *http.Request) {
 	var lastPlacedTime time.Time
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT time FROM LastPlacedTime WHERE address = $1", address).Scan(&lastPlacedTime)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte({"time": 0}))
+		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
+			w.Write([]byte({"error": "Internal server error"}))
+		}
+		return
 	}
+
 	// Create a LastPlacedPixel instance with the scanned timestamp
-	lastPlacedPixel := LastPlacedPixel{
-			Time:    lastPlacedTime,
-	}
+	lastPlacedPixel := LastPlacedPixel{Time:lastPlacedTime,}
 	// Convert to JSON and send the response
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -115,9 +119,9 @@ func getLastPlacedPixel(w http.ResponseWriter, r *http.Request) {
 
 	out, err := json.Marshal(lastPlacedPixel)
 	if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
 	}
 	w.Write([]byte(out))
 }
