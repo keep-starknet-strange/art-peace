@@ -3,17 +3,22 @@ package routes
 import (
 	"context"
 	"fmt"
-	"net/http"
-
 	"github.com/jackc/pgx/v5"
-
 	"github.com/keep-starknet-strange/art-peace/backend/core"
+	"encoding/json"
+	"net/http"
+	"time"
 )
+
+type LastPlacedPixel struct {
+	Time  time.Time json:"time"
+}
 
 func InitUserRoutes() {
 	http.HandleFunc("/getExtraPixels", getExtraPixels)
 	http.HandleFunc("/getUsername", getUsername)
 	http.HandleFunc("/getPixelCount", getPixelCount)
+	http.HandleFunc("/getLastPlacedPixel", getLastPlacedPixel)
 }
 
 func setCommonHeaders(w http.ResponseWriter) {
@@ -88,4 +93,31 @@ func getPixelCount(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf(`{"count": %d}`, count)))
+}
+
+func getLastPlacedPixel(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	var lastPlacedTime time.Time
+	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT time FROM LastPlacedTime WHERE address = $1", address).Scan(&lastPlacedTime)
+	if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+	}
+	// Create a LastPlacedPixel instance with the scanned timestamp
+	lastPlacedPixel := LastPlacedPixel{
+			Time:    lastPlacedTime,
+	}
+	// Convert to JSON and send the response
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	out, err := json.Marshal(lastPlacedPixel)
+	if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+	}
+	w.Write([]byte(out))
 }
