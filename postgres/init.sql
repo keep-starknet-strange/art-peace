@@ -88,7 +88,8 @@ CREATE TABLE Colors (
 );
 
 CREATE TABLE VotableColors (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   hex text NOT NULL,
   votes integer NOT NULL
 );

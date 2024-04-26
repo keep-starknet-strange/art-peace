@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive'
+import { getVotableColors} from "./services/apiService.js"
 import './App.css';
 import Canvas from './canvas/Canvas.js';
 import PixelSelector from './canvas/PixelSelector.js';
@@ -131,31 +132,31 @@ function App() {
   // NFTs
   const [nftSelectionMode, setNftSelectionMode] = useState(false);
 
-  // Timing
-  const [timeLeftInDay, setTimeLeftInDay] = useState('');
-  const startTime = "15:00";
-  const [hours, minutes] = startTime.split(":");
-  
-  
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const nextDayStart = new Date(now);
-      nextDayStart.setDate(now.getDate() + 1);
-      nextDayStart.setUTCHours(parseInt(hours), parseInt(minutes), 0, 0);
+  // Timing: Removed Timer from here because of re-rendering issues
 
-      const difference = nextDayStart - now;
-      const hoursFinal = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutesFinal = Math.floor((difference / 1000 / 60) % 60);
-      const secondsFinal = Math.floor((difference / 1000) % 60);
-
-      const formattedTimeLeft = `${hoursFinal.toString().padStart(2, '0')}:${minutesFinal.toString().padStart(2, '0')}:${secondsFinal.toString().padStart(2, '0')}`;
-      setTimeLeftInDay(formattedTimeLeft);
-    };
-
-    const interval = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(interval);
+  // VotableColor API
+  const [colorApiState, setColorApiState] = useState({
+    loading:null,
+    error:"",
+    data:null
   })
+  //Fetch Data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setColorApiState(prevState => ({ ...prevState, loading: true }));
+        const result = await  getVotableColors()
+        setColorApiState(prevState => ({ ...prevState, data: result, loading:false }));
+      } catch (error) {
+        // Handle or log the error as needed
+        setColorApiState(prevState => ({ ...prevState, error, loading:false }));
+        console.error('Error fetching votable colors:', error);
+      }
+    };
+    fetchData();
+  }, []); 
+
+  console.log(colorApiState)
 
   // Tabs
   const tabs = ['Canvas', 'Quests', 'Vote', 'Templates', 'NFTs', 'Account'];
@@ -177,7 +178,7 @@ function App() {
         { (templateCreationMode || templatePlacedMode) && (
           <TemplateBuilderPanel templateImage={templateImage} setTemplateImage={setTemplateImage} setTemplateCreationMode={setTemplateCreationMode} setTemplatePlacedMode={setTemplatePlacedMode} templateImagePositionY={templateImagePositionY} templateImagePositionX={templateImagePositionX} setTemplateImagePositionX={setTemplateImagePositionX} setTemplateImagePositionY={setTemplateImagePositionY} templateImagePosition={templateImagePosition} setTemplateImagePosition={setTemplateImagePosition} templateColorIds={templateColorIds} setTemplateColorIds={templateColorIds} />
         )}
-        <TabPanel activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} nftSelectionMode={nftSelectionMode} setNftSelectionMode={setNftSelectionMode} setTemplateCreationMode={setTemplateCreationMode} setTemplateImage={setTemplateImage} setTemplateColorIds={setTemplateColorIds} timeLeftInDay={timeLeftInDay} />
+      <TabPanel colorApiState={colorApiState} activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} nftSelectionMode={nftSelectionMode} setNftSelectionMode={setNftSelectionMode} setTemplateCreationMode={setTemplateCreationMode} setTemplateImage={setTemplateImage} setTemplateColorIds={setTemplateColorIds} />
       </div>
       <div className="App__footer">
         <PixelSelector selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} getDeviceTypeInfo={getDeviceTypeInfo} extraPixels={extraPixels} extraPixelsUsed={extraPixelsUsed} />

@@ -1,6 +1,5 @@
-import React from 'react';
 import './TabPanel.css';
-
+import { TimerInjector } from "../utils/TimerInjector.js"
 import Quests from './quests/Quests.js';
 import Voting from './Voting.js';
 import Templates from './templates/Templates.js';
@@ -11,10 +10,14 @@ const TabPanel = props => {
   return (
     <div className="TabPanel">
       {props.activeTab === "Quests" && (
-        <Quests timeLeftInDay={props.timeLeftInDay} />
+        <TimerInjector>
+            {({timeLeftInDay}) => <Quests timeLeftInDay={timeLeftInDay} />}
+        </TimerInjector>
       )}
       {props.activeTab === "Vote" && (
-        <Voting timeLeftInDay={props.timeLeftInDay} />
+        <TimerInjector>
+             {({timeLeftInDay}) => <Voting colorApiState={props.colorApiState} timeLeftInDay={timeLeftInDay} />}
+         </TimerInjector>
       )}
       {props.activeTab === "Templates" && (
         <Templates setTemplateCreationMode={props.setTemplateCreationMode} setTemplateImage={props.setTemplateImage} setTemplateColorIds={props.setTemplateColorIds} />
@@ -26,5 +29,6 @@ const TabPanel = props => {
     </div>
   );
 }
+
 
 export default TabPanel;
