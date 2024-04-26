@@ -230,22 +230,22 @@ func LikeNFT(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-		if !rows.Next() {
+	if !rows.Next() {
 
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
-	if err != nil {
+		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
+		if err != nil {
 			message := "NFT Already Liked By User"
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
 			return
-	}
-
-	message := "NFT liked successfully"
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
-
-	return
 		}
+
+		message := "NFT liked successfully"
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
+
+		return
+	}
 
 	message := "NFT Already Liked By User"
 	w.WriteHeader(http.StatusOK)
