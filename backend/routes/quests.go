@@ -41,7 +41,7 @@ func GetMainQuests(w http.ResponseWriter, r *http.Request) {
 
 
 
-// Query todayQuest
+// Get today's quests based on the current day index.
 func getTodayQuest(w http.ResponseWriter, r *http.Request) {
  	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests	WHERE dayIndex = (SELECT MAX(dayIndex) FROM Days)`	
 	handleQuestQuery(w, r, query)
