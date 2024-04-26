@@ -2,14 +2,12 @@ package routes
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
-	// "io/ioutil"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	"github.com/pkg/errors"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -223,9 +221,8 @@ func LikeNFT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Received request: %+v", nftlikeReq)
-
 	// Check if the user has already liked the NFT
+
 	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 	if err != nil {
 		http.Error(w, errors.Wrap(err, "error querying database").Error(), http.StatusInternalServerError)
@@ -233,23 +230,27 @@ func LikeNFT(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	if !rows.Next() {
-		// No rows returned, user hasn't liked the NFT yet
-		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
-		if err != nil {
-			http.Error(w, errors.Wrap(err, "error inserting into database").Error(), http.StatusInternalServerError)
+		if !rows.Next() {
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
+	if err != nil {
+			message := "NFT Already Liked By User"
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
 			return
-		}
-		fmt.Println("NFT Liked By User")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("NFT Liked By User"))
-		return
 	}
 
-	// User has already liked the NFT
-	fmt.Println("NFT Already Liked By User")
+	message := "NFT liked successfully"
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("NFT Already Liked By User"))
+	w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
+
+	return
+		}
+
+	message := "NFT Already Liked By User"
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
+
 }
 
 func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
@@ -269,26 +270,6 @@ func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Received request: %+v", nftlikeReq)
-
-	// check if the user has like the nft
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM NFTLikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	defer rows.Close()
-
-	if !rows.Next() { // No rows returned, user hasn't liked the NFT yet
-
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Cannot Unlike an NFT You did not Like"))
-		fmt.Println("Cannot Unlike an NFT You did not Like")
-		return
-
-	}
-
 	// delete the like here
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 
@@ -298,9 +279,10 @@ func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	message := "NFT Unlike By User"
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("NFT Unlike By User"))
-	fmt.Println("NFT Unlike By User")
+	w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
+
 	return
 
 }
@@ -321,17 +303,15 @@ func getNftlikeCounts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	log.Printf("nftKey: %d", nftkey)
-
 	var count int
 
 	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT COUNT(*) FROM nftlikes WHERE nftKey = $1", nftkey).Scan(&count)
 
 	if err != nil {
 
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(`{"error": "No Like for this NFT"}`))
+		if err == pgx.ErrNoRows {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprintf(`{"count": %d}`, 0)))
 			return
 		}
 
@@ -342,7 +322,7 @@ func getNftlikeCounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(strconv.Itoa(count)))
+	w.Write([]byte(fmt.Sprintf(`{"count": %d}`, count)))
 	return
 
 }
