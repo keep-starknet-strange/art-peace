@@ -94,7 +94,7 @@ const PixelSelector = (props) => {
 
   // TODO: getLastPlacedPixelTime
   useEffect(() => {
-    const getLastPlacedPixel = backendUrl + "/getLastPlacedPixel?address=address1";
+    const getLastPlacedPixel = backendUrl + "/get-last-placed-pixel?address=address1";
     fetch(getLastPlacedPixel, { mode: "cors" })
         .then((response) => response.json())
         .then((responseData) => {

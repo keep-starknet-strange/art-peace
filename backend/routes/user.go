@@ -15,10 +15,10 @@ type LastPlacedPixel struct {
 }
 
 func InitUserRoutes() {
-	http.HandleFunc("/getExtraPixels", getExtraPixels)
-	http.HandleFunc("/getUsername", getUsername)
-	http.HandleFunc("/getPixelCount", getPixelCount)
-	http.HandleFunc("/getLastPlacedPixel", getLastPlacedPixel)
+	http.HandleFunc("/get-last-placed-pixel", getLastPlacedPixel)
+	http.HandleFunc("/get-extra-pixels", getExtraPixels)
+	http.HandleFunc("/get-username", getUsername)
+	http.HandleFunc("/get-pixel-count", getPixelCount)
 }
 
 func setCommonHeaders(w http.ResponseWriter) {

@@ -20,7 +20,6 @@ func InitNFTRoutes() {
 	http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
 	// Create a static file server for the nft images
 	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("."))))
-	//http.HandleFunc("/nft-image", nftImage)
 }
 
 type NFTData struct {
@@ -135,26 +134,6 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte(out))
 }
-
-// func nftImage(w http.ResponseWriter, r *http.Request) {
-//   // Get the png image at location "nft-{tokenId}.png"
-//   tokenId := r.URL.Query().Get("tokenId")
-//   imageLocation := fmt.Sprintf("nft-%s.png", tokenId)
-//
-//   image, err := os.Open(imageLocation)
-//   if err != nil {
-//     w.WriteHeader(http.StatusInternalServerError)
-//     w.Write([]byte(err.Error()))
-//     return
-//   }
-//   defer image.Close()
-//
-//   w.Header().Set("Access-Control-Allow-Origin", "*")
-//   w.Header().Set("Content-Type", "image/png")
-//   w.WriteHeader(http.StatusOK)
-//
-//   io.Copy(w, image)
-// }
 
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := io.ReadAll(r.Body)
