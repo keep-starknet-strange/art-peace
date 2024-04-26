@@ -11,9 +11,9 @@ import (
 )
 
 func InitUserRoutes() {
-	http.HandleFunc("/getExtraPixels", getExtraPixels)
-	http.HandleFunc("/getUsername", getUsername)
-	http.HandleFunc("/getPixelCount", getPixelCount)
+	http.HandleFunc("/get-extra-pixels", getExtraPixels)
+	http.HandleFunc("/get-username", getUsername)
+	http.HandleFunc("/get-pixel-count", getPixelCount)
 }
 
 func setCommonHeaders(w http.ResponseWriter) {

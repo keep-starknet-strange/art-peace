@@ -90,7 +90,7 @@ services:
       - apibara
     environment:
       - APIBARA_STREAM_URL=http://art-peace-apibara-1:7171
-      - BACKEND_TARGET_URL=http://art-peace-backend-1:8080/consumeIndexerMsg
+      - BACKEND_TARGET_URL=http://art-peace-backend-1:8080/consume-indexer-msg
     volumes:
       - configs:/configs
     restart: on-failure

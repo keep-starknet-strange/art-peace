@@ -20,10 +20,29 @@ type Quest struct {
 }
 
 func InitQuestsRoutes() {
-	http.HandleFunc("/getDailyQuests", GetDailyQuests)
-	http.HandleFunc("/getMainQuests", GetMainQuests)
-	http.HandleFunc("/get-completed-daily-quests", GetCompletedDailyQuests)
+ 	http.HandleFunc("/get-daily-duests", GetDailyQuests)
+	http.HandleFunc("/get-main-quests", GetMainQuests)
+	http.HandleFunc("/get-todays-quests", getTodaysQuests)
+  http.HandleFunc("/get-completed-daily-quests", GetCompletedDailyQuests)
 	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
+}
+
+// Query dailyQuests
+func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
+	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests ORDER BY dayIndex ASC`
+	handleQuestQuery(w, r, query)
+}
+
+// Query mainQuest
+func GetMainQuests(w http.ResponseWriter, r *http.Request) {
+	query := `SELECT key, name, description, reward FROM MainQuests`
+	handleQuestQuery(w, r, query)
+}
+
+// Get today's quests based on the current day index.
+func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
+	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE dayIndex = (SELECT MAX(dayIndex) FROM Days)`
+	handleQuestQuery(w, r, query)
 }
 
 func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
@@ -45,18 +64,6 @@ func GetCompletedDailyQuests(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := fmt.Sprintf(`SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserDailyQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
-	handleQuestQuery(w, r, query)
-}
-
-// Query dailyQuests
-func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
-	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests ORDER BY dayIndex ASC`
-	handleQuestQuery(w, r, query)
-}
-
-// Query mainQuest
-func GetMainQuests(w http.ResponseWriter, r *http.Request) {
-	query := `SELECT key, name, description, reward FROM MainQuests`
 	handleQuestQuery(w, r, query)
 }
 

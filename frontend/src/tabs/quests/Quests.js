@@ -11,12 +11,12 @@ const Quests = (props) => {
     const fetchQuests = async () => {
       try {
         // Fetching daily quests from backend
-        const dailyResponse = await fetch('http://localhost:8080/getDailyQuests');
+        const dailyResponse = await fetch('http://localhost:8080/get-daily-quests');
         const dailyData = await dailyResponse.json();
         setDailyQuests(dailyData);
 
         // Fetching main quests from backend
-        const mainResponse = await fetch('http://localhost:8080/getMainQuests');
+        const mainResponse = await fetch('http://localhost:8080/get-main-quests');
         const mainData = await mainResponse.json();
         setMainQuests(mainData);
       } catch (error) {
