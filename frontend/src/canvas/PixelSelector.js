@@ -92,6 +92,20 @@ const PixelSelector = (props) => {
     return () => clearInterval(interval);
   }, [getTimeTillNextPlacement]);
 
+  // TODO: getLastPlacedPixelTime
+  useEffect(() => {
+    const getLastPlacedPixel = backendUrl + "/getLastPlacedPixel?address=address1";
+    fetch(getLastPlacedPixel, { mode: "cors" })
+        .then((response) => response.json())
+        .then((responseData) => {
+          const time = new Date(responseData.time).toLocaleString('en-US', { timeZone: 'UTC' });
+          setPlacedTime(time)
+        })
+        .catch((error) => {
+            console.error("Error fetching data:", error);
+        });
+  }, []);
+
   return (
     <div className={"PixelSelector " + (props.getDeviceTypeInfo().isPortrait ? " PixelSelector--portrait" : "")}>
     {
