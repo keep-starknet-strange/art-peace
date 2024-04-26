@@ -22,8 +22,8 @@ type Quest struct {
 func InitQuestsRoutes() {
 	http.HandleFunc("/getDailyQuests", GetDailyQuests)
 	http.HandleFunc("/getMainQuests", GetMainQuests)
-	http.HandleFunc("/getCompletedDailyQuests", GetCompletedDailyQuests)
-	http.HandleFunc("/getCompletedMainQuests", GetCompletedMainQuests)
+	http.HandleFunc("/get-completed-daily-quests", GetCompletedDailyQuests)
+	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
 }
 
 func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +33,7 @@ func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := fmt.Sprintf(`SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserMainQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
+	query := fmt.Sprintf(`SELECT key, name, description, reward FROM MainQuests WHERE key = (SELECT questKey FROM UserMainQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
 	handleQuestQuery(w, r, query)
 }
 
