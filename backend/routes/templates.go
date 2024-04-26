@@ -25,10 +25,10 @@ func InitTemplateRoutes() {
 	http.HandleFunc("/get-templates", getTemplates)
 	http.HandleFunc("/add-template-img", addTemplateImg)
 	http.HandleFunc("/add-template-data", addTemplateData)
-	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("."))))
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/add-template-devnet", addTemplateDevnet)
 	}
+	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("."))))
 }
 
 // TODO: Add specific location for template images

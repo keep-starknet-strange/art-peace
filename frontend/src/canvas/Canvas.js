@@ -360,7 +360,7 @@ const Canvas = props => {
     
     const position = props.selectedPositionX + props.selectedPositionY * width
     const colorIdx = props.selectedColorId
-    let placePixelEndpoint = backendUrl + "/placePixelDevnet"
+    let placePixelEndpoint = backendUrl + "/place-pixel-devnet"
 
     fetch(placePixelEndpoint, {
       mode: "cors",

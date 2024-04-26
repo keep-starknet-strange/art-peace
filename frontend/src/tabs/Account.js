@@ -23,7 +23,7 @@ const Account = (props) => {
   };
 
   useEffect(() => {
-    const getUsernameUrl = `${backendUrl}/getUsername?address=${userAddress}`;
+    const getUsernameUrl = `${backendUrl}/get-username?address=${userAddress}`;
     fetch(getUsernameUrl, {mode: "cors"})
       .then(res => {
         if (!res.ok) {
@@ -49,7 +49,7 @@ const Account = (props) => {
   
   useEffect(() => {
     const fetchPixelCount = async () => {
-      const getPixelCountUrl = `${backendUrl}/getPixelCount?address=${userAddress}`;
+      const getPixelCountUrl = `${backendUrl}/get-pixel-count?address=${userAddress}`;
       const response = await fetch(getPixelCountUrl, {mode: "cors"});
       if (response.ok) {
         const data = await response.json();
