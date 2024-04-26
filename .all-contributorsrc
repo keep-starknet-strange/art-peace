@@ -117,6 +117,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "raizo07",
+      "name": "Agada Gabriel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81079370?v=4",
+      "profile": "https://github.com/raizo07",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "abdulqaharu",
+      "name": "Abdulqahar Usman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/21007582?v=4",
+      "profile": "https://github.com/abdulqaharu",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "aweolumidedavid",
+      "name": "Awe Olumide David",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49573727?v=4",
+      "profile": "https://github.com/aweolumidedavid",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

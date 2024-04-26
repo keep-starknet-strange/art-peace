@@ -11,6 +11,7 @@ import TabPanel from './tabs/TabPanel.js';
 import { usePreventZoom } from './utils/Window.js';
 import logo from './resources/logo.png';
 import canvasConfig from "./configs/canvas.config.json"
+import backendConfig from "./configs/backend.config.json";
 
 function App() {
   // Window management
@@ -19,6 +20,7 @@ function App() {
   const isDesktopOrLaptop = useMediaQuery({
     query: '(min-width: 1224px)'
   })
+  const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port;
   const isBigScreen = useMediaQuery({ query: '(min-width: 1824px)' })
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1224px)' })
   const isPortrait = useMediaQuery({ query: '(orientation: portrait)' })
@@ -53,6 +55,21 @@ function App() {
   const [extraPixels, setExtraPixels] = useState(42); // TODO: fetch from server
   const [extraPixelsUsed, setExtraPixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
+
+  useEffect(() => {
+    const address = 0;
+    let getExtraPixelsEndpoint = `${backendUrl}/get-extra-pixels?address=${address}`;
+    fetch(getExtraPixelsEndpoint, { mode: "cors" }).then((response) => {
+      response
+        .json()
+        .then((data) => {
+          setExtraPixels(data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+  },[])
 
   const clearPixelSelection = () => {
     setSelectedPositionX(null);

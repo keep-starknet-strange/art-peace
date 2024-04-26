@@ -12,11 +12,17 @@ type BackendScriptsConfig struct {
 	MintNFTDevnet          string `json:"mint_nft_devnet"`
 }
 
+type WebSocketConfig struct {
+	ReadBufferSize  int `json:"read_buffer_size"`
+	WriteBufferSize int `json:"write_buffer_size"`
+}
+
 type BackendConfig struct {
 	Host       string               `json:"host"`
 	Port       int                  `json:"port"`
 	Scripts    BackendScriptsConfig `json:"scripts"`
 	Production bool                 `json:"production"`
+	WebSocket  WebSocketConfig      `json:"websocket"`
 }
 
 var DefaultBackendConfig = BackendConfig{
@@ -29,6 +35,10 @@ var DefaultBackendConfig = BackendConfig{
 		MintNFTDevnet:          "../scripts/mint_nft.sh",
 	},
 	Production: false,
+	WebSocket: WebSocketConfig{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	},
 }
 
 var DefaultBackendConfigPath = "../configs/backend.config.json"

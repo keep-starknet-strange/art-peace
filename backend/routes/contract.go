@@ -7,8 +7,8 @@ import (
 )
 
 func InitContractRoutes() {
-	http.HandleFunc("/getContractAddress", getContractAddress)
-	http.HandleFunc("/setContractAddress", setContractAddress)
+	http.HandleFunc("/get-contract-address", getContractAddress)
+	http.HandleFunc("/set-contract-address", setContractAddress)
 }
 
 func getContractAddress(w http.ResponseWriter, r *http.Request) {
