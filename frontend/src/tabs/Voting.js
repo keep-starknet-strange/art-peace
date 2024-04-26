@@ -32,7 +32,9 @@ const Voting = props => {
             <div className="Voting__colors__item__color" style={{backgroundColor: color.hex}}></div>
             <div className="Voting__colors__item__votes">{color.votes}</div>
           </div>
-        )):"No Data Added Yet"}
+        )):
+        <div style={{padding:"14px", textAlign:"center"}}>No Color Added Yet</div>
+        }
         </div>
       </div>
     </BasicTab>
