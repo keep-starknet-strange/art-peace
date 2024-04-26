@@ -29,7 +29,6 @@ const Canvas = props => {
 
   const [colors, setColors] = useState([]);
   const [setupColors, setSetupColors] = useState(false);
-  const [lastPlacedPixelTime, setLastPlacedPixelTime] = useState(0);
 
   useEffect(() => {
     if (setupColors) {
@@ -545,20 +544,7 @@ const Canvas = props => {
     };
   }, [props.selectedColorId, pixelSelect, props.nftSelectionMode, nftSelectionStarted, nftSelectionPositionX, nftSelectionPositionY, nftSelectionWidth, nftSelectionHeight, height, width, props.canvasRef, nftSelectionEndX, nftSelectionEndY, nftSelectionStartX, nftSelectionStartY, props]);
 
-  // TODO: getLastPlacedPixelTime
-  useEffect(() => {
-    const getLastPlacedPixel = backendUrl + "/getLastPlacedPixel?address=address1";
-    fetch(getLastPlacedPixel, { mode: "cors" })
-        .then((response) => response.json())
-        .then((responseData) => {
-          const time = new Date(responseData.time).toLocaleString('en-US', { timeZone: 'UTC' });
-          setLastPlacedPixelTime(time)
-        })
-        .catch((error) => {
-            console.error("Error fetching data:", error);
-        });
-  }, []);
-
+  
   // TODO: both place options
   return (
 
