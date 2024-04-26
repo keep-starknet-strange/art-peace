@@ -112,7 +112,7 @@ const Canvas = props => {
     const canvas = props.canvasRef.current
     const context = canvas.getContext('2d')
 
-    let getCanvasEndpoint = backendUrl + "/getCanvas"
+    let getCanvasEndpoint = backendUrl + "/get-canvas"
     fetch(getCanvasEndpoint, { mode: 'cors' }).then(response => {
       return response.arrayBuffer()
     }).then(data => {
@@ -216,7 +216,7 @@ const Canvas = props => {
 
     const position = y * width + x;
     let getPixelInfoEndpoint =
-      backendUrl + "/getPixelInfo?position=" + position.toString();
+      backendUrl + "/get-pixel-info?position=" + position.toString();
     fetch(getPixelInfoEndpoint, {
       mode: "cors",
     })

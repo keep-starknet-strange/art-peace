@@ -8,8 +8,8 @@ import (
 )
 
 func InitUserRoutes() {
-	http.HandleFunc("/getExtraPixels", getExtraPixels)
-	http.HandleFunc("/getUsername", getUsername)
+	http.HandleFunc("/get-extra-pixels", getExtraPixels)
+	http.HandleFunc("/get-username", getUsername)
 }
 
 func getExtraPixels(w http.ResponseWriter, r *http.Request) {

@@ -9,8 +9,8 @@ import (
 )
 
 func InitCanvasRoutes() {
-	http.HandleFunc("/initCanvas", initCanvas)
-	http.HandleFunc("/getCanvas", getCanvas)
+	http.HandleFunc("/init-canvas", initCanvas)
+	http.HandleFunc("/get-canvas", getCanvas)
 }
 
 func initCanvas(w http.ResponseWriter, r *http.Request) {
