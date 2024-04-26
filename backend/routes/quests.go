@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -21,6 +22,30 @@ type Quest struct {
 func InitQuestsRoutes() {
 	http.HandleFunc("/getDailyQuests", GetDailyQuests)
 	http.HandleFunc("/getMainQuests", GetMainQuests)
+	http.HandleFunc("/getCompletedDailyQuests", GetCompletedDailyQuests)
+	http.HandleFunc("/getCompletedMainQuests", GetCompletedMainQuests)
+}
+
+func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
+	userAddress := r.URL.Query().Get("address")
+	if userAddress == "" {
+		http.Error(w, `{"error": "Missing address parameter"}`, http.StatusBadRequest)
+		return
+	}
+
+	query := fmt.Sprintf(`SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserMainQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
+	handleQuestQuery(w, r, query)
+}
+
+func GetCompletedDailyQuests(w http.ResponseWriter, r *http.Request) {
+	userAddress := r.URL.Query().Get("address")
+	if userAddress == "" {
+		http.Error(w, `{"error": "Missing address parameter"}`, http.StatusBadRequest)
+		return
+	}
+
+	query := fmt.Sprintf(`SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserDailyQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
+	handleQuestQuery(w, r, query)
 }
 
 // Query dailyQuests
