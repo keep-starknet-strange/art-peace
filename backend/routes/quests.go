@@ -19,8 +19,9 @@ type Quest struct {
 }
 
 func InitQuestsRoutes() {
-	http.HandleFunc("/get-daily-duests", GetDailyQuests)
+ 	http.HandleFunc("/get-daily-duests", GetDailyQuests)
 	http.HandleFunc("/get-main-quests", GetMainQuests)
+	http.HandleFunc("/get-todays-quests", getTodaysQuests)
 }
 
 // Query dailyQuests
@@ -32,6 +33,12 @@ func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
 // Query mainQuest
 func GetMainQuests(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT key, name, description, reward FROM MainQuests`
+	handleQuestQuery(w, r, query)
+}
+
+// Get today's quests based on the current day index.
+func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
+	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE dayIndex = (SELECT MAX(dayIndex) FROM Days)`
 	handleQuestQuery(w, r, query)
 }
 
