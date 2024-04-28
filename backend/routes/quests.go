@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
@@ -19,12 +21,18 @@ type Quest struct {
 	DayIndex    int    `json:"dayIndex,omitempty"` // Only for daily quests
 }
 
+// Time struct holds a single time value
+type Time struct {
+	Time		time.Time	`json:"time"`
+}
+
 func InitQuestsRoutes() {
 	http.HandleFunc("/get-daily-quests", GetDailyQuests)
 	http.HandleFunc("/get-main-quests", GetMainQuests)
 	http.HandleFunc("/get-todays-quests", getTodaysQuests)
 	http.HandleFunc("/get-completed-daily-quests", GetCompletedDailyQuests)
 	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
+	http.HandleFunc("/get-today-start-time", GetTodayStartTime)
 }
 
 // Query dailyQuests
@@ -44,6 +52,7 @@ func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE dayIndex = (SELECT MAX(dayIndex) FROM Days)`
 	handleQuestQuery(w, r, query)
 }
+
 
 func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
 	userAddress := r.URL.Query().Get("address")
@@ -66,6 +75,33 @@ func GetCompletedDailyQuests(w http.ResponseWriter, r *http.Request) {
 	query := fmt.Sprintf(`SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserDailyQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
 	handleQuestQuery(w, r, query)
 }
+
+//  Get today's start time
+func GetTodayStartTime(w http.ResponseWriter, r *http.Request) {
+	// SQL query to fetch the highest dayIndex row
+	query := "SELECT dayStart FROM days WHERE dayIndex = (SELECT MAX(dayIndex) FROM days)"
+
+	var todayStartTime Time
+
+	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), query).Scan(&todayStartTime.Time)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Day start not found"))
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+		}
+		return
+	}
+
+	setupCORS(&w, r)
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(todayStartTime); err != nil {
+		http.Error(w, "Error encoding response: "+err.Error(), http.StatusInternalServerError)
+	}
+}
+
 
 func handleQuestQuery(w http.ResponseWriter, r *http.Request, query string) {
 	var quests []Quest
@@ -97,6 +133,8 @@ func handleQuestQuery(w http.ResponseWriter, r *http.Request, query string) {
 	}
 }
 
+
+
 // CORS setup
 func setupCORS(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
@@ -106,3 +144,5 @@ func setupCORS(w *http.ResponseWriter, r *http.Request) {
 		(*w).WriteHeader(http.StatusOK)
 	}
 }
+
+
