@@ -124,3 +124,12 @@ CREATE TABLE NFTs (
   blockNumber integer NOT NULL,
   minter char(64) NOT NULL
 );
+
+CREATE TABLE NFTLikes (
+  nftKey integer NOT NULL,
+  liker char(64) NOT NULL,
+  PRIMARY KEY (nftKey, liker)
+);
+
+CREATE INDEX nftLikes_nft_key_index ON NFTLikes (nftKey);
+CREATE INDEX nftLikes_liker_index ON NFTLikes (liker);
