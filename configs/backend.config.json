@@ -9,9 +9,12 @@
   },
   "production": false,
   "websocket": {
-      "read_buffer_size": 1024,
-      "write_buffer_size": 1024
+    "read_buffer_size": 1024,
+    "write_buffer_size": 1024
+  },
+  "cors": {
+    "allowedOrigins": "*",
+    "allowedMethods": "GET, POST, PUT, DELETE, OPTIONS",
+    "allowedHeaders": "Content-Type, Authorization"
   }
 }
-
-
