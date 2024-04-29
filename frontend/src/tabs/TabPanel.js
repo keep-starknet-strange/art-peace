@@ -16,7 +16,7 @@ const TabPanel = props => {
       )}
       {props.activeTab === "Vote" && (
         <TimerInjector>
-             {({timeLeftInDay}) => <Voting colorApiState={props.colorApiState} timeLeftInDay={timeLeftInDay} />}
+             {({timeLeftInDay}) => <Voting timeLeftInDay={timeLeftInDay} />}
          </TimerInjector>
       )}
       {props.activeTab === "Templates" && (
@@ -29,6 +29,5 @@ const TabPanel = props => {
     </div>
   );
 }
-
 
 export default TabPanel;

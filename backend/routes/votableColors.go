@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -22,11 +21,11 @@ type ColorsRequest struct {
 
 func InitVotableColorsRoutes() {
 	http.HandleFunc("/init-votable-colors", InitVotableColors)
-	http.HandleFunc("/votableColors", GetVotableColorsWithVoteCount)
+	http.HandleFunc("/votable-colors", GetVotableColorsWithVoteCount)
 }
 
 func InitVotableColors(w http.ResponseWriter, r *http.Request) {
-	//Todo: Make sure Votable colors is not present in Color Table
+	// TODO: Make sure Votable colors is not present in Color Table
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -55,21 +54,6 @@ func InitVotableColors(w http.ResponseWriter, r *http.Request) {
 
 	// Proceed with inserting unique colors into the VotableColors table
 	for _, colorHex := range request.Colors {
-		// Check if color already exists in the VotableColors table
-		var count int
-		err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT COUNT(*) FROM VotableColors WHERE hex = $1", colorHex).Scan(&count)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Error checking existing colors"))
-			return
-		}
-		if count > 0 {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Color already exists"))
-			return
-		}
-
-		// Insert the color into the VotableColors table
 		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), `
 			INSERT INTO VotableColors (hex, votes)
 			VALUES ($1, $2)
@@ -83,12 +67,9 @@ func InitVotableColors(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Votable colors initialized"))
-	fmt.Println("Votable colors initialized")
 }
 
 func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
-
-	//Todo: Add userAddress field in response
 
 	var votableColors []VotableColor
 
@@ -100,7 +81,6 @@ func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 		FROM ColorVotes
 		GROUP BY colorKey
 	) cv ON vc.key = cv.colorKey
-	ORDER BY vc.key ASC
 	`)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

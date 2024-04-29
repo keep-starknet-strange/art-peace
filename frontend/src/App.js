@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive'
-import { getVotableColors} from "./services/apiService.js"
 import './App.css';
 import Canvas from './canvas/Canvas.js';
 import PixelSelector from './canvas/PixelSelector.js';
@@ -132,32 +131,6 @@ function App() {
   // NFTs
   const [nftSelectionMode, setNftSelectionMode] = useState(false);
 
-  // Timing: Removed Timer from here because of re-rendering issues
-
-  // VotableColor API
-  const [colorApiState, setColorApiState] = useState({
-    loading:null,
-    error:"",
-    data:null
-  })
-  //Fetch Data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setColorApiState(prevState => ({ ...prevState, loading: true }));
-        const result = await  getVotableColors()
-        setColorApiState(prevState => ({ ...prevState, data: result, loading:false }));
-      } catch (error) {
-        // Handle or log the error as needed
-        setColorApiState(prevState => ({ ...prevState, error, loading:false }));
-        console.error('Error fetching votable colors:', error);
-      }
-    };
-    fetchData();
-  }, []); 
-
-  console.log(colorApiState)
-
   // Tabs
   const tabs = ['Canvas', 'Quests', 'Vote', 'Templates', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -178,7 +151,7 @@ function App() {
         { (templateCreationMode || templatePlacedMode) && (
           <TemplateBuilderPanel templateImage={templateImage} setTemplateImage={setTemplateImage} setTemplateCreationMode={setTemplateCreationMode} setTemplatePlacedMode={setTemplatePlacedMode} templateImagePositionY={templateImagePositionY} templateImagePositionX={templateImagePositionX} setTemplateImagePositionX={setTemplateImagePositionX} setTemplateImagePositionY={setTemplateImagePositionY} templateImagePosition={templateImagePosition} setTemplateImagePosition={setTemplateImagePosition} templateColorIds={templateColorIds} setTemplateColorIds={templateColorIds} />
         )}
-      <TabPanel colorApiState={colorApiState} activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} nftSelectionMode={nftSelectionMode} setNftSelectionMode={setNftSelectionMode} setTemplateCreationMode={setTemplateCreationMode} setTemplateImage={setTemplateImage} setTemplateColorIds={setTemplateColorIds} />
+      <TabPanel activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} nftSelectionMode={nftSelectionMode} setNftSelectionMode={setNftSelectionMode} setTemplateCreationMode={setTemplateCreationMode} setTemplateImage={setTemplateImage} setTemplateColorIds={setTemplateColorIds} />
       </div>
       <div className="App__footer">
         <PixelSelector selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} getDeviceTypeInfo={getDeviceTypeInfo} extraPixels={extraPixels} extraPixelsUsed={extraPixelsUsed} />

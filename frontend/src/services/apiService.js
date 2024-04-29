@@ -22,7 +22,7 @@ const fetchWrapper = async (url, options = {}) => {
 
 export const getVotableColors = async () => {
     try {
-        return await fetchWrapper('votableColors');
+        return await fetchWrapper('votable-colors');
     } catch (err) {
         // Handle or re-throw the error as needed
         throw err;
