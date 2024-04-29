@@ -1,6 +1,7 @@
 .NFTs__main {
   position: relative;
   width: min(100%, 40rem);
+  margin: 0 auto;
 
   transition: all 0.5s;
 }

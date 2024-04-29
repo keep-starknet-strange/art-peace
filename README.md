@@ -95,7 +95,7 @@ However, it might be worth running only certain components for development/testi
 
 - [Diagrams](./docs/diagrams/)
 - [r/place technical document](https://www.redditinc.com/blog/how-we-built-rplace)
-- [Telegram](https://t.me/+rd1pvEo8T2w2ZDRh)
+- [Telegram](https://t.me/art_peace_starknet)
 - [OnlyDust](https://app.onlydust.com/p/artpeace)
 
 ## Contributors ✨
@@ -129,6 +129,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/aweolumidedavid"><img src="https://avatars.githubusercontent.com/u/49573727?v=4?s=100" width="100px;" alt="Awe Olumide David"/><br /><sub><b>Awe Olumide David</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=aweolumidedavid" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/kateberryd"><img src="https://avatars.githubusercontent.com/u/35270183?v=4?s=100" width="100px;" alt="Catherine Jonathan"/><br /><sub><b>Catherine Jonathan</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=kateberryd" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/EjembiEmmanuel"><img src="https://avatars.githubusercontent.com/u/83036156?v=4?s=100" width="100px;" alt="Emmaunuel Ejembi"/><br /><sub><b>Emmaunuel Ejembi</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=EjembiEmmanuel" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/CollinsC1O"><img src="https://avatars.githubusercontent.com/u/101604886?v=4?s=100" width="100px;" alt="CollinsC1O"/><br /><sub><b>CollinsC1O</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=CollinsC1O" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>

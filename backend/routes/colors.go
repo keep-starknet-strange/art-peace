@@ -2,126 +2,65 @@ package routes
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"log"
 	"net/http"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-type Colors struct {
-	Hex string `json:"hex"`
-}
-
 func InitColorsRoutes() {
+	http.HandleFunc("/init-colors", InitColors)
 	http.HandleFunc("/get-colors", GetAllColors)
 	http.HandleFunc("/get-color", GetSingleColor)
-	http.HandleFunc("/init-colors", InitColors)
 }
 
-func GetAllColors(w http.ResponseWriter, r *http.Request) {
-
-	var colors []Colors
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT hex FROM colors")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	defer rows.Close()
-
-	for rows.Next() {
-		var c Colors
-		err := rows.Scan(&c.Hex)
-		if err != nil {
-			log.Fatalf("Scan failed: %v\n", err)
-		}
-		colors = append(colors, c)
-	}
-	if err := rows.Err(); err != nil {
-		log.Fatalf("Error retrieving data: %v\n", err)
-	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	out, err := json.Marshal(colors)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write([]byte(out))
-}
-
-func GetSingleColor(w http.ResponseWriter, r *http.Request) {
-
-	colorKey := r.URL.Query().Get("id")
-	if colorKey == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("ID not provided"))
-		return
-	}
-
-	var c Colors
-	row := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT hex FROM colors WHERE key = $1", colorKey)
-	err := row.Scan(&c.Hex)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Color not found"))
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-		}
-		return
-	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	out, err := json.Marshal(c)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write([]byte(out))
-}
+type ColorType = string
 
 func InitColors(w http.ResponseWriter, r *http.Request) {
-	// TODO: Add authentication and/or check if colors already exist
-	reqBody, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+	// Only allow admin to initialize colors
+	if AdminMiddleware(w, r) {
 		return
 	}
 
-	var colors []string
-	err = json.Unmarshal(reqBody, &colors)
+	// TODO: check if colors already exist
+	colors, err := ReadJsonBody[[]ColorType](r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
 		return
 	}
 
-	for _, color := range colors {
+	for _, color := range *colors {
 		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO colors (hex) VALUES ($1)", color)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert color: "+color)
 			return
 		}
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Colors initialized"))
-	fmt.Println("Colors initialized")
+	WriteResultJson(w, "Colors initialized")
+}
+
+func GetAllColors(w http.ResponseWriter, r *http.Request) {
+	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM colors ORDER BY key")
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve colors")
+		return
+	}
+
+	WriteDataJson(w, string(colors))
+}
+
+func GetSingleColor(w http.ResponseWriter, r *http.Request) {
+	colorKey := r.URL.Query().Get("id")
+	if colorKey == "" {
+		WriteErrorJson(w, http.StatusBadRequest, "ID not provided")
+		return
+	}
+
+	color, err := core.PostgresQueryOne[ColorType]("SELECT hex FROM colors WHERE key = $1", colorKey)
+	if err != nil {
+		WriteErrorJson(w, http.StatusNotFound, "Color not found")
+		return
+	}
+
+	WriteDataJson(w, *color)
 }

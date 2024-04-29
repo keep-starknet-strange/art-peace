@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 )
@@ -13,17 +13,21 @@ func InitContractRoutes() {
 
 func getContractAddress(w http.ResponseWriter, r *http.Request) {
 	contractAddress := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
-	w.Write([]byte(contractAddress))
+	WriteDataJson(w, "\""+contractAddress+"\"")
 }
 
+// TODO: Set env var on infra level in production
 func setContractAddress(w http.ResponseWriter, r *http.Request) {
-	// TODO: Add authentication
-	data, err := ioutil.ReadAll(r.Body)
+	// Only allow admin to set contract address
+	if AdminMiddleware(w, r) {
+		return
+	}
+
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid request"))
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 	os.Setenv("ART_PEACE_CONTRACT_ADDRESS", string(data))
-	w.Write([]byte("Contract address set successfully"))
+	WriteResultJson(w, "Contract address set")
 }

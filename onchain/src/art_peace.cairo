@@ -72,7 +72,6 @@ pub mod ArtPeace {
         color: u8,
     }
 
-    // TODO: Span or Array for each?
     #[derive(Drop, Serde)]
     pub struct InitParams {
         pub canvas_width: u128,
