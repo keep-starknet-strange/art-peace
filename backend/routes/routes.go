@@ -11,4 +11,5 @@ func InitRoutes() {
 	InitNFTRoutes()
 	InitQuestsRoutes()
 	InitColorsRoutes()
+	InitVotableColorsRoutes()
 }

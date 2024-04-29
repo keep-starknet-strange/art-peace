@@ -88,14 +88,16 @@ CREATE TABLE Colors (
 );
 
 CREATE TABLE VotableColors (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   hex text NOT NULL,
   votes integer NOT NULL
 );
 CREATE INDEX votableColors_votes_index ON VotableColors (votes);
 
 CREATE TABLE ColorVotes (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   userAddress char(64) NOT NULL,
   colorKey integer NOT NULL
 );

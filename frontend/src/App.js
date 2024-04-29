@@ -131,32 +131,6 @@ function App() {
   // NFTs
   const [nftSelectionMode, setNftSelectionMode] = useState(false);
 
-  // Timing
-  const [timeLeftInDay, setTimeLeftInDay] = useState('');
-  const startTime = "15:00";
-  const [hours, minutes] = startTime.split(":");
-  
-  
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const nextDayStart = new Date(now);
-      nextDayStart.setDate(now.getDate() + 1);
-      nextDayStart.setUTCHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-      const difference = nextDayStart - now;
-      const hoursFinal = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutesFinal = Math.floor((difference / 1000 / 60) % 60);
-      const secondsFinal = Math.floor((difference / 1000) % 60);
-
-      const formattedTimeLeft = `${hoursFinal.toString().padStart(2, '0')}:${minutesFinal.toString().padStart(2, '0')}:${secondsFinal.toString().padStart(2, '0')}`;
-      setTimeLeftInDay(formattedTimeLeft);
-    };
-
-    const interval = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(interval);
-  })
-
   // Tabs
   const tabs = ['Canvas', 'Quests', 'Vote', 'Templates', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -177,7 +151,7 @@ function App() {
         { (templateCreationMode || templatePlacedMode) && (
           <TemplateBuilderPanel templateImage={templateImage} setTemplateImage={setTemplateImage} setTemplateCreationMode={setTemplateCreationMode} setTemplatePlacedMode={setTemplatePlacedMode} templateImagePositionY={templateImagePositionY} templateImagePositionX={templateImagePositionX} setTemplateImagePositionX={setTemplateImagePositionX} setTemplateImagePositionY={setTemplateImagePositionY} templateImagePosition={templateImagePosition} setTemplateImagePosition={setTemplateImagePosition} templateColorIds={templateColorIds} setTemplateColorIds={templateColorIds} />
         )}
-        <TabPanel activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} nftSelectionMode={nftSelectionMode} setNftSelectionMode={setNftSelectionMode} setTemplateCreationMode={setTemplateCreationMode} setTemplateImage={setTemplateImage} setTemplateColorIds={setTemplateColorIds} timeLeftInDay={timeLeftInDay} />
+      <TabPanel activeTab={activeTab} setActiveTab={setActiveTab} getDeviceTypeInfo={getDeviceTypeInfo} nftSelectionMode={nftSelectionMode} setNftSelectionMode={setNftSelectionMode} setTemplateCreationMode={setTemplateCreationMode} setTemplateImage={setTemplateImage} setTemplateColorIds={setTemplateColorIds} />
       </div>
       <div className="App__footer">
         <PixelSelector selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} getDeviceTypeInfo={getDeviceTypeInfo} extraPixels={extraPixels} extraPixelsUsed={extraPixelsUsed} />
