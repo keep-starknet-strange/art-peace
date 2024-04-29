@@ -1,10 +1,6 @@
 package routes
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -17,10 +13,11 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-nft", getNFT)
 	http.HandleFunc("/get-nfts", getNFTs)
 	http.HandleFunc("/get-my-nfts", getMyNFTs)
-	http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
+  if !core.ArtPeaceBackend.BackendConfig.Production {
+	  http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
+  }
 	// Create a static file server for the nft images
 	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("."))))
-	//http.HandleFunc("/nft-image", nftImage)
 }
 
 type NFTData struct {
@@ -36,150 +33,66 @@ type NFTData struct {
 func getNFT(w http.ResponseWriter, r *http.Request) {
 	tokenId := r.URL.Query().Get("tokenId")
 
-	var nftData NFTData
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nfts WHERE token_id = $1", tokenId)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	defer rows.Close()
-
-	err = rows.Scan(&nftData.TokenID, &nftData.Position, &nftData.Width, &nftData.Height, &nftData.ImageHash, &nftData.BlockNumber, &nftData.Minter)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	out, err := json.Marshal(nftData)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write([]byte(out))
+  nft, err := core.PostgresQueryOneJson[NFTData]("SELECT * FROM nfts WHERE token_id = $1", tokenId)
+  if err != nil {
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFT")
+    return
+  }
+  
+  WriteDataJson(w, string(nft))
 }
 
 func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	address := r.URL.Query().Get("address")
 
-	var nftDatas []NFTData
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nfts WHERE minter = $1", address)
+  nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE minter = $1", address)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var nftData NFTData
-		err = rows.Scan(&nftData.TokenID, &nftData.Position, &nftData.Width, &nftData.Height, &nftData.ImageHash, &nftData.BlockNumber, &nftData.Minter)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		nftDatas = append(nftDatas, nftData)
-	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	out, err := json.Marshal(nftDatas)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write([]byte(out))
+  WriteDataJson(w, string(nfts))
 }
 
 func getNFTs(w http.ResponseWriter, r *http.Request) {
 	// TODO: Pagination & Likes
-	var nftDatas []NFTData
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nfts")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	defer rows.Close()
+  nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts")
+  if err != nil {
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
+    return
+  }
 
-	for rows.Next() {
-		var nftData NFTData
-		err = rows.Scan(&nftData.TokenID, &nftData.Position, &nftData.Width, &nftData.Height, &nftData.ImageHash, &nftData.BlockNumber, &nftData.Minter)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		nftDatas = append(nftDatas, nftData)
-	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	out, err := json.Marshal(nftDatas)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write([]byte(out))
+  WriteDataJson(w, string(nfts))
 }
 
-// func nftImage(w http.ResponseWriter, r *http.Request) {
-//   // Get the png image at location "nft-{tokenId}.png"
-//   tokenId := r.URL.Query().Get("tokenId")
-//   imageLocation := fmt.Sprintf("nft-%s.png", tokenId)
-//
-//   image, err := os.Open(imageLocation)
-//   if err != nil {
-//     w.WriteHeader(http.StatusInternalServerError)
-//     w.Write([]byte(err.Error()))
-//     return
-//   }
-//   defer image.Close()
-//
-//   w.Header().Set("Access-Control-Allow-Origin", "*")
-//   w.Header().Set("Content-Type", "image/png")
-//   w.WriteHeader(http.StatusOK)
-//
-//   io.Copy(w, image)
-// }
-
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
-	reqBody, err := io.ReadAll(r.Body)
+  // Disable this in production
+  if NonProductionMiddleware(w, r) {
+    return
+  }
+
+  // TODO: map[string]int instead of map[string]string
+  jsonBody, err := ReadJsonBody[map[string]string](r)
+  if err != nil {
+    WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+    return
+  }
+
+	position, err := strconv.Atoi((*jsonBody)["position"])
 	if err != nil {
-		panic(err)
-	}
-	var jsonBody map[string]string
-	err = json.Unmarshal(reqBody, &jsonBody)
-	if err != nil {
-		panic(err)
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert position to int")
+    return
 	}
 
-	position, err := strconv.Atoi(jsonBody["position"])
+	width, err := strconv.Atoi((*jsonBody)["width"])
 	if err != nil {
-		panic(err)
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert width to int")
+    return
 	}
 
-	width, err := strconv.Atoi(jsonBody["width"])
+	height, err := strconv.Atoi((*jsonBody)["height"])
 	if err != nil {
-		panic(err)
-	}
-
-	height, err := strconv.Atoi(jsonBody["height"])
-	if err != nil {
-		panic(err)
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert height to int")
+    return
 	}
 
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.MintNFTDevnet
@@ -188,10 +101,9 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	cmd := exec.Command(shellCmd, contract, "mint_nft", strconv.Itoa(position), strconv.Itoa(width), strconv.Itoa(height))
 	_, err = cmd.Output()
 	if err != nil {
-		fmt.Println("Error executing shell command: ", err)
-		panic(err)
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to mint NFT on devnet")
+    return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Write([]byte("Minted NFT on devnet"))
+  WriteResultJson(w, "NFT minted on devnet")
 }

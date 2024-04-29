@@ -1,6 +1,6 @@
 .ExpandableTab {
   position: absolute;
-  padding: 1.2rem 0.5rem 0.5rem 0.5rem;
+  padding: 1rem 0.5rem 0.5rem 0.5rem;
   width: 100%;
   right: 0;
 
@@ -8,55 +8,55 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transition: width 0.5s;
+  transition: width 0.2s;
 
-  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.8));
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.9)
+  );
   border-radius: 1rem;
-  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.3);
+  border: 0.2rem solid rgba(0, 0, 0, 0.4);
+
+  pointer-events: fill;
 }
 
 .ExpandableTab--expanded {
-  width: calc(100vw - 4rem);
-  transition: width 0.5s;
+  width: calc(100vw - 1rem); /* 0.5rem margin on each side */
+  transition: width 0.3s;
 }
 
 .ExpandableTab__title {
-  padding: 0 0.5rem;
-  font-size: 1.6rem;
-  text-decoration: underline;
-  margin: 0 auto 1.5rem auto;
+  margin: 0 0 2rem 0;
 }
 
 .ExpandableTab__content {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: center;
   width: 100%;
 }
 
-.ExpandableTab__hamburger {
+.ExpandableTab__expand {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 2rem;
-  cursor: pointer;
+  top: 0.7rem;
+  left: 0.7rem;
 
-  /* TODO: Hamburger icon */
   width: 3rem;
   height: 3rem;
-  background-color: rgba(0, 0, 0, 0.4);
-  border-radius: 0.5rem;
-  box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.2);
-  border: 0.1rem solid rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.ExpandableTab__hamburger:hover {
-  background-color: rgba(0, 0, 0, 0.6);
-  transform: scale(1.1) translateY(-0.1rem);
+.ExpandableTab__expand p {
+  font-size: 2rem;
+  transform: translateY(-0.3rem);
 }
 
-.ExpandableTab__hamburger:active {
-  background-color: rgba(0, 0, 0, 0.8);
-  transform: scale(1.05) translateY(0.1rem);
+.ExpandedTab__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
 }

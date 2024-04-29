@@ -1,5 +1,31 @@
-.Quests__item__header {
-  padding: 0 0.5rem;
-  font-size: 1.4rem;
-  text-decoration: underline;
+.Quests {
+  height: 55vh;
+  overflow-y: scroll;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.Quests__header {
+  padding: 0.5rem;
+}
+
+.Quests__timer {
+  margin: 1rem 0 0.5rem 1rem;
+  padding: 0.5rem 1rem;
+  text-align: center;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
 }

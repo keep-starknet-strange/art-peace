@@ -6,8 +6,6 @@ RUN apt-get update && apt-get install -y \
 curl jq git
 RUN curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 2.6.3
 RUN curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | bash
-# TODO: Source not working properly & requiring manual /root/.local/bin/ paths
-RUN source /root/.bashrc
 RUN /bin/bash /root/.local/bin/snfoundryup --version 0.21.0
 
 # TODO: build container?
@@ -22,5 +20,4 @@ COPY ./onchain .
 WORKDIR /scripts
 COPY ./tests/integration/docker/ .
 
-# TODO: Prevent need for sleep w/ depends_on?
 CMD ["./initialize.sh"]

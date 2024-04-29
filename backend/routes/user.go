@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
@@ -15,31 +14,23 @@ func InitUserRoutes() {
 func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 	user := r.URL.Query().Get("address")
 
-	var available string
-	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT available FROM ExtraPixels WHERE address = $1", user).Scan(&available)
+  available, err := core.PostgresQueryOne[string]("SELECT available FROM ExtraPixels WHERE address = $1", user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+    WriteErrorJson(w, http.StatusNotFound, "No extra pixels available")
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(available))
+  WriteDataJson(w, *available)
 }
 
 func getUsername(w http.ResponseWriter, r *http.Request) {
 	address := r.URL.Query().Get("address")
 
-	var name string
-	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT name FROM Users WHERE address = $1", address).Scan(&name)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
+  name, err := core.PostgresQueryOne[string]("SELECT name FROM Users WHERE address = $1", address)
+  if err != nil {
+    WriteErrorJson(w, http.StatusNotFound, "No username found")
+    return
+  }
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(name))
+  WriteDataJson(w, *name)
 }

@@ -1,17 +1,16 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState } from 'react';
 import './Templates.css';
 import EventItem from './EventItem.js';
 import TemplateItem from './TemplateItem.js';
 import ExpandableTab from '../ExpandableTab.js';
+import { backendUrl } from '../../utils/Consts.js';
 import canvasConfig from '../../configs/canvas.config.json';
-import backendConfig from "../../configs/backend.config.json"
 
-const TemplatesMainSection = props => {
+const TemplatesMainSection = (props) => {
   // Each color represented as 'RRGGBB'
   const colorsPalette = canvasConfig.colors;
 
-  const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port
-  const imageURL = backendUrl + "/templates/"
+  const imageURL = backendUrl + '/templates/';
 
   const imageToPalette = (image) => {
     // Convert image pixels to be within the color palette
@@ -40,8 +39,14 @@ const TemplatesMainSection = props => {
       let minColor = colorsPalette[0];
       let minColorIndex = 0;
       for (let j = 0; j < colorsPalette.length; j++) {
-        const color = colorsPalette[j].match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16));
-        const distance = Math.sqrt(Math.pow(data[i] - color[0], 2) + Math.pow(data[i + 1] - color[1], 2) + Math.pow(data[i + 2] - color[2], 2));
+        const color = colorsPalette[j]
+          .match(/[A-Za-z0-9]{2}/g)
+          .map((x) => parseInt(x, 16));
+        const distance = Math.sqrt(
+          Math.pow(data[i] - color[0], 2) +
+            Math.pow(data[i + 1] - color[1], 2) +
+            Math.pow(data[i + 2] - color[2], 2)
+        );
         if (distance < minDistance) {
           minDistance = distance;
           minColor = color;
@@ -57,34 +62,44 @@ const TemplatesMainSection = props => {
     // Set image data back to canvas
     ctx.putImageData(imageData, 0, 0);
     return [canvas.toDataURL(), imagePalleteIds];
-  }
+  };
 
   const uploadTemplate = () => {
     // Open file upload dialog
     props.inputFile.current.click();
-  }
+  };
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file === undefined) {
-      return
+      return;
     }
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       var image = new Image();
       image.src = e.target.result;
 
-      image.onload = function() {
+      image.onload = function () {
         var height = this.height;
         var width = this.width;
         if (height < 5 || width < 5) {
-          alert("Image is too small, minimum size is 5x5. Given size is " + width + "x" + height);
+          alert(
+            'Image is too small, minimum size is 5x5. Given size is ' +
+              width +
+              'x' +
+              height
+          );
           return;
         }
         if (height > 50 || width > 50) {
-          alert("Image is too large, maximum size is 50x50. Given size is " + width + "x" + height);
+          alert(
+            'Image is too large, maximum size is 50x50. Given size is ' +
+              width +
+              'x' +
+              height
+          );
           return;
         }
         const [paletteImage, colorIds] = imageToPalette(image);
@@ -94,124 +109,365 @@ const TemplatesMainSection = props => {
         props.setTemplateCreationMode(true);
       };
     };
-  }
+  };
 
   return (
-    <div className="Templates__main">
-      <div className="Templates__header">
-        <h2 className="Templates__heading">For you</h2>
-        <input type="file" id="file" accept=".png" ref={props.inputFile} style={{display: 'none'}} onChange={handleFileChange}/>
-        <div className="Templates__create" onClick={uploadTemplate}>Create</div>
+    <div className='Templates__main'>
+      <div className='Templates__header'>
+        <h2 className='Templates__heading'>For you</h2>
+        <input
+          type='file'
+          id='file'
+          accept='.png'
+          ref={props.inputFile}
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+        <div className='Templates__create' onClick={uploadTemplate}>
+          Create
+        </div>
       </div>
-      <div className="Templates__container">
-        <h3 className="Templates__subheading">Events</h3>
+      <div className='Templates__container'>
+        <h3 className='Templates__subheading'>Events</h3>
         {props.eventTemplates.map((template, index) => {
-          return <EventItem key={index} template={template} />
+          return <EventItem key={index} template={template} />;
         })}
         {props.availableTemplates.map((template, index) => {
-          let formattedhash = template.hash.replace("0x0", "0x")
-          template.image = imageURL + "template-" + formattedhash + ".png"
-          return <TemplateItem key={index} template={template} />
+          let formattedhash = template.hash.replace('0x0', '0x');
+          template.image = imageURL + 'template-' + formattedhash + '.png';
+          return <TemplateItem key={index} template={template} />;
         })}
-        <h3 className="Templates__subheading">Mine</h3>
+        <h3 className='Templates__subheading'>Mine</h3>
         {props.myTemplates.map((template, index) => {
-          return <TemplateItem key={index} template={template} />
+          return <TemplateItem key={index} template={template} />;
         })}
-        <h3 className="Templates__subheading">Subscribed</h3>
+        <h3 className='Templates__subheading'>Subscribed</h3>
         {props.subscribedTemplates.map((template, index) => {
-          return <TemplateItem key={index} template={template} />
+          return <TemplateItem key={index} template={template} />;
         })}
       </div>
     </div>
   );
-}
+};
 
-const TemplatesExpandedSection = props => {
+const TemplatesExpandedSection = (props) => {
   return (
-    <div className="Templates__all">
-      <div className="Templates__header">
-        <h2 className="Templates__heading">All Templates</h2>
+    <div className='Templates__all'>
+      <div className='Templates__header'>
+        <h2 className='Templates__heading'>All Templates</h2>
       </div>
-      <div className="Templates__all__grid">
+      <div className='Templates__all__grid'>
         {props.allTemplates.map((template, index) => {
-          return <TemplateItem key={index} template={template} />
+          return <TemplateItem key={index} template={template} />;
         })}
       </div>
     </div>
   );
-}
+};
 
-const Templates = props => {
+const Templates = (props) => {
   const endTime = (minutes) => {
     const now = Date.now();
     const endTime = new Date(now + minutes * 60000);
     return endTime;
-  }
+  };
 
   const eventTemplates = [
-    { name: "Event Template 1", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 20, width: 20, height: 20, end_time: endTime(10), position: 0, reward: 100, reward_token: "ETH" },
-    { name: "Event Template 2", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 12, width: 25, height: 20, end_time: endTime(13), position: 47, reward: 100, reward_token: "STRK" },
-    { name: "Event Template 3", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 15, width: 20, height: 20, end_time: endTime(15), position: 0, reward: 0.010, reward_token: "ETH" },
-    { name: "Event Template 4", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 10, width: 20, height: 20, end_time: endTime(20), position: 0 }
+    {
+      name: 'Event Template 1',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 20,
+      width: 20,
+      height: 20,
+      end_time: endTime(10),
+      position: 0,
+      reward: 100,
+      reward_token: 'ETH'
+    },
+    {
+      name: 'Event Template 2',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 12,
+      width: 25,
+      height: 20,
+      end_time: endTime(13),
+      position: 47,
+      reward: 100,
+      reward_token: 'STRK'
+    },
+    {
+      name: 'Event Template 3',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 15,
+      width: 20,
+      height: 20,
+      end_time: endTime(15),
+      position: 0,
+      reward: 0.01,
+      reward_token: 'ETH'
+    },
+    {
+      name: 'Event Template 4',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 10,
+      width: 20,
+      height: 20,
+      end_time: endTime(20),
+      position: 0
+    }
   ];
 
   const myTemplates = [
-    { name: "My Template 1", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 20, width: 20, height: 20, position: 25, likes: 10, reward: 100, reward_token: "ETH" },
-    { name: "My Template With long name 2", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 12, width: 25, height: 20, position: 47, likes: 20, reward: 0.000003, reward_token: "ETH" },
-    { name: "My Template 3", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 15, width: 20, height: 20, position: 0, likes: 5, reward: 200, reward_token: "STRK" },
-    { name: "My Template 4", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 10, width: 20, height: 20, position: 47, likes: 15, reward: 100, reward_token: "STRK" },
+    {
+      name: 'My Template 1',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 20,
+      width: 20,
+      height: 20,
+      position: 25,
+      likes: 10,
+      reward: 100,
+      reward_token: 'ETH'
+    },
+    {
+      name: 'My Template With long name 2',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 12,
+      width: 25,
+      height: 20,
+      position: 47,
+      likes: 20,
+      reward: 0.000003,
+      reward_token: 'ETH'
+    },
+    {
+      name: 'My Template 3',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 15,
+      width: 20,
+      height: 20,
+      position: 0,
+      likes: 5,
+      reward: 200,
+      reward_token: 'STRK'
+    },
+    {
+      name: 'My Template 4',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 10,
+      width: 20,
+      height: 20,
+      position: 47,
+      likes: 15,
+      reward: 100,
+      reward_token: 'STRK'
+    }
   ];
 
   const subscribedTemplates = [
-    { name: "Subscribed Template 1", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 20, width: 20, height: 20, position: 0, likes: 12, creator: "hello.stark", reward: 100, reward_token: "ETH" },
-    { name: "Subscribed Template 2", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 12, width: 25, height: 20, position: 47, likes: 15, creator: "0x000000000000000000000000", reward: 200, reward_token: "STRK" },
-    { name: "Subscribed Template 3", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 15, width: 20, height: 20, position: 0, likes: 20, creator: "good.stark" },
-    { name: "Subscribed Template 4", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 10, width: 20, height: 20, position: 47, likes: 25, creator: "Me" }
+    {
+      name: 'Subscribed Template 1',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 20,
+      width: 20,
+      height: 20,
+      position: 0,
+      likes: 12,
+      creator: 'hello.stark',
+      reward: 100,
+      reward_token: 'ETH'
+    },
+    {
+      name: 'Subscribed Template 2',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 12,
+      width: 25,
+      height: 20,
+      position: 47,
+      likes: 15,
+      creator: '0x000000000000000000000000',
+      reward: 200,
+      reward_token: 'STRK'
+    },
+    {
+      name: 'Subscribed Template 3',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 15,
+      width: 20,
+      height: 20,
+      position: 0,
+      likes: 20,
+      creator: 'good.stark'
+    },
+    {
+      name: 'Subscribed Template 4',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 10,
+      width: 20,
+      height: 20,
+      position: 47,
+      likes: 25,
+      creator: 'Me'
+    }
   ];
 
   const allTemplates = [
-    { name: "All Template 1", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 20, width: 20, height: 20, position: 0, likes: 12, creator: "hello.stark",  reward: 100, reward_token: "STRK" },
-    { name: "All Template 2", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 12, width: 25, height: 20, position: 47, likes: 15, creator: "0x00000000000000000000000", reward: 100, reward_token: "STRK" },
-    { name: "All Template 3", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 15, width: 20, height: 20, position: 0, likes: 20, creator: "good.stark", reward: 100, reward_token: "STRK" },
-    { name: "All Template 4", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 10, width: 20, height: 20, position: 47, likes: 25, creator: "Me",reward: 0.00002100023, reward_token: "ETH" },
-    { name: "All Template 5", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 20, width: 20, height: 20, position: 0, likes: 12, creator: "hello.stark" },
-    { name: "All Template 6", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 12, width: 25, height: 20, position: 47, likes: 15, creator: "You" },
-    { name: "All Template 7", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 15, width: 20, height: 20, position: 0, likes: 20, creator: "good.stark" },
-    { name: "All Template 8", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 10, width: 20, height: 20, position: 47, likes: 25, creator: "Me" },
-    { name: "All Template 9", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 20, width: 20, height: 20, position: 0, likes: 12, creator: "hello.stark" },
-    { name: "All Template 10", image: "https://www.w3schools.com/w3images/mountains.jpg", users: 12, width: 25, height: 20, position: 47, likes: 15, creator: ";kjhdflakj" }
+    {
+      name: 'All Template 1',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 20,
+      width: 20,
+      height: 20,
+      position: 0,
+      likes: 12,
+      creator: 'hello.stark',
+      reward: 100,
+      reward_token: 'STRK'
+    },
+    {
+      name: 'All Template 2',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 12,
+      width: 25,
+      height: 20,
+      position: 47,
+      likes: 15,
+      creator: '0x00000000000000000000000',
+      reward: 100,
+      reward_token: 'STRK'
+    },
+    {
+      name: 'All Template 3',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 15,
+      width: 20,
+      height: 20,
+      position: 0,
+      likes: 20,
+      creator: 'good.stark',
+      reward: 100,
+      reward_token: 'STRK'
+    },
+    {
+      name: 'All Template 4',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 10,
+      width: 20,
+      height: 20,
+      position: 47,
+      likes: 25,
+      creator: 'Me',
+      reward: 0.00002100023,
+      reward_token: 'ETH'
+    },
+    {
+      name: 'All Template 5',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 20,
+      width: 20,
+      height: 20,
+      position: 0,
+      likes: 12,
+      creator: 'hello.stark'
+    },
+    {
+      name: 'All Template 6',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 12,
+      width: 25,
+      height: 20,
+      position: 47,
+      likes: 15,
+      creator: 'You'
+    },
+    {
+      name: 'All Template 7',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 15,
+      width: 20,
+      height: 20,
+      position: 0,
+      likes: 20,
+      creator: 'good.stark'
+    },
+    {
+      name: 'All Template 8',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 10,
+      width: 20,
+      height: 20,
+      position: 47,
+      likes: 25,
+      creator: 'Me'
+    },
+    {
+      name: 'All Template 9',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 20,
+      width: 20,
+      height: 20,
+      position: 0,
+      likes: 12,
+      creator: 'hello.stark'
+    },
+    {
+      name: 'All Template 10',
+      image: 'https://www.w3schools.com/w3images/mountains.jpg',
+      users: 12,
+      width: 25,
+      height: 20,
+      position: 47,
+      likes: 15,
+      creator: ';kjhdflakj'
+    }
   ];
 
-  const backendUrl = "http://" + backendConfig.host + ":" + backendConfig.port
-  const [setup, setSetup] = useState(false)
-  const [availableTemplates, setAvailableTemplates] = useState([])
-  const inputFile = useRef()
+  const [setup, setSetup] = useState(false);
+  const [availableTemplates, setAvailableTemplates] = useState([]);
+  const inputFile = useRef();
 
   React.useEffect(() => {
     if (!setup) {
-      setSetup(true)
+      setSetup(true);
     } else {
-      return
+      return;
     }
 
-    let getTemplatesEndpoint = backendUrl + "/get-templates";
+    let getTemplatesEndpoint = backendUrl + '/get-templates';
     fetch(getTemplatesEndpoint, {
-      mode: 'cors',
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      if (data === null) {
-        data = []
-      }
-      setAvailableTemplates(data)
-    }).catch((error) => {
-      console.error('Error:', error);
-    });
-  }, [setup, backendUrl])
+      mode: 'cors'
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((response) => {
+        if (response.data === null) {
+          response.data = [];
+        }
+        setAvailableTemplates(response.data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }, [setup, backendUrl]);
 
   return (
-    <ExpandableTab title="Templates" mainSection={TemplatesMainSection} expandedSection={TemplatesExpandedSection} eventTemplates={eventTemplates} myTemplates={myTemplates} subscribedTemplates={subscribedTemplates} allTemplates={allTemplates} inputFile={inputFile} setTemplateImage={props.setTemplateImage} setTemplateCreationMode={props.setTemplateCreationMode} setTemplateColorIds={props.setTemplateColorIds} availableTemplates={availableTemplates} />
+    <ExpandableTab
+      title='Templates'
+      mainSection={TemplatesMainSection}
+      expandedSection={TemplatesExpandedSection}
+      eventTemplates={eventTemplates}
+      myTemplates={myTemplates}
+      subscribedTemplates={subscribedTemplates}
+      allTemplates={allTemplates}
+      inputFile={inputFile}
+      setTemplateImage={props.setTemplateImage}
+      setTemplateCreationMode={props.setTemplateCreationMode}
+      setTemplateColorIds={props.setTemplateColorIds}
+      availableTemplates={availableTemplates}
+      setActiveTab={props.setActiveTab}
+    />
   );
-}
+};
 
 export default Templates;

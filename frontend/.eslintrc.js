@@ -1,10 +1,10 @@
 module.exports = {
-  root: true, 
+  root: true,
   parserOptions: {
-    ecmaVersion: 2020, 
-    sourceType: 'module', 
+    ecmaVersion: 2020,
+    sourceType: 'module',
     ecmaFeatures: {
-      jsx: true 
+      jsx: true
     }
   },
   settings: {
@@ -14,9 +14,10 @@ module.exports = {
   },
   env: {
     jest: true,
-    browser: true, 
-    amd: true, 
-    node: true 
+    browser: true,
+    es6: true,
+    amd: true,
+    node: true
   },
   extends: [
     'eslint:recommended',
@@ -24,7 +25,19 @@ module.exports = {
     'plugin:prettier/recommended' // Make this the last element so prettier config overrides other formatting rules
   ],
   rules: {
-    'no-unused-vars': ['error', { vars: 'all', args: 'after-used', ignoreRestSiblings: false }],
-    'prettier/prettier': ['error', {}, { usePrettierrc: true }] 
+    'no-unused-vars': [
+      'error',
+      {
+        vars: 'all',
+        args: 'after-used',
+        ignoreRestSiblings: false,
+        argsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        varsIgnorePattern: '^_'
+      }
+    ],
+    'prettier/prettier': ['error', {}, { usePrettierrc: true }],
+    'react/prop-types': 'off'
   }
-}
+};
