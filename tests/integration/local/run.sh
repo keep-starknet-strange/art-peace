@@ -31,6 +31,7 @@ touch $REDIS_LOG_FILE
 redis-server 2>&1 > $REDIS_LOG_FILE &
 REDIS_PID=$!
 sleep 2 # Wait for redis to start; TODO: Check if redis is actually running
+redis-cli del canvas
 
 # Start the art-peace-db with postgres
 echo "Starting art-peace-db ..."
@@ -67,8 +68,10 @@ DEPLOY_LOG_FILE=$LOG_DIR/deploy.log
 touch $DEPLOY_LOG_FILE
 $SCRIPT_DIR/deploy.sh 2>&1 > $DEPLOY_LOG_FILE
 # Read last word of last line of deploy log
-ART_PEACE_CONTRACT_ADDRESS=$(cat $DEPLOY_LOG_FILE | tail -n 1 | awk '{print $NF}')
+ART_PEACE_CONTRACT_ADDRESS=$(cat $DEPLOY_LOG_FILE | grep Deployed\ contract\ \"ArtPeace\" | tail -n 1 | awk '{print $NF}')
+CANVAS_NFT_CONTRACT_ADDRESS=$(cat $DEPLOY_LOG_FILE | grep Deployed\ contract\ \"CanvasNFT\" | tail -n 1 | awk '{print $NF}')
 echo "Deployed art-peace contract(s) at $ART_PEACE_CONTRACT_ADDRESS"
+echo "Deployed canvas NFT contract at $CANVAS_NFT_CONTRACT_ADDRESS"
 
 # Start the art-peace place_pixel indexer script
 echo "Starting art-peace place_pixel indexer script ..."
@@ -80,16 +83,21 @@ cd $WORK_DIR/indexer
 rm -f $TMP_DIR/indexer.env
 touch $TMP_DIR/indexer.env
 echo "ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> $TMP_DIR/indexer.env
+echo "NFT_CONTRACT_ADDRESS=$CANVAS_NFT_CONTRACT_ADDRESS" >> $TMP_DIR/indexer.env
 echo "APIBARA_STREAM_URL=http://localhost:7171" >> $TMP_DIR/indexer.env
-echo "BACKEND_TARGET_URL=http://localhost:8080/consumeIndexerMsg" >> $TMP_DIR/indexer.env
+echo "BACKEND_TARGET_URL=http://localhost:8080/consume-indexer-msg" >> $TMP_DIR/indexer.env
 apibara run script.js --allow-env $TMP_DIR/indexer.env 2>&1 > $INDEXER_SCRIPT_LOG_FILE &
 INDEXER_SCRIPT_PID=$!
 sleep 2 # Wait for indexer script to start; TODO: Check if indexer script is actually running
 
 # Initialize the art-peace canvas in the backend/redis
 echo "Initializing art-peace canvas ..."
-curl http://localhost:8080/initCanvas -X POST
-curl http://localhost:8080/setContractAddress -X POST -d "$ART_PEACE_CONTRACT_ADDRESS"
+curl http://localhost:8080/init-canvas -X POST
+curl http://localhost:8080/set-contract-address -X POST -d "$ART_PEACE_CONTRACT_ADDRESS"
+COLORS=$(cat $CANVAS_CONFIG_FILE | jq -r '.colors | map("\"\(.)\"") | join(",")')
+curl http://localhost:8080/init-colors -X POST -d "[$COLORS]"
+VOTABLE_COLORS=$(cat $CANVAS_CONFIG_FILE | jq -r '.votableColors | map("\"\(.)\"") | join(",")')
+curl http://localhost:8080/init-votable-colors -X POST -d "[$VOTABLE_COLORS]"
 
 # Start the art-peace frontend
 echo "Starting art-peace frontend ..."

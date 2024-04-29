@@ -1,0 +1,33 @@
+.Voting__description {
+  padding: 0 0.5rem 0 1rem;
+  margin: 0.7rem 0;
+}
+
+.Voting__timer {
+  margin: 1rem 0 0.5rem 0;
+  padding: 0.5rem 1rem;
+  text-align: center;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+}
+
+.Voting__grid {
+  height: 41vh;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-gap: 0rem 2rem;
+  overflow-y: scroll;
+}

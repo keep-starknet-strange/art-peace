@@ -3,11 +3,13 @@ use starknet::ContractAddress;
 #[derive(Drop, Copy, Serde, starknet::Store)]
 pub struct TemplateMetadata {
     pub hash: felt252,
+    pub name: felt252,
     pub position: u128,
     pub width: u128,
     pub height: u128,
     pub reward: u256,
-    pub reward_token: ContractAddress
+    pub reward_token: ContractAddress,
+    pub creator: ContractAddress
 }
 
 #[starknet::interface]

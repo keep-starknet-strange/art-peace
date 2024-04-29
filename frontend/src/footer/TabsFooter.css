@@ -1,0 +1,19 @@
+.TabsFooter {
+  width: min(100vw, 100rem);
+  height: max(3.4rem, 10%);
+  margin: min(1rem, 3%) 0;
+  padding: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.TabsFooter__tab--active {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-shadow: 0 0.2rem 0.5rem rgba(255, 255, 255, 0.9);
+  border: 0.1rem solid rgba(255, 255, 255, 0.8);
+}

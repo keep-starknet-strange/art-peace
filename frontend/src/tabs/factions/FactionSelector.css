@@ -1,0 +1,50 @@
+.FactionSelector {
+  position: relative;
+  margin: 0.3rem;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.9)
+  );
+  border-radius: 0.3rem;
+  box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
+  border: 0.2rem solid rgba(0, 0, 0, 0.4);
+
+  pointer-events: fill;
+}
+
+.FactionSelector:hover {
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.95)
+  );
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.6);
+  transform: translateY(-0.2rem);
+}
+
+.FactionSelector:active {
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.4);
+  transform: translateY(0.1rem);
+}
+
+.FactionSelector__icon {
+  margin: 0.5rem;
+  width: 5rem;
+  height: 5rem;
+}
+
+.FactionSelector__name {
+  padding: 0 1rem;
+}

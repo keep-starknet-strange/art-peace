@@ -6,8 +6,15 @@ import (
 )
 
 type BackendScriptsConfig struct {
-	PlacePixelDevnet      string `json:"place_pixel_devnet"`
-	AddTemplateHashDevnet string `json:"add_template_hash_devnet"`
+	PlacePixelDevnet       string `json:"place_pixel_devnet"`
+	PlaceExtraPixelsDevnet string `json:"place_extra_pixels_devnet"`
+	AddTemplateDevnet      string `json:"add_template_devnet"`
+	MintNFTDevnet          string `json:"mint_nft_devnet"`
+}
+
+type WebSocketConfig struct {
+	ReadBufferSize  int `json:"read_buffer_size"`
+	WriteBufferSize int `json:"write_buffer_size"`
 }
 
 type BackendConfig struct {
@@ -15,16 +22,23 @@ type BackendConfig struct {
 	Port       int                  `json:"port"`
 	Scripts    BackendScriptsConfig `json:"scripts"`
 	Production bool                 `json:"production"`
+	WebSocket  WebSocketConfig      `json:"websocket"`
 }
 
 var DefaultBackendConfig = BackendConfig{
 	Host: "localhost",
 	Port: 8080,
 	Scripts: BackendScriptsConfig{
-		PlacePixelDevnet:      "../scripts/place_pixel.sh",
-		AddTemplateHashDevnet: "../scripts/add_template_hash.sh",
+		PlacePixelDevnet:       "../scripts/place_pixel.sh",
+		PlaceExtraPixelsDevnet: "../scripts/place_extra_pixels.sh",
+		AddTemplateDevnet:      "../scripts/add_template.sh",
+		MintNFTDevnet:          "../scripts/mint_nft.sh",
 	},
 	Production: false,
+	WebSocket: WebSocketConfig{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	},
 }
 
 var DefaultBackendConfigPath = "../configs/backend.config.json"

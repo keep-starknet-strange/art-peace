@@ -95,7 +95,7 @@ However, it might be worth running only certain components for development/testi
 
 - [Diagrams](./docs/diagrams/)
 - [r/place technical document](https://www.redditinc.com/blog/how-we-built-rplace)
-- [Telegram](https://t.me/+rd1pvEo8T2w2ZDRh)
+- [Telegram](https://t.me/art_peace_starknet)
 - [OnlyDust](https://app.onlydust.com/p/artpeace)
 
 ## Contributors ✨
@@ -114,6 +114,22 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Ayoazeez26"><img src="https://avatars.githubusercontent.com/u/44169294?v=4?s=100" width="100px;" alt="Abdulhakeem Abdulazeez Ayodeji"/><br /><sub><b>Abdulhakeem Abdulazeez Ayodeji</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Ayoazeez26" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tekkac"><img src="https://avatars.githubusercontent.com/u/98529704?v=4?s=100" width="100px;" alt="Trunks @ Carbonable"/><br /><sub><b>Trunks @ Carbonable</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=tekkac" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ptisserand"><img src="https://avatars.githubusercontent.com/u/544314?v=4?s=100" width="100px;" alt="ptisserand"/><br /><sub><b>ptisserand</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=ptisserand" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://mubarak23.github.io/"><img src="https://avatars.githubusercontent.com/u/7858376?v=4?s=100" width="100px;" alt="Mubarak Muhammad Aminu"/><br /><sub><b>Mubarak Muhammad Aminu</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=mubarak23" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/thomas192"><img src="https://avatars.githubusercontent.com/u/65908739?v=4?s=100" width="100px;" alt="0xK2"/><br /><sub><b>0xK2</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=thomas192" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://fishonsnote.medium.com/"><img src="https://avatars.githubusercontent.com/u/43862685?v=4?s=100" width="100px;" alt="Fishon Amos"/><br /><sub><b>Fishon Amos</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=fishonamos" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Xaxxoo"><img src="https://avatars.githubusercontent.com/u/51526246?v=4?s=100" width="100px;" alt="Xaxxoo"/><br /><sub><b>Xaxxoo</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Xaxxoo" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/manoahLinks"><img src="https://avatars.githubusercontent.com/u/100848212?v=4?s=100" width="100px;" alt="Mano.dev"/><br /><sub><b>Mano.dev</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=manoahLinks" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Otaiki1"><img src="https://avatars.githubusercontent.com/u/38711713?v=4?s=100" width="100px;" alt="Abdulsamad sadiq"/><br /><sub><b>Abdulsamad sadiq</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Otaiki1" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/raizo07"><img src="https://avatars.githubusercontent.com/u/81079370?v=4?s=100" width="100px;" alt="Agada Gabriel"/><br /><sub><b>Agada Gabriel</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=raizo07" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/abdulqaharu"><img src="https://avatars.githubusercontent.com/u/21007582?v=4?s=100" width="100px;" alt="Abdulqahar Usman"/><br /><sub><b>Abdulqahar Usman</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=abdulqaharu" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/aweolumidedavid"><img src="https://avatars.githubusercontent.com/u/49573727?v=4?s=100" width="100px;" alt="Awe Olumide David"/><br /><sub><b>Awe Olumide David</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=aweolumidedavid" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/kateberryd"><img src="https://avatars.githubusercontent.com/u/35270183?v=4?s=100" width="100px;" alt="Catherine Jonathan"/><br /><sub><b>Catherine Jonathan</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=kateberryd" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/EjembiEmmanuel"><img src="https://avatars.githubusercontent.com/u/83036156?v=4?s=100" width="100px;" alt="Emmaunuel Ejembi"/><br /><sub><b>Emmaunuel Ejembi</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=EjembiEmmanuel" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/CollinsC1O"><img src="https://avatars.githubusercontent.com/u/101604886?v=4?s=100" width="100px;" alt="CollinsC1O"/><br /><sub><b>CollinsC1O</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=CollinsC1O" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>

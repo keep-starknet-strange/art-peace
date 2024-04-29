@@ -1,0 +1,107 @@
+.TemplateBuilderPanel {
+  position: relative;
+  padding: 1.2rem 0.5rem 0.5rem 0.5rem;
+  margin: 0.5rem;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.4)
+  );
+  z-index: 100;
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.2);
+}
+
+.TemplateBuilderPanel__exit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.2rem;
+  margin: 0.6rem;
+  cursor: pointer;
+}
+
+.TemplateBuilderPanel__exit:hover {
+  color: red;
+  transform: scale(1.2, 1.2);
+}
+
+.TemplateBuilderPanel__exit:active {
+  color: red;
+  transform: scale(1, 1);
+}
+
+.TemplateBuilderPanel__title {
+  font-size: 1.4rem;
+  margin: 0.5rem;
+  text-decoration: underline;
+}
+
+.TemplateBuilderPanel__form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  margin: 0.5rem;
+}
+
+.TemplateBuilderPanel__row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-content: center;
+  width: 100%;
+}
+
+.TemplateBuilderPanel__label {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+  flex: 1;
+}
+
+.TemplateBuilderPanel__input {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.2);
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.2);
+  flex: 1;
+  width: 70%;
+}
+
+.TemplateBuilderPanel__input:focus {
+  outline: none;
+  border: 0.1rem solid rgba(0, 0, 0, 0.5);
+}
+
+.TemplateBuilderPanel__button {
+  font-size: 1.2rem;
+  margin: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.2);
+  background-color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.2);
+}
+
+.TemplateBuilderPanel__button:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+  transform: scale(1.05) translateY(-0.1rem);
+  box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.5);
+}
+
+.TemplateBuilderPanel__button:active {
+  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.8);
+  transform: scale(1) translateY(0);
+}
