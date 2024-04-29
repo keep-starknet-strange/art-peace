@@ -50,6 +50,7 @@ const (
 	pixelPlacedEvent   = "0x02d7b50ebf415606d77c7e7842546fc13f8acfbfd16f7bcf2bc2d08f54114c23"
 	nftMintedEvent     = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
 	templateAddedEvent = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
+	newDay             = "0x019cdbd24e137c00d1feb99cc0b48b86b676f6b69c788c7f112afeb8cd614c16"
 )
 
 // TODO: User might miss some messages between loading canvas and connecting to websocket?
@@ -70,6 +71,8 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 			processNFTMintedEvent(event, w)
 		} else if eventKey == templateAddedEvent {
 			processTemplateAddedEvent(event, w)
+		} else if eventKey == newDay {
+			processNewDayEvent(event, w)
 		} else {
 			fmt.Println("Unknown event key: ", eventKey)
 		}
@@ -347,4 +350,37 @@ func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
 	// TODO: Ws message to all clients
 
 	WriteResultJson(w, "Template add indexed successfully")
+}
+
+func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
+	dayIdxHex := event.Event.Keys[1]
+	dayStartTimeHex := event.Event.Data[0]
+
+	dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error converting day index hex to int")
+		return
+	}
+
+	dayStartTime, err := strconv.ParseInt(dayStartTimeHex, 0, 64)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error converting day start time hex to int")
+		return
+	}
+
+	// Set day in postgres
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Days (day_index, day_start) VALUES ($1, to_timestamp($2))", dayIdx, dayStartTime)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error inserting day into postgres")
+		return
+	}
+
+	if dayIdx > 0 {
+		// Update end time of previous day
+		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Days SET day_end = $1 WHERE day_index = $2", dayStartTime, dayIdx-1)
+		if err != nil {
+			WriteErrorJson(w, http.StatusInternalServerError, "Error updating end time of previous day in postgres")
+			return
+		}
+	}
 }

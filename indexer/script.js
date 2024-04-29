@@ -29,6 +29,14 @@ export const config = {
         includeTransaction: false,
         includeReceipt: false,
       },
+      {
+        // New Day Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: ["0x19CDBD24E137C00D1FEB99CC0B48B86B676F6B69C788C7F112AFEB8CD614C16"],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false,
+      },
     ],
   },
   sinkType: "webhook",
