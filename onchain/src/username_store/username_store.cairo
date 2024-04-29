@@ -18,22 +18,20 @@ pub mod UsernameStore {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        UserNameChanged {
-            old_username: felt252,
-            new_username: felt252,
-            address: ContractAddress
-        }
+        UserNameChanged: UserNameChanged,
+        UserNameClaimed: UserNameClaimed
     }
 
     #[derive(Drop, starknet::Event)]
-    struct UserNameClaimed {
+    struct UserNameChanged {
         #[key]
-        username: felt252,
+        old_username: felt252,
+        new_username: felt252,
         address: ContractAddress
     }
 
     #[derive(Drop, starknet::Event)]
-    struct UserNameTransferred {
+    struct UserNameClaimed {
         #[key]
         username: felt252,
         address: ContractAddress
