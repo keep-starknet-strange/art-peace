@@ -16,6 +16,7 @@ func InitWebsocketRoutes() {
 func wsReader(conn *websocket.Conn) {
 	for {
 		// TODO: exit on close in backend?
+		// TODO: handle different message types
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println(err)
@@ -38,7 +39,6 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Client Connected")
 	core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections, ws)
 	wsReader(ws)
 }

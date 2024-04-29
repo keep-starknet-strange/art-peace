@@ -97,7 +97,7 @@ curl http://localhost:8080/set-contract-address -X POST -d "$ART_PEACE_CONTRACT_
 COLORS=$(cat $CANVAS_CONFIG_FILE | jq -r '.colors | map("\"\(.)\"") | join(",")')
 curl http://localhost:8080/init-colors -X POST -d "[$COLORS]"
 VOTABLE_COLORS=$(cat $CANVAS_CONFIG_FILE | jq -r '.votableColors | map("\"\(.)\"") | join(",")')
-curl http://localhost:8080/init-votable-colors -X POST -d "{\"colors\": [$VOTABLE_COLORS]}"
+curl http://localhost:8080/init-votable-colors -X POST -d "[$VOTABLE_COLORS]"
 
 # Start the art-peace frontend
 echo "Starting art-peace frontend ..."

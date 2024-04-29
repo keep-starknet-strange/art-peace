@@ -3,13 +3,7 @@
     "width": 256,
     "height": 256
   },
-  "colors": [
-    "010001",
-    "FEFDFB",
-    "FA5310",
-    "9DAEB6",
-    "E9C69E"
-  ],
+  "colors": ["010001", "FEFDFB", "FA5310", "9DAEB6", "E9C69E"],
   "votableColors": [
     "FEFDFB",
     "FA5310",

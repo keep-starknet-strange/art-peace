@@ -1,14 +1,10 @@
 FROM golang:1.22.2-alpine
-# TODO: Add psql to the image?
-# TODO: depends on in docker compose?
 
 RUN apk add --no-cache bash curl git jq
 
 SHELL ["/bin/bash", "-c"]
 RUN curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 2.6.3
 RUN curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | bash
-# TODO: Source not working properly & requiring manual /root/.local/bin/ paths
-RUN source /root/.profile
 RUN /bin/bash /root/.local/bin/snfoundryup --version 0.21.0
 
 # Copy over the configs

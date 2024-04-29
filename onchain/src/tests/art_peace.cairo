@@ -247,13 +247,9 @@ fn deploy_test() {
     assert!(
         art_peace.get_total_pixels() == WIDTH * HEIGHT, "Deployed contract has wrong total pixels"
     );
-// TODO: Other getters & asserts
 }
 
-// TODO: To fuzz test
-// TODO: Test out of bounds, other assert failures
 // TODO: event spy?
-// TODO: all getters & setters
 // TODO: Tests assert in code
 // TODO: Check pixel owner
 
@@ -319,8 +315,6 @@ fn deploy_unruggable_quest_test() {
     );
 }
 
-// TODO: Daily quest test day 2, stats, other fields ...
-
 #[test]
 fn pixel_quests_test() {
     let pixel_quest = snf::declare("PixelQuest");
@@ -329,8 +323,6 @@ fn pixel_quests_test() {
     let art_peace = IArtPeaceDispatcher {
         contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
     };
-
-    // snf::start_prank(CheatTarget::One(art_peace.contract_address), TEST_ACCOUNT());
 
     let x = 10;
     let y = 20;
@@ -541,7 +533,6 @@ fn increase_day_panic_test() {
     snf::start_warp(CheatTarget::One(art_peace_address), DAY_IN_SECONDS - 1);
     art_peace.increase_day_index();
 }
-// TODO: test invalid template inputs
 
 // TODO: Deploy test for nft that checks name, symbol, uri, etc.
 

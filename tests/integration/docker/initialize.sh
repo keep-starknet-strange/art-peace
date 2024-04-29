@@ -19,4 +19,4 @@ curl http://backend:8080/init-colors -X POST -d "[$COLORS]"
 
 echo "Setup the votable colors from the color config"
 VOTABLE_COLORS=$(cat /configs/canvas.config.json | jq -r '.votableColors | map("\"\(.)\"") | join(",")')
-curl http://backend:8080/init-votable-colors -X POST -d "{\"colors\": [$VOTABLE_COLORS]}"
+curl http://backend:8080/init-votable-colors -X POST -d "[$VOTABLE_COLORS]"

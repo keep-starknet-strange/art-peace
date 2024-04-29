@@ -1,30 +1,28 @@
 import backendConfig from '../configs/backend.config.json';
-export const backendUrlBase = "http://" + backendConfig.host + ":" + backendConfig.port
+export const backendUrlBase =
+  'http://' + backendConfig.host + ':' + backendConfig.port;
 
 const fetchWrapper = async (url, options = {}) => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    try {
-        const response = await fetch(`${backendUrlBase}/${url}`, { mode: 'cors', signal, ...options });
-        if (!response.ok) {
-            throw new Error(`Failed to fetch ${url}`);
-        }
-        return await response.json();
-    } catch (err) {
-        console.log(`Error while fetching ${url}:`, err);
-        throw err; // Re-throw the error for further handling if needed
+  const controller = new AbortController();
+  const signal = controller.signal;
+  try {
+    const response = await fetch(`${backendUrlBase}/${url}`, {
+      mode: 'cors',
+      signal,
+      ...options
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${url}`);
     }
-    finally {
-        controller.abort(); // Ensure the request is aborted after completion or error
-    }
+    return await response.json();
+  } catch (err) {
+    console.log(`Error while fetching ${url}:`, err);
+    throw err; // Re-throw the error for further handling if needed
+  } finally {
+    controller.abort(); // Ensure the request is aborted after completion or error
+  }
 };
 
-
 export const getVotableColors = async () => {
-    try {
-        return await fetchWrapper('votable-colors');
-    } catch (err) {
-        // Handle or re-throw the error as needed
-        throw err;
-    }
+  return await fetchWrapper('votable-colors');
 };

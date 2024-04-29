@@ -1,6 +1,8 @@
 @font-face {
   font-family: 'Public-Pixel';
-  src: local('Public-Pixel'), url('./fonts/PublicPixel-z84yD.ttf') format('truetype');
+  src:
+    local('Public-Pixel'),
+    url('./fonts/PublicPixel-z84yD.ttf') format('truetype');
 }
 
 html {

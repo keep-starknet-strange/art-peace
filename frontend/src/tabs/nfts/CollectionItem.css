@@ -52,5 +52,6 @@
 }
 
 /* Underline the first child of .CollectionItem__info__item */
-.CollectionItem__info__item > *:first-child { text-decoration: underline;
+.CollectionItem__info__item > *:first-child {
+  text-decoration: underline;
 }

@@ -2,17 +2,12 @@ package routes
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
-	"github.com/pkg/errors"
 )
 
 func InitNFTRoutes() {
@@ -22,7 +17,9 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-nft-likes", getNftLikeCount)
 	http.HandleFunc("/like-nft", LikeNFT)
 	http.HandleFunc("/unlike-nft", UnLikeNFT)
-	http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
+	if !core.ArtPeaceBackend.BackendConfig.Production {
+		http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
+	}
 	// Create a static file server for the nft images
 	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("."))))
 }
@@ -45,130 +42,66 @@ type NFTLikesRequest struct {
 func getNFT(w http.ResponseWriter, r *http.Request) {
 	tokenId := r.URL.Query().Get("tokenId")
 
-	var nftData NFTData
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nfts WHERE token_id = $1", tokenId)
+	nft, err := core.PostgresQueryOneJson[NFTData]("SELECT * FROM nfts WHERE token_id = $1", tokenId)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	defer rows.Close()
-
-	err = rows.Scan(&nftData.TokenID, &nftData.Position, &nftData.Width, &nftData.Height, &nftData.ImageHash, &nftData.BlockNumber, &nftData.Minter)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFT")
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	out, err := json.Marshal(nftData)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write([]byte(out))
+	WriteDataJson(w, string(nft))
 }
 
 func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	address := r.URL.Query().Get("address")
 
-	var nftDatas []NFTData
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nfts WHERE minter = $1", address)
+	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE minter = $1", address)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var nftData NFTData
-		err = rows.Scan(&nftData.TokenID, &nftData.Position, &nftData.Width, &nftData.Height, &nftData.ImageHash, &nftData.BlockNumber, &nftData.Minter)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		nftDatas = append(nftDatas, nftData)
-	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	out, err := json.Marshal(nftDatas)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write([]byte(out))
+	WriteDataJson(w, string(nfts))
 }
 
 func getNFTs(w http.ResponseWriter, r *http.Request) {
 	// TODO: Pagination & Likes
-	var nftDatas []NFTData
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT * FROM nfts")
+	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var nftData NFTData
-		err = rows.Scan(&nftData.TokenID, &nftData.Position, &nftData.Width, &nftData.Height, &nftData.ImageHash, &nftData.BlockNumber, &nftData.Minter)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		nftDatas = append(nftDatas, nftData)
-	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	out, err := json.Marshal(nftDatas)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write([]byte(out))
+	WriteDataJson(w, string(nfts))
 }
 
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
-	reqBody, err := io.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-	var jsonBody map[string]string
-	err = json.Unmarshal(reqBody, &jsonBody)
-	if err != nil {
-		panic(err)
+	// Disable this in production
+	if NonProductionMiddleware(w, r) {
+		return
 	}
 
-	position, err := strconv.Atoi(jsonBody["position"])
+	// TODO: map[string]int instead of map[string]string
+	jsonBody, err := ReadJsonBody[map[string]string](r)
 	if err != nil {
-		panic(err)
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
 	}
 
-	width, err := strconv.Atoi(jsonBody["width"])
+	position, err := strconv.Atoi((*jsonBody)["position"])
 	if err != nil {
-		panic(err)
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert position to int")
+		return
 	}
 
-	height, err := strconv.Atoi(jsonBody["height"])
+	width, err := strconv.Atoi((*jsonBody)["width"])
 	if err != nil {
-		panic(err)
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert width to int")
+		return
+	}
+
+	height, err := strconv.Atoi((*jsonBody)["height"])
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert height to int")
+		return
 	}
 
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.MintNFTDevnet
@@ -177,105 +110,68 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	cmd := exec.Command(shellCmd, contract, "mint_nft", strconv.Itoa(position), strconv.Itoa(width), strconv.Itoa(height))
 	_, err = cmd.Output()
 	if err != nil {
-		fmt.Println("Error executing shell command: ", err)
-		panic(err)
-	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Write([]byte("Minted NFT on devnet"))
-}
-
-func LikeNFT(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to mint NFT on devnet")
 		return
 	}
 
-	var nftlikeReq NFTLikesRequest
-	err := json.NewDecoder(r.Body).Decode(&nftlikeReq)
+	WriteResultJson(w, "NFT minted on devnet")
+}
+
+func LikeNFT(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+
+	nftlikeReq, err := ReadJsonBody[NFTLikesRequest](r)
 	if err != nil {
-		http.Error(w, errors.Wrap(err, "error decoding JSON").Error(), http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 
 	// TODO:  ensure that the nft exists
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 	if err != nil {
-		message := "NFT Already Liked By User"
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
+		WriteErrorJson(w, http.StatusBadRequest, "NFT already liked by user")
 		return
 	}
 
-	message := "NFT liked successfully"
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
-
-	return
-
+	WriteResultJson(w, "NFT liked successfully")
 }
 
 func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
-	var nftlikeReq NFTLikesRequest
-	err := json.NewDecoder(r.Body).Decode(&nftlikeReq)
+	nftlikeReq, err := ReadJsonBody[NFTLikesRequest](r)
 	if err != nil {
-		http.Error(w, errors.Wrap(err, "error decoding JSON").Error(), http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 
-	// delete the like here
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to unlike NFT")
 		return
 	}
 
-	message := "NFT Unlike By User"
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf(`{"message": "%s"}`, message)))
-
-	return
+	WriteResultJson(w, "NFT unliked successfully")
 }
 
 func getNftLikeCount(w http.ResponseWriter, r *http.Request) {
 	nftkey := r.URL.Query().Get("nft_key")
-
 	if nftkey == "" {
-		http.Error(w, `{"error": "Missing nft key parameter"}`, http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "NFT key not provided")
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	var count int
-	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT COUNT(*) FROM nftlikes WHERE nftKey = $1", nftkey).Scan(&count)
-
+	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM nftlikes WHERE nftKey = $1", nftkey)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(fmt.Sprintf(`{"count": %d}`, 0)))
-			return
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve like count")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf(`{"count": %d}`, count)))
-	return
+	WriteDataJson(w, strconv.Itoa(*count))
 }

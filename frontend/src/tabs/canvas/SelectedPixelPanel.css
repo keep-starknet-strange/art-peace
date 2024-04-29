@@ -1,0 +1,38 @@
+.SelectedPixelPanel {
+  position: relative;
+  padding: 1rem 0.5rem 0.5rem 0.5rem;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.9)
+  );
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.3);
+  border: 0.2rem solid rgba(0, 0, 0, 0.4);
+
+  pointer-events: fill;
+}
+
+.SelectedPixelPanel__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.SelectedPixelPanel__item {
+  margin: 0.5rem;
+  padding: 0;
+}
+
+.SelectedPixelPanel__address {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

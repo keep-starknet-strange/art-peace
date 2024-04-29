@@ -1,22 +1,24 @@
 package routes
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-// the Quest struct will represent the structure for both Daily and Main Quests data
-type Quest struct {
+type DailyQuest struct {
 	Key         int    `json:"key"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Reward      int    `json:"reward"`
-	DayIndex    int    `json:"dayIndex,omitempty"` // Only for daily quests
+	DayIndex    int    `json:"dayIndex"`
+}
+
+type MainQuest struct {
+	Key         int    `json:"key"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Reward      int    `json:"reward"`
 }
 
 func InitQuestsRoutes() {
@@ -27,82 +29,65 @@ func InitQuestsRoutes() {
 	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
 }
 
-// Query dailyQuests
 func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
-	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests ORDER BY dayIndex ASC`
-	handleQuestQuery(w, r, query)
+	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, day_index FROM DailyQuests ORDER BY day_index ASC")
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get daily quests")
+		return
+	}
+
+	WriteDataJson(w, string(quests))
 }
 
-// Query mainQuest
 func GetMainQuests(w http.ResponseWriter, r *http.Request) {
-	query := `SELECT key, name, description, reward FROM MainQuests`
-	handleQuestQuery(w, r, query)
+	quests, err := core.PostgresQueryJson[MainQuest]("SELECT key, name, description, reward FROM MainQuests")
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main quests")
+		return
+	}
+
+	WriteDataJson(w, string(quests))
 }
 
 // Get today's quests based on the current day index.
 func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
-	query := `SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE dayIndex = (SELECT MAX(dayIndex) FROM Days)`
-	handleQuestQuery(w, r, query)
+	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE dayIndex = (SELECT MAX(dayIndex) FROM Days)")
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's quests")
+		return
+	}
+
+	WriteDataJson(w, string(quests))
 }
 
 func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
 	userAddress := r.URL.Query().Get("address")
 	if userAddress == "" {
-		http.Error(w, `{"error": "Missing address parameter"}`, http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
 		return
 	}
 
-	query := fmt.Sprintf(`SELECT key, name, description, reward FROM MainQuests WHERE key = (SELECT questKey FROM UserMainQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
-	handleQuestQuery(w, r, query)
+	quests, err := core.PostgresQueryJson[MainQuest]("SELECT key, name, description, reward FROM MainQuests WHERE key = (SELECT questKey FROM UserMainQuests WHERE userAddress = $1 AND completed = TRUE)", userAddress)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get completed main quests")
+		return
+	}
+
+	WriteDataJson(w, string(quests))
 }
 
 func GetCompletedDailyQuests(w http.ResponseWriter, r *http.Request) {
 	userAddress := r.URL.Query().Get("address")
 	if userAddress == "" {
-		http.Error(w, `{"error": "Missing address parameter"}`, http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
 		return
 	}
 
-	query := fmt.Sprintf(`SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserDailyQuests WHERE userAddress = '%s' AND completed = TRUE)`, userAddress)
-	handleQuestQuery(w, r, query)
-}
-
-func handleQuestQuery(w http.ResponseWriter, r *http.Request, query string) {
-	var quests []Quest
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), query)
+	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserDailyQuests WHERE userAddress = $1 AND completed = TRUE)", userAddress)
 	if err != nil {
-		http.Error(w, "Database query failed: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var q Quest
-		if err := rows.Scan(&q.Key, &q.Name, &q.Description, &q.Reward, &q.DayIndex); err != nil {
-			log.Printf("Error scanning row: %v", err)
-			continue // Log and continue to process other rows
-		}
-		quests = append(quests, q)
-	}
-	if err := rows.Err(); err != nil {
-		log.Printf("Error during rows iteration: %v", err)
-		http.Error(w, "Error processing data: "+err.Error(), http.StatusInternalServerError)
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get completed daily quests")
 		return
 	}
 
-	setupCORS(&w, r)
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(quests); err != nil {
-		http.Error(w, "Error encoding response: "+err.Error(), http.StatusInternalServerError)
-	}
-}
-
-// CORS setup
-func setupCORS(w *http.ResponseWriter, r *http.Request) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	if r.Method == "OPTIONS" {
-		(*w).Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-		(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		(*w).WriteHeader(http.StatusOK)
-	}
+	WriteDataJson(w, string(quests))
 }
