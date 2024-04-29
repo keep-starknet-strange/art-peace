@@ -544,7 +544,6 @@ const Canvas = props => {
     };
   }, [props.selectedColorId, pixelSelect, props.nftSelectionMode, nftSelectionStarted, nftSelectionPositionX, nftSelectionPositionY, nftSelectionWidth, nftSelectionHeight, height, width, props.canvasRef, nftSelectionEndX, nftSelectionEndY, nftSelectionStartX, nftSelectionStartY, props]);
 
-  
   // TODO: both place options
   return (
 

@@ -73,8 +73,6 @@ const PixelSelector = (props) => {
     setSelectorMode(false);
   }
 
-  // TODO: setPlacedTime(Date.now());
-
   useEffect(() => {
     const getPlacementText = () => {
       let timeTillNextPlacement = getTimeTillNextPlacement();
@@ -92,13 +90,12 @@ const PixelSelector = (props) => {
     return () => clearInterval(interval);
   }, [getTimeTillNextPlacement]);
 
-  // TODO: getLastPlacedPixelTime
   useEffect(() => {
-    const getLastPlacedPixel = backendUrl + "/get-last-placed-pixel?address=address1";
+    const getLastPlacedPixel = backendUrl + "/get-last-placed-time?address=0";
     fetch(getLastPlacedPixel, { mode: "cors" })
         .then((response) => response.json())
         .then((responseData) => {
-          const time = new Date(responseData.time).toLocaleString('en-US', { timeZone: 'UTC' });
+          const time = new Date(responseData.time)
           setPlacedTime(time)
         })
         .catch((error) => {

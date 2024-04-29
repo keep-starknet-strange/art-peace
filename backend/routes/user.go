@@ -2,20 +2,21 @@ package routes
 
 import (
 	"context"
-	"fmt"
-	"github.com/jackc/pgx/v5"
-	"github.com/keep-starknet-strange/art-peace/backend/core"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-type LastPlacedPixel struct {
-	Time  time.Time json:"time"
+type LastPlacedTime struct {
+	Time time.Time `json:"time"`
 }
 
 func InitUserRoutes() {
-	http.HandleFunc("/get-last-placed-pixel", getLastPlacedPixel)
+	http.HandleFunc("/get-last-placed-time", getLastPlacedTime)
 	http.HandleFunc("/get-extra-pixels", getExtraPixels)
 	http.HandleFunc("/get-username", getUsername)
 	http.HandleFunc("/get-pixel-count", getPixelCount)
@@ -95,29 +96,35 @@ func getPixelCount(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf(`{"count": %d}`, count)))
 }
 
-func getLastPlacedPixel(w http.ResponseWriter, r *http.Request) {
+func getLastPlacedTime(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
 	address := r.URL.Query().Get("address")
-	var lastPlacedTime time.Time
-	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT time FROM LastPlacedTime WHERE address = $1", address).Scan(&lastPlacedTime)
+	if address == "" {
+		http.Error(w, `{"error": "Missing address parameter"}`, http.StatusBadRequest)
+		return
+	}
+
+	var lastTime time.Time
+	err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT time FROM LastPlacedTime WHERE address = $1", address).Scan(&lastTime)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte({"time": 0}))
+			w.Write([]byte(`{"time": 0}`))
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte({"error": "Internal server error"}))
+			w.Write([]byte(`{"error": "Internal server error"}`))
 		}
 		return
 	}
 
 	// Create a LastPlacedPixel instance with the scanned timestamp
-	lastPlacedPixel := LastPlacedPixel{Time:lastPlacedTime,}
+	lastPlacedTime := LastPlacedTime{Time: lastTime}
 	// Convert to JSON and send the response
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	out, err := json.Marshal(lastPlacedPixel)
+	out, err := json.Marshal(lastPlacedTime)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
