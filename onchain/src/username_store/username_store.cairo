@@ -11,14 +11,18 @@ pub mod UsernameStore {
 
     #[storage]
     struct Storage {
-        usernames: LegacyMap::<felt252, ContractAddress>
+        usernames: LegacyMap::<felt252, ContractAddress>,
+        address_to_username: LegacyMap::<ContractAddress, felt252>
     }
-
+   
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        UserNameClaimed: UserNameClaimed,
-        UserNameTransferred: UserNameTransferred
+        UserNameChanged {
+            old_username: felt252,
+            new_username: felt252,
+            address: ContractAddress
+        }
     }
 
     #[derive(Drop, starknet::Event)]
@@ -37,39 +41,57 @@ pub mod UsernameStore {
 
     #[abi(embed_v0)]
     pub impl UsernameStore of IUsernameStore<ContractState> {
-        fn claim_username(ref self: ContractState, key: felt252) {
-            let mut username_address = self.usernames.read(key);
+        fn claim_username(ref self: ContractState, username: felt252) {
+            let caller_address = get_caller_address();
+            let username_address = self.usernames.read(username);
+            let existing_username = self.address_to_username.read(caller_address);
 
             assert(
                 username_address == contract_address_const::<0>(),
                 UserNameClaimErrors::USERNAME_CLAIMED
             );
+            assert(
+                existing_username == 0,
+                "user_already_has_username"
+            );
 
-            self.usernames.write(key, get_caller_address());
+            self.usernames.write(username, caller_address);
+            self.address_to_username.write(caller_address, username);
 
-            self
-                .emit(
-                    Event::UserNameClaimed(
-                        UserNameClaimed { username: key, address: get_caller_address() }
-                    )
-                )
+            self.emit(
+                Event::UserNameClaimed {
+                    username: username,
+                    address: caller_address
+                }
+            );
         }
 
-        fn transfer_username(ref self: ContractState, key: felt252, new_Address: ContractAddress) {
-            let username_address = self.usernames.read(key);
+        fn change_username(ref self: ContractState, new_username: felt252) {
+            let caller_address = get_caller_address();
+            let existing_username = self.address_to_username.read(caller_address);
 
-            if username_address != get_caller_address() {
-                core::panic_with_felt252(UserNameClaimErrors::USERNAME_CANNOT_BE_TRANSFER);
-            }
+            assert(
+                existing_username != 0,
+                "user_does_not_have_username_to_change"
+            );
 
-            self.usernames.write(key, new_Address);
+            let new_username_address = self.usernames.read(new_username);
+            assert(
+                new_username_address == contract_address_const::<0>(),
+                UserNameClaimErrors::USERNAME_CLAIMED
+            );
 
-            self
-                .emit(
-                    Event::UserNameTransferred(
-                        UserNameTransferred { username: key, address: new_Address }
-                    )
-                )
+            self.usernames.write(existing_username, contract_address_const::<0>());
+            self.usernames.write(new_username, caller_address);
+            self.address_to_username.write(caller_address, new_username);
+
+            self.emit(
+                Event::UserNameChanged {
+                    old_username: existing_username,
+                    new_username: new_username,
+                    address: caller_address
+                }
+            );
         }
 
         fn get_username(ref self: ContractState, key: felt252) -> ContractAddress {
