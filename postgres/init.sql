@@ -103,16 +103,22 @@ CREATE TABLE ColorVotes (
 CREATE INDEX colorVotes_user_address_index ON ColorVotes (user_address);
 CREATE INDEX colorVotes_color_key_index ON ColorVotes (color_key);
 
+CREATE TABLE TemplateData (
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  hash text NOT NULL,
+  data bytea NOT NULL
+);
+
 -- TODO: key -> template_id?
 CREATE TABLE Templates (
-  key integer NOT NULL PRIMARY KEY,
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
-  hash text NOT NULL,
   width integer NOT NULL,
   height integer NOT NULL,
   position integer NOT NULL,
   reward integer NOT NULL,
-  reward_token char(64) NOT NULL
+  reward_token char(64) NOT NULL,
+  template_id integer REFERENCES TemplateData
 );
 
 -- TODO: Owner & change on transfer
