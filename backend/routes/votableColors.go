@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
@@ -70,7 +69,6 @@ func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 	  ) cv ON vc.key = cv.color_key
 	`)
 	if err != nil {
-    fmt.Println(err)
 		WriteErrorJson(w, http.StatusInternalServerError, "Error fetching votable colors")
 		return
 	}
