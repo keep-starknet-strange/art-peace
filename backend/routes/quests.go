@@ -62,7 +62,6 @@ func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
 	WriteDataJson(w, string(quests))
 }
 
-
 func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
 	userAddress := r.URL.Query().Get("address")
 	if userAddress == "" {
@@ -96,12 +95,11 @@ func GetCompletedDailyQuests(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTodayStartTime(w http.ResponseWriter, r *http.Request) {
-  todayStartTime, err := core.PostgresQueryOne[time.Time]("SELECT day_start FROM days WHERE day_index = (SELECT MAX(day_index) FROM days)")
-  if err != nil {
-    WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's start time")
-    return
-  }
+	todayStartTime, err := core.PostgresQueryOne[time.Time]("SELECT day_start FROM days WHERE day_index = (SELECT MAX(day_index) FROM days)")
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's start time")
+		return
+	}
 
-  WriteDataJson(w, "\"" + string(todayStartTime.UTC().Format(time.RFC3339)) + "\"")
+	WriteDataJson(w, "\""+string(todayStartTime.UTC().Format(time.RFC3339))+"\"")
 }
-
