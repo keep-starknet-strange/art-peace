@@ -128,10 +128,8 @@ const CanvasContainer = (props) => {
 
     const position = y * width + x;
     const getPixelInfoEndpoint =
-      backendUrl + '/getPixelInfo?position=' + position.toString();
-    fetch(getPixelInfoEndpoint, {
-      mode: 'cors'
-    })
+      backendUrl + '/get-pixel-info?position=' + position.toString();
+    fetch(getPixelInfoEndpoint)
       .then((response) => {
         return response.json();
       })
@@ -185,7 +183,7 @@ const CanvasContainer = (props) => {
     const position = y * width + x;
     const colorId = props.selectedColorId;
 
-    const placePixelEndpoint = backendUrl + '/placePixelDevnet';
+    const placePixelEndpoint = backendUrl + '/place-pixel-devnet';
     fetch(placePixelEndpoint, {
       mode: 'cors',
       method: 'POST',

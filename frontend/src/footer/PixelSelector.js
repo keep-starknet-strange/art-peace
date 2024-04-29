@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './PixelSelector.css';
 import '../utils/Styles.css';
+import { backendUrl } from '../utils/Consts.js';
 
 const PixelSelector = (props) => {
   // Track when a placement is available
@@ -8,7 +9,7 @@ const PixelSelector = (props) => {
   const updateInterval = 250; // 250ms
   // TODO: make this a config
   const timeBetweenPlacements = 5000; // 5 seconds
-  const [lastPlacedTime, _setLastPlacedTime] = useState(0);
+  const [lastPlacedTime, setLastPlacedTime] = useState(0);
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
   const [pixelAvailable, setPixelAvailable] = useState(false);
 
@@ -47,6 +48,19 @@ const PixelSelector = (props) => {
     props.extraPixels,
     props.extraPixelsUsed
   ]);
+
+  useEffect(() => {
+    const getLastPlacedPixel = backendUrl + '/get-last-placed-time?address=0';
+    fetch(getLastPlacedPixel)
+      .then((response) => response.json())
+      .then((responseData) => {
+        const time = new Date(responseData.data);
+        setLastPlacedTime(time);
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
 
   // Selector mode controls
 

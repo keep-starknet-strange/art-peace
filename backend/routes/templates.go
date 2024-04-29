@@ -58,41 +58,41 @@ type TemplateData struct {
 }
 
 func getTemplates(w http.ResponseWriter, r *http.Request) {
-  templates, err := core.PostgresQueryJson[TemplateData]("SELECT * FROM templates")
-  if err != nil {
-    WriteErrorJson(w, http.StatusInternalServerError, "Failed to get templates")
-    return
-  }
+	templates, err := core.PostgresQueryJson[TemplateData]("SELECT * FROM templates")
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get templates")
+		return
+	}
 
-  WriteDataJson(w, string(templates))
+	WriteDataJson(w, string(templates))
 }
 
 func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("image")
 	if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Failed to read image")
-    return
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to read image")
+		return
 	}
 	defer file.Close()
 
 	// Decode the image to check dimensions
 	img, _, err := image.Decode(file)
 	if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Failed to decode image")
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to decode image")
 		return
 	}
 	bounds := img.Bounds()
 	width, height := bounds.Max.X-bounds.Min.X, bounds.Max.Y-bounds.Min.Y
 	if width < 5 || width > 50 || height < 5 || height > 50 {
-    WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
 
 	// Read all data from the uploaded file and write it to the temporary file
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-    WriteErrorJson(w, http.StatusInternalServerError, "Failed to read image data")
-    return
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to read image data")
+		return
 	}
 
 	r.Body.Close()
@@ -101,40 +101,40 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 	hash := hashTemplateImage(imageData)
 	// TODO: Store image hash and pixel data in postgres database
 
-  WriteResultJson(w, hash)
+	WriteResultJson(w, hash)
 }
 
 func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	// Passed as byte array w/ color indexes instead of image
 	// Map like {"width": "64", "height": "64", "image": byte array}
-  jsonBody, err := ReadJsonBody[map[string]string](r)
-  if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
-    return
-  }
+	jsonBody, err := ReadJsonBody[map[string]string](r)
+	if err != nil {
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
 
 	width, err := strconv.Atoi((*jsonBody)["width"])
 	if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Invalid width")
-    return
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid width")
+		return
 	}
 
 	height, err := strconv.Atoi((*jsonBody)["height"])
 	if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Invalid height")
-    return
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid height")
+		return
 	}
 
 	imageData := (*jsonBody)["image"]
 	// Split string by comma
-  // TODO: Change to byte encoding
+	// TODO: Change to byte encoding
 	imageSplit := strings.Split(imageData, ",")
 	imageBytes := make([]byte, len(imageSplit))
 	for idx, val := range imageSplit {
 		valInt, err := strconv.Atoi(val)
 		if err != nil {
-      WriteErrorJson(w, http.StatusBadRequest, "Invalid image data")
-      return
+			WriteErrorJson(w, http.StatusBadRequest, "Invalid image data")
+			return
 		}
 		imageBytes[idx] = byte(valInt)
 	}
@@ -147,17 +147,17 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	for idx, colorHex := range colorPaletteHex {
 		r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
 		if err != nil {
-      WriteErrorJson(w, http.StatusInternalServerError, "Failed to create color palette")
+			WriteErrorJson(w, http.StatusInternalServerError, "Failed to create color palette")
 			return
 		}
 		g, err := strconv.ParseInt(colorHex[2:4], 16, 64)
 		if err != nil {
-      WriteErrorJson(w, http.StatusInternalServerError, "Failed to create color palette")
+			WriteErrorJson(w, http.StatusInternalServerError, "Failed to create color palette")
 			return
 		}
 		b, err := strconv.ParseInt(colorHex[4:6], 16, 64)
 		if err != nil {
-      WriteErrorJson(w, http.StatusInternalServerError, "Failed to create color palette")
+			WriteErrorJson(w, http.StatusInternalServerError, "Failed to create color palette")
 			return
 		}
 		colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
@@ -177,18 +177,18 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	filename := fmt.Sprintf("template-%s.png", hash)
 	file, err := os.Create(filename)
 	if err != nil {
-    WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
 		return
 	}
 	defer file.Close()
 
 	err = png.Encode(file, generatedImage)
 	if err != nil {
-    WriteErrorJson(w, http.StatusInternalServerError, "Failed to encode image")
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to encode image")
 		return
 	}
 
-  WriteResultJson(w, hash)
+	WriteResultJson(w, hash)
 }
 
 func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {
@@ -197,11 +197,11 @@ func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  jsonBody, err := ReadJsonBody[map[string]string](r)
-  if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
-    return
-  }
+	jsonBody, err := ReadJsonBody[map[string]string](r)
+	if err != nil {
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
 
 	hash := (*jsonBody)["hash"]
 
@@ -211,27 +211,27 @@ func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {
 
 	position, err := strconv.Atoi((*jsonBody)["position"])
 	if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Invalid position")
-    return
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid position")
+		return
 	}
 
 	width, err := strconv.Atoi((*jsonBody)["width"])
 	if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Invalid width")
-    return
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid width")
+		return
 	}
 
 	height, err := strconv.Atoi((*jsonBody)["height"])
 	if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Invalid height")
-    return
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid height")
+		return
 	}
 
 	// TODO: u256
 	reward, err := strconv.Atoi((*jsonBody)["reward"])
 	if err != nil {
-    WriteErrorJson(w, http.StatusBadRequest, "Invalid reward")
-    return
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid reward")
+		return
 	}
 
 	rewardToken := (*jsonBody)["rewardToken"]
@@ -241,9 +241,9 @@ func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {
 	cmd := exec.Command(shellCmd, contract, "add_template", hash, nameHex, strconv.Itoa(position), strconv.Itoa(width), strconv.Itoa(height), strconv.Itoa(reward), rewardToken)
 	_, err = cmd.Output()
 	if err != nil {
-    WriteErrorJson(w, http.StatusInternalServerError, "Failed to add template to devnet")
-    return
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to add template to devnet")
+		return
 	}
 
-  WriteResultJson(w, "Template added to devnet")
+	WriteResultJson(w, "Template added to devnet")
 }

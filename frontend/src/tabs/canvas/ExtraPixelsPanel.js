@@ -18,7 +18,7 @@ const ExtraPixelsPanel = (props) => {
   };
 
   const submit = () => {
-    let placeExtraPixelsEndpoint = backendUrl + '/placeExtraPixelsDevnet';
+    let placeExtraPixelsEndpoint = backendUrl + '/place-extra-pixels-devnet';
     fetch(placeExtraPixelsEndpoint, {
       mode: 'cors',
       method: 'POST',

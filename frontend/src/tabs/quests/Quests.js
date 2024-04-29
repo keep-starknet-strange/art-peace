@@ -74,7 +74,7 @@ const Quests = (props) => {
     const fetchQuests = async () => {
       try {
         // Fetching daily quests from backend
-        const getDailyQuestsEndpoint = backendUrl + '/getDailyQuests';
+        const getDailyQuestsEndpoint = backendUrl + '/get-daily-quests';
         const dailyResponse = await fetch(getDailyQuestsEndpoint);
         let dailyData = await dailyResponse.json().data;
         if (!dailyData) {
@@ -84,7 +84,7 @@ const Quests = (props) => {
         setTodaysQuests(sortByCompleted(dailyData));
 
         // Fetching main quests from backend
-        const getMainQuestsEndpoint = backendUrl + '/getMainQuests';
+        const getMainQuestsEndpoint = backendUrl + '/get-main-quests';
         const mainResponse = await fetch(getMainQuestsEndpoint);
         let mainData = await mainResponse.json().data;
         if (!mainData) {

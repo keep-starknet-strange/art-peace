@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
+import { backendUrl } from '../../utils/Consts.js';
 
 const Account = (props) => {
   // TODO: Icons for each rank & buttons
@@ -10,7 +11,7 @@ const Account = (props) => {
     '0x0000000000000000000000000000000000000000000000000000000000000000'
   );
   const [username, setUsername] = useState('');
-  const [pixelCount, _setPixelCount] = useState(2572);
+  const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState('');
 
   const [usernameSaved, setUsernameSaved] = useState(false);
@@ -24,6 +25,44 @@ const Account = (props) => {
   const editUsername = () => {
     setUsernameSaved(false);
   };
+
+  useEffect(() => {
+    const getUsernameUrl = `${backendUrl}/get-username?address=${address}`;
+    fetch(getUsernameUrl)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch username');
+        }
+        return res.json();
+      })
+      .then((result) => {
+        if (result.data === null || result.data === '') {
+          setUsername('');
+          setUsernameSaved(false);
+        } else {
+          setUsername(result.data);
+          setUsernameSaved(true);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to fetch username:', error);
+      });
+  }, [address]);
+
+  useEffect(() => {
+    const fetchPixelCount = async () => {
+      const getPixelCountUrl = `${backendUrl}/get-pixel-count?address=${address}`;
+      const response = await fetch(getPixelCountUrl);
+      if (response.ok) {
+        const result = await response.json();
+        setPixelCount(result.data);
+      } else {
+        console.error('Failed to fetch pixel count:', await response.text());
+      }
+    };
+
+    fetchPixelCount();
+  }, [address]);
 
   useEffect(() => {
     if (pixelCount >= 5000) {

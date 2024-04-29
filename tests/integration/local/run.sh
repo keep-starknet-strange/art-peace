@@ -85,17 +85,19 @@ touch $TMP_DIR/indexer.env
 echo "ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> $TMP_DIR/indexer.env
 echo "NFT_CONTRACT_ADDRESS=$CANVAS_NFT_CONTRACT_ADDRESS" >> $TMP_DIR/indexer.env
 echo "APIBARA_STREAM_URL=http://localhost:7171" >> $TMP_DIR/indexer.env
-echo "BACKEND_TARGET_URL=http://localhost:8080/consumeIndexerMsg" >> $TMP_DIR/indexer.env
+echo "BACKEND_TARGET_URL=http://localhost:8080/consume-indexer-msg" >> $TMP_DIR/indexer.env
 apibara run script.js --allow-env $TMP_DIR/indexer.env 2>&1 > $INDEXER_SCRIPT_LOG_FILE &
 INDEXER_SCRIPT_PID=$!
 sleep 2 # Wait for indexer script to start; TODO: Check if indexer script is actually running
 
 # Initialize the art-peace canvas in the backend/redis
 echo "Initializing art-peace canvas ..."
-curl http://localhost:8080/initCanvas -X POST
-curl http://localhost:8080/setContractAddress -X POST -d "$ART_PEACE_CONTRACT_ADDRESS"
+curl http://localhost:8080/init-canvas -X POST
+curl http://localhost:8080/set-contract-address -X POST -d "$ART_PEACE_CONTRACT_ADDRESS"
 COLORS=$(cat $CANVAS_CONFIG_FILE | jq -r '.colors | map("\"\(.)\"") | join(",")')
 curl http://localhost:8080/init-colors -X POST -d "[$COLORS]"
+VOTABLE_COLORS=$(cat $CANVAS_CONFIG_FILE | jq -r '.votableColors | map("\"\(.)\"") | join(",")')
+curl http://localhost:8080/init-votable-colors -X POST -d "[$VOTABLE_COLORS]"
 
 # Start the art-peace frontend
 echo "Starting art-peace frontend ..."

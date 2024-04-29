@@ -8,7 +8,8 @@ pub struct TemplateMetadata {
     pub width: u128,
     pub height: u128,
     pub reward: u256,
-    pub reward_token: ContractAddress
+    pub reward_token: ContractAddress,
+    pub creator: ContractAddress
 }
 
 #[starknet::interface]

@@ -1,9 +1,9 @@
 import React from 'react';
 import './TabPanel.css';
-
 import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
 import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
 import Factions from './factions/Factions.js';
+import { TimerInjector } from '../utils/TimerInjector.js';
 import Quests from './quests/Quests.js';
 import Voting from './voting/Voting.js';
 import NFTs from './nfts/NFTs.js';
@@ -11,6 +11,7 @@ import Account from './account/Account.js';
 import Templates from './templates/Templates.js';
 
 const TabPanel = (props) => {
+  // TODO: Speed up timer injection by using a context
   return (
     <div className='TabPanel'>
       {props.showSelectedPixelPanel && (
@@ -31,19 +32,27 @@ const TabPanel = (props) => {
         />
       )}
       {props.activeTab === 'Quests' && (
-        <Quests
-          timeLeftInDay={props.timeLeftInDay}
-          setActiveTab={props.setActiveTab}
-        />
+        <TimerInjector>
+          {({ timeLeftInDay }) => (
+            <Quests
+              timeLeftInDay={timeLeftInDay}
+              setActiveTab={props.setActiveTab}
+            />
+          )}
+        </TimerInjector>
       )}
       {props.activeTab === 'Factions' && (
         <Factions setActiveTab={props.setActiveTab} />
       )}
       {props.activeTab === 'Vote' && (
-        <Voting
-          timeLeftInDay={props.timeLeftInDay}
-          setActiveTab={props.setActiveTab}
-        />
+        <TimerInjector>
+          {({ timeLeftInDay }) => (
+            <Voting
+              timeLeftInDay={timeLeftInDay}
+              setActiveTab={props.setActiveTab}
+            />
+          )}
+        </TimerInjector>
       )}
       {props.activeTab === 'Templates' && (
         <Templates

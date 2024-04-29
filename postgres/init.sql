@@ -88,14 +88,14 @@ CREATE TABLE Colors (
 );
 
 CREATE TABLE VotableColors (
-  key integer NOT NULL PRIMARY KEY,
-  hex text NOT NULL,
-  votes integer NOT NULL
+  -- Postgres auto-incrementing primary key
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  hex text NOT NULL
 );
-CREATE INDEX votableColors_votes_index ON VotableColors (votes);
 
 CREATE TABLE ColorVotes (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   user_address char(64) NOT NULL,
   color_key integer NOT NULL
 );
@@ -125,33 +125,41 @@ CREATE TABLE NFTs (
   minter char(64) NOT NULL
 );
 
-CREATE TABLE Factions {
+CREATE TABLE NFTLikes (
+  nftKey integer NOT NULL,
+  liker char(64) NOT NULL,
+  PRIMARY KEY (nftKey, liker)
+);
+CREATE INDEX nftLikes_nft_key_index ON NFTLikes (nftKey);
+CREATE INDEX nftLikes_liker_index ON NFTLikes (liker);
+
+CREATE TABLE Factions (
   -- Postgres auto-incrementing primary key
   key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
   icon text NOT NULL,
   leader char(64) NOT NULL
-};
+);
 
-CREATE TABLE FactionLinks {
+CREATE TABLE FactionLinks (
   link_type text NOT NULL,
   link text NOT NULL,
   faction_key integer NOT NULL
-};
+);
 
-CREATE TABLE FactionChats {
+CREATE TABLE FactionChats (
   sender char(64) NOT NULL,
   faction_key integer NOT NULL,
   message text NOT NULL,
   time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-};
+);
 
-CREATE TABLE FactionMembers {
+CREATE TABLE FactionMembers (
   user_address char(64) NOT NULL,
   faction_key integer NOT NULL
-};
+);
 
-CREATE TABLE FactionTemplates {
+CREATE TABLE FactionTemplates (
   template_key integer NOT NULL,
   faction_key integer NOT NULL
-};
+);

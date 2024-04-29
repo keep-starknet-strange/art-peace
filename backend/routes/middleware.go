@@ -10,20 +10,20 @@ import (
 // Return true if middleware stops the request
 
 func NonProductionMiddleware(w http.ResponseWriter, r *http.Request) bool {
-  if core.ArtPeaceBackend.BackendConfig.Production {
-    WriteErrorJson(w, http.StatusNotImplemented, "Route is disabled in production")
-    return true
-  }
+	if core.ArtPeaceBackend.BackendConfig.Production {
+		WriteErrorJson(w, http.StatusNotImplemented, "Route is disabled in production")
+		return true
+	}
 
-  return false
+	return false
 }
 
 func AuthMiddleware(w http.ResponseWriter, r *http.Request) bool {
-  // TODO: Implement authentication
-  return false
+	// TODO: Implement authentication
+	return false
 }
 
 func AdminMiddleware(w http.ResponseWriter, r *http.Request) bool {
-  // TODO: Implement admin authentication
-  return false
+	// TODO: Implement admin authentication
+	return false
 }

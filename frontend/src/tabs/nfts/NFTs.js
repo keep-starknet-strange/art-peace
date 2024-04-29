@@ -86,7 +86,6 @@ const NFTs = (props) => {
         return response.json();
       })
       .then((response) => {
-        console.log(response);
         if (response.data) {
           setMyNFTs(response.data);
         }

@@ -103,9 +103,24 @@ function App() {
   const [selectedPositionY, setSelectedPositionY] = useState(null);
   const [pixelPlacedBy, setPixelPlacedBy] = useState('');
 
-  const [extraPixels, _setExtraPixels] = useState(5); // TODO: fetch from server
+  const [extraPixels, setExtraPixels] = useState(0);
   const [extraPixelsUsed, setExtraPixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
+
+  useEffect(() => {
+    const address = 0;
+    let getExtraPixelsEndpoint = `${backendUrl}/get-extra-pixels?address=${address}`;
+    fetch(getExtraPixelsEndpoint).then((response) => {
+      response
+        .json()
+        .then((result) => {
+          setExtraPixels(result.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+  }, []);
 
   const clearPixelSelection = () => {
     setSelectedPositionX(null);
@@ -169,31 +184,6 @@ function App() {
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
 
-  // Timing
-  const [timeLeftInDay, setTimeLeftInDay] = useState('');
-  const startTime = '15:00';
-  const [hours, minutes] = startTime.split(':');
-
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const nextDayStart = new Date(now);
-      nextDayStart.setDate(now.getDate() + 1);
-      nextDayStart.setUTCHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-      const difference = nextDayStart - now;
-      const hoursFinal = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutesFinal = Math.floor((difference / 1000 / 60) % 60);
-      const secondsFinal = Math.floor((difference / 1000) % 60);
-
-      const formattedTimeLeft = `${hoursFinal.toString().padStart(2, '0')}:${minutesFinal.toString().padStart(2, '0')}:${secondsFinal.toString().padStart(2, '0')}`;
-      setTimeLeftInDay(formattedTimeLeft);
-    };
-
-    const interval = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(interval);
-  });
-
   // Tabs
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -240,7 +230,6 @@ function App() {
           getDeviceTypeInfo={getDeviceTypeInfo}
           nftMintingMode={nftMintingMode}
           setNftMintingMode={setNftMintingMode}
-          timeLeftInDay={timeLeftInDay}
           showSelectedPixelPanel={
             !isPortrait
               ? pixelSelectedMode

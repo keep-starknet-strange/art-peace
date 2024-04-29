@@ -21,7 +21,7 @@ const Canvas = (props) => {
         const context = canvas.getContext('2d');
         context.imageSmoothingEnabled = false;
 
-        let getCanvasEndpoint = backendUrl + '/getCanvas';
+        let getCanvasEndpoint = backendUrl + '/get-canvas';
         let response = await fetch(getCanvasEndpoint);
         let canvasData = await response.arrayBuffer();
 

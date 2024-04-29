@@ -1,33 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import BasicTab from '../BasicTab.js';
 import './Voting.css';
 import VoteItem from './VoteItem.js';
+import { getVotableColors } from '../../services/apiService.js';
 
 const Voting = (props) => {
-  // TODO: Pull from API
-  const colors = [
-    '#FF0000',
-    '#00FF00',
-    '#0000FF',
-    '#FFFF00',
-    '#00FFFF',
-    '#FF00FF',
-    '#FFFFFF',
-    '#808080',
-    '#C0C0C0',
-    '#800000',
-    '#808000',
-    '#008000',
-    '#800080',
-    '#008080',
-    '#000000'
-  ];
-  const colorVotes = colors.map(() => Math.floor(Math.random() * 10000));
-
-  const [votes, setVotes] = useState(colorVotes);
   const [userVote, setUserVote] = useState(-1);
 
   const castVote = (index) => {
+    // TODO: Implement the logic to cast a vote
+    /*
     if (userVote === index) {
       return;
     }
@@ -35,10 +17,47 @@ const Voting = (props) => {
     if (userVote !== -1) {
       newVotes[userVote]--;
     }
-    setUserVote(index);
     newVotes[index]++;
     setVotes(newVotes);
+    */
+    setUserVote(index);
+    console.log('Voting for color with index:', index);
   };
+
+  // VotableColor API
+  const [votableColorApiState, setVotableColorApiState] = useState({
+    loading: null,
+    error: '',
+    data: null
+  });
+  useEffect(() => {
+    const fetchVotableColoers = async () => {
+      try {
+        setVotableColorApiState((prevState) => ({
+          ...prevState,
+          loading: true
+        }));
+        const result = await getVotableColors();
+        // Sort by votes
+        let votableColors = result.data;
+        votableColors.sort((a, b) => b.votes - a.votes);
+        setVotableColorApiState((prevState) => ({
+          ...prevState,
+          data: votableColors,
+          loading: false
+        }));
+      } catch (error) {
+        // Handle or log the error as needed
+        setVotableColorApiState((prevState) => ({
+          ...prevState,
+          error,
+          loading: false
+        }));
+        console.error('Error fetching votable colors:', error);
+      }
+    };
+    fetchVotableColoers();
+  }, []);
 
   return (
     <BasicTab title='Voting' setActiveTab={props.setActiveTab}>
@@ -51,16 +70,22 @@ const Voting = (props) => {
       </p>
 
       <div className='Voting__grid'>
-        {colors.map((color, index) => (
-          <VoteItem
-            key={index}
-            color={color}
-            votes={votes[index]}
-            castVote={castVote}
-            index={index}
-            userVote={userVote}
-          />
-        ))}
+        {votableColorApiState.data && votableColorApiState.data.length ? (
+          votableColorApiState.data.map((color, index) => (
+            <VoteItem
+              key={index}
+              color={`#${color.hex}FF`}
+              votes={color.votes}
+              castVote={castVote}
+              index={index}
+              userVote={userVote}
+            />
+          ))
+        ) : (
+          <div style={{ padding: '1.4rem', textAlign: 'center' }}>
+            No Color Added Yet
+          </div>
+        )}
       </div>
     </BasicTab>
   );
