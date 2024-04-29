@@ -73,8 +73,6 @@ const PixelSelector = (props) => {
     setSelectorMode(false);
   }
 
-  // TODO: setPlacedTime(Date.now());
-
   useEffect(() => {
     const getPlacementText = () => {
       let timeTillNextPlacement = getTimeTillNextPlacement();
@@ -91,6 +89,19 @@ const PixelSelector = (props) => {
     }, updateInterval);
     return () => clearInterval(interval);
   }, [getTimeTillNextPlacement]);
+
+  useEffect(() => {
+    const getLastPlacedPixel = backendUrl + "/get-last-placed-time?address=0";
+    fetch(getLastPlacedPixel, { mode: "cors" })
+        .then((response) => response.json())
+        .then((responseData) => {
+          const time = new Date(responseData.time)
+          setPlacedTime(time)
+        })
+        .catch((error) => {
+            console.error("Error fetching data:", error);
+        });
+  }, []);
 
   return (
     <div className={"PixelSelector " + (props.getDeviceTypeInfo().isPortrait ? " PixelSelector--portrait" : "")}>
