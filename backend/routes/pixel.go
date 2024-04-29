@@ -57,10 +57,20 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	address, err := core.PostgresQueryOne[string]("SELECT address FROM Pixels WHERE position = $1 ORDER BY time DESC LIMIT 1", position)
+
 	if err != nil {
 		WriteDataJson(w, "\"0000000000000000000000000000000000000000000000000000000000000000\"")
 	} else {
-		WriteDataJson(w, "\""+*address+"\"")
+		username, err := core.PostgresQueryOne[string]("SELECT name FROM Users WHERE address = $1 ORDER BY time DESC LIMIT 1", address)
+		if err != nil {
+			WriteDataJson(w, "\"0000000000000000000000000000000000000000000000000000000000000000\"")
+		}
+
+		if username != nil {
+			WriteDataJson(w, "\""+*username+"\"")
+		} else {
+			WriteDataJson(w, "\""+*address+"\"")
+		}
 	}
 }
 
