@@ -128,10 +128,8 @@ CREATE TABLE NFTs (
 CREATE TABLE NFTLikes (
   nftKey integer NOT NULL,
   liker char(64) NOT NULL,
-  time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (nftKey, liker),
-  CONSTRAINT unique_nftliker UNIQUE (nftKey, liker)
+  PRIMARY KEY (nftKey, liker)
 );
 
-CREATE INDEX nft_key_index ON NFTLikes (nftKey);
-CREATE INDEX liker_index ON NFTLikes (liker);
+CREATE INDEX nftLikes_nft_key_index ON NFTLikes (nftKey);
+CREATE INDEX nftLikes_liker_index ON NFTLikes (liker);
