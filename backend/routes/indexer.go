@@ -68,7 +68,8 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		if eventKey == pixelPlacedEvent {
 			processPixelPlacedEvent(event, w)
 		} else if eventKey == nftMintedEvent {
-			processNFTMintedEvent(event, w)
+			var tokenID int64
+			processNFTMintedEvent(event, w, tokenID)	
 		} else if eventKey == templateAddedEvent {
 			processTemplateAddedEvent(event, w)
 		} else if eventKey == newDay {
@@ -160,7 +161,7 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	WriteResultJson(w, "Pixel placement indexed successfully")
 }
 
-func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
+func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter, tokenID int64) {
 	// TODO: combine high and low token ids
 	tokenIdLowHex := event.Event.Keys[1]
 	// TODO: tokenIdHighHex := event.Event.Keys[2]
@@ -277,7 +278,9 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// TODO: Ws message to all clients
 
-	WriteResultJson(w, "NFT mint indexed successfully")
+	WriteResultJson(w, "NFT mint indexed successfully");
+
+	sendNFTWebSocketMessage(tokenID) //**
 }
 
 func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
@@ -384,3 +387,18 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 		}
 	}
 }
+
+func sendNFTWebSocketMessage(tokenID int64) {
+    message := map[string]int64{"token_id": tokenID} // Message to be sent
+    messageBytes, _ := json.Marshal(message) // Convert message to bytes
+    for idx, conn := range core.ArtPeaceBackend.WSConnections {
+        if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
+            fmt.Println(err)
+            conn.Close()
+            core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
+        }
+    }
+}
+
+
+    

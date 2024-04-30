@@ -51,6 +51,12 @@ function App() {
     }
   }, [readyState]);
 
+  useEffect(() => {
+    if (lastJsonMessage) {
+        colorPixel(lastJsonMessage.position, lastJsonMessage.color);
+    }
+}, [lastJsonMessage]);
+
   // Colors
   const staticColors = canvasConfig.colors;
   const [colors, setColors] = useState([]);
