@@ -36,6 +36,15 @@
   margin: 0;
 }
 
+.link_style{
+  color: blue;
+}
+.link_style:hover{
+  color: rgb(38, 38, 194);
+  transition: all 0.4s;
+}
+
+
 .Button__primary {
   margin: 0.2rem;
   padding: 0.5rem 1rem;
