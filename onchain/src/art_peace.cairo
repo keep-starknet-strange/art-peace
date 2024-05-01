@@ -59,6 +59,7 @@ pub mod ArtPeace {
     struct NewDay {
         #[key]
         day_index: u32,
+        start_time: u64,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -105,6 +106,7 @@ pub mod ArtPeace {
         self.start_day_time.write(starknet::get_block_timestamp());
         self.end_time.write(init_params.end_time);
         self.day_index.write(0);
+        self.emit(NewDay { day_index: 0, start_time: starknet::get_block_timestamp() });
 
         // TODO: Dev only - remove
         let test_address = starknet::contract_address_const::<
@@ -281,7 +283,7 @@ pub mod ArtPeace {
 
             self.day_index.write(self.day_index.read() + 1);
             self.start_day_time.write(block_timestamp);
-            self.emit(NewDay { day_index: self.day_index.read() });
+            self.emit(NewDay { day_index: self.day_index.read(), start_time: block_timestamp });
         }
 
         fn get_daily_quest_count(self: @ContractState) -> core::zeroable::NonZero::<u32> {

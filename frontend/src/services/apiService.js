@@ -23,6 +23,10 @@ const fetchWrapper = async (url, options = {}) => {
   }
 };
 
+export const getTodaysStartTime = async () => {
+  return await fetchWrapper('get-today-start-time');
+};
+
 export const getVotableColors = async () => {
   return await fetchWrapper('votable-colors');
 };
