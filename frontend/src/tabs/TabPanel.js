@@ -1,4 +1,5 @@
 import React from 'react';
+import { CSSTransition } from 'react-transition-group';
 import './TabPanel.css';
 import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
 import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
@@ -15,62 +16,127 @@ const TabPanel = (props) => {
   return (
     <div className='TabPanel'>
       {props.showSelectedPixelPanel && (
-        <SelectedPixelPanel
-          selectedPositionX={props.selectedPositionX}
-          selectedPositionY={props.selectedPositionY}
-          clearPixelSelection={props.clearPixelSelection}
-          pixelPlacedBy={props.pixelPlacedBy}
-        />
+        <CSSTransition
+          in={props.showSelectedPixelPanel}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+        >
+          <SelectedPixelPanel
+            selectedPositionX={props.selectedPositionX}
+            selectedPositionY={props.selectedPositionY}
+            clearPixelSelection={props.clearPixelSelection}
+            pixelPlacedBy={props.pixelPlacedBy}
+          />
+        </CSSTransition>
       )}
       {props.showExtraPixelsPanel && (
-        <ExtraPixelsPanel
-          extraPixelsData={props.extraPixelsData}
-          colors={props.colors}
-          clearExtraPixels={props.clearExtraPixels}
-          clearExtraPixel={props.clearExtraPixel}
-          clearPixelSelection={props.clearPixelSelection}
-        />
+        <CSSTransition
+          in={props.showExtraPixelsPanel}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+        >
+          <ExtraPixelsPanel
+            extraPixelsData={props.extraPixelsData}
+            colors={props.colors}
+            clearExtraPixels={props.clearExtraPixels}
+            clearExtraPixel={props.clearExtraPixel}
+            clearPixelSelection={props.clearPixelSelection}
+          />
+        </CSSTransition>
       )}
       {props.activeTab === 'Quests' && (
-        <TimerInjector>
-          {({ timeLeftInDay }) => (
-            <Quests
-              timeLeftInDay={timeLeftInDay}
-              setActiveTab={props.setActiveTab}
-            />
-          )}
-        </TimerInjector>
+        <CSSTransition
+          in={props.activeTab === 'Quests'}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+        >
+          <TimerInjector>
+            {({ timeLeftInDay }) => (
+              <Quests
+                timeLeftInDay={timeLeftInDay}
+                setActiveTab={props.setActiveTab}
+              />
+            )}
+          </TimerInjector>
+        </CSSTransition>
       )}
       {props.activeTab === 'Factions' && (
-        <Factions setActiveTab={props.setActiveTab} />
+        <CSSTransition
+          in={props.activeTab === 'Factions'}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+        >
+          <Factions setActiveTab={props.setActiveTab} />
+        </CSSTransition>
       )}
       {props.activeTab === 'Vote' && (
-        <TimerInjector>
-          {({ timeLeftInDay }) => (
-            <Voting
-              timeLeftInDay={timeLeftInDay}
-              setActiveTab={props.setActiveTab}
-            />
-          )}
-        </TimerInjector>
+        <CSSTransition
+          in={props.activeTab === 'Vote'}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+        >
+          <TimerInjector>
+            {({ timeLeftInDay }) => (
+              <Voting
+                timeLeftInDay={timeLeftInDay}
+                setActiveTab={props.setActiveTab}
+              />
+            )}
+          </TimerInjector>
+        </CSSTransition>
       )}
       {props.activeTab === 'Templates' && (
-        <Templates
-          setTemplateCreationMode={props.setTemplateCreationMode}
-          setTemplateImage={props.setTemplateImage}
-          setTemplateColorIds={props.setTemplateColorIds}
-          setActiveTab={props.setActiveTab}
-        />
+        <CSSTransition
+          in={props.activeTab === 'Templates'}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+        >
+          <Templates
+            setTemplateCreationMode={props.setTemplateCreationMode}
+            setTemplateImage={props.setTemplateImage}
+            setTemplateColorIds={props.setTemplateColorIds}
+            setActiveTab={props.setActiveTab}
+          />
+        </CSSTransition>
       )}
       {props.activeTab === 'NFTs' && (
-        <NFTs
-          nftMintingMode={props.nftMintingMode}
-          setNftMintingMode={props.setNftMintingMode}
-          setActiveTab={props.setActiveTab}
-        />
+        <CSSTransition
+          in={props.activeTab === 'NFTs'}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+        >
+          <NFTs
+            nftMintingMode={props.nftMintingMode}
+            setNftMintingMode={props.setNftMintingMode}
+            setActiveTab={props.setActiveTab}
+          />
+        </CSSTransition>
       )}
       {props.activeTab === 'Account' && (
-        <Account setActiveTab={props.setActiveTab} />
+        <CSSTransition
+          in={props.activeTab === 'Account'}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+          exit={true}
+        >
+          <Account setActiveTab={props.setActiveTab} />
+        </CSSTransition>
       )}
     </div>
   );

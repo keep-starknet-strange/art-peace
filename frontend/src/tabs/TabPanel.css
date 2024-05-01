@@ -3,3 +3,26 @@
   width: 100%;
   height: 100%;
 }
+/* This fires as soon as the element enters the DOM*/
+.list-transition-enter, .list-transition-appear {
+/*We give the list the initial dimension of the list button*/
+transform: translateX(100%);
+opacity: 0;
+}
+/* This is where we can add the transition*/
+.list-transition-enter-active, .list-transition-appear-active {
+transform: translateX(0);
+opacity: 1;
+transition: all 400ms;
+}
+/* This fires as soon as the this.state.showList is false */
+.list-transition-exit {
+transform: translateX(0);
+opacity: 1;
+}
+/* fires as element leaves the DOM*/
+.list-transition-exit-active {
+transform: translateX(100%);
+opacity: 0;
+transition: all 400ms;
+}
