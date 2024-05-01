@@ -2,11 +2,11 @@ package routes
 
 import (
 	"context"
-    "net/http"
-    "os"
-    "os/exec"
-    "strconv"
-    "github.com/keep-starknet-strange/art-peace/backend/core"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
+	"net/http"
+	"os"
+	"os/exec"
+	"strconv"
 )
 
 type VotableColor struct {
@@ -87,31 +87,31 @@ func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 }
 
 func voteColorDevnet(w http.ResponseWriter, r *http.Request) {
-    if NonProductionMiddleware(w, r) {
-        return
-    }
+	if NonProductionMiddleware(w, r) {
+		return
+	}
 
-    jsonBody, err := ReadJsonBody[map[string]int](r)
-    if err != nil {
-        WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
-        return
-    }
+	jsonBody, err := ReadJsonBody[map[string]int](r)
+	if err != nil {
+		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
 
-    colorIndex, ok := (*jsonBody)["colorIndex"] // Dereference the pointer to access the map
-    if !ok {
-        WriteErrorJson(w, http.StatusBadRequest, "colorIndex not provided")
-        return
-    }
+	colorIndex, ok := (*jsonBody)["colorIndex"] // Dereference the pointer to access the map
+	if !ok {
+		WriteErrorJson(w, http.StatusBadRequest, "colorIndex not provided")
+		return
+	}
 
-    shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.VoteColorDevnet
-    contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.VoteColorDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
 
-    cmd := exec.Command(shellCmd, contract, "vote_color", strconv.Itoa(colorIndex))
-    _, err = cmd.Output()
-    if err != nil {
-        WriteErrorJson(w, http.StatusInternalServerError, "Failed to vote for color on devnet because the onchain is not setup yet")
-        return
-    }
+	cmd := exec.Command(shellCmd, contract, "vote_color", strconv.Itoa(colorIndex))
+	_, err = cmd.Output()
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to vote for color on devnet because the onchain is not setup yet")
+		return
+	}
 
-    WriteResultJson(w, "Color voted on devnet")
+	WriteResultJson(w, "Color voted on devnet")
 }
