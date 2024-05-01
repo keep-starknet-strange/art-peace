@@ -2,7 +2,7 @@ import backendConfig from '../configs/backend.config.json';
 export const backendUrlBase =
   'http://' + backendConfig.host + ':' + backendConfig.port;
 
-const fetchWrapper = async (url, options = {}) => {
+export const fetchWrapper = async (url, options = {}) => {
   const controller = new AbortController();
   const signal = controller.signal;
   try {

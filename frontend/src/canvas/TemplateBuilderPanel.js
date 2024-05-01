@@ -1,6 +1,7 @@
 import React from 'react';
 import './TemplateBuilderPanel.css';
 import { backendUrl } from '../utils/Consts.js';
+import { fetchWrapper } from '../services/apiService.js';
 
 const TemplateBuilderPanel = (props) => {
   const [templateName, setTemplateName] = React.useState('');
@@ -11,11 +12,11 @@ const TemplateBuilderPanel = (props) => {
     let addTemplateEndpoint = backendUrl + '/add-template-devnet';
     let template = new Image();
     template.src = props.templateImage;
-    template.onload = function () {
+    template.onload = async function () {
       let templateWidth = this.width;
       let templateHeight = this.height;
-      let addTemplateDataEndpoint = backendUrl + '/add-template-data';
-      fetch(addTemplateDataEndpoint, {
+      let addTemplateDataEndpoint = 'add-template-data';
+      const response = await fetchWrapper(addTemplateDataEndpoint, {
         method: 'POST',
         mode: 'cors',
         body: JSON.stringify({
@@ -24,39 +25,29 @@ const TemplateBuilderPanel = (props) => {
           image: props.templateColorIds.toString()
         })
       })
-        .then((response) => {
-          return response.json();
-        })
-        .then((response) => {
-          // Load template hash from response
-          let templateHash = response.result;
+      if(!response.result){
+        return
+      }
 
-          fetch(addTemplateEndpoint, {
-            method: 'POST',
-            mode: 'cors',
-            body: JSON.stringify({
-              name: name,
-              position: props.templateImagePosition.toString(),
-              width: templateWidth.toString(),
-              height: templateHeight.toString(),
-              hash: templateHash,
-              reward: reward,
-              rewardToken: rewardToken
-            })
-          })
-            .then((response) => {
-              return response.json();
-            })
-            .then((response) => {
-              console.log('Template created:', response.result);
-            })
-            .catch((error) => {
-              console.error('Error creating template:', error);
-            });
+      let templateHash = response.result;
+      const response2 = await fetchWrapper(addTemplateEndpoint, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify({
+          name: name,
+          position: props.templateImagePosition.toString(),
+          width: templateWidth.toString(),
+          height: templateHeight.toString(),
+          hash: templateHash,
+          reward: reward,
+          rewardToken: rewardToken
         })
-        .catch((error) => {
-          console.error('Error creating template data:', error);
-        });
+      })
+
+      if(!response2.result){
+        return
+      }
+      console.log('Template created:', response.result);
     };
   };
 

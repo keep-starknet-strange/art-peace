@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './PixelSelector.css';
 import '../utils/Styles.css';
 import { backendUrl } from '../utils/Consts.js';
+import { fetchWrapper } from '../services/apiService.js';
 
 const PixelSelector = (props) => {
   // Track when a placement is available
@@ -50,16 +51,17 @@ const PixelSelector = (props) => {
   ]);
 
   useEffect(() => {
-    const getLastPlacedPixel = backendUrl + '/get-last-placed-time?address=0';
-    fetch(getLastPlacedPixel)
-      .then((response) => response.json())
-      .then((responseData) => {
-        const time = new Date(responseData.data);
-        setLastPlacedTime(time);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      });
+    const getLastPlacedPixel = 'get-last-placed-time?address=0';
+    async function fetchGetLastPlacedPixel(){
+      const response = await fetchWrapper(getLastPlacedPixel);
+      if(!response.data){
+        return
+      }
+      const time = new Date(response.data);
+      setLastPlacedTime(time);
+    }
+
+    fetchGetLastPlacedPixel()
   }, []);
 
   // Selector mode controls

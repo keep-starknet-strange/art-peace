@@ -87,7 +87,7 @@ const NFTSelector = (props) => {
   ]);
 
   useEffect(() => {
-    const mouseUp = (event) => {
+    const mouseUp = async (event) => {
       // TODO: Do nothing if dragging the canvas
       if (event.button === 0 && props.nftMintingMode) {
         if (!nftSelectionStarted) {
@@ -146,12 +146,12 @@ const NFTSelector = (props) => {
           }
 
           // Mint NFT
-          let mintNFTEndpoint = backendUrl + '/mint-nft-devnet';
+          let mintNFTEndpoint = 'mint-nft-devnet';
           let nftPosition =
             nftSelectionPositionX + nftSelectionPositionY * props.width;
           let nftWidth = nftSelectionWidth;
           let nftHeight = nftSelectionHeight;
-          fetch(mintNFTEndpoint, {
+          const response = await fetchWrapper(mintNFTEndpoint, {
             mode: 'cors',
             method: 'POST',
             body: JSON.stringify({
@@ -160,17 +160,9 @@ const NFTSelector = (props) => {
               height: nftHeight.toString()
             })
           })
-            .then((response) => {
-              return response.json();
-            })
-            .then((response) => {
-              console.log(response.result);
-            })
-            .catch((error) => {
-              console.error('Error minting nft');
-              console.error(error);
-            });
-
+          if(response.result){
+            console.log(response.result)
+          }
           setNftSelectionStarted(false);
           setNftSelectionPositionX(-1);
           setNftSelectionPositionY(-1);

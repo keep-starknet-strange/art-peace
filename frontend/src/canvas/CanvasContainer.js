@@ -5,6 +5,7 @@ import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
 import NFTSelector from './NFTSelector.js';
 import { backendUrl } from '../utils/Consts.js';
 import canvasConfig from '../configs/canvas.config.json';
+import { fetchWrapper } from '../services/apiService.js';
 
 const CanvasContainer = (props) => {
   // TODO: Handle window resize
@@ -112,7 +113,7 @@ const CanvasContainer = (props) => {
     ctx.fillRect(x, y, 1, 1);
   };
 
-  const pixelSelect = (x, y) => {
+  const pixelSelect = async (x, y) => {
     // Clear selection if clicking the same pixel
     if (
       props.selectedColorId === -1 &&
@@ -127,23 +128,15 @@ const CanvasContainer = (props) => {
     props.setPixelSelection(x, y);
 
     const position = y * width + x;
-    const getPixelInfoEndpoint =
-      backendUrl + '/get-pixel-info?position=' + position.toString();
-    fetch(getPixelInfoEndpoint)
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        // TODO: Cache pixel info & clear cache on update from websocket
-        // TODO: Dont query if hover select ( until 1s after hover? )
-        props.setPixelPlacedBy(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    const getPixelInfoEndpoint = await fetchWrapper(`get-pixel-info?position=${position.toString()}`);
+
+    if(!getPixelInfoEndpoint.data){
+return
+    }
+    props.setPixelPlacedBy(getPixelInfoEndpoint.data);
   };
 
-  const pixelClicked = (e) => {
+  const pixelClicked = async (e) => {
     if (props.nftMintingMode) {
       return;
     }
@@ -183,25 +176,17 @@ const CanvasContainer = (props) => {
     const position = y * width + x;
     const colorId = props.selectedColorId;
 
-    const placePixelEndpoint = backendUrl + '/place-pixel-devnet';
-    fetch(placePixelEndpoint, {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({
-        position: position.toString(),
-        color: colorId.toString()
-      })
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        console.log(response.result);
-      })
-      .catch((error) => {
-        console.error('Error placing pixel');
-        console.error(error);
-      });
+    const response = await fetchWrapper(`place-pixel-devnet`, {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+           position: position.toString(),
+          color: colorId.toString()
+         })
+       })
+    if(response.result){
+      console.log(response.result)
+    }
     props.clearPixelSelection();
     props.setSelectedColorId(-1);
   };
