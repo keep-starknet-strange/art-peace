@@ -43,6 +43,11 @@ const QuestItem = (props) => {
           validated = false;
         }
         // TODO: Check is hex
+        let hexPattern = /^0x[0-9a-fA-F]{63,64}$/;
+        if (!hexPattern.test(input.value)){
+          console.log('Invalid address');
+          validated = false;
+        }
       } else if (props.args[inputIndex].inputType == 'text') {
         // Any string < 32 characters
         if (input.value.length >= 32) {
