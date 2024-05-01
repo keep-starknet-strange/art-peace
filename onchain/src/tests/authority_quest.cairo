@@ -10,7 +10,9 @@ use snforge_std::{declare, CheatTarget, ContractClassTrait};
 fn deploy_authority_quest_main() -> ContractAddress {
     let authority_quest = declare("AuthorityQuest");
     let mut authority_calldata = array![];
-    AuthorityQuestInitParams { art_peace: utils::ART_PEACE_CONTRACT(), authority: get_contract_address(), reward: 20, }
+    AuthorityQuestInitParams {
+        art_peace: utils::ART_PEACE_CONTRACT(), authority: get_contract_address(), reward: 20,
+    }
         .serialize(ref authority_calldata);
     let main_authority_quest = authority_quest.deploy(@authority_calldata).unwrap();
 
@@ -49,19 +51,26 @@ fn authority_quest_test() {
         )
     };
 
-    let main_authority_quest = IAuthorityQuestDispatcher{contract_address: main_authority_quest};
+    let main_authority_quest = IAuthorityQuestDispatcher { contract_address: main_authority_quest };
 
-    let calldata: Span<felt252> = array![utils::PLAYER1().try_into().unwrap(), utils::PLAYER2().try_into().unwrap()].span();
+    let calldata: Span<felt252> = array![
+        utils::PLAYER1().try_into().unwrap(), utils::PLAYER2().try_into().unwrap()
+    ]
+        .span();
     main_authority_quest.mark_claimable(calldata);
 
-    snf::start_prank(target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER1());
+    snf::start_prank(
+        target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER1()
+    );
     art_peace.claim_main_quest(0, calldata);
 
     assert!(
         art_peace.get_extra_pixels_count() == 20, "Extra pixels are wrong after main quest claim"
     );
 
-    snf::start_prank(target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER2());
+    snf::start_prank(
+        target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER2()
+    );
     art_peace.claim_main_quest(0, calldata);
 
     assert!(
@@ -80,12 +89,14 @@ fn authority_quest_double_claim_test() {
         )
     };
 
-    let main_authority_quest = IAuthorityQuestDispatcher{contract_address: main_authority_quest};
+    let main_authority_quest = IAuthorityQuestDispatcher { contract_address: main_authority_quest };
 
     let calldata: Span<felt252> = array![utils::PLAYER1().try_into().unwrap()].span();
     main_authority_quest.mark_claimable(calldata);
 
-    snf::start_prank(target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER1());
+    snf::start_prank(
+        target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER1()
+    );
     art_peace.claim_main_quest(0, calldata);
 
     assert!(

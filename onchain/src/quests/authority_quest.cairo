@@ -1,7 +1,7 @@
 #[starknet::contract]
 pub mod AuthorityQuest {
     use core::traits::TryInto;
-use starknet::{ContractAddress, get_caller_address};
+    use starknet::{ContractAddress, get_caller_address};
     use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
     use art_peace::quests::{IAuthorityQuest, IQuest, QuestClaimed};
 
@@ -34,16 +34,17 @@ use starknet::{ContractAddress, get_caller_address};
         self.authority.write(init_params.authority);
         self.reward.write(init_params.reward);
     }
-    
+
     #[abi(embed_v0)]
     impl AuthorityQuestImpl of IAuthorityQuest<ContractState> {
         fn mark_claimable(ref self: ContractState, calldata: Span<felt252>) {
             assert(get_caller_address() == self.authority.read(), 'Only authority address allowed');
             let mut i = 0;
-            while i < calldata.len() {
-                self.claimable.write((*calldata[i]).try_into().unwrap(), true);
-                i += 1;
-            }
+            while i < calldata
+                .len() {
+                    self.claimable.write((*calldata[i]).try_into().unwrap(), true);
+                    i += 1;
+                }
         }
     }
 
@@ -61,7 +62,7 @@ use starknet::{ContractAddress, get_caller_address};
             }
 
             if self.claimable.read(user) {
-                 true
+                true
             } else {
                 false
             }

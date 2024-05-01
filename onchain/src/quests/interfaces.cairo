@@ -18,7 +18,7 @@ pub trait IQuest<TContractState> {
 }
 
 #[starknet::interface]
-pub trait IAuthorityQuest<TContractState>{
+pub trait IAuthorityQuest<TContractState> {
     fn mark_claimable(ref self: TContractState, calldata: Span<felt252>);
 }
 
