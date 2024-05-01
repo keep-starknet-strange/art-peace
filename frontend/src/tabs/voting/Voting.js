@@ -6,39 +6,44 @@ import { getVotableColors } from '../../services/apiService.js';
 
 const Voting = (props) => {
   const [userVote, setUserVote] = useState(-1);
+  const [votableColorApiState, setVotableColorApiState] = useState({
+    loading: false,
+    data: null,
+    error: ''
+  });
 
-  const castVote = (index) => {
-    // TODO: Implement the logic to cast a vote
-    /*
+  const castVote = async (index) => {
     if (userVote === index) {
-      return;
+      return; // Prevent re-voting for the same index
     }
-    let newVotes = [...votes];
-    if (userVote !== -1) {
-      newVotes[userVote]--;
+    try {
+      const response = await fetch('/vote-color-devnet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ colorIndex: index })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        console.log('Vote successful:', result);
+        setUserVote(index);
+      } else {
+        throw new Error(result.message || 'Failed to vote');
+      }
+    } catch (error) {
+      console.error('Error voting for color:', error);
     }
-    newVotes[index]++;
-    setVotes(newVotes);
-    */
-    setUserVote(index);
-    console.log('Voting for color with index:', index);
   };
 
-  // VotableColor API
-  const [votableColorApiState, setVotableColorApiState] = useState({
-    loading: null,
-    error: '',
-    data: null
-  });
   useEffect(() => {
-    const fetchVotableColoers = async () => {
+    const fetchVotableColors = async () => {
       try {
         setVotableColorApiState((prevState) => ({
           ...prevState,
           loading: true
         }));
         const result = await getVotableColors();
-        // Sort by votes
         let votableColors = result.data;
         votableColors.sort((a, b) => b.votes - a.votes);
         setVotableColorApiState((prevState) => ({
@@ -47,7 +52,6 @@ const Voting = (props) => {
           loading: false
         }));
       } catch (error) {
-        // Handle or log the error as needed
         setVotableColorApiState((prevState) => ({
           ...prevState,
           error,
@@ -56,7 +60,7 @@ const Voting = (props) => {
         console.error('Error fetching votable colors:', error);
       }
     };
-    fetchVotableColoers();
+    fetchVotableColors();
   }, []);
 
   return (
