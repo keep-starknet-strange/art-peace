@@ -1,5 +1,10 @@
 #[starknet::contract]
 pub mod ArtPeace {
+    use core::array::ArrayTrait;
+    use core::option::OptionTrait;
+    use core::traits::TryInto;
+    use core::traits::Into;
+    use core::dict::Felt252DictTrait;
     use starknet::ContractAddress;
     use art_peace::{IArtPeace, Pixel};
     use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
@@ -9,6 +14,7 @@ pub mod ArtPeace {
     };
     use art_peace::templates::component::TemplateStoreComponent;
     use art_peace::templates::interfaces::{ITemplateVerifier, ITemplateStore, TemplateMetadata};
+    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 
@@ -472,10 +478,17 @@ pub mod ArtPeace {
     #[abi(embed_v0)]
     impl ArtPeaceTemplateVerifier of ITemplateVerifier<ContractState> {
         // TODO: Check template function
-        fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
+        fn complete_template(
+            ref self: ContractState,
+            template_id: u32,
+            template_image: Span<u8>,
+            token: ContractAddress
+        ) {
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
             // TODO: ensure template_image matches the template size & hash
+            let mut pixel_contributors: Array<ContractAddress> = ArrayTrait::new();
+            let mut total_pixels_by_user: Felt252Dict<u32> = Default::default();
             let template_metadata: TemplateMetadata = self.get_template(template_id);
             let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata
                 .width
@@ -487,6 +500,7 @@ pub mod ArtPeace {
             let canvas_width = self.canvas_width.read();
             let (mut x, mut y) = (0, 0);
             let mut matches = 0;
+            let pixel_contributors_span = pixel_contributors.span();
             while y < template_metadata
                 .height {
                     x = 0;
@@ -498,6 +512,29 @@ pub mod ArtPeace {
                             // TODO: Check if the color is transparent
                             if color == self.canvas.read(pos).color {
                                 matches += 1;
+
+                                let mut pixel_owner = self.canvas.read(pos).owner;
+                                let mut found = false;
+                                let mut user_index = 0;
+                                let mut index = 0;
+
+                                while index < pixel_contributors_span
+                                    .len() {
+                                        if *pixel_contributors_span.at(index) == pixel_owner {
+                                            found = true;
+                                            user_index = index;
+                                            break;
+                                        }
+                                        index += 1;
+                                    };
+
+                                if !found {
+                                    pixel_contributors.append(pixel_owner);
+                                    total_pixels_by_user.insert(pixel_owner.into(), 1);
+                                } else {
+                                    let count = total_pixels_by_user.get(pixel_owner.into());
+                                    total_pixels_by_user.insert(pixel_owner.into(), count + 1);
+                                }
                             }
                             x += 1;
                         };
@@ -507,7 +544,20 @@ pub mod ArtPeace {
             // TODO: Allow some threshold?
             if matches == template_metadata.width * template_metadata.height {
                 self.templates.completed_templates.write(template_id, true);
-            // TODO: Distribute rewards
+                // Distribute rewards
+                if pixel_contributors.len() > 0 {
+                    let mut i = 0;
+
+                    while i < pixel_contributors
+                        .len() {
+                            let mut user = *pixel_contributors.at(i).into();
+                            let user_to_felt: felt252 = user.into();
+                            let total_pixels = total_pixels_by_user.get(user_to_felt).into();
+
+                            IERC20Dispatcher { contract_address: token }
+                                .transfer(user, total_pixels);
+                        }
+                }
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
         }
