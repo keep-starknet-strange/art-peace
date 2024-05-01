@@ -1,6 +1,6 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 use art_peace::quests::nft_quest::NFTMintQuest::NFTMintQuestInitParams;
- use art_peace::nfts::interfaces::{ICanvasNFTStore, NFTMetadata};
+use art_peace::nfts::interfaces::{ICanvasNFTStore, NFTMetadata};
 use art_peace::nfts::interfaces::{ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait};
 use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
 use art_peace::tests::art_peace::deploy_with_quests_contract;
