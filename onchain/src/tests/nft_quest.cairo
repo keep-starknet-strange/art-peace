@@ -36,26 +36,26 @@ fn test_get_reward() {
     assert(current_reward == test_reward, 'Reward Not set');
 }
 
-// #[test]
-// fn test_is_claimable() {
-//     let contract_address = deploy_nft_quest();
-//     let dispatcher = IQuestDispatcher { contract_address };
-//     // let calldata: Array<felt252> = array![0];
-//     let test_is_claim = dispatcher.is_claimable(contract_address_const::<1>(), SINGLE_CALLDATA());
+#[test]
+fn test_is_claimable() {
+    let contract_address = deploy_nft_quest();
+    let dispatcher = IQuestDispatcher { contract_address };
+    // let calldata: Array<felt252> = array![0];
+    let test_is_claim = dispatcher.is_claimable(contract_address_const::<1>(), SINGLE_CALLDATA());
 
-//     let is_claim = false;
+    let is_claim = false;
 
-//     assert(is_claim == test_is_claim, 'Cannot Claim Mint NFT Quest');
-// }
+    assert(is_claim == test_is_claim, 'Cannot Claim Mint NFT Quest');
+}
 
-// #[test]
-// fn test_claim() {
-//     let contract_address = deploy_nft_quest();
-//     let dispatcher = IQuestDispatcher { contract_address };
-//     // let calldata: Array<felt252> = array![0]; calldata.span()
-//     let test_claim_reward = dispatcher.claim(contract_address_const::<1>(), SINGLE_CALLDATA());
+#[test]
+fn test_claim() {
+    let contract_address = deploy_nft_quest();
+    let dispatcher = IQuestDispatcher { contract_address };
+    // let calldata: Array<felt252> = array![0]; calldata.span()
+    let test_claim_reward = dispatcher.claim(contract_address_const::<1>(), SINGLE_CALLDATA());
 
-//     let claim_reward = 18;
+    let claim_reward = 18;
 
-//     assert(claim_reward != test_claim_reward, 'Mint NFT Reward not Claim');
-// }
+    assert(claim_reward != test_claim_reward, 'Mint NFT Reward not Claim');
+}
