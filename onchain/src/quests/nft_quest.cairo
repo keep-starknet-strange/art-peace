@@ -26,7 +26,7 @@ pub mod NFTMintQuest {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: TemplateQuestInitParams) {
+    fn constructor(ref self: ContractState, init_params: NFTMintQuestInitParams) {
         self.CanvasNFT.write(init_params.CanvasNFT);
         self.reward.write(init_params.reward);
     }
@@ -50,7 +50,7 @@ pub mod NFTMintQuest {
             let nft_store = ICanvasNFTStoreDispatcher { contract_address: self.CanvasNFT.read() };
             let token_miner = nft_store.get_nft_minter(token_id);
 
-            if token_miner.minter != user {
+            if token_miner != user {
                 return false;
             }
 

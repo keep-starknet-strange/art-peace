@@ -9,6 +9,7 @@ mod quests {
     pub mod pixel_quest;
     pub mod template_quest;
     pub mod unruggable_quest;
+    pub mod nft_quest;
 
     use interfaces::{
         IQuest, IPixelQuest, IUnruggableQuest, QuestClaimed, IQuestDispatcher,
@@ -58,6 +59,7 @@ mod tests {
     mod art_peace;
     mod username_store;
     mod template_quest;
+    mod nft_quest;
     pub(crate) mod utils;
 }
 
