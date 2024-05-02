@@ -36,8 +36,9 @@
 }
 
 .QuestItem__info__desc {
-  padding: 0.2rem 0 0.2rem 1rem;
+  padding: 0.2rem 0 0.2rem 0rem;
   margin: 0;
+  line-height: 1.3rem;
 }
 
 .QuestItem__progress {
