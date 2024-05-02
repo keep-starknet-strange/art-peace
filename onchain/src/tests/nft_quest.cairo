@@ -16,7 +16,7 @@ fn SINGLE_CALLDATA() -> Span<felt252> {
 }
 
 fn deploy_nft_quest() -> ContractAddress {
-    let contract = declare("CanvasNFT");
+    let contract = declare("NFTMintQuest");
 
     let mut nft_quest_calldata = array![];
     NFTMintQuestInitParams { CanvasNFT: utils::NFT_CONTRACT(), reward: reward_amt, }
