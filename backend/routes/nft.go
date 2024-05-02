@@ -63,7 +63,7 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 		page, _ = strconv.Atoi(pageStr)
 	}
 
-	offset := (page - 1) * limit
+	offset := (page - 1) * limit  //pagination ends here
 	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE minter = $1", address)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
@@ -82,7 +82,7 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 		page, _ = strconv.Atoi(pageStr)
 	}
 
-	offset := (page - 1) * limit
+	offset := (page - 1) * limit //pagination ends here
 
 	
 	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts")
