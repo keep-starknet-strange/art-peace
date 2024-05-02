@@ -100,20 +100,9 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	imageData := imageToPixelData(fileBytes)
 	hash := hashTemplateImage(imageData)
-	templateId := 0
-	err = core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2) RETURNING key", hash, imageData).Scan(&templateId)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2)", hash, imageData)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in postgres")
-		return
-	}
-	// Set pixel in postgres
-	name := ""
-	position := 0
-	reward := 0
-	rewardToken := "RWRD"
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Templates (name, width, height, position, reward, reward_token, template_id) VALUES ($1, $2, $3, $4, $5, $6, $7)", name, width, height, position, reward, rewardToken, templateId)
-	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert image data into postgres")
 		return
 	}
 
@@ -158,7 +147,7 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	hash := hashTemplateImage(imageBytes)
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2)", hash, imageBytes)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to add template data in database")
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in database")
 		return
 	}
 	colorPaletteHex := core.ArtPeaceBackend.CanvasConfig.Colors
