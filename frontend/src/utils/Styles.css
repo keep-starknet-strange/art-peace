@@ -36,14 +36,16 @@
   margin: 0;
 }
 
-.link_style{
-  color: blue;
-}
-.link_style:hover{
-  color: rgb(38, 38, 194);
-  transition: all 0.4s;
+.Link__primary {
+  color: rgb(58, 90, 224);
+  font-weight: bold;
+  transition: all 0.2s;
 }
 
+.Link__primary:hover {
+  color: rgb(38, 58, 194);
+  text-shadow: 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1);
+}
 
 .Button__primary {
   margin: 0.2rem;
