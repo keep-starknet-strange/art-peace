@@ -53,8 +53,9 @@ func getNFT(w http.ResponseWriter, r *http.Request) {
 }
 
 func getMyNFTs(w http.ResponseWriter, r *http.Request) {
-	//Pagination
 	address := r.URL.Query().Get("address")
+	//Pagination
+
 	pageStr := r.URL.Query().Get("page")
 	limit := 10 // Default limit
 	page := 1   // Default page
@@ -64,7 +65,7 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	offset := (page - 1) * limit //pagination ends here
-	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE minter = $1", address)
+	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE minter = $1", address, offset)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
@@ -86,7 +87,26 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 
 	offset := (page - 1) * limit //pagination ends here
 
-	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts")
+	// SQL query to get NFTs and their like counts
+	query := `
+		SELECT 
+			nfts.*, 
+			COALESCE(like_count, 0) AS like_count
+		FROM 
+			nfts
+		LEFT JOIN (
+			SELECT 
+				nftKey, 
+				COUNT(*) AS like_count
+			FROM 
+				nftlikes
+			GROUP BY 
+				nftKey
+		) likes ON nfts.token_id = likes.nftKey
+		LIMIT $1 OFFSET $2
+		`
+
+	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts", query, limit, offset)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
