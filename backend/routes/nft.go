@@ -53,6 +53,7 @@ func getNFT(w http.ResponseWriter, r *http.Request) {
 }
 
 func getMyNFTs(w http.ResponseWriter, r *http.Request) {
+	//Pagination
 	address := r.URL.Query().Get("address")
 	pageStr := r.URL.Query().Get("page")
 	limit := 10 // Default limit
@@ -73,6 +74,8 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 
 func getNFTs(w http.ResponseWriter, r *http.Request) {
 	// TODO: Likes
+
+	//Pagination
 	limit := 10 // Default limit
 	pageStr := r.URL.Query().Get("page")
 	page := 1 // Default page
