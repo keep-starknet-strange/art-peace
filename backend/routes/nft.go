@@ -40,7 +40,6 @@ type NFTLikesRequest struct {
 }
 
 func getNFT(w http.ResponseWriter, r *http.Request) {
-	
 
 	tokenId := r.URL.Query().Get("tokenId")
 
@@ -63,7 +62,7 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 		page, _ = strconv.Atoi(pageStr)
 	}
 
-	offset := (page - 1) * limit  //pagination ends here
+	offset := (page - 1) * limit //pagination ends here
 	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE minter = $1", address)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
@@ -76,7 +75,7 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 	// TODO: Likes
 	limit := 10 // Default limit
 	pageStr := r.URL.Query().Get("page")
-	page := 1   // Default page
+	page := 1 // Default page
 
 	if pageStr != "" {
 		page, _ = strconv.Atoi(pageStr)
@@ -84,7 +83,6 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 
 	offset := (page - 1) * limit //pagination ends here
 
-	
 	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts")
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
