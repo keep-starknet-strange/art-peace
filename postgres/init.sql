@@ -111,14 +111,14 @@ CREATE TABLE TemplateData (
 
 -- TODO: key -> template_id?
 CREATE TABLE Templates (
-  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  key integer NOT NULL PRIMARY KEY,
   name text NOT NULL,
+  hash text NOT NULL,
   width integer NOT NULL,
   height integer NOT NULL,
   position integer NOT NULL,
   reward integer NOT NULL,
-  reward_token char(64) NOT NULL,
-  template_id integer REFERENCES TemplateData
+  reward_token char(64) NOT NULL
 );
 
 -- TODO: Owner & change on transfer
