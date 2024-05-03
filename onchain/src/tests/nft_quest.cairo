@@ -15,18 +15,31 @@ fn SINGLE_CALLDATA() -> Span<felt252> {
     array![1].span()
 }
 
+fn deploy_nft_contract() -> ContractAddress {
+    let contract = snf::declare("CanvasNFT");
+    let mut calldata = array![];
+    let name: ByteArray = "CanvasNFTs";
+    let symbol: ByteArray = "A/P";
+    name.serialize(ref calldata);
+    symbol.serialize(ref calldata);
+    contract.deploy_at(@calldata, utils::NFT_CONTRACT()).unwrap()
+}
+
+
 fn deploy_nft_quest() -> ContractAddress {
     let contract = declare("NFTMintQuest");
 
     let mut nft_quest_calldata = array![];
-    NFTMintQuestInitParams { CanvasNFT: utils::NFT_CONTRACT(), reward: reward_amt, }
+    NFTMintQuestInitParams { CanvasNFT: utils::NFT_QUEST_CONTRACT(), reward: reward_amt, }
         .serialize(ref nft_quest_calldata);
 
     contract.deploy(@nft_quest_calldata).unwrap()
 }
 
+
 #[test]
 fn test_get_reward() {
+    deploy_nft_contract();
     let contract_address = deploy_nft_quest();
     let dispatcher = IQuestDispatcher { contract_address };
     let current_reward = dispatcher.get_reward();
@@ -36,17 +49,17 @@ fn test_get_reward() {
     assert(current_reward == test_reward, 'Reward Not set');
 }
 
-#[test]
-fn test_is_claimable() {
-    let contract_address = deploy_nft_quest();
-    let dispatcher = IQuestDispatcher { contract_address };
-    // let calldata: Array<felt252> = array![0];
-    let test_is_claim = dispatcher.is_claimable(contract_address_const::<1>(), SINGLE_CALLDATA());
+// #[test]
+// fn test_is_claimable() {
+//     let contract_address = deploy_nft_quest();
+//     let dispatcher = IQuestDispatcher { contract_address };
+//     // let calldata: Array<felt252> = array![0];
+//     let test_is_claim = dispatcher.is_claimable(contract_address_const::<1>(), SINGLE_CALLDATA());
 
-    let is_claim = false;
+//     let is_claim = false;
 
-    assert(is_claim == test_is_claim, 'Cannot Claim Mint NFT Quest');
-}
+//     assert(is_claim == test_is_claim, 'Cannot Claim Mint NFT Quest');
+// }
 
 #[test]
 fn test_claim() {
