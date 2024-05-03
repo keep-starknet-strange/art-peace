@@ -97,9 +97,12 @@ CREATE TABLE ColorVotes (
   -- Postgres auto-incrementing primary key
   key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   user_address char(64) NOT NULL,
-  color_key integer NOT NULL
+  day_index integer NOT NULL,
+  color_key integer NOT NULL,
+  UNIQUE (user_address, day_index)
 );
 CREATE INDEX colorVotes_user_address_index ON ColorVotes (user_address);
+CREATE INDEX colorVotes_day_index ON ColorVotes (day_index);
 CREATE INDEX colorVotes_color_key_index ON ColorVotes (color_key);
 
 -- TODO: key -> template_id?

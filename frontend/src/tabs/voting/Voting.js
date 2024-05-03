@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import BasicTab from '../BasicTab.js';
 import './Voting.css';
 import VoteItem from './VoteItem.js';
-import { getVotableColors } from '../../services/apiService.js';
+import {
+  getVotableColors,
+  voteColorDevnet
+} from '../../services/apiService.js';
 
 const Voting = (props) => {
   const [userVote, setUserVote] = useState(-1);
@@ -17,19 +20,12 @@ const Voting = (props) => {
       return; // Prevent re-voting for the same index
     }
     try {
-      const response = await fetch('/vote-color-devnet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ colorIndex: index })
-      });
-      const result = await response.json();
-      if (response.ok) {
-        console.log('Vote successful:', result);
+      const result = await voteColorDevnet(index);
+      if (result.result) {
+        console.log('Vote successful:', result.result);
         setUserVote(index);
       } else {
-        throw new Error(result.message || 'Failed to vote');
+        throw new Error(result.error || 'Failed to vote');
       }
     } catch (error) {
       console.error('Error voting for color:', error);
@@ -81,7 +77,7 @@ const Voting = (props) => {
               color={`#${color.hex}FF`}
               votes={color.votes}
               castVote={castVote}
-              index={index}
+              index={color.key}
               userVote={userVote}
             />
           ))

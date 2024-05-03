@@ -51,7 +51,7 @@ func GetMainQuests(w http.ResponseWriter, r *http.Request) {
 
 // Get today's quests based on the current day index.
 func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
-	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE dayIndex = (SELECT MAX(dayIndex) FROM Days)")
+	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, day_index FROM DailyQuests WHERE day_index = (SELECT MAX(day_index) FROM Days)")
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's quests")
 		return
@@ -83,7 +83,7 @@ func GetCompletedDailyQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, dayIndex FROM DailyQuests WHERE key = (SELECT questKey FROM UserDailyQuests WHERE userAddress = $1 AND completed = TRUE)", userAddress)
+	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, day_index FROM DailyQuests WHERE key = (SELECT questKey FROM UserDailyQuests WHERE userAddress = $1 AND completed = TRUE)", userAddress)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get completed daily quests")
 		return

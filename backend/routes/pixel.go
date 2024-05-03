@@ -67,6 +67,7 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
 func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
 	if NonProductionMiddleware(w, r) {
+		WriteErrorJson(w, http.StatusBadRequest, "Method only allowed in non-production mode")
 		return
 	}
 
@@ -117,6 +118,7 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
 func placeExtraPixelsDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
 	if NonProductionMiddleware(w, r) {
+		WriteErrorJson(w, http.StatusBadRequest, "Method only allowed in non-production mode")
 		return
 	}
 

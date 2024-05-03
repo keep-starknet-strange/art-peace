@@ -34,6 +34,7 @@ var DefaultBackendConfig = BackendConfig{
 		PlaceExtraPixelsDevnet: "../scripts/place_extra_pixels.sh",
 		AddTemplateDevnet:      "../scripts/add_template.sh",
 		MintNFTDevnet:          "../scripts/mint_nft.sh",
+		VoteColorDevnet:        "../scripts/vote_color.sh",
 	},
 	Production: false,
 	WebSocket: WebSocketConfig{
