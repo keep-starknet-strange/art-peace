@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"image/color"
@@ -99,7 +100,11 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	imageData := imageToPixelData(fileBytes)
 	hash := hashTemplateImage(imageData)
-	// TODO: Store image hash and pixel data in postgres database
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2)", hash, imageData)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in postgres")
+		return
+	}
 
 	WriteResultJson(w, hash)
 }
@@ -140,8 +145,11 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hash := hashTemplateImage(imageBytes)
-	// TODO: Store image hash and pixel data in database
-
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2)", hash, imageBytes)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in database")
+		return
+	}
 	colorPaletteHex := core.ArtPeaceBackend.CanvasConfig.Colors
 	colorPalette := make([]color.RGBA, len(colorPaletteHex))
 	for idx, colorHex := range colorPaletteHex {
