@@ -5,6 +5,7 @@ use interfaces::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel
 
 
 mod quests {
+    pub mod authority_quest;
     pub mod interfaces;
     pub mod pixel_quest;
     pub mod template_quest;
@@ -12,7 +13,7 @@ mod quests {
     pub mod nft_quest;
 
     use interfaces::{
-        IQuest, IPixelQuest, IUnruggableQuest, QuestClaimed, IQuestDispatcher,
+        IQuest, IAuthorityQuest, IPixelQuest, IUnruggableQuest, QuestClaimed, IQuestDispatcher,
         IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher,
         IUnruggableMemecoinDispatcherTrait
     };
@@ -60,6 +61,7 @@ mod tests {
     mod username_store;
     mod template_quest;
     mod nft_quest;
+    mod authority_quest;
     pub(crate) mod utils;
 }
 
