@@ -386,11 +386,11 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 	dayIdxHex := event.Event.Keys[1]
 	dayStartTimeHex := event.Event.Data[0]
 
-  dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
-  if err != nil {
-    WriteErrorJson(w, http.StatusInternalServerError, "Error converting day index hex to int")
-    return
-  }
+	dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error converting day index hex to int")
+		return
+	}
 
 	dayStartTime, err := strconv.ParseInt(dayStartTimeHex, 0, 64)
 	if err != nil {
