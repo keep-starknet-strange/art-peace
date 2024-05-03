@@ -34,10 +34,11 @@ CREATE TABLE Users (
 CREATE INDEX user_address_index ON Users (address);
 
 CREATE TABLE Days (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   day_index integer NOT NULL,
   day_start timestamp NOT NULL,
-  day_end timestamp NOT NULL
+  day_end timestamp
 );
 CREATE INDEX days_day_index_index ON Days (day_index);
 

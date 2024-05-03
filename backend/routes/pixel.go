@@ -49,6 +49,11 @@ func getPixel(w http.ResponseWriter, r *http.Request) {
 	WriteDataJson(w, pixel)
 }
 
+type PixelInfo struct {
+	Address string `json:"address"`
+	Name    string `json:"username"`
+}
+
 func getPixelInfo(w http.ResponseWriter, r *http.Request) {
 	position, err := strconv.Atoi(r.URL.Query().Get("position"))
 	if err != nil {
@@ -56,11 +61,19 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	address, err := core.PostgresQueryOne[string]("SELECT address FROM Pixels WHERE position = $1 ORDER BY time DESC LIMIT 1", position)
+	queryRes, err := core.PostgresQueryOne[PixelInfo](`
+    SELECT p.address, COALESCE(u.name, '') as name FROM Pixels p
+    LEFT JOIN Users u ON p.address = u.address WHERE p.position = $1
+    ORDER BY p.time DESC LIMIT 1`, position)
 	if err != nil {
-		WriteDataJson(w, "\"0000000000000000000000000000000000000000000000000000000000000000\"")
+		WriteDataJson(w, "\"0x0000000000000000000000000000000000000000000000000000000000000000\"")
+		return
+	}
+
+	if queryRes.Name == "" {
+		WriteDataJson(w, "\"0x"+queryRes.Address+"\"")
 	} else {
-		WriteDataJson(w, "\""+*address+"\"")
+		WriteDataJson(w, "\""+queryRes.Name+"\"")
 	}
 }
 

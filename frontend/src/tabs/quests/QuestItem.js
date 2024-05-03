@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { encodeToLink } from '../../utils/encodeToLink';
 import './QuestItem.css';
 import '../../utils/Styles.css';
 
@@ -74,9 +75,10 @@ const QuestItem = (props) => {
       <div className='QuestItem__main'>
         <div className='QuestItem__info'>
           <p className='Text__small QuestItem__info__title'>{props.title}</p>
-          <p className='Text__xsmall QuestItem__info__desc'>
-            {props.description}
-          </p>
+          <p
+            dangerouslySetInnerHTML={encodeToLink(props.description)}
+            className='Text__xsmall QuestItem__info__desc'
+          ></p>
         </div>
         <div
           className={
