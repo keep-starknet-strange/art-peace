@@ -34,15 +34,11 @@ const QuestItem = (props) => {
       }
       // Switch based on props.args.type[inputIndex]
       if (props.args[inputIndex].inputType == 'address') {
-        // Starts w/ 0x and is 65 || 66 characters long
-        if (
-          !input.value.startsWith('0x') ||
-          !(input.value.length == 65 || input.value.length == 66)
-        ) {
-          console.log('Invalid address');
+        // Starts w/ 0x and is 65 || 66 hex characters long
+        let hexPattern = /^0x[0-9a-fA-F]{63,64}$/;
+        if (!hexPattern.test(input.value)) {
           validated = false;
         }
-        // TODO: Check is hex
       } else if (props.args[inputIndex].inputType == 'text') {
         // Any string < 32 characters
         if (input.value.length >= 32) {
