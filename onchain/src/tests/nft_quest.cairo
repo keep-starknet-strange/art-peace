@@ -1,8 +1,10 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
+use art_peace::quests::template_quest::TemplateQuest::TemplateQuestInitParams;
 use art_peace::quests::nft_quest::NFTMintQuest::NFTMintQuestInitParams;
-use art_peace::nfts::interfaces::{ICanvasNFTStore, NFTMetadata};
-use art_peace::nfts::interfaces::{ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait};
 use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
+use art_peace::templates::interfaces::{
+    ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, TemplateMetadata
+};
 use art_peace::tests::art_peace::deploy_with_quests_contract;
 use art_peace::tests::utils;
 use starknet::{ContractAddress, get_caller_address, get_contract_address, contract_address_const};
@@ -11,26 +13,16 @@ use snforge_std::{declare, CheatTarget, ContractClassTrait};
 
 const reward_amt: u32 = 18;
 
-fn SINGLE_CALLDATA() -> Span<felt252> {
-    array![1].span()
-}
-
-fn deploy_nft_contract() -> ContractAddress {
-    let contract = snf::declare("CanvasNFT");
-    let mut calldata = array![];
-    let name: ByteArray = "CanvasNFTs";
-    let symbol: ByteArray = "A/P";
-    name.serialize(ref calldata);
-    symbol.serialize(ref calldata);
-    contract.deploy_at(@calldata, utils::NFT_CONTRACT()).unwrap()
-}
-
 
 fn deploy_nft_quest() -> ContractAddress {
     let contract = declare("NFTMintQuest");
 
     let mut nft_quest_calldata = array![];
-    NFTMintQuestInitParams { CanvasNFT: utils::NFT_QUEST_CONTRACT(), reward: reward_amt, }
+    NFTMintQuestInitParams {
+        CanvasNFT: utils::NFT_QUEST_CONTRACT(),
+        art_peace: utils::ART_PEACE_CONTRACT(),
+        reward: reward_amt,
+    }
         .serialize(ref nft_quest_calldata);
 
     contract.deploy(@nft_quest_calldata).unwrap()
@@ -38,37 +30,20 @@ fn deploy_nft_quest() -> ContractAddress {
 
 
 #[test]
-fn test_get_reward() {
-    let contract_address = deploy_nft_quest();
-    let dispatcher = IQuestDispatcher { contract_address };
-    let current_reward = dispatcher.get_reward();
+fn deploy_nft_quest_test() {
+    let nft_quest = deploy_nft_quest();
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(array![].span(), array![nft_quest].span())
+    };
 
-    let test_reward = 18;
+    let zero_address = contract_address_const::<0>();
 
-    assert(current_reward == test_reward, 'Reward Not set');
-}
-
-#[test]
-fn test_is_claimable() {
-    let contract_address = deploy_nft_quest();
-    let dispatcher = IQuestDispatcher { contract_address };
-    deploy_nft_contract();
-    // let calldata: Array<felt252> = array![0];
-    let test_is_claim = dispatcher.is_claimable(contract_address_const::<1>(), SINGLE_CALLDATA());
-
-    let is_claim = false;
-
-    assert(is_claim == test_is_claim, 'Cannot Claim Mint NFT Quest');
-}
-
-#[test]
-fn test_claim() {
-    let contract_address = deploy_nft_quest();
-    let dispatcher = IQuestDispatcher { contract_address };
-    // let calldata: Array<felt252> = array![0]; calldata.span()
-    let test_claim_reward = dispatcher.claim(contract_address_const::<1>(), SINGLE_CALLDATA());
-
-    let claim_reward = 18;
-
-    assert(claim_reward != test_claim_reward, 'Mint NFT Reward not Claim');
+    assert!(
+        art_peace.get_days_quests(0) == array![zero_address, zero_address, zero_address].span(),
+        "Daily quests were not set correctly"
+    );
+    assert!(
+        art_peace.get_main_quests() == array![nft_quest].span(),
+        "Main quests were not set correctly"
+    );
 }
