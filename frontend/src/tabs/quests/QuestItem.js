@@ -15,7 +15,6 @@ const QuestItem = (props) => {
     if (props.args == null || props.args.length == 0) {
       return;
     }
-
     setExpanded(!expanded);
   };
 
@@ -97,36 +96,38 @@ const QuestItem = (props) => {
           </div>
         </div>
       </div>
-      {expanded && (
-        <div className='QuestItem__form'>
-          <div className='QuestItem__form__seperator'></div>
-          {props.args &&
-            props.args.map((arg, idx) => (
-              <div className='QuestItem__form__item' key={idx}>
-                <label className='Text__xsmall QuestItem__form__label'>
-                  {arg.label}:&nbsp;
-                </label>
-                <input
-                  type='text'
-                  className='Text__small Input__primary QuestItem__form__input'
-                  placeholder={arg.placeholder}
-                  onChange={validateInputs}
-                ></input>
-              </div>
-            ))}
-          {props.args && (
-            <button
-              className={
-                'Button__primary QuestItem__form__submit ' +
-                (inputsValidated ? '' : 'Button__disabled')
-              }
-              onClick={validateInputs}
-            >
-              Submit
-            </button>
-          )}
-        </div>
-      )}
+      <div
+        className={
+          'QuestItem__form' + (expanded ? ' QuestItem__form--expanded' : '')
+        }
+      >
+        <div className='QuestItem__form__seperator'></div>
+        {props.args &&
+          props.args.map((arg, idx) => (
+            <div className='QuestItem__form__item' key={idx}>
+              <label className='Text__xsmall QuestItem__form__label'>
+                {arg.label}:&nbsp;
+              </label>
+              <input
+                type='text'
+                className='Text__small Input__primary QuestItem__form__input'
+                placeholder={arg.placeholder}
+                onChange={validateInputs}
+              ></input>
+            </div>
+          ))}
+        {props.args && (
+          <button
+            className={
+              'Button__primary QuestItem__form__submit ' +
+              (inputsValidated ? '' : 'Button__disabled')
+            }
+            onClick={validateInputs}
+          >
+            Submit
+          </button>
+        )}
+      </div>
     </div>
   );
 };
