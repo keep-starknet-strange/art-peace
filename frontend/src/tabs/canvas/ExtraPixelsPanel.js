@@ -36,7 +36,7 @@ const submit = () => {
         console.log(response.result);
     })
     .catch((error) => {
-        console.error('Error placing extra pixels: ', error);
+        console.error('Error placing the extra pixels: ', error);
     });
     clearAll();
 };
