@@ -133,7 +133,6 @@ func placeExtraPixelsDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Pixel position instead of x, y
 	jsonBody, err := ReadJsonBody[map[string][]map[string]int](r)
 	if err != nil {
 		WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
@@ -146,8 +145,7 @@ func placeExtraPixelsDevnet(w http.ResponseWriter, r *http.Request) {
 	positions := strconv.Itoa(len((*jsonBody)["extraPixels"]))
 	colors := strconv.Itoa(len((*jsonBody)["extraPixels"]))
 	for _, pixel := range (*jsonBody)["extraPixels"] {
-		pos := pixel["x"] + pixel["y"]*int(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
-		positions += " " + strconv.Itoa(pos)
+		positions += " " + strconv.Itoa(pixel["position"])
 		colors += " " + strconv.Itoa(pixel["colorId"])
 	}
 
