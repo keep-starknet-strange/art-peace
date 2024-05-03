@@ -76,6 +76,7 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
 	if NonProductionMiddleware(w, r) {
+		WriteErrorJson(w, http.StatusMethodNotAllowed, "Method only allowed in non-production mode")
 		return
 	}
 
