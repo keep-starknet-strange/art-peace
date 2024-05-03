@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './TabPanel.css';
 import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
@@ -12,20 +12,6 @@ import Account from './account/Account.js';
 import Templates from './templates/Templates.js';
 
 const TabPanel = (props) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const validStates = [
-    'Quests',
-    'Factions',
-    'Vote',
-    'Templates',
-    'NFTs',
-    'Account'
-  ];
-  useEffect(() => {
-    setCurrentIndex(validStates.indexOf(props.activeTab));
-  });
-  const itemRefs = validStates.map(() => useRef(null));
-  const nodeRef = itemRefs[currentIndex];
   // TODO: Speed up timer injection by using a context
   return (
     <div className='TabPanel'>
@@ -61,13 +47,14 @@ const TabPanel = (props) => {
       <SwitchTransition mode='out-in'>
         <CSSTransition
           key={props.activeTab}
-          nodeRef={nodeRef}
           timeout={400}
           classNames='list-transition'
+          unmountOnExit
+          appear
         >
           <div>
             {props.activeTab === 'Quests' && (
-              <div ref={nodeRef}>
+              <div>
                 <TimerInjector>
                   {({ timeLeftInDay }) => (
                     <Quests
@@ -79,12 +66,12 @@ const TabPanel = (props) => {
               </div>
             )}
             {props.activeTab === 'Factions' && (
-              <div ref={nodeRef}>
+              <div>
                 <Factions setActiveTab={props.setActiveTab} />
               </div>
             )}
             {props.activeTab === 'Vote' && (
-              <div ref={nodeRef}>
+              <div>
                 <TimerInjector>
                   {({ timeLeftInDay }) => (
                     <Voting
@@ -96,7 +83,7 @@ const TabPanel = (props) => {
               </div>
             )}
             {props.activeTab === 'Templates' && (
-              <div ref={nodeRef}>
+              <div>
                 <Templates
                   setTemplateCreationMode={props.setTemplateCreationMode}
                   setTemplateImage={props.setTemplateImage}
@@ -106,7 +93,7 @@ const TabPanel = (props) => {
               </div>
             )}
             {props.activeTab === 'NFTs' && (
-              <div ref={nodeRef}>
+              <div>
                 <NFTs
                   nftMintingMode={props.nftMintingMode}
                   setNftMintingMode={props.setNftMintingMode}
@@ -115,7 +102,7 @@ const TabPanel = (props) => {
               </div>
             )}
             {props.activeTab === 'Account' && (
-              <div ref={nodeRef}>
+              <div>
                 <Account setActiveTab={props.setActiveTab} />
               </div>
             )}
