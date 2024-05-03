@@ -71,7 +71,7 @@ func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 	  LEFT JOIN (
 	  	SELECT color_key, COUNT(DISTINCT user_address) AS votes
 	  	FROM ColorVotes
-      WHERE day_index = (SELECT MAX(day_index) FROM Days)
+	  	WHERE day_index = (SELECT MAX(day_index) FROM Days)
 	  	GROUP BY color_key
 	  ) cv ON vc.key = cv.color_key
 	`)
