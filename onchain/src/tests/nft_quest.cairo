@@ -39,7 +39,6 @@ fn deploy_nft_quest() -> ContractAddress {
 
 #[test]
 fn test_get_reward() {
-    deploy_nft_contract();
     let contract_address = deploy_nft_quest();
     let dispatcher = IQuestDispatcher { contract_address };
     let current_reward = dispatcher.get_reward();
@@ -49,17 +48,18 @@ fn test_get_reward() {
     assert(current_reward == test_reward, 'Reward Not set');
 }
 
-// #[test]
-// fn test_is_claimable() {
-//     let contract_address = deploy_nft_quest();
-//     let dispatcher = IQuestDispatcher { contract_address };
-//     // let calldata: Array<felt252> = array![0];
-//     let test_is_claim = dispatcher.is_claimable(contract_address_const::<1>(), SINGLE_CALLDATA());
+#[test]
+fn test_is_claimable() {
+    let contract_address = deploy_nft_quest();
+    let dispatcher = IQuestDispatcher { contract_address };
+    deploy_nft_contract();
+    // let calldata: Array<felt252> = array![0];
+    let test_is_claim = dispatcher.is_claimable(contract_address_const::<1>(), SINGLE_CALLDATA());
 
-//     let is_claim = false;
+    let is_claim = false;
 
-//     assert(is_claim == test_is_claim, 'Cannot Claim Mint NFT Quest');
-// }
+    assert(is_claim == test_is_claim, 'Cannot Claim Mint NFT Quest');
+}
 
 #[test]
 fn test_claim() {
