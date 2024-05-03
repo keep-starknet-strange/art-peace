@@ -315,7 +315,9 @@ pub mod ArtPeace {
             self.color_votes.read((color, day))
         }
 
-        fn finalize_color_votes(ref self: ContractState) {// TODO: Make the function internal only & call in the end of the day
+        fn finalize_color_votes(
+            ref self: ContractState
+        ) { // TODO: Make the function internal only & call in the end of the day
         // TODO: Implement with : adding top X colors to the palette
         // TODO: Implement with : setting up the next day's votable colors
         }
