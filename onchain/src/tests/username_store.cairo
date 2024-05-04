@@ -25,11 +25,21 @@ fn test_claim_username() {
 fn test_change_username() {
     let contract_address = deploy_contract();
     let dispatcher = IUsernameStoreDispatcher { contract_address };
-    dispatcher.claim_username('devsweet');
 
-    dispatcher.change_username('devsweet');
+    let initial_username = 'devsweet';
+    dispatcher.claim_username(initial_username);
+    let initial_username_address = dispatcher.get_username(initial_username);
+    assert_eq!(initial_username_address, contract_address, "Initial username not claimed properly");
 
-    let username_address = dispatcher.get_username('devsweet');
+    let new_username = 'devcool';
+    dispatcher.claim_username(new_username); // You must also claim the new username to ensure it's available for the test
+    dispatcher.change_username(new_username);
+    
+    // Check new username is now linked to the contract address
+    let new_username_address = dispatcher.get_username(new_username);
+    assert_eq!(new_username_address, contract_address, "Username not changed correctly");
 
-    assert_eq!(username_address, contract_address, "Username not changed");
+    // Ensure the old username is no longer linked
+    let old_username_address = dispatcher.get_username(initial_username);
+    assert_eq!(old_username_address, contract_address_const::<0>(), "Old username still linked");
 }
