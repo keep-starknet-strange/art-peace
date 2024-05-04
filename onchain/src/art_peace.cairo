@@ -30,6 +30,13 @@ pub mod ArtPeace {
         color_count: u8,
         // Map: color index -> color value in RGBA
         color_palette: LegacyMap::<u8, u32>,
+        votable_colors_count: u8,
+        // Map: (votable color index, day index) -> color value in RGBA
+        votable_colors: LegacyMap::<(u8, u32), u32>,
+        // Map: (votable color index, day index) -> amount of votes
+        color_votes: LegacyMap::<(u8, u32), u32>,
+        // Map: (user's address, day_index) -> color index
+        user_votes: LegacyMap::<(ContractAddress, u32), u8>,
         creation_time: u64,
         end_time: u64,
         day_index: u32,
@@ -51,6 +58,7 @@ pub mod ArtPeace {
     enum Event {
         Newday: NewDay,
         PixelPlaced: PixelPlaced,
+        VoteColor: VoteColor,
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
     }
@@ -59,6 +67,7 @@ pub mod ArtPeace {
     struct NewDay {
         #[key]
         day_index: u32,
+        start_time: u64,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -72,12 +81,23 @@ pub mod ArtPeace {
         color: u8,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct VoteColor {
+        #[key]
+        voted_by: ContractAddress,
+        #[key]
+        day: u32,
+        #[key]
+        color: u8,
+    }
+
     #[derive(Drop, Serde)]
     pub struct InitParams {
         pub canvas_width: u128,
         pub canvas_height: u128,
         pub time_between_pixels: u64,
         pub color_palette: Array<u32>,
+        pub votable_colors: Array<u32>,
         pub end_time: u64,
         pub daily_quests: Span<ContractAddress>,
         pub main_quests: Span<ContractAddress>,
@@ -101,10 +121,19 @@ pub mod ArtPeace {
             i += 1;
         };
 
+        let votable_colors_count: u8 = init_params.votable_colors.len().try_into().unwrap();
+        self.votable_colors_count.write(votable_colors_count);
+        let mut i: u8 = 0;
+        while i < votable_colors_count {
+            self.votable_colors.write((i, 0), *init_params.votable_colors.at(i.into()));
+            i += 1;
+        };
+
         self.creation_time.write(starknet::get_block_timestamp());
         self.start_day_time.write(starknet::get_block_timestamp());
         self.end_time.write(init_params.end_time);
         self.day_index.write(0);
+        self.emit(NewDay { day_index: 0, start_time: starknet::get_block_timestamp() });
 
         // TODO: Dev only - remove
         let test_address = starknet::contract_address_const::<
@@ -261,6 +290,38 @@ pub mod ArtPeace {
             colors
         }
 
+        fn vote_color(ref self: ContractState, color: u8) {
+            let now = starknet::get_block_timestamp();
+            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
+            assert(color != 0, 'Color 0 indicates no vote');
+            assert(color <= self.votable_colors_count.read(), 'Color out of bounds');
+            let caller = starknet::get_caller_address();
+            let day = self.day_index.read();
+            let users_vote = self.user_votes.read((caller, day));
+            if users_vote != color {
+                if users_vote != 0 {
+                    let old_vote = self.color_votes.read((users_vote, day));
+                    self.color_votes.write((users_vote, day), old_vote - 1);
+                }
+                let new_vote = self.color_votes.read((color, day));
+                self.color_votes.write((color, day), new_vote + 1);
+                self.user_votes.write((caller, day), color);
+                self.emit(VoteColor { voted_by: caller, day, color });
+            }
+        }
+
+        fn get_color_votes(self: @ContractState, color: u8) -> u32 {
+            let day = self.day_index.read();
+            self.color_votes.read((color, day))
+        }
+
+        fn finalize_color_votes(
+            ref self: ContractState
+        ) { // TODO: Make the function internal only & call in the end of the day
+        // TODO: Implement with : adding top X colors to the palette
+        // TODO: Implement with : setting up the next day's votable colors
+        }
+
         fn get_creation_time(self: @ContractState) -> u64 {
             self.creation_time.read()
         }
@@ -281,7 +342,7 @@ pub mod ArtPeace {
 
             self.day_index.write(self.day_index.read() + 1);
             self.start_day_time.write(block_timestamp);
-            self.emit(NewDay { day_index: self.day_index.read() });
+            self.emit(NewDay { day_index: self.day_index.read(), start_time: block_timestamp });
         }
 
         fn get_daily_quest_count(self: @ContractState) -> core::zeroable::NonZero::<u32> {

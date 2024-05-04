@@ -59,13 +59,13 @@ func PostgresQuery[RowType any](query string, args ...interface{}) ([]RowType, e
 }
 
 func PostgresQueryOne[RowType any](query string, args ...interface{}) (*RowType, error) {
-	var result *RowType
+	var result RowType
 	err := pgxscan.Get(context.Background(), ArtPeaceBackend.Databases.Postgres, &result, query, args...)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 func PostgresQueryJson[RowType any](query string, args ...interface{}) ([]byte, error) {

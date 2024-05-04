@@ -78,5 +78,5 @@ func getLastPlacedTime(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return the last placed time in utc z format
-	WriteDataJson(w, lastTime.UTC().Format(time.RFC3339))
+	WriteDataJson(w, "\""+string(lastTime.UTC().Format(time.RFC3339))+"\"")
 }

@@ -25,7 +25,8 @@ const Quests = (props) => {
   const localDailyQuests = [
     {
       title: 'Place 10 pixels',
-      description: 'Add 10 pixels on the canvas',
+      description:
+        'Add 10 pixels on the canvas [art/peace theme](https://www.google.com/)',
       reward: '3',
       status: 'completed'
     },
@@ -37,7 +38,7 @@ const Quests = (props) => {
     },
     {
       title: 'Deploy a Memecoin',
-      description: 'Create an Unruggable memecoin',
+      description: 'Create an Unruggable memecoin ',
       reward: '10',
       status: 'incomplete',
       args: createArgs(['MemeCoin Address'], ['0x1234'], ['address'])
