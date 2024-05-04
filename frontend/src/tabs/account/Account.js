@@ -15,17 +15,30 @@ const Account = (props) => {
   const [accountRank, setAccountRank] = useState('');
 
   const [usernameSaved, setUsernameSaved] = useState(false);
+  const [isEditing, setIsEditing] = useState(false)
+  const [usernameBeforeEdit, setUsernameBeforeEdit] = useState("")
 
   const handleSubmit = (event) => {
     event.preventDefault();
     setUsername(username);
     setUsernameSaved(true);
+    setIsEditing(false)
+    setUsernameBeforeEdit("")
   };
 
   const editUsername = () => {
+    setIsEditing(true)
+    setUsernameBeforeEdit(username)
     setUsernameSaved(false);
   };
 
+
+  const handleCancelEdit = () => {
+    setUsername(usernameBeforeEdit)
+    setUsernameSaved(true)
+    setIsEditing(false)
+    setUsernameBeforeEdit("")
+  }
   useEffect(() => {
     const getUsernameUrl = `${backendUrl}/get-username?address=${address}`;
     fetch(getUsernameUrl)
@@ -112,12 +125,22 @@ const Account = (props) => {
               required
               onChange={(e) => setUsername(e.target.value)}
             />
+            <div>
+           {
+            isEditing &&  <button
+            className='Text__small Button__primary Account__username__button'
+            onClick={handleCancelEdit}
+          >
+            cancel
+          </button>
+           }
             <button
               className='Text__small Button__primary Account__username__button'
               type='submit'
             >
               submit
             </button>
+            </div>
           </form>
         </div>
       )}
