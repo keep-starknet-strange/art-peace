@@ -23,6 +23,17 @@ const fetchWrapper = async (url, options = {}) => {
   }
 };
 
+export const getTodaysStartTime = async () => {
+  return await fetchWrapper('get-today-start-time');
+};
+
 export const getVotableColors = async () => {
   return await fetchWrapper('votable-colors');
+};
+
+export const voteColorDevnet = async (colorIdx) => {
+  return await fetchWrapper('vote-color-devnet', {
+    method: 'POST',
+    body: JSON.stringify({ colorIndex: colorIdx })
+  });
 };

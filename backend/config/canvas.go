@@ -13,7 +13,8 @@ type CanvasSize struct {
 type CanvasConfig struct {
 	Canvas         CanvasSize `json:"canvas"`
 	Colors         []string   `json:"colors"`
-	ColorsBitWidth uint       `json:"colors_bitwidth"`
+	VotableColors  []string   `json:"votableColors"`
+	ColorsBitWidth uint       `json:"colorsBitwidth"`
 }
 
 var DefaultCanvasConfig = &CanvasConfig{
@@ -30,6 +31,15 @@ var DefaultCanvasConfig = &CanvasConfig{
 		"#FFFF00",
 		"#FF00FF",
 		"#00FFFF",
+	},
+	VotableColors: []string{
+		"#DDDDDD",
+		"#DD0000",
+		"#00DD00",
+		"#0000DD",
+		"#DDDD00",
+		"#DD00DD",
+		"#00DDDD",
 	},
 	ColorsBitWidth: 5,
 }

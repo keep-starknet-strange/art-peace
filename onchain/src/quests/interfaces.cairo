@@ -18,6 +18,11 @@ pub trait IQuest<TContractState> {
 }
 
 #[starknet::interface]
+pub trait IAuthorityQuest<TContractState> {
+    fn mark_claimable(ref self: TContractState, calldata: Span<felt252>);
+}
+
+#[starknet::interface]
 pub trait IPixelQuest<TContractState> {
     fn is_claimed(self: @TContractState, user: starknet::ContractAddress) -> bool;
     fn get_pixels_needed(self: @TContractState) -> u32;
