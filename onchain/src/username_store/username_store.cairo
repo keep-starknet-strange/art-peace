@@ -12,22 +12,14 @@ pub mod UsernameStore {
     #[storage]
     struct Storage {
         usernames: LegacyMap::<felt252, ContractAddress>,
-        address_to_username: LegacyMap::<ContractAddress, felt252>
+        user_to_username: LegacyMap::<ContractAddress, felt252> // New mapping to store user to username relationship
     }
-   
+
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        UserNameChanged: UserNameChanged,
-        UserNameClaimed: UserNameClaimed
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct UserNameChanged {
-        #[key]
-        old_username: felt252,
-        new_username: felt252,
-        address: ContractAddress
+        UserNameClaimed: UserNameClaimed,
+        UserNameChanged: UserNameChanged // Changed event name to reflect username change
     }
 
     #[derive(Drop, starknet::Event)]
@@ -37,58 +29,65 @@ pub mod UsernameStore {
         address: ContractAddress
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct UserNameChanged {
+        #[key]
+        old_username: felt252, // Added old_username field
+        new_username: felt252,
+        address: ContractAddress
+    }
+
     #[abi(embed_v0)]
     pub impl UsernameStore of IUsernameStore<ContractState> {
-        fn claim_username(ref self: ContractState, username: felt252) {
+        fn claim_username(ref self: ContractState, key: felt252) {
             let caller_address = get_caller_address();
-            let username_address = self.usernames.read(username);
-            let existing_username = self.address_to_username.read(caller_address);
+
+            assert!(
+                self.user_to_username.read(caller_address) == 0, // Check if user already has a username
+                "user_already_has_username"
+            );
+
+            let username_address = self.usernames.read(key);
 
             assert(
                 username_address == contract_address_const::<0>(),
                 UserNameClaimErrors::USERNAME_CLAIMED
             );
-            assert(
-                existing_username == 0,
-                "user_already_has_username"
-            );
 
-            self.usernames.write(username, caller_address);
-            self.address_to_username.write(caller_address, username);
+            self.usernames.write(key, caller_address);
+            self.user_to_username.write(caller_address, key); // Record the user to username relationship
 
             self.emit(
-                Event::UserNameClaimed {
-                    username: username,
-                    address: caller_address
-                }
+                Event::UserNameClaimed(
+                    UserNameClaimed { username: key, address: caller_address }
+                )
             );
         }
 
         fn change_username(ref self: ContractState, new_username: felt252) {
             let caller_address = get_caller_address();
-            let existing_username = self.address_to_username.read(caller_address);
+            let old_username = self.user_to_username.read(caller_address);
 
-            assert(
-                existing_username != 0,
-                "user_does_not_have_username_to_change"
+            assert!(
+                old_username != 0, // Check if user has an existing username to change
+                "user_does_not_have_username"
             );
 
             let new_username_address = self.usernames.read(new_username);
+
             assert(
                 new_username_address == contract_address_const::<0>(),
                 UserNameClaimErrors::USERNAME_CLAIMED
             );
 
-            self.usernames.write(existing_username, contract_address_const::<0>());
+            self.usernames.write(old_username, contract_address_const::<0>());
             self.usernames.write(new_username, caller_address);
-            self.address_to_username.write(caller_address, new_username);
+            self.user_to_username.write(caller_address, new_username); // Update the user to username relationship
 
             self.emit(
-                Event::UserNameChanged {
-                    old_username: existing_username,
-                    new_username: new_username,
-                    address: caller_address
-                }
+                Event::UserNameChanged(
+                    UserNameChanged { old_username: old_username, new_username: new_username, address: caller_address }
+                )
             );
         }
 
