@@ -34,7 +34,7 @@ fn test_change_username() {
 
     // Verify initial claim
     let initial_username_address = dispatcher.get_username(initial_username);
-    
+
     //assert_eq!(initial_username_address, simulated_caller_address, "Initial username not claimed properly");
 
     // Claim a new username for changing
@@ -50,5 +50,5 @@ fn test_change_username() {
 
     // Ensure the old username is no longer linked
     let old_username_address = dispatcher.get_username(initial_username);
-    assert_ne!(old_username_address, simulated_caller_address, "Old username still linked");
+    assert_ne!(old_username_address, new_username_address, "Old username still linked");
 }
