@@ -135,7 +135,6 @@ CREATE INDEX nftLikes_nft_key_index ON NFTLikes (nftKey);
 CREATE INDEX nftLikes_liker_index ON NFTLikes (liker);
 
 CREATE TABLE Factions (
-  -- Postgres auto-incrementing primary key
   key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
   icon text NOT NULL,
@@ -149,8 +148,9 @@ CREATE TABLE FactionLinks (
 );
 
 CREATE TABLE FactionChats (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   sender char(64) NOT NULL,
-  faction_key integer NOT NULL,
+  faction_key integer NOT NULL REFERENCES Factions(key),
   message text NOT NULL,
   time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -162,5 +162,5 @@ CREATE TABLE FactionMembers (
 
 CREATE TABLE FactionTemplates (
   template_key integer NOT NULL,
-  faction_key integer NOT NULL
+  faction_key INTEGER NOT NULL REFERENCES Factions(key)
 );

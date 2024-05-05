@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	"github.com/keep-starknet-strange/art-peace/backend/core"
+    "github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 // Middleware functions for routes
