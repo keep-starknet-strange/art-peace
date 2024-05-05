@@ -30,3 +30,10 @@ export const getTodaysStartTime = async () => {
 export const getVotableColors = async () => {
   return await fetchWrapper('votable-colors');
 };
+
+export const voteColorDevnet = async (colorIdx) => {
+  return await fetchWrapper('vote-color-devnet', {
+    method: 'POST',
+    body: JSON.stringify({ colorIndex: colorIdx })
+  });
+};

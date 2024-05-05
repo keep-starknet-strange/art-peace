@@ -57,6 +57,18 @@ fn deploy_contract() -> ContractAddress {
             0x000088,
             0x888800
         ],
+        votable_colors: array![
+            0xDD0000,
+            0x00DD00,
+            0x0000DD,
+            0xDDDD00,
+            0xDD00DD,
+            0x00DDDD,
+            0x880000,
+            0x008800,
+            0x000088,
+            0x888800
+        ],
         end_time: 1000000,
         daily_quests: array![].span(),
         main_quests: array![].span(),
@@ -88,6 +100,18 @@ pub fn deploy_with_quests_contract(
             0xFFFF00,
             0xFF00FF,
             0x00FFFF,
+            0x880000,
+            0x008800,
+            0x000088,
+            0x888800
+        ],
+        votable_colors: array![
+            0xDD0000,
+            0x00DD00,
+            0x0000DD,
+            0xDDDD00,
+            0xDD00DD,
+            0x00DDDD,
             0x880000,
             0x008800,
             0x000088,
