@@ -15,7 +15,7 @@ fn test_claim_username() {
     let contract_address = deploy_contract();
     let dispatcher = IUsernameStoreDispatcher { contract_address };
     dispatcher.claim_username('deal');
-    
+
     let username_address = dispatcher.get_username('deal');
 
     assert!(contract_address != username_address, "Username not claimed");
@@ -37,7 +37,7 @@ fn test_change_username() {
 
     // Change to a new, different username
     dispatcher.change_username(new_username);
-    
+
     // Verify new username association
     let new_username_address = dispatcher.get_username(new_username);
     assert_eq!(new_username_address, initial_username_address, "Username not changed correctly");

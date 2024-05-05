@@ -12,7 +12,9 @@ pub mod UsernameStore {
     #[storage]
     struct Storage {
         usernames: LegacyMap::<felt252, ContractAddress>,
-        user_to_username: LegacyMap::<ContractAddress, felt252> // New mapping to store user to username relationship
+        user_to_username: LegacyMap::<
+            ContractAddress, felt252
+        > // New mapping to store user to username relationship
     }
 
     #[event]
@@ -43,7 +45,9 @@ pub mod UsernameStore {
             let caller_address = get_caller_address();
 
             assert!(
-                self.user_to_username.read(caller_address) == 0, // Check if user already has a username
+                self
+                    .user_to_username
+                    .read(caller_address) == 0, // Check if user already has a username
                 "user_already_has_username"
             );
 
@@ -55,13 +59,16 @@ pub mod UsernameStore {
             );
 
             self.usernames.write(key, caller_address);
-            self.user_to_username.write(caller_address, key); // Record the user to username relationship
+            self
+                .user_to_username
+                .write(caller_address, key); // Record the user to username relationship
 
-            self.emit(
-                Event::UserNameClaimed(
-                    UserNameClaimed { username: key, address: caller_address }
-                )
-            );
+            self
+                .emit(
+                    Event::UserNameClaimed(
+                        UserNameClaimed { username: key, address: caller_address }
+                    )
+                );
         }
 
         fn change_username(ref self: ContractState, new_username: felt252) {
@@ -82,13 +89,20 @@ pub mod UsernameStore {
 
             self.usernames.write(old_username, contract_address_const::<0>());
             self.usernames.write(new_username, caller_address);
-            self.user_to_username.write(caller_address, new_username); // Update the user to username relationship
+            self
+                .user_to_username
+                .write(caller_address, new_username); // Update the user to username relationship
 
-            self.emit(
-                Event::UserNameChanged(
-                    UserNameChanged { old_username: old_username, new_username: new_username, address: caller_address }
-                )
-            );
+            self
+                .emit(
+                    Event::UserNameChanged(
+                        UserNameChanged {
+                            old_username: old_username,
+                            new_username: new_username,
+                            address: caller_address
+                        }
+                    )
+                );
         }
 
         fn get_username(ref self: ContractState, key: felt252) -> ContractAddress {
