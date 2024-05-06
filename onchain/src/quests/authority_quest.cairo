@@ -1,16 +1,16 @@
 #[starknet::contract]
-pub mod UnruggableQuest {
+pub mod AuthorityQuest {
+    use core::traits::TryInto;
     use starknet::{ContractAddress, get_caller_address};
-    use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{
-        IQuest, IUnruggableQuest, IUnruggableMemecoinDispatcher, IUnruggableMemecoinDispatcherTrait,
-        QuestClaimed
-    };
+    use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
+    use art_peace::quests::{IAuthorityQuest, IQuest, QuestClaimed};
 
     #[storage]
     struct Storage {
         art_peace: ContractAddress,
+        authority: ContractAddress,
         reward: u32,
+        claimable: LegacyMap<ContractAddress, bool>,
         claimed: LegacyMap<ContractAddress, bool>,
     }
 
@@ -20,27 +20,36 @@ pub mod UnruggableQuest {
         QuestClaimed: QuestClaimed,
     }
 
+
     #[derive(Drop, Serde)]
-    pub struct UnruggableQuestInitParams {
+    pub struct AuthorityQuestInitParams {
         pub art_peace: ContractAddress,
+        pub authority: ContractAddress,
         pub reward: u32,
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: UnruggableQuestInitParams) {
+    fn constructor(ref self: ContractState, init_params: AuthorityQuestInitParams) {
         self.art_peace.write(init_params.art_peace);
+        self.authority.write(init_params.authority);
         self.reward.write(init_params.reward);
     }
 
     #[abi(embed_v0)]
-    impl UnruggableQuestImpl of IUnruggableQuest<ContractState> {
-        fn is_claimed(self: @ContractState, user: ContractAddress) -> bool {
-            self.claimed.read(user)
+    impl AuthorityQuestImpl of IAuthorityQuest<ContractState> {
+        fn mark_claimable(ref self: ContractState, calldata: Span<felt252>) {
+            assert(get_caller_address() == self.authority.read(), 'Only authority address allowed');
+            let mut i = 0;
+            while i < calldata
+                .len() {
+                    self.claimable.write((*calldata[i]).try_into().unwrap(), true);
+                    i += 1;
+                }
         }
     }
 
     #[abi(embed_v0)]
-    impl UnruggableQuest of IQuest<ContractState> {
+    impl AuthorityQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
             self.reward.read()
         }
@@ -52,20 +61,11 @@ pub mod UnruggableQuest {
                 return false;
             }
 
-            let coin_address_as_felt252: felt252 = *calldata.at(0);
-            let coin = IUnruggableMemecoinDispatcher {
-                contract_address: coin_address_as_felt252.try_into().unwrap()
-            };
-
-            if coin.owner() != user {
-                return false;
+            if self.claimable.read(user) {
+                true
+            } else {
+                false
             }
-
-            if coin.is_launched() != true {
-                return false;
-            }
-
-            true
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
@@ -81,4 +81,3 @@ pub mod UnruggableQuest {
         }
     }
 }
-

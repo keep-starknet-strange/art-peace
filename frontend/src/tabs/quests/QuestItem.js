@@ -15,7 +15,6 @@ const QuestItem = (props) => {
     if (props.args == null || props.args.length == 0) {
       return;
     }
-
     setExpanded(!expanded);
   };
 
@@ -35,15 +34,11 @@ const QuestItem = (props) => {
       }
       // Switch based on props.args.type[inputIndex]
       if (props.args[inputIndex].inputType == 'address') {
-        // Starts w/ 0x and is 65 || 66 characters long
-        if (
-          !input.value.startsWith('0x') ||
-          !(input.value.length == 65 || input.value.length == 66)
-        ) {
-          console.log('Invalid address');
+        // Starts w/ 0x and is 65 || 66 hex characters long
+        let hexPattern = /^0x[0-9a-fA-F]{63,64}$/;
+        if (!hexPattern.test(input.value)) {
           validated = false;
         }
-        // TODO: Check is hex
       } else if (props.args[inputIndex].inputType == 'text') {
         // Any string < 32 characters
         if (input.value.length >= 32) {
@@ -97,36 +92,38 @@ const QuestItem = (props) => {
           </div>
         </div>
       </div>
-      {expanded && (
-        <div className='QuestItem__form'>
-          <div className='QuestItem__form__seperator'></div>
-          {props.args &&
-            props.args.map((arg, idx) => (
-              <div className='QuestItem__form__item' key={idx}>
-                <label className='Text__xsmall QuestItem__form__label'>
-                  {arg.label}:&nbsp;
-                </label>
-                <input
-                  type='text'
-                  className='Text__small Input__primary QuestItem__form__input'
-                  placeholder={arg.placeholder}
-                  onChange={validateInputs}
-                ></input>
-              </div>
-            ))}
-          {props.args && (
-            <button
-              className={
-                'Button__primary QuestItem__form__submit ' +
-                (inputsValidated ? '' : 'Button__disabled')
-              }
-              onClick={validateInputs}
-            >
-              Submit
-            </button>
-          )}
-        </div>
-      )}
+      <div
+        className={
+          'QuestItem__form' + (expanded ? ' QuestItem__form--expanded' : '')
+        }
+      >
+        <div className='QuestItem__form__seperator'></div>
+        {props.args &&
+          props.args.map((arg, idx) => (
+            <div className='QuestItem__form__item' key={idx}>
+              <label className='Text__xsmall QuestItem__form__label'>
+                {arg.label}:&nbsp;
+              </label>
+              <input
+                type='text'
+                className='Text__small Input__primary QuestItem__form__input'
+                placeholder={arg.placeholder}
+                onChange={validateInputs}
+              ></input>
+            </div>
+          ))}
+        {props.args && (
+          <button
+            className={
+              'Button__primary QuestItem__form__submit ' +
+              (inputsValidated ? '' : 'Button__disabled')
+            }
+            onClick={validateInputs}
+          >
+            Submit
+          </button>
+        )}
+      </div>
     </div>
   );
 };

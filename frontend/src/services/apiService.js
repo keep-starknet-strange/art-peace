@@ -2,7 +2,7 @@ import backendConfig from '../configs/backend.config.json';
 export const backendUrlBase =
   'http://' + backendConfig.host + ':' + backendConfig.port;
 
-const fetchWrapper = async (url, options = {}) => {
+export const fetchWrapper = async (url, options = {}) => {
   const controller = new AbortController();
   const signal = controller.signal;
   try {
@@ -29,4 +29,11 @@ export const getTodaysStartTime = async () => {
 
 export const getVotableColors = async () => {
   return await fetchWrapper('votable-colors');
+};
+
+export const voteColorDevnet = async (colorIdx) => {
+  return await fetchWrapper('vote-color-devnet', {
+    method: 'POST',
+    body: JSON.stringify({ colorIndex: colorIdx })
+  });
 };

@@ -10,6 +10,7 @@ type BackendScriptsConfig struct {
 	PlaceExtraPixelsDevnet string `json:"place_extra_pixels_devnet"`
 	AddTemplateDevnet      string `json:"add_template_devnet"`
 	MintNFTDevnet          string `json:"mint_nft_devnet"`
+	VoteColorDevnet        string `json:"vote_color_devnet"`
 }
 
 type WebSocketConfig struct {
@@ -33,6 +34,7 @@ var DefaultBackendConfig = BackendConfig{
 		PlaceExtraPixelsDevnet: "../scripts/place_extra_pixels.sh",
 		AddTemplateDevnet:      "../scripts/add_template.sh",
 		MintNFTDevnet:          "../scripts/mint_nft.sh",
+		VoteColorDevnet:        "../scripts/vote_color.sh",
 	},
 	Production: false,
 	WebSocket: WebSocketConfig{

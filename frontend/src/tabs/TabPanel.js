@@ -1,4 +1,5 @@
 import React from 'react';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './TabPanel.css';
 import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
 import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
@@ -14,15 +15,27 @@ const TabPanel = (props) => {
   // TODO: Speed up timer injection by using a context
   return (
     <div className='TabPanel'>
-      {props.showSelectedPixelPanel && (
+      <CSSTransition
+        in={props.showSelectedPixelPanel}
+        timeout={400}
+        classNames='list-transition'
+        unmountOnExit
+        appear
+      >
         <SelectedPixelPanel
           selectedPositionX={props.selectedPositionX}
           selectedPositionY={props.selectedPositionY}
           clearPixelSelection={props.clearPixelSelection}
           pixelPlacedBy={props.pixelPlacedBy}
         />
-      )}
-      {props.showExtraPixelsPanel && (
+      </CSSTransition>
+      <CSSTransition
+        in={props.showExtraPixelsPanel}
+        timeout={400}
+        classNames='list-transition'
+        unmountOnExit
+        appear
+      >
         <ExtraPixelsPanel
           extraPixelsData={props.extraPixelsData}
           colors={props.colors}
@@ -30,48 +43,72 @@ const TabPanel = (props) => {
           clearExtraPixel={props.clearExtraPixel}
           clearPixelSelection={props.clearPixelSelection}
         />
-      )}
-      {props.activeTab === 'Quests' && (
-        <TimerInjector>
-          {({ timeLeftInDay }) => (
-            <Quests
-              timeLeftInDay={timeLeftInDay}
-              setActiveTab={props.setActiveTab}
-            />
-          )}
-        </TimerInjector>
-      )}
-      {props.activeTab === 'Factions' && (
-        <Factions setActiveTab={props.setActiveTab} />
-      )}
-      {props.activeTab === 'Vote' && (
-        <TimerInjector>
-          {({ timeLeftInDay }) => (
-            <Voting
-              timeLeftInDay={timeLeftInDay}
-              setActiveTab={props.setActiveTab}
-            />
-          )}
-        </TimerInjector>
-      )}
-      {props.activeTab === 'Templates' && (
-        <Templates
-          setTemplateCreationMode={props.setTemplateCreationMode}
-          setTemplateImage={props.setTemplateImage}
-          setTemplateColorIds={props.setTemplateColorIds}
-          setActiveTab={props.setActiveTab}
-        />
-      )}
-      {props.activeTab === 'NFTs' && (
-        <NFTs
-          nftMintingMode={props.nftMintingMode}
-          setNftMintingMode={props.setNftMintingMode}
-          setActiveTab={props.setActiveTab}
-        />
-      )}
-      {props.activeTab === 'Account' && (
-        <Account setActiveTab={props.setActiveTab} />
-      )}
+      </CSSTransition>
+      <SwitchTransition mode='out-in'>
+        <CSSTransition
+          key={props.activeTab}
+          timeout={400}
+          classNames='list-transition'
+          unmountOnExit
+          appear
+        >
+          <div>
+            {props.activeTab === 'Quests' && (
+              <div>
+                <TimerInjector>
+                  {({ timeLeftInDay }) => (
+                    <Quests
+                      timeLeftInDay={timeLeftInDay}
+                      setActiveTab={props.setActiveTab}
+                    />
+                  )}
+                </TimerInjector>
+              </div>
+            )}
+            {props.activeTab === 'Factions' && (
+              <div>
+                <Factions setActiveTab={props.setActiveTab} />
+              </div>
+            )}
+            {props.activeTab === 'Vote' && (
+              <div>
+                <TimerInjector>
+                  {({ timeLeftInDay }) => (
+                    <Voting
+                      timeLeftInDay={timeLeftInDay}
+                      setActiveTab={props.setActiveTab}
+                    />
+                  )}
+                </TimerInjector>
+              </div>
+            )}
+            {props.activeTab === 'Templates' && (
+              <div>
+                <Templates
+                  setTemplateCreationMode={props.setTemplateCreationMode}
+                  setTemplateImage={props.setTemplateImage}
+                  setTemplateColorIds={props.setTemplateColorIds}
+                  setActiveTab={props.setActiveTab}
+                />
+              </div>
+            )}
+            {props.activeTab === 'NFTs' && (
+              <div>
+                <NFTs
+                  nftMintingMode={props.nftMintingMode}
+                  setNftMintingMode={props.setNftMintingMode}
+                  setActiveTab={props.setActiveTab}
+                />
+              </div>
+            )}
+            {props.activeTab === 'Account' && (
+              <div>
+                <Account setActiveTab={props.setActiveTab} />
+              </div>
+            )}
+          </div>
+        </CSSTransition>
+      </SwitchTransition>
     </div>
   );
 };
