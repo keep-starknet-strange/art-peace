@@ -68,8 +68,9 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		if eventKey == pixelPlacedEvent {
 			processPixelPlacedEvent(event, w)
 		} else if eventKey == nftMintedEvent {
-			var tokenID int64
-			processNFTMintedEvent(event, w, tokenID)	
+			var tokenId int64
+			var _ int64 = tokenId
+			processNFTMintedEvent(event, w)
 		} else if eventKey == templateAddedEvent {
 			processTemplateAddedEvent(event, w)
 		} else if eventKey == newDay {
@@ -161,10 +162,14 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	WriteResultJson(w, "Pixel placement indexed successfully")
 }
 
-func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter, tokenID int64) {
+func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 	// TODO: combine high and low token ids
 	tokenIdLowHex := event.Event.Keys[1]
 	// TODO: tokenIdHighHex := event.Event.Keys[2]
+
+	tokenID := event.Event.Keys[1] // Assuming this is the token ID
+	sendNFTWebSocketMessage(tokenID)
+
 
 	positionHex := event.Event.Data[0]
 	widthHex := event.Event.Data[1]
@@ -278,9 +283,8 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter, tokenID in
 
 	// TODO: Ws message to all clients
 
-	WriteResultJson(w, "NFT mint indexed successfully");
+	WriteResultJson(w, "NFT mint indexed successfully")
 
-	sendNFTWebSocketMessage(tokenID) //**
 }
 
 func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
@@ -388,17 +392,15 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 }
 
-func sendNFTWebSocketMessage(tokenID int64) {
-    message := map[string]int64{"token_id": tokenID} // Message to be sent
-    messageBytes, _ := json.Marshal(message) // Convert message to bytes
-    for idx, conn := range core.ArtPeaceBackend.WSConnections {
-        if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
-            fmt.Println(err)
-            conn.Close()
-            core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
-        }
-    }
+func sendNFTWebSocketMessage(tokenID string) {
+	message := map[string]interface{}{
+		"token_id":    tokenID,
+		"messageType": "nftMinted",
+	}
+	sendWebSocketMessage(message)
 }
 
+func sendWebSocketMessage(message map[string]interface{}) {
+	// Generic function to send a message over a WebSocket
+}
 
-    

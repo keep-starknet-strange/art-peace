@@ -51,10 +51,16 @@ function App() {
     }
   }, [readyState]);
 
-  useEffect(() => {
-    if (lastJsonMessage) {
-        colorPixel(lastJsonMessage.position, lastJsonMessage.color);
-    }
+useEffect(() => {
+  if (lastJsonMessage) {
+      // Check the message type and handle accordingly
+      if (lastJsonMessage.messageType === 'colorPixel') {
+          colorPixel(lastJsonMessage.position, lastJsonMessage.color);
+      } else if (lastJsonMessage.messageType === 'nftMinted') {
+        //handle nft minted
+          const tokenID = lastJsonMessage.token_id;
+      }
+  }
 }, [lastJsonMessage]);
 
   // Colors
@@ -193,13 +199,6 @@ function App() {
   // Tabs
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
-
-  useEffect(() => {
-    if (lastJsonMessage) {
-      // TODO: handle other events
-      colorPixel(lastJsonMessage.position, lastJsonMessage.color);
-    }
-  }, [lastJsonMessage]);
 
   return (
     <div className='App'>
