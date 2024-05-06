@@ -3,9 +3,11 @@ use art_peace::quests::authority_quest::AuthorityQuest::AuthorityQuestInitParams
 use art_peace::quests::interfaces::{IAuthorityQuestDispatcher, IAuthorityQuestDispatcherTrait};
 use art_peace::tests::art_peace::deploy_with_quests_contract;
 use art_peace::tests::utils;
-use starknet::{ContractAddress, get_caller_address, get_contract_address, contract_address_const};
+
 use snforge_std as snf;
 use snforge_std::{declare, CheatTarget, ContractClassTrait};
+
+use starknet::{ContractAddress, get_caller_address, get_contract_address, contract_address_const};
 
 fn deploy_authority_quest_main() -> ContractAddress {
     let authority_quest = declare("AuthorityQuest");

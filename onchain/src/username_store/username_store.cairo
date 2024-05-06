@@ -1,12 +1,12 @@
-pub mod UserNameClaimErrors {
+pub(crate) mod UserNameClaimErrors {
     pub const USERNAME_CLAIMED: felt252 = 'username_claimed';
     pub const USERNAME_CANNOT_BE_TRANSFER: felt252 = 'username_cannot_be_transferred';
 }
 
 #[starknet::contract]
 pub mod UsernameStore {
-    use starknet::{get_caller_address, ContractAddress, contract_address_const};
     use art_peace::username_store::IUsernameStore;
+    use starknet::{ContractAddress, contract_address_const, get_caller_address};
     use super::UserNameClaimErrors;
 
     #[storage]
