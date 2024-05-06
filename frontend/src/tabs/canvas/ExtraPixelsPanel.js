@@ -1,6 +1,6 @@
 import React from 'react';
 import './ExtraPixelsPanel.css';
-import { backendUrl } from '../../utils/Consts.js';
+import { fetchWrapper } from '../../services/apiService.js';
 
 const ExtraPixelsPanel = (props) => {
   // TODO: Change on isPortrait
@@ -17,24 +17,18 @@ const ExtraPixelsPanel = (props) => {
     // TODO: clear color selection
   };
 
-  const submit = () => {
-    let placeExtraPixelsEndpoint = backendUrl + '/place-extra-pixels-devnet';
-    fetch(placeExtraPixelsEndpoint, {
+  const submit = async () => {
+    let placeExtraPixelsEndpoint = 'place-extra-pixels-devnet';
+    const response = await fetchWrapper(placeExtraPixelsEndpoint, {
       mode: 'cors',
       method: 'POST',
       body: JSON.stringify({
         extraPixels: props.extraPixelsData
       })
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        console.log(response.result);
-      })
-      .catch((error) => {
-        console.error('Error placing extra pixels: ', error);
-      });
+    });
+    if (response.result) {
+      console.log(response.result);
+    }
     clearAll();
   };
 
