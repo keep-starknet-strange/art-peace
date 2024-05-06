@@ -402,5 +402,6 @@ func sendNFTWebSocketMessage(tokenID string) {
 
 func sendWebSocketMessage(message map[string]interface{}) {
 	// Generic function to send a message over a WebSocket
+	// Implementation logic to send the message...
 }
 
