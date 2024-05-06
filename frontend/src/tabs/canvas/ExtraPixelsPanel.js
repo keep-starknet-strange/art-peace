@@ -1,6 +1,7 @@
 import React from 'react';
 import './ExtraPixelsPanel.css';
 import { backendUrl } from '../../utils/Consts.js';
+import canvasConfig from '../../configs/canvas.config.json';
 
 const ExtraPixelsPanel = (props) => {
   // TODO: Change on isPortrait
@@ -17,29 +18,29 @@ const ExtraPixelsPanel = (props) => {
     // TODO: clear color selection
   };
 
-const submit = () => {
+  const submit = () => {
     let placeExtraPixelsEndpoint = backendUrl + '/place-extra-pixels-devnet';
     fetch(placeExtraPixelsEndpoint, {
-        mode: 'cors',
-        method: 'POST',
-        body: JSON.stringify({
-            extraPixels: props.extraPixelsData.map(pixel => ({
-                position: pixel.x + pixel.y * props.canvasWidth, // Compute position here
-                colorId: pixel.colorId
-            }))
-        })
+      mode: 'cors',
+      method: 'POST',
+      body: JSON.stringify({
+        extraPixels: props.extraPixelsData.map((pixel) => ({
+          position: pixel.x + pixel.y * canvasConfig.canvas.width,
+          colorId: pixel.colorId
+        }))
+      })
     })
-    .then((response) => {
+      .then((response) => {
         return response.json();
-    })
-    .then((response) => {
+      })
+      .then((response) => {
         console.log(response.result);
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         console.error('Error placing the extra pixels: ', error);
-    });
+      });
     clearAll();
-};
+  };
 
   return (
     <div className='ExtraPixelsPanel'>
