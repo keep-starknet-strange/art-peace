@@ -170,7 +170,6 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 	tokenID := event.Event.Keys[1] // Assuming this is the token ID
 	sendNFTWebSocketMessage(tokenID)
 
-
 	positionHex := event.Event.Data[0]
 	widthHex := event.Event.Data[1]
 	heightHex := event.Event.Data[2]
@@ -404,4 +403,3 @@ func sendWebSocketMessage(message map[string]interface{}) {
 	// Generic function to send a message over a WebSocket
 	// Implementation logic to send the message...
 }
-
