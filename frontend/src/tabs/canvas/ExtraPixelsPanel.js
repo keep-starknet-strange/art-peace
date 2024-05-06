@@ -1,5 +1,6 @@
 import React from 'react';
 import './ExtraPixelsPanel.css';
+import canvasConfig from '../../configs/canvas.config.json';
 import { fetchWrapper } from '../../services/apiService.js';
 
 const ExtraPixelsPanel = (props) => {
@@ -23,7 +24,10 @@ const ExtraPixelsPanel = (props) => {
       mode: 'cors',
       method: 'POST',
       body: JSON.stringify({
-        extraPixels: props.extraPixelsData
+        extraPixels: props.extraPixelsData.map((pixel) => ({
+          position: pixel.x + pixel.y * canvasConfig.canvas.width,
+          colorId: pixel.colorId
+        }))
       })
     });
     if (response.result) {
