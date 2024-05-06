@@ -1,16 +1,15 @@
 #[starknet::contract]
-pub mod AuthorityQuest {
-    use core::traits::TryInto;
+pub mod RainbowQuest {
     use starknet::{ContractAddress, get_caller_address};
-    use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
-    use art_peace::quests::{IAuthorityQuest, IQuest, QuestClaimed};
+    use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
+    use art_peace::quests::{IQuest, IRainbowQuest, QuestClaimed};
+
+    const U8_MAX_VALUE: u8 = 255;
 
     #[storage]
     struct Storage {
         art_peace: ContractAddress,
-        authority: ContractAddress,
         reward: u32,
-        claimable: LegacyMap<ContractAddress, bool>,
         claimed: LegacyMap<ContractAddress, bool>,
     }
 
@@ -20,40 +19,27 @@ pub mod AuthorityQuest {
         QuestClaimed: QuestClaimed,
     }
 
-
     #[derive(Drop, Serde)]
-    pub struct AuthorityQuestInitParams {
+    pub struct UnruggableQuestInitParams {
         pub art_peace: ContractAddress,
-        pub authority: ContractAddress,
         pub reward: u32,
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: AuthorityQuestInitParams) {
+    fn constructor(ref self: ContractState, init_params: UnruggableQuestInitParams) {
         self.art_peace.write(init_params.art_peace);
-        self.authority.write(init_params.authority);
         self.reward.write(init_params.reward);
     }
 
     #[abi(embed_v0)]
-    impl AuthorityQuestImpl of IAuthorityQuest<ContractState> {
+    impl RainbowQuestImpl of IRainbowQuest<ContractState> {
         fn is_claimed(self: @ContractState, user: ContractAddress) -> bool {
             self.claimed.read(user)
-        }
-
-        fn mark_claimable(ref self: ContractState, calldata: Span<felt252>) {
-            assert(get_caller_address() == self.authority.read(), 'Only authority address allowed');
-            let mut i = 0;
-            while i < calldata
-                .len() {
-                    self.claimable.write((*calldata[i]).try_into().unwrap(), true);
-                    i += 1;
-                }
         }
     }
 
     #[abi(embed_v0)]
-    impl AuthorityQuest of IQuest<ContractState> {
+    impl RainbowQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
             self.reward.read()
         }
@@ -65,11 +51,17 @@ pub mod AuthorityQuest {
                 return false;
             }
 
-            if self.claimable.read(user) {
-                true
-            } else {
-                false
-            }
+            let art_piece = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
+
+            let mut result = true;
+            let mut i = 0;
+            while i <= U8_MAX_VALUE {
+                if (art_piece.get_user_pixels_placed_color(user, i) == 0) {
+                    result = false;
+                }
+            };
+
+            result
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
@@ -85,3 +77,4 @@ pub mod AuthorityQuest {
         }
     }
 }
+

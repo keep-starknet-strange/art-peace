@@ -8,12 +8,13 @@ mod quests {
     pub mod authority_quest;
     pub mod interfaces;
     pub mod pixel_quest;
+    pub mod rainbow_quest;
     pub mod template_quest;
     pub mod unruggable_quest;
 
     use interfaces::{
-        IQuest, IAuthorityQuest, IPixelQuest, IUnruggableQuest, QuestClaimed, IQuestDispatcher,
-        IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher,
+        IQuest, IAuthorityQuest, IPixelQuest, IRainbowQuest, IUnruggableQuest, QuestClaimed,
+        IQuestDispatcher, IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher,
         IUnruggableMemecoinDispatcherTrait
     };
 }
