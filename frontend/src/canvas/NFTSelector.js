@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './NFTSelector.css';
-import { backendUrl } from '../utils/Consts.js';
+import { fetchWrapper } from '../services/apiService.js';
 
 const NFTSelector = (props) => {
   const [nftSelectionPositionX, setNftSelectionPositionX] = useState(-1);
@@ -159,9 +159,9 @@ const NFTSelector = (props) => {
               width: nftWidth.toString(),
               height: nftHeight.toString()
             })
-          })
-          if(response.result){
-            console.log(response.result)
+          });
+          if (response.result) {
+            console.log(response.result);
           }
           setNftSelectionStarted(false);
           setNftSelectionPositionX(-1);

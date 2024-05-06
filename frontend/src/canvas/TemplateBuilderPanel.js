@@ -24,9 +24,9 @@ const TemplateBuilderPanel = (props) => {
           height: templateHeight.toString(),
           image: props.templateColorIds.toString()
         })
-      })
-      if(!response.result){
-        return
+      });
+      if (!response.result) {
+        return;
       }
 
       let templateHash = response.result;
@@ -42,10 +42,10 @@ const TemplateBuilderPanel = (props) => {
           reward: reward,
           rewardToken: rewardToken
         })
-      })
+      });
 
-      if(!response2.result){
-        return
+      if (!response2.result) {
+        return;
       }
       console.log('Template created:', response.result);
     };

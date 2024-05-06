@@ -110,14 +110,16 @@ function App() {
 
   useEffect(() => {
     const address = 0;
-    async function fetchExtraPixelsEndpoint(){
-      let getExtraPixelsEndpoint = await fetchWrapper(`get-extra-pixels?address=${address}`);
-      if(!getExtraPixelsEndpoint.data) {
-        return
+    async function fetchExtraPixelsEndpoint() {
+      let getExtraPixelsEndpoint = await fetchWrapper(
+        `get-extra-pixels?address=${address}`
+      );
+      if (!getExtraPixelsEndpoint.data) {
+        return;
       }
-      setExtraPixels(getExtraPixelsEndpoint.data)
+      setExtraPixels(getExtraPixelsEndpoint.data);
     }
-    fetchExtraPixelsEndpoint()
+    fetchExtraPixelsEndpoint();
   }, []);
 
   const clearPixelSelection = () => {

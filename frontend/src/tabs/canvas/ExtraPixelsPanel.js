@@ -1,6 +1,5 @@
 import React from 'react';
 import './ExtraPixelsPanel.css';
-import { backendUrl } from '../../utils/Consts.js';
 import { fetchWrapper } from '../../services/apiService.js';
 
 const ExtraPixelsPanel = (props) => {
@@ -20,15 +19,15 @@ const ExtraPixelsPanel = (props) => {
 
   const submit = async () => {
     let placeExtraPixelsEndpoint = 'place-extra-pixels-devnet';
-    const response  = await fetchWrapper(placeExtraPixelsEndpoint, {
+    const response = await fetchWrapper(placeExtraPixelsEndpoint, {
       mode: 'cors',
       method: 'POST',
       body: JSON.stringify({
         extraPixels: props.extraPixelsData
       })
-    })
-    if(response.result){
-      console.log(response.result)
+    });
+    if (response.result) {
+      console.log(response.result);
     }
     clearAll();
   };

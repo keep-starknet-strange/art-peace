@@ -3,7 +3,6 @@ import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
 import NFTSelector from './NFTSelector.js';
-import { backendUrl } from '../utils/Consts.js';
 import canvasConfig from '../configs/canvas.config.json';
 import { fetchWrapper } from '../services/apiService.js';
 
@@ -128,10 +127,14 @@ const CanvasContainer = (props) => {
     props.setPixelSelection(x, y);
 
     const position = y * width + x;
-    const getPixelInfoEndpoint = await fetchWrapper(`get-pixel-info?position=${position.toString()}`);
+    // TODO: Cache pixel info & clear cache on update from websocket
+    // TODO: Dont query if hover select ( until 1s after hover? )
+    const getPixelInfoEndpoint = await fetchWrapper(
+      `get-pixel-info?position=${position.toString()}`
+    );
 
-    if(!getPixelInfoEndpoint.data){
-return
+    if (!getPixelInfoEndpoint.data) {
+      return;
     }
     props.setPixelPlacedBy(getPixelInfoEndpoint.data);
   };
@@ -177,15 +180,15 @@ return
     const colorId = props.selectedColorId;
 
     const response = await fetchWrapper(`place-pixel-devnet`, {
-        mode: 'cors',
-        method: 'POST',
-        body: JSON.stringify({
-           position: position.toString(),
-          color: colorId.toString()
-         })
-       })
-    if(response.result){
-      console.log(response.result)
+      mode: 'cors',
+      method: 'POST',
+      body: JSON.stringify({
+        position: position.toString(),
+        color: colorId.toString()
+      })
+    });
+    if (response.result) {
+      console.log(response.result);
     }
     props.clearPixelSelection();
     props.setSelectedColorId(-1);

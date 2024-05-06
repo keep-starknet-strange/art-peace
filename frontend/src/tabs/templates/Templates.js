@@ -435,8 +435,10 @@ const Templates = (props) => {
     }
 
     let getTemplatesEndpoint = 'get-templates';
-    async function getTemplates(){
-      const response = await fetchWrapper(getTemplatesEndpoint, {mode: 'cors'})
+    async function getTemplates() {
+      const response = await fetchWrapper(getTemplatesEndpoint, {
+        mode: 'cors'
+      });
       if (response.data === null) {
         response.data = [];
       }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './PixelSelector.css';
 import '../utils/Styles.css';
-import { backendUrl } from '../utils/Consts.js';
 import { fetchWrapper } from '../services/apiService.js';
 
 const PixelSelector = (props) => {
@@ -52,16 +51,16 @@ const PixelSelector = (props) => {
 
   useEffect(() => {
     const getLastPlacedPixel = 'get-last-placed-time?address=0';
-    async function fetchGetLastPlacedPixel(){
+    async function fetchGetLastPlacedPixel() {
       const response = await fetchWrapper(getLastPlacedPixel);
-      if(!response.data){
-        return
+      if (!response.data) {
+        return;
       }
       const time = new Date(response.data);
       setLastPlacedTime(time);
     }
 
-    fetchGetLastPlacedPixel()
+    fetchGetLastPlacedPixel();
   }, []);
 
   // Selector mode controls

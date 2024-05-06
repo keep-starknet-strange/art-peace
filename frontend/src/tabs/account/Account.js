@@ -29,7 +29,7 @@ const Account = (props) => {
 
   useEffect(() => {
     const getUsernameUrl = `get-username?address=${address}`;
-    async function fetchUsernameUrl(){
+    async function fetchUsernameUrl() {
       const result = await fetchWrapper(getUsernameUrl);
       if (result.data === null || result.data === '') {
         setUsername('');
@@ -39,7 +39,7 @@ const Account = (props) => {
         setUsernameSaved(true);
       }
     }
-    fetchUsernameUrl()
+    fetchUsernameUrl();
   }, [address]);
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import ExpandableTab from '../ExpandableTab.js';
 import CollectionItem from './CollectionItem.js';
 import NFTItem from './NFTItem.js';
 import { backendUrl } from '../../utils/Consts.js';
+import { fetchWrapper } from '../../services/apiService.js';
 
 const NFTsMainSection = (props) => {
   const imageURL = backendUrl + '/nft-images/';
@@ -81,8 +82,8 @@ const NFTs = (props) => {
     const addr =
       '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0';
     let getMyNFTsEndpoint = `get-my-nfts?address=${addr}`;
-    async function getMyNfts(){
-      const response = await fetch(getMyNFTsEndpoint, { mode: 'cors' })
+    async function getMyNfts() {
+      const response = await fetchWrapper(getMyNFTsEndpoint, { mode: 'cors' });
       if (response.data) {
         setMyNFTs(response.data);
       }
@@ -90,13 +91,13 @@ const NFTs = (props) => {
     getMyNfts();
 
     let getNFTsEndpoint = 'get-nfts';
-    async function getNfts(){
-      const response = await fetch(getNFTsEndpoint, { mode: 'cors' })
+    async function getNfts() {
+      const response = await fetchWrapper(getNFTsEndpoint, { mode: 'cors' });
       if (response.data) {
         setAllNFTs(response.data);
       }
     }
-    getNfts()
+    getNfts();
   }, [setup, setSetup, setMyNFTs, setAllNFTs]);
 
   return (
