@@ -61,6 +61,7 @@ mod tests {
     mod username_store;
     mod template_quest;
     mod authority_quest;
+    pub(crate) mod rainbow_quest;
     pub(crate) mod utils;
 }
 

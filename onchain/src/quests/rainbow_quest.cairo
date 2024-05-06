@@ -4,8 +4,6 @@ pub mod RainbowQuest {
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
     use art_peace::quests::{IQuest, IRainbowQuest, QuestClaimed};
 
-    const U8_MAX_VALUE: u8 = 255;
-
     #[storage]
     struct Storage {
         art_peace: ContractAddress,
@@ -20,13 +18,13 @@ pub mod RainbowQuest {
     }
 
     #[derive(Drop, Serde)]
-    pub struct UnruggableQuestInitParams {
+    pub struct RainbowQuestInitParams {
         pub art_peace: ContractAddress,
         pub reward: u32,
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: UnruggableQuestInitParams) {
+    fn constructor(ref self: ContractState, init_params: RainbowQuestInitParams) {
         self.art_peace.write(init_params.art_peace);
         self.reward.write(init_params.reward);
     }
@@ -55,11 +53,14 @@ pub mod RainbowQuest {
 
             let mut result = true;
             let mut i = 0;
-            while i <= U8_MAX_VALUE {
-                if (art_piece.get_user_pixels_placed_color(user, i) == 0) {
-                    result = false;
-                }
-            };
+            while i < art_piece
+                .get_color_count() {
+                    if (art_piece.get_user_pixels_placed_color(user, i) == 0) {
+                        result = false;
+                    }
+
+                    i += 1;
+                };
 
             result
         }

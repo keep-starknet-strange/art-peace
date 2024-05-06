@@ -242,7 +242,7 @@ fn deploy_unruggable_mock() -> ContractAddress {
     contract_addr
 }
 
-fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
+pub(crate) fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     let last_time = art_peace.get_last_placed_time();
     snf::start_warp(CheatTarget::One(art_peace.contract_address), last_time + TIME_BETWEEN_PIXELS);
 }
