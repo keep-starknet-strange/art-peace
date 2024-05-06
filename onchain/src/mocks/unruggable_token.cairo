@@ -3,7 +3,7 @@
 //
 
 #[starknet::contract]
-pub mod UnruggableMock {
+pub(crate) mod UnruggableMock {
     use art_peace::quests::interfaces::IUnruggableMemecoin;
     use openzeppelin::token::erc20::ERC20Component;
     use starknet::ContractAddress;

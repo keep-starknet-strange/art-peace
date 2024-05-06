@@ -3,7 +3,6 @@ pub mod interfaces;
 use art_peace::ArtPeace;
 use interfaces::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel};
 
-
 mod quests {
     pub mod authority_quest;
     pub mod interfaces;
@@ -57,11 +56,13 @@ mod mocks {
 
 #[cfg(test)]
 mod tests {
-    mod art_peace;
-    mod username_store;
-    mod template_quest;
-    mod nft_quest;
-    mod authority_quest;
+    pub(crate) mod art_peace;
+    pub(crate) mod username_store;
+    pub(crate) mod authority_quest;
+    pub(crate) mod nft_quest;
+    pub(crate) mod pixel_quest;
+    pub(crate) mod template_quest;
+    pub(crate) mod unruggable_quest;
     pub(crate) mod utils;
 }
 

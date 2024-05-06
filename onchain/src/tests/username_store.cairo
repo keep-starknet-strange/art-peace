@@ -1,8 +1,10 @@
-use snforge_std::{declare, ContractClassTrait};
 use art_peace::username_store::interfaces::{
     IUsernameStoreDispatcher, IUsernameStoreDispatcherTrait
 };
-use starknet::{ContractAddress, get_caller_address, get_contract_address, contract_address_const};
+
+use snforge_std::{declare, ContractClassTrait};
+
+use starknet::{ContractAddress, contract_address_const};
 
 fn deploy_contract() -> ContractAddress {
     let contract = declare("UsernameStore");
@@ -20,6 +22,7 @@ fn test_claim_username() {
 
     assert(contract_address != username_address, 'Username not claimed');
 }
+
 #[test]
 fn test_transfer_username() {
     let contract_address = deploy_contract();
