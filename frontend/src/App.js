@@ -40,6 +40,12 @@ function App() {
     shouldReconnect: () => true
   });
 
+  // const App = () => {
+  //   const lastJsonMessage = {
+  //     messageType: 'nftMinted',
+  //     token_id: 'tokenID'
+  //   }};
+
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
       sendJsonMessage({
