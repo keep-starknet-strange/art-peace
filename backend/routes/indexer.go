@@ -68,8 +68,6 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		if eventKey == pixelPlacedEvent {
 			processPixelPlacedEvent(event, w)
 		} else if eventKey == nftMintedEvent {
-			var tokenId int64
-			var _ int64 = tokenId
 			processNFTMintedEvent(event, w)
 		} else if eventKey == templateAddedEvent {
 			processTemplateAddedEvent(event, w)
@@ -166,9 +164,6 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 	// TODO: combine high and low token ids
 	tokenIdLowHex := event.Event.Keys[1]
 	// TODO: tokenIdHighHex := event.Event.Keys[2]
-
-	tokenID := event.Event.Keys[1] // Assuming this is the token ID
-	sendNFTWebSocketMessage(tokenID)
 
 	positionHex := event.Event.Data[0]
 	widthHex := event.Event.Data[1]
@@ -284,6 +279,10 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	WriteResultJson(w, "NFT mint indexed successfully")
 
+	
+	sendNFTWebSocketMessage(tokenIdLowHex)
+
+
 }
 
 func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
@@ -398,6 +397,10 @@ func sendNFTWebSocketMessage(tokenID string) {
 	}
 	sendWebSocketMessage(message)
 }
+
+// func sendColorPixelWebSocketMessage(pixelInfo map[string]interface{}) {
+//     // New function for sending color pixel WebSocket messages
+// }
 
 func sendWebSocketMessage(message map[string]interface{}) {
 	// Generic function to send a message over a WebSocket
