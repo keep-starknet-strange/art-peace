@@ -1,0 +1,76 @@
+use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
+use art_peace::quests::nft_quest::NFTMintQuest::NFTMintQuestInitParams;
+use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
+use art_peace::nfts::interfaces::{
+    NFTMintParams, IArtPeaceNFTMinterDispatcher, IArtPeaceNFTMinterDispatcherTrait
+};
+use art_peace::tests::art_peace::deploy_with_quests_contract;
+use art_peace::tests::utils;
+use starknet::{ContractAddress, get_caller_address, get_contract_address, contract_address_const};
+use snforge_std as snf;
+use snforge_std::{declare, CheatTarget, ContractClassTrait};
+
+const reward_amt: u32 = 18;
+
+fn deploy_nft_quest() -> ContractAddress {
+    let contract = declare("NFTMintQuest");
+
+    let mut nft_quest_calldata = array![];
+    NFTMintQuestInitParams {
+        canvas_nft: utils::NFT_CONTRACT(),
+        art_peace: utils::ART_PEACE_CONTRACT(),
+        reward: reward_amt,
+    }
+        .serialize(ref nft_quest_calldata);
+
+    contract.deploy(@nft_quest_calldata).unwrap()
+}
+
+
+#[test]
+fn deploy_nft_quest_test() {
+    let nft_quest = deploy_nft_quest();
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(array![].span(), array![nft_quest].span())
+    };
+
+    let zero_address = contract_address_const::<0>();
+
+    assert!(
+        art_peace.get_days_quests(0) == array![zero_address, zero_address, zero_address].span(),
+        "Daily quests were not set correctly"
+    );
+    assert!(
+        art_peace.get_main_quests() == array![nft_quest].span(),
+        "Main quests were not set correctly"
+    );
+}
+
+
+#[test]
+fn nft_quest_test() {
+    let nft_mint_quest = deploy_nft_quest();
+
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(
+            array![].span(), array![nft_mint_quest].span()
+        )
+    };
+    let art_peace_nft_minter = IArtPeaceNFTMinterDispatcher {
+        contract_address: art_peace.contract_address
+    };
+    art_peace_nft_minter.add_nft_contract(utils::NFT_CONTRACT());
+
+    let calldata: Array<felt252> = array![0];
+
+    snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
+    let mint_params = NFTMintParams { height: 2, width: 2, position: 10 };
+    art_peace_nft_minter.mint_nft(mint_params);
+    art_peace.claim_main_quest(0, calldata.span());
+
+    assert!(
+        art_peace.get_extra_pixels_count() == reward_amt,
+        "Extra pixels are wrong after main quest claim"
+    );
+    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
+}
