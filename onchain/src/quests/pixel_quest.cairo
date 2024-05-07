@@ -81,23 +81,23 @@ pub mod PixelQuest {
                 return false;
             }
 
+            // Daily Pixel Quest
             if self.is_daily.read() {
                 let day = art_peace.get_day();
                 if day != self.claim_day.read() {
                     return false;
                 }
 
-                // Daily Pixel Quest
                 if self.is_color.read() {
                     let placement_count = art_peace
                         .get_user_pixels_placed_day_color(user, day, self.color.read());
                     return placement_count >= self.pixels_needed.read();
-                } else {
+                } else { // Daily Pixel Quest
                     let placement_count = art_peace.get_user_pixels_placed_day(user, day);
                     return placement_count >= self.pixels_needed.read();
                 }
-            } else {
-                // Main Pixel Quest
+            } // Main Pixel Quest
+            else {
                 if self.is_color.read() {
                     let placement_count = art_peace
                         .get_user_pixels_placed_color(user, self.color.read());
@@ -116,7 +116,7 @@ pub mod PixelQuest {
             );
 
             assert(self.is_claimable(user, calldata), 'Quest not claimable');
-
+            // This should be applied only for main quest, not dailys, otherwise dailys become main
             self.claimed.write(user, true);
             let reward = self.reward.read();
 
