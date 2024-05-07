@@ -55,6 +55,16 @@ export const config = {
         includeTransaction: false,
         includeReceipt: false,
       },
+      {
+        // NFT Transfer Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: [
+          "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9",
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false,
+      },
     ],
   },
   sinkType: "webhook",
@@ -63,11 +73,11 @@ export const config = {
   },
 };
 
-//This transformation filters events from the NFT Mint event
+//This transformation filters events from the NFT Transfer event
 export default function transform({ events }) {
   return events.flatMap(({ event }) => {
-    // Check if event is a NFT Mint event and a new mint
-    if (isNFTMintedEvent(event) && isANewMint(event)) {
+    // Check if event is a NFT Transfer event and a new mint
+    if (isNFTTransferEvent(event) && isANewMint(event)) {
       const [, , to, token_id] = event.topics;
 
       return {
@@ -77,8 +87,8 @@ export default function transform({ events }) {
           owner: to,
         },
       };
-      // Check if event is a NFT Mint event and not a new mint
-    } else if (isNFTMintedEvent(event) && !isANewMint(event)) {
+      // Check if event is a NFT Transfer event and not a new mint
+    } else if (isNFTTransferEvent(event) && !isANewMint(event)) {
       const [_, , to, token_id] = event.topics;
 
       // Update the new owner
@@ -97,10 +107,10 @@ export default function transform({ events }) {
 }
 
 // Check is the event signature matches the NFT Mint signature
-const isNFTMintedEvent = (event) => {
+const isNFTTransferEvent = (event) => {
   return (
     event.topics[0] ===
-    "0x30826E0CD9A517F76E857E3F3100FE5B9098E9F8216D3DB283FB4C9A641232F"
+    "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"
   );
 };
 
