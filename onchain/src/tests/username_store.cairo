@@ -1,6 +1,7 @@
 use art_peace::username_store::interfaces::{
     IUsernameStoreDispatcher, IUsernameStoreDispatcherTrait
 };
+
 use art_peace::tests::utils;
 use starknet::{ContractAddress, get_caller_address, contract_address_const};
 use snforge_std as snf;

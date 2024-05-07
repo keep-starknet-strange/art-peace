@@ -17,6 +17,8 @@ import (
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
+// TODO: Remove error json messages and just log errors on indexing
+
 func InitIndexerRoutes() {
 	http.HandleFunc("/consume-indexer-msg", consumeIndexerMsg)
 }
@@ -100,7 +102,7 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// Perform comparison with maxPosition
 	if position < 0 || position >= maxPosition {
-		http.Error(w, "Position out of range", http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Position value exceeds canvas dimensions")
 		return
 	}
 
@@ -117,7 +119,7 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	//validate color
 	colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
 	if int(color) < 0 || int(color) >= colorsLength {
-		http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Color value exceeds color palette")
 		return
 	}
 
