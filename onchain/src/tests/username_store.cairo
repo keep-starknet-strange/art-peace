@@ -1,8 +1,10 @@
-use snforge_std::{declare, ContractClassTrait};
 use art_peace::username_store::interfaces::{
     IUsernameStoreDispatcher, IUsernameStoreDispatcherTrait
 };
+use art_peace::tests::utils;
 use starknet::{ContractAddress, get_caller_address, contract_address_const};
+use snforge_std as snf;
+use snforge_std::{declare, CheatTarget, ContractClassTrait};
 
 fn deploy_contract() -> ContractAddress {
     let contract = declare("UsernameStore");
@@ -14,11 +16,15 @@ fn deploy_contract() -> ContractAddress {
 fn test_claim_username() {
     let contract_address = deploy_contract();
     let dispatcher = IUsernameStoreDispatcher { contract_address };
+
+    snf::start_prank(CheatTarget::One(contract_address), utils::PLAYER1());
     dispatcher.claim_username('deal');
 
-    let username_address = dispatcher.get_username('deal');
-
-    assert!(contract_address != username_address, "Username not claimed");
+    let username_address = dispatcher.get_username_address('deal');
+    assert!(username_address == utils::PLAYER1(), "User didn't claim name");
+    let username = dispatcher.get_username(utils::PLAYER1());
+    assert!(username == 'deal', "Username not claimed");
+    snf::stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
@@ -26,23 +32,23 @@ fn test_change_username() {
     let contract_address = deploy_contract();
     let dispatcher = IUsernameStoreDispatcher { contract_address };
 
-    let initial_username = 'devsweet';
-    dispatcher.claim_username(initial_username);
+    snf::start_prank(CheatTarget::One(contract_address), utils::PLAYER1());
 
-    //get user address
-    let initial_username_address = dispatcher.get_username(initial_username);
+    // Set initial username
+    let username = 'devsweet';
+    dispatcher.claim_username(username);
+    let initial_username = dispatcher.get_username(utils::PLAYER1());
+    assert!(initial_username == username, "Initial username not set");
 
-    //a new username for changing
+    // Change username
     let new_username = 'devcool';
-
-    // Change to a new, different username
     dispatcher.change_username(new_username);
 
-    // Verify new username association
-    let new_username_address = dispatcher.get_username(new_username);
-    assert_eq!(new_username_address, initial_username_address, "Username not changed correctly");
+    let new_username_address = dispatcher.get_username_address(new_username);
+    assert!(new_username_address == utils::PLAYER1(), "New username not linked");
+    let new_username = dispatcher.get_username(utils::PLAYER1());
+    assert!(new_username == new_username, "New username not set");
 
-    // Ensure the old username is no longer linked
-    let old_username_address = dispatcher.get_username(initial_username);
-    assert_ne!(old_username_address, new_username_address, "Old username still linked");
+    let old_username_address = dispatcher.get_username_address(initial_username);
+    assert!(old_username_address == contract_address_const::<0>(), "Old username not unlinked");
 }
