@@ -4,6 +4,7 @@ import ExpandableTab from '../ExpandableTab.js';
 import CollectionItem from './CollectionItem.js';
 import NFTItem from './NFTItem.js';
 import { backendUrl } from '../../utils/Consts.js';
+import { fetchWrapper } from '../../services/apiService.js';
 
 const NFTsMainSection = (props) => {
   const imageURL = backendUrl + '/nft-images/';
@@ -80,33 +81,23 @@ const NFTs = (props) => {
     // TODO
     const addr =
       '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0';
-    let getMyNFTsEndpoint = backendUrl + '/get-my-nfts?address=' + addr;
-    fetch(getMyNFTsEndpoint, { mode: 'cors' })
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        if (response.data) {
-          setMyNFTs(response.data);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    let getMyNFTsEndpoint = `get-my-nfts?address=${addr}`;
+    async function getMyNfts() {
+      const response = await fetchWrapper(getMyNFTsEndpoint, { mode: 'cors' });
+      if (response.data) {
+        setMyNFTs(response.data);
+      }
+    }
+    getMyNfts();
 
-    let getNFTsEndpoint = backendUrl + '/get-nfts';
-    fetch(getNFTsEndpoint, { mode: 'cors' })
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        if (response.data) {
-          setAllNFTs(response.data);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    let getNFTsEndpoint = 'get-nfts';
+    async function getNfts() {
+      const response = await fetchWrapper(getNFTsEndpoint, { mode: 'cors' });
+      if (response.data) {
+        setAllNFTs(response.data);
+      }
+    }
+    getNfts();
   }, [setup, setSetup, setMyNFTs, setAllNFTs]);
 
   return (
