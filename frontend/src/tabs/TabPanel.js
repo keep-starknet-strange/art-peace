@@ -42,6 +42,8 @@ const TabPanel = (props) => {
           clearExtraPixels={props.clearExtraPixels}
           clearExtraPixel={props.clearExtraPixel}
           clearPixelSelection={props.clearPixelSelection}
+          isEraserMode={props.isEraserMode}
+          setIsEraserMode={props.setIsEraserMode}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>

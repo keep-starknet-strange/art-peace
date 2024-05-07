@@ -23,16 +23,25 @@ const CanvasContainer = (props) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartY, setDragStartY] = useState(0);
+
+  const [isErasing, setIsErasing] = useState(false);
+
   const handlePointerDown = (e) => {
-    setIsDragging(true);
-    setDragStartX(e.clientX);
-    setDragStartY(e.clientY);
+    if (!props.isEraserMode) {
+      setIsDragging(true);
+      setDragStartX(e.clientX);
+      setDragStartY(e.clientY);
+    } else {
+      setIsErasing(true);
+    }
   };
 
   const handlePointerUp = () => {
+    setIsErasing(false);
     setIsDragging(false);
     setDragStartX(0);
     setDragStartY(0);
+    
   };
 
   const handlePointerMove = (e) => {
@@ -41,6 +50,9 @@ const CanvasContainer = (props) => {
       setCanvasY(canvasY + e.clientY - dragStartY);
       setDragStartX(e.clientX);
       setDragStartY(e.clientY);
+    }
+    if (isErasing) {
+      pixelClicked(e)
     }
   };
 
@@ -158,12 +170,25 @@ const CanvasContainer = (props) => {
       return;
     }
 
+    // Erase Extra Pixel
+    if (props.isEraserMode) {
+      const pixel = props.extraPixelsData.filter((pixelData) => {
+        return pixelData.x === x && pixelData.y === y
+      })
+      const pixelIndex = props.extraPixelsData.indexOf(pixel[0])
+      if (pixelIndex !== -1) props.clearExtraPixel(pixelIndex);
+      // Toggle Eraser mode  if there are no Extra Pixels placed
+      if (!props.extraPixelsData.length) props.setIsEraserMode(!props.isEraserMode);
+      return;
+    }
+
     pixelSelect(x, y);
 
     // Color Extra Pixel
     if (props.selectedColorId === -1) {
       return;
     }
+
     if (props.extraPixels > 0) {
       if (props.extraPixelsUsed < props.extraPixels) {
         props.addExtraPixel(x, y);

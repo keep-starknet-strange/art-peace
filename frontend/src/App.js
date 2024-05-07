@@ -104,9 +104,11 @@ function App() {
   const [selectedPositionY, setSelectedPositionY] = useState(null);
   const [pixelPlacedBy, setPixelPlacedBy] = useState('');
 
-  const [extraPixels, setExtraPixels] = useState(0);
+  const [extraPixels] = useState(0);
   const [extraPixelsUsed, setExtraPixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
+
+  const [isEraserMode, setIsEraserMode] = React.useState(false);
 
   useEffect(() => {
     const address = 0;
@@ -202,6 +204,7 @@ function App() {
         canvasRef={canvasRef}
         extraPixelsCanvasRef={extraPixelsCanvasRef}
         extraPixels={extraPixels}
+        extraPixelsData={extraPixelsData}
         selectedColorId={selectedColorId}
         setSelectedColorId={setSelectedColorId}
         pixelSelectedMode={pixelSelectedMode}
@@ -214,6 +217,9 @@ function App() {
         addExtraPixel={addExtraPixel}
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
+        isEraserMode={isEraserMode}
+        setIsEraserMode={setIsEraserMode}
+        clearExtraPixel={clearExtraPixel}
       />
       <img src={logo} alt='logo' className='App__logo--mobile' />
       <div
@@ -247,6 +253,8 @@ function App() {
           extraPixelsData={extraPixelsData}
           clearExtraPixels={clearExtraPixels}
           clearExtraPixel={clearExtraPixel}
+          isEraserMode={isEraserMode}
+          setIsEraserMode={setIsEraserMode}
         />
       </div>
       <div className='App__footer'>
