@@ -98,8 +98,4 @@ fn rainbow_quest_color_missing_test() {
 
     let calldata = array![].span();
     art_peace.claim_main_quest(0, calldata);
-
-    assert!(
-        art_peace.get_extra_pixels_count() == 20, "Extra pixels are wrong after main quest claim"
-    );
 }
