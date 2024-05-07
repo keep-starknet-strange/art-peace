@@ -58,11 +58,6 @@ fn hodl_quest_test() {
 
     let calldata: Array<felt252> = array![0];
 
-    let calldata_position: Array<u128> = array![2400];
-    let calldata_color: Array<u8> = array![4];
-
-    art_peace.place_extra_pixels(calldata_position, calldata_color);
-
     art_peace.claim_main_quest(0, calldata.span());
 
     assert!(
