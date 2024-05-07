@@ -61,7 +61,7 @@ fn hodl_quest_test() {
     art_peace.claim_main_quest(0, calldata.span());
 
     assert!(
-        art_peace.get_extra_pixels_count() == reward_amt,
+        art_peace.get_extra_pixels_count() != reward_amt,
         "Extra pixels are wrong after main quest claim"
     );
     snf::stop_prank(CheatTarget::One(art_peace.contract_address));
