@@ -16,15 +16,26 @@ const Account = (props) => {
   const [accountRank, setAccountRank] = useState('');
 
   const [usernameSaved, setUsernameSaved] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
     setUsername(username);
     setUsernameSaved(true);
+    setIsEditing(false);
+    setUsernameBeforeEdit('');
   };
 
   const editUsername = () => {
-    setUsernameSaved(false);
+    setIsEditing(true);
+    setUsernameBeforeEdit(username);
+  };
+
+  const handleCancelEdit = () => {
+    setUsername(usernameBeforeEdit);
+    setIsEditing(false);
+    setUsernameBeforeEdit('');
   };
 
   useEffect(() => {
@@ -81,7 +92,7 @@ const Account = (props) => {
       <p className='Text__small Account__item Account__address'>
         Address: {address}
       </p>
-      {usernameSaved ? (
+      {usernameSaved && !isEditing ? (
         <div className='Text__small Account__special Account__username'>
           <p style={{ margin: 0, padding: 0 }}>Username: {username}</p>
           <div
@@ -105,12 +116,22 @@ const Account = (props) => {
               required
               onChange={(e) => setUsername(e.target.value)}
             />
-            <button
-              className='Text__small Button__primary Account__username__button'
-              type='submit'
-            >
-              submit
-            </button>
+            <div>
+              {isEditing && (
+                <button
+                  className='Text__small Button__primary Account__username__button'
+                  onClick={handleCancelEdit}
+                >
+                  cancel
+                </button>
+              )}
+              <button
+                className='Text__small Button__primary Account__username__button'
+                type='submit'
+              >
+                submit
+              </button>
+            </div>
           </form>
         </div>
       )}
