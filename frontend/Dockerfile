@@ -6,7 +6,8 @@ WORKDIR /app
 COPY ./frontend/package.json ./frontend/package-lock.json ./
 RUN npm install
 COPY ./frontend ./
-COPY ./configs/docker-backend.config.json ./src/backend.config.json
+COPY ./configs/canvas.config.json ./src/configs/canvas.config.json
+COPY ./configs/docker-backend.config.json ./src/configs/backend.config.json
 
 SHELL ["/bin/bash", "-c"]
 # Clear the entrypoint

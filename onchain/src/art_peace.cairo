@@ -30,6 +30,13 @@ pub mod ArtPeace {
         color_count: u8,
         // Map: color index -> color value in RGBA
         color_palette: LegacyMap::<u8, u32>,
+        votable_colors_count: u8,
+        // Map: (votable color index, day index) -> color value in RGBA
+        votable_colors: LegacyMap::<(u8, u32), u32>,
+        // Map: (votable color index, day index) -> amount of votes
+        color_votes: LegacyMap::<(u8, u32), u32>,
+        // Map: (user's address, day_index) -> color index
+        user_votes: LegacyMap::<(ContractAddress, u32), u8>,
         creation_time: u64,
         end_time: u64,
         day_index: u32,
@@ -51,6 +58,7 @@ pub mod ArtPeace {
     enum Event {
         Newday: NewDay,
         PixelPlaced: PixelPlaced,
+        VoteColor: VoteColor,
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
     }
@@ -59,6 +67,7 @@ pub mod ArtPeace {
     struct NewDay {
         #[key]
         day_index: u32,
+        start_time: u64,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -72,17 +81,26 @@ pub mod ArtPeace {
         color: u8,
     }
 
-    // TODO: Span or Array for each?
+    #[derive(Drop, starknet::Event)]
+    struct VoteColor {
+        #[key]
+        voted_by: ContractAddress,
+        #[key]
+        day: u32,
+        #[key]
+        color: u8,
+    }
+
     #[derive(Drop, Serde)]
     pub struct InitParams {
         pub canvas_width: u128,
         pub canvas_height: u128,
         pub time_between_pixels: u64,
         pub color_palette: Array<u32>,
+        pub votable_colors: Array<u32>,
         pub end_time: u64,
         pub daily_quests: Span<ContractAddress>,
         pub main_quests: Span<ContractAddress>,
-        pub nft_contract: ContractAddress,
     }
 
     const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
@@ -103,10 +121,25 @@ pub mod ArtPeace {
             i += 1;
         };
 
+        let votable_colors_count: u8 = init_params.votable_colors.len().try_into().unwrap();
+        self.votable_colors_count.write(votable_colors_count);
+        let mut i: u8 = 0;
+        while i < votable_colors_count {
+            self.votable_colors.write((i, 0), *init_params.votable_colors.at(i.into()));
+            i += 1;
+        };
+
         self.creation_time.write(starknet::get_block_timestamp());
         self.start_day_time.write(starknet::get_block_timestamp());
         self.end_time.write(init_params.end_time);
         self.day_index.write(0);
+        self.emit(NewDay { day_index: 0, start_time: starknet::get_block_timestamp() });
+
+        // TODO: Dev only - remove
+        let test_address = starknet::contract_address_const::<
+            0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
+        >();
+        self.extra_pixels.write(test_address, 1000);
 
         // TODO: To config
         let daily_quests_count = self.get_daily_quest_count();
@@ -127,8 +160,6 @@ pub mod ArtPeace {
                 self.main_quests.write(i, *init_params.main_quests.at(i));
                 i += 1;
             };
-
-        self.nft_contract.write(init_params.nft_contract);
     }
 
     #[abi(embed_v0)]
@@ -165,13 +196,16 @@ pub mod ArtPeace {
 
         fn place_pixel(ref self: ContractState, pos: u128, color: u8) {
             let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), '');
-            assert(pos < self.total_pixels.read(), '');
-            assert(color < self.color_count.read(), '');
+            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
+            assert(pos < self.total_pixels.read(), 'Position out of bounds');
+            assert(color < self.color_count.read(), 'Color out of bounds');
             // TODO: Use sender not caller?
             let caller = starknet::get_caller_address();
             // TODO: Only if the user has placed a pixel before?
-            assert(now - self.last_placed_time.read(caller) >= self.time_between_pixels.read(), '');
+            assert(
+                now - self.last_placed_time.read(caller) >= self.time_between_pixels.read(),
+                'Pixel not available'
+            );
             let pixel = Pixel { color, owner: caller };
             self.canvas.write(pos, pixel);
             self.last_placed_time.write(caller, now);
@@ -191,12 +225,12 @@ pub mod ArtPeace {
 
         fn place_extra_pixels(ref self: ContractState, positions: Array<u128>, colors: Array<u8>) {
             let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), '');
+            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             let pixel_count = positions.len();
-            assert(pixel_count == colors.len(), '');
+            assert(pixel_count == colors.len(), 'Positions & Colors must match');
             let caller = starknet::get_caller_address();
             let extra_pixels = self.extra_pixels.read(caller);
-            assert(pixel_count <= extra_pixels, '');
+            assert(pixel_count <= extra_pixels, 'Not enough extra pixels');
             let color_palette_count = self.color_count.read();
             let total_pixels = self.total_pixels.read();
             let day = self.day_index.read();
@@ -204,8 +238,8 @@ pub mod ArtPeace {
             while i < pixel_count {
                 let pos = *positions.at(i);
                 let color = *colors.at(i);
-                assert(pos < total_pixels, '');
-                assert(color < color_palette_count, '');
+                assert(pos < total_pixels, 'Position out of bounds');
+                assert(color < color_palette_count, 'Color out of bounds');
                 let pixel = Pixel { color, owner: caller };
                 self.canvas.write(pos, pixel);
                 self
@@ -214,6 +248,7 @@ pub mod ArtPeace {
                         (day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1
                     );
                 i += 1;
+                self.emit(PixelPlaced { placed_by: caller, pos, day, color });
             };
             self.extra_pixels.write(caller, extra_pixels - pixel_count);
         //TODO: to extra pixel self.emit(ExtraPixelsPlaced { placed_by: caller, positions, day, colors });
@@ -255,6 +290,38 @@ pub mod ArtPeace {
             colors
         }
 
+        fn vote_color(ref self: ContractState, color: u8) {
+            let now = starknet::get_block_timestamp();
+            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
+            assert(color != 0, 'Color 0 indicates no vote');
+            assert(color <= self.votable_colors_count.read(), 'Color out of bounds');
+            let caller = starknet::get_caller_address();
+            let day = self.day_index.read();
+            let users_vote = self.user_votes.read((caller, day));
+            if users_vote != color {
+                if users_vote != 0 {
+                    let old_vote = self.color_votes.read((users_vote, day));
+                    self.color_votes.write((users_vote, day), old_vote - 1);
+                }
+                let new_vote = self.color_votes.read((color, day));
+                self.color_votes.write((color, day), new_vote + 1);
+                self.user_votes.write((caller, day), color);
+                self.emit(VoteColor { voted_by: caller, day, color });
+            }
+        }
+
+        fn get_color_votes(self: @ContractState, color: u8) -> u32 {
+            let day = self.day_index.read();
+            self.color_votes.read((color, day))
+        }
+
+        fn finalize_color_votes(
+            ref self: ContractState
+        ) { // TODO: Make the function internal only & call in the end of the day
+        // TODO: Implement with : adding top X colors to the palette
+        // TODO: Implement with : setting up the next day's votable colors
+        }
+
         fn get_creation_time(self: @ContractState) -> u64 {
             self.creation_time.read()
         }
@@ -275,7 +342,7 @@ pub mod ArtPeace {
 
             self.day_index.write(self.day_index.read() + 1);
             self.start_day_time.write(block_timestamp);
-            self.emit(NewDay { day_index: self.day_index.read() });
+            self.emit(NewDay { day_index: self.day_index.read(), start_time: block_timestamp });
         }
 
         fn get_daily_quest_count(self: @ContractState) -> core::zeroable::NonZero::<u32> {
@@ -353,7 +420,7 @@ pub mod ArtPeace {
 
         fn claim_today_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
             let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), '');
+            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             let quest = self.daily_quests.read((self.day_index.read(), quest_id));
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
@@ -369,7 +436,7 @@ pub mod ArtPeace {
 
         fn claim_main_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
             let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), '');
+            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             let quest = self.main_quests.read(quest_id);
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
@@ -440,6 +507,14 @@ pub mod ArtPeace {
 
     #[abi(embed_v0)]
     impl ArtPeaceNFTMinter of IArtPeaceNFTMinter<ContractState> {
+        fn add_nft_contract(ref self: ContractState, nft_contract: ContractAddress) {
+            let zero_address = starknet::contract_address_const::<0>();
+            assert(self.nft_contract.read() == zero_address, 'NFT contract already set');
+            self.nft_contract.write(nft_contract);
+            ICanvasNFTAdditionalDispatcher { contract_address: nft_contract }
+                .set_canvas_contract(starknet::get_contract_address());
+        }
+
         fn mint_nft(self: @ContractState, mint_params: NFTMintParams) {
             let metadata = NFTMetadata {
                 position: mint_params.position,
@@ -459,8 +534,8 @@ pub mod ArtPeace {
     impl ArtPeaceTemplateVerifier of ITemplateVerifier<ContractState> {
         // TODO: Check template function
         fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
-            assert(template_id < self.get_templates_count(), '');
-            assert(!self.is_template_complete(template_id), '');
+            assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
+            assert(!self.is_template_complete(template_id), 'Template already completed');
             // TODO: ensure template_image matches the template size & hash
             let template_metadata: TemplateMetadata = self.get_template(template_id);
             let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata

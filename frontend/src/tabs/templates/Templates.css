@@ -1,0 +1,88 @@
+.Templates__main {
+  position: relative;
+  width: min(100%, 40rem);
+
+  transition: all 0.5s;
+}
+
+.Templates__container {
+  height: 55vh;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+
+.Templates__header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.Templates__heading {
+  font-size: 1.4rem;
+  text-align: center;
+  padding: 0;
+  padding-bottom: 0.5rem;
+  margin: 0;
+  text-decoration: underline;
+}
+
+.Templates__subheading {
+  font-size: 1.4rem;
+  text-align: center;
+  padding: 1rem 0;
+  margin: 0;
+  text-decoration: underline;
+}
+
+.Templates__create {
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  text-align: center;
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 0.1rem solid rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.Templates__create:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+}
+
+.Templates__create:active {
+  transform: scale(1) translateY(2px);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+}
+
+.Templates__all {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  border-left: 4px solid rgba(0, 0, 0, 0.3);
+}
+
+.Templates__all__grid {
+  margin-top: 0.5rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30rem, 1fr));
+  grid-template-rows: min-content;
+  height: 55vh;
+  overflow: scroll;
+}
+
+.Templates__all__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+
+  height: 13rem;
+}

@@ -1,0 +1,108 @@
+.EventItem {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  padding: 0.4rem;
+  margin: 0.5rem;
+  border-radius: 0.3rem;
+  box-shadow: 0 0.3rem 0.7rem rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.EventItem:hover {
+  transform: translateY(-0.3rem);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.7);
+}
+
+.EventItem:active {
+  transform: translateY(0);
+  box-shadow: 0 0.3rem 0.7rem rgba(0, 0, 0, 0.5);
+}
+
+.EventItem__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+  padding: 0;
+  display: block;
+  border: 2px solid rgba(0, 0, 150, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.EventItem__desc {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 0 0.5rem;
+  margin: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  width: 95%;
+}
+
+/* TODO: Fix ellipsis */
+.EventItem__name {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 0.3rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-right: 0.5rem;
+  padding: 0 0.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.EventItem__users {
+  min-width: 3rem;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 0.3rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.EventItem__time {
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 0.3rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  padding: 0 0.3rem;
+}
+
+/* TODO: icon */
+
+.EventItem__info {
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.EventItem__info__item {
+  flex-grow: 1;
+  text-align: center;
+  border: 2px solid rgba(0, 0, 150, 0.1);
+  padding: 0.5rem 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Style children of .EventItem__info__item */
+.EventItem__info__item > * {
+  margin: 0;
+  padding: 0.3rem;
+}
+
+/* Underline the first child of .EventItem__info__item */
+.EventItem__info__item > *:first-child {
+  text-decoration: underline;
+}

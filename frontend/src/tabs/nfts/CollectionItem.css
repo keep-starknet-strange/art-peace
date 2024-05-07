@@ -1,0 +1,57 @@
+.CollectionItem {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  padding: 0;
+  margin: 0.5rem 1.4rem 0.5rem 0.5rem;
+  border-radius: 0.3rem;
+  box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
+}
+
+.CollectionItem__imagecontainer {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 20rem;
+  border: 2px solid rgba(0, 0, 150, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.CollectionItem__image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
+  image-rendering: pixelated;
+}
+
+.CollectionItem__info {
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+}
+
+.CollectionItem__info__item {
+  flex-grow: 1;
+  text-align: center;
+  border: 2px solid rgba(0, 0, 150, 0.1);
+  padding: 0.5rem 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Style children of .CollectionItem__info__item */
+.CollectionItem__info__item > * {
+  margin: 0;
+  padding: 0.3rem;
+}
+
+/* Underline the first child of .CollectionItem__info__item */
+.CollectionItem__info__item > *:first-child {
+  text-decoration: underline;
+}

@@ -1,6 +1,6 @@
 .BasicTab {
   position: relative;
-  padding: 1.2rem 0.5rem 0.5rem 0.5rem;
+  padding: 1rem 0.5rem 0.5rem 0.5rem;
   width: 100%;
 
   display: flex;
@@ -8,14 +8,24 @@
   justify-content: center;
   align-content: center;
 
-  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.8));
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.9)
+  );
   border-radius: 1rem;
-  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.3);
+  border: 0.2rem solid rgba(0, 0, 0, 0.4);
+
+  pointer-events: fill;
 }
 
 .BasicTab__title {
-  padding: 0 0.5rem;
-  font-size: 1.6rem;
-  text-decoration: underline;
-  margin: 0 auto 1.5rem auto;
+  margin-bottom: 0.5rem;
+}
+
+.BasicTab__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
 }
