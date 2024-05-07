@@ -49,9 +49,9 @@ pub mod HodlQuest {
             let art_peace_main = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
 
             let get_extra_pixels_count = art_peace_main
-                .get_user_extra_pixels_count(get_caller_address());
+                .get_user_extra_pixels_count(user);
 
-            if get_extra_pixels_count != self.extra_pixel.read() {
+            if get_extra_pixels_count >= self.extra_pixel.read() {
                 return false;
             }
 
@@ -59,9 +59,7 @@ pub mod HodlQuest {
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
-            if get_caller_address() != self.art_peace.read() {
-                return 0;
-            }
+            assert(get_caller_address() == self.art_peace.read(), 'Only ArtPeace can claim quests'); 
 
             if !self.is_claimable(user, calldata) {
                 return 0;
