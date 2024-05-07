@@ -62,6 +62,9 @@ const ExtraPixelsPanel = (props) => {
                 style={{
                   backgroundColor: `#${props.colors[pixelData.colorId]}FF`
                 }}
+                onMouseOver={() =>
+                  props.setPixelSelection(pixelData.x, pixelData.y)
+                }
                 onClick={() => props.clearExtraPixel(index)}
               >
                 <p className='ExtraPixelsPanel__bubble__remove'>X</p>

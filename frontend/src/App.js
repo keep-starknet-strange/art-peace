@@ -247,6 +247,7 @@ function App() {
           extraPixelsData={extraPixelsData}
           clearExtraPixels={clearExtraPixels}
           clearExtraPixel={clearExtraPixel}
+          setPixelSelection={setPixelSelection}
         />
       </div>
       <div className='App__footer'>
