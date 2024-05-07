@@ -48,7 +48,8 @@ pub mod HodlQuest {
 
             let art_peace_main = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
 
-            let get_extra_pixels_count = art_peace_main.get_user_extra_pixels_count(get_caller_address());
+            let get_extra_pixels_count = art_peace_main
+                .get_user_extra_pixels_count(get_caller_address());
 
             if get_extra_pixels_count != self.extra_pixel.read() {
                 return false;
