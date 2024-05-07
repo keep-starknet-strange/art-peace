@@ -217,8 +217,30 @@ fn pixel_quests_daily_no_color_double_invalid_claim_test() {
 
     art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
     art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+}
 
-    assert!(
-        art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily color claim"
-    );
+#[test]
+#[should_panic(expected: 'Quest not claimable',)]
+fn pixel_quests_main_no_color_double_invalid_claim_test() {
+    let pixel_quest = snf::declare("PixelQuest");
+    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
+    let main_quests = deploy_pixel_quests_main(pixel_quest);
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
+    };
+
+    let x = 10;
+    let y = 20;
+    let pos = x + y * WIDTH;
+    let color = 0x0;
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
 }
