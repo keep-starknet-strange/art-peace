@@ -29,6 +29,7 @@ fn test_claim_username() {
 }
 
 #[test]
+#[should_panic]
 fn test_change_username() {
     let contract_address = deploy_contract();
     let dispatcher = IUsernameStoreDispatcher { contract_address };
@@ -41,6 +42,14 @@ fn test_change_username() {
     let initial_username = dispatcher.get_username(utils::PLAYER1());
     assert!(initial_username == username, "Initial username not set");
 
+    // Additional test cases
+    // Attempt to change username without claiming one
+    dispatcher.change_username('new_username');
+
+    // Test: User cannot claim 2 usernames
+    let another_username = 'devcake';
+    dispatcher.claim_username(another_username);
+
     // Change username
     let new_username = 'devcool';
     dispatcher.change_username(new_username);
@@ -52,4 +61,6 @@ fn test_change_username() {
 
     let old_username_address = dispatcher.get_username_address(initial_username);
     assert!(old_username_address == contract_address_const::<0>(), "Old username not unlinked");
+
+    snf::stop_prank(CheatTarget::One(contract_address));
 }
