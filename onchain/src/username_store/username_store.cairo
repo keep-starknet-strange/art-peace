@@ -1,6 +1,7 @@
-pub(crate) mod UserNameClaimErrors {
-    pub const USERNAME_CLAIMED: felt252 = 'username_claimed';
-    pub const USERNAME_CANNOT_BE_TRANSFER: felt252 = 'username_cannot_be_transferred';
+pub mod UserNameClaimErrors {
+    pub const USERNAME_CLAIMED: felt252 = 'Username already claimed';
+    pub const USER_HAS_USERNAME: felt252 = 'User already has a username';
+    pub const USER_DOESNT_HAVE_USERNAME: felt252 = 'User does not have a username';
 }
 
 #[starknet::contract]
