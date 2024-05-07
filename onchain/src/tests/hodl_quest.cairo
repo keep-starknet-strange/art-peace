@@ -56,7 +56,7 @@ fn hodl_quest_test() {
         contract_address: deploy_with_quests_contract(array![].span(), array![hodl_quest].span())
     };
 
-    let calldata: Array<felt252> = array![0];
+    let calldata: Array<felt252> = array![18];
 
     art_peace.claim_main_quest(0, calldata.span());
 
