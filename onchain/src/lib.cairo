@@ -10,6 +10,7 @@ mod quests {
     pub mod template_quest;
     pub mod unruggable_quest;
     pub mod nft_quest;
+    pub mod hodl_quest;
 
     use interfaces::{
         IQuest, IAuthorityQuest, IPixelQuest, IUnruggableQuest, QuestClaimed, IQuestDispatcher,
@@ -60,6 +61,7 @@ mod tests {
     pub(crate) mod username_store;
     pub(crate) mod authority_quest;
     pub(crate) mod nft_quest;
+    pub(crate) mod hodl_quest;
     pub(crate) mod pixel_quest;
     pub(crate) mod template_quest;
     pub(crate) mod unruggable_quest;
