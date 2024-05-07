@@ -117,10 +117,8 @@ pub mod PixelQuest {
                 get_caller_address() == self.art_peace.read().contract_address,
                 'Only ArtPeace can claim quests'
             );
-            // TODO: should we revert if the quest is not claimable?
-            if !self.is_claimable(user, calldata) {
-                return 0;
-            }
+
+            assert(self.is_claimable(user, calldata), 'Quest not claimable');
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
