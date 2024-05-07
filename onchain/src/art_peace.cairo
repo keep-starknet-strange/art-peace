@@ -56,6 +56,7 @@ pub mod ArtPeace {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
+        QuestClaimed: QuestClaimed,
         Newday: NewDay,
         PixelPlaced: PixelPlaced,
         VoteColor: VoteColor,
@@ -89,6 +90,13 @@ pub mod ArtPeace {
         day: u32,
         #[key]
         color: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct QuestClaimed {
+        pub user: ContractAddress,
+        pub reward: u32,
+        pub calldata: Span<felt252>,
     }
 
     #[derive(Drop, Serde)]
@@ -416,6 +424,7 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
+            self.emit(QuestClaimed { user, reward, calldata });
         }
 
         fn claim_today_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
@@ -432,6 +441,7 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
+            self.emit(QuestClaimed { user, reward, calldata });
         }
 
         fn claim_main_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
@@ -448,6 +458,7 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
+            self.emit(QuestClaimed { user, reward, calldata });
         }
 
         fn get_nft_contract(self: @ContractState) -> ContractAddress {

@@ -2,19 +2,13 @@
 pub mod RainbowQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{IQuest, IRainbowQuest, QuestClaimed};
+    use art_peace::quests::{IQuest, IRainbowQuest};
 
     #[storage]
     struct Storage {
         art_peace: ContractAddress,
         reward: u32,
         claimed: LegacyMap<ContractAddress, bool>,
-    }
-
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        QuestClaimed: QuestClaimed,
     }
 
     #[derive(Drop, Serde)]
@@ -73,7 +67,6 @@ pub mod RainbowQuest {
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }

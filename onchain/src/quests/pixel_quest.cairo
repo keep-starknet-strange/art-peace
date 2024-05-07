@@ -2,7 +2,7 @@
 pub mod PixelQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{IQuest, IPixelQuest, QuestClaimed};
+    use art_peace::quests::{IQuest, IPixelQuest};
 
     #[storage]
     struct Storage {
@@ -16,12 +16,6 @@ pub mod PixelQuest {
         claim_day: u32,
         is_color: bool, // If the quest is for a specific color
         color: u8,
-    }
-
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        QuestClaimed: QuestClaimed,
     }
 
     #[derive(Drop, Serde)]
@@ -130,7 +124,6 @@ pub mod PixelQuest {
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }

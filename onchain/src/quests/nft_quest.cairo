@@ -2,7 +2,7 @@
 pub mod NFTMintQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::nfts::interfaces::{ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait};
-    use art_peace::quests::{IQuest, QuestClaimed};
+    use art_peace::quests::IQuest;
 
     #[storage]
     struct Storage {
@@ -11,13 +11,6 @@ pub mod NFTMintQuest {
         reward: u32,
         claimed: LegacyMap<ContractAddress, bool>,
     }
-
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        QuestClaimed: QuestClaimed,
-    }
-
 
     #[derive(Drop, Serde)]
     pub struct NFTMintQuestInitParams {
@@ -70,7 +63,6 @@ pub mod NFTMintQuest {
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }
