@@ -27,7 +27,7 @@ const Canvas = (props) => {
 
         let colorData = new Uint8Array(canvasData, 0, canvasData.byteLength);
         let dataArray = [];
-        let bitwidth = canvasConfig.colors_bitwidth;
+        let bitwidth = canvasConfig.colorsBitwidth;
         let oneByteBitOffset = 8 - bitwidth;
         let twoByteBitOffset = 16 - bitwidth;
         let canvasBits = props.width * props.height * bitwidth;

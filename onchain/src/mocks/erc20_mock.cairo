@@ -3,7 +3,7 @@
 //
 
 #[starknet::contract]
-pub mod SnakeERC20Mock {
+pub(crate) mod SnakeERC20Mock {
     use openzeppelin::token::erc20::ERC20Component;
     use starknet::ContractAddress;
 

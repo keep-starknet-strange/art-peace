@@ -17,6 +17,8 @@ import (
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
+// TODO: Remove error json messages and just log errors on indexing
+
 func InitIndexerRoutes() {
 	http.HandleFunc("/consume-indexer-msg", consumeIndexerMsg)
 }
@@ -50,6 +52,7 @@ const (
 	pixelPlacedEvent   = "0x02d7b50ebf415606d77c7e7842546fc13f8acfbfd16f7bcf2bc2d08f54114c23"
 	nftMintedEvent     = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
 	templateAddedEvent = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
+	voteColorEvent     = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
 	newDay             = "0x019cdbd24e137c00d1feb99cc0b48b86b676f6b69c788c7f112afeb8cd614c16"
 )
 
@@ -71,6 +74,8 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 			processNFTMintedEvent(event, w)
 		} else if eventKey == templateAddedEvent {
 			processTemplateAddedEvent(event, w)
+		} else if eventKey == voteColorEvent {
+			processVoteColorEvent(event, w)
 		} else if eventKey == newDay {
 			processNewDayEvent(event, w)
 		} else {
@@ -97,7 +102,7 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// Perform comparison with maxPosition
 	if position < 0 || position >= maxPosition {
-		http.Error(w, "Position out of range", http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Position value exceeds canvas dimensions")
 		return
 	}
 
@@ -114,7 +119,7 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	//validate color
 	colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
 	if int(color) < 0 || int(color) >= colorsLength {
-		http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Color value exceeds color palette")
 		return
 	}
 
@@ -355,6 +360,33 @@ func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
 	// TODO: Ws message to all clients
 
 	WriteResultJson(w, "Template add indexed successfully")
+}
+
+func processVoteColorEvent(event IndexerEvent, w http.ResponseWriter) {
+	voter := event.Event.Keys[1][2:] // Remove 0x prefix
+	dayIdxHex := event.Event.Keys[2]
+	colorHex := event.Event.Keys[3]
+
+	dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error converting day index hex to int")
+		return
+	}
+
+	color, err := strconv.ParseInt(colorHex, 0, 64)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error converting color hex to int")
+		return
+	}
+
+	// Set vote in postgres ( or update if already exists )
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO ColorVotes (user_address, day_index, color_key) VALUES ($1, $2, $3) ON CONFLICT (user_address, day_index) DO UPDATE SET color_key = $3", voter, dayIdx, color)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error inserting color vote into postgres")
+		return
+	}
+
+	WriteResultJson(w, "Color vote indexed successfully")
 }
 
 func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {

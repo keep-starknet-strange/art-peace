@@ -18,6 +18,11 @@ pub trait IQuest<TContractState> {
 }
 
 #[starknet::interface]
+pub trait IAuthorityQuest<TContractState> {
+    fn mark_claimable(ref self: TContractState, calldata: Span<felt252>);
+}
+
+#[starknet::interface]
 pub trait IPixelQuest<TContractState> {
     fn is_claimed(self: @TContractState, user: starknet::ContractAddress) -> bool;
     fn get_pixels_needed(self: @TContractState) -> u32;
@@ -34,17 +39,8 @@ pub trait IUnruggableQuest<TContractState> {
 
 #[starknet::interface]
 pub trait IUnruggableMemecoin<TState> {
-    // ************************************
-    // * Ownership
-    // ************************************
+    // Returns the owner of the unruggable memecoin
     fn owner(self: @TState) -> ContractAddress;
-
-    // ************************************
-    // * Additional functions
-    // ************************************
-    /// Checks whether token has launched
-    ///
-    /// # Returns
-    ///     bool: whether token has launched
+    // Checks whether token has launched
     fn is_launched(self: @TState) -> bool;
 }

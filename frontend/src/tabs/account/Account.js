@@ -3,6 +3,7 @@ import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl } from '../../utils/Consts.js';
+import { fetchWrapper } from '../../services/apiService.js';
 
 const Account = (props) => {
   // TODO: Icons for each rank & buttons
@@ -15,38 +16,41 @@ const Account = (props) => {
   const [accountRank, setAccountRank] = useState('');
 
   const [usernameSaved, setUsernameSaved] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
     setUsername(username);
     setUsernameSaved(true);
+    setIsEditing(false);
+    setUsernameBeforeEdit('');
   };
 
   const editUsername = () => {
-    setUsernameSaved(false);
+    setIsEditing(true);
+    setUsernameBeforeEdit(username);
+  };
+
+  const handleCancelEdit = () => {
+    setUsername(usernameBeforeEdit);
+    setIsEditing(false);
+    setUsernameBeforeEdit('');
   };
 
   useEffect(() => {
-    const getUsernameUrl = `${backendUrl}/get-username?address=${address}`;
-    fetch(getUsernameUrl)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch username');
-        }
-        return res.json();
-      })
-      .then((result) => {
-        if (result.data === null || result.data === '') {
-          setUsername('');
-          setUsernameSaved(false);
-        } else {
-          setUsername(result.data);
-          setUsernameSaved(true);
-        }
-      })
-      .catch((error) => {
-        console.error('Failed to fetch username:', error);
-      });
+    const getUsernameUrl = `get-username?address=${address}`;
+    async function fetchUsernameUrl() {
+      const result = await fetchWrapper(getUsernameUrl);
+      if (result.data === null || result.data === '') {
+        setUsername('');
+        setUsernameSaved(false);
+      } else {
+        setUsername(result.data);
+        setUsernameSaved(true);
+      }
+    }
+    fetchUsernameUrl();
   }, [address]);
 
   useEffect(() => {
@@ -88,7 +92,7 @@ const Account = (props) => {
       <p className='Text__small Account__item Account__address'>
         Address: {address}
       </p>
-      {usernameSaved ? (
+      {usernameSaved && !isEditing ? (
         <div className='Text__small Account__special Account__username'>
           <p style={{ margin: 0, padding: 0 }}>Username: {username}</p>
           <div
@@ -112,12 +116,22 @@ const Account = (props) => {
               required
               onChange={(e) => setUsername(e.target.value)}
             />
-            <button
-              className='Text__small Button__primary Account__username__button'
-              type='submit'
-            >
-              submit
-            </button>
+            <div>
+              {isEditing && (
+                <button
+                  className='Text__small Button__primary Account__username__button'
+                  onClick={handleCancelEdit}
+                >
+                  cancel
+                </button>
+              )}
+              <button
+                className='Text__small Button__primary Account__username__button'
+                type='submit'
+              >
+                submit
+              </button>
+            </div>
           </form>
         </div>
       )}
