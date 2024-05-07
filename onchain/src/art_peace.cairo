@@ -427,8 +427,7 @@ pub mod ArtPeace {
             ref self: ContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>
         ) {
             let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), '');
-            // TODO: Only allow to claim the quest of the current day
+            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             let quest = self.daily_quests.read((day_index, quest_id));
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);

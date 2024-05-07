@@ -82,20 +82,17 @@ pub mod PixelQuest {
             }
 
             if self.is_daily.read() {
+                let day = art_peace.get_day();
+                if day != self.claim_day.read() {
+                    return false;
+                }
+
                 // Daily Pixel Quest
                 if self.is_color.read() {
-                    let day = art_peace.get_day();
-                    if day != self.claim_day.read() {
-                        return false;
-                    }
                     let placement_count = art_peace
                         .get_user_pixels_placed_day_color(user, day, self.color.read());
                     return placement_count >= self.pixels_needed.read();
                 } else {
-                    let day = art_peace.get_day();
-                    if day != self.claim_day.read() {
-                        return false;
-                    }
                     let placement_count = art_peace.get_user_pixels_placed_day(user, day);
                     return placement_count >= self.pixels_needed.read();
                 }
