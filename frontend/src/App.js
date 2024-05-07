@@ -10,7 +10,6 @@ import { usePreventZoom } from './utils/Window.js';
 import { backendUrl, wsUrl } from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
-import { fetchWrapper } from './services/apiService.js';
 
 function App() {
   // Window management
@@ -104,7 +103,7 @@ function App() {
   const [selectedPositionY, setSelectedPositionY] = useState(null);
   const [pixelPlacedBy, setPixelPlacedBy] = useState('');
 
-  const [extraPixels] = useState(0);
+  const [extraPixels, setExtraPixels] = useState(0);
   const [extraPixelsUsed, setExtraPixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
 
@@ -112,16 +111,17 @@ function App() {
 
   useEffect(() => {
     const address = 0;
-    async function fetchExtraPixelsEndpoint() {
-      let getExtraPixelsEndpoint = await fetchWrapper(
-        `get-extra-pixels?address=${address}`
-      );
-      if (!getExtraPixelsEndpoint.data) {
-        return;
-      }
-      setExtraPixels(getExtraPixelsEndpoint.data);
-    }
-    fetchExtraPixelsEndpoint();
+    let getExtraPixelsEndpoint = `${backendUrl}/get-extra-pixels?address=${address}`;
+    fetch(getExtraPixelsEndpoint).then((response) => {
+      response
+        .json()
+        .then((result) => {
+          setExtraPixels(result.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
   }, []);
 
   const clearPixelSelection = () => {

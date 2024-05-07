@@ -41,7 +41,6 @@ const CanvasContainer = (props) => {
     setIsDragging(false);
     setDragStartX(0);
     setDragStartY(0);
-    
   };
 
   const handlePointerMove = (e) => {
@@ -52,7 +51,7 @@ const CanvasContainer = (props) => {
       setDragStartY(e.clientY);
     }
     if (isErasing) {
-      pixelClicked(e)
+      pixelClicked(e);
     }
   };
 
@@ -173,12 +172,13 @@ const CanvasContainer = (props) => {
     // Erase Extra Pixel
     if (props.isEraserMode) {
       const pixel = props.extraPixelsData.filter((pixelData) => {
-        return pixelData.x === x && pixelData.y === y
-      })
-      const pixelIndex = props.extraPixelsData.indexOf(pixel[0])
+        return pixelData.x === x && pixelData.y === y;
+      });
+      const pixelIndex = props.extraPixelsData.indexOf(pixel[0]);
       if (pixelIndex !== -1) props.clearExtraPixel(pixelIndex);
       // Toggle Eraser mode  if there are no Extra Pixels placed
-      if (!props.extraPixelsData.length) props.setIsEraserMode(!props.isEraserMode);
+      if (!props.extraPixelsData.length)
+        props.setIsEraserMode(!props.isEraserMode);
       return;
     }
 
