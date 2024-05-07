@@ -76,6 +76,7 @@ const PixelSelector = (props) => {
 
     if (pixelAvailable) {
       setSelectorMode(true);
+      props.setIsEraserMode(false);
     }
   };
 

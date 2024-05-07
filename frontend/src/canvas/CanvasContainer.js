@@ -171,10 +171,9 @@ const CanvasContainer = (props) => {
 
     // Erase Extra Pixel
     if (props.isEraserMode) {
-      const pixel = props.extraPixelsData.filter((pixelData) => {
+      const pixelIndex = props.extraPixelsData.findIndex((pixelData) => {
         return pixelData.x === x && pixelData.y === y;
       });
-      const pixelIndex = props.extraPixelsData.indexOf(pixel[0]);
       if (pixelIndex !== -1) props.clearExtraPixel(pixelIndex);
       // Toggle Eraser mode  if there are no Extra Pixels placed
       if (!props.extraPixelsData.length)

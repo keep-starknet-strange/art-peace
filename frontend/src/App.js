@@ -10,6 +10,7 @@ import { usePreventZoom } from './utils/Window.js';
 import { backendUrl, wsUrl } from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
+import { fetchWrapper } from './services/apiService.js';
 
 function App() {
   // Window management
@@ -111,17 +112,16 @@ function App() {
 
   useEffect(() => {
     const address = 0;
-    let getExtraPixelsEndpoint = `${backendUrl}/get-extra-pixels?address=${address}`;
-    fetch(getExtraPixelsEndpoint).then((response) => {
-      response
-        .json()
-        .then((result) => {
-          setExtraPixels(result.data);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    });
+    async function fetchExtraPixelsEndpoint() {
+      let getExtraPixelsEndpoint = await fetchWrapper(
+        `get-extra-pixels?address=${address}`
+      );
+      if (!getExtraPixelsEndpoint.data) {
+        return;
+      }
+      setExtraPixels(getExtraPixelsEndpoint.data);
+    }
+    fetchExtraPixelsEndpoint();
   }, []);
 
   const clearPixelSelection = () => {
@@ -265,6 +265,7 @@ function App() {
           getDeviceTypeInfo={getDeviceTypeInfo}
           extraPixels={extraPixels}
           extraPixelsUsed={extraPixelsUsed}
+          setIsEraserMode={setIsEraserMode}
         />
         <TabsFooter
           tabs={tabs}
