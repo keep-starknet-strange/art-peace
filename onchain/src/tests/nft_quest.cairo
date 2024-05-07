@@ -1,10 +1,8 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-use art_peace::quests::template_quest::TemplateQuest::TemplateQuestInitParams;
 use art_peace::quests::nft_quest::NFTMintQuest::NFTMintQuestInitParams;
-// use art_peace::quests::nft_quest::{INFTMintQuestDispatcher, INFTMintQuestDispatcherTrait} // NFTMintQuest::NFTMintQuestInitParams;
 use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
-use art_peace::templates::interfaces::{
-    ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, TemplateMetadata
+use art_peace::nfts::interfaces::{
+    NFTMintParams, IArtPeaceNFTMinterDispatcher, IArtPeaceNFTMinterDispatcherTrait
 };
 use art_peace::tests::art_peace::deploy_with_quests_contract;
 use art_peace::tests::utils;
@@ -14,13 +12,12 @@ use snforge_std::{declare, CheatTarget, ContractClassTrait};
 
 const reward_amt: u32 = 18;
 
-
 fn deploy_nft_quest() -> ContractAddress {
     let contract = declare("NFTMintQuest");
 
     let mut nft_quest_calldata = array![];
     NFTMintQuestInitParams {
-        CanvasNFT: utils::NFT_QUEST_CONTRACT(),
+        canvas_nft: utils::NFT_CONTRACT(),
         art_peace: utils::ART_PEACE_CONTRACT(),
         reward: reward_amt,
     }
@@ -50,6 +47,7 @@ fn deploy_nft_quest_test() {
 }
 
 
+#[test]
 fn nft_quest_test() {
     let nft_mint_quest = deploy_nft_quest();
 
@@ -58,30 +56,21 @@ fn nft_quest_test() {
             array![].span(), array![nft_mint_quest].span()
         )
     };
+    let art_peace_nft_minter = IArtPeaceNFTMinterDispatcher {
+        contract_address: art_peace.contract_address
+    };
+    art_peace_nft_minter.add_nft_contract(utils::NFT_CONTRACT());
 
-    let nft_mint_quest = IQuestDispatcher { contract_address: nft_mint_quest };
+    let calldata: Array<felt252> = array![0];
 
-    let calldata: Span<felt252> = array![
-        utils::PLAYER1().try_into().unwrap(), utils::PLAYER2().try_into().unwrap()
-    ]
-        .span();
-    nft_mint_quest.is_claimable(contract_address_const::<1>(), calldata);
-
-    snf::start_prank(
-        target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER1()
-    );
-    art_peace.claim_main_quest(0, calldata);
+    snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
+    let mint_params = NFTMintParams { height: 2, width: 2, position: 10 };
+    art_peace_nft_minter.mint_nft(mint_params);
+    art_peace.claim_main_quest(0, calldata.span());
 
     assert!(
-        art_peace.get_extra_pixels_count() == 20, "Extra pixels are wrong after main quest claim"
+        art_peace.get_extra_pixels_count() == reward_amt,
+        "Extra pixels are wrong after main quest claim"
     );
-
-    snf::start_prank(
-        target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER2()
-    );
-    art_peace.claim_main_quest(0, calldata);
-
-    assert!(
-        art_peace.get_extra_pixels_count() == 20, "Extra pixels are wrong after main quest claim"
-    );
+    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
 }

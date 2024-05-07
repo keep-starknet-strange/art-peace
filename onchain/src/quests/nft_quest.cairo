@@ -1,13 +1,12 @@
 #[starknet::contract]
 pub mod NFTMintQuest {
     use starknet::{ContractAddress, get_caller_address};
-    use art_peace::nfts::interfaces::{ICanvasNFTStore, NFTMetadata};
     use art_peace::nfts::interfaces::{ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait};
     use art_peace::quests::{IQuest, QuestClaimed};
 
     #[storage]
     struct Storage {
-        CanvasNFT: ContractAddress,
+        canvas_nft: ContractAddress,
         art_peace: ContractAddress,
         reward: u32,
         claimed: LegacyMap<ContractAddress, bool>,
@@ -22,14 +21,14 @@ pub mod NFTMintQuest {
 
     #[derive(Drop, Serde)]
     pub struct NFTMintQuestInitParams {
-        pub CanvasNFT: ContractAddress,
+        pub canvas_nft: ContractAddress,
         pub art_peace: ContractAddress,
         pub reward: u32,
     }
 
     #[constructor]
     fn constructor(ref self: ContractState, init_params: NFTMintQuestInitParams) {
-        self.CanvasNFT.write(init_params.CanvasNFT);
+        self.canvas_nft.write(init_params.canvas_nft);
         self.art_peace.write(init_params.art_peace);
         self.reward.write(init_params.reward);
     }
@@ -48,13 +47,12 @@ pub mod NFTMintQuest {
             }
 
             let token_id_felt = *calldata.at(0);
-            // let token_id: u256 = token_id_felt.try_into().unwrap();
             let token_id: u256 = token_id_felt.into();
 
-            let nft_store = ICanvasNFTStoreDispatcher { contract_address: self.CanvasNFT.read() };
-            let token_miner = nft_store.get_nft_minter(token_id);
+            let nft_store = ICanvasNFTStoreDispatcher { contract_address: self.canvas_nft.read() };
+            let token_minter = nft_store.get_nft_minter(token_id);
 
-            if token_miner != user {
+            if token_minter != user {
                 return false;
             }
 
