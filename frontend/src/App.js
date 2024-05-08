@@ -40,12 +40,7 @@ function App() {
     share: false,
     shouldReconnect: () => true
   });
-
-  // const App = () => {
-  //   const lastJsonMessage = {
-  //     messageType: 'nftMinted',
-  //     token_id: 'tokenID'
-  //   }};
+  const [tokenId, setTokenId] = useState(null)
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
@@ -58,17 +53,17 @@ function App() {
     }
   }, [readyState]);
 
-useEffect(() => {
-  if (lastJsonMessage) {
+  useEffect(() => {
+    if (lastJsonMessage) {
       // Check the message type and handle accordingly
       if (lastJsonMessage.messageType === 'colorPixel') {
-          colorPixel(lastJsonMessage.position, lastJsonMessage.color);
-      } else if (lastJsonMessage.messageType === 'nftMinted') {
-        //handle nft minted
-          const tokenID = lastJsonMessage.token_id;
+        colorPixel(lastJsonMessage.position, lastJsonMessage.color);
+      } else if (lastJsonMessage.messageType === 'nftMinted' && activeTab === 'NFTs') {
+       const tokenId = lastJsonMessage.token_id
+          setTokenId(tokenId)
       }
-  }
-}, [lastJsonMessage]);
+    }
+  }, [lastJsonMessage]);
 
   // Colors
   const staticColors = canvasConfig.colors;
@@ -258,6 +253,7 @@ useEffect(() => {
           extraPixelsData={extraPixelsData}
           clearExtraPixels={clearExtraPixels}
           clearExtraPixel={clearExtraPixel}
+          tokenId={tokenId}
         />
       </div>
       <div className='App__footer'>

@@ -71,6 +71,25 @@ const NFTs = (props) => {
   const [myNFTs, setMyNFTs] = React.useState([]);
   const [allNFTs, setAllNFTs] = React.useState([]);
 
+  const retrieveNFTById = async (tokenId) => {
+
+    try {
+      let getNFTBtTokenId = `get-nft?tokenId=${tokenId}`;
+      const response = await fetchWrapper(getNFTBtTokenId, { mode: 'cors' });
+      if (response.data) {
+        setMyNFTs((prev) => ([...prev, response.data]))
+      }
+    } catch (error) {
+      console.error('Error fetching NFT data:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    if(props.tokenId !== null){
+      retrieveNFTById(props.tokenId)
+    }
+  }, [props.tokenId])
+
   React.useEffect(() => {
     if (!setup) {
       setSetup(true);
@@ -94,6 +113,7 @@ const NFTs = (props) => {
     async function getNfts() {
       const response = await fetchWrapper(getNFTsEndpoint, { mode: 'cors' });
       if (response.data) {
+        console.log(response.data)
         setAllNFTs(response.data);
       }
     }

@@ -46,7 +46,7 @@ const TabPanel = (props) => {
       </CSSTransition>
       <SwitchTransition mode='out-in'>
         <CSSTransition
-          key={props.activeTab}
+          key={props.activeTab} 
           timeout={400}
           classNames='list-transition'
           unmountOnExit
@@ -98,6 +98,7 @@ const TabPanel = (props) => {
                   nftMintingMode={props.nftMintingMode}
                   setNftMintingMode={props.setNftMintingMode}
                   setActiveTab={props.setActiveTab}
+                  tokenId={props.tokenId}
                 />
               </div>
             )}

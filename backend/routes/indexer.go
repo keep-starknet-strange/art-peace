@@ -144,23 +144,11 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// Send message to all connected clients
 	var message = map[string]interface{}{
-		"position": position,
-		"color":    color,
+		"position":    position,
+		"color":       color,
+		"messageType": "colorPixel",
 	}
-	messageBytes, err := json.Marshal(message)
-	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Error marshalling message")
-		return
-	}
-	for idx, conn := range core.ArtPeaceBackend.WSConnections {
-		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
-			fmt.Println(err)
-			// TODO: Should we always remove connection?
-			// Remove connection
-			conn.Close()
-			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
-		}
-	}
+	sendWebSocketMessage(w, message)
 
 	WriteResultJson(w, "Pixel placement indexed successfully")
 }
@@ -284,9 +272,7 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	WriteResultJson(w, "NFT mint indexed successfully")
 
-	
-	sendNFTWebSocketMessage(tokenIdLowHex)
-
+	sendNFTWebSocketMessage(w, tokenId)
 
 }
 
@@ -422,19 +408,29 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 }
 
-func sendNFTWebSocketMessage(tokenID string) {
+func sendNFTWebSocketMessage(w http.ResponseWriter, tokenID int64) {
 	message := map[string]interface{}{
 		"token_id":    tokenID,
 		"messageType": "nftMinted",
 	}
-	sendWebSocketMessage(message)
+	sendWebSocketMessage(w, message)
 }
 
-// func sendColorPixelWebSocketMessage(pixelInfo map[string]interface{}) {
-//     // New function for sending color pixel WebSocket messages
-// }
-
-func sendWebSocketMessage(message map[string]interface{}) {
+func sendWebSocketMessage(w http.ResponseWriter, message map[string]interface{}) {
 	// Generic function to send a message over a WebSocket
 	// Implementation logic to send the message...
+	messageBytes, err := json.Marshal(message)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error marshalling message")
+		return
+	}
+	for idx, conn := range core.ArtPeaceBackend.WSConnections {
+		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
+			fmt.Println(err)
+			// TODO: Should we always remove connection?
+			// Remove connection
+			conn.Close()
+			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
+		}
+	}
 }
