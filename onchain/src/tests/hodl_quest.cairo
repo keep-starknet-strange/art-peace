@@ -47,15 +47,18 @@ fn deploy_hodl_quest_test() {
 
 #[test]
 fn hodl_quest_test() {
-    let hodl_quest = deploy_hodl_quest();
+    let hodl_quest_contract_address = deploy_hodl_quest();
 
     let art_peace = IArtPeaceDispatcher {
-        contract_address: deploy_with_quests_contract(array![].span(), array![hodl_quest].span())
+        contract_address: deploy_with_quests_contract(
+            array![].span(), array![hodl_quest_contract_address].span()
+        )
     };
 
     let calldata: Array<felt252> = array![];
 
     art_peace.claim_main_quest(0, calldata.span());
+
 
     assert!(
         art_peace.get_extra_pixels_count() == reward_amt,
