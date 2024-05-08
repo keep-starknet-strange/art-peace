@@ -104,9 +104,11 @@ function App() {
   const [selectedPositionY, setSelectedPositionY] = useState(null);
   const [pixelPlacedBy, setPixelPlacedBy] = useState('');
 
-  const [extraPixels, setExtraPixels] = useState(0);
+  const [extraPixels, setExtraPixels] = useState(3);
   const [extraPixelsUsed, setExtraPixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
+
+  const [selectorMode, setSelectorMode] = useState(false);
 
   const [isEraserMode, setIsEraserMode] = React.useState(false);
 
@@ -125,6 +127,7 @@ function App() {
   }, []);
 
   const clearPixelSelection = () => {
+    setSelectedColorId(-1);
     setSelectedPositionX(null);
     setSelectedPositionY(null);
     setPixelSelectedMode(false);
@@ -238,8 +241,8 @@ function App() {
           setNftMintingMode={setNftMintingMode}
           showSelectedPixelPanel={
             !isPortrait
-              ? pixelSelectedMode
-              : pixelSelectedMode && activeTab === tabs[0]
+              ? pixelSelectedMode || isEraserMode
+              : (pixelSelectedMode || isEraserMode) && activeTab === tabs[0]
           }
           selectedPositionX={selectedPositionX}
           selectedPositionY={selectedPositionY}
@@ -253,6 +256,8 @@ function App() {
           extraPixelsData={extraPixelsData}
           clearExtraPixels={clearExtraPixels}
           clearExtraPixel={clearExtraPixel}
+          selectorMode={selectorMode}
+          setSelectorMode={setSelectorMode}
           isEraserMode={isEraserMode}
           setIsEraserMode={setIsEraserMode}
         />
@@ -265,6 +270,8 @@ function App() {
           getDeviceTypeInfo={getDeviceTypeInfo}
           extraPixels={extraPixels}
           extraPixelsUsed={extraPixelsUsed}
+          selectorMode={selectorMode}
+          setSelectorMode={setSelectorMode}
           setIsEraserMode={setIsEraserMode}
         />
         <TabsFooter

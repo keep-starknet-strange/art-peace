@@ -11,10 +11,10 @@ const ExtraPixelsPanel = (props) => {
     props.clearExtraPixels();
   };
 
-  // TODO: swap eraser mode when selecting a color
   const eraserMode = () => {
     props.setIsEraserMode(!props.isEraserMode);
-    // TODO: clear color selection
+    props.setSelectorMode(false);
+    props.clearPixelSelection();
   };
 
   const submit = async () => {

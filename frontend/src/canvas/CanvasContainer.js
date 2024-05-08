@@ -221,7 +221,7 @@ const CanvasContainer = (props) => {
 
   useEffect(() => {
     const hoverColor = (e) => {
-      if (props.selectedColorId === -1) {
+      if (props.selectedColorId === -1 && !props.isEraserMode) {
         return;
       }
       if (props.nftMintingMode) {
@@ -248,7 +248,7 @@ const CanvasContainer = (props) => {
     return () => {
       window.removeEventListener('mousemove', hoverColor);
     };
-  }, [props.selectedColorId, props.nftMintingMode]);
+  }, [props.selectedColorId, props.nftMintingMode, props.isEraserMode]);
 
   const getSelectedColorInverse = () => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
