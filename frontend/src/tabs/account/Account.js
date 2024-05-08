@@ -4,7 +4,7 @@ import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl } from '../../utils/Consts.js';
 import { fetchWrapper } from '../../services/apiService.js';
-import StarIcon from '../../icons/star.js';
+import ColoredIcon from '../../icons/ColoredIcon.js';
 
 const Account = (props) => {
   // TODO: Icons for each rank & buttons
@@ -20,6 +20,9 @@ const Account = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
   const [iconColor, setIconColor] = useState('');
+  const path = useState(
+    'm5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275z'
+  );
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -146,7 +149,8 @@ const Account = (props) => {
       <h2 className='Text__medium Heading__sub Account__subheader'>Stats</h2>
       <p className='Text__small Account__item'>Pixels placed: {pixelCount}</p>
       <p className='Text__small Account__item'>
-        Rank: {accountRank} <StarIcon width='24' color={iconColor} />
+        Rank: {accountRank}
+        <ColoredIcon width='24' color={iconColor} path={path} />
       </p>
     </BasicTab>
   );
