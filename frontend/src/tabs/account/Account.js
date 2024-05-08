@@ -19,6 +19,7 @@ const Account = (props) => {
   const [usernameSaved, setUsernameSaved] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
+  const [iconColor, setIconColor] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -72,14 +73,19 @@ const Account = (props) => {
   useEffect(() => {
     if (pixelCount >= 5000) {
       setAccountRank('Champion');
+      setIconColor('#B9F2FF');
     } else if (pixelCount >= 3000) {
       setAccountRank('Platinum');
+      setIconColor('#E5E4E2');
     } else if (pixelCount >= 2000) {
       setAccountRank('Gold');
+      setIconColor('#FFAA00');
     } else if (pixelCount >= 1000) {
       setAccountRank('Silver');
+      setIconColor('#C0C0C0');
     } else {
       setAccountRank('Bronze');
+      setIconColor('#CD7F32');
     }
   }, [pixelCount]);
 
@@ -140,7 +146,7 @@ const Account = (props) => {
       <h2 className='Text__medium Heading__sub Account__subheader'>Stats</h2>
       <p className='Text__small Account__item'>Pixels placed: {pixelCount}</p>
       <p className='Text__small Account__item'>
-        Rank: {accountRank} <StarIcon width='24' color='#FFAA00' />
+        Rank: {accountRank} <StarIcon width='24' color={iconColor} />
       </p>
     </BasicTab>
   );
