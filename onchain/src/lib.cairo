@@ -13,8 +13,8 @@ mod quests {
     pub mod nft_quest;
 
     use interfaces::{
-        IQuest, IAuthorityQuest, IPixelQuest, IRainbowQuest, IUnruggableQuest, QuestClaimed,
-        IQuestDispatcher, IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher,
+        IQuest, IAuthorityQuest, IPixelQuest, IRainbowQuest, IUnruggableQuest, IQuestDispatcher,
+        IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher,
         IUnruggableMemecoinDispatcherTrait
     };
 }
