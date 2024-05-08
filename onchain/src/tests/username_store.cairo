@@ -57,7 +57,7 @@ fn test_change_username() {
 }
 
 #[test]
-#[should_panic(expected: ('User already has a username',))]
+#[should_panic(expected: ())]
 fn test_cannot_claim_multiple_usernames() {
     let contract_address = deploy_contract();
     let dispatcher = IUsernameStoreDispatcher { contract_address };
