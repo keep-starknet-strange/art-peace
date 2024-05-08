@@ -3,7 +3,7 @@ pub mod AuthorityQuest {
     use core::traits::TryInto;
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
-    use art_peace::quests::{IAuthorityQuest, IQuest, QuestClaimed};
+    use art_peace::quests::{IAuthorityQuest, IQuest};
 
     #[storage]
     struct Storage {
@@ -13,13 +13,6 @@ pub mod AuthorityQuest {
         claimable: LegacyMap<ContractAddress, bool>,
         claimed: LegacyMap<ContractAddress, bool>,
     }
-
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        QuestClaimed: QuestClaimed,
-    }
-
 
     #[derive(Drop, Serde)]
     pub struct AuthorityQuestInitParams {
@@ -79,7 +72,6 @@ pub mod AuthorityQuest {
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }

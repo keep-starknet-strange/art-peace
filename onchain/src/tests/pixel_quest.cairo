@@ -88,7 +88,7 @@ fn deploy_pixel_quest_test() {
 }
 
 #[test]
-fn pixel_quests_test() {
+fn pixel_quests_daily_no_color_test() {
     let pixel_quest = snf::declare("PixelQuest");
     let daily_quests = deploy_pixel_quests_daily(pixel_quest);
     let main_quests = deploy_pixel_quests_main(pixel_quest);
@@ -99,76 +99,148 @@ fn pixel_quests_test() {
     let x = 10;
     let y = 20;
     let pos = x + y * WIDTH;
-    let color = 0x5;
+    let color = 0x0;
     art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(art_peace.get_extra_pixels_count() == 0, "Extra pixels are wrong after invalid claims");
-
     warp_to_next_available_time(art_peace);
-    let x = 15;
-    let y = 25;
-    let color = 0x1;
-    art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(art_peace.get_extra_pixels_count() == 0, "Extra pixels are wrong after invalid claims");
-
-    warp_to_next_available_time(art_peace);
-    let x = 20;
-    let y = 30;
-    let pos = x + y * WIDTH;
-    let color = 0x9;
     art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(
-        art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily quest 1 claim"
-    );
-
     warp_to_next_available_time(art_peace);
-    let x = 25;
-    let y = 35;
-    let color = 0x1;
-    art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(
-        art_peace.get_extra_pixels_count() == 30, "Extra pixels are wrong after main quest 1 claim"
-    );
+    art_peace.place_pixel(pos, color);
 
-    warp_to_next_available_time(art_peace);
-    let x = 30;
-    let y = 40;
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+
+    assert!(
+        art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily color claim"
+    );
+}
+
+#[test]
+fn pixel_quests_daily_color_test() {
+    let pixel_quest = snf::declare("PixelQuest");
+    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
+    let main_quests = deploy_pixel_quests_main(pixel_quest);
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
+    };
+
+    let x = 10;
+    let y = 20;
     let pos = x + y * WIDTH;
     let color = 0x1;
     art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(
-        art_peace.get_extra_pixels_count() == 40, "Extra pixels are wrong after daily quest 2 claim"
-    );
-
     warp_to_next_available_time(art_peace);
-    let x = 35;
-    let y = 45;
-    let color = 0x1;
-    art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+
     art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
+
     assert!(
-        art_peace.get_extra_pixels_count() == 60, "Extra pixels are wrong after main quest 2 claim"
+        art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily color claim"
     );
+}
+
+#[test]
+fn pixel_quests_main_no_color_test() {
+    let pixel_quest = snf::declare("PixelQuest");
+    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
+    let main_quests = deploy_pixel_quests_main(pixel_quest);
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
+    };
+
+    let x = 10;
+    let y = 20;
+    let pos = x + y * WIDTH;
+    let color = 0x0;
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+
+    assert!(
+        art_peace.get_extra_pixels_count() == 20, "Extra pixels are wrong after daily color claim"
+    );
+}
+
+#[test]
+fn pixel_quests_main_color_test() {
+    let pixel_quest = snf::declare("PixelQuest");
+    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
+    let main_quests = deploy_pixel_quests_main(pixel_quest);
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
+    };
+
+    let x = 10;
+    let y = 20;
+    let pos = x + y * WIDTH;
+    let color = 0x1;
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+
+    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
+
+    assert!(
+        art_peace.get_extra_pixels_count() == 20, "Extra pixels are wrong after daily color claim"
+    );
+}
+
+#[test]
+#[should_panic(expected: 'Quest not claimable',)]
+fn pixel_quests_daily_no_color_double_invalid_claim_test() {
+    let pixel_quest = snf::declare("PixelQuest");
+    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
+    let main_quests = deploy_pixel_quests_main(pixel_quest);
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
+    };
+
+    let x = 10;
+    let y = 20;
+    let pos = x + y * WIDTH;
+    let color = 0x0;
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+}
+
+#[test]
+#[should_panic(expected: 'Quest not claimable',)]
+fn pixel_quests_main_no_color_double_invalid_claim_test() {
+    let pixel_quest = snf::declare("PixelQuest");
+    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
+    let main_quests = deploy_pixel_quests_main(pixel_quest);
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
+    };
+
+    let x = 10;
+    let y = 20;
+    let pos = x + y * WIDTH;
+    let color = 0x0;
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+    warp_to_next_available_time(art_peace);
+    art_peace.place_pixel(pos, color);
+
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
 }

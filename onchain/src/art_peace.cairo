@@ -56,6 +56,8 @@ pub mod ArtPeace {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
+        DailyQuestClaimed: DailyQuestClaimed,
+        MainQuestClaimed: MainQuestClaimed,
         Newday: NewDay,
         PixelPlaced: PixelPlaced,
         VoteColor: VoteColor,
@@ -89,6 +91,28 @@ pub mod ArtPeace {
         day: u32,
         #[key]
         color: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct DailyQuestClaimed {
+        #[key]
+        pub day_index: u32,
+        #[key]
+        pub quest_id: u32,
+        #[key]
+        pub user: ContractAddress,
+        pub reward: u32,
+        pub calldata: Span<felt252>,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct MainQuestClaimed {
+        #[key]
+        pub quest_id: u32,
+        #[key]
+        pub user: ContractAddress,
+        pub reward: u32,
+        pub calldata: Span<felt252>,
     }
 
     #[derive(Drop, Serde)]
@@ -403,8 +427,7 @@ pub mod ArtPeace {
             ref self: ContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>
         ) {
             let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), '');
-            // TODO: Only allow to claim the quest of the current day
+            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             let quest = self.daily_quests.read((day_index, quest_id));
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
@@ -416,12 +439,14 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
+            self.emit(DailyQuestClaimed { day_index, quest_id, user, reward, calldata });
         }
 
         fn claim_today_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
             let now = starknet::get_block_timestamp();
             assert(now <= self.end_time.read(), 'ArtPeace game has ended');
-            let quest = self.daily_quests.read((self.day_index.read(), quest_id));
+            let day_index = self.day_index.read();
+            let quest = self.daily_quests.read((day_index, quest_id));
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
             if reward > 0 {
@@ -432,6 +457,7 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
+            self.emit(DailyQuestClaimed { day_index, quest_id, user, reward, calldata });
         }
 
         fn claim_main_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
@@ -448,6 +474,7 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
+            self.emit(MainQuestClaimed { quest_id, user, reward, calldata });
         }
 
         fn get_nft_contract(self: @ContractState) -> ContractAddress {
