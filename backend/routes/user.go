@@ -13,6 +13,7 @@ func InitUserRoutes() {
 	http.HandleFunc("/get-extra-pixels", getExtraPixels)
 	http.HandleFunc("/get-username", getUsername)
 	http.HandleFunc("/get-pixel-count", getPixelCount)
+	http.HandleFunc("/get-user-vote", getUserColorVote)
 }
 
 func getExtraPixels(w http.ResponseWriter, r *http.Request) {
@@ -80,3 +81,22 @@ func getLastPlacedTime(w http.ResponseWriter, r *http.Request) {
 	// Return the last placed time in utc z format
 	WriteDataJson(w, "\""+string(lastTime.UTC().Format(time.RFC3339))+"\"")
 }
+
+
+func getUserColorVote(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		return
+	}
+
+	vote, err := core.PostgresQueryOne[int]("SELECT color_key FROM ColorVotes WHERE user_address = $1", address);
+
+	if err != nil {
+		WriteDataJson(w, "0")
+		return
+	}
+
+	WriteDataJson(w, strconv.Itoa(*vote))
+}
+
