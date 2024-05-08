@@ -10,7 +10,7 @@ import { usePreventZoom } from './utils/Window.js';
 import { backendUrl, wsUrl } from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
-// import { fetchWrapper } from './services/apiService.js';
+import { fetchWrapper } from './services/apiService.js';
 
 function App() {
   // Window management
