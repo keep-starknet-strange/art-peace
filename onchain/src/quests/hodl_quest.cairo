@@ -60,6 +60,8 @@ pub mod HodlQuest {
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
             assert(get_caller_address() == self.art_peace.read(), 'Only ArtPeace can claim quests');
 
+            assert(self.is_claimable(user, calldata), 'Quest not claimable');
+
             self.claimed.write(user, true);
             let reward = self.reward.read();
             self.emit(QuestClaimed { user, reward, calldata });
