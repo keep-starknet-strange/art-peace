@@ -51,10 +51,10 @@ pub mod HodlQuest {
             let get_extra_pixels_count = art_peace_main.get_user_extra_pixels_count(user);
 
             if get_extra_pixels_count >= self.extra_pixel.read() {
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
