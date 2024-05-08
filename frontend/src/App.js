@@ -104,7 +104,7 @@ function App() {
   const [selectedPositionY, setSelectedPositionY] = useState(null);
   const [pixelPlacedBy, setPixelPlacedBy] = useState('');
 
-  const [extraPixels, setExtraPixels] = useState(3);
+  const [extraPixels, setExtraPixels] = useState(0);
   const [extraPixelsUsed, setExtraPixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
 
