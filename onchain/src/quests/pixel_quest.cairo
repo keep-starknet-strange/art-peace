@@ -116,7 +116,7 @@ pub mod PixelQuest {
             );
 
             assert(self.is_claimable(user, calldata), 'Quest not claimable');
-            // This should be applied only for main quest, not dailys, otherwise dailys become main
+
             self.claimed.write(user, true);
             let reward = self.reward.read();
 
