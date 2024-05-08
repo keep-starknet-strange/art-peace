@@ -10,7 +10,7 @@ import { usePreventZoom } from './utils/Window.js';
 import { backendUrl, wsUrl } from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
-import { fetchWrapper } from './services/apiService.js';
+// import { fetchWrapper } from './services/apiService.js';
 
 function App() {
   // Window management
@@ -103,7 +103,6 @@ function App() {
   const [selectedPositionX, setSelectedPositionX] = useState(null);
   const [selectedPositionY, setSelectedPositionY] = useState(null);
   const [pixelPlacedBy, setPixelPlacedBy] = useState('');
-
   const [extraPixels, setExtraPixels] = useState(0);
   const [extraPixelsUsed, setExtraPixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
@@ -215,6 +214,7 @@ function App() {
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
       />
+
       <img src={logo} alt='logo' className='App__logo--mobile' />
       <div
         className={

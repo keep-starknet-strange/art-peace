@@ -226,11 +226,65 @@ const CanvasContainer = (props) => {
     };
   }, [props.selectedColorId, props.nftMintingMode]);
 
+  // TODO: Get canvas
+  const getCanvasColor = () => {
+    let color = props.canvasRef.current
+      .getContext('2d')
+      .getImageData(
+        props.selectedPositionX,
+        props.selectedPositionY,
+        1,
+        1
+      ).data;
+
+    return (
+      '#' +
+      color[0].toString(16).padStart(2, '0') +
+      color[1].toString(16).padStart(2, '0') +
+      color[2].toString(16).padStart(2, '0') +
+      color[3].toString(16).padStart(2, '0')
+    );
+  };
+
+  // TODO: Check if canvas color is similar with extra pixel selected color
+  function findSimilarColorIndex(selectedColor) {
+    const hexToRgb = (hex) =>
+      hex
+        .replace('#', '')
+        .match(/.{2}/g)
+        .map((val) => parseInt(val, 16));
+    const colorDistance = (rgb1, rgb2) =>
+      rgb1.reduce((acc, val, i) => acc + Math.pow(val - rgb2[i], 2), 0);
+
+    const targetRgb = hexToRgb(selectedColor);
+    const threshold = 50;
+    return props.colors.findIndex(
+      (color) =>
+        colorDistance(hexToRgb(color), targetRgb) < Math.pow(threshold, 2)
+    );
+  }
+
   const getSelectedColorInverse = () => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
       return null;
     }
-    if (props.selectedColorId === -1) {
+
+    let canvasColor = getCanvasColor();
+    let selectedColor = '#' + props.colors[props.selectedColorId] + 'FF';
+    //TODO: Check if canvas color is == selectedColor
+    if (canvasColor.toLowerCase() == selectedColor.toLowerCase()) {
+      selectedColor = selectedColor.replace('#', '');
+      let selectedColorInverse =
+        '#' +
+        selectedColor
+          .match(/../g)
+          .map((val) => (255 - parseInt(val, 16)).toString(16).padStart(2, '0'))
+          .join('');
+      let selectedColorId = findSimilarColorIndex(selectedColorInverse);
+      props.setSelectedColorId(selectedColorId);
+    }
+
+    if (props.selectedColorId === -1 || props.selectedColorId == 0) {
       // TODO: Check if extra pixel placed at position
       let color = props.canvasRef.current
         .getContext('2d')
@@ -240,6 +294,7 @@ const CanvasContainer = (props) => {
           1,
           1
         ).data;
+
       return (
         '#' +
         (255 - color[0]).toString(16).padStart(2, '0') +
@@ -248,6 +303,7 @@ const CanvasContainer = (props) => {
         color[3].toString(16).padStart(2, '0')
       );
     }
+
     return '#' + props.colors[props.selectedColorId] + 'FF';
   };
 
