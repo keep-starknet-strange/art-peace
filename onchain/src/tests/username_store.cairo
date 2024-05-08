@@ -57,7 +57,7 @@ fn test_change_username() {
 }
 
 #[test]
-#[should_panic(expected: "User already has a username")]
+#[should_panic(expected: ('User already has a username',))]
 fn test_cannot_claim_multiple_usernames() {
     let contract_address = deploy_contract();
     let dispatcher = IUsernameStoreDispatcher { contract_address };
@@ -76,7 +76,7 @@ fn test_cannot_claim_multiple_usernames() {
 }
 
 #[test]
-#[should_panic(expected: "User cannot change because user does not have a username")]
+#[should_panic(expected: ('User cannot change because user does not have a username',))]
 fn test_cannot_change_with_no_username() {
     let contract_address = deploy_contract();
     let dispatcher = IUsernameStoreDispatcher { contract_address };
