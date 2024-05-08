@@ -46,3 +46,7 @@
   width: 100%;
   flex: 1;
 }
+
+.Rank__icon {
+  color: red;
+}

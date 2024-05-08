@@ -4,6 +4,7 @@ import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl } from '../../utils/Consts.js';
 import { fetchWrapper } from '../../services/apiService.js';
+import StarIcon from '../../icons/star.js';
 
 const Account = (props) => {
   // TODO: Icons for each rank & buttons
@@ -138,7 +139,9 @@ const Account = (props) => {
 
       <h2 className='Text__medium Heading__sub Account__subheader'>Stats</h2>
       <p className='Text__small Account__item'>Pixels placed: {pixelCount}</p>
-      <p className='Text__small Account__item'>Rank: {accountRank}</p>
+      <p className='Text__small Account__item'>
+        Rank: {accountRank} <StarIcon width='24' color='#FFAA00' />
+      </p>
     </BasicTab>
   );
 };
