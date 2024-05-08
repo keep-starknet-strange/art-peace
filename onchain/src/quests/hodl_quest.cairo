@@ -2,7 +2,7 @@
 pub mod HodlQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{IQuest, QuestClaimed};
+    use art_peace::quests::{IQuest};
 
     #[storage]
     struct Storage {
@@ -10,12 +10,6 @@ pub mod HodlQuest {
         reward: u32,
         extra_pixel: u32,
         claimed: LegacyMap<ContractAddress, bool>,
-    }
-
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        QuestClaimed: QuestClaimed,
     }
 
 
@@ -64,7 +58,6 @@ pub mod HodlQuest {
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }
