@@ -1,14 +1,15 @@
 import React from 'react';
 
-const ColoredIcon = ({ width, color, path }) => {
+const ColoredIcon = (props) => {
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
-      width={width}
-      height={width}
+      width={props.width}
+      height={props.width}
       viewBox='0 0 24 24'
+      style={props.style}
     >
-      <path fill={color} d={path} />
+      <path fill={props.color} d={props.path} />
     </svg>
   );
 };

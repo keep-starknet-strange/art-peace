@@ -8,6 +8,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  transition: width 0.2s;
 
   background-image: linear-gradient(
     to bottom right,
