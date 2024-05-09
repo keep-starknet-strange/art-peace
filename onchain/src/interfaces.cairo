@@ -22,7 +22,7 @@ pub trait IArtPeace<TContractState> {
     // Place pixels on the canvas
     fn place_pixel(ref self: TContractState, pos: u128, color: u8);
     fn place_pixel_xy(ref self: TContractState, x: u128, y: u128, color: u8);
-    fn place_extra_pixels(ref self: TContractState, positions: Array<u128>, colors: Array<u8>);
+    fn place_extra_pixels(ref self: TContractState, positions: Span<u128>, colors: Span<u8>);
 
     // Get placement info
     fn get_last_placed_time(self: @TContractState) -> u64;
