@@ -4,6 +4,7 @@ import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl } from '../../utils/Consts.js';
 import { fetchWrapper } from '../../services/apiService.js';
+import ColoredIcon from '../../icons/ColoredIcon.js';
 
 const Account = (props) => {
   // TODO: Icons for each rank & buttons
@@ -18,6 +19,10 @@ const Account = (props) => {
   const [usernameSaved, setUsernameSaved] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
+  const [rankColor, setRankColor] = useState('');
+  const path = useState(
+    'm5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275z'
+  );
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -71,16 +76,23 @@ const Account = (props) => {
   useEffect(() => {
     if (pixelCount >= 5000) {
       setAccountRank('Champion');
+      setRankColor('#B9F2FF');
     } else if (pixelCount >= 3000) {
       setAccountRank('Platinum');
+      setRankColor('#E5E4E2');
     } else if (pixelCount >= 2000) {
       setAccountRank('Gold');
+      setRankColor('#FFAA00');
     } else if (pixelCount >= 1000) {
       setAccountRank('Silver');
+      setRankColor('#C0C0C0');
     } else {
       setAccountRank('Bronze');
+      setRankColor('#CD7F32');
     }
   }, [pixelCount]);
+
+  // TODO: Add a shimmer effect to the rank icon
 
   return (
     <BasicTab title='Account' setActiveTab={props.setActiveTab}>
@@ -138,7 +150,15 @@ const Account = (props) => {
 
       <h2 className='Text__medium Heading__sub Account__subheader'>Stats</h2>
       <p className='Text__small Account__item'>Pixels placed: {pixelCount}</p>
-      <p className='Text__small Account__item'>Rank: {accountRank}</p>
+      <p className='Text__small Account__item'>
+        Rank: {accountRank}
+        <ColoredIcon
+          width='3rem'
+          color={rankColor}
+          path={path}
+          style={{ marginLeft: '0.5rem' }}
+        />
+      </p>
     </BasicTab>
   );
 };
