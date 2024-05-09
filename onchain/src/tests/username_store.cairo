@@ -1,14 +1,15 @@
+use art_peace::tests::utils;
 use art_peace::username_store::interfaces::{
     IUsernameStoreDispatcher, IUsernameStoreDispatcherTrait
 };
 
-use art_peace::tests::utils;
-use starknet::{ContractAddress, get_caller_address, contract_address_const};
 use snforge_std as snf;
-use snforge_std::{declare, CheatTarget, ContractClassTrait};
+use snforge_std::{CheatTarget, ContractClassTrait};
+
+use starknet::{ContractAddress, get_caller_address, contract_address_const};
 
 fn deploy_contract() -> ContractAddress {
-    let contract = declare("UsernameStore");
+    let contract = snf::declare("UsernameStore");
 
     return contract.deploy(@ArrayTrait::new()).unwrap();
 }
@@ -87,4 +88,16 @@ fn test_cannot_change_with_no_username() {
     dispatcher.change_username(username);
 
     snf::stop_prank(CheatTarget::One(contract_address));
+}
+
+#[test]
+#[should_panic(expected: 'Username already claimed')]
+fn test_claim_same_username_twice() {
+    let contract_address = deploy_contract();
+    let dispatcher = IUsernameStoreDispatcher { contract_address };
+    dispatcher.claim_username('devsweet');
+
+    snf::start_prank(CheatTarget::One(contract_address), utils::PLAYER1());
+
+    dispatcher.claim_username('devsweet');
 }
