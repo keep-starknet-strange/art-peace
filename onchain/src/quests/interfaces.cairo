@@ -1,12 +1,5 @@
 use starknet::ContractAddress;
 
-#[derive(Drop, starknet::Event)]
-pub struct QuestClaimed {
-    pub user: ContractAddress,
-    pub reward: u32,
-    pub calldata: Span<felt252>,
-}
-
 #[starknet::interface]
 pub trait IQuest<TContractState> {
     // Return the reward for the quest.
@@ -19,6 +12,7 @@ pub trait IQuest<TContractState> {
 
 #[starknet::interface]
 pub trait IAuthorityQuest<TContractState> {
+    fn is_claimed(self: @TContractState, user: ContractAddress) -> bool;
     fn mark_claimable(ref self: TContractState, calldata: Span<felt252>);
 }
 
@@ -30,6 +24,11 @@ pub trait IPixelQuest<TContractState> {
     fn claim_day(self: @TContractState) -> u32;
     fn is_color(self: @TContractState) -> bool;
     fn color(self: @TContractState) -> u8;
+}
+
+#[starknet::interface]
+pub trait IRainbowQuest<TContractState> {
+    fn is_claimed(self: @TContractState, user: starknet::ContractAddress) -> bool;
 }
 
 #[starknet::interface]
