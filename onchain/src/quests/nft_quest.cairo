@@ -5,7 +5,6 @@ pub mod NFTMintQuest {
 
     use starknet::{ContractAddress, get_caller_address};
 
-
     #[storage]
     struct Storage {
         canvas_nft: ContractAddress,

@@ -205,6 +205,17 @@ fn pixel_quests_daily_no_color_double_invalid_claim_test() {
         contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
     };
 
+
+#[test]
+#[should_panic(expected: 'Quest not claimable',)]
+fn pixel_quests_daily_no_color_double_invalid_claim_test() {
+    let pixel_quest = snf::declare("PixelQuest");
+    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
+    let main_quests = deploy_pixel_quests_main(pixel_quest);
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
+    };
+
     let x = 10;
     let y = 20;
     let pos = x + y * WIDTH;

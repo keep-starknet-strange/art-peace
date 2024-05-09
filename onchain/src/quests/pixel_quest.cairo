@@ -2,7 +2,7 @@
 pub mod PixelQuest {
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
     use art_peace::quests::{IQuest, IPixelQuest};
-
+    
     use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
@@ -115,8 +115,8 @@ pub mod PixelQuest {
                 get_caller_address() == self.art_peace.read().contract_address,
                 'Only ArtPeace can claim quests'
             );
-
             assert(self.is_claimable(user, calldata), 'Quest not claimable');
+            
             // This should be applied only for main quest, not dailys, otherwise dailys become main
             self.claimed.write(user, true);
             let reward = self.reward.read();
