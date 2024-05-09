@@ -43,15 +43,15 @@ pub mod UsernameStore {
         fn claim_username(ref self: ContractState, key: felt252) {
             let caller_address = get_caller_address();
 
+            assert(
+                self.user_to_username.read(caller_address) == 0,
+                UserNameClaimErrors::USER_HAS_USERNAME
+            );
+
             let username_address = self.usernames.read(key);
             assert(
                 username_address == contract_address_const::<0>(),
                 UserNameClaimErrors::USERNAME_CLAIMED
-            );
-
-            assert(
-                self.user_to_username.read(caller_address) == 0,
-                UserNameClaimErrors::USER_HAS_USERNAME
             );
 
             self.usernames.write(key, caller_address);
