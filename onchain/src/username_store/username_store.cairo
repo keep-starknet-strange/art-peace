@@ -72,7 +72,7 @@ pub mod UsernameStore {
                 )
         }
 
-        fn get_username(ref self: ContractState, key: felt252) -> ContractAddress {
+        fn get_username_address(ref self: ContractState, key: felt252) -> ContractAddress {
             self.usernames.read(key)
         }
     }

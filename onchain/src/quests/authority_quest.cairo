@@ -1,9 +1,9 @@
 #[starknet::contract]
 pub mod AuthorityQuest {
-    use core::traits::TryInto;
-    use starknet::{ContractAddress, get_caller_address};
     use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
     use art_peace::quests::{IAuthorityQuest, IQuest};
+    
+    use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {

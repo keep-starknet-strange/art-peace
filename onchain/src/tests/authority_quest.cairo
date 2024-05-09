@@ -3,12 +3,14 @@ use art_peace::quests::authority_quest::AuthorityQuest::AuthorityQuestInitParams
 use art_peace::quests::interfaces::{IAuthorityQuestDispatcher, IAuthorityQuestDispatcherTrait};
 use art_peace::tests::art_peace::deploy_with_quests_contract;
 use art_peace::tests::utils;
+
 use snforge_std as snf;
-use snforge_std::{declare, CheatTarget, ContractClassTrait};
+use snforge_std::{CheatTarget, ContractClassTrait};
+
 use starknet::{ContractAddress, get_contract_address, contract_address_const};
 
 fn deploy_authority_quest_main() -> ContractAddress {
-    let authority_quest = declare("AuthorityQuest");
+    let authority_quest = snf::declare("AuthorityQuest");
     let mut authority_calldata = array![];
     AuthorityQuestInitParams {
         art_peace: utils::ART_PEACE_CONTRACT(), authority: get_contract_address(), reward: 20,
@@ -104,4 +106,24 @@ fn authority_quest_double_claim_test() {
     );
 
     art_peace.claim_main_quest(0, calldata);
+}
+
+#[test]
+#[should_panic(expected: ('Quest not claimable',))]
+fn authority_quest_claim_if_not_claimable_test() {
+    let main_authority_quest = deploy_authority_quest_main();
+
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(
+            array![].span(), array![main_authority_quest].span()
+        )
+    };
+
+    let calldata: Span<felt252> = array![utils::PLAYER1().try_into().unwrap()].span();
+
+    snf::start_prank(
+        target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER1()
+    );
+    art_peace.claim_main_quest(0, calldata);
+
 }

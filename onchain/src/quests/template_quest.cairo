@@ -1,8 +1,9 @@
 #[starknet::contract]
 pub mod TemplateQuest {
-    use starknet::{ContractAddress, get_caller_address};
     use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
     use art_peace::quests::IQuest;
+
+    use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {
