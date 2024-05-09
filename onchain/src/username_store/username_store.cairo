@@ -42,7 +42,7 @@ pub mod UsernameStore {
     impl UsernameStore of IUsernameStore<ContractState> {
         fn claim_username(ref self: ContractState, key: felt252) {
             let caller_address = get_caller_address();
-    
+
             let username_address = self.usernames.read(key);
             assert(
                 username_address == contract_address_const::<0>(),

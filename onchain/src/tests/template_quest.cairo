@@ -103,7 +103,7 @@ fn template_quest_claim_not_creator_test() {
 
     let calldata: Array<felt252> = array![0];
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
-    
+
     art_peace.claim_main_quest(0, calldata.span());
 }
 

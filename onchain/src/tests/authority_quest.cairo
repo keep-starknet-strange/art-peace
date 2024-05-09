@@ -124,7 +124,6 @@ fn authority_quest_claim_if_not_claimable_test() {
     snf::start_prank(
         target: CheatTarget::One(art_peace.contract_address), caller_address: utils::PLAYER1()
     );
-    
-    art_peace.claim_main_quest(0, calldata);
 
+    art_peace.claim_main_quest(0, calldata);
 }
