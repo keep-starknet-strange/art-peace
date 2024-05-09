@@ -103,13 +103,8 @@ fn template_quest_claim_not_creator_test() {
 
     let calldata: Array<felt252> = array![0];
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
+    
     art_peace.claim_main_quest(0, calldata.span());
-    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
-
-    assert!(
-        art_peace.get_user_extra_pixels_count(utils::PLAYER1()) == reward_amt,
-        "Extra pixels are wrong after main quest claim"
-    );
 }
 
 #[test]
@@ -124,11 +119,6 @@ fn template_quest_claim_no_template_added_test() {
 
     let calldata: Array<felt252> = array![0];
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
-    art_peace.claim_main_quest(0, calldata.span());
-    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
 
-    assert!(
-        art_peace.get_user_extra_pixels_count(utils::PLAYER1()) == reward_amt,
-        "Extra pixels are wrong after main quest claim"
-    );
+    art_peace.claim_main_quest(0, calldata.span());
 }
