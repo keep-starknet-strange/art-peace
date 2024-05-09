@@ -26,7 +26,6 @@ fn test_claim_username() {
     assert!(username_address == utils::PLAYER1(), "User didn't claim name");
     let username = dispatcher.get_username(utils::PLAYER1());
     assert!(username == 'deal', "Username not claimed");
-    snf::stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
@@ -53,8 +52,6 @@ fn test_change_username() {
 
     let old_username_address = dispatcher.get_username_address(initial_username);
     assert!(old_username_address == contract_address_const::<0>(), "Old username not unlinked");
-
-    snf::stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
@@ -72,8 +69,6 @@ fn test_cannot_claim_multiple_usernames() {
     // Attempt to claim another username
     let new_username = 'devcool';
     dispatcher.claim_username(new_username);
-
-    snf::stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
@@ -86,8 +81,6 @@ fn test_cannot_change_with_no_username() {
 
     let username = 'devsweet';
     dispatcher.change_username(username);
-
-    snf::stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
