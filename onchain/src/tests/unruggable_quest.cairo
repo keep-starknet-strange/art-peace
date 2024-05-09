@@ -95,5 +95,6 @@ fn unruggable_quest_claim_if_not_claimable_test() {
     };
 
     let calldata: Span<felt252> = array![].span();
+    
     art_peace.claim_main_quest(0, calldata);
 }
