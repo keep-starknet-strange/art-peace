@@ -49,11 +49,12 @@ type IndexerMessage struct {
 }
 
 const (
-	pixelPlacedEvent   = "0x02d7b50ebf415606d77c7e7842546fc13f8acfbfd16f7bcf2bc2d08f54114c23"
-	nftMintedEvent     = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
-	templateAddedEvent = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
-	voteColorEvent     = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
-	newDay             = "0x019cdbd24e137c00d1feb99cc0b48b86b676f6b69c788c7f112afeb8cd614c16"
+	pixelPlacedEvent       = "0x02d7b50ebf415606d77c7e7842546fc13f8acfbfd16f7bcf2bc2d08f54114c23"
+	extraPixelsPlacedEvent = "0x000e8f5c4e6f651bf4c7b093805f85c9b8ec2ec428210f90a4c9c135c347f48c"
+	nftMintedEvent         = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
+	templateAddedEvent     = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
+	voteColorEvent         = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
+	newDay                 = "0x019cdbd24e137c00d1feb99cc0b48b86b676f6b69c788c7f112afeb8cd614c16"
 )
 
 // TODO: User might miss some messages between loading canvas and connecting to websocket?
@@ -70,6 +71,8 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		eventKey := event.Event.Keys[0]
 		if eventKey == pixelPlacedEvent {
 			processPixelPlacedEvent(event, w)
+		} else if eventKey == extraPixelsPlacedEvent {
+			processExtraPixelsPlacedEvent(event, w)
 		} else if eventKey == nftMintedEvent {
 			processNFTMintedEvent(event, w)
 		} else if eventKey == templateAddedEvent {
@@ -163,6 +166,51 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 
 	WriteResultJson(w, "Pixel placement indexed successfully")
+}
+
+func processExtraPixelsPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
+	placedByAddress := event.Event.Keys[1][2:]
+	positionsLenHex := event.Event.Data[0]
+
+	positionsLen, err := strconv.ParseInt(positionsLenHex, 0, 64)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error converting positionsLen hex to int")
+		return
+	}
+
+	colorsLenHex := event.Event.Data[1+positionsLen]
+	colorsLen, err := strconv.ParseInt(colorsLenHex, 0, 64)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error converting colorsLen hex to int")
+		return
+	}
+	if colorsLen != positionsLen {
+		WriteErrorJson(w, http.StatusBadRequest, "Colors length does not match positions length")
+		return
+	}
+
+	// Get Address extra pixels in postgres
+	var available, used int64
+	err = core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(),
+		"SELECT available, used FROM ExtraPixels WHERE address = $1", placedByAddress).Scan(&available, &used)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error getting ExtraPixels into postgres")
+		return
+	}
+
+	// Set new extra pixels in postgres
+	new_available := available - positionsLen
+	new_used := used + positionsLen
+	if new_available < 0 {
+		WriteErrorJson(w, http.StatusBadRequest, "Not enough available extra pixels")
+		return
+	}
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE ExtraPixels SET available = $1, used = $2 WHERE address = $3", new_available, new_used, placedByAddress)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error updating ExtraPixels in postgres")
+		return
+	}
 }
 
 func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
