@@ -60,6 +60,7 @@ pub mod ArtPeace {
         MainQuestClaimed: MainQuestClaimed,
         Newday: NewDay,
         PixelPlaced: PixelPlaced,
+        ExtraPixelsPlaced: ExtraPixelsPlaced,
         VoteColor: VoteColor,
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
@@ -81,6 +82,16 @@ pub mod ArtPeace {
         #[key]
         day: u32,
         color: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ExtraPixelsPlaced {
+        #[key]
+        placed_by: ContractAddress,
+        #[key]
+        day: u32,
+        positions: Span<u128>,
+        colors: Span<u8>,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -247,7 +258,7 @@ pub mod ArtPeace {
             self.place_pixel(pos, color);
         }
 
-        fn place_extra_pixels(ref self: ContractState, positions: Array<u128>, colors: Array<u8>) {
+        fn place_extra_pixels(ref self: ContractState, positions: Span<u128>, colors: Span<u8>) {
             let now = starknet::get_block_timestamp();
             assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             let pixel_count = positions.len();
@@ -275,7 +286,7 @@ pub mod ArtPeace {
                 self.emit(PixelPlaced { placed_by: caller, pos, day, color });
             };
             self.extra_pixels.write(caller, extra_pixels - pixel_count);
-        //TODO: to extra pixel self.emit(ExtraPixelsPlaced { placed_by: caller, positions, day, colors });
+            self.emit(ExtraPixelsPlaced { placed_by: caller, positions, day, colors });
         }
 
         fn get_last_placed_time(self: @ContractState) -> u64 {
