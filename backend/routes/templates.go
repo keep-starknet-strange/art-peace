@@ -43,21 +43,23 @@ func hashTemplateImage(pixelData []byte) string {
 	return hash.String()
 }
 
-func imageToPixelData(imageData []byte) ([]byte, error) {
+func bytesToRGBA(colorBytes []byte) color.RGBA {
+	r := colorBytes[0]
+	g := colorBytes[1]
+	b := colorBytes[2]
+	return color.RGBA{r, g, b, 0xFF}
+}
+
+func imageToPixelData(imageData []byte, colorsData []byte) ([]byte, error) {
 	img, _, err := image.Decode(bytes.NewReader(imageData))
 	if err != nil {
 		return nil, err
 	}
 
-	palette := []color.Color{
-		color.RGBA{0x00, 0x00, 0x00, 0xFF}, // Black
-		color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, // White
-		color.RGBA{0xFF, 0x00, 0x00, 0xFF}, // Red
-		color.RGBA{0x00, 0xFF, 0x00, 0xFF}, // Green
-		color.RGBA{0x00, 0x00, 0xFF, 0xFF}, // Blue
-		color.RGBA{0xFF, 0xFF, 0x00, 0xFF}, // Yellow
-		color.RGBA{0xFF, 0x00, 0xFF, 0xFF}, // Magenta
-		color.RGBA{0x00, 0xFF, 0xFF, 0xFF}, // Cyan
+	colorCount := len(colorsData) / 3
+	palette := make([]color.Color, colorCount)
+	for i := 0; i < colorCount; i++ {
+		palette[i] = bytesToRGBA(colorsData[i*3 : i*3+3])
 	}
 
 	bounds := img.Bounds()
@@ -78,6 +80,7 @@ func imageToPixelData(imageData []byte) ([]byte, error) {
 
 	return pixelData, nil
 }
+
 
 func findClosestColor(target color.RGBA, palette []color.Color) int {
 	minDistance := math.MaxFloat64
@@ -139,6 +142,9 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Seek the file pointer back to the beginning of the file
+	file.Seek(0, 0)
+
 	// Read all data from the uploaded file and write it to the temporary file
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
@@ -148,7 +154,13 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	imageData, err := imageToPixelData(fileBytes)
+	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM colors ORDER BY key")
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve colors")
+		return
+	}
+
+	imageData, err := imageToPixelData(fileBytes, colors)
 	if err != nil {
 		panic(err)
 	}
