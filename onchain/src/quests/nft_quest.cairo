@@ -1,39 +1,33 @@
 #[starknet::contract]
-pub mod UnruggableQuest {
+pub mod NFTMintQuest {
     use starknet::{ContractAddress, get_caller_address};
-    use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{
-        IQuest, IUnruggableQuest, IUnruggableMemecoinDispatcher, IUnruggableMemecoinDispatcherTrait
-    };
+    use art_peace::nfts::interfaces::{ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait};
+    use art_peace::quests::IQuest;
 
     #[storage]
     struct Storage {
+        canvas_nft: ContractAddress,
         art_peace: ContractAddress,
         reward: u32,
         claimed: LegacyMap<ContractAddress, bool>,
     }
 
     #[derive(Drop, Serde)]
-    pub struct UnruggableQuestInitParams {
+    pub struct NFTMintQuestInitParams {
+        pub canvas_nft: ContractAddress,
         pub art_peace: ContractAddress,
         pub reward: u32,
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: UnruggableQuestInitParams) {
+    fn constructor(ref self: ContractState, init_params: NFTMintQuestInitParams) {
+        self.canvas_nft.write(init_params.canvas_nft);
         self.art_peace.write(init_params.art_peace);
         self.reward.write(init_params.reward);
     }
 
     #[abi(embed_v0)]
-    impl UnruggableQuestImpl of IUnruggableQuest<ContractState> {
-        fn is_claimed(self: @ContractState, user: ContractAddress) -> bool {
-            self.claimed.read(user)
-        }
-    }
-
-    #[abi(embed_v0)]
-    impl UnruggableQuest of IQuest<ContractState> {
+    impl NFTMintQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
             self.reward.read()
         }
@@ -45,20 +39,17 @@ pub mod UnruggableQuest {
                 return false;
             }
 
-            let coin_address_as_felt252: felt252 = *calldata.at(0);
-            let coin = IUnruggableMemecoinDispatcher {
-                contract_address: coin_address_as_felt252.try_into().unwrap()
-            };
+            let token_id_felt = *calldata.at(0);
+            let token_id: u256 = token_id_felt.into();
 
-            if coin.owner() != user {
+            let nft_store = ICanvasNFTStoreDispatcher { contract_address: self.canvas_nft.read() };
+            let token_minter = nft_store.get_nft_minter(token_id);
+
+            if token_minter != user {
                 return false;
             }
 
-            if coin.is_launched() != true {
-                return false;
-            }
-
-            true
+            return true;
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
@@ -73,4 +64,3 @@ pub mod UnruggableQuest {
         }
     }
 }
-

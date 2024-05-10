@@ -24,8 +24,9 @@ const Quests = (props) => {
 
   const localDailyQuests = [
     {
-      name: 'Place 10 pixels',
-      description: 'Add 10 pixels on the canvas',
+      title: 'Place 10 pixels',
+      description:
+        'Add 10 pixels on the canvas [art/peace theme](https://www.google.com/)',
       reward: '3',
       status: 'completed'
     },

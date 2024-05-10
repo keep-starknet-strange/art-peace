@@ -10,6 +10,7 @@ import { usePreventZoom } from './utils/Window.js';
 import { backendUrl, wsUrl } from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
+import { fetchWrapper } from './services/apiService.js';
 
 function App() {
   // Window management
@@ -132,17 +133,16 @@ function App() {
   }, [basePixelUp, factionPixels, extraPixels]);
 
   useEffect(() => {
-    let getExtraPixelsEndpoint = `${backendUrl}/get-extra-pixels?address=${address}`;
-    fetch(getExtraPixelsEndpoint).then((response) => {
-      response
-        .json()
-        .then((result) => {
-          setExtraPixels(result.data + 10);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    });
+    async function fetchExtraPixelsEndpoint() {
+      let extraPixelsResponse = await fetchWrapper(
+        `get-extra-pixels?address=${address}`
+      );
+      if (!extraPixelsResponse.data) {
+        return;
+      }
+      setExtraPixels(extraPixelsResponse.data + 10);
+    }
+    fetchExtraPixelsEndpoint();
 
     /*
     let getFactionPixelsEndpoint = `${backendUrl}/get-faction-pixels?address=${address}`;

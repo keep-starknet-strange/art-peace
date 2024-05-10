@@ -5,6 +5,7 @@ import TemplateItem from './TemplateItem.js';
 import ExpandableTab from '../ExpandableTab.js';
 import { backendUrl } from '../../utils/Consts.js';
 import canvasConfig from '../../configs/canvas.config.json';
+import { fetchWrapper } from '../../services/apiService.js';
 
 const TemplatesMainSection = (props) => {
   // Each color represented as 'RRGGBB'
@@ -433,22 +434,18 @@ const Templates = (props) => {
       return;
     }
 
-    let getTemplatesEndpoint = backendUrl + '/get-templates';
-    fetch(getTemplatesEndpoint, {
-      mode: 'cors'
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        if (response.data === null) {
-          response.data = [];
-        }
-        setAvailableTemplates(response.data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
+    let getTemplatesEndpoint = 'get-templates';
+    async function getTemplates() {
+      const response = await fetchWrapper(getTemplatesEndpoint, {
+        mode: 'cors'
       });
+      if (response.data === null) {
+        response.data = [];
+      }
+      setAvailableTemplates(response.data);
+    }
+
+    getTemplates();
   }, [setup, backendUrl]);
 
   return (

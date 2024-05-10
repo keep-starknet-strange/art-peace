@@ -1,10 +1,8 @@
 #[starknet::contract]
-pub mod UnruggableQuest {
+pub mod RainbowQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{
-        IQuest, IUnruggableQuest, IUnruggableMemecoinDispatcher, IUnruggableMemecoinDispatcherTrait
-    };
+    use art_peace::quests::{IQuest, IRainbowQuest};
 
     #[storage]
     struct Storage {
@@ -14,26 +12,26 @@ pub mod UnruggableQuest {
     }
 
     #[derive(Drop, Serde)]
-    pub struct UnruggableQuestInitParams {
+    pub struct RainbowQuestInitParams {
         pub art_peace: ContractAddress,
         pub reward: u32,
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: UnruggableQuestInitParams) {
+    fn constructor(ref self: ContractState, init_params: RainbowQuestInitParams) {
         self.art_peace.write(init_params.art_peace);
         self.reward.write(init_params.reward);
     }
 
     #[abi(embed_v0)]
-    impl UnruggableQuestImpl of IUnruggableQuest<ContractState> {
+    impl RainbowQuestImpl of IRainbowQuest<ContractState> {
         fn is_claimed(self: @ContractState, user: ContractAddress) -> bool {
             self.claimed.read(user)
         }
     }
 
     #[abi(embed_v0)]
-    impl UnruggableQuest of IQuest<ContractState> {
+    impl RainbowQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
             self.reward.read()
         }
@@ -45,20 +43,21 @@ pub mod UnruggableQuest {
                 return false;
             }
 
-            let coin_address_as_felt252: felt252 = *calldata.at(0);
-            let coin = IUnruggableMemecoinDispatcher {
-                contract_address: coin_address_as_felt252.try_into().unwrap()
-            };
+            let art_piece = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
 
-            if coin.owner() != user {
-                return false;
-            }
+            let mut result = true;
+            let mut i = 0;
+            while i < art_piece
+                .get_color_count() {
+                    if (art_piece.get_user_pixels_placed_color(user, i) == 0) {
+                        result = false;
+                        break;
+                    }
 
-            if coin.is_launched() != true {
-                return false;
-            }
+                    i += 1;
+                };
 
-            true
+            result
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {

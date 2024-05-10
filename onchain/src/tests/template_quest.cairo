@@ -5,9 +5,11 @@ use art_peace::templates::interfaces::{
 };
 use art_peace::tests::art_peace::deploy_with_quests_contract;
 use art_peace::tests::utils;
-use starknet::{ContractAddress, get_caller_address, get_contract_address, contract_address_const};
+
 use snforge_std as snf;
 use snforge_std::{declare, CheatTarget, ContractClassTrait};
+
+use starknet::{ContractAddress, get_caller_address, contract_address_const};
 
 const reward_amt: u32 = 18;
 

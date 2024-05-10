@@ -5,76 +5,82 @@ import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl, devnetMode } from '../../utils/Consts.js';
 import { fetchWrapper } from '../../services/apiService.js';
+import ColoredIcon from '../../icons/ColoredIcon.js';
 
 const Account = (props) => {
   // TODO: Icons for each rank & buttons
-  // TODO: Button to cancel username edit
   const [username, setUsername] = useState('');
   const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState('');
 
   const [usernameSaved, setUsernameSaved] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
+  const [rankColor, setRankColor] = useState('');
+  const path = useState(
+    'm5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275z'
+  );
 
-  const handleSubmit = (event) => {
+  // TODO: Pending & ... options for edit
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const newUsernameResponse = fetchWrapper('new-username-devnet', {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({
-        username: username
-      })
-    });
-    if (newUsernameResponse.result) {
+    let usernameResponse;
+    if (usernameBeforeEdit === '') {
+      usernameResponse = await fetchWrapper('new-username-devnet', {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          username: username
+        })
+      });
+    } else {
+      usernameResponse = await fetchWrapper('change-username-devnet', {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          username: username
+        })
+      });
+    }
+    if (usernameResponse.result) {
       // TODO: Only change if tx is successful
       setUsername(username);
       setUsernameSaved(true);
-      console.log(newUsernameResponse.result);
+      setIsEditing(false);
+      setUsernameBeforeEdit('');
+      console.log(usernameResponse.result);
     } else {
-      setUsername('');
+      setUsername(usernameBeforeEdit);
       setUsernameSaved(false);
+      setIsEditing(false);
+      setUsernameBeforeEdit('');
     }
   };
 
-  const editUsername = async () => {
-    setUsernameSaved(false);
-    const updateUsernameResult = await fetchWrapper('change-username-devnet', {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({
-        username: username
-      })
-    });
-    if (updateUsernameResult.result) {
-      setUsername(username);
-      setUsernameSaved(true);
-      console.log(updateUsernameResult.result);
-    } else {
-      setUsername('');
-      setUsernameSaved(false);
-    }
+  const editUsername = () => {
+    setIsEditing(true);
+    setUsernameBeforeEdit(username);
+  };
+
+  const handleCancelEdit = () => {
+    setUsername(usernameBeforeEdit);
+    setIsEditing(false);
+    setUsernameBeforeEdit('');
   };
 
   useEffect(() => {
-    const getUsernameUrl = `${backendUrl}/get-username?address=${props.address}`;
-    fetch(getUsernameUrl)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch username');
-        }
-        return res.json();
-      })
-      .then((result) => {
-        if (result.data === null || result.data === '') {
-          setUsername('');
-          setUsernameSaved(false);
-        } else {
-          setUsername(result.data);
-          setUsernameSaved(true);
-        }
-      })
-      .catch((error) => {
-        console.error('Failed to fetch username:', error);
-      });
+    const getUsernameUrl = `get-username?address=${props.address}`;
+    async function fetchUsernameUrl() {
+      const result = await fetchWrapper(getUsernameUrl);
+      if (result.data === null || result.data === '') {
+        setUsername('');
+        setUsernameSaved(false);
+      } else {
+        setUsername(result.data);
+        setUsernameSaved(true);
+      }
+    }
+    fetchUsernameUrl();
   }, [props.address]);
 
   useEffect(() => {
@@ -95,33 +101,44 @@ const Account = (props) => {
   useEffect(() => {
     if (pixelCount >= 50) {
       setAccountRank('Alpha Wolf');
+      setRankColor('#B9F2FF');
     } else if (pixelCount >= 30) {
       setAccountRank('Degen Artist');
+      setRankColor('#FFAA00');
     } else if (pixelCount >= 10) {
       setAccountRank('Pixel Sensei');
+      setRankColor('#C0C0C0');
     } else {
       setAccountRank('Art Beggar');
+      setRankColor('#CD7F32');
     }
   }, [pixelCount]);
 
   const connectWallet = async () => {
     const starknet = await connect();
+    if (!starknet) {
+      return;
+    }
 
     let [addr] = await starknet.enable();
     if (devnetMode) {
       // TODO: to lowercase on frontend and/or backend for all hex/address calls
       addr = '328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0';
-    } else {
-      addr = addr.toLowerCase();
-      addr = addr.slice(2);
+      props.setupStarknet(addr, starknet);
+      return;
     }
     if (addr && addr.length > 0) {
+      addr = addr.toLowerCase();
+      addr = addr.slice(2);
       props.setupStarknet(addr, starknet);
     }
   };
 
   // TODO: Ethereum login
   // TODO: Change layout based on if connected or not
+  // TODO: Add a shimmer effect to the rank icon
+  // TODO: Addr overflow with ellipsis
+
   return (
     <BasicTab
       title='Account'
@@ -140,7 +157,7 @@ const Account = (props) => {
       <p className='Text__small Account__item Account__address'>
         Address: 0x{props.address}
       </p>
-      {usernameSaved ? (
+      {usernameSaved && !isEditing ? (
         <div className='Text__small Account__special Account__username'>
           <p style={{ margin: 0, padding: 0 }}>Username: {username}</p>
           <div
@@ -164,19 +181,37 @@ const Account = (props) => {
               required
               onChange={(e) => setUsername(e.target.value)}
             />
-            <button
-              className='Text__small Button__primary Account__username__button'
-              type='submit'
-            >
-              submit
-            </button>
+            <div>
+              {isEditing && (
+                <button
+                  className='Text__small Button__primary Account__username__button'
+                  onClick={handleCancelEdit}
+                >
+                  cancel
+                </button>
+              )}
+              <button
+                className='Text__small Button__primary Account__username__button'
+                type='submit'
+              >
+                submit
+              </button>
+            </div>
           </form>
         </div>
       )}
 
       <h2 className='Text__medium Heading__sub Account__subheader'>Stats</h2>
       <p className='Text__small Account__item'>Pixels placed: {pixelCount}</p>
-      <p className='Text__small Account__item'>Rank: {accountRank}</p>
+      <p className='Text__small Account__item'>
+        Rank: {accountRank}
+        <ColoredIcon
+          width='3rem'
+          color={rankColor}
+          path={path}
+          style={{ marginLeft: '0.5rem' }}
+        />
+      </p>
     </BasicTab>
   );
 };

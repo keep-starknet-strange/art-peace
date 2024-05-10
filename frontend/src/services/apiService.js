@@ -34,9 +34,6 @@ export const getVotableColors = async () => {
 export const voteColorDevnet = async (colorIdx) => {
   return await fetchWrapper('vote-color-devnet', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
     body: JSON.stringify({ colorIndex: colorIdx })
   });
 };
