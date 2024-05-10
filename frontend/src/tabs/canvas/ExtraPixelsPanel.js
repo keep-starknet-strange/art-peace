@@ -33,6 +33,9 @@ const ExtraPixelsPanel = (props) => {
       console.log(response.result);
     }
     clearAll();
+    props.setIsEraserMode(false);
+    props.setSelectorMode(false);
+    props.clearPixelSelection();
   };
 
   return (
