@@ -24,19 +24,19 @@ const Quests = (props) => {
 
   const localDailyQuests = [
     {
-      title: 'Place 10 pixels',
+      name: 'Place 10 pixels',
       description: 'Add 10 pixels on the canvas',
       reward: '3',
       status: 'completed'
     },
     {
-      title: 'Build a template',
+      name: 'Build a template',
       description: 'Create a template for the community to use',
       reward: '3',
       status: 'claim'
     },
     {
-      title: 'Deploy a Memecoin',
+      name: 'Deploy a Memecoin',
       description: 'Create an Unruggable memecoin',
       reward: '10',
       status: 'incomplete',
@@ -46,7 +46,7 @@ const Quests = (props) => {
 
   const localMainQuests = [
     {
-      title: 'Tweet #art/peace',
+      name: 'Tweet #art/peace',
       description: 'Tweet about art/peace using the hashtag & addr',
       reward: '10',
       status: 'incomplete',
@@ -57,13 +57,13 @@ const Quests = (props) => {
       )
     },
     {
-      title: 'Place 100 pixels',
+      name: 'Place 100 pixels',
       description: 'Add 100 pixels on the canvas',
       reward: '10',
       status: 'completed'
     },
     {
-      title: 'Mint art/peace NFT',
+      name: 'Mint art/peace NFT',
       description: 'Mint an NFT using the art/peace theme',
       reward: '5',
       status: 'incomplete'
@@ -74,23 +74,24 @@ const Quests = (props) => {
     const fetchQuests = async () => {
       try {
         // Fetching daily quests from backend
-        const getDailyQuestsEndpoint = backendUrl + '/get-daily-quests';
-        const dailyResponse = await fetch(getDailyQuestsEndpoint);
-        let dailyData = await dailyResponse.json().data;
+        const getTodaysQuestsEndpoint = backendUrl + '/get-todays-quests';
+        const dailyResponse = await fetch(getTodaysQuestsEndpoint);
+        let dailyData = await dailyResponse.json();
+        dailyData = dailyData.data;
         if (!dailyData) {
-          dailyData = [];
+          dailyData = localDailyQuests;
         }
-        dailyData.push(...localDailyQuests);
         setTodaysQuests(sortByCompleted(dailyData));
 
         // Fetching main quests from backend
         const getMainQuestsEndpoint = backendUrl + '/get-main-quests';
         const mainResponse = await fetch(getMainQuestsEndpoint);
-        let mainData = await mainResponse.json().data;
+        let mainData = await mainResponse.json();
+        mainData = mainData.data;
         if (!mainData) {
-          mainData = [];
+          // TODO: remove this & use []
+          mainData = localMainQuests;
         }
-        mainData.push(...localMainQuests);
         setMainQuests(sortByCompleted(mainData));
       } catch (error) {
         console.error('Failed to fetch quests', error);
@@ -101,6 +102,7 @@ const Quests = (props) => {
   }, []);
 
   const sortByCompleted = (arr) => {
+    /*TODO
     if (!arr) return [];
     const newArray = [];
     for (let i = 0; i < arr.length; i++) {
@@ -111,6 +113,8 @@ const Quests = (props) => {
       }
     }
     return newArray;
+    */
+    return arr;
   };
 
   return (
@@ -123,7 +127,7 @@ const Quests = (props) => {
         {todaysQuests.map((quest, index) => (
           <QuestItem
             key={index}
-            title={quest.title}
+            title={quest.name}
             description={quest.description}
             reward={quest.reward}
             status={quest.status}
@@ -135,7 +139,7 @@ const Quests = (props) => {
         {mainQuests.map((quest, index) => (
           <QuestItem
             key={index}
-            title={quest.title}
+            title={quest.name}
             description={quest.description}
             reward={quest.reward}
             status={quest.status}

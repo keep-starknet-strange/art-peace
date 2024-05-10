@@ -20,3 +20,7 @@ curl http://backend:8080/init-colors -X POST -d "[$COLORS]"
 echo "Setup the votable colors from the color config"
 VOTABLE_COLORS=$(cat /configs/canvas.config.json | jq -r '.votableColors | map("\"\(.)\"") | join(",")')
 curl http://backend:8080/init-votable-colors -X POST -d "[$VOTABLE_COLORS]"
+
+echo "Setup the quests from the quest config"
+QUESTS_CONFIG_FILE="/configs/quests.config.json"
+curl http://backend:8080/init-quests -X POST -d "@$QUESTS_CONFIG_FILE"

@@ -29,6 +29,12 @@ const TabPanel = (props) => {
           clearExtraPixels={props.clearExtraPixels}
           clearExtraPixel={props.clearExtraPixel}
           clearPixelSelection={props.clearPixelSelection}
+          setSelectedColorId={props.setSelectedColorId}
+          basePixelUp={props.basePixelUp}
+          factionPixels={props.factionPixels}
+          extraPixels={props.extraPixels}
+          availablePixels={props.availablePixels}
+          availablePixelsUsed={props.availablePixelsUsed}
         />
       )}
       {props.activeTab === 'Quests' && (
@@ -70,7 +76,12 @@ const TabPanel = (props) => {
         />
       )}
       {props.activeTab === 'Account' && (
-        <Account setActiveTab={props.setActiveTab} />
+        <Account
+          setActiveTab={props.setActiveTab}
+          connected={props.connected}
+          address={props.address}
+          setupStarknet={props.setupStarknet}
+        />
       )}
     </div>
   );

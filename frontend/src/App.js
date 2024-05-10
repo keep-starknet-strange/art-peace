@@ -34,6 +34,23 @@ function App() {
     };
   };
 
+  // Account
+  const [address, setAddress] = useState('0');
+  const [provider, setProvider] = useState();
+  const [connected, setConnected] = useState(false);
+
+  const setupStarknet = (addr, prov) => {
+    setAddress(addr);
+    setProvider(prov);
+    setConnected(true);
+  };
+
+  const _starknetData = () => {
+    return {
+      rpc: provider
+    };
+  };
+
   // Websocket
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(wsUrl, {
     share: false,
@@ -103,24 +120,45 @@ function App() {
   const [selectedPositionY, setSelectedPositionY] = useState(null);
   const [pixelPlacedBy, setPixelPlacedBy] = useState('');
 
-  const [extraPixels, setExtraPixels] = useState(0);
-  const [extraPixelsUsed, setExtraPixelsUsed] = useState(0);
+  const [basePixelUp, setBasePixelUp] = useState(true); // TODO: Base values
+  const [factionPixels, setFactionPixels] = useState(4);
+  const [extraPixels, setExtraPixels] = useState(10);
+  const [availablePixels, setAvailablePixels] = useState(0);
+  const [availablePixelsUsed, setAvailablePixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
 
   useEffect(() => {
-    const address = 0;
+    setAvailablePixels((basePixelUp ? 1 : 0) + factionPixels + extraPixels);
+  }, [basePixelUp, factionPixels, extraPixels]);
+
+  useEffect(() => {
     let getExtraPixelsEndpoint = `${backendUrl}/get-extra-pixels?address=${address}`;
     fetch(getExtraPixelsEndpoint).then((response) => {
       response
         .json()
         .then((result) => {
-          setExtraPixels(result.data);
+          setExtraPixels(result.data + 10);
         })
         .catch((error) => {
           console.error(error);
         });
     });
-  }, []);
+
+    /*
+    let getFactionPixelsEndpoint = `${backendUrl}/get-faction-pixels?address=${address}`;
+    fetch(getFactionPixelsEndpoint).then((response) => {
+      response
+        .json()
+        .then((result) => {
+          setFactionPixels(result.data + 4);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+    */
+    setFactionPixels(4); // TODO
+  }, [address]);
 
   const clearPixelSelection = () => {
     setSelectedPositionX(null);
@@ -137,7 +175,7 @@ function App() {
   };
 
   const clearExtraPixels = useCallback(() => {
-    setExtraPixelsUsed(0);
+    setAvailablePixelsUsed(0);
     setExtraPixelsData([]);
 
     const canvas = extraPixelsCanvasRef.current;
@@ -148,7 +186,7 @@ function App() {
   // TODO: thread safety?
   const clearExtraPixel = useCallback(
     (index) => {
-      setExtraPixelsUsed(extraPixelsUsed - 1);
+      setAvailablePixelsUsed(availablePixelsUsed - 1);
       setExtraPixelsData(extraPixelsData.filter((_, i) => i !== index));
       const canvas = extraPixelsCanvasRef.current;
       const context = canvas.getContext('2d');
@@ -157,7 +195,7 @@ function App() {
       const y = pixel.y;
       context.clearRect(x, y, 1, 1);
     },
-    [extraPixelsData, extraPixelsUsed, setExtraPixelsData, setExtraPixelsUsed]
+    [extraPixelsData, availablePixelsUsed]
   );
 
   const addExtraPixel = useCallback(
@@ -171,14 +209,14 @@ function App() {
         newExtraPixelsData[existingPixelIndex].colorId = selectedColorId;
         setExtraPixelsData(newExtraPixelsData);
       } else {
-        setExtraPixelsUsed(extraPixelsUsed + 1);
+        setAvailablePixelsUsed(availablePixelsUsed + 1);
         setExtraPixelsData([
           ...extraPixelsData,
           { x: x, y: y, colorId: selectedColorId }
         ]);
       }
     },
-    [extraPixelsData, extraPixelsUsed, selectedColorId]
+    [extraPixelsData, availablePixelsUsed, selectedColorId]
   );
 
   // NFTs
@@ -187,6 +225,43 @@ function App() {
   // Tabs
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
+  const [showExtraPixelsPanel, setShowExtraPixelsPanel] = useState(false);
+
+  useEffect(() => {
+    // TODO: If selecting into other tab, ask to stop selecting?
+    if (activeTab !== tabs[0] && showExtraPixelsPanel) {
+      clearExtraPixels();
+      setSelectedColorId(-1);
+      setShowExtraPixelsPanel(false);
+      return;
+    }
+
+    if (selectedColorId !== -1) {
+      if (availablePixels > (basePixelUp ? 1 : 0)) {
+        setActiveTab(tabs[0]);
+        setShowExtraPixelsPanel(true);
+        return;
+      } else {
+        setShowExtraPixelsPanel(false);
+        return;
+      }
+    } else {
+      if (availablePixelsUsed > 0) {
+        setActiveTab(tabs[0]);
+        setShowExtraPixelsPanel(true);
+        return;
+      } else {
+        setShowExtraPixelsPanel(false);
+        return;
+      }
+    }
+  }, [
+    activeTab,
+    selectedColorId,
+    availablePixels,
+    availablePixelsUsed,
+    basePixelUp
+  ]);
 
   useEffect(() => {
     if (lastJsonMessage) {
@@ -201,7 +276,7 @@ function App() {
         colors={colors}
         canvasRef={canvasRef}
         extraPixelsCanvasRef={extraPixelsCanvasRef}
-        extraPixels={extraPixels}
+        availablePixels={availablePixels}
         selectedColorId={selectedColorId}
         setSelectedColorId={setSelectedColorId}
         pixelSelectedMode={pixelSelectedMode}
@@ -210,7 +285,8 @@ function App() {
         setPixelSelection={setPixelSelection}
         clearPixelSelection={clearPixelSelection}
         setPixelPlacedBy={setPixelPlacedBy}
-        extraPixelsUsed={extraPixelsUsed}
+        basePixelUp={basePixelUp}
+        availablePixelsUsed={availablePixelsUsed}
         addExtraPixel={addExtraPixel}
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
@@ -224,6 +300,9 @@ function App() {
         }
       >
         <TabPanel
+          connected={connected}
+          address={address}
+          setupStarknet={setupStarknet}
           colors={colors}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -237,16 +316,18 @@ function App() {
           }
           selectedPositionX={selectedPositionX}
           selectedPositionY={selectedPositionY}
+          setSelectedColorId={setSelectedColorId}
           clearPixelSelection={clearPixelSelection}
           pixelPlacedBy={pixelPlacedBy}
-          showExtraPixelsPanel={
-            !isPortrait
-              ? extraPixelsUsed > 0
-              : extraPixelsUsed > 0 && activeTab === tabs[0]
-          }
+          showExtraPixelsPanel={showExtraPixelsPanel}
           extraPixelsData={extraPixelsData}
           clearExtraPixels={clearExtraPixels}
           clearExtraPixel={clearExtraPixel}
+          basePixelUp={basePixelUp}
+          factionPixels={factionPixels}
+          extraPixels={extraPixels}
+          availablePixels={availablePixels}
+          availablePixelsUsed={availablePixelsUsed}
         />
       </div>
       <div className='App__footer'>
@@ -255,8 +336,10 @@ function App() {
           selectedColorId={selectedColorId}
           setSelectedColorId={setSelectedColorId}
           getDeviceTypeInfo={getDeviceTypeInfo}
-          extraPixels={extraPixels}
-          extraPixelsUsed={extraPixelsUsed}
+          availablePixels={availablePixels}
+          availablePixelsUsed={availablePixelsUsed}
+          basePixelUp={basePixelUp}
+          setBasePixelUp={setBasePixelUp}
         />
         <TabsFooter
           tabs={tabs}

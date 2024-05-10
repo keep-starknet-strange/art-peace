@@ -2,6 +2,8 @@ package routes
 
 import (
 	"net/http"
+	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -13,6 +15,10 @@ func InitUserRoutes() {
 	http.HandleFunc("/get-extra-pixels", getExtraPixels)
 	http.HandleFunc("/get-username", getUsername)
 	http.HandleFunc("/get-pixel-count", getPixelCount)
+  if !core.ArtPeaceBackend.BackendConfig.Production {
+    http.HandleFunc("/new-username-devnet", newUsernameDevnet)
+    http.HandleFunc("/change-username-devnet", changeUsernameDevnet)
+  }
 }
 
 func getExtraPixels(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +76,7 @@ func getLastPlacedTime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lastTime, err := core.PostgresQueryOne[time.Time]("SELECT time FROM LastPlacedTime WHERE address = $1", address)
+	lastTime, err := core.PostgresQueryOne[*time.Time]("SELECT time FROM LastPlacedTime WHERE address = $1", address)
 	if err != nil {
 		// TODO: Handle no row vs error differently?
 		WriteDataJson(w, "0") // Never placed a pixel
@@ -78,5 +84,79 @@ func getLastPlacedTime(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return the last placed time in utc z format
-	WriteDataJson(w, "\""+string(lastTime.UTC().Format(time.RFC3339))+"\"")
+	WriteDataJson(w, "\""+string((*lastTime).UTC().Format(time.RFC3339))+"\"")
+}
+
+func newUsernameDevnet(w http.ResponseWriter, r *http.Request) {
+  // Disable this in production
+  if NonProductionMiddleware(w, r) {
+    return
+  }
+
+  jsonBody, err := ReadJsonBody[map[string]string](r)
+  if err != nil {
+    WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+    return
+  }
+
+  username := (*jsonBody)["username"]
+
+  if username == "" {
+    WriteErrorJson(w, http.StatusBadRequest, "Missing username parameter")
+    return
+  }
+
+  if len(username) > 31 {
+    WriteErrorJson(w, http.StatusBadRequest, "Username too long (max 31 characters)")
+    return
+  }
+
+  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.NewUsernameDevnet
+  contract := os.Getenv("USERNAME_STORE_CONTRACT")
+
+  cmd := exec.Command(shellCmd, contract, "claim_username", username)
+  _, err = cmd.Output()
+  if err != nil {
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
+    return
+  }
+
+  WriteResultJson(w, "Username claimed")
+}
+
+func changeUsernameDevnet(w http.ResponseWriter, r *http.Request) {
+  // Disable this in production
+  if NonProductionMiddleware(w, r) {
+    return
+  }
+
+  jsonBody, err := ReadJsonBody[map[string]string](r)
+  if err != nil {
+    WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+    return
+  }
+
+  username := (*jsonBody)["username"]
+
+  if username == "" {
+    WriteErrorJson(w, http.StatusBadRequest, "Missing username parameter")
+    return
+  }
+
+  if len(username) > 31 {
+    WriteErrorJson(w, http.StatusBadRequest, "Username too long (max 31 characters)")
+    return
+  }
+
+  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.ChangeUsernameDevnet
+  contract := os.Getenv("USERNAME_STORE_CONTRACT")
+
+  cmd := exec.Command(shellCmd, contract, "change_username", username)
+  _, err = cmd.Output()
+  if err != nil {
+    WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
+    return
+  }
+
+  WriteResultJson(w, "Username changed")
 }

@@ -16,7 +16,7 @@ const CanvasContainer = (props) => {
 
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(2);
+  const [canvasScale, setCanvasScale] = useState(3.85);
 
   const canvasContainerRef = useRef(null);
 
@@ -99,9 +99,10 @@ const CanvasContainer = (props) => {
   // Init canvas transform to center of the viewport
   useEffect(() => {
     const containerRect = canvasContainerRef.current.getBoundingClientRect();
-    const adjust = ((canvasScale - 1) * width) / 2;
-    setCanvasX(containerRect.width / 2 - adjust);
-    setCanvasY(containerRect.height / 2 - adjust);
+    const adjustX = ((canvasScale - 1) * width) / 2;
+    const adjustY = ((canvasScale - 1) * height) / 2;
+    setCanvasX(containerRect.width / 2 - adjustX);
+    setCanvasY(containerRect.height / 2 - adjustY);
   }, [canvasContainerRef]);
 
   const colorExtraPixel = (x, y, colorId) => {
@@ -168,8 +169,8 @@ const CanvasContainer = (props) => {
     if (props.selectedColorId === -1) {
       return;
     }
-    if (props.extraPixels > 0) {
-      if (props.extraPixelsUsed < props.extraPixels) {
+    if (props.availablePixels > (props.basePixelUp ? 1 : 0)) {
+      if (props.availablePixelsUsed < props.availablePixels) {
         props.addExtraPixel(x, y);
         colorExtraPixel(x, y, props.selectedColorId);
         return;
@@ -331,7 +332,7 @@ const CanvasContainer = (props) => {
           colors={props.colors}
           pixelClicked={pixelClicked}
         />
-        {props.extraPixels > 0 && (
+        {props.availablePixels > 0 && (
           <ExtraPixelsCanvas
             extraPixelsCanvasRef={props.extraPixelsCanvasRef}
             width={width}

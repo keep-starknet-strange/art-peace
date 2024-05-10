@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -22,13 +23,75 @@ type MainQuest struct {
 	Reward      int    `json:"reward"`
 }
 
+type QuestContractConfig struct {
+  Type string `json:"type"`
+  InitParams []string `json:"initParams"`
+}
+
+type QuestConfig struct {
+  Name string `json:"name"`
+  Description string `json:"description"`
+  Reward int `json:"reward"`
+  ContractConfig QuestContractConfig `json:"questContract"`
+}
+
+type DailyQuestConfig struct {
+  Day int `json:"day"`
+  Quests []QuestConfig `json:"quests"`
+}
+
+type QuestsConfig struct {
+  DailyQuests struct {
+    DailyQuestsCount int `json:"dailyQuestsCount"`
+    Quests []DailyQuestConfig `json:"dailyQuests"`
+  } `json:"daily"`
+  MainQuests struct {
+    Quests []QuestConfig `json:"mainQuests"`
+  } `json:"main"`
+}
+
 func InitQuestsRoutes() {
+  http.HandleFunc("/init-quests", InitQuests)
 	http.HandleFunc("/get-daily-quests", GetDailyQuests)
 	http.HandleFunc("/get-main-quests", GetMainQuests)
 	http.HandleFunc("/get-todays-quests", getTodaysQuests)
 	http.HandleFunc("/get-completed-daily-quests", GetCompletedDailyQuests)
 	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
 	http.HandleFunc("/get-today-start-time", GetTodayStartTime)
+}
+
+func InitQuests(w http.ResponseWriter, r *http.Request) {
+  // Only allow admin to initialize colors
+  if AdminMiddleware(w, r) {
+    return
+  }
+
+  // TODO: check if quests already exist
+  questJson, err := ReadJsonBody[QuestsConfig](r)
+  if err != nil {
+    WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+    return
+  }
+
+  for _, dailyQuestConfig := range questJson.DailyQuests.Quests {
+    for _, questConfig := range dailyQuestConfig.Quests {
+      _, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO DailyQuests (name, description, reward, day_index) VALUES ($1, $2, $3, $4)", questConfig.Name, questConfig.Description, questConfig.Reward, dailyQuestConfig.Day - 1)
+      if err != nil {
+        WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert daily quest")
+        return
+      }
+    }
+  }
+
+  for _, questConfig := range questJson.MainQuests.Quests {
+    _, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuests (name, description, reward) VALUES ($1, $2, $3)", questConfig.Name, questConfig.Description, questConfig.Reward)
+    if err != nil {
+      WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest")
+      return
+    }
+  }
+
+  WriteResultJson(w, "Initialized quests successfully")
 }
 
 func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +105,7 @@ func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMainQuests(w http.ResponseWriter, r *http.Request) {
-	quests, err := core.PostgresQueryJson[MainQuest]("SELECT key, name, description, reward FROM MainQuests")
+	quests, err := core.PostgresQueryJson[MainQuest]("SELECT key, name, description, reward FROM MainQuests ORDER BY key ASC")
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main quests")
 		return
@@ -53,11 +116,15 @@ func GetMainQuests(w http.ResponseWriter, r *http.Request) {
 
 // Get today's quests based on the current day index.
 func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
-	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, day_index FROM DailyQuests WHERE day_index = (SELECT MAX(day_index) FROM Days)")
+	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT key, name, description, reward, day_index FROM DailyQuests WHERE day_index = (SELECT MAX(day_index) FROM Days) ORDER BY key ASC")
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's quests")
 		return
 	}
+  if len(quests) == 0 {
+    WriteDataJson(w, "[]")
+    return
+  }
 
 	WriteDataJson(w, string(quests))
 }
@@ -95,11 +162,11 @@ func GetCompletedDailyQuests(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTodayStartTime(w http.ResponseWriter, r *http.Request) {
-	todayStartTime, err := core.PostgresQueryOne[time.Time]("SELECT day_start FROM days WHERE day_index = (SELECT MAX(day_index) FROM days)")
+	todayStartTime, err := core.PostgresQueryOne[*time.Time]("SELECT day_start FROM days WHERE day_index = (SELECT MAX(day_index) FROM days)")
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's start time")
 		return
 	}
 
-	WriteDataJson(w, "\""+string(todayStartTime.UTC().Format(time.RFC3339))+"\"")
+	WriteDataJson(w, "\""+string((*todayStartTime).UTC().Format(time.RFC3339))+"\"")
 }

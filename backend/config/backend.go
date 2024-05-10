@@ -10,6 +10,8 @@ type BackendScriptsConfig struct {
 	PlaceExtraPixelsDevnet string `json:"place_extra_pixels_devnet"`
 	AddTemplateDevnet      string `json:"add_template_devnet"`
 	MintNFTDevnet          string `json:"mint_nft_devnet"`
+  NewUsernameDevnet      string `json:"new_username_devnet"`
+  ChangeUsernameDevnet   string `json:"change_username_devnet"`
 }
 
 type WebSocketConfig struct {
@@ -33,6 +35,8 @@ var DefaultBackendConfig = BackendConfig{
 		PlaceExtraPixelsDevnet: "../scripts/place_extra_pixels.sh",
 		AddTemplateDevnet:      "../scripts/add_template.sh",
 		MintNFTDevnet:          "../scripts/mint_nft.sh",
+    NewUsernameDevnet:      "../scripts/new_username.sh",
+    ChangeUsernameDevnet:   "../scripts/change_username.sh",
 	},
 	Production: false,
 	WebSocket: WebSocketConfig{

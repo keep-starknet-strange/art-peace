@@ -43,7 +43,8 @@ CREATE TABLE Days (
 CREATE INDEX days_day_index_index ON Days (day_index);
 
 CREATE TABLE DailyQuests (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
   description text NOT NULL,
   reward integer NOT NULL,
@@ -64,7 +65,8 @@ CREATE INDEX userDailyQuests_user_address_index ON UserDailyQuests (user_address
 CREATE INDEX userDailyQuests_quest_key_index ON UserDailyQuests (quest_key);
 
 CREATE TABLE MainQuests (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
   description text NOT NULL,
   reward integer NOT NULL

@@ -40,6 +40,7 @@ fn deploy_contract() -> ContractAddress {
     let contract = snf::declare("ArtPeace");
     let mut calldata = array![];
     InitParams {
+        host: utils::HOST(),
         canvas_width: WIDTH,
         canvas_height: HEIGHT,
         time_between_pixels: TIME_BETWEEN_PIXELS,
@@ -58,8 +59,7 @@ fn deploy_contract() -> ContractAddress {
             0x888800
         ],
         end_time: 1000000,
-        daily_quests: array![].span(),
-        main_quests: array![].span(),
+        daily_quests_count: 3,
     }
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
@@ -74,8 +74,10 @@ pub fn deploy_with_quests_contract(
     deploy_nft_contract();
 
     let contract = snf::declare("ArtPeace");
+    let daily_quests_count = 3;
     let mut calldata = array![];
     InitParams {
+        host: utils::HOST(),
         canvas_width: WIDTH,
         canvas_height: HEIGHT,
         time_between_pixels: TIME_BETWEEN_PIXELS,
@@ -94,11 +96,34 @@ pub fn deploy_with_quests_contract(
             0x888800
         ],
         end_time: 1000000,
-        daily_quests: daily_quests,
-        main_quests: main_quests,
+        daily_quests_count: daily_quests_count,
     }
         .serialize(ref calldata);
+
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
+
+    snf::start_prank(CheatTarget::One(contract_addr), utils::HOST());
+    let art_peace = IArtPeaceDispatcher { contract_address: contract_addr };
+    let mut i = 0;
+    let mut dayId = 0;
+    let mut days_quests: Array<ContractAddress> = array![];
+    while i < daily_quests
+        .len() {
+            days_quests.append(*daily_quests.at(i));
+            i += 1;
+            if i % daily_quests_count == 0 {
+                art_peace.add_daily_quests(dayId, days_quests.span());
+                dayId += 1;
+                days_quests = array![];
+            }
+        };
+    if days_quests.len() > 0 {
+        art_peace.add_daily_quests(dayId, days_quests.span());
+    }
+
+    art_peace.add_main_quests(main_quests);
+    snf::stop_prank(CheatTarget::One(contract_addr));
+
     snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
 
     contract_addr
@@ -542,7 +567,9 @@ fn nft_mint_test() {
     let nft_minter = IArtPeaceNFTMinterDispatcher { contract_address: art_peace.contract_address };
     let nft_store = ICanvasNFTStoreDispatcher { contract_address: utils::NFT_CONTRACT() };
     let nft = IERC721Dispatcher { contract_address: utils::NFT_CONTRACT() };
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::HOST());
     nft_minter.add_nft_contract(utils::NFT_CONTRACT());
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
 
     let mint_params = NFTMintParams { position: 10, width: 16, height: 16, };
     snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::PLAYER1());

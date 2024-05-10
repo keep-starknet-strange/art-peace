@@ -1,0 +1,52 @@
+{
+  "daily": {
+    "dailyQuestsCount": 1,
+    "dailyQuests": [
+      {
+        "day": 1,
+        "quests": [
+          {
+            "name": "Place 5 pixels",
+            "description": "Add 5 pixels on the canvas",
+            "reward": 3,
+            "questContract": {
+              "type": "PixelQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "5",
+                "1",
+                "$DAY_IDX",
+                "0",
+                "0"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "main": {
+    "mainQuests": [
+      {
+        "name": "Deploy a Memecoin",
+        "description": "Create an Unruggable memecoin",
+        "reward": 15,
+        "questContract": {
+          "type": "UnruggableQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD"
+          ],
+          "claimParams": [
+            {
+              "type": "address",
+              "name": "MemeCoin Address",
+              "example": "0x02D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

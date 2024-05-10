@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -66,6 +67,7 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
     LEFT JOIN Users u ON p.address = u.address WHERE p.position = $1
     ORDER BY p.time DESC LIMIT 1`, position)
 	if err != nil {
+    fmt.Println(err)
 		WriteDataJson(w, "\"0x0000000000000000000000000000000000000000000000000000000000000000\"")
 		return
 	}

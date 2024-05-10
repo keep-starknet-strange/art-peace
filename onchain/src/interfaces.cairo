@@ -6,6 +6,20 @@ pub struct Pixel {
     pub owner: starknet::ContractAddress,
 }
 
+#[derive(Drop, Serde, starknet::Store)]
+pub struct Faction {
+    pub name: felt252,
+    pub leader: starknet::ContractAddress,
+    pub pixel_pool: u32
+}
+
+#[derive(Drop, Serde, starknet::Store)]
+pub struct MemberMetadata {
+    pub address: starknet::ContractAddress,
+    pub member_placed_time: u64,
+    pub member_pixels: u32
+}
+
 // TODO: Tests for all
 // TODO: Split into components : existing w/ canvas and user info, quests, stats, etc.
 #[starknet::interface]
@@ -22,7 +36,7 @@ pub trait IArtPeace<TContractState> {
     // Place pixels on the canvas
     fn place_pixel(ref self: TContractState, pos: u128, color: u8);
     fn place_pixel_xy(ref self: TContractState, x: u128, y: u128, color: u8);
-    fn place_extra_pixels(ref self: TContractState, positions: Array<u128>, colors: Array<u8>);
+    fn place_extra_pixels(ref self: TContractState, positions: Span<u128>, colors: Span<u8>);
 
     // Get placement info
     fn get_last_placed_time(self: @TContractState) -> u64;
@@ -30,6 +44,29 @@ pub trait IArtPeace<TContractState> {
     fn get_time_between_pixels(self: @TContractState) -> u64;
     fn get_extra_pixels_count(self: @TContractState) -> u32;
     fn get_user_extra_pixels_count(self: @TContractState, user: starknet::ContractAddress) -> u32;
+
+    // Faction stuff
+    fn get_factions_count(self: @TContractState) -> u32;
+    fn get_faction(self: @TContractState, faction_id: u32) -> Faction;
+    fn get_faction_leader(self: @TContractState, faction_id: u32) -> starknet::ContractAddress;
+    fn init_faction(
+        ref self: TContractState,
+        name: felt252,
+        leader: starknet::ContractAddress,
+        pool: u32,
+        members: Span<starknet::ContractAddress>
+    );
+    fn replace_member(
+        ref self: TContractState,
+        faction_id: u32,
+        member_id: u32,
+        new_member: starknet::ContractAddress
+    );
+    fn get_faction_members(
+        self: @TContractState, faction_id: u32
+    ) -> Span<starknet::ContractAddress>;
+    fn get_faction_member_count(self: @TContractState, faction_id: u32) -> u32;
+    fn get_faction_members_pixels(self: @TContractState, faction_id: u32, member_id: u32) -> u32;
 
     // Get color info
     fn get_color_count(self: @TContractState) -> u8;
@@ -44,7 +81,7 @@ pub trait IArtPeace<TContractState> {
     fn increase_day_index(ref self: TContractState);
 
     // Get quest info
-    fn get_daily_quest_count(self: @TContractState) -> core::zeroable::NonZero::<u32>;
+    fn get_daily_quests_count(self: @TContractState) -> u32;
     fn get_daily_quest(
         self: @TContractState, day_index: u32, quest_id: u32
     ) -> starknet::ContractAddress;
@@ -55,7 +92,11 @@ pub trait IArtPeace<TContractState> {
     fn get_main_quest(self: @TContractState, quest_id: u32) -> starknet::ContractAddress;
     fn get_main_quests(self: @TContractState) -> Span<starknet::ContractAddress>;
 
-    // Claim quests
+    // Quests
+    fn add_daily_quests(
+        ref self: TContractState, day_index: u32, quests: Span<starknet::ContractAddress>
+    );
+    fn add_main_quests(ref self: TContractState, quests: Span<starknet::ContractAddress>);
     fn claim_daily_quest(
         ref self: TContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>
     );

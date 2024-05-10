@@ -11,43 +11,40 @@ const PixelSelector = (props) => {
   const timeBetweenPlacements = 5000; // 5 seconds
   const [lastPlacedTime, setLastPlacedTime] = useState(0);
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
-  const [pixelAvailable, setPixelAvailable] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (props.extraPixels > 0) {
-        let newPixelAvailable = props.extraPixels - props.extraPixelsUsed > 0;
-        setPixelAvailable(newPixelAvailable);
-        if (newPixelAvailable) {
-          setPlacementTimer('Place Pixel');
-        } else {
-          // TODO: Do we want to allow selecting colors / erasing xtra pixels?
-          setPlacementTimer('Out of XTRA');
-        }
+    if (props.availablePixels > 0) {
+      let amountAvailable = props.availablePixels - props.availablePixelsUsed;
+      if (amountAvailable > 1) {
+        setPlacementTimer('Place Pixels');
+        return;
+      } else if (amountAvailable === 1) {
+        setPlacementTimer('Place Pixel');
+        return;
+      } else {
+        setPlacementTimer('Out of Pixels');
         return;
       }
-
-      let timeSinceLastPlacement = Date.now() - lastPlacedTime;
-      let newPixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
-      setPixelAvailable(newPixelAvailable);
-      if (newPixelAvailable) {
-        setPlacementTimer('Place Pixel');
-      } else {
-        let secondsTillPlacement = Math.floor(
-          (timeBetweenPlacements - timeSinceLastPlacement) / 1000
-        );
-        setPlacementTimer(
-          `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
-        );
-      }
-    }, updateInterval);
-    return () => clearInterval(interval);
-  }, [
-    lastPlacedTime,
-    timeBetweenPlacements,
-    props.extraPixels,
-    props.extraPixelsUsed
-  ]);
+    } else {
+      const interval = setInterval(() => {
+        let timeSinceLastPlacement = Date.now() - lastPlacedTime;
+        let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
+        if (basePixelAvailable) {
+          props.setBasePixelUp(true);
+          setPlacementTimer('Place Pixel');
+          clearInterval(interval);
+        } else {
+          let secondsTillPlacement = Math.floor(
+            (timeBetweenPlacements - timeSinceLastPlacement) / 1000
+          );
+          setPlacementTimer(
+            `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
+          );
+        }
+      }, updateInterval);
+      return () => clearInterval(interval);
+    }
+  }, [props.availablePixels, props.availablePixelsUsed, lastPlacedTime]);
 
   useEffect(() => {
     const getLastPlacedPixel = backendUrl + '/get-last-placed-time?address=0';
@@ -73,7 +70,7 @@ const PixelSelector = (props) => {
       return;
     }
 
-    if (pixelAvailable) {
+    if (props.availablePixels > props.availablePixelsUsed) {
       setSelectorMode(true);
     }
   };
@@ -92,16 +89,18 @@ const PixelSelector = (props) => {
     <div className='PixelSelector'>
       {selectorMode && (
         <div className='PixelSelector__selector'>
-          {props.colors.map((color, idx) => {
-            return (
-              <div
-                className='PixelSelector__color PixelSelector__color__selectable'
-                key={idx}
-                style={{ backgroundColor: `#${color}FF` }}
-                onClick={() => selectColor(idx)}
-              ></div>
-            );
-          })}
+          <div className='PixelSelector__selector__colors'>
+            {props.colors.map((color, idx) => {
+              return (
+                <div
+                  className='PixelSelector__color PixelSelector__color__selectable'
+                  key={idx}
+                  style={{ backgroundColor: `#${color}FF` }}
+                  onClick={() => selectColor(idx)}
+                ></div>
+              );
+            })}
+          </div>
           <div className='Button__close' onClick={() => cancelSelector()}>
             x
           </div>
@@ -111,18 +110,18 @@ const PixelSelector = (props) => {
         <div
           className={
             'Button__primary Text__large ' +
-            (pixelAvailable
+            (props.availablePixels > props.availablePixelsUsed
               ? 'PixelSelector__button--valid'
               : 'PixelSelector__button--invalid')
           }
           onClick={toSelectorMode}
         >
           <p className='PixelSelector__text'>{placementTimer}</p>
-          {props.extraPixels > 0 && (
+          {props.availablePixels > (props.basePixelUp ? 1 : 0) && (
             <div className='PixelSelector__extras'>
               <p style={{ margin: '0 0.5rem' }}>|</p>
               <p className='PixelSelector__text'>
-                {props.extraPixels - props.extraPixelsUsed} XTRA
+                {props.availablePixels - props.availablePixelsUsed} XTRA
               </p>
             </div>
           )}

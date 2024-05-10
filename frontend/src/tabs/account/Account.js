@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'get-starknet';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
-import { backendUrl } from '../../utils/Consts.js';
+import { backendUrl, devnetMode } from '../../utils/Consts.js';
+import { fetchWrapper } from '../../services/apiService.js';
 
 const Account = (props) => {
   // TODO: Icons for each rank & buttons
   // TODO: Button to cancel username edit
-  const [address, _setAddress] = useState(
-    '0x0000000000000000000000000000000000000000000000000000000000000000'
-  );
   const [username, setUsername] = useState('');
   const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState('');
@@ -18,16 +17,45 @@ const Account = (props) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setUsername(username);
-    setUsernameSaved(true);
+    const newUsernameResponse = fetchWrapper('new-username-devnet', {
+      mode: 'cors',
+      method: 'POST',
+      body: JSON.stringify({
+        username: username
+      })
+    });
+    if (newUsernameResponse.result) {
+      // TODO: Only change if tx is successful
+      setUsername(username);
+      setUsernameSaved(true);
+      console.log(newUsernameResponse.result);
+    } else {
+      setUsername('');
+      setUsernameSaved(false);
+    }
   };
 
-  const editUsername = () => {
+  const editUsername = async () => {
     setUsernameSaved(false);
+    const updateUsernameResult = await fetchWrapper('change-username-devnet', {
+      mode: 'cors',
+      method: 'POST',
+      body: JSON.stringify({
+        username: username
+      })
+    });
+    if (updateUsernameResult.result) {
+      setUsername(username);
+      setUsernameSaved(true);
+      console.log(updateUsernameResult.result);
+    } else {
+      setUsername('');
+      setUsernameSaved(false);
+    }
   };
 
   useEffect(() => {
-    const getUsernameUrl = `${backendUrl}/get-username?address=${address}`;
+    const getUsernameUrl = `${backendUrl}/get-username?address=${props.address}`;
     fetch(getUsernameUrl)
       .then((res) => {
         if (!res.ok) {
@@ -47,11 +75,11 @@ const Account = (props) => {
       .catch((error) => {
         console.error('Failed to fetch username:', error);
       });
-  }, [address]);
+  }, [props.address]);
 
   useEffect(() => {
     const fetchPixelCount = async () => {
-      const getPixelCountUrl = `${backendUrl}/get-pixel-count?address=${address}`;
+      const getPixelCountUrl = `${backendUrl}/get-pixel-count?address=${props.address}`;
       const response = await fetch(getPixelCountUrl);
       if (response.ok) {
         const result = await response.json();
@@ -62,31 +90,55 @@ const Account = (props) => {
     };
 
     fetchPixelCount();
-  }, [address]);
+  }, [props.address]);
 
   useEffect(() => {
-    if (pixelCount >= 5000) {
-      setAccountRank('Champion');
-    } else if (pixelCount >= 3000) {
-      setAccountRank('Platinum');
-    } else if (pixelCount >= 2000) {
-      setAccountRank('Gold');
-    } else if (pixelCount >= 1000) {
-      setAccountRank('Silver');
+    if (pixelCount >= 50) {
+      setAccountRank('Alpha Wolf');
+    } else if (pixelCount >= 30) {
+      setAccountRank('Degen Artist');
+    } else if (pixelCount >= 10) {
+      setAccountRank('Pixel Sensei');
     } else {
-      setAccountRank('Bronze');
+      setAccountRank('Art Beggar');
     }
   }, [pixelCount]);
 
+  const connectWallet = async () => {
+    const starknet = await connect();
+
+    let [addr] = await starknet.enable();
+    if (devnetMode) {
+      // TODO: to lowercase on frontend and/or backend for all hex/address calls
+      addr = '328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0';
+    } else {
+      addr = addr.toLowerCase();
+      addr = addr.slice(2);
+    }
+    if (addr && addr.length > 0) {
+      props.setupStarknet(addr, starknet);
+    }
+  };
+
+  // TODO: Ethereum login
+  // TODO: Change layout based on if connected or not
   return (
-    <BasicTab title='Account' setActiveTab={props.setActiveTab}>
+    <BasicTab
+      title='Account'
+      connected={props.connected}
+      address={props.address}
+      setupStarknet={props.setupStarknet}
+      setActiveTab={props.setActiveTab}
+    >
       <h2 className='Text__medium Heading__sub Account__subheader'>Info</h2>
       <div className='Account__login'>
-        <div className='Text__small Button__primary'>StarkNet Login</div>
+        <div className='Text__small Button__primary' onClick={connectWallet}>
+          StarkNet Login
+        </div>
         <div className='Text__small Button__primary'>Ethereum Login</div>
       </div>
       <p className='Text__small Account__item Account__address'>
-        Address: {address}
+        Address: 0x{props.address}
       </p>
       {usernameSaved ? (
         <div className='Text__small Account__special Account__username'>
