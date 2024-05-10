@@ -71,13 +71,12 @@ const NFTs = (props) => {
   const [myNFTs, setMyNFTs] = React.useState([]);
   const [allNFTs, setAllNFTs] = React.useState([]);
 
-  const retrieveNFTById = async (tokenId) => {
-
+  const retrieveMyNFTById = async (tokenId) => {
     try {
       let getNFTBtTokenId = `get-nft?tokenId=${tokenId}`;
       const response = await fetchWrapper(getNFTBtTokenId, { mode: 'cors' });
       if (response.data) {
-        setMyNFTs((prev) => ([...prev, response.data]))
+        setMyNFTs((prev) => [response.data, ...prev]);
       }
     } catch (error) {
       console.error('Error fetching NFT data:', error);
@@ -85,10 +84,10 @@ const NFTs = (props) => {
   };
 
   React.useEffect(() => {
-    if(props.tokenId !== null){
-      retrieveNFTById(props.tokenId)
+    if (props.latestMintedTokenId !== null) {
+      retrieveMyNFTById(props.latestMintedTokenId);
     }
-  }, [props.tokenId])
+  }, [props.latestMintedTokenId]);
 
   React.useEffect(() => {
     if (!setup) {
@@ -109,6 +108,7 @@ const NFTs = (props) => {
     }
     getMyNfts();
 
+    // TODO: remove setup & do fetch refresh on expand
     let getNFTsEndpoint = 'get-nfts';
     async function getNfts() {
       const response = await fetchWrapper(getNFTsEndpoint, { mode: 'cors' });

@@ -40,7 +40,7 @@ function App() {
     share: false,
     shouldReconnect: () => true
   });
-  const [tokenId, setTokenId] = useState(null)
+  const [latestMintedTokenId, setLatestMintedTokenId] = useState(null);
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
@@ -58,14 +58,17 @@ function App() {
       // Check the message type and handle accordingly
       if (lastJsonMessage.messageType === 'colorPixel') {
         colorPixel(lastJsonMessage.position, lastJsonMessage.color);
-      } else if (lastJsonMessage.messageType === 'nftMinted' && activeTab === 'NFTs') {
-       const tokenId = lastJsonMessage.token_id;
-       const minter = lastJsonMessage.minter;
-       if (minter === userAccount) {
-        setTokenId(tokenId);
-      }
-
-          setTokenId(tokenId)
+      } else if (
+        lastJsonMessage.messageType === 'nftMinted' &&
+        activeTab === 'NFTs'
+      ) {
+        // TODO: Compare to user's address
+        if (
+          lastJsonMessage.minter ===
+          '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0'
+        ) {
+          setLatestMintedTokenId(lastJsonMessage.token_id);
+        }
       }
     }
   }, [lastJsonMessage]);
@@ -258,7 +261,7 @@ function App() {
           extraPixelsData={extraPixelsData}
           clearExtraPixels={clearExtraPixels}
           clearExtraPixel={clearExtraPixel}
-          tokenId={tokenId}
+          latestMintedTokenId={latestMintedTokenId}
         />
       </div>
       <div className='App__footer'>

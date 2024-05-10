@@ -270,7 +270,12 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// TODO: Ws message to all clients
 
-	sendNFTWebSocketMessage(w, tokenId, minter)
+	message := map[string]interface{}{
+		"token_id":    tokenId,
+		"minter":      minter,
+		"messageType": "nftMinted",
+	}
+	sendWebSocketMessage(w, message)
 
 	WriteResultJson(w, "NFT mint indexed successfully")
 
@@ -406,15 +411,6 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 			return
 		}
 	}
-}
-
-func sendNFTWebSocketMessage(w http.ResponseWriter, tokenID int64, minter string) {
-	message := map[string]interface{}{
-		"token_id":    tokenID,
-		"minter":      minter,
-		"messageType": "nftMinted",
-	}
-	sendWebSocketMessage(w, message)
 }
 
 func sendWebSocketMessage(w http.ResponseWriter, message map[string]interface{}) {
