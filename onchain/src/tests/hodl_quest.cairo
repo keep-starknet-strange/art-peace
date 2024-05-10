@@ -58,9 +58,13 @@ fn hodl_quest_test() {
     let calldata: Array<felt252> = array![];
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
 
-    snf::store(hodl_quest_contract_address, selector!("user_extra_pixel"), array![user_extra_pixel.into()].span(),);
+    snf::store(
+        hodl_quest_contract_address,
+        selector!("user_extra_pixel"),
+        array![user_extra_pixel.into()].span(),
+    );
 
-   // art_peace.claim_main_quest(0, calldata.span());
+    art_peace.claim_main_quest(0, calldata.span());
 
     assert!(
         art_peace.get_extra_pixels_count() == reward_amt,
