@@ -414,8 +414,6 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 }
 
 func sendWebSocketMessage(w http.ResponseWriter, message map[string]interface{}) {
-	// Generic function to send a message over a WebSocket
-	// Implementation logic to send the message...
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Error marshalling message")
