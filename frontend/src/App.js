@@ -40,6 +40,7 @@ function App() {
     share: false,
     shouldReconnect: () => true
   });
+  const [latestMintedTokenId, setLatestMintedTokenId] = useState(null);
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
@@ -51,6 +52,26 @@ function App() {
       });
     }
   }, [readyState]);
+
+  useEffect(() => {
+    if (lastJsonMessage) {
+      // Check the message type and handle accordingly
+      if (lastJsonMessage.messageType === 'colorPixel') {
+        colorPixel(lastJsonMessage.position, lastJsonMessage.color);
+      } else if (
+        lastJsonMessage.messageType === 'nftMinted' &&
+        activeTab === 'NFTs'
+      ) {
+        // TODO: Compare to user's address
+        if (
+          lastJsonMessage.minter ===
+          '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0'
+        ) {
+          setLatestMintedTokenId(lastJsonMessage.token_id);
+        }
+      }
+    }
+  }, [lastJsonMessage]);
 
   // Colors
   const staticColors = canvasConfig.colors;
@@ -188,13 +209,6 @@ function App() {
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
 
-  useEffect(() => {
-    if (lastJsonMessage) {
-      // TODO: handle other events
-      colorPixel(lastJsonMessage.position, lastJsonMessage.color);
-    }
-  }, [lastJsonMessage]);
-
   return (
     <div className='App'>
       <CanvasContainer
@@ -247,6 +261,7 @@ function App() {
           extraPixelsData={extraPixelsData}
           clearExtraPixels={clearExtraPixels}
           clearExtraPixel={clearExtraPixel}
+          latestMintedTokenId={latestMintedTokenId}
         />
       </div>
       <div className='App__footer'>
