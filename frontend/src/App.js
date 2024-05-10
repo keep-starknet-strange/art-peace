@@ -59,7 +59,12 @@ function App() {
       if (lastJsonMessage.messageType === 'colorPixel') {
         colorPixel(lastJsonMessage.position, lastJsonMessage.color);
       } else if (lastJsonMessage.messageType === 'nftMinted' && activeTab === 'NFTs') {
-       const tokenId = lastJsonMessage.token_id
+       const tokenId = lastJsonMessage.token_id;
+       const minter = lastJsonMessage.minter;
+       if (minter === userAccount) {
+        setTokenId(tokenId);
+      }
+
           setTokenId(tokenId)
       }
     }

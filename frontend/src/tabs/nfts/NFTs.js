@@ -113,7 +113,6 @@ const NFTs = (props) => {
     async function getNfts() {
       const response = await fetchWrapper(getNFTsEndpoint, { mode: 'cors' });
       if (response.data) {
-        console.log(response.data)
         setAllNFTs(response.data);
       }
     }
