@@ -73,48 +73,7 @@ export const config = {
   },
 };
 
-//This transformation filters events from the NFT Transfer event
-export default function transform({ events }) {
-  return events.flatMap(({ event }) => {
-    // Check if event is a NFT Transfer event and a new mint
-    if (isNFTTransferEvent(event) && isANewMint(event)) {
-      const [, , to, token_id] = event.topics;
-
-      return {
-        insert: {
-          token_id,
-          minter: to,
-          owner: to,
-        },
-      };
-      // Check if event is a NFT Transfer event and not a new mint
-    } else if (isNFTTransferEvent(event) && !isANewMint(event)) {
-      const [_, , to, token_id] = event.topics;
-
-      // Update the new owner
-      return {
-        entity: {
-          token_id,
-        },
-        update: {
-          owner: to,
-        },
-      };
-    } else {
-      return [];
-    }
-  });
+// This transform does nothing.
+export default function transform(block) {
+  return block;
 }
-
-// Check is the event signature matches the NFT Mint signature
-const isNFTTransferEvent = (event) => {
-  return (
-    event.topics[0] ===
-    "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"
-  );
-};
-
-//Check if the value of 'from' in the event is set to zero
-const isANewMint = (event) => {
-  return event.topics[1].toString() === "0";
-};

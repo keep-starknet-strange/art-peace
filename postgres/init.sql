@@ -134,7 +134,6 @@ CREATE TABLE NFTs (
   block_number integer NOT NULL,
   minter char(64) NOT NULL,
   owner char(64) NOT NULL,
-  _cursor integer
 );
 
 CREATE TABLE NFTLikes (

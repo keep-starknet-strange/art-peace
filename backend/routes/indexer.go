@@ -52,6 +52,7 @@ const (
 	templateAddedEvent = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
 	voteColorEvent     = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
 	newDay             = "0x019cdbd24e137c00d1feb99cc0b48b86b676f6b69c788c7f112afeb8cd614c16"
+	nftTransferEvent   = "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"
 )
 
 // TODO: User might miss some messages between loading canvas and connecting to websocket?
@@ -76,6 +77,8 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 			processVoteColorEvent(event, w)
 		} else if eventKey == newDay {
 			processNewDayEvent(event, w)
+		} else if eventKey == nftTransferEvent {
+			processNFTTransferEvent(event, w)
 		} else {
 			fmt.Println("Unknown event key: ", eventKey)
 		}
@@ -206,7 +209,7 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 
 	// Set NFT in postgres
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (token_id, position, width, height, image_hash, block_number, minter) VALUES ($1, $2, $3, $4, $5, $6, $7)", tokenId, position, width, height, imageHashHex, blockNumber, minter)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (token_id, position, width, height, image_hash, block_number, minter, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", tokenId, position, width, height, imageHashHex, blockNumber, minter, minter)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Error inserting NFT into postgres")
 		return
@@ -413,4 +416,24 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 			return
 		}
 	}
+}
+
+func processNFTTransferEvent(event IndexerEvent, w http.ResponseWriter) {
+	to := event.Event.Keys[2][2:] // Remove 0x prefix
+	tokenIdHex := event.Event.Keys[3]
+
+	tokenId, err := strconv.ParseInt(tokenIdHex, 0, 64)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error converting token id to hex")
+		return 
+	}
+
+	// Set owner
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE NFTs SET owner = $1 WHERE token_id = $2", to, tokenId ) 
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error updating new owner in postgres")
+		return 
+	}
+
+	WriteResultJson(w, "NFT Owner updated successfully")
 }
