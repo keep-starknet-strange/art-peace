@@ -2,7 +2,7 @@
 pub mod TemplateQuest {
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
-    use art_peace::quests::{IQuest, QuestClaimed};
+    use art_peace::quests::IQuest;
 
     #[storage]
     struct Storage {
@@ -10,13 +10,6 @@ pub mod TemplateQuest {
         reward: u32,
         claimed: LegacyMap<ContractAddress, bool>,
     }
-
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        QuestClaimed: QuestClaimed,
-    }
-
 
     #[derive(Drop, Serde)]
     pub struct TemplateQuestInitParams {
@@ -59,17 +52,12 @@ pub mod TemplateQuest {
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
-            if get_caller_address() != self.art_peace.read() {
-                return 0;
-            }
+            assert(get_caller_address() == self.art_peace.read(), 'Only ArtPeace can claim quests');
 
-            if !self.is_claimable(user, calldata) {
-                return 0;
-            }
+            assert(self.is_claimable(user, calldata), 'Quest not claimable');
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }

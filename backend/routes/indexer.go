@@ -144,23 +144,11 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// Send message to all connected clients
 	var message = map[string]interface{}{
-		"position": position,
-		"color":    color,
+		"position":    position,
+		"color":       color,
+		"messageType": "colorPixel",
 	}
-	messageBytes, err := json.Marshal(message)
-	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Error marshalling message")
-		return
-	}
-	for idx, conn := range core.ArtPeaceBackend.WSConnections {
-		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
-			fmt.Println(err)
-			// TODO: Should we always remove connection?
-			// Remove connection
-			conn.Close()
-			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
-		}
-	}
+	sendWebSocketMessage(w, message)
 
 	WriteResultJson(w, "Pixel placement indexed successfully")
 }
@@ -282,7 +270,15 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// TODO: Ws message to all clients
 
+	message := map[string]interface{}{
+		"token_id":    tokenId,
+		"minter":      minter,
+		"messageType": "nftMinted",
+	}
+	sendWebSocketMessage(w, message)
+
 	WriteResultJson(w, "NFT mint indexed successfully")
+
 }
 
 func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
@@ -413,6 +409,23 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 		if err != nil {
 			WriteErrorJson(w, http.StatusInternalServerError, "Error updating end time of previous day in postgres")
 			return
+		}
+	}
+}
+
+func sendWebSocketMessage(w http.ResponseWriter, message map[string]interface{}) {
+	messageBytes, err := json.Marshal(message)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error marshalling message")
+		return
+	}
+	for idx, conn := range core.ArtPeaceBackend.WSConnections {
+		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
+			fmt.Println(err)
+			// TODO: Should we always remove connection?
+			// Remove connection
+			conn.Close()
+			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
 		}
 	}
 }
