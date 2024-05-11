@@ -17,6 +17,8 @@ import (
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
+// TODO: Remove error json messages and just log errors on indexing
+
 func InitIndexerRoutes() {
 	http.HandleFunc("/consume-indexer-msg", consumeIndexerMsg)
 }
@@ -103,7 +105,7 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// Perform comparison with maxPosition
 	if position < 0 || position >= maxPosition {
-		http.Error(w, "Position out of range", http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Position value exceeds canvas dimensions")
 		return
 	}
 
@@ -120,7 +122,7 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	//validate color
 	colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
 	if int(color) < 0 || int(color) >= colorsLength {
-		http.Error(w, "Color value exceeds bit width", http.StatusBadRequest)
+		WriteErrorJson(w, http.StatusBadRequest, "Color value exceeds color palette")
 		return
 	}
 
@@ -145,23 +147,11 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// Send message to all connected clients
 	var message = map[string]interface{}{
-		"position": position,
-		"color":    color,
+		"position":    position,
+		"color":       color,
+		"messageType": "colorPixel",
 	}
-	messageBytes, err := json.Marshal(message)
-	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Error marshalling message")
-		return
-	}
-	for idx, conn := range core.ArtPeaceBackend.WSConnections {
-		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
-			fmt.Println(err)
-			// TODO: Should we always remove connection?
-			// Remove connection
-			conn.Close()
-			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
-		}
-	}
+	sendWebSocketMessage(w, message)
 
 	WriteResultJson(w, "Pixel placement indexed successfully")
 }
@@ -283,7 +273,15 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// TODO: Ws message to all clients
 
+	message := map[string]interface{}{
+		"token_id":    tokenId,
+		"minter":      minter,
+		"messageType": "nftMinted",
+	}
+	sendWebSocketMessage(w, message)
+
 	WriteResultJson(w, "NFT mint indexed successfully")
+
 }
 
 func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
@@ -436,4 +434,21 @@ func processNFTTransferEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 
 	WriteResultJson(w, "NFT Owner updated successfully")
+}
+
+func sendWebSocketMessage(w http.ResponseWriter, message map[string]interface{}) {
+	messageBytes, err := json.Marshal(message)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Error marshalling message")
+		return
+	}
+	for idx, conn := range core.ArtPeaceBackend.WSConnections {
+		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
+			fmt.Println(err)
+			// TODO: Should we always remove connection?
+			// Remove connection
+			conn.Close()
+			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
+		}
+	}
 }

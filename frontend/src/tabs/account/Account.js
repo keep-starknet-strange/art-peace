@@ -3,6 +3,8 @@ import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl } from '../../utils/Consts.js';
+import { fetchWrapper } from '../../services/apiService.js';
+import ColoredIcon from '../../icons/ColoredIcon.js';
 
 const Account = (props) => {
   // TODO: Icons for each rank & buttons
@@ -15,38 +17,45 @@ const Account = (props) => {
   const [accountRank, setAccountRank] = useState('');
 
   const [usernameSaved, setUsernameSaved] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
+  const [rankColor, setRankColor] = useState('');
+  const path = useState(
+    'm5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275z'
+  );
 
   const handleSubmit = (event) => {
     event.preventDefault();
     setUsername(username);
     setUsernameSaved(true);
+    setIsEditing(false);
+    setUsernameBeforeEdit('');
   };
 
   const editUsername = () => {
-    setUsernameSaved(false);
+    setIsEditing(true);
+    setUsernameBeforeEdit(username);
+  };
+
+  const handleCancelEdit = () => {
+    setUsername(usernameBeforeEdit);
+    setIsEditing(false);
+    setUsernameBeforeEdit('');
   };
 
   useEffect(() => {
-    const getUsernameUrl = `${backendUrl}/get-username?address=${address}`;
-    fetch(getUsernameUrl)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch username');
-        }
-        return res.json();
-      })
-      .then((result) => {
-        if (result.data === null || result.data === '') {
-          setUsername('');
-          setUsernameSaved(false);
-        } else {
-          setUsername(result.data);
-          setUsernameSaved(true);
-        }
-      })
-      .catch((error) => {
-        console.error('Failed to fetch username:', error);
-      });
+    const getUsernameUrl = `get-username?address=${address}`;
+    async function fetchUsernameUrl() {
+      const result = await fetchWrapper(getUsernameUrl);
+      if (result.data === null || result.data === '') {
+        setUsername('');
+        setUsernameSaved(false);
+      } else {
+        setUsername(result.data);
+        setUsernameSaved(true);
+      }
+    }
+    fetchUsernameUrl();
   }, [address]);
 
   useEffect(() => {
@@ -67,16 +76,23 @@ const Account = (props) => {
   useEffect(() => {
     if (pixelCount >= 5000) {
       setAccountRank('Champion');
+      setRankColor('#B9F2FF');
     } else if (pixelCount >= 3000) {
       setAccountRank('Platinum');
+      setRankColor('#E5E4E2');
     } else if (pixelCount >= 2000) {
       setAccountRank('Gold');
+      setRankColor('#FFAA00');
     } else if (pixelCount >= 1000) {
       setAccountRank('Silver');
+      setRankColor('#C0C0C0');
     } else {
       setAccountRank('Bronze');
+      setRankColor('#CD7F32');
     }
   }, [pixelCount]);
+
+  // TODO: Add a shimmer effect to the rank icon
 
   return (
     <BasicTab title='Account' setActiveTab={props.setActiveTab}>
@@ -88,7 +104,7 @@ const Account = (props) => {
       <p className='Text__small Account__item Account__address'>
         Address: {address}
       </p>
-      {usernameSaved ? (
+      {usernameSaved && !isEditing ? (
         <div className='Text__small Account__special Account__username'>
           <p style={{ margin: 0, padding: 0 }}>Username: {username}</p>
           <div
@@ -112,19 +128,37 @@ const Account = (props) => {
               required
               onChange={(e) => setUsername(e.target.value)}
             />
-            <button
-              className='Text__small Button__primary Account__username__button'
-              type='submit'
-            >
-              submit
-            </button>
+            <div>
+              {isEditing && (
+                <button
+                  className='Text__small Button__primary Account__username__button'
+                  onClick={handleCancelEdit}
+                >
+                  cancel
+                </button>
+              )}
+              <button
+                className='Text__small Button__primary Account__username__button'
+                type='submit'
+              >
+                submit
+              </button>
+            </div>
           </form>
         </div>
       )}
 
       <h2 className='Text__medium Heading__sub Account__subheader'>Stats</h2>
       <p className='Text__small Account__item'>Pixels placed: {pixelCount}</p>
-      <p className='Text__small Account__item'>Rank: {accountRank}</p>
+      <p className='Text__small Account__item'>
+        Rank: {accountRank}
+        <ColoredIcon
+          width='3rem'
+          color={rankColor}
+          path={path}
+          style={{ marginLeft: '0.5rem' }}
+        />
+      </p>
     </BasicTab>
   );
 };
