@@ -425,3 +425,24 @@ fn deposit_reward_test() {
         art_peace_token_balance == reward_amount, "reward wrongly distributed when adding template"
     );
 }
+
+#[test]
+#[should_panic(expected: ('Color 0 indicates no vote',))]
+fn vote_color_no_vote_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+    snf::start_prank(CheatTarget::One(art_peace_address), utils::PLAYER1());
+    art_peace.vote_color(0);
+    snf::stop_prank(CheatTarget::One(art_peace_address));
+}
+
+#[test]
+#[should_panic(expected: ('Color out of bounds', ))]
+fn vote_color_out_of_bounds_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+    let votable_colors = art_peace.get_votable_colors();
+    snf::start_prank(CheatTarget::One(art_peace_address), utils::PLAYER1());
+    art_peace.vote_color(votable_colors.len().try_into().unwrap() + 1);
+    snf::stop_prank(CheatTarget::One(art_peace_address));
+}
