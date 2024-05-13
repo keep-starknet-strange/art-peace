@@ -32,5 +32,5 @@ ACCOUNT_FILE=$TMP_DIR/starknet_accounts.json
 /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE account add --name $ACCOUNT_NAME --address $ACCOUNT_ADDRESS --private-key $ACCOUNT_PRIVATE_KEY
 
 #TODO: rename script and make more generic
-echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME invoke --contract-address $1 --function $2 --calldata $3 $4 $5" > $LOG_DIR/cmd.txt
-/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $1 --function $2 --calldata $3 $4 $5 > $LOG_DIR/output.json
+echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME invoke --contract-address $1 --function $2 --calldata $3" > $LOG_DIR/cmd.txt
+/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $1 --function $2 --calldata $3 > $LOG_DIR/output.json

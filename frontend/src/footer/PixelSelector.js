@@ -1,67 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import './PixelSelector.css';
 import '../utils/Styles.css';
-import { fetchWrapper } from '../services/apiService.js';
 
 const PixelSelector = (props) => {
   // Track when a placement is available
 
-  const updateInterval = 250; // 250ms
-  // TODO: make this a config
-  const timeBetweenPlacements = 5000; // 5 seconds
-  const [lastPlacedTime, setLastPlacedTime] = useState(0);
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
-  const [pixelAvailable, setPixelAvailable] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (props.extraPixels > 0) {
-        let newPixelAvailable = props.extraPixels - props.extraPixelsUsed > 0;
-        setPixelAvailable(newPixelAvailable);
-        if (newPixelAvailable) {
-          setPlacementTimer('Place Pixel');
-        } else {
-          // TODO: Do we want to allow selecting colors / erasing xtra pixels?
-          setPlacementTimer('Out of XTRA');
-        }
+    if (props.availablePixels > 0) {
+      let amountAvailable = props.availablePixels - props.availablePixelsUsed;
+      if (amountAvailable > 1) {
+        setPlacementTimer('Place Pixels');
         return;
-      }
-
-      let timeSinceLastPlacement = Date.now() - lastPlacedTime;
-      let newPixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
-      setPixelAvailable(newPixelAvailable);
-      if (newPixelAvailable) {
+      } else if (amountAvailable === 1) {
         setPlacementTimer('Place Pixel');
+        return;
       } else {
-        let secondsTillPlacement = Math.floor(
-          (timeBetweenPlacements - timeSinceLastPlacement) / 1000
-        );
-        setPlacementTimer(
-          `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
-        );
-      }
-    }, updateInterval);
-    return () => clearInterval(interval);
-  }, [
-    lastPlacedTime,
-    timeBetweenPlacements,
-    props.extraPixels,
-    props.extraPixelsUsed
-  ]);
-
-  useEffect(() => {
-    const getLastPlacedPixel = 'get-last-placed-time?address=0';
-    async function fetchGetLastPlacedPixel() {
-      const response = await fetchWrapper(getLastPlacedPixel);
-      if (!response.data) {
+        setPlacementTimer('Out of Pixels');
         return;
       }
-      const time = new Date(response.data);
-      setLastPlacedTime(time);
+    } else {
+      setPlacementTimer(props.basePixelTimer);
     }
-
-    fetchGetLastPlacedPixel();
-  }, []);
+  }, [props.availablePixels, props.availablePixelsUsed, props.basePixelTimer]);
 
   // Selector mode controls
 
@@ -74,7 +36,7 @@ const PixelSelector = (props) => {
       return;
     }
 
-    if (pixelAvailable) {
+    if (props.availablePixels > props.availablePixelsUsed) {
       setSelectorMode(true);
     }
   };
@@ -93,16 +55,18 @@ const PixelSelector = (props) => {
     <div className='PixelSelector'>
       {selectorMode && (
         <div className='PixelSelector__selector'>
-          {props.colors.map((color, idx) => {
-            return (
-              <div
-                className='PixelSelector__color PixelSelector__color__selectable'
-                key={idx}
-                style={{ backgroundColor: `#${color}FF` }}
-                onClick={() => selectColor(idx)}
-              ></div>
-            );
-          })}
+          <div className='PixelSelector__selector__colors'>
+            {props.colors.map((color, idx) => {
+              return (
+                <div
+                  className='PixelSelector__color PixelSelector__color__selectable'
+                  key={idx}
+                  style={{ backgroundColor: `#${color}FF` }}
+                  onClick={() => selectColor(idx)}
+                ></div>
+              );
+            })}
+          </div>
           <div className='Button__close' onClick={() => cancelSelector()}>
             x
           </div>
@@ -112,18 +76,26 @@ const PixelSelector = (props) => {
         <div
           className={
             'Button__primary Text__large ' +
-            (pixelAvailable
+            (props.availablePixels > props.availablePixelsUsed
               ? 'PixelSelector__button--valid'
               : 'PixelSelector__button--invalid')
           }
           onClick={toSelectorMode}
         >
           <p className='PixelSelector__text'>{placementTimer}</p>
-          {props.extraPixels > 0 && (
+          {props.availablePixels > (props.basePixelUp ? 1 : 0) && (
             <div className='PixelSelector__extras'>
-              <p style={{ margin: '0 0.5rem' }}>|</p>
+              <div
+                style={{
+                  margin: '0 1rem',
+                  height: '2.4rem',
+                  width: '0.5rem',
+                  borderRadius: '0.25rem',
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)'
+                }}
+              ></div>
               <p className='PixelSelector__text'>
-                {props.extraPixels - props.extraPixelsUsed} XTRA
+                {props.availablePixels - props.availablePixelsUsed} left
               </p>
             </div>
           )}

@@ -45,7 +45,7 @@ services:
       - 5050:5050
   deployer:
     build:
-      dockerfile: onchain/Dockerfile
+      dockerfile: onchain/Dockerfile.init
       context: .
     depends_on:
       - devnet
@@ -53,6 +53,18 @@ services:
     command: bash -c "./initialize.sh"
     environment:
       - SCARB=/root/.local/bin/scarb
+    volumes:
+      - configs:/configs
+  updater:
+    build:
+      dockerfile: onchain/Dockerfile.update
+      context: .
+    depends_on:
+      devnet:
+        condition: service_started
+      deployer:
+        condition: service_completed_successfully
+    command: bash -c "./update_devnet.sh"
     volumes:
       - configs:/configs
   apibara:

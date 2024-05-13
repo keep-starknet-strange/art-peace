@@ -17,7 +17,7 @@ const TabPanel = (props) => {
     <div className='TabPanel'>
       <CSSTransition
         in={props.showSelectedPixelPanel}
-        timeout={400}
+        timeout={300}
         classNames='list-transition'
         unmountOnExit
         appear
@@ -31,7 +31,7 @@ const TabPanel = (props) => {
       </CSSTransition>
       <CSSTransition
         in={props.showExtraPixelsPanel}
-        timeout={400}
+        timeout={300}
         classNames='list-transition'
         unmountOnExit
         appear
@@ -42,12 +42,26 @@ const TabPanel = (props) => {
           clearExtraPixels={props.clearExtraPixels}
           clearExtraPixel={props.clearExtraPixel}
           clearPixelSelection={props.clearPixelSelection}
+          setSelectedColorId={props.setSelectedColorId}
+          setLastPlacedTime={props.setLastPlacedTime}
+          basePixelUp={props.basePixelUp}
+          basePixelTimer={props.basePixelTimer}
+          factionPixels={props.factionPixels}
+          setFactionPixels={props.setFactionPixels}
+          factionPixelTimers={props.factionPixelTimers}
+          factionPixelsData={props.factionPixelsData}
+          setFactionPixelsData={props.setFactionPixelsData}
+          extraPixels={props.extraPixels}
+          setExtraPixels={props.setExtraPixels}
+          availablePixels={props.availablePixels}
+          availablePixelsUsed={props.availablePixelsUsed}
+          userFactions={props.userFactions}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>
         <CSSTransition
           key={props.activeTab}
-          timeout={400}
+          timeout={300}
           classNames='list-transition'
           unmountOnExit
           appear
@@ -60,6 +74,9 @@ const TabPanel = (props) => {
                     <Quests
                       timeLeftInDay={timeLeftInDay}
                       setActiveTab={props.setActiveTab}
+                      address={props.address}
+                      setExtraPixels={props.setExtraPixels}
+                      extraPixels={props.extraPixels}
                     />
                   )}
                 </TimerInjector>
@@ -67,7 +84,10 @@ const TabPanel = (props) => {
             )}
             {props.activeTab === 'Factions' && (
               <div>
-                <Factions setActiveTab={props.setActiveTab} />
+                <Factions
+                  setActiveTab={props.setActiveTab}
+                  userFactions={props.userFactions}
+                />
               </div>
             )}
             {props.activeTab === 'Vote' && (
@@ -104,7 +124,12 @@ const TabPanel = (props) => {
             )}
             {props.activeTab === 'Account' && (
               <div>
-                <Account setActiveTab={props.setActiveTab} />
+                <Account
+                  setActiveTab={props.setActiveTab}
+                  connected={props.connected}
+                  address={props.address}
+                  setupStarknet={props.setupStarknet}
+                />
               </div>
             )}
           </div>

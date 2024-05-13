@@ -1,0 +1,14 @@
+FROM ubuntu:24.04
+
+# TODO: Auto update the versions from .tool-versions
+SHELL ["/bin/bash", "-c"]
+RUN apt-get update && apt-get install -y \
+curl jq git
+
+WORKDIR /configs
+COPY ./configs/ .
+
+WORKDIR /scripts
+COPY ./tests/integration/docker/ .
+
+CMD ["./update_devnet.sh"]
