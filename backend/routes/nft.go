@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func InitNFTRoutes() {
@@ -44,11 +45,11 @@ func getNFT(w http.ResponseWriter, r *http.Request) {
 
 	nft, err := core.PostgresQueryOneJson[NFTData]("SELECT * FROM nfts WHERE token_id = $1", tokenId)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFT")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFT")
 		return
 	}
 
-	WriteDataJson(w, string(nft))
+	routeutils.WriteDataJson(w, string(nft))
 }
 
 func getMyNFTs(w http.ResponseWriter, r *http.Request) {
@@ -56,52 +57,52 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 
 	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE minter = $1", address)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
 	}
-	WriteDataJson(w, string(nfts))
+	routeutils.WriteDataJson(w, string(nfts))
 }
 
 func getNFTs(w http.ResponseWriter, r *http.Request) {
 	// TODO: Pagination & Likes
 	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts")
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
 	}
 
-	WriteDataJson(w, string(nfts))
+	routeutils.WriteDataJson(w, string(nfts))
 }
 
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
-	if NonProductionMiddleware(w, r) {
-		WriteErrorJson(w, http.StatusMethodNotAllowed, "Method only allowed in non-production mode")
+	if routeutils.NonProductionMiddleware(w, r) {
+		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method only allowed in non-production mode")
 		return
 	}
 
 	// TODO: map[string]int instead of map[string]string
-	jsonBody, err := ReadJsonBody[map[string]string](r)
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
 	if err != nil {
-		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 
 	position, err := strconv.Atoi((*jsonBody)["position"])
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert position to int")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert position to int")
 		return
 	}
 
 	width, err := strconv.Atoi((*jsonBody)["width"])
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert width to int")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert width to int")
 		return
 	}
 
 	height, err := strconv.Atoi((*jsonBody)["height"])
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert height to int")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert height to int")
 		return
 	}
 
@@ -111,68 +112,68 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	cmd := exec.Command(shellCmd, contract, "mint_nft", strconv.Itoa(position), strconv.Itoa(width), strconv.Itoa(height))
 	_, err = cmd.Output()
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to mint NFT on devnet")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to mint NFT on devnet")
 		return
 	}
 
-	WriteResultJson(w, "NFT minted on devnet")
+	routeutils.WriteResultJson(w, "NFT minted on devnet")
 }
 
 func LikeNFT(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
+		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
-	nftlikeReq, err := ReadJsonBody[NFTLikesRequest](r)
+	nftlikeReq, err := routeutils.ReadJsonBody[NFTLikesRequest](r)
 	if err != nil {
-		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 
 	// TODO:  ensure that the nft exists
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 	if err != nil {
-		WriteErrorJson(w, http.StatusBadRequest, "NFT already liked by user")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "NFT already liked by user")
 		return
 	}
 
-	WriteResultJson(w, "NFT liked successfully")
+	routeutils.WriteResultJson(w, "NFT liked successfully")
 }
 
 func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
+		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
-	nftlikeReq, err := ReadJsonBody[NFTLikesRequest](r)
+	nftlikeReq, err := routeutils.ReadJsonBody[NFTLikesRequest](r)
 	if err != nil {
-		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to unlike NFT")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unlike NFT")
 		return
 	}
 
-	WriteResultJson(w, "NFT unliked successfully")
+	routeutils.WriteResultJson(w, "NFT unliked successfully")
 }
 
 func getNftLikeCount(w http.ResponseWriter, r *http.Request) {
 	nftkey := r.URL.Query().Get("nft_key")
 	if nftkey == "" {
-		WriteErrorJson(w, http.StatusBadRequest, "NFT key not provided")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "NFT key not provided")
 		return
 	}
 
 	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM nftlikes WHERE nftKey = $1", nftkey)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve like count")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve like count")
 		return
 	}
 
-	WriteDataJson(w, strconv.Itoa(*count))
+	routeutils.WriteDataJson(w, strconv.Itoa(*count))
 }

@@ -1,7 +1,7 @@
 #[starknet::contract]
 pub mod ArtPeace {
     use starknet::ContractAddress;
-    use art_peace::{IArtPeace, Pixel};
+    use art_peace::{IArtPeace, Pixel, Faction, MemberMetadata};
     use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::nfts::interfaces::{
         IArtPeaceNFTMinter, NFTMetadata, NFTMintParams, ICanvasNFTAdditionalDispatcher,
@@ -18,6 +18,7 @@ pub mod ArtPeace {
 
     #[storage]
     struct Storage {
+        host: ContractAddress,
         canvas: LegacyMap::<u128, Pixel>,
         canvas_width: u128,
         canvas_height: u128,
@@ -27,6 +28,18 @@ pub mod ArtPeace {
         time_between_pixels: u64,
         // Map: user's address -> amount of extra pixels they have
         extra_pixels: LegacyMap::<ContractAddress, u32>,
+        time_between_member_pixels: u64,
+        factions_count: u32,
+        // Map: faction id -> faction data
+        factions: LegacyMap::<u32, Faction>,
+        // Map: faction id -> amount of members
+        faction_member_counts: LegacyMap::<u32, u32>,
+        // Map: (faction id, member index) -> member's metadata
+        faction_members: LegacyMap::<(u32, u32), MemberMetadata>,
+        // Map: member address -> amount of faction memberships
+        user_memberships_count: LegacyMap::<ContractAddress, u32>,
+        // Map: (member address, membership index) -> (faction id, member index)
+        user_memberships: LegacyMap::<(ContractAddress, u32), (u32, u32)>,
         color_count: u8,
         // Map: color index -> color value in RGBA
         color_palette: LegacyMap::<u8, u32>,
@@ -41,6 +54,7 @@ pub mod ArtPeace {
         end_time: u64,
         day_index: u32,
         start_day_time: u64,
+        daily_quests_count: u32,
         // Map: (day_index, quest_id) -> quest contract address
         daily_quests: LegacyMap::<(u32, u32), ContractAddress>,
         main_quests_count: u32,
@@ -56,11 +70,17 @@ pub mod ArtPeace {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
+        NewDay: NewDay,
+        PixelPlaced: PixelPlaced,
+        BasicPixelPlaced: BasicPixelPlaced,
+        MemberPixelsPlaced: MemberPixelsPlaced,
+        ExtraPixelsPlaced: ExtraPixelsPlaced,
         DailyQuestClaimed: DailyQuestClaimed,
         MainQuestClaimed: MainQuestClaimed,
-        Newday: NewDay,
-        PixelPlaced: PixelPlaced,
         VoteColor: VoteColor,
+        FactionCreated: FactionCreated,
+        MemberReplaced: MemberReplaced,
+        // TODO: Integrate template event
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
     }
@@ -84,13 +104,27 @@ pub mod ArtPeace {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct VoteColor {
+    struct BasicPixelPlaced {
         #[key]
-        voted_by: ContractAddress,
+        placed_by: ContractAddress,
+        timestamp: u64,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct MemberPixelsPlaced {
         #[key]
-        day: u32,
+        faction_id: u32,
         #[key]
-        color: u8,
+        member_id: u32,
+        placed_time: u64,
+        member_pixels: u32,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ExtraPixelsPlaced {
+        #[key]
+        placed_by: ContractAddress,
+        extra_pixels: u32,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -115,22 +149,53 @@ pub mod ArtPeace {
         pub calldata: Span<felt252>,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct VoteColor {
+        #[key]
+        voted_by: ContractAddress,
+        #[key]
+        day: u32,
+        #[key]
+        color: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct FactionCreated {
+        #[key]
+        faction_id: u32,
+        name: felt252,
+        leader: ContractAddress,
+        pool: u32,
+        members: Span<ContractAddress>,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct MemberReplaced {
+        #[key]
+        faction_id: u32,
+        #[key]
+        member_id: u32,
+        new_member: ContractAddress,
+    }
+
     #[derive(Drop, Serde)]
     pub struct InitParams {
+        pub host: ContractAddress,
         pub canvas_width: u128,
         pub canvas_height: u128,
         pub time_between_pixels: u64,
         pub color_palette: Array<u32>,
         pub votable_colors: Array<u32>,
         pub end_time: u64,
-        pub daily_quests: Span<ContractAddress>,
-        pub main_quests: Span<ContractAddress>,
+        pub daily_quests_count: u32,
     }
 
     const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 
     #[constructor]
     fn constructor(ref self: ContractState, init_params: InitParams) {
+        self.host.write(init_params.host);
+
         self.canvas_width.write(init_params.canvas_width);
         self.canvas_height.write(init_params.canvas_height);
         self.total_pixels.write(init_params.canvas_width * init_params.canvas_height);
@@ -163,27 +228,21 @@ pub mod ArtPeace {
         let test_address = starknet::contract_address_const::<
             0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
         >();
+        let zero_address = starknet::contract_address_const::<0>();
         self.extra_pixels.write(test_address, 1000);
+        self
+            .init_faction(
+                'StarkNet',
+                test_address,
+                10,
+                array![test_address, test_address, zero_address, zero_address, zero_address].span()
+            );
+        self
+            .init_faction(
+                'briq', test_address, 9, array![test_address, zero_address, zero_address].span()
+            );
 
-        // TODO: To config
-        let daily_quests_count = self.get_daily_quest_count();
-        let mut i = 0;
-        while i < init_params
-            .daily_quests
-            .len() {
-                let (day_index, quest_id) = DivRem::div_rem(i, daily_quests_count);
-                self.daily_quests.write((day_index, quest_id), *init_params.daily_quests.at(i));
-                i += 1;
-            };
-
-        self.main_quests_count.write(init_params.main_quests.len());
-        let mut i = 0;
-        while i < init_params
-            .main_quests
-            .len() {
-                self.main_quests.write(i, *init_params.main_quests.at(i));
-                i += 1;
-            };
+        self.daily_quests_count.write(init_params.daily_quests_count);
     }
 
     #[abi(embed_v0)]
@@ -218,65 +277,192 @@ pub mod ArtPeace {
             self.total_pixels.read()
         }
 
-        fn place_pixel(ref self: ContractState, pos: u128, color: u8) {
-            let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
+        fn check_game_running(self: @ContractState) {
+            let block_timestamp = starknet::get_block_timestamp();
+            assert(block_timestamp <= self.end_time.read(), 'ArtPeace game has ended');
+        }
+
+        fn check_valid_pixel(self: @ContractState, pos: u128, color: u8) {
             assert(pos < self.total_pixels.read(), 'Position out of bounds');
             assert(color < self.color_count.read(), 'Color out of bounds');
-            // TODO: Use sender not caller?
-            let caller = starknet::get_caller_address();
-            // TODO: Only if the user has placed a pixel before?
+        }
+
+        fn check_timing(self: @ContractState, now: u64) {
+            let block_timestamp = starknet::get_block_timestamp();
+            // TODO: To config?
+            let leanience_margin = 20; // 20 seconds
+            let expected_block_time = 6 * 60; // 6 minutes
+            assert(now >= block_timestamp - leanience_margin, 'Block timestamp is too old');
             assert(
-                now - self.last_placed_time.read(caller) >= self.time_between_pixels.read(),
-                'Pixel not available'
+                now <= block_timestamp + 2 * expected_block_time, 'Passed timestamp too far ahead'
             );
+        }
+
+        fn place_pixel_inner(ref self: ContractState, pos: u128, color: u8) {
+            self.check_valid_pixel(pos, color);
+
+            let caller = starknet::get_caller_address();
             let pixel = Pixel { color, owner: caller };
             self.canvas.write(pos, pixel);
-            self.last_placed_time.write(caller, now);
             let day = self.day_index.read();
             self
                 .user_pixels_placed
                 .write(
                     (day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1
                 );
+            // TODO: Optimize?
             self.emit(PixelPlaced { placed_by: caller, pos, day, color });
         }
 
-        fn place_pixel_xy(ref self: ContractState, x: u128, y: u128, color: u8) {
-            let pos = x + y * self.canvas_width.read();
-            self.place_pixel(pos, color);
+        // TODO: Make the function internal only
+        fn place_basic_pixel_inner(ref self: ContractState, pos: u128, color: u8, now: u64) {
+            self.place_pixel_inner(pos, color);
+            let caller = starknet::get_caller_address();
+            self.last_placed_time.write(caller, now);
+            self.emit(BasicPixelPlaced { placed_by: caller, timestamp: now });
         }
 
-        fn place_extra_pixels(ref self: ContractState, positions: Array<u128>, colors: Array<u8>) {
-            let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
+        fn place_member_pixels_inner(
+            ref self: ContractState,
+            faction_id: u32,
+            member_id: u32,
+            positions: Span<u128>,
+            colors: Span<u8>,
+            mut offset: u32,
+            now: u64
+        ) -> u32 {
+            let pixel_count = positions.len();
+            let member_pixels = self.get_faction_members_pixels(faction_id, member_id, now);
+            let mut member_pixels_left = member_pixels;
+            while member_pixels_left > 0 {
+                let pos = *positions.at(offset);
+                let color = *colors.at(offset);
+                self.place_pixel_inner(pos, color);
+                offset += 1;
+                member_pixels_left -= 1;
+                if offset == pixel_count {
+                    break;
+                }
+            };
+            let caller = starknet::get_caller_address();
+            if member_pixels != 0 {
+                // TODO: Optimize
+                if member_pixels_left == 0 {
+                    let new_member_metadata = MemberMetadata {
+                        address: caller, member_placed_time: now, member_pixels: 0
+                    };
+                    self.faction_members.write((faction_id, member_id), new_member_metadata);
+                    self
+                        .emit(
+                            MemberPixelsPlaced {
+                                faction_id, member_id, placed_time: now, member_pixels: 0
+                            }
+                        );
+                } else {
+                    let last_placed_time = self
+                        .faction_members
+                        .read((faction_id, member_id))
+                        .member_placed_time;
+                    let new_member_metadata = MemberMetadata {
+                        address: caller,
+                        member_placed_time: last_placed_time,
+                        member_pixels: member_pixels_left
+                    };
+                    self.faction_members.write((faction_id, member_id), new_member_metadata);
+                    self
+                        .emit(
+                            MemberPixelsPlaced {
+                                faction_id,
+                                member_id,
+                                placed_time: last_placed_time,
+                                member_pixels: member_pixels_left
+                            }
+                        );
+                }
+            }
+            return offset;
+        }
+
+        fn place_pixel(ref self: ContractState, pos: u128, color: u8, now: u64) {
+            self.check_game_running();
+            self.check_timing(now);
+            let caller = starknet::get_caller_address();
+            assert(
+                now - self.last_placed_time.read(caller) >= self.time_between_pixels.read(),
+                'Pixel not available'
+            );
+
+            self.place_basic_pixel_inner(pos, color, now);
+        }
+
+        fn place_pixel_xy(ref self: ContractState, x: u128, y: u128, color: u8, now: u64) {
+            let pos = x + y * self.canvas_width.read();
+            self.place_pixel(pos, color, now);
+        }
+
+        fn place_pixel_blocktime(ref self: ContractState, pos: u128, color: u8) {
+            let block_timestamp = starknet::get_block_timestamp();
+            self.place_pixel(pos, color, block_timestamp);
+        }
+
+        fn place_extra_pixels(
+            ref self: ContractState, positions: Span<u128>, colors: Span<u8>, now: u64
+        ) {
+            self.check_game_running();
+            self.check_timing(now);
             let pixel_count = positions.len();
             assert(pixel_count == colors.len(), 'Positions & Colors must match');
+
+            // Order to use pixels : user base pixel -> member pixels -> extra pixels
             let caller = starknet::get_caller_address();
-            let extra_pixels = self.extra_pixels.read(caller);
-            assert(pixel_count <= extra_pixels, 'Not enough extra pixels');
-            let color_palette_count = self.color_count.read();
-            let total_pixels = self.total_pixels.read();
-            let day = self.day_index.read();
+            let mut pixels_placed = 0;
+
+            // Use base pixel if available
+            if now - self.last_placed_time.read(caller) >= self.time_between_pixels.read() {
+                let pos = *positions.at(pixels_placed);
+                let color = *colors.at(pixels_placed);
+                self.place_basic_pixel_inner(pos, color, now);
+                pixels_placed += 1;
+                if pixels_placed == pixel_count {
+                    return;
+                }
+            }
+
+            // Use member pixels if available
+            let membership_count = self.user_memberships_count.read(caller);
             let mut i = 0;
-            while i < pixel_count {
-                let pos = *positions.at(i);
-                let color = *colors.at(i);
-                assert(pos < total_pixels, 'Position out of bounds');
-                assert(color < color_palette_count, 'Color out of bounds');
-                let pixel = Pixel { color, owner: caller };
-                self.canvas.write(pos, pixel);
-                self
-                    .user_pixels_placed
-                    .write(
-                        (day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1
+            while i < membership_count {
+                let (faction_id, member_id) = self.user_memberships.read((caller, i));
+                pixels_placed = self
+                    .place_member_pixels_inner(
+                        faction_id, member_id, positions, colors, pixels_placed, now
                     );
+                if pixels_placed == pixel_count {
+                    break;
+                }
                 i += 1;
-                self.emit(PixelPlaced { placed_by: caller, pos, day, color });
             };
-            self.extra_pixels.write(caller, extra_pixels - pixel_count);
-        //TODO: to extra pixel self.emit(ExtraPixelsPlaced { placed_by: caller, positions, day, colors });
+            if pixels_placed == pixel_count {
+                return;
+            }
+
+            // TODO: place_extra_pixels_inner
+            // Use extra pixels
+            let extra_pixels = self.extra_pixels.read(caller);
+            let prior_pixels = pixels_placed;
+            assert(extra_pixels >= pixel_count - prior_pixels, 'Not enough extra pixels');
+            while pixels_placed < pixel_count {
+                let pos = *positions.at(pixels_placed);
+                let color = *colors.at(pixels_placed);
+                self.place_pixel_inner(pos, color);
+                pixels_placed += 1;
+            };
+            let extra_pixels_placed = pixel_count - prior_pixels;
+            self.extra_pixels.write(caller, extra_pixels - extra_pixels_placed);
+            self.emit(ExtraPixelsPlaced { placed_by: caller, extra_pixels: extra_pixels_placed });
         }
+
+        // TODO: Place extra pixels cheaper func: pass pixels to use instead of checking all
 
         fn get_last_placed_time(self: @ContractState) -> u64 {
             self.last_placed_time.read(starknet::get_caller_address())
@@ -296,6 +482,160 @@ pub mod ArtPeace {
 
         fn get_user_extra_pixels_count(self: @ContractState, user: ContractAddress) -> u32 {
             self.extra_pixels.read(user)
+        }
+
+        fn get_factions_count(self: @ContractState) -> u32 {
+            self.factions_count.read()
+        }
+
+        fn get_faction(self: @ContractState, faction_id: u32) -> Faction {
+            self.factions.read(faction_id)
+        }
+
+        fn get_faction_leader(self: @ContractState, faction_id: u32) -> ContractAddress {
+            self.factions.read(faction_id).leader
+        }
+
+        fn init_faction(
+            ref self: ContractState,
+            name: felt252,
+            leader: ContractAddress,
+            pool: u32,
+            members: Span<ContractAddress>
+        ) {
+            // TODO
+            //assert(
+            //    starknet::get_caller_address() == self.host.read(), 'Factions are set by the host'
+            //);
+            assert(members.len() <= pool, 'Invalid faction members count');
+            let faction_id = self.factions_count.read();
+            let faction = Faction { name, leader, pixel_pool: pool };
+            self.factions.write(faction_id, faction);
+            self.factions_count.write(faction_id + 1);
+            let mut i = 0;
+            while i < members
+                .len() {
+                    let member_address = *members.at(i);
+                    let member = MemberMetadata {
+                        address: member_address, member_placed_time: 0, member_pixels: 0
+                    };
+                    let member_membership_count = self.user_memberships_count.read(member_address);
+                    self.faction_members.write((faction_id, i), member);
+                    self
+                        .user_memberships
+                        .write((member_address, member_membership_count), (faction_id, i));
+                    self.user_memberships_count.write(member_address, member_membership_count + 1);
+                    i += 1;
+                };
+            self.faction_member_counts.write(faction_id, members.len());
+            self.emit(FactionCreated { faction_id, name, leader, pool, members });
+        }
+
+        // TODO: Tests and integration
+        fn replace_member(
+            ref self: ContractState, faction_id: u32, member_id: u32, new_member: ContractAddress
+        ) {
+            assert(
+                starknet::get_caller_address() == self.get_faction_leader(faction_id),
+                'Only leader can replace members'
+            );
+            let member_count = self.faction_member_counts.read(faction_id);
+            assert(member_id < member_count, 'Member ID out of bounds');
+
+            let old_member = self.faction_members.read((faction_id, member_id));
+            let old_member_address = old_member.address;
+
+            let old_member_membership_count = self.user_memberships_count.read(old_member.address);
+            let mut member_id = 0;
+            while member_id < old_member_membership_count {
+                let (fid, mid) = self.user_memberships.read((old_member_address, member_id));
+                if fid == faction_id && mid == member_id {
+                    break;
+                }
+                member_id += 1;
+            };
+            let last_member_membership = self
+                .user_memberships
+                .read((old_member.address, old_member_membership_count - 1));
+            self.user_memberships.write((old_member.address, member_id), last_member_membership);
+            self.user_memberships_count.write(old_member.address, old_member_membership_count - 1);
+
+            let member = MemberMetadata {
+                address: new_member, member_placed_time: 0, member_pixels: 0
+            };
+            self.faction_members.write((faction_id, member_id), member);
+
+            let new_member_membership_count = self.user_memberships_count.read(new_member);
+            self
+                .user_memberships
+                .write((new_member, new_member_membership_count), (faction_id, member_id));
+            self.user_memberships_count.write(new_member, new_member_membership_count + 1);
+            self.emit(MemberReplaced { faction_id, member_id, new_member });
+        }
+
+        //fn add_faction_member(ref self: ContractState, faction_id: u32, member: ContractAddress) {
+        //    assert(
+        //        starknet::get_caller_address() == self.get_faction_owner(faction_id),
+        //        'Only the faction owner can add members'
+        //    );
+        //    let faction = self.factions.read(faction_id);
+        //    let member_count = self.faction_member_counts.read(faction_id);
+        //    assert(member_count < faction.pixel_pool, 'Faction is full');
+        //    let member_data = MemberMetadata { address: member, member_placed_time: 0, member_pixels: 0 };
+        //    self.faction_members.write((faction_id, member_count), member_data);
+        //    self.faction_member_counts.write(faction_id, member_count + 1);
+        //}
+
+        //fn remove_faction_member(ref self: ContractState, faction_id: u32, member_id: u32) {
+        //    assert(
+        //        starknet::get_caller_address() == self.get_faction_owner(faction_id),
+        //        'Only the faction owner can remove members'
+        //    );
+        //    let member_count = self.faction_member_counts.read(faction_id);
+        //    // Replace the removed member with the last member
+        //    let last_member = self.faction_members.read((faction_id, member_count - 1));
+        //    self.faction_members.write((faction_id, member_id), last_member);
+        //    self.faction_member_counts.write(faction_id, member_count - 1);
+        //}
+
+        fn get_faction_members(self: @ContractState, faction_id: u32) -> Span<ContractAddress> {
+            let member_count = self.faction_member_counts.read(faction_id);
+            let mut i = 0;
+            let mut members = array![];
+            while i < member_count {
+                members.append(self.faction_members.read((faction_id, i)).address);
+                i += 1;
+            };
+
+            members.span()
+        }
+
+        fn get_faction_member_count(self: @ContractState, faction_id: u32) -> u32 {
+            self.faction_member_counts.read(faction_id)
+        }
+
+        fn get_faction_members_pixels(
+            self: @ContractState, faction_id: u32, member_id: u32, now: u64
+        ) -> u32 {
+            let member_count = self.faction_member_counts.read(faction_id);
+            let pixel_pool = self.factions.read(faction_id).pixel_pool;
+            let member_metadata = self.faction_members.read((faction_id, member_id));
+            if member_id >= member_count {
+                return 0;
+            }
+            if member_metadata.member_pixels > 0 {
+                // TODO: If member_pixels > 0 && < allocation && enough time has passed, return allocation instead of member_pixels
+                return member_metadata.member_pixels;
+            } else {
+                let time_since_last_pixel = now - member_metadata.member_placed_time;
+                // TODO: Setup time_between_member_pixels
+                if time_since_last_pixel < self.time_between_member_pixels.read() {
+                    return 0;
+                } else {
+                    // TODO: Think about when pixel_pool % member_count != 0
+                    return pixel_pool / member_count.into();
+                }
+            }
         }
 
         fn get_color_count(self: @ContractState) -> u8 {
@@ -358,6 +698,7 @@ pub mod ArtPeace {
             self.day_index.read()
         }
 
+        // TODO: Integrate call into backend
         fn increase_day_index(ref self: ContractState) {
             let block_timestamp = starknet::get_block_timestamp();
             let start_day_time = self.start_day_time.read();
@@ -369,9 +710,8 @@ pub mod ArtPeace {
             self.emit(NewDay { day_index: self.day_index.read(), start_time: block_timestamp });
         }
 
-        fn get_daily_quest_count(self: @ContractState) -> core::zeroable::NonZero::<u32> {
-            // TODO: hardcoded 3 daily quests
-            3
+        fn get_daily_quests_count(self: @ContractState) -> u32 {
+            self.daily_quests_count.read()
         }
 
         fn get_daily_quest(self: @ContractState, day_index: u32, quest_id: u32) -> ContractAddress {
@@ -381,7 +721,7 @@ pub mod ArtPeace {
         fn get_days_quests(self: @ContractState, day_index: u32) -> Span<ContractAddress> {
             let mut i = 0;
             let mut quests = array![];
-            let quest_count = self.get_daily_quest_count().into();
+            let quest_count = self.get_daily_quests_count();
             while i < quest_count {
                 quests.append(self.daily_quests.read((day_index, i)));
                 i += 1;
@@ -394,7 +734,7 @@ pub mod ArtPeace {
             let day = self.day_index.read();
             let mut quests = array![];
             let mut i = 0;
-            let quest_count = self.get_daily_quest_count().into();
+            let quest_count = self.get_daily_quests_count();
             while i < quest_count {
                 quests.append(self.daily_quests.read((day, i)));
                 i += 1;
@@ -421,6 +761,38 @@ pub mod ArtPeace {
             };
 
             quests.span()
+        }
+
+        fn add_daily_quests(
+            ref self: ContractState, day_index: u32, quests: Span<ContractAddress>
+        ) {
+            assert(
+                starknet::get_caller_address() == self.host.read(), 'Quests are set by the host'
+            );
+            assert(quests.len() <= self.get_daily_quests_count(), 'Invalid daily quests count');
+            let zero_address = starknet::contract_address_const::<0>();
+            assert(
+                self.daily_quests.read((day_index, 0)) == zero_address, 'Daily quests already set'
+            );
+            let mut i = 0;
+            while i < quests
+                .len() {
+                    self.daily_quests.write((day_index, i), *quests.at(i));
+                    i += 1;
+                };
+        }
+
+        fn add_main_quests(ref self: ContractState, quests: Span<ContractAddress>) {
+            assert(
+                starknet::get_caller_address() == self.host.read(), 'Quests are set by the host'
+            );
+            let mut i = self.main_quests_count.read();
+            let end = i + quests.len();
+            while i < end {
+                self.main_quests.write(i, *quests.at(i));
+                i += 1;
+            };
+            self.main_quests_count.write(end);
         }
 
         fn claim_daily_quest(
@@ -535,6 +907,10 @@ pub mod ArtPeace {
     #[abi(embed_v0)]
     impl ArtPeaceNFTMinter of IArtPeaceNFTMinter<ContractState> {
         fn add_nft_contract(ref self: ContractState, nft_contract: ContractAddress) {
+            assert(
+                starknet::get_caller_address() == self.host.read(),
+                'NFT contract is set by the host'
+            );
             let zero_address = starknet::contract_address_const::<0>();
             assert(self.nft_contract.read() == zero_address, 'NFT contract already set');
             self.nft_contract.write(nft_contract);

@@ -21,6 +21,10 @@ pub(crate) fn NFT_CONTRACT() -> ContractAddress {
     contract_address_const::<'CanvasNFT'>()
 }
 
+pub(crate) fn HOST() -> ContractAddress {
+    contract_address_const::<'Host'>()
+}
+
 pub(crate) fn PLAYER1() -> ContractAddress {
     contract_address_const::<'Player1'>()
 }

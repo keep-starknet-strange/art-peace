@@ -81,3 +81,20 @@ fn unruggable_quest_test() {
         art_peace.get_extra_pixels_count() == 20, "Extra pixels are wrong after main quest claim"
     );
 }
+
+#[test]
+#[should_panic(expected: 'Index out of bounds')]
+fn unruggable_quest_claim_if_not_claimable_test() {
+    let unruggable_quest = snf::declare("UnruggableQuest");
+    let main_unruggable_quest = deploy_unruggable_quest_main(unruggable_quest);
+
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(
+            array![].span(), array![main_unruggable_quest].span()
+        )
+    };
+
+    let calldata: Span<felt252> = array![].span();
+
+    art_peace.claim_main_quest(0, calldata);
+}

@@ -5,12 +5,12 @@ use art_peace::tests::art_peace::{deploy_with_quests_contract, warp_to_next_avai
 use art_peace::tests::utils;
 
 use snforge_std as snf;
-use snforge_std::{declare, CheatTarget, ContractClassTrait};
+use snforge_std::{CheatTarget, ContractClassTrait};
 
 use starknet::{ContractAddress, contract_address_const};
 
 fn deploy_rainbow_quest_main() -> ContractAddress {
-    let rainbow_quest = declare("RainbowQuest");
+    let rainbow_quest = snf::declare("RainbowQuest");
     let mut rainbow_calldate = array![];
     RainbowQuestInitParams { art_peace: utils::ART_PEACE_CONTRACT(), reward: 20, }
         .serialize(ref rainbow_calldate);
@@ -58,7 +58,7 @@ fn rainbow_quest_test() {
     let mut i: u8 = 0;
     while i < art_peace
         .get_color_count() {
-            art_peace.place_pixel(i.into(), i);
+            art_peace.place_pixel_blocktime(i.into(), i);
             warp_to_next_available_time(art_peace);
 
             i += 1;
@@ -90,7 +90,7 @@ fn rainbow_quest_color_missing_test() {
     let mut i: u8 = 0;
     while i < art_peace.get_color_count()
         - 1 {
-            art_peace.place_pixel(i.into(), i);
+            art_peace.place_pixel_blocktime(i.into(), i);
             warp_to_next_available_time(art_peace);
 
             i += 1;

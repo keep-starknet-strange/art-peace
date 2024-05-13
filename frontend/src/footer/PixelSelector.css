@@ -42,7 +42,7 @@
 
 .PixelSelector__selector {
   margin: 0.2rem;
-  padding: 0.5rem 1rem;
+  padding: 0rem 0.5rem;
 
   display: flex;
   flex-direction: row;
@@ -61,7 +61,17 @@
   pointer-events: fill;
 }
 
+.PixelSelector__selector__colors {
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .PixelSelector__color__selectable {
+  margin: 0.5rem;
   cursor: pointer;
   pointer-events: fill;
 }

@@ -1,8 +1,9 @@
 #[starknet::contract]
 pub mod PixelQuest {
-    use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
     use art_peace::quests::{IQuest, IPixelQuest};
+
+    use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {
@@ -30,7 +31,7 @@ pub mod PixelQuest {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: PixelQuestInitParams,) {
+    fn constructor(ref self: ContractState, init_params: PixelQuestInitParams) {
         self.art_peace.write(IArtPeaceDispatcher { contract_address: init_params.art_peace });
         self.reward.write(init_params.reward);
         self.pixels_needed.write(init_params.pixels_needed);

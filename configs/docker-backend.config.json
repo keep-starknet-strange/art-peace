@@ -5,8 +5,11 @@
     "place_pixel_devnet": "/scripts/place_pixel.sh",
     "place_extra_pixels_devnet": "/scripts/place_extra_pixels.sh",
     "add_template_devnet": "/scripts/add_template.sh",
+    "claim_today_quest_devnet": "/scripts/claim_today_quest.sh",
     "mint_nft_devnet": "/scripts/mint_nft.sh",
-    "vote_color_devnet": "/scripts/vote_color.sh"
+    "vote_color_devnet": "/scripts/vote_color.sh",
+    "new_username_devnet": "/scripts/new_username.sh",
+    "change_username_devnet": "/scripts/change_username.sh"
   },
   "production": false,
   "websocket": {
