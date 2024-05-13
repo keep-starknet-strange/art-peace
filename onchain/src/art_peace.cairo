@@ -985,9 +985,7 @@ pub mod ArtPeace {
     }
 
     /// Internals
-    fn finalize_color_votes(
-        ref self: ContractState
-    ) { 
+    fn finalize_color_votes(ref self: ContractState) {
         // Should we use a storage variable here ?
         let nb_max: u8 = 3;
 
@@ -1041,7 +1039,7 @@ pub mod ArtPeace {
                 break;
             }
             let index: u8 = max_indexes.get(max_index.into());
-            
+
             let color = self.votable_colors.read((index, day));
             let color_index = self.color_count.read();
             self.color_palette.write(color_index, color);
@@ -1065,7 +1063,7 @@ pub mod ArtPeace {
                     found = 1;
                     break;
                 };
-                max_index += 1;        
+                max_index += 1;
             };
             if found == 0 {
                 next_day_votable_colors_index.append(votable_index);
@@ -1073,7 +1071,10 @@ pub mod ArtPeace {
             votable_index += 1;
         };
 
-        let next_day_votable_colors_count: u8 = next_day_votable_colors_index.len().try_into().unwrap();
+        let next_day_votable_colors_count: u8 = next_day_votable_colors_index
+            .len()
+            .try_into()
+            .unwrap();
         let next_day = day + 1;
         votable_index = 0;
         while votable_index < next_day_votable_colors_count {
@@ -1084,6 +1085,5 @@ pub mod ArtPeace {
         };
         self.votable_colors_count.write(next_day_votable_colors_count);
     }
-
 }
 

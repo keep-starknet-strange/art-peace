@@ -437,7 +437,7 @@ fn vote_color_no_vote_test() {
 }
 
 #[test]
-#[should_panic(expected: ('Color out of bounds', ))]
+#[should_panic(expected: ('Color out of bounds',))]
 fn vote_color_out_of_bounds_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
@@ -587,7 +587,7 @@ fn get_votable_colors_test() {
         0x880000,
         0x008800,
         0x000088,
-        0x888800
+        0x888800,
     ];
     assert_eq!(votable_colors.len(), expected_colors.len(), "Wrong number of votable colors");
     assert_eq!(votable_colors, expected_colors, "Wrong votable colors");
@@ -602,16 +602,10 @@ fn votable_colors_is_updated_according_to_votes_test() {
     let vote_player3 = 3; // 0xDDDD00,
 
     let expected_colors = array![
-        0xDD0000,
-        // 0x00DD00,
+        0xDD0000, // 0x00DD00,
         // 0x0000DD,
         // 0xDDDD00,
-        0xDD00DD,
-        0x00DDDD,
-        0x880000,
-        0x008800,
-        0x000088,
-        0x888800
+        0xDD00DD, 0x00DDDD, 0x880000, 0x008800, 0x000088, 0x888800,
     ];
 
     snf::start_prank(CheatTarget::One(art_peace_address), utils::PLAYER1());
@@ -630,7 +624,9 @@ fn votable_colors_is_updated_according_to_votes_test() {
     snf::start_warp(CheatTarget::One(art_peace_address), DAY_IN_SECONDS);
     art_peace.increase_day_index();
     let votable_colors = art_peace.get_votable_colors();
-    assert_eq!(votable_colors.len() + 3, old_votable_colors_count, "Number of votable colors not updated");
+    assert_eq!(
+        votable_colors.len() + 3, old_votable_colors_count, "Number of votable colors not updated"
+    );
     assert_eq!(votable_colors, expected_colors, "Votable colors mismatch");
     snf::stop_warp(CheatTarget::One(art_peace_address));
 }
