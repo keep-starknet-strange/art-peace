@@ -18,16 +18,13 @@ func getHttpConfig() config.HttpConfig {
 func SetupAccessHeaders(w http.ResponseWriter) {
 	config := getHttpConfig()
 
-	// Set Access-Control-Allow-Origin dynamically based on config
 	for _, origin := range config.AllowOrigin {
 		w.Header().Add("Access-Control-Allow-Origin", origin)
 	}
 
-	// Join methods into a single string for the header
 	methods := strings.Join(config.AllowMethods, ", ")
 	w.Header().Set("Access-Control-Allow-Methods", methods)
 
-	// Join headers into a single string for the header
 	headers := strings.Join(config.AllowHeaders, ", ")
 	w.Header().Set("Access-Control-Allow-Headers", headers)
 }

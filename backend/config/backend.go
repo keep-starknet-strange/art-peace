@@ -17,22 +17,24 @@ type BackendScriptsConfig struct {
 }
 
 type WebSocketConfig struct {
-	ReadBufferSize  int      `json:"read_buffer_size"`
-	WriteBufferSize int      `json:"write_buffer_size"`
-	AllowOrigin     []string `json:"allowOrigin"`
-	AllowMethods    string   `json:"allowMethods"`
-	AllowHeaders    string   `json:"allowHeaders"`
+	ReadBufferSize  int `json:"read_buffer_size"`
+	WriteBufferSize int `json:"write_buffer_size"`
+}
+
+type HttpConfig struct {
+	AllowOrigin  []string `json:"allow_origin"`
+	AllowMethods []string `json:"allow_methods"`
+	AllowHeaders []string `json:"allow_headers"`
 }
 
 type BackendConfig struct {
-	Host       string               `json:"host"`
-	Port       int                  `json:"port"`
-	Scripts    BackendScriptsConfig `json:"scripts"`
-	Production bool                 `json:"production"`
-	WebSocket  WebSocketConfig      `json:"websocket"`
+	Host             string               `json:"host"`
+	Port             int                  `json:"port"`
+	Scripts          BackendScriptsConfig `json:"scripts"`
+	Production       bool                 `json:"production"`
+	WebSocket        WebSocketConfig      `json:"websocket"`
+	HttpConfigValues HttpConfig           `json:"http_config"`
 }
-
-//httpconfigstruct
 
 var DefaultBackendConfig = BackendConfig{
 	Host: "localhost",
@@ -51,11 +53,14 @@ var DefaultBackendConfig = BackendConfig{
 	WebSocket: WebSocketConfig{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
-		AllowOrigin:     []string{"*"},
-		AllowMethods:    "GET, POST, PUT, DELETE, HEAD, OPTIONS",
-		AllowHeaders:    "application/json",
+	},
+	HttpConfigValues: HttpConfig{
+		AllowOrigin:  []string{"*"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders: []string{"Content-Type"},
 	},
 }
+
 var DefaultBackendConfigPath = "../configs/backend.config.json"
 
 func LoadBackendConfig(backendConfigPath string) (*BackendConfig, error) {
