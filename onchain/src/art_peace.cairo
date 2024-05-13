@@ -230,18 +230,17 @@ pub mod ArtPeace {
         >();
         let zero_address = starknet::contract_address_const::<0>();
         self.extra_pixels.write(test_address, 1000);
-        self.init_faction(
-            'StarkNet',
-            test_address,
-            10,
-            array![test_address, test_address, zero_address, zero_address, zero_address].span()
-        );
-        self.init_faction(
-            'briq',
-            test_address,
-            9,
-            array![test_address, zero_address, zero_address].span()
-        );
+        self
+            .init_faction(
+                'StarkNet',
+                test_address,
+                10,
+                array![test_address, test_address, zero_address, zero_address, zero_address].span()
+            );
+        self
+            .init_faction(
+                'briq', test_address, 9, array![test_address, zero_address, zero_address].span()
+            );
 
         self.daily_quests_count.write(init_params.daily_quests_count);
     }
@@ -293,12 +292,9 @@ pub mod ArtPeace {
             // TODO: To config?
             let leanience_margin = 20; // 20 seconds
             let expected_block_time = 6 * 60; // 6 minutes
+            assert(now >= block_timestamp - leanience_margin, 'Block timestamp is too old');
             assert(
-                now >= block_timestamp - leanience_margin, 'Block timestamp is too old'
-            );
-            assert(
-                now <= block_timestamp + 2 * expected_block_time,
-                'Passed timestamp too far ahead'
+                now <= block_timestamp + 2 * expected_block_time, 'Passed timestamp too far ahead'
             );
         }
 
@@ -326,7 +322,15 @@ pub mod ArtPeace {
             self.emit(BasicPixelPlaced { placed_by: caller, timestamp: now });
         }
 
-        fn place_member_pixels_inner(ref self: ContractState, faction_id: u32, member_id: u32, positions: Span<u128>, colors: Span<u8>, mut offset: u32, now: u64) -> u32 {
+        fn place_member_pixels_inner(
+            ref self: ContractState,
+            faction_id: u32,
+            member_id: u32,
+            positions: Span<u128>,
+            colors: Span<u8>,
+            mut offset: u32,
+            now: u64
+        ) -> u32 {
             let pixel_count = positions.len();
             let member_pixels = self.get_faction_members_pixels(faction_id, member_id, now);
             let mut member_pixels_left = member_pixels;
@@ -342,25 +346,39 @@ pub mod ArtPeace {
             };
             let caller = starknet::get_caller_address();
             if member_pixels != 0 {
-              // TODO: Optimize
-              if member_pixels_left == 0 {
-                let new_member_metadata = MemberMetadata {
-                  address: caller,
-                  member_placed_time: now,
-                  member_pixels: 0
-                };
-                self.faction_members.write((faction_id, member_id), new_member_metadata);
-                self.emit(MemberPixelsPlaced { faction_id, member_id, placed_time: now, member_pixels: 0 });
-              } else {
-                let last_placed_time = self.faction_members.read((faction_id, member_id)).member_placed_time;
-                let new_member_metadata = MemberMetadata {
-                  address: caller,
-                  member_placed_time: last_placed_time,
-                  member_pixels: member_pixels_left
-                };
-                self.faction_members.write((faction_id, member_id), new_member_metadata);
-                self.emit(MemberPixelsPlaced { faction_id, member_id, placed_time: last_placed_time, member_pixels: member_pixels_left });
-              }
+                // TODO: Optimize
+                if member_pixels_left == 0 {
+                    let new_member_metadata = MemberMetadata {
+                        address: caller, member_placed_time: now, member_pixels: 0
+                    };
+                    self.faction_members.write((faction_id, member_id), new_member_metadata);
+                    self
+                        .emit(
+                            MemberPixelsPlaced {
+                                faction_id, member_id, placed_time: now, member_pixels: 0
+                            }
+                        );
+                } else {
+                    let last_placed_time = self
+                        .faction_members
+                        .read((faction_id, member_id))
+                        .member_placed_time;
+                    let new_member_metadata = MemberMetadata {
+                        address: caller,
+                        member_placed_time: last_placed_time,
+                        member_pixels: member_pixels_left
+                    };
+                    self.faction_members.write((faction_id, member_id), new_member_metadata);
+                    self
+                        .emit(
+                            MemberPixelsPlaced {
+                                faction_id,
+                                member_id,
+                                placed_time: last_placed_time,
+                                member_pixels: member_pixels_left
+                            }
+                        );
+                }
             }
             return offset;
         }
@@ -387,7 +405,9 @@ pub mod ArtPeace {
             self.place_pixel(pos, color, block_timestamp);
         }
 
-        fn place_extra_pixels(ref self: ContractState, positions: Span<u128>, colors: Span<u8>, now: u64) {
+        fn place_extra_pixels(
+            ref self: ContractState, positions: Span<u128>, colors: Span<u8>, now: u64
+        ) {
             self.check_game_running();
             self.check_timing(now);
             let pixel_count = positions.len();
@@ -413,7 +433,10 @@ pub mod ArtPeace {
             let mut i = 0;
             while i < membership_count {
                 let (faction_id, member_id) = self.user_memberships.read((caller, i));
-                pixels_placed = self.place_member_pixels_inner(faction_id, member_id, positions, colors, pixels_placed, now);
+                pixels_placed = self
+                    .place_member_pixels_inner(
+                        faction_id, member_id, positions, colors, pixels_placed, now
+                    );
                 if pixels_placed == pixel_count {
                     break;
                 }

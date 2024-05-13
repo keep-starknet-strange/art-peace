@@ -177,7 +177,10 @@ fn deploy_erc20_mock() -> ContractAddress {
 
 pub(crate) fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     let last_time = art_peace.get_last_placed_time();
-    snf::start_warp(CheatTarget::One(art_peace.contract_address), last_time + TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN);
+    snf::start_warp(
+        CheatTarget::One(art_peace.contract_address),
+        last_time + TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN
+    );
 }
 
 fn compute_template_hash(template: Span<u8>) -> felt252 {

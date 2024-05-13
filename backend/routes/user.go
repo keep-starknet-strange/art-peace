@@ -13,64 +13,63 @@ import (
 )
 
 func InitUserRoutes() {
-  http.HandleFunc("/get-username-store-address", getUsernameStoreAddress)
-  http.HandleFunc("/set-username-store-address", setUsernameStoreAddress)
+	http.HandleFunc("/get-username-store-address", getUsernameStoreAddress)
+	http.HandleFunc("/set-username-store-address", setUsernameStoreAddress)
 	http.HandleFunc("/get-last-placed-time", getLastPlacedTime)
-  http.HandleFunc("/get-faction-pixels", getFactionPixels)
+	http.HandleFunc("/get-faction-pixels", getFactionPixels)
 	http.HandleFunc("/get-extra-pixels", getExtraPixels)
 	http.HandleFunc("/get-username", getUsername)
 	http.HandleFunc("/get-pixel-count", getPixelCount)
-  if !core.ArtPeaceBackend.BackendConfig.Production {
-    http.HandleFunc("/new-username-devnet", newUsernameDevnet)
-    http.HandleFunc("/change-username-devnet", changeUsernameDevnet)
-  }
+	if !core.ArtPeaceBackend.BackendConfig.Production {
+		http.HandleFunc("/new-username-devnet", newUsernameDevnet)
+		http.HandleFunc("/change-username-devnet", changeUsernameDevnet)
+	}
 }
 
 func getUsernameStoreAddress(w http.ResponseWriter, r *http.Request) {
-  contractAddress := os.Getenv("USERNAME_STORE_CONTRACT_ADDRESS")
-  routeutils.WriteDataJson(w, "\""+contractAddress+"\"")
+	contractAddress := os.Getenv("USERNAME_STORE_CONTRACT_ADDRESS")
+	routeutils.WriteDataJson(w, "\""+contractAddress+"\"")
 }
 
 // TODO: Set env var on infra level in production
 func setUsernameStoreAddress(w http.ResponseWriter, r *http.Request) {
-  // Only allow admin to set contract address
-  if routeutils.AdminMiddleware(w, r) {
-    return
-  }
+	// Only allow admin to set contract address
+	if routeutils.AdminMiddleware(w, r) {
+		return
+	}
 
-  data, err := io.ReadAll(r.Body)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
-    return
-  }
-  os.Setenv("USERNAME_STORE_CONTRACT_ADDRESS", string(data))
-  routeutils.WriteResultJson(w, "Contract address set")
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
+	os.Setenv("USERNAME_STORE_CONTRACT_ADDRESS", string(data))
+	routeutils.WriteResultJson(w, "Contract address set")
 }
 
 type MembershipPixelsData struct {
-  FactionId      int `json:"factionId"`
-  MemberId       int `json:"memberId"`
-  Allocation     int `json:"allocation"`
-  LastPlacedTime *time.Time `json:"lastPlacedTime"`
-  MemberPixels   int `json:"memberPixels"`
+	FactionId      int        `json:"factionId"`
+	MemberId       int        `json:"memberId"`
+	Allocation     int        `json:"allocation"`
+	LastPlacedTime *time.Time `json:"lastPlacedTime"`
+	MemberPixels   int        `json:"memberPixels"`
 }
 
 func getFactionPixels(w http.ResponseWriter, r *http.Request) {
-  address := r.URL.Query().Get("address")
-  if address == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
-    return
-  }
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		return
+	}
 
-  membershipPixels, err := core.PostgresQueryJson[MembershipPixelsData]("SELECT faction_id, member_id, allocation, last_placed_time, member_pixels FROM FactionMembersInfo WHERE user_address = $1", address)
-  if err != nil {
-    routeutils.WriteDataJson(w, "[]")
-    return
-  }
+	membershipPixels, err := core.PostgresQueryJson[MembershipPixelsData]("SELECT faction_id, member_id, allocation, last_placed_time, member_pixels FROM FactionMembersInfo WHERE user_address = $1", address)
+	if err != nil {
+		routeutils.WriteDataJson(w, "[]")
+		return
+	}
 
-  routeutils.WriteDataJson(w, string(membershipPixels))
+	routeutils.WriteDataJson(w, string(membershipPixels))
 }
-
 
 func getExtraPixels(w http.ResponseWriter, r *http.Request) {
 	address := r.URL.Query().Get("address")
@@ -101,7 +100,7 @@ func getUsername(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  routeutils.WriteDataJson(w, "\"" + *name + "\"")
+	routeutils.WriteDataJson(w, "\""+*name+"\"")
 }
 
 func getPixelCount(w http.ResponseWriter, r *http.Request) {
@@ -129,7 +128,7 @@ func getLastPlacedTime(w http.ResponseWriter, r *http.Request) {
 
 	lastTime, err := core.PostgresQueryOne[*time.Time]("SELECT COALESCE((SELECT time FROM LastPlacedTime WHERE address = $1), TO_TIMESTAMP(0))", address)
 	if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get last placed time")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get last placed time")
 		return
 	}
 
@@ -138,75 +137,75 @@ func getLastPlacedTime(w http.ResponseWriter, r *http.Request) {
 }
 
 func newUsernameDevnet(w http.ResponseWriter, r *http.Request) {
-  // Disable this in production
-  if routeutils.NonProductionMiddleware(w, r) {
-    return
-  }
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
 
-  jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
-    return
-  }
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		return
+	}
 
-  username := (*jsonBody)["username"]
+	username := (*jsonBody)["username"]
 
-  if username == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing username parameter")
-    return
-  }
+	if username == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing username parameter")
+		return
+	}
 
-  if len(username) > 31 {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Username too long (max 31 characters)")
-    return
-  }
+	if len(username) > 31 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Username too long (max 31 characters)")
+		return
+	}
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.NewUsernameDevnet
-  contract := os.Getenv("USERNAME_STORE_CONTRACT_ADDRESS")
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.NewUsernameDevnet
+	contract := os.Getenv("USERNAME_STORE_CONTRACT_ADDRESS")
 
-  cmd := exec.Command(shellCmd, contract, "claim_username", username)
-  _, err = cmd.Output()
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
-    return
-  }
+	cmd := exec.Command(shellCmd, contract, "claim_username", username)
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
+		return
+	}
 
-  routeutils.WriteResultJson(w, "Username claimed")
+	routeutils.WriteResultJson(w, "Username claimed")
 }
 
 func changeUsernameDevnet(w http.ResponseWriter, r *http.Request) {
-  // Disable this in production
-  if routeutils.NonProductionMiddleware(w, r) {
-    return
-  }
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
 
-  jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
-    return
-  }
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		return
+	}
 
-  username := (*jsonBody)["username"]
+	username := (*jsonBody)["username"]
 
-  if username == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing username parameter")
-    return
-  }
+	if username == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing username parameter")
+		return
+	}
 
-  if len(username) > 31 {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Username too long (max 31 characters)")
-    return
-  }
+	if len(username) > 31 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Username too long (max 31 characters)")
+		return
+	}
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.ChangeUsernameDevnet
-  contract := os.Getenv("USERNAME_STORE_CONTRACT_ADDRESS")
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.ChangeUsernameDevnet
+	contract := os.Getenv("USERNAME_STORE_CONTRACT_ADDRESS")
 
-  cmd := exec.Command(shellCmd, contract, "change_username", username)
-  _, err = cmd.Output()
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
-    return
-  }
+	cmd := exec.Command(shellCmd, contract, "change_username", username)
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
+		return
+	}
 
-  routeutils.WriteResultJson(w, "Username changed")
+	routeutils.WriteResultJson(w, "Username changed")
 }

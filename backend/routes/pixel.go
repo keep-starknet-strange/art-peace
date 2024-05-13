@@ -67,7 +67,7 @@ func getPixelInfo(w http.ResponseWriter, r *http.Request) {
     LEFT JOIN Users u ON p.address = u.address WHERE p.position = $1
     ORDER BY p.time DESC LIMIT 1`, position)
 	if err != nil {
-    routeutils.WriteDataJson(w, "\"0x0000000000000000000000000000000000000000000000000000000000000000\"")
+		routeutils.WriteDataJson(w, "\"0x0000000000000000000000000000000000000000000000000000000000000000\"")
 		return
 	}
 
@@ -103,11 +103,11 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  timestamp, err := strconv.Atoi((*jsonBody)["timestamp"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid time")
-    return
-  }
+	timestamp, err := strconv.Atoi((*jsonBody)["timestamp"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid time")
+		return
+	}
 
 	// Validate position range
 	if position < 0 || position >= int(core.ArtPeaceBackend.CanvasConfig.Canvas.Width*core.ArtPeaceBackend.CanvasConfig.Canvas.Height) {
@@ -136,8 +136,8 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
 }
 
 type ExtraPixelJson struct {
-  ExtraPixels []map[string]int `json:"extraPixels"`
-  Timestamp int `json:"timestamp"`
+	ExtraPixels []map[string]int `json:"extraPixels"`
+	Timestamp   int              `json:"timestamp"`
 }
 
 func placeExtraPixelsDevnet(w http.ResponseWriter, r *http.Request) {

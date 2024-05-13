@@ -8,7 +8,7 @@ func InitRoutes() {
 	indexer.InitIndexerRoutes()
 	InitCanvasRoutes()
 	InitPixelRoutes()
-  InitFactionRoutes()
+	InitFactionRoutes()
 	InitWebsocketRoutes()
 	InitTemplateRoutes()
 	InitUserRoutes()

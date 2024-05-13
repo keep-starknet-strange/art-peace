@@ -41,11 +41,21 @@ pub trait IArtPeace<TContractState> {
     // Place pixels on the canvas
     fn place_pixel_inner(ref self: TContractState, pos: u128, color: u8);
     fn place_basic_pixel_inner(ref self: TContractState, pos: u128, color: u8, now: u64);
-    fn place_member_pixels_inner(ref self: TContractState, faction_id: u32, member_id: u32, positions: Span<u128>, colors: Span<u8>, offset: u32, now: u64) -> u32;
+    fn place_member_pixels_inner(
+        ref self: TContractState,
+        faction_id: u32,
+        member_id: u32,
+        positions: Span<u128>,
+        colors: Span<u8>,
+        offset: u32,
+        now: u64
+    ) -> u32;
     fn place_pixel(ref self: TContractState, pos: u128, color: u8, now: u64);
     fn place_pixel_xy(ref self: TContractState, x: u128, y: u128, color: u8, now: u64);
     fn place_pixel_blocktime(ref self: TContractState, pos: u128, color: u8);
-    fn place_extra_pixels(ref self: TContractState, positions: Span<u128>, colors: Span<u8>, now: u64);
+    fn place_extra_pixels(
+        ref self: TContractState, positions: Span<u128>, colors: Span<u8>, now: u64
+    );
 
     // Get placement info
     fn get_last_placed_time(self: @TContractState) -> u64;
@@ -75,7 +85,9 @@ pub trait IArtPeace<TContractState> {
         self: @TContractState, faction_id: u32
     ) -> Span<starknet::ContractAddress>;
     fn get_faction_member_count(self: @TContractState, faction_id: u32) -> u32;
-    fn get_faction_members_pixels(self: @TContractState, faction_id: u32, member_id: u32, now: u64) -> u32;
+    fn get_faction_members_pixels(
+        self: @TContractState, faction_id: u32, member_id: u32, now: u64
+    ) -> u32;
 
     // Get color info
     fn get_color_count(self: @TContractState) -> u8;

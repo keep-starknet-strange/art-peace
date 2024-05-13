@@ -23,14 +23,14 @@ func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	templateId, err := strconv.ParseInt(templateIdHex, 0, 64)
 	if err != nil {
-    PrintIndexerError("processTemplateAddedEvent", "Error converting template id hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
+		PrintIndexerError("processTemplateAddedEvent", "Error converting template id hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
 		return
 	}
 
 	// Parse template name hex as bytes encoded in utf-8
 	decodedName, err := hex.DecodeString(templateNameHex)
 	if err != nil {
-    PrintIndexerError("processTemplateAddedEvent", "Error decoding template name hex", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
+		PrintIndexerError("processTemplateAddedEvent", "Error decoding template name hex", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
 		return
 	}
 	// Trim off 0s at the start
@@ -47,32 +47,32 @@ func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	templatePosition, err := strconv.ParseInt(templatePositionHex, 0, 64)
 	if err != nil {
-    PrintIndexerError("processTemplateAddedEvent", "Error converting template position hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
+		PrintIndexerError("processTemplateAddedEvent", "Error converting template position hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
 		return
 	}
 
 	templateWidth, err := strconv.ParseInt(templateWidthHex, 0, 64)
 	if err != nil {
-    PrintIndexerError("processTemplateAddedEvent", "Error converting template width hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
+		PrintIndexerError("processTemplateAddedEvent", "Error converting template width hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
 		return
 	}
 
 	templateHeight, err := strconv.ParseInt(templateHeightHex, 0, 64)
 	if err != nil {
-    PrintIndexerError("processTemplateAddedEvent", "Error converting template height hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
+		PrintIndexerError("processTemplateAddedEvent", "Error converting template height hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
 		return
 	}
 
 	templateReward, err := strconv.ParseInt(templateRewardLowHex, 0, 64)
 	if err != nil {
-    PrintIndexerError("processTemplateAddedEvent", "Error converting template reward hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
+		PrintIndexerError("processTemplateAddedEvent", "Error converting template reward hex to int", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
 		return
 	}
 
 	// Add template to postgres
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Templates (key, name, hash, position, width, height, reward, reward_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", templateId, templateName, templateHashHex, templatePosition, templateWidth, templateHeight, templateReward, templateRewardToken)
 	if err != nil {
-    PrintIndexerError("processTemplateAddedEvent", "Error inserting template into postgres", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
+		PrintIndexerError("processTemplateAddedEvent", "Error inserting template into postgres", templateIdHex, templateHashHex, templateNameHex, templatePositionHex, templateWidthHex, templateHeightHex, templateRewardLowHex, templateRewardToken)
 		return
 	}
 

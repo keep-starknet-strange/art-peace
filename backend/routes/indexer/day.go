@@ -14,20 +14,20 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
 	if err != nil {
-    PrintIndexerError("processNewDayEvent", "Error converting day index hex to int", dayIdxHex, dayStartTimeHex)
+		PrintIndexerError("processNewDayEvent", "Error converting day index hex to int", dayIdxHex, dayStartTimeHex)
 		return
 	}
 
 	dayStartTime, err := strconv.ParseInt(dayStartTimeHex, 0, 64)
 	if err != nil {
-    PrintIndexerError("processNewDayEvent", "Error converting day start time hex to int", dayIdxHex, dayStartTimeHex)
+		PrintIndexerError("processNewDayEvent", "Error converting day start time hex to int", dayIdxHex, dayStartTimeHex)
 		return
 	}
 
 	// Set day in postgres
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Days (day_index, day_start) VALUES ($1, to_timestamp($2))", dayIdx, dayStartTime)
 	if err != nil {
-    PrintIndexerError("processNewDayEvent", "Error inserting day into postgres", dayIdx, dayStartTime)
+		PrintIndexerError("processNewDayEvent", "Error inserting day into postgres", dayIdx, dayStartTime)
 		return
 	}
 
@@ -35,7 +35,7 @@ func processNewDayEvent(event IndexerEvent, w http.ResponseWriter) {
 		// Update end time of previous day
 		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Days SET day_end = $1 WHERE day_index = $2", dayStartTime, dayIdx-1)
 		if err != nil {
-      PrintIndexerError("processNewDayEvent", "Error updating end time of previous day in postgres", dayIdx, dayStartTime)
+			PrintIndexerError("processNewDayEvent", "Error updating end time of previous day in postgres", dayIdx, dayStartTime)
 			return
 		}
 	}
