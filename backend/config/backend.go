@@ -49,12 +49,11 @@ var DefaultBackendConfig = BackendConfig{
 	WebSocket: WebSocketConfig{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
-		AllowOrigin:     "*",
+		AllowOrigin:     []string{"*"}, // Correctly initialize as a slice of strings
 		AllowMethods:    "GET, POST, PUT, DELETE, HEAD, OPTIONS",
 		AllowHeaders:    "application/json",
 	},
 }
-
 var DefaultBackendConfigPath = "../configs/backend.config.json"
 
 func LoadBackendConfig(backendConfigPath string) (*BackendConfig, error) {

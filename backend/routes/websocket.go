@@ -35,7 +35,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 			if origin == "" {
 				return true
 			}
-		
+
 			for _, allowedOrigin := range core.ArtPeaceBackend.BackendConfig.WebSocket.AllowOrigin {
 				if allowedOrigin == "*" {
 					return true
@@ -44,7 +44,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 					return true
 				}
 			}
-		
+
 			return false
 		},
 	}
