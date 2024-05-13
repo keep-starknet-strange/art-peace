@@ -25,33 +25,34 @@ func wsReader(conn *websocket.Conn) {
 		fmt.Println("WS message received: ", messageType, string(p))
 	}
 }
-
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  core.ArtPeaceBackend.BackendConfig.WebSocket.ReadBufferSize,
 		WriteBufferSize: core.ArtPeaceBackend.BackendConfig.WebSocket.WriteBufferSize,
+
 		CheckOrigin: func(r *http.Request) bool {
 			origin := r.Header.Get("Origin")
 			if origin == "" {
 				return true
 			}
-
+		
 			for _, allowedOrigin := range core.ArtPeaceBackend.BackendConfig.WebSocket.AllowOrigin {
+				if allowedOrigin == "*" {
+					return true
+				}
 				if origin == allowedOrigin {
 					return true
 				}
 			}
-
+		
 			return false
 		},
 	}
-
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
 	core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections, ws)
 	wsReader(ws)
 }
