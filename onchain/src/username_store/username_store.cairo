@@ -39,9 +39,10 @@ pub mod UsernameStore {
     }
 
     #[abi(embed_v0)]
-    pub impl UsernameStore of IUsernameStore<ContractState> {
+    impl UsernameStore of IUsernameStore<ContractState> {
         fn claim_username(ref self: ContractState, key: felt252) {
             let caller_address = get_caller_address();
+
             assert(
                 self.user_to_username.read(caller_address) == 0,
                 UserNameClaimErrors::USER_HAS_USERNAME

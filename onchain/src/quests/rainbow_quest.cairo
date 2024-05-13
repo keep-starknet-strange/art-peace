@@ -1,8 +1,9 @@
 #[starknet::contract]
 pub mod RainbowQuest {
-    use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
     use art_peace::quests::{IQuest, IRainbowQuest};
+
+    use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {

@@ -1,8 +1,9 @@
 #[starknet::contract]
 pub mod NFTMintQuest {
-    use starknet::{ContractAddress, get_caller_address};
     use art_peace::nfts::interfaces::{ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait};
     use art_peace::quests::IQuest;
+
+    use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {
