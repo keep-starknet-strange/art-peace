@@ -47,6 +47,9 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 			return false
 		},
+
+		//To do: Logic for Allowed Methods and Allowed headers
+		
 	}
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
