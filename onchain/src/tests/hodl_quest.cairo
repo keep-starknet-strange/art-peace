@@ -61,7 +61,7 @@ fn hodl_quest_test() {
     snf::store(
         art_peace.contract_address,
         snf::map_entry_address(selector!("extra_pixels"), array![18].span()),
-        array![18].span()
+        array![contract_address_const::<1>().into()].span()
     );
 
     art_peace.claim_main_quest(0, calldata.span());
