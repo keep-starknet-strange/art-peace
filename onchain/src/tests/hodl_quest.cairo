@@ -9,7 +9,7 @@ use snforge_std as snf;
 use snforge_std::{declare, CheatTarget, ContractClassTrait};
 
 const reward_amt: u32 = 18;
-const user_extra_pixel: u32 = 20;
+const user_extra_pixel: u32 = 0;
 
 
 fn deploy_hodl_quest() -> ContractAddress {
