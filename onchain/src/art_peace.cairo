@@ -679,11 +679,17 @@ pub mod ArtPeace {
             self.color_votes.read((color, day))
         }
 
-        fn finalize_color_votes(
-            ref self: ContractState
-        ) { // TODO: Make the function internal only & call in the end of the day
-        // TODO: Implement with : adding top X colors to the palette
-        // TODO: Implement with : setting up the next day's votable colors
+        fn get_votable_colors(self: @ContractState) -> Array<u32> {
+            let day = self.day_index.read();
+            let votable_colors_count = self.votable_colors_count.read();
+            let mut votable_colors = array![];
+            let mut i = 0;
+            while i < votable_colors_count {
+                votable_colors.append(self.votable_colors.read((i, day)));
+                i += 1;
+            };
+
+            votable_colors
         }
 
         fn get_creation_time(self: @ContractState) -> u64 {
@@ -704,6 +710,7 @@ pub mod ArtPeace {
             let start_day_time = self.start_day_time.read();
 
             assert(block_timestamp >= start_day_time + DAY_IN_SECONDS, 'day has not passed');
+            finalize_color_votes(ref self);
 
             self.day_index.write(self.day_index.read() + 1);
             self.start_day_time.write(block_timestamp);
@@ -976,5 +983,107 @@ pub mod ArtPeace {
             }
         }
     }
+
+    /// Internals
+    fn finalize_color_votes(
+        ref self: ContractState
+    ) { 
+        // Should we use a storage variable here ?
+        let nb_max: u8 = 3;
+
+        let day = self.day_index.read();
+        let votable_colors_count = self.votable_colors_count.read();
+
+        let mut max_scores: Felt252Dict<u32> = Default::default();
+        let mut max_indexes: Felt252Dict<u8> = Default::default();
+        let mut max_index: u8 = 0;
+
+        let mut votable_index: u8 = 0;
+
+        while votable_index < votable_colors_count {
+            max_index = 0;
+            let mut index = votable_index;
+            let mut vote = self.color_votes.read((index, day));
+            // update max scores if needed
+            while max_index < nb_max {
+                let mut m: felt252 = max_index.into();
+                if (max_scores.get(m) < vote) {
+                    let mut old_vote = max_scores.get(m);
+                    let mut old_index = max_indexes.get(m);
+                    max_scores.insert(m, vote);
+                    max_indexes.insert(m, index);
+                    vote = old_vote;
+                    index = old_index;
+
+                    max_index += 1;
+                    // update max dict
+                    while max_index < nb_max {
+                        m = max_index.into();
+                        old_vote = max_scores.get(m);
+                        old_index = max_indexes.get(m);
+                        max_scores.insert(m, vote);
+                        max_indexes.insert(m, index);
+                        vote = old_vote;
+                        index = old_index;
+                        max_index += 1;
+                    };
+                };
+                max_index += 1;
+            };
+            votable_index += 1;
+        };
+
+        // update palette
+        max_index = 0;
+        while max_index < nb_max {
+            if (max_scores.get(max_index.into()) == 0) {
+                // no more max
+                break;
+            }
+            let index: u8 = max_indexes.get(max_index.into());
+            
+            let color = self.votable_colors.read((index, day));
+            let color_index = self.color_count.read();
+            self.color_palette.write(color_index, color);
+            self.color_count.write(color_index + 1);
+            max_index += 1;
+        };
+
+        // update votable colors
+        let mut next_day_votable_colors_index: Array<u8> = array![];
+        votable_index = 0;
+        while votable_index < votable_colors_count {
+            let mut found: u8 = 0;
+            max_index = 0;
+            while max_index < nb_max {
+                if (max_scores.get(max_index.into()) == 0) {
+                    // no more max
+                    break;
+                }
+                let index: u8 = max_indexes.get(max_index.into());
+                if index == votable_index {
+                    found = 1;
+                    break;
+                };
+                max_index += 1;        
+            };
+            if found == 0 {
+                next_day_votable_colors_index.append(votable_index);
+            }
+            votable_index += 1;
+        };
+
+        let next_day_votable_colors_count: u8 = next_day_votable_colors_index.len().try_into().unwrap();
+        let next_day = day + 1;
+        votable_index = 0;
+        while votable_index < next_day_votable_colors_count {
+            let old_index = next_day_votable_colors_index.at(votable_index.into());
+            let color = self.votable_colors.read((*old_index, day));
+            self.votable_colors.write((votable_index, next_day), color);
+            votable_index += 1;
+        };
+        self.votable_colors_count.write(next_day_votable_colors_count);
+    }
+
 }
 
