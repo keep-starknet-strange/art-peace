@@ -129,7 +129,7 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 		return
 	}
 
-  message := map[string]interface{}{
+	message := map[string]interface{}{
 		"token_id":    tokenId,
 		"minter":      minter,
 		"messageType": "nftMinted",

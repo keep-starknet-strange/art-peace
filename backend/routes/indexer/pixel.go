@@ -71,11 +71,11 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 
 	// Send message to all connected clients
 	var message = map[string]interface{}{
-		"position": position,
-		"color":    color,
-    "messageType": "colorPixel",
+		"position":    position,
+		"color":       color,
+		"messageType": "colorPixel",
 	}
-  routeutils.SendWebSocketMessage(w, message)
+	routeutils.SendWebSocketMessage(w, message)
 }
 
 func processBasicPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
