@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
@@ -128,6 +129,12 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 		return
 	}
 
-	// TODO: Ws message to all clients
+  message := map[string]interface{}{
+		"token_id":    tokenId,
+		"minter":      minter,
+		"messageType": "nftMinted",
+	}
+	routeutils.SendWebSocketMessage(w, message)
+
 	// TODO: Response?
 }

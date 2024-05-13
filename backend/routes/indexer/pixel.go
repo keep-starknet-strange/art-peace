@@ -2,13 +2,11 @@ package indexer
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/websocket"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
@@ -75,21 +73,9 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	var message = map[string]interface{}{
 		"position": position,
 		"color":    color,
+    "messageType": "colorPixel",
 	}
-	messageBytes, err := json.Marshal(message)
-	if err != nil {
-		PrintIndexerError("processPixelPlacedEvent", "Error marshalling message", address, posHex, dayIdxHex, colorHex)
-		return
-	}
-	for idx, conn := range core.ArtPeaceBackend.WSConnections {
-		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
-			fmt.Println(err)
-			// TODO: Should we always remove connection?
-			// Remove connection
-			conn.Close()
-			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
-		}
-	}
+  routeutils.SendWebSocketMessage(w, message)
 }
 
 func processBasicPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {

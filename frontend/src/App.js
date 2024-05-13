@@ -57,6 +57,7 @@ function App() {
     share: false,
     shouldReconnect: () => true
   });
+  const [latestMintedTokenId, setLatestMintedTokenId] = useState(null);
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
@@ -68,6 +69,23 @@ function App() {
       });
     }
   }, [readyState]);
+
+  useEffect(() => {
+    if (lastJsonMessage) {
+      // Check the message type and handle accordingly
+      if (lastJsonMessage.messageType === 'colorPixel') {
+        colorPixel(lastJsonMessage.position, lastJsonMessage.color);
+      } else if (
+        lastJsonMessage.messageType === 'nftMinted' &&
+        activeTab === 'NFTs'
+      ) {
+        // TODO: Compare to user's address
+        if (lastJsonMessage.minter === address) {
+          setLatestMintedTokenId(lastJsonMessage.token_id);
+        }
+      }
+    }
+  }, [lastJsonMessage, address, activeTab]);
 
   // Colors
   const staticColors = canvasConfig.colors;
@@ -364,13 +382,6 @@ function App() {
     basePixelUp
   ]);
 
-  useEffect(() => {
-    if (lastJsonMessage) {
-      // TODO: handle other events
-      colorPixel(lastJsonMessage.position, lastJsonMessage.color);
-    }
-  }, [lastJsonMessage]);
-
   return (
     <div className='App'>
       <CanvasContainer
@@ -438,6 +449,7 @@ function App() {
           setFactionPixelsData={setFactionPixelsData}
           factionPixelTimers={factionPixelTimers}
           userFactions={userFactions}
+          latestMintedTokenId={latestMintedTokenId}
         />
       </div>
       <div className='App__footer'>

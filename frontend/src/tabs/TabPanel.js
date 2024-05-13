@@ -118,6 +118,7 @@ const TabPanel = (props) => {
                   nftMintingMode={props.nftMintingMode}
                   setNftMintingMode={props.setNftMintingMode}
                   setActiveTab={props.setActiveTab}
+                  latestMintedTokenId={props.latestMintedTokenId}
                 />
               </div>
             )}
