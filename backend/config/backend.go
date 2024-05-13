@@ -32,6 +32,8 @@ type BackendConfig struct {
 	WebSocket  WebSocketConfig      `json:"websocket"`
 }
 
+//httpconfigstruct
+
 var DefaultBackendConfig = BackendConfig{
 	Host: "localhost",
 	Port: 8080,
