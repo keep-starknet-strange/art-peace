@@ -49,6 +49,9 @@ var DefaultBackendConfig = BackendConfig{
 	WebSocket: WebSocketConfig{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
+		AllowOrigin:     "*",
+		AllowMethods:    "GET, POST, PUT, DELETE, HEAD, OPTIONS",
+		AllowHeaders:    "application/json",
 	},
 }
 
