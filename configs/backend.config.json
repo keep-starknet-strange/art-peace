@@ -1,6 +1,8 @@
 {
   "host": "localhost",
   "port": 8080,
+  "host": "localhost",
+  "port": 8080,
   "scripts": {
     "place_pixel_devnet": "../tests/integration/local/place_pixel.sh",
     "place_extra_pixels_devnet": "../tests/integration/local/place_extra_pixels.sh",
@@ -11,6 +13,9 @@
   "production": false,
   "websocket": {
     "read_buffer_size": 1024,
-    "write_buffer_size": 1024
+    "write_buffer_size": 1024,
+    "allowOrigin": "*",
+    "allowMethods": "GET, POST, PUT, DELETE",
+    "allowHeaders": "Content-Type"
   }
 }
