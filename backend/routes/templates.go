@@ -160,7 +160,7 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	imageData, err := imageToPixelData(fileBytes)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
 	}
 	hash := hashTemplateImage(imageData)
@@ -174,14 +174,14 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 	filename := fmt.Sprintf("template-%s.png", hash)
 	newimg, err := os.Create(filename)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
 		return
 	}
 	defer file.Close()
 
 	err = png.Encode(newimg, img)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to encode image")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to encode image")
 		return
 	}
 
@@ -210,7 +210,7 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if width < 5 || width > 50 || height < 5 || height > 50 {
-		WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
 
@@ -229,7 +229,7 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(imageBytes) != width*height {
-		WriteErrorJson(w, http.StatusBadRequest, "Invalid image data")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image data")
 		return
 	}
 

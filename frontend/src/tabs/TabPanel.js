@@ -42,6 +42,10 @@ const TabPanel = (props) => {
           clearExtraPixels={props.clearExtraPixels}
           clearExtraPixel={props.clearExtraPixel}
           clearPixelSelection={props.clearPixelSelection}
+          selectorMode={props.selectorMode}
+          setSelectorMode={props.setSelectorMode}
+          isEraserMode={props.isEraserMode}
+          setIsEraserMode={props.setIsEraserMode}
           setSelectedColorId={props.setSelectedColorId}
           setLastPlacedTime={props.setLastPlacedTime}
           basePixelUp={props.basePixelUp}

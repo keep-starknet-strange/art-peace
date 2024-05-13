@@ -233,9 +233,9 @@ fn pixel_quests_daily_no_color_claim_if_not_claimable_test() {
     let y = 20;
     let pos = x + y * WIDTH;
     let color = 0x0;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     warp_to_next_available_time(art_peace);
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
 
     art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
 }
@@ -280,9 +280,9 @@ fn pixel_quests_dmain_no_color_claim_if_not_claimable_test() {
     let y = 20;
     let pos = x + y * WIDTH;
     let color = 0x0;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     warp_to_next_available_time(art_peace);
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
 
     art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
 }

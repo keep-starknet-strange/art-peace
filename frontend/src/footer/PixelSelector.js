@@ -25,10 +25,6 @@ const PixelSelector = (props) => {
     }
   }, [props.availablePixels, props.availablePixelsUsed, props.basePixelTimer]);
 
-  // Selector mode controls
-
-  const [selectorMode, setSelectorMode] = useState(false);
-
   const toSelectorMode = (event) => {
     event.preventDefault();
     // Only works if not hitting the close button
@@ -37,23 +33,24 @@ const PixelSelector = (props) => {
     }
 
     if (props.availablePixels > props.availablePixelsUsed) {
-      setSelectorMode(true);
+      props.setSelectorMode(true);
+      props.setIsEraserMode(false);
     }
   };
 
   const selectColor = (idx) => {
     props.setSelectedColorId(idx);
-    setSelectorMode(false);
+    props.setSelectorMode(false);
   };
 
   const cancelSelector = () => {
     props.setSelectedColorId(-1);
-    setSelectorMode(false);
+    props.setSelectorMode(false);
   };
 
   return (
     <div className='PixelSelector'>
-      {selectorMode && (
+      {props.selectorMode && (
         <div className='PixelSelector__selector'>
           <div className='PixelSelector__selector__colors'>
             {props.colors.map((color, idx) => {
@@ -72,7 +69,7 @@ const PixelSelector = (props) => {
           </div>
         </div>
       )}
-      {!selectorMode && (
+      {!props.selectorMode && (
         <div
           className={
             'Button__primary Text__large ' +
