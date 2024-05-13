@@ -43,7 +43,8 @@ pub mod ArtPeace {
         color_count: u8,
         // Map: color index -> color value in RGBA
         color_palette: LegacyMap::<u8, u32>,
-        votable_colors_count: u8,
+        // Map: (day index) -> number of votable colors
+        votable_colors_count: LegacyMap::<u32, u8>,
         // Map: (votable color index, day index) -> color value in RGBA
         votable_colors: LegacyMap::<(u8, u32), u32>,
         // Map: (votable color index, day index) -> amount of votes
@@ -211,7 +212,7 @@ pub mod ArtPeace {
         };
 
         let votable_colors_count: u8 = init_params.votable_colors.len().try_into().unwrap();
-        self.votable_colors_count.write(votable_colors_count);
+        self.votable_colors_count.write(0, votable_colors_count);
         let mut i: u8 = 0;
         while i < votable_colors_count {
             self.votable_colors.write((i, 0), *init_params.votable_colors.at(i.into()));
@@ -656,11 +657,11 @@ pub mod ArtPeace {
 
         fn vote_color(ref self: ContractState, color: u8) {
             let now = starknet::get_block_timestamp();
+            let day = self.day_index.read();
             assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             assert(color != 0, 'Color 0 indicates no vote');
-            assert(color <= self.votable_colors_count.read(), 'Color out of bounds');
+            assert(color <= self.votable_colors_count.read(day), 'Color out of bounds');
             let caller = starknet::get_caller_address();
-            let day = self.day_index.read();
             let users_vote = self.user_votes.read((caller, day));
             if users_vote != color {
                 if users_vote != 0 {
@@ -681,7 +682,7 @@ pub mod ArtPeace {
 
         fn get_votable_colors(self: @ContractState) -> Array<u32> {
             let day = self.day_index.read();
-            let votable_colors_count = self.votable_colors_count.read();
+            let votable_colors_count = self.votable_colors_count.read(day);
             let mut votable_colors = array![];
             let mut i = 0;
             while i < votable_colors_count {
@@ -990,7 +991,7 @@ pub mod ArtPeace {
         let nb_max: u8 = 3;
 
         let day = self.day_index.read();
-        let votable_colors_count = self.votable_colors_count.read();
+        let votable_colors_count = self.votable_colors_count.read(day);
 
         let mut max_scores: Felt252Dict<u32> = Default::default();
         let mut max_indexes: Felt252Dict<u8> = Default::default();
@@ -1083,7 +1084,7 @@ pub mod ArtPeace {
             self.votable_colors.write((votable_index, next_day), color);
             votable_index += 1;
         };
-        self.votable_colors_count.write(next_day_votable_colors_count);
+        self.votable_colors_count.write(next_day, next_day_votable_colors_count);
     }
 }
 
