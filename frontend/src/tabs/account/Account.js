@@ -17,20 +17,30 @@ const Account = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
   const [rankColor, setRankColor] = useState('');
-  const path = useState(
-    'm5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275z'
-  );
+  const path =
+    'm5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275z';
+
+  const toHex = (str) => {
+    let hex = '0x';
+    for (let i = 0; i < str.length; i++) {
+      hex += '' + str.charCodeAt(i).toString(16);
+    }
+    return hex;
+  };
 
   // TODO: Pending & ... options for edit
   const handleSubmit = async (event) => {
     event.preventDefault();
+    // TODO: Check hex felt on backend as well
+    // TODO: Verify valid address & wallet connection
+    // Convert string username to hex bytes utf-8
     let usernameResponse;
     if (usernameBeforeEdit === '') {
       usernameResponse = await fetchWrapper('new-username-devnet', {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          username: username
+          username: toHex(username)
         })
       });
     } else {
@@ -38,7 +48,7 @@ const Account = (props) => {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          username: username
+          username: toHex(username)
         })
       });
     }
@@ -122,12 +132,13 @@ const Account = (props) => {
 
     let [addr] = await starknet.enable();
     if (devnetMode) {
-      // TODO: to lowercase on frontend and/or backend for all hex/address calls
-      addr = '328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0';
+      addr = '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0';
       props.setupStarknet(addr, starknet);
       return;
     }
     if (addr && addr.length > 0) {
+      // TODO: to lowercase on frontend and/or backend for all hex/address calls
+      // TODO: Also add leading 0 if 63 chars
       addr = addr.toLowerCase();
       addr = addr.slice(2);
       props.setupStarknet(addr, starknet);
@@ -186,6 +197,7 @@ const Account = (props) => {
                 <button
                   className='Text__small Button__primary Account__username__button'
                   onClick={handleCancelEdit}
+                  type='button'
                 >
                   cancel
                 </button>

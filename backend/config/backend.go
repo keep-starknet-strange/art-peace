@@ -9,6 +9,7 @@ type BackendScriptsConfig struct {
 	PlacePixelDevnet       string `json:"place_pixel_devnet"`
 	PlaceExtraPixelsDevnet string `json:"place_extra_pixels_devnet"`
 	AddTemplateDevnet      string `json:"add_template_devnet"`
+  ClaimTodayQuestDevnet  string `json:"claim_today_quest_devnet"`
 	MintNFTDevnet          string `json:"mint_nft_devnet"`
 	VoteColorDevnet        string `json:"vote_color_devnet"`
   NewUsernameDevnet      string `json:"new_username_devnet"`
@@ -35,6 +36,7 @@ var DefaultBackendConfig = BackendConfig{
 		PlacePixelDevnet:       "../scripts/place_pixel.sh",
 		PlaceExtraPixelsDevnet: "../scripts/place_extra_pixels.sh",
 		AddTemplateDevnet:      "../scripts/add_template.sh",
+    ClaimTodayQuestDevnet:  "../scripts/claim_today_quest.sh",
 		MintNFTDevnet:          "../scripts/mint_nft.sh",
 		VoteColorDevnet:        "../scripts/vote_color.sh",
     NewUsernameDevnet:      "../scripts/new_username.sh",

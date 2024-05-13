@@ -75,7 +75,8 @@ const Quests = (props) => {
     const fetchQuests = async () => {
       try {
         // Fetching daily quests from backend
-        const getTodaysQuestsEndpoint = backendUrl + '/get-todays-quests';
+        const getTodaysQuestsEndpoint =
+          backendUrl + `/get-todays-user-quests?address=${props.address}`;
         const dailyResponse = await fetch(getTodaysQuestsEndpoint);
         let dailyData = await dailyResponse.json();
         dailyData = dailyData.data;
@@ -85,7 +86,8 @@ const Quests = (props) => {
         setTodaysQuests(sortByCompleted(dailyData));
 
         // Fetching main quests from backend
-        const getMainQuestsEndpoint = backendUrl + '/get-main-quests';
+        const getMainQuestsEndpoint =
+          backendUrl + `/get-main-user-quests?address=${props.address}`;
         const mainResponse = await fetch(getMainQuestsEndpoint);
         let mainData = await mainResponse.json();
         mainData = mainData.data;
@@ -103,19 +105,25 @@ const Quests = (props) => {
   }, []);
 
   const sortByCompleted = (arr) => {
-    /*TODO
+    // Sort by quest_id & completed; ie quest_id and completed at the end
     if (!arr) return [];
-    const newArray = [];
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i].status == 'completed') {
-        newArray.push(arr[i]);
-      } else {
-        newArray.unshift(arr[i]);
+    arr.sort((a, b) => a.questId - b.questId);
+    const completed = arr.filter((quest) => quest.completed);
+    const incomplete = arr.filter((quest) => !quest.completed);
+    return incomplete.concat(completed);
+  };
+
+  const markCompleted = (questId) => {
+    let questReward = 0;
+    const newQuests = todaysQuests.map((quest) => {
+      if (quest.questId === questId) {
+        questReward = quest.reward;
+        return { ...quest, completed: true };
       }
-    }
-    return newArray;
-    */
-    return arr;
+      return quest;
+    });
+    setTodaysQuests(newQuests);
+    props.setExtraPixels(props.extraPixels + questReward);
   };
 
   return (
@@ -128,11 +136,13 @@ const Quests = (props) => {
         {todaysQuests.map((quest, index) => (
           <QuestItem
             key={index}
+            questId={quest.questId}
             title={quest.name}
             description={quest.description}
             reward={quest.reward}
-            status={quest.status}
+            status={quest.completed ? 'completed' : 'incomplete'}
             args={quest.args}
+            markCompleted={markCompleted}
           />
         ))}
 
@@ -140,11 +150,13 @@ const Quests = (props) => {
         {mainQuests.map((quest, index) => (
           <QuestItem
             key={index}
+            questId={quest.questId}
             title={quest.name}
             description={quest.description}
             reward={quest.reward}
-            status={quest.status}
+            status={quest.completed ? 'completed' : 'incomplete'}
             args={quest.args}
+            markCompleted={markCompleted}
           />
         ))}
       </div>

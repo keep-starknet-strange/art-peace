@@ -30,7 +30,7 @@ pub mod PixelQuest {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: PixelQuestInitParams,) {
+    fn constructor(ref self: ContractState, init_params: PixelQuestInitParams) {
         self.art_peace.write(IArtPeaceDispatcher { contract_address: init_params.art_peace });
         self.reward.write(init_params.reward);
         self.pixels_needed.write(init_params.pixels_needed);

@@ -46,7 +46,7 @@ for entry in $(echo $DAILY_QUESTS | jq -r '.[] | @base64'); do
     echo ${entry} | base64 --decode | jq -r ${1}
   }
   QUEST_DAY=$(_jq '.day')
-  DAY_IDX=$($QUEST_DAY-1)
+  DAY_IDX=$(($QUEST_DAY-1))
   echo "  Deploying daily quest for day $QUEST_DAY..."
   echo
   QUESTS=$(_jq '[.quests[]]')
@@ -67,6 +67,7 @@ for entry in $(echo $DAILY_QUESTS | jq -r '.[] | @base64'); do
       continue
     fi
     echo "    Deploying \"$QUEST_NAME\" quest's contract..."
+    echo "      Day: $QUEST_DAY -- $DAY_IDX"
     echo "      Contract type: $QUEST_TYPE"
     CALLDATA=$(echo -n $QUEST_INIT_PARAMS | jq -r '[.[]] | join(" ")')
     echo "      Contract calldata: $CALLDATA"
@@ -74,6 +75,7 @@ for entry in $(echo $DAILY_QUESTS | jq -r '.[] | @base64'); do
     echo "      Class hash index: $CLASS_HASH_IDX"
     CLASS_HASH=${DECLARED_CONTRACT_HASHES[$CLASS_HASH_IDX-1]}
     echo "      Using class hash $CLASS_HASH"
+    echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $CALLDATA"
     CONTRACT_DEPLOY_RESULT=$(/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $CALLDATA | tail -n 1)
     CONTRACT_ADDRESS=$(echo $CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
     echo "      Deployed contract \"$QUEST_NAME\" with address $CONTRACT_ADDRESS"
@@ -81,6 +83,8 @@ for entry in $(echo $DAILY_QUESTS | jq -r '.[] | @base64'); do
     echo
   done
   echo "  Deployed daily quest contracts: ${DAILY_QUEST_CONTRACTS[@]}"
+  echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function add_daily_quests --calldata $DAY_IDX ${#DAILY_QUEST_CONTRACTS[@]} ${DAILY_QUEST_CONTRACTS[@]}"
+  /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function add_daily_quests --calldata $DAY_IDX ${#DAILY_QUEST_CONTRACTS[@]} ${DAILY_QUEST_CONTRACTS[@]}
   DAILY_QUEST_CONTRACTS=( )
 done
 
@@ -112,6 +116,7 @@ for entry in $(echo $MAIN_QUESTS | jq -r '.[] | @base64'); do
   echo "    Class hash index: $CLASS_HASH_IDX"
   CLASS_HASH=${DECLARED_CONTRACT_HASHES[$CLASS_HASH_IDX-1]}
   echo "    Using class hash $CLASS_HASH"
+  echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $CALLDATA"
   CONTRACT_DEPLOY_RESULT=$(/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $CLASS_HASH --constructor-calldata $CALLDATA | tail -n 1)
   CONTRACT_ADDRESS=$(echo $CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
   echo "    Deployed contract \"$QUEST_NAME\" with address $CONTRACT_ADDRESS"
@@ -119,6 +124,8 @@ for entry in $(echo $MAIN_QUESTS | jq -r '.[] | @base64'); do
   echo
 done
 echo "Deployed main quest contracts: ${MAIN_QUEST_CONTRACTS[@]}"
+echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function add_main_quests --calldata ${#MAIN_QUEST_CONTRACTS[@]} ${MAIN_QUEST_CONTRACTS[@]}"
+/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function add_main_quests --calldata ${#MAIN_QUEST_CONTRACTS[@]} ${MAIN_QUEST_CONTRACTS[@]}
 
 #echo "Setting up contract \"$ART_PEACE_CLASS_NAME\"..."
 #echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function set_nft_contract --calldata $NFT_CONTRACT_ADDRESS"

@@ -46,18 +46,19 @@
   height: 100%;
 
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 2fr 3fr;
   gap: 1rem;
   overflow: hidden;
 }
 
 .ExtraPixelPanel__info {
-  margin: auto;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  /* TODO: Fix scrolling */
+  overflow-y: scroll;
 }
 
 /* TODO: Always scroll to bottom when adding new pixel */
@@ -71,6 +72,7 @@
   grid-auto-rows: 4.25rem;
   gap: 1rem;
 
+  /* TODO: Fix scrolling */
   overflow-y: scroll;
   border-left: 2px solid rgba(0, 0, 0, 0.4);
 }
@@ -147,6 +149,22 @@
   border: 0.1rem solid rgba(0, 0, 0, 0.4);
 }
 
+.ExtraPixelsPanel__info__item--clickable {
+  cursor: pointer;
+  pointer-events: fill;
+  transition: all 0.1s;
+}
+
+.ExtraPixelsPanel__info__item--clickable:hover {
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.4);
+  transform: translateY(-0.2rem) scale(1.03);
+}
+
+.ExtraPixelsPanel__info__item--clickable:active {
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  transform: translateY(0) scale(1);
+}
+
 .ExtraPixelsPanel__info__item--used {
   background: linear-gradient(
     to bottom right,
@@ -162,4 +180,28 @@
 
 .ExtraPixelsPanel__info__item__details {
   margin-top: 0.5rem !important;
+}
+
+.ExtraPixelsPanel__info__item__expand {
+  width: 100%;
+  padding-top: 0.5rem;
+  border-top: 0.1rem solid rgba(0, 0, 0, 0.4);
+  margin-top: 0.5rem;
+}
+
+.ExtraPixelsPanel__info__item__expand__item {
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+  margin-top: 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }

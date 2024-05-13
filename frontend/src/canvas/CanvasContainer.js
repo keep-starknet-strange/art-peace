@@ -180,12 +180,14 @@ const CanvasContainer = (props) => {
     const position = y * width + x;
     const colorId = props.selectedColorId;
 
+    const timestamp = Math.floor(Date.now() / 1000);
     const response = await fetchWrapper(`place-pixel-devnet`, {
       mode: 'cors',
       method: 'POST',
       body: JSON.stringify({
         position: position.toString(),
-        color: colorId.toString()
+        color: colorId.toString(),
+        timestamp: timestamp.toString()
       })
     });
     if (response.result) {
@@ -193,6 +195,8 @@ const CanvasContainer = (props) => {
     }
     props.clearPixelSelection();
     props.setSelectedColorId(-1);
+    props.setLastPlacedTime(timestamp * 1000);
+    // TODO: Fix last placed time if error in placing pixel
   };
   // TODO: Erasing extra pixels
 

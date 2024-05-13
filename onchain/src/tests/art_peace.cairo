@@ -25,6 +25,7 @@ const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 const WIDTH: u128 = 100;
 const HEIGHT: u128 = 100;
 const TIME_BETWEEN_PIXELS: u64 = 10;
+const LEANIENCE_MARGIN: u64 = 20;
 
 fn deploy_contract() -> ContractAddress {
     deploy_nft_contract();
@@ -67,7 +68,7 @@ fn deploy_contract() -> ContractAddress {
     }
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
-    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
+    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN);
 
     contract_addr
 }
@@ -140,7 +141,7 @@ pub(crate) fn deploy_with_quests_contract(
     art_peace.add_main_quests(main_quests);
     snf::stop_prank(CheatTarget::One(contract_addr));
 
-    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
+    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN);
 
     contract_addr
 }
@@ -176,7 +177,7 @@ fn deploy_erc20_mock() -> ContractAddress {
 
 pub(crate) fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     let last_time = art_peace.get_last_placed_time();
-    snf::start_warp(CheatTarget::One(art_peace.contract_address), last_time + TIME_BETWEEN_PIXELS);
+    snf::start_warp(CheatTarget::One(art_peace.contract_address), last_time + TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN);
 }
 
 fn compute_template_hash(template: Span<u8>) -> felt252 {
@@ -217,7 +218,8 @@ fn place_pixel_test() {
     let y = 20;
     let pos = x + y * WIDTH;
     let color = 0x5;
-    art_peace.place_pixel(pos, color);
+    let now = 10;
+    art_peace.place_pixel(pos, color, now);
     assert!(art_peace.get_pixel_color(pos) == color, "Pixel was not placed correctly at pos");
     assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel was not placed correctly at xy");
 
@@ -226,7 +228,8 @@ fn place_pixel_test() {
     let y = 25;
     let pos = x + y * WIDTH;
     let color = 0x7;
-    art_peace.place_pixel_xy(x, y, color);
+    let now = 20;
+    art_peace.place_pixel_xy(x, y, color, now);
     assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel xy was not placed correctly at xy");
     assert!(art_peace.get_pixel(pos).color == color, "Pixel xy was not placed correctly at pos");
 }
@@ -271,7 +274,7 @@ fn template_full_basic_test() {
     let y = 0;
     let pos = x + y * WIDTH;
     let color = 1;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -283,7 +286,7 @@ fn template_full_basic_test() {
     let y = 0;
     let pos = x + y * WIDTH;
     let color = 2;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -295,7 +298,7 @@ fn template_full_basic_test() {
     let y = 1;
     let pos = x + y * WIDTH;
     let color = 3;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -307,7 +310,7 @@ fn template_full_basic_test() {
     let y = 1;
     let pos = x + y * WIDTH;
     let color = 4;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == true,

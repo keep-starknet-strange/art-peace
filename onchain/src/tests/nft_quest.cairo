@@ -59,7 +59,9 @@ fn nft_quest_test() {
     let art_peace_nft_minter = IArtPeaceNFTMinterDispatcher {
         contract_address: art_peace.contract_address
     };
+    snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::HOST());
     art_peace_nft_minter.add_nft_contract(utils::NFT_CONTRACT());
+    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
 
     let calldata: Array<felt252> = array![0];
 

@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import './PixelSelector.css';
 import '../utils/Styles.css';
-import { fetchWrapper } from '../services/apiService.js';
 
 const PixelSelector = (props) => {
   // Track when a placement is available
 
-  const updateInterval = 250; // 250ms
-  // TODO: make this a config
-  const timeBetweenPlacements = 5000; // 5 seconds
-  const [lastPlacedTime, setLastPlacedTime] = useState(0);
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
 
   useEffect(() => {
@@ -26,39 +21,9 @@ const PixelSelector = (props) => {
         return;
       }
     } else {
-      const interval = setInterval(() => {
-        let timeSinceLastPlacement = Date.now() - lastPlacedTime;
-        let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
-        if (basePixelAvailable) {
-          props.setBasePixelUp(true);
-          setPlacementTimer('Place Pixel');
-          clearInterval(interval);
-        } else {
-          let secondsTillPlacement = Math.floor(
-            (timeBetweenPlacements - timeSinceLastPlacement) / 1000
-          );
-          setPlacementTimer(
-            `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
-          );
-        }
-      }, updateInterval);
-      return () => clearInterval(interval);
+      setPlacementTimer(props.basePixelTimer);
     }
-  }, [props.availablePixels, props.availablePixelsUsed, lastPlacedTime]);
-
-  useEffect(() => {
-    const getLastPlacedPixel = 'get-last-placed-time?address=0';
-    async function fetchGetLastPlacedPixel() {
-      const response = await fetchWrapper(getLastPlacedPixel);
-      if (!response.data) {
-        return;
-      }
-      const time = new Date(response.data);
-      setLastPlacedTime(time);
-    }
-
-    fetchGetLastPlacedPixel();
-  }, []);
+  }, [props.availablePixels, props.availablePixelsUsed, props.basePixelTimer]);
 
   // Selector mode controls
 
@@ -120,9 +85,17 @@ const PixelSelector = (props) => {
           <p className='PixelSelector__text'>{placementTimer}</p>
           {props.availablePixels > (props.basePixelUp ? 1 : 0) && (
             <div className='PixelSelector__extras'>
-              <p style={{ margin: '0 0.5rem' }}>|</p>
+              <div
+                style={{
+                  margin: '0 1rem',
+                  height: '2.4rem',
+                  width: '0.5rem',
+                  borderRadius: '0.25rem',
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)'
+                }}
+              ></div>
               <p className='PixelSelector__text'>
-                {props.availablePixels - props.availablePixelsUsed} XTRA
+                {props.availablePixels - props.availablePixelsUsed} left
               </p>
             </div>
           )}
