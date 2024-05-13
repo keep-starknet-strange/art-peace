@@ -85,7 +85,7 @@ function App() {
         }
       }
     }
-  }, [lastJsonMessage, address, activeTab]);
+  }, [lastJsonMessage]);
 
   // Colors
   const staticColors = canvasConfig.colors;
