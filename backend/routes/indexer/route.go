@@ -51,8 +51,8 @@ const (
 	nftMintedEvent          = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
 	usernameClaimedEvent    = "0x019be6537c04b790ae4e3a06d6e777ec8b2e9950a01d76eed8a2a28941cc511c"
 	usernameChangedEvent    = "0x03c44b98666b0a27eadcdf5dc42449af5f907b19523858368c4ffbc7a2625dab"
-
-	templateAddedEvent = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
+	templateAddedEvent 		= "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
+	nftTransferEvent   		= "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"
 )
 
 var eventProcessors = map[string](func(IndexerEvent, http.ResponseWriter)){
@@ -70,6 +70,7 @@ var eventProcessors = map[string](func(IndexerEvent, http.ResponseWriter)){
 	usernameClaimedEvent:    processUsernameClaimedEvent,
 	usernameChangedEvent:    processUsernameChangedEvent,
 	templateAddedEvent:      processTemplateAddedEvent,
+	nftTransferEvent:		 processNFTTransferEvent,
 }
 
 // TODO: User might miss some messages between loading canvas and connecting to websocket?
