@@ -12,11 +12,10 @@ const ExtraPixelsPanel = (props) => {
     props.setSelectedColorId(-1);
   };
 
-  // TODO: swap eraser mode when selecting a color
-  const [isEraserMode, setIsEraserMode] = React.useState(false);
   const eraserMode = () => {
-    setIsEraserMode(!isEraserMode);
-    // TODO: clear color selection
+    props.setIsEraserMode(!props.isEraserMode);
+    props.setSelectorMode(false);
+    props.clearPixelSelection();
   };
 
   // TODO: Is rounding down the time always okay?
@@ -90,6 +89,9 @@ const ExtraPixelsPanel = (props) => {
       props.setExtraPixels(newExtraPixels);
     }
     clearAll();
+    props.setIsEraserMode(false);
+    props.setSelectorMode(false);
+    props.clearPixelSelection();
   };
 
   const [basePixelUsed, setBasePixelUsed] = React.useState(false);

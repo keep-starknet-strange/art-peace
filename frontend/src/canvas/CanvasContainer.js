@@ -23,13 +23,21 @@ const CanvasContainer = (props) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartY, setDragStartY] = useState(0);
+
+  const [isErasing, setIsErasing] = useState(false);
+
   const handlePointerDown = (e) => {
-    setIsDragging(true);
-    setDragStartX(e.clientX);
-    setDragStartY(e.clientY);
+    if (!props.isEraserMode) {
+      setIsDragging(true);
+      setDragStartX(e.clientX);
+      setDragStartY(e.clientY);
+    } else {
+      setIsErasing(true);
+    }
   };
 
   const handlePointerUp = () => {
+    setIsErasing(false);
     setIsDragging(false);
     setDragStartX(0);
     setDragStartY(0);
@@ -41,6 +49,9 @@ const CanvasContainer = (props) => {
       setCanvasY(canvasY + e.clientY - dragStartY);
       setDragStartX(e.clientX);
       setDragStartY(e.clientY);
+    }
+    if (isErasing) {
+      pixelClicked(e);
     }
   };
 
@@ -159,12 +170,25 @@ const CanvasContainer = (props) => {
       return;
     }
 
+    // Erase Extra Pixel
+    if (props.isEraserMode) {
+      const pixelIndex = props.extraPixelsData.findIndex((pixelData) => {
+        return pixelData.x === x && pixelData.y === y;
+      });
+      if (pixelIndex !== -1) props.clearExtraPixel(pixelIndex);
+      // Toggle Eraser mode  if there are no Extra Pixels placed
+      if (!props.extraPixelsData.length)
+        props.setIsEraserMode(!props.isEraserMode);
+      return;
+    }
+
     pixelSelect(x, y);
 
     // Color Extra Pixel
     if (props.selectedColorId === -1) {
       return;
     }
+
     if (props.availablePixels > (props.basePixelUp ? 1 : 0)) {
       if (props.availablePixelsUsed < props.availablePixels) {
         props.addExtraPixel(x, y);
@@ -202,7 +226,7 @@ const CanvasContainer = (props) => {
 
   useEffect(() => {
     const hoverColor = (e) => {
-      if (props.selectedColorId === -1) {
+      if (props.selectedColorId === -1 && !props.isEraserMode) {
         return;
       }
       if (props.nftMintingMode) {
@@ -229,7 +253,7 @@ const CanvasContainer = (props) => {
     return () => {
       window.removeEventListener('mousemove', hoverColor);
     };
-  }, [props.selectedColorId, props.nftMintingMode]);
+  }, [props.selectedColorId, props.nftMintingMode, props.isEraserMode]);
 
   const getSelectedColorInverse = () => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {

@@ -148,6 +148,10 @@ function App() {
   const [availablePixelsUsed, setAvailablePixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
 
+  const [selectorMode, setSelectorMode] = useState(false);
+
+  const [isEraserMode, setIsEraserMode] = React.useState(false);
+
   useEffect(() => {
     const getLastPlacedPixel = `get-last-placed-time?address=${address}`;
     async function fetchGetLastPlacedPixel() {
@@ -265,6 +269,7 @@ function App() {
   }, [address]);
 
   const clearPixelSelection = () => {
+    setSelectedColorId(-1);
     setSelectedPositionX(null);
     setSelectedPositionY(null);
     setPixelSelectedMode(false);
@@ -388,6 +393,8 @@ function App() {
         colors={colors}
         canvasRef={canvasRef}
         extraPixelsCanvasRef={extraPixelsCanvasRef}
+        extraPixels={extraPixels}
+        extraPixelsData={extraPixelsData}
         availablePixels={availablePixels}
         selectedColorId={selectedColorId}
         setSelectedColorId={setSelectedColorId}
@@ -402,6 +409,9 @@ function App() {
         addExtraPixel={addExtraPixel}
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
+        isEraserMode={isEraserMode}
+        setIsEraserMode={setIsEraserMode}
+        clearExtraPixel={clearExtraPixel}
         setLastPlacedTime={setLastPlacedTime}
       />
       <img src={logo} alt='logo' className='App__logo--mobile' />
@@ -424,8 +434,8 @@ function App() {
           setNftMintingMode={setNftMintingMode}
           showSelectedPixelPanel={
             !isPortrait
-              ? pixelSelectedMode
-              : pixelSelectedMode && activeTab === tabs[0]
+              ? pixelSelectedMode || isEraserMode
+              : (pixelSelectedMode || isEraserMode) && activeTab === tabs[0]
           }
           selectedPositionX={selectedPositionX}
           selectedPositionY={selectedPositionY}
@@ -436,6 +446,10 @@ function App() {
           extraPixelsData={extraPixelsData}
           clearExtraPixels={clearExtraPixels}
           clearExtraPixel={clearExtraPixel}
+          selectorMode={selectorMode}
+          setSelectorMode={setSelectorMode}
+          isEraserMode={isEraserMode}
+          setIsEraserMode={setIsEraserMode}
           basePixelUp={basePixelUp}
           basePixelTimer={basePixelTimer}
           factionPixels={factionPixels}
@@ -458,6 +472,10 @@ function App() {
           selectedColorId={selectedColorId}
           setSelectedColorId={setSelectedColorId}
           getDeviceTypeInfo={getDeviceTypeInfo}
+          extraPixels={extraPixels}
+          selectorMode={selectorMode}
+          setSelectorMode={setSelectorMode}
+          setIsEraserMode={setIsEraserMode}
           availablePixels={availablePixels}
           availablePixelsUsed={availablePixelsUsed}
           basePixelUp={basePixelUp}
