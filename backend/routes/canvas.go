@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func InitCanvasRoutes() {
@@ -14,7 +15,7 @@ func InitCanvasRoutes() {
 
 func initCanvas(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to initialize canvas
-	if AdminMiddleware(w, r) {
+	if routeutils.AdminMiddleware(w, r) {
 		return
 	}
 
@@ -31,23 +32,23 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 		ctx := context.Background()
 		err := core.ArtPeaceBackend.Databases.Redis.Set(ctx, "canvas", canvas, 0).Err()
 		if err != nil {
-			WriteErrorJson(w, http.StatusInternalServerError, "Failed to initialize canvas")
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to initialize canvas")
 			return
 		}
 
-		WriteResultJson(w, "Canvas initialized")
+		routeutils.WriteResultJson(w, "Canvas initialized")
 	} else {
-		WriteErrorJson(w, http.StatusConflict, "Canvas already initialized")
+		routeutils.WriteErrorJson(w, http.StatusConflict, "Canvas already initialized")
 	}
 }
 
 func getCanvas(w http.ResponseWriter, r *http.Request) {
-	SetupAccessHeaders(w)
+	routeutils.SetupAccessHeaders(w)
 
 	ctx := context.Background()
 	val, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to get canvas")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get canvas")
 		return
 	}
 

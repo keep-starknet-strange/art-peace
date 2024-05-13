@@ -15,7 +15,7 @@
 .list-transition-enter-active,
 .list-transition-appear-active {
   transform: translateX(0);
-  transition: all 200ms;
+  transition: all 150ms;
 }
 
 /* This fires as soon as the this.state.showList is false */

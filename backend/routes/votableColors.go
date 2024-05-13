@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 type VotableColor struct {
@@ -26,15 +27,15 @@ func InitVotableColorsRoutes() {
 
 func InitVotableColors(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to initialize votable colors
-	if AdminMiddleware(w, r) {
+	if routeutils.AdminMiddleware(w, r) {
 		return
 	}
 
 	// TODO: Make sure Votable colors is not present in Color Table
 	// TODO: Check if votable colors are already initialized
-	colors, err := ReadJsonBody[[]ColorType](r)
+	colors, err := routeutils.ReadJsonBody[[]ColorType](r)
 	if err != nil {
-		WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
 		return
 	}
 
@@ -42,7 +43,7 @@ func InitVotableColors(w http.ResponseWriter, r *http.Request) {
 	uniqueColors := make(map[string]bool)
 	for _, colorHex := range *colors {
 		if _, exists := uniqueColors[colorHex]; exists {
-			WriteErrorJson(w, http.StatusBadRequest, "Duplicate colors in the request")
+			routeutils.WriteErrorJson(w, http.StatusBadRequest, "Duplicate colors in the request")
 			return
 		}
 		uniqueColors[colorHex] = true
@@ -55,12 +56,12 @@ func InitVotableColors(w http.ResponseWriter, r *http.Request) {
 			VALUES ($1)
 		`, colorHex)
 		if err != nil {
-			WriteErrorJson(w, http.StatusInternalServerError, "Error inserting votable color: "+colorHex)
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error inserting votable color: "+colorHex)
 			return
 		}
 	}
 
-	WriteResultJson(w, "Votable colors initialized")
+	routeutils.WriteResultJson(w, "Votable colors initialized")
 }
 
 func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +77,7 @@ func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 	  ) cv ON vc.key = cv.color_key
 	`)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Error fetching votable colors")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error fetching votable colors")
 		return
 	}
 
@@ -87,31 +88,31 @@ func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	WriteDataJson(w, string(votableColors))
+	routeutils.WriteDataJson(w, string(votableColors))
 }
 
 func voteColorDevnet(w http.ResponseWriter, r *http.Request) {
-	if NonProductionMiddleware(w, r) {
-		WriteErrorJson(w, http.StatusUnauthorized, "Method only allowed in non-production mode")
+	if routeutils.NonProductionMiddleware(w, r) {
+		routeutils.WriteErrorJson(w, http.StatusUnauthorized, "Method only allowed in non-production mode")
 		return
 	}
 
-	jsonBody, err := ReadJsonBody[map[string]int](r)
+	jsonBody, err := routeutils.ReadJsonBody[map[string]int](r)
 	if err != nil {
-		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 
 	colorIndex, ok := (*jsonBody)["colorIndex"]
 	if !ok {
-		WriteErrorJson(w, http.StatusBadRequest, "colorIndex not provided")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "colorIndex not provided")
 		return
 	}
 
 	// Validate color format
 	votableColorsLength := len(core.ArtPeaceBackend.CanvasConfig.VotableColors)
 	if colorIndex <= 0 || colorIndex > votableColorsLength {
-		WriteErrorJson(w, http.StatusBadRequest, "Invalid colorIndex, out of range")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid colorIndex, out of range")
 		return
 	}
 
@@ -121,9 +122,9 @@ func voteColorDevnet(w http.ResponseWriter, r *http.Request) {
 	cmd := exec.Command(shellCmd, contract, "vote_color", strconv.Itoa(colorIndex))
 	_, err = cmd.Output()
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to vote for color on devnet")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to vote for color on devnet")
 		return
 	}
 
-	WriteResultJson(w, "Color voted on devnet")
+	routeutils.WriteResultJson(w, "Color voted on devnet")
 }

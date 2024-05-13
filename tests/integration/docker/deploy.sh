@@ -38,13 +38,8 @@ ART_PEACE_CLASS_DECLARE_RESULT=$(cd $CONTRACT_DIR && /root/.local/bin/sncast --u
 ART_PEACE_CLASS_HASH=$(echo $ART_PEACE_CLASS_DECLARE_RESULT | jq -r '.class_hash')
 echo "Declared class \"$ART_PEACE_CLASS_NAME\" with hash $ART_PEACE_CLASS_HASH"
 
-NFT_CLASS_NAME="CanvasNFT"
-
-NFT_CLASS_DECLARE_RESULT=$(cd $CONTRACT_DIR && /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json declare --contract-name $NFT_CLASS_NAME | tail -n 1)
-NFT_CLASS_HASH=$(echo $NFT_CLASS_DECLARE_RESULT | jq -r '.class_hash')
-echo "Declared class \"$NFT_CLASS_NAME\" with hash $NFT_CLASS_HASH"
-
 CANVAS_CONFIG=$WORK_DIR/configs/canvas.config.json
+QUESTS_CONFIG=$WORK_DIR/configs/quests.config.json
 WIDTH=$(jq -r '.canvas.width' $CANVAS_CONFIG)
 HEIGHT=$(jq -r '.canvas.height' $CANVAS_CONFIG)
 PLACE_DELAY=0x00
@@ -53,8 +48,9 @@ COLORS=$(jq -r '.colors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 VOTABLE_COLOR_COUNT=$(jq -r '.votableColors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 VOTABLE_COLORS=$(jq -r '.votableColors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 END_TIME=3000000000
+DAILY_QUESTS_COUNT=$(jq -r '.daily.dailyQuestsCount' $QUESTS_CONFIG)
 
-CALLDATA=$(echo -n $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT $COLORS $VOTABLE_COLOR_COUNT $VOTABLE_COLORS $END_TIME 0 0)
+CALLDATA=$(echo -n $ACCOUNT_ADDRESS $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT $COLORS $VOTABLE_COLOR_COUNT $VOTABLE_COLORS $END_TIME $DAILY_QUESTS_COUNT)
 
 # Precalculated contract address
 # echo "Precalculating contract address..."
@@ -65,6 +61,13 @@ echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --acc
 ART_PEACE_CONTRACT_DEPLOY_RESULT=$(/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $ART_PEACE_CLASS_HASH --constructor-calldata $CALLDATA | tail -n 1)
 ART_PEACE_CONTRACT_ADDRESS=$(echo $ART_PEACE_CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
 echo "Deployed contract \"$ART_PEACE_CLASS_NAME\" with address $ART_PEACE_CONTRACT_ADDRESS"
+
+
+NFT_CLASS_NAME="CanvasNFT"
+
+NFT_CLASS_DECLARE_RESULT=$(cd $CONTRACT_DIR && /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json declare --contract-name $NFT_CLASS_NAME | tail -n 1)
+NFT_CLASS_HASH=$(echo $NFT_CLASS_DECLARE_RESULT | jq -r '.class_hash')
+echo "Declared class \"$NFT_CLASS_NAME\" with hash $NFT_CLASS_HASH"
 
 NFT_NAME="0 318195848183955342120051 10"
 NFT_SYMBOL="0 4271952 3"
@@ -80,11 +83,27 @@ echo "Setting up contract \"$ART_PEACE_CLASS_NAME\"..."
 echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function set_nft_contract --calldata $NFT_CONTRACT_ADDRESS"
 /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function add_nft_contract --calldata $NFT_CONTRACT_ADDRESS
 
+USERNAME_STORE_CLASS_NAME="UsernameStore"
+
+USERNAME_STORE_CLASS_DECLARE_RESULT=$(cd $CONTRACT_DIR && /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json declare --contract-name $USERNAME_STORE_CLASS_NAME | tail -n 1)
+USERNAME_STORE_CLASS_HASH=$(echo $USERNAME_STORE_CLASS_DECLARE_RESULT | jq -r '.class_hash')
+echo "Declared class \"$USERNAME_STORE_CLASS_NAME\" with hash $USERNAME_STORE_CLASS_HASH"
+
+echo "Deploying contract \"$USERNAME_STORE_CLASS_NAME\"..."
+echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $USERNAME_STORE_CLASS_HASH"
+USERNAME_STORE_CONTRACT_DEPLOY_RESULT=$(/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $USERNAME_STORE_CLASS_HASH | tail -n 1)
+USERNAME_STORE_ADDRESS=$(echo $USERNAME_STORE_CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
+echo "Deployed contract \"$USERNAME_STORE_CLASS_NAME\" with address $USERNAME_STORE_ADDRESS"
+
+ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS ACCOUNT_FILE=$ACCOUNT_FILE $SCRIPT_DIR/deploy_quests.sh
+
 # TODO: Remove these lines?
 echo "ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" > /configs/configs.env
 echo "REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> /configs/configs.env
 echo "NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /configs/configs.env
 echo "REACT_APP_NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /configs/configs.env
+echo "USERNAME_STORE_ADDRESS=$USERNAME_STORE_ADDRESS" >> /configs/configs.env
+echo "REACT_APP_USERNAME_STORE_ADDRESS=$USERNAME_STORE_ADDRESS" >> /configs/configs.env
 
 # TODO
 # MULTICALL_TEMPLATE_DIR=$CONTRACT_DIR/tests/multicalls

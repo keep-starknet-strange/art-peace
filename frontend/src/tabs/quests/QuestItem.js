@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { encodeToLink } from '../../utils/encodeToLink';
 import './QuestItem.css';
 import '../../utils/Styles.css';
+import { fetchWrapper } from '../../services/apiService';
 
 const QuestItem = (props) => {
   // TODO: Flash red on quest if clicked and not completed w/ no args
-  // TODO: Animate form
   const [expanded, setExpanded] = useState(false);
-  const expandQuest = () => {
+  const _expandQuest = () => {
     if (props.status == 'completed') {
       return;
     }
@@ -61,6 +61,25 @@ const QuestItem = (props) => {
     setInputsValidated(validated);
   };
 
+  const claimOrExpand = async () => {
+    if (props.status == 'completed') {
+      return;
+    }
+    const response = await fetchWrapper(`claim-today-quest-devnet`, {
+      mode: 'cors',
+      method: 'POST',
+      body: JSON.stringify({
+        // TODO
+        questId: props.questId.toString()
+      })
+    });
+    if (response.result) {
+      console.log(response.result);
+      props.markCompleted(props.questId);
+    }
+    // TODO: Expand if not claimable && has args
+  };
+
   return (
     <div
       className={
@@ -85,7 +104,7 @@ const QuestItem = (props) => {
         >
           <div
             className={`QuestItem__progression QuestItem__progression--${props.status}`}
-            onClick={expandQuest}
+            onClick={claimOrExpand}
           ></div>
           <div className='Text__xsmall QuestItem__reward'>
             +{props.reward}px

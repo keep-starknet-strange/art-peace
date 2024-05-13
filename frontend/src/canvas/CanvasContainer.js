@@ -16,7 +16,7 @@ const CanvasContainer = (props) => {
 
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(2);
+  const [canvasScale, setCanvasScale] = useState(3.85);
 
   const canvasContainerRef = useRef(null);
 
@@ -110,9 +110,10 @@ const CanvasContainer = (props) => {
   // Init canvas transform to center of the viewport
   useEffect(() => {
     const containerRect = canvasContainerRef.current.getBoundingClientRect();
-    const adjust = ((canvasScale - 1) * width) / 2;
-    setCanvasX(containerRect.width / 2 - adjust);
-    setCanvasY(containerRect.height / 2 - adjust);
+    const adjustX = ((canvasScale - 1) * width) / 2;
+    const adjustY = ((canvasScale - 1) * height) / 2;
+    setCanvasX(containerRect.width / 2 - adjustX);
+    setCanvasY(containerRect.height / 2 - adjustY);
   }, [canvasContainerRef]);
 
   const colorExtraPixel = (x, y, colorId) => {
@@ -187,9 +188,9 @@ const CanvasContainer = (props) => {
     if (props.selectedColorId === -1) {
       return;
     }
-
-    if (props.extraPixels > 0) {
-      if (props.extraPixelsUsed < props.extraPixels) {
+    
+    if (props.availablePixels > (props.basePixelUp ? 1 : 0)) {
+      if (props.availablePixelsUsed < props.availablePixels) {
         props.addExtraPixel(x, y);
         colorExtraPixel(x, y, props.selectedColorId);
         return;
@@ -203,12 +204,14 @@ const CanvasContainer = (props) => {
     const position = y * width + x;
     const colorId = props.selectedColorId;
 
+    const timestamp = Math.floor(Date.now() / 1000);
     const response = await fetchWrapper(`place-pixel-devnet`, {
       mode: 'cors',
       method: 'POST',
       body: JSON.stringify({
         position: position.toString(),
-        color: colorId.toString()
+        color: colorId.toString(),
+        timestamp: timestamp.toString()
       })
     });
     if (response.result) {
@@ -216,6 +219,8 @@ const CanvasContainer = (props) => {
     }
     props.clearPixelSelection();
     props.setSelectedColorId(-1);
+    props.setLastPlacedTime(timestamp * 1000);
+    // TODO: Fix last placed time if error in placing pixel
   };
   // TODO: Erasing extra pixels
 
@@ -343,7 +348,7 @@ const CanvasContainer = (props) => {
           colors={props.colors}
           pixelClicked={pixelClicked}
         />
-        {props.extraPixels > 0 && (
+        {props.availablePixels > 0 && (
           <ExtraPixelsCanvas
             extraPixelsCanvasRef={props.extraPixelsCanvasRef}
             width={width}

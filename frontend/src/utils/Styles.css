@@ -1,26 +1,31 @@
 .Text__xsmall {
   font-size: 1rem;
   color: rgba(0, 0, 0, 0.9);
+  line-height: 1.2rem;
 }
 
 .Text__small {
   font-size: 1.2rem;
   color: rgba(0, 0, 0, 0.9);
+  line-height: 1.4rem;
 }
 
 .Text__medium {
   font-size: 1.4rem;
   color: rgba(0, 0, 0, 0.9);
+  line-height: 1.6rem;
 }
 
 .Text__large {
   font-size: 1.6rem;
   color: rgba(0, 0, 0, 0.9);
+  line-height: 1.8rem;
 }
 
 .Text__xlarge {
   font-size: 1.8rem;
   color: rgba(0, 0, 0, 0.9);
+  line-height: 2rem;
 }
 
 .Heading__main {

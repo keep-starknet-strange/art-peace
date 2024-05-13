@@ -5,3 +5,5 @@ export const backendUrl =
 
 export const wsUrl =
   'ws://' + backendConfig.host + ':' + backendConfig.port + '/ws';
+
+export const devnetMode = backendConfig.production === false;

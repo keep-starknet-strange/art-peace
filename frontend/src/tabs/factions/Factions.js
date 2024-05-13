@@ -4,38 +4,32 @@ import FactionSelector from './FactionSelector.js';
 import FactionItem from './FactionItem.js';
 import ExpandableTab from '../ExpandableTab.js';
 
-const FactionsMainSection = () => {
+const FactionsMainSection = (props) => {
   // TODO: Add icons
-  const myFactions = [
-    {
-      id: 1,
-      name: 'Faction 1',
-      icon: 'https://via.placeholder.com/50'
-    },
-    {
-      id: 2,
-      name: 'Faction 2',
-      icon: 'https://via.placeholder.com/50'
-    },
-    {
-      id: 3,
-      name: 'Faction 3',
-      icon: 'https://via.placeholder.com/50'
-    },
-    {
-      id: 4,
-      name: 'Faction 4',
-      icon: 'https://via.placeholder.com/50'
-    },
-    {
-      id: 5,
-      name: 'Faction 5',
-      icon: 'https://via.placeholder.com/50'
-    }
-  ];
-
   const [selectedFaction, setSelectedFaction] = useState(null);
   const clearFactionSelection = () => setSelectedFaction(null);
+
+  const [myFactions, setMyFactions] = useState([]);
+  useState(() => {
+    let newFactions = [];
+    if (!props.userFactions) {
+      return;
+    }
+    props.userFactions.forEach((faction) => {
+      if (
+        newFactions.findIndex((f) => f.factionId === faction.factionId) !== -1
+      ) {
+        return;
+      }
+      let newFaction = {
+        factionId: faction.factionId,
+        name: faction.name,
+        icon: 'https://via.placeholder.com/50'
+      };
+      newFactions.push(newFaction);
+    });
+    setMyFactions(newFactions);
+  }, [props.userFactions]);
 
   return (
     <div className='Factions__main'>
@@ -46,7 +40,7 @@ const FactionsMainSection = () => {
               <FactionSelector
                 key={idx}
                 id={idx}
-                factionId={faction.id}
+                factionId={faction.factionId}
                 name={faction.name}
                 icon={faction.icon}
                 setSelectedFaction={setSelectedFaction}
@@ -84,6 +78,7 @@ const Factions = (props) => {
       mainSection={FactionsMainSection}
       expandedSection={FactionsExpandedSection}
       setActiveTab={props.setActiveTab}
+      userFactions={props.userFactions}
     />
   );
 };
