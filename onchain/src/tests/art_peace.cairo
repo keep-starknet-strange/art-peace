@@ -603,7 +603,7 @@ fn votable_colors_is_updated_according_to_votes_test() {
 
     let expected_colors = array![
         0xDD0000, // 0x00DD00,
-        // 0x0000DD,
+         // 0x0000DD,
         // 0xDDDD00,
         0xDD00DD, 0x00DDDD, 0x880000, 0x008800, 0x000088, 0x888800,
     ];
