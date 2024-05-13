@@ -188,7 +188,7 @@ const CanvasContainer = (props) => {
     if (props.selectedColorId === -1) {
       return;
     }
-    
+
     if (props.availablePixels > (props.basePixelUp ? 1 : 0)) {
       if (props.availablePixelsUsed < props.availablePixels) {
         props.addExtraPixel(x, y);

@@ -473,7 +473,6 @@ function App() {
           setSelectedColorId={setSelectedColorId}
           getDeviceTypeInfo={getDeviceTypeInfo}
           extraPixels={extraPixels}
-          extraPixelsUsed={extraPixelsUsed}
           selectorMode={selectorMode}
           setSelectorMode={setSelectorMode}
           setIsEraserMode={setIsEraserMode}
