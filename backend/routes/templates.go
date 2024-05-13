@@ -50,16 +50,21 @@ func bytesToRGBA(colorBytes []byte) color.RGBA {
 	return color.RGBA{r, g, b, 0xFF}
 }
 
-func imageToPixelData(imageData []byte, colorsData []byte) ([]byte, error) {
+func imageToPixelData(imageData []byte) ([]byte, error) {
 	img, _, err := image.Decode(bytes.NewReader(imageData))
 	if err != nil {
 		return nil, err
 	}
 
-	colorCount := len(colorsData) / 3
+	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM colors ORDER BY key")
+	if err != nil {
+		return nil, err
+	}
+
+	colorCount := len(colors) / 3
 	palette := make([]color.Color, colorCount)
 	for i := 0; i < colorCount; i++ {
-		palette[i] = bytesToRGBA(colorsData[i*3 : i*3+3])
+		palette[i] = bytesToRGBA(colors[i*3 : i*3+3])
 	}
 
 	bounds := img.Bounds()
@@ -80,7 +85,6 @@ func imageToPixelData(imageData []byte, colorsData []byte) ([]byte, error) {
 
 	return pixelData, nil
 }
-
 
 func findClosestColor(target color.RGBA, palette []color.Color) int {
 	minDistance := math.MaxFloat64
@@ -142,7 +146,6 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Seek the file pointer back to the beginning of the file
 	file.Seek(0, 0)
 
 	// Read all data from the uploaded file and write it to the temporary file
@@ -154,20 +157,30 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM colors ORDER BY key")
+	imageData, err := imageToPixelData(fileBytes)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve colors")
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
-	}
-
-	imageData, err := imageToPixelData(fileBytes, colors)
-	if err != nil {
-		panic(err)
 	}
 	hash := hashTemplateImage(imageData)
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2)", hash, imageData)
 	if err != nil {
 		WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in postgres")
+		return
+	}
+
+	// TODO: Path to store generated image
+	filename := fmt.Sprintf("template-%s.png", hash)
+	newimg, err := os.Create(filename)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
+		return
+	}
+	defer file.Close()
+
+	err = png.Encode(newimg, img)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to encode image")
 		return
 	}
 
@@ -195,6 +208,11 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if width < 5 || width > 50 || height < 5 || height > 50 {
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
+		return
+	}
+
 	imageData := (*jsonBody)["image"]
 	// Split string by comma
 	// TODO: Change to byte encoding
@@ -207,6 +225,11 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		imageBytes[idx] = byte(valInt)
+	}
+
+	if len(imageBytes) != width*height {
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid image data")
+		return
 	}
 
 	hash := hashTemplateImage(imageBytes)
