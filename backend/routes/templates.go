@@ -44,21 +44,28 @@ func hashTemplateImage(pixelData []byte) string {
 	return hash.String()
 }
 
+func bytesToRGBA(colorBytes []byte) color.RGBA {
+	r := colorBytes[0]
+	g := colorBytes[1]
+	b := colorBytes[2]
+	return color.RGBA{r, g, b, 0xFF}
+}
+
 func imageToPixelData(imageData []byte) ([]byte, error) {
 	img, _, err := image.Decode(bytes.NewReader(imageData))
 	if err != nil {
 		return nil, err
 	}
 
-	palette := []color.Color{
-		color.RGBA{0x00, 0x00, 0x00, 0xFF}, // Black
-		color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, // White
-		color.RGBA{0xFF, 0x00, 0x00, 0xFF}, // Red
-		color.RGBA{0x00, 0xFF, 0x00, 0xFF}, // Green
-		color.RGBA{0x00, 0x00, 0xFF, 0xFF}, // Blue
-		color.RGBA{0xFF, 0xFF, 0x00, 0xFF}, // Yellow
-		color.RGBA{0xFF, 0x00, 0xFF, 0xFF}, // Magenta
-		color.RGBA{0x00, 0xFF, 0xFF, 0xFF}, // Cyan
+	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM colors ORDER BY key")
+	if err != nil {
+		return nil, err
+	}
+
+	colorCount := len(colors) / 3
+	palette := make([]color.Color, colorCount)
+	for i := 0; i < colorCount; i++ {
+		palette[i] = bytesToRGBA(colors[i*3 : i*3+3])
 	}
 
 	bounds := img.Bounds()
@@ -140,6 +147,8 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	file.Seek(0, 0)
+
 	// Read all data from the uploaded file and write it to the temporary file
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
@@ -151,12 +160,28 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	imageData, err := imageToPixelData(fileBytes)
 	if err != nil {
-		panic(err)
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
+		return
 	}
 	hash := hashTemplateImage(imageData)
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2)", hash, imageData)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in postgres")
+		return
+	}
+
+	// TODO: Path to store generated image
+	filename := fmt.Sprintf("template-%s.png", hash)
+	newimg, err := os.Create(filename)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
+		return
+	}
+	defer file.Close()
+
+	err = png.Encode(newimg, img)
+	if err != nil {
+		WriteErrorJson(w, http.StatusInternalServerError, "Failed to encode image")
 		return
 	}
 
@@ -184,6 +209,11 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if width < 5 || width > 50 || height < 5 || height > 50 {
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
+		return
+	}
+
 	imageData := (*jsonBody)["image"]
 	// Split string by comma
 	// TODO: Change to byte encoding
@@ -196,6 +226,11 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		imageBytes[idx] = byte(valInt)
+	}
+
+	if len(imageBytes) != width*height {
+		WriteErrorJson(w, http.StatusBadRequest, "Invalid image data")
+		return
 	}
 
 	hash := hashTemplateImage(imageBytes)
