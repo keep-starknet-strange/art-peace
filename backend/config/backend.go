@@ -19,6 +19,9 @@ type BackendScriptsConfig struct {
 type WebSocketConfig struct {
 	ReadBufferSize  int `json:"read_buffer_size"`
 	WriteBufferSize int `json:"write_buffer_size"`
+	AllowOrigin     string `json:"allowOrigin"`
+    AllowMethods    string `json:"allowMethods"`
+    AllowHeaders    string `json:"allowHeaders"`
 }
 
 type BackendConfig struct {
