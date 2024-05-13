@@ -4,6 +4,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func InitContractRoutes() {
@@ -13,21 +15,21 @@ func InitContractRoutes() {
 
 func getContractAddress(w http.ResponseWriter, r *http.Request) {
 	contractAddress := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
-	WriteDataJson(w, "\""+contractAddress+"\"")
+	routeutils.WriteDataJson(w, "\""+contractAddress+"\"")
 }
 
 // TODO: Set env var on infra level in production
 func setContractAddress(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to set contract address
-	if AdminMiddleware(w, r) {
+	if routeutils.AdminMiddleware(w, r) {
 		return
 	}
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 	os.Setenv("ART_PEACE_CONTRACT_ADDRESS", string(data))
-	WriteResultJson(w, "Contract address set")
+	routeutils.WriteResultJson(w, "Contract address set")
 }

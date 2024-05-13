@@ -23,6 +23,16 @@ const Voting = (props) => {
       const result = await voteColorDevnet(index);
       if (result.result) {
         console.log('Vote successful:', result.result);
+        const oldColorIdx = votableColorApiState.data.findIndex(
+          (idx) => idx.key === userVote
+        );
+        const colorIdx = votableColorApiState.data.findIndex(
+          (idx) => idx.key === index
+        );
+        if (oldColorIdx !== -1) {
+          votableColorApiState.data[oldColorIdx].votes--;
+        }
+        votableColorApiState.data[colorIdx].votes++;
         setUserVote(index);
       } else {
         throw new Error(result.error || 'Failed to vote');

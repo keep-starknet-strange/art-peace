@@ -25,6 +25,7 @@ const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 const WIDTH: u128 = 100;
 const HEIGHT: u128 = 100;
 const TIME_BETWEEN_PIXELS: u64 = 10;
+const LEANIENCE_MARGIN: u64 = 20;
 
 fn deploy_contract() -> ContractAddress {
     deploy_nft_contract();
@@ -32,6 +33,7 @@ fn deploy_contract() -> ContractAddress {
     let contract = snf::declare("ArtPeace");
     let mut calldata = array![];
     InitParams {
+        host: utils::HOST(),
         canvas_width: WIDTH,
         canvas_height: HEIGHT,
         time_between_pixels: TIME_BETWEEN_PIXELS,
@@ -62,12 +64,11 @@ fn deploy_contract() -> ContractAddress {
             0x888800
         ],
         end_time: 1000000,
-        daily_quests: array![].span(),
-        main_quests: array![].span(),
+        daily_quests_count: 3,
     }
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
-    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
+    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN);
 
     contract_addr
 }
@@ -78,8 +79,10 @@ pub(crate) fn deploy_with_quests_contract(
     deploy_nft_contract();
 
     let contract = snf::declare("ArtPeace");
+    let daily_quests_count = 3;
     let mut calldata = array![];
     InitParams {
+        host: utils::HOST(),
         canvas_width: WIDTH,
         canvas_height: HEIGHT,
         time_between_pixels: TIME_BETWEEN_PIXELS,
@@ -110,12 +113,35 @@ pub(crate) fn deploy_with_quests_contract(
             0x888800
         ],
         end_time: 1000000,
-        daily_quests: daily_quests,
-        main_quests: main_quests,
+        daily_quests_count: daily_quests_count,
     }
         .serialize(ref calldata);
+
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
-    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
+
+    snf::start_prank(CheatTarget::One(contract_addr), utils::HOST());
+    let art_peace = IArtPeaceDispatcher { contract_address: contract_addr };
+    let mut i = 0;
+    let mut dayId = 0;
+    let mut days_quests: Array<ContractAddress> = array![];
+    while i < daily_quests
+        .len() {
+            days_quests.append(*daily_quests.at(i));
+            i += 1;
+            if i % daily_quests_count == 0 {
+                art_peace.add_daily_quests(dayId, days_quests.span());
+                dayId += 1;
+                days_quests = array![];
+            }
+        };
+    if days_quests.len() > 0 {
+        art_peace.add_daily_quests(dayId, days_quests.span());
+    }
+
+    art_peace.add_main_quests(main_quests);
+    snf::stop_prank(CheatTarget::One(contract_addr));
+
+    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN);
 
     contract_addr
 }
@@ -151,7 +177,10 @@ fn deploy_erc20_mock() -> ContractAddress {
 
 pub(crate) fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     let last_time = art_peace.get_last_placed_time();
-    snf::start_warp(CheatTarget::One(art_peace.contract_address), last_time + TIME_BETWEEN_PIXELS);
+    snf::start_warp(
+        CheatTarget::One(art_peace.contract_address),
+        last_time + TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN
+    );
 }
 
 fn compute_template_hash(template: Span<u8>) -> felt252 {
@@ -192,7 +221,8 @@ fn place_pixel_test() {
     let y = 20;
     let pos = x + y * WIDTH;
     let color = 0x5;
-    art_peace.place_pixel(pos, color);
+    let now = 10;
+    art_peace.place_pixel(pos, color, now);
     assert!(art_peace.get_pixel_color(pos) == color, "Pixel was not placed correctly at pos");
     assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel was not placed correctly at xy");
 
@@ -201,7 +231,8 @@ fn place_pixel_test() {
     let y = 25;
     let pos = x + y * WIDTH;
     let color = 0x7;
-    art_peace.place_pixel_xy(x, y, color);
+    let now = 20;
+    art_peace.place_pixel_xy(x, y, color, now);
     assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel xy was not placed correctly at xy");
     assert!(art_peace.get_pixel(pos).color == color, "Pixel xy was not placed correctly at pos");
 }
@@ -246,7 +277,7 @@ fn template_full_basic_test() {
     let y = 0;
     let pos = x + y * WIDTH;
     let color = 1;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -258,7 +289,7 @@ fn template_full_basic_test() {
     let y = 0;
     let pos = x + y * WIDTH;
     let color = 2;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -270,7 +301,7 @@ fn template_full_basic_test() {
     let y = 1;
     let pos = x + y * WIDTH;
     let color = 3;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -282,7 +313,7 @@ fn template_full_basic_test() {
     let y = 1;
     let pos = x + y * WIDTH;
     let color = 4;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == true,
@@ -326,7 +357,9 @@ fn nft_mint_test() {
     let nft_minter = IArtPeaceNFTMinterDispatcher { contract_address: art_peace.contract_address };
     let nft_store = ICanvasNFTStoreDispatcher { contract_address: utils::NFT_CONTRACT() };
     let nft = IERC721Dispatcher { contract_address: utils::NFT_CONTRACT() };
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::HOST());
     nft_minter.add_nft_contract(utils::NFT_CONTRACT());
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
 
     let mint_params = NFTMintParams { position: 10, width: 16, height: 16, };
     snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::PLAYER1());

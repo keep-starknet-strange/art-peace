@@ -1,4 +1,4 @@
-package routes
+package routeutils
 
 import (
 	"encoding/json"

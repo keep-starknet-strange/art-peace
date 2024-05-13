@@ -1,9 +1,14 @@
 package routes
 
+import (
+	"github.com/keep-starknet-strange/art-peace/backend/routes/indexer"
+)
+
 func InitRoutes() {
-	InitIndexerRoutes()
+	indexer.InitIndexerRoutes()
 	InitCanvasRoutes()
 	InitPixelRoutes()
+	InitFactionRoutes()
 	InitWebsocketRoutes()
 	InitTemplateRoutes()
 	InitUserRoutes()

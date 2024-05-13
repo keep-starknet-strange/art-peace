@@ -1,0 +1,219 @@
+{
+  "daily": {
+    "dailyQuestsCount": 3,
+    "dailyQuests": [
+      {
+        "day": 1,
+        "quests": [
+          {
+            "name": "Place 5 pixels",
+            "description": "Add 5 pixels on the canvas",
+            "reward": 3,
+            "questContract": {
+              "type": "PixelQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "5",
+                "1",
+                "$DAY_IDX",
+                "0",
+                "0"
+              ]
+            }
+          },
+          {
+            "name": "Create a username",
+            "description": "Add a username in the Accounts tab",
+            "reward": 3,
+            "questContract": {
+              "type": "UsernameQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ]
+            }
+          },
+          {
+            "name": "Join a faction",
+            "description": "Represent your favorite L2 by joining their faction",
+            "reward": 5,
+            "questContract": {
+              "type": "FactionQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "quests": [
+          {
+            "name": "The Void",
+            "description": "Place 10 black pixels and spread the void",
+            "reward": 5,
+            "questContract": {
+              "type": "PixelQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "10",
+                "1",
+                "$DAY_IDX",
+                "1",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "Mint art/peace NFT",
+            "description": "Mint an art/peace NFT under the NFT tab",
+            "reward": 5,
+            "questContract": {
+              "type": "NFTQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ]
+            }
+          },
+          {
+            "name": "Make your vote",
+            "description": "Vote for a new color in the Vote tab",
+            "reward": 3,
+            "questContract": {
+              "type": "VoteQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "quests": [
+          {
+            "name": "The Rainbow",
+            "description": "Place at least 1 pixel of each color",
+            "reward": 10,
+            "questContract": {
+              "type": "RainbowQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "$DAY_IDX"
+              ]
+            }
+          },
+          {
+            "name": "TODO",
+            "description": "TODO",
+            "reward": 5,
+            "questContract": {
+              "type": "TODOQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ]
+            }
+          },
+          {
+            "name": "TODO",
+            "description": "TODO",
+            "reward": 5,
+            "questContract": {
+              "type": "TODOQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "main": {
+    "mainQuests": [
+      {
+        "name": "Represent your faction",
+        "description": "Tweet your faction alliance using the #artpeace hashtag",
+        "reward": 10,
+        "questContract": {
+          "type": "AuthorityQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD",
+            "$AUTHORITY"
+          ]
+        }
+      },
+      {
+        "name": "HODL",
+        "description": "Accumulate 20 extra pixels in your account",
+        "reward": 10,
+        "questContract": {
+          "type": "HodlQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD",
+            "20"
+          ]
+        }
+      },
+      {
+        "name": "Deploy a Memecoin",
+        "description": "Create an Unruggable memecoin",
+        "reward": 15,
+        "questContract": {
+          "type": "UnruggableQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD"
+          ],
+          "claimParams": [
+            {
+              "type": "address",
+              "name": "MemeCoin Address",
+              "example": "0x02D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Place 100 pixels",
+        "description": "Add 100 pixels on the canvas",
+        "reward": 15,
+        "questContract": {
+          "type": "PixelQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD",
+            "100",
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      },
+      {
+        "name": "Buy an art/peace NFT",
+        "description": "Buy an art/peace NFT under the NFT tab",
+        "reward": 15,
+        "questContract": {
+          "type": "NFTQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD"
+          ]
+        }
+      }
+    ]
+  }
+}
