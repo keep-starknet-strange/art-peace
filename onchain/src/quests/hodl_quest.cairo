@@ -1,5 +1,6 @@
 #[starknet::contract]
 pub mod HodlQuest {
+    use core::traits::TryInto;
     use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
     use art_peace::quests::{IQuest};
@@ -42,7 +43,7 @@ pub mod HodlQuest {
 
             let art_peace_main = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
 
-            let get_extra_pixels_count = art_peace_main.get_user_extra_pixels_count(user);
+            let get_extra_pixels_count = art_peace_main.get_user_extra_pixels_count(user.into());
 
             if get_extra_pixels_count >= self.extra_pixel.read() {
                 return true;
@@ -54,7 +55,7 @@ pub mod HodlQuest {
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
             assert(get_caller_address() == self.art_peace.read(), 'Only ArtPeace can claim quests');
 
-            assert(self.is_claimable(user, calldata), 'Quest not claimable');
+            assert(!self.is_claimable(user, calldata), 'Quest not claimable');
 
             self.claimed.write(user, true);
             let reward = self.reward.read();

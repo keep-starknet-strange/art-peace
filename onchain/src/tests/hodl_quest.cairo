@@ -9,7 +9,7 @@ use snforge_std as snf;
 use snforge_std::{declare, CheatTarget, ContractClassTrait};
 
 const reward_amt: u32 = 18;
-const user_extra_pixel: u32 = 0;
+const user_extra_pixel: u32 = 65;
 
 
 fn deploy_hodl_quest() -> ContractAddress {
@@ -56,12 +56,14 @@ fn hodl_quest_test() {
     };
 
     let calldata: Array<felt252> = array![];
+    let user = contract_address_const::<1>();
+
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
 
     snf::store(
         art_peace.contract_address,
-        snf::map_entry_address(selector!("extra_pixels"), array![18].span()),
-        array![contract_address_const::<1>().into()].span()
+        snf::map_entry_address(selector!("extra_pixels"), array![65].span()),
+        array![user.into()].span()
     );
 
     art_peace.claim_main_quest(0, calldata.span());
