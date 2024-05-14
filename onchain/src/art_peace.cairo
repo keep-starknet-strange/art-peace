@@ -215,7 +215,7 @@ pub mod ArtPeace {
         self.votable_colors_count.write(0, votable_colors_count);
         let mut i: u8 = 0;
         while i < votable_colors_count {
-            self.votable_colors.write((i, 0), *init_params.votable_colors.at(i.into()));
+            self.votable_colors.write((i + 1, 0), *init_params.votable_colors.at(i.into()));
             i += 1;
         };
 
@@ -684,8 +684,8 @@ pub mod ArtPeace {
             let day = self.day_index.read();
             let votable_colors_count = self.votable_colors_count.read(day);
             let mut votable_colors = array![];
-            let mut i = 0;
-            while i < votable_colors_count {
+            let mut i = 1;
+            while i <= votable_colors_count {
                 votable_colors.append(self.votable_colors.read((i, day)));
                 i += 1;
             };
@@ -997,9 +997,9 @@ pub mod ArtPeace {
         let mut max_indexes: Felt252Dict<u8> = Default::default();
         let mut max_index: u8 = 0;
 
-        let mut votable_index: u8 = 0;
+        let mut votable_index: u8 = 1; // 0 means no vote
 
-        while votable_index < votable_colors_count {
+        while votable_index <= votable_colors_count {
             max_index = 0;
             let mut index = votable_index;
             let mut vote = self.color_votes.read((index, day));
@@ -1050,8 +1050,8 @@ pub mod ArtPeace {
 
         // update votable colors
         let mut next_day_votable_colors_index: Array<u8> = array![];
-        votable_index = 0;
-        while votable_index < votable_colors_count {
+        votable_index = 1; // index 0 is unreachable
+        while votable_index <= votable_colors_count {
             let mut found: u8 = 0;
             max_index = 0;
             while max_index < nb_max {
@@ -1081,7 +1081,7 @@ pub mod ArtPeace {
         while votable_index < next_day_votable_colors_count {
             let old_index = next_day_votable_colors_index.at(votable_index.into());
             let color = self.votable_colors.read((*old_index, day));
-            self.votable_colors.write((votable_index, next_day), color);
+            self.votable_colors.write((votable_index + 1, next_day), color);
             votable_index += 1;
         };
         self.votable_colors_count.write(next_day, next_day_votable_colors_count);

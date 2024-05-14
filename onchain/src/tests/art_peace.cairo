@@ -502,11 +502,11 @@ fn color_votes_are_reset_for_next_day_test() {
 fn color_palette_is_updated_according_to_votes_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
-    let vote_player1 = 1; // 0x00DD00,
+    let vote_player1 = 2; // 0x00DD00,
     let color_player1 = 0x00DD00;
-    let vote_player2 = 2; // 0x0000DD,
+    let vote_player2 = 3; // 0x0000DD,
     let color_player2 = 0x0000DD;
-    let vote_player3 = 3; // 0xDDDD00,
+    let vote_player3 = 4; // 0xDDDD00,
     let color_player3 = 0xDDDD00;
 
     let old_colors_count = art_peace.get_color_count();
@@ -597,9 +597,9 @@ fn get_votable_colors_test() {
 fn votable_colors_is_updated_according_to_votes_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
-    let vote_player1 = 1; // 0x00DD00,
-    let vote_player2 = 2; // 0x0000DD,
-    let vote_player3 = 3; // 0xDDDD00,
+    let vote_player1 = 2; // 0x00DD00,
+    let vote_player2 = 3; // 0x0000DD,
+    let vote_player3 = 4; // 0xDDDD00,
 
     let expected_colors = array![
         0xDD0000, // 0x00DD00,
