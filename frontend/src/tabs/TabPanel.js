@@ -3,6 +3,7 @@ import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './TabPanel.css';
 import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
 import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
+import NFTMintingPanel from './nfts/NFTMintingPanel.js';
 import Factions from './factions/Factions.js';
 import { TimerInjector } from '../utils/TimerInjector.js';
 import Quests from './quests/Quests.js';
@@ -60,6 +61,21 @@ const TabPanel = (props) => {
           availablePixels={props.availablePixels}
           availablePixelsUsed={props.availablePixelsUsed}
           userFactions={props.userFactions}
+        />
+      </CSSTransition>
+      <CSSTransition
+        in={props.nftMintingMode}
+        timeout={300}
+        classNames='list-transition'
+        unmountOnExit
+        appear
+      >
+        <NFTMintingPanel
+          setNftMintingMode={props.setNftMintingMode}
+          address={props.address}
+          nftPosition={props.nftPosition}
+          nftWidth={props.nftWidth}
+          nftHeight={props.nftHeight}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>
@@ -123,6 +139,8 @@ const TabPanel = (props) => {
                   setNftMintingMode={props.setNftMintingMode}
                   setActiveTab={props.setActiveTab}
                   latestMintedTokenId={props.latestMintedTokenId}
+                  setLatestMintedTokenId={props.setLatestMintedTokenId}
+                  address={props.address}
                 />
               </div>
             )}
@@ -133,6 +151,7 @@ const TabPanel = (props) => {
                   connected={props.connected}
                   address={props.address}
                   setupStarknet={props.setupStarknet}
+                  provider={props.provider}
                 />
               </div>
             )}

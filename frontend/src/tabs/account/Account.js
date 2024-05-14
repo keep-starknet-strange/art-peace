@@ -158,72 +158,85 @@ const Account = (props) => {
       setupStarknet={props.setupStarknet}
       setActiveTab={props.setActiveTab}
     >
-      <h2 className='Text__medium Heading__sub Account__subheader'>Info</h2>
-      <div className='Account__login'>
-        <div className='Text__small Button__primary' onClick={connectWallet}>
-          StarkNet Login
-        </div>
-        <div className='Text__small Button__primary'>Ethereum Login</div>
-      </div>
-      <p className='Text__small Account__item Account__address'>
-        Address: 0x{props.address}
-      </p>
-      {usernameSaved && !isEditing ? (
-        <div className='Text__small Account__special Account__username'>
-          <p style={{ margin: 0, padding: 0 }}>Username: {username}</p>
-          <div
-            className='Text__small Button__primary Account__username__button'
-            onClick={editUsername}
-          >
-            edit
+      {props.address === '0' && (
+        <div className='Account__login'>
+          <div className='Text__small Button__primary' onClick={connectWallet}>
+            StarkNet Login
           </div>
-        </div>
-      ) : (
-        <div>
-          <p className='Text__small Account__item'>Username:&nbsp;</p>
-          <form
-            className='Account__item Account__username__form'
-            onSubmit={handleSubmit}
-          >
-            <input
-              className='Text__small Input__primary Account__username__input'
-              type='text'
-              value={username}
-              required
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <div>
-              {isEditing && (
-                <button
-                  className='Text__small Button__primary Account__username__button'
-                  onClick={handleCancelEdit}
-                  type='button'
-                >
-                  cancel
-                </button>
-              )}
-              <button
-                className='Text__small Button__primary Account__username__button'
-                type='submit'
-              >
-                submit
-              </button>
-            </div>
-          </form>
+          <div className='Text__small Button__primary'>Ethereum Login</div>
         </div>
       )}
+      {props.address !== '0' && (
+        <div>
+          <h2 className='Text__medium Heading__sub Account__subheader'>Info</h2>
+          <p className='Text__small Account__item Account__address'>
+            Address: 0x{props.address}
+          </p>
+          {usernameSaved && !isEditing ? (
+            <div className='Text__small Account__special Account__username'>
+              <p style={{ margin: 0, padding: 0 }}>Username: {username}</p>
+              <div
+                className='Text__small Button__primary Account__username__button'
+                onClick={editUsername}
+              >
+                edit
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p className='Text__small Account__item'>Username:&nbsp;</p>
+              <form
+                className='Account__item Account__username__form'
+                onSubmit={handleSubmit}
+              >
+                <input
+                  className='Text__small Input__primary Account__username__input'
+                  type='text'
+                  value={username}
+                  required
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <div>
+                  {isEditing && (
+                    <button
+                      className='Text__small Button__primary Account__username__button'
+                      onClick={handleCancelEdit}
+                      type='button'
+                    >
+                      cancel
+                    </button>
+                  )}
+                  <button
+                    className='Text__small Button__primary Account__username__button'
+                    type='submit'
+                  >
+                    submit
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+          <p className='Text__small Account__item'>
+            Network: {props.provider.chainId}
+          </p>
 
-      <h2 className='Text__medium Heading__sub Account__subheader'>Stats</h2>
-      <p className='Text__small Account__item'>Pixels placed: {pixelCount}</p>
-      <p className='Text__small Account__item'>
-        Rank: {accountRank}
-        <ColoredIcon
-          width='3rem'
-          color={rankColor}
-          path={path}
-          style={{ marginLeft: '0.5rem' }}
-        />
-      </p>
+          <h2 className='Text__medium Heading__sub Account__subheader'>
+            Stats
+          </h2>
+          <p className='Text__small Account__item'>
+            Pixels placed: {pixelCount}
+          </p>
+          <p className='Text__small Account__item'>
+            Rank: {accountRank}
+            <ColoredIcon
+              width='3rem'
+              color={rankColor}
+              path={path}
+              style={{ marginLeft: '0.5rem' }}
+            />
+          </p>
+        </div>
+      )}
     </BasicTab>
   );
 };

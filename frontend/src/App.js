@@ -46,12 +46,6 @@ function App() {
     setConnected(true);
   };
 
-  const _starknetData = () => {
-    return {
-      rpc: provider
-    };
-  };
-
   // Websocket
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(wsUrl, {
     share: false,
@@ -345,6 +339,9 @@ function App() {
 
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
+  const [nftPosition, setNftPosition] = useState(null);
+  const [nftWidth, setNftWidth] = useState(null);
+  const [nftHeight, setNftHeight] = useState(null);
 
   // Tabs
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
@@ -409,6 +406,9 @@ function App() {
         addExtraPixel={addExtraPixel}
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
+        setNftPosition={setNftPosition}
+        setNftWidth={setNftWidth}
+        setNftHeight={setNftHeight}
         isEraserMode={isEraserMode}
         setIsEraserMode={setIsEraserMode}
         clearExtraPixel={clearExtraPixel}
@@ -432,6 +432,9 @@ function App() {
           getDeviceTypeInfo={getDeviceTypeInfo}
           nftMintingMode={nftMintingMode}
           setNftMintingMode={setNftMintingMode}
+          nftPosition={nftPosition}
+          nftWidth={nftWidth}
+          nftHeight={nftHeight}
           showSelectedPixelPanel={
             !isPortrait
               ? pixelSelectedMode || isEraserMode
@@ -464,6 +467,8 @@ function App() {
           factionPixelTimers={factionPixelTimers}
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
+          setLatestMintedTokenId={setLatestMintedTokenId}
+          provider={provider}
         />
       </div>
       <div className='App__footer'>
@@ -482,6 +487,8 @@ function App() {
           setBasePixelUp={setBasePixelUp}
           lastPlacedTime={lastPlacedTime}
           basePixelTimer={basePixelTimer}
+          address={address}
+          setActiveTab={setActiveTab}
         />
         <TabsFooter
           tabs={tabs}

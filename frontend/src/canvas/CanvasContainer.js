@@ -369,6 +369,9 @@ const CanvasContainer = (props) => {
             height={height}
             nftMintingMode={props.nftMintingMode}
             setNftMintingMode={props.setNftMintingMode}
+            setNftPosition={props.setNftPosition}
+            setNftWidth={props.setNftWidth}
+            setNftHeight={props.setNftHeight}
           />
         )}
       </div>

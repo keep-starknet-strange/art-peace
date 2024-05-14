@@ -8,6 +8,10 @@ const PixelSelector = (props) => {
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
 
   useEffect(() => {
+    if (props.address === '0') {
+      setPlacementTimer('Connect Wallet');
+      return;
+    }
     if (props.availablePixels > 0) {
       let amountAvailable = props.availablePixels - props.availablePixelsUsed;
       if (amountAvailable > 1) {
@@ -29,6 +33,11 @@ const PixelSelector = (props) => {
     event.preventDefault();
     // Only works if not hitting the close button
     if (event.target.classList.contains('Button__close')) {
+      return;
+    }
+
+    if (props.address === '0') {
+      props.setActiveTab('Account');
       return;
     }
 
@@ -74,7 +83,7 @@ const PixelSelector = (props) => {
           className={
             'Button__primary Text__large ' +
             (props.availablePixels > props.availablePixelsUsed
-              ? 'PixelSelector__button--valid'
+              ? ''
               : 'PixelSelector__button--invalid')
           }
           onClick={toSelectorMode}
