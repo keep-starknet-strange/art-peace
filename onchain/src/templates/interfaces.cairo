@@ -32,5 +32,5 @@ pub trait ITemplateVerifier<TContractState> {
     // Verifies the template is complete, and if so, sets the template as complete.
     // If there was a reward escrowed, it is transferred to the builders.
     // Passed template_image contains the full image, and is used to verify the template.
-    fn complete_template(ref self: TContractState, template_id: u32, template_image: Span<u8>);
+    fn complete_template(ref self: TContractState, template_id: u32, token: ContractAddress, template_image: Span<u8>);
 }
