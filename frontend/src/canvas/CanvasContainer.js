@@ -259,6 +259,17 @@ const CanvasContainer = (props) => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
       return null;
     }
+
+    const existingPixel = props.extraPixelsData.find(
+      (pixel) =>
+        pixel.x == props.selectedPositionX && pixel.y == props.selectedPositionY
+    );
+
+    if (existingPixel) {
+      props.setSelectedColorId(existingPixel.colorId);
+      return;
+    }
+
     if (props.selectedColorId === -1) {
       // TODO: Check if extra pixel placed at position
       let color = props.canvasRef.current
@@ -277,6 +288,7 @@ const CanvasContainer = (props) => {
         color[3].toString(16).padStart(2, '0')
       );
     }
+
     return '#' + props.colors[props.selectedColorId] + 'FF';
   };
 
