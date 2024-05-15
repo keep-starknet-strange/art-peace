@@ -1,9 +1,9 @@
 #[starknet::contract]
 pub mod AuthorityQuest {
-    use core::traits::TryInto;
-    use starknet::{ContractAddress, get_caller_address};
     use art_peace::templates::interfaces::{ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait};
-    use art_peace::quests::{IAuthorityQuest, IQuest, QuestClaimed};
+    use art_peace::quests::{IAuthorityQuest, IQuest};
+
+    use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {
@@ -13,13 +13,6 @@ pub mod AuthorityQuest {
         claimable: LegacyMap<ContractAddress, bool>,
         claimed: LegacyMap<ContractAddress, bool>,
     }
-
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        QuestClaimed: QuestClaimed,
-    }
-
 
     #[derive(Drop, Serde)]
     pub struct AuthorityQuestInitParams {
@@ -37,6 +30,10 @@ pub mod AuthorityQuest {
 
     #[abi(embed_v0)]
     impl AuthorityQuestImpl of IAuthorityQuest<ContractState> {
+        fn is_claimed(self: @ContractState, user: ContractAddress) -> bool {
+            self.claimed.read(user)
+        }
+
         fn mark_claimable(ref self: ContractState, calldata: Span<felt252>) {
             assert(get_caller_address() == self.authority.read(), 'Only authority address allowed');
             let mut i = 0;
@@ -75,7 +72,6 @@ pub mod AuthorityQuest {
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }

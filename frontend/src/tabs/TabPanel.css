@@ -5,15 +5,17 @@
 }
 
 /* This fires as soon as the element enters the DOM*/
-.list-transition-enter, .list-transition-appear {
+.list-transition-enter,
+.list-transition-appear {
   /*We give the list the initial dimension of the list button*/
   transform: translateX(120%);
 }
 
 /* This is where we can add the transition*/
-.list-transition-enter-active, .list-transition-appear-active {
+.list-transition-enter-active,
+.list-transition-appear-active {
   transform: translateX(0);
-  transition: all 200ms;
+  transition: all 150ms;
 }
 
 /* This fires as soon as the this.state.showList is false */

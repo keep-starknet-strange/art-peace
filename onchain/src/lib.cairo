@@ -1,18 +1,21 @@
 pub mod art_peace;
 pub mod interfaces;
 use art_peace::ArtPeace;
-use interfaces::{IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel};
-
+use interfaces::{
+    IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel, Faction, MemberMetadata
+};
 
 mod quests {
     pub mod authority_quest;
     pub mod interfaces;
     pub mod pixel_quest;
+    pub mod rainbow_quest;
     pub mod template_quest;
     pub mod unruggable_quest;
+    pub mod nft_quest;
 
     use interfaces::{
-        IQuest, IAuthorityQuest, IPixelQuest, IUnruggableQuest, QuestClaimed, IQuestDispatcher,
+        IQuest, IAuthorityQuest, IPixelQuest, IRainbowQuest, IUnruggableQuest, IQuestDispatcher,
         IQuestDispatcherTrait, IUnruggableMemecoin, IUnruggableMemecoinDispatcher,
         IUnruggableMemecoinDispatcherTrait
     };
@@ -56,10 +59,14 @@ mod mocks {
 
 #[cfg(test)]
 mod tests {
-    mod art_peace;
-    mod username_store;
-    mod template_quest;
-    mod authority_quest;
+    pub(crate) mod art_peace;
+    pub(crate) mod username_store;
+    pub(crate) mod authority_quest;
+    pub(crate) mod nft_quest;
+    pub(crate) mod pixel_quest;
+    pub(crate) mod rainbow_quest;
+    pub(crate) mod template_quest;
+    pub(crate) mod unruggable_quest;
     pub(crate) mod utils;
 }
 

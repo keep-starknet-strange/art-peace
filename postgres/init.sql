@@ -15,7 +15,8 @@ CREATE INDEX pixels_time_index ON Pixels (time);
 
 CREATE TABLE LastPlacedTime (
   address char(64) NOT NULL,
-  time timestamp NOT NULL
+  time timestamp NOT NULL,
+  UNIQUE (address)
 );
 CREATE INDEX lastPlacedTime_address_index ON LastPlacedTime (address);
 CREATE INDEX lastPlacedTime_time_index ON LastPlacedTime (time);
@@ -43,28 +44,34 @@ CREATE TABLE Days (
 CREATE INDEX days_day_index_index ON Days (day_index);
 
 CREATE TABLE DailyQuests (
-  key integer NOT NULL PRIMARY KEY,
+  day_index integer NOT NULL,
+  quest_id integer NOT NULL,
   name text NOT NULL,
   description text NOT NULL,
   reward integer NOT NULL,
-  day_index integer NOT NULL
+  PRIMARY KEY (day_index, quest_id)
 );
 CREATE INDEX dailyQuests_day_index_index ON DailyQuests (day_index);
+CREATE INDEX dailyQuests_quest_id_index ON DailyQuests (quest_id);
 
 -- TODO: Add calldata field
 -- Table for storing the daily quests that the user has completed
 CREATE TABLE UserDailyQuests (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   user_address char(64) NOT NULL,
-  quest_key integer NOT NULL,
+  day_index integer NOT NULL,
+  quest_id integer NOT NULL,
   completed boolean NOT NULL,
-  completed_at timestamp
+  completed_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_address, day_index, quest_id)
 );
 CREATE INDEX userDailyQuests_user_address_index ON UserDailyQuests (user_address);
-CREATE INDEX userDailyQuests_quest_key_index ON UserDailyQuests (quest_key);
+CREATE INDEX userDailyQuests_quest_id_index ON UserDailyQuests (quest_id);
 
 CREATE TABLE MainQuests (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
   description text NOT NULL,
   reward integer NOT NULL
@@ -72,14 +79,15 @@ CREATE TABLE MainQuests (
 
 -- Table for storing the main quests that the user has completed
 CREATE TABLE UserMainQuests (
-  key integer NOT NULL PRIMARY KEY,
+  -- Postgres auto-incrementing primary key
+  key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   user_address char(64) NOT NULL,
-  quest_key integer NOT NULL,
+  quest_id integer NOT NULL,
   completed boolean NOT NULL,
   completed_at timestamp
 );
 CREATE INDEX userMainQuests_user_address_index ON UserMainQuests (user_address);
-CREATE INDEX userMainQuests_quest_key_index ON UserMainQuests (quest_key);
+CREATE INDEX userMainQuests_quest_id_index ON UserMainQuests (quest_id);
 
 -- TODO: key to color_idx
 CREATE TABLE Colors (
@@ -88,6 +96,7 @@ CREATE TABLE Colors (
   hex text NOT NULL
 );
 
+-- TODO: Add day_index
 CREATE TABLE VotableColors (
   -- Postgres auto-incrementing primary key
   key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -146,15 +155,18 @@ CREATE INDEX nftLikes_liker_index ON NFTLikes (liker);
 CREATE TABLE Factions (
   key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
-  icon text NOT NULL,
-  leader char(64) NOT NULL
+  icon text,
+  leader char(64) NOT NULL,
+  pixel_pool integer NOT NULL
 );
+CREATE INDEX factions_leader_index ON Factions (leader);
 
 CREATE TABLE FactionLinks (
   link_type text NOT NULL,
-  link text NOT NULL,
-  faction_key integer NOT NULL
+  link_url text NOT NULL,
+  faction_id integer NOT NULL
 );
+CREATE INDEX factionLinks_faction_id_index ON FactionLinks (faction_id);
 
 CREATE TABLE FactionChats (
   id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -164,10 +176,18 @@ CREATE TABLE FactionChats (
   time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE FactionMembers (
+-- TODO: Should allocation be here or somewhere else?
+CREATE TABLE FactionMembersInfo (
+  faction_id integer NOT NULL,
+  member_id integer NOT NULL,
   user_address char(64) NOT NULL,
-  faction_key integer NOT NULL
+  allocation integer NOT NULL,
+  last_placed_time timestamp NOT NULL,
+  member_pixels integer NOT NULL,
+  UNIQUE (faction_id, member_id)
 );
+CREATE INDEX factionMembersInfo_faction_id_index ON FactionMembersInfo (faction_id);
+CREATE INDEX factionMembersInfo_user_address_index ON FactionMembersInfo (user_address);
 
 CREATE TABLE FactionTemplates (
   template_key integer NOT NULL,

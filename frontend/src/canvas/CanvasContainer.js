@@ -3,8 +3,8 @@ import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
 import NFTSelector from './NFTSelector.js';
-import { backendUrl } from '../utils/Consts.js';
 import canvasConfig from '../configs/canvas.config.json';
+import { fetchWrapper } from '../services/apiService.js';
 
 const CanvasContainer = (props) => {
   // TODO: Handle window resize
@@ -16,20 +16,28 @@ const CanvasContainer = (props) => {
 
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(2);
+  const [canvasScale, setCanvasScale] = useState(3.85);
 
   const canvasContainerRef = useRef(null);
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartY, setDragStartY] = useState(0);
+
+  const [isErasing, setIsErasing] = useState(false);
+
   const handlePointerDown = (e) => {
-    setIsDragging(true);
-    setDragStartX(e.clientX);
-    setDragStartY(e.clientY);
+    if (!props.isEraserMode) {
+      setIsDragging(true);
+      setDragStartX(e.clientX);
+      setDragStartY(e.clientY);
+    } else {
+      setIsErasing(true);
+    }
   };
 
   const handlePointerUp = () => {
+    setIsErasing(false);
     setIsDragging(false);
     setDragStartX(0);
     setDragStartY(0);
@@ -41,6 +49,9 @@ const CanvasContainer = (props) => {
       setCanvasY(canvasY + e.clientY - dragStartY);
       setDragStartX(e.clientX);
       setDragStartY(e.clientY);
+    }
+    if (isErasing) {
+      pixelClicked(e);
     }
   };
 
@@ -99,9 +110,10 @@ const CanvasContainer = (props) => {
   // Init canvas transform to center of the viewport
   useEffect(() => {
     const containerRect = canvasContainerRef.current.getBoundingClientRect();
-    const adjust = ((canvasScale - 1) * width) / 2;
-    setCanvasX(containerRect.width / 2 - adjust);
-    setCanvasY(containerRect.height / 2 - adjust);
+    const adjustX = ((canvasScale - 1) * width) / 2;
+    const adjustY = ((canvasScale - 1) * height) / 2;
+    setCanvasX(containerRect.width / 2 - adjustX);
+    setCanvasY(containerRect.height / 2 - adjustY);
   }, [canvasContainerRef]);
 
   const colorExtraPixel = (x, y, colorId) => {
@@ -112,7 +124,7 @@ const CanvasContainer = (props) => {
     ctx.fillRect(x, y, 1, 1);
   };
 
-  const pixelSelect = (x, y) => {
+  const pixelSelect = async (x, y) => {
     // Clear selection if clicking the same pixel
     if (
       props.selectedColorId === -1 &&
@@ -127,23 +139,19 @@ const CanvasContainer = (props) => {
     props.setPixelSelection(x, y);
 
     const position = y * width + x;
-    const getPixelInfoEndpoint =
-      backendUrl + '/get-pixel-info?position=' + position.toString();
-    fetch(getPixelInfoEndpoint)
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        // TODO: Cache pixel info & clear cache on update from websocket
-        // TODO: Dont query if hover select ( until 1s after hover? )
-        props.setPixelPlacedBy(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    // TODO: Cache pixel info & clear cache on update from websocket
+    // TODO: Dont query if hover select ( until 1s after hover? )
+    const getPixelInfoEndpoint = await fetchWrapper(
+      `get-pixel-info?position=${position.toString()}`
+    );
+
+    if (!getPixelInfoEndpoint.data) {
+      return;
+    }
+    props.setPixelPlacedBy(getPixelInfoEndpoint.data);
   };
 
-  const pixelClicked = (e) => {
+  const pixelClicked = async (e) => {
     if (props.nftMintingMode) {
       return;
     }
@@ -162,14 +170,27 @@ const CanvasContainer = (props) => {
       return;
     }
 
+    // Erase Extra Pixel
+    if (props.isEraserMode) {
+      const pixelIndex = props.extraPixelsData.findIndex((pixelData) => {
+        return pixelData.x === x && pixelData.y === y;
+      });
+      if (pixelIndex !== -1) props.clearExtraPixel(pixelIndex);
+      // Toggle Eraser mode  if there are no Extra Pixels placed
+      if (!props.extraPixelsData.length)
+        props.setIsEraserMode(!props.isEraserMode);
+      return;
+    }
+
     pixelSelect(x, y);
 
     // Color Extra Pixel
     if (props.selectedColorId === -1) {
       return;
     }
-    if (props.extraPixels > 0) {
-      if (props.extraPixelsUsed < props.extraPixels) {
+
+    if (props.availablePixels > (props.basePixelUp ? 1 : 0)) {
+      if (props.availablePixelsUsed < props.availablePixels) {
         props.addExtraPixel(x, y);
         colorExtraPixel(x, y, props.selectedColorId);
         return;
@@ -183,33 +204,29 @@ const CanvasContainer = (props) => {
     const position = y * width + x;
     const colorId = props.selectedColorId;
 
-    const placePixelEndpoint = backendUrl + '/place-pixel-devnet';
-    fetch(placePixelEndpoint, {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const response = await fetchWrapper(`place-pixel-devnet`, {
       mode: 'cors',
       method: 'POST',
       body: JSON.stringify({
         position: position.toString(),
-        color: colorId.toString()
+        color: colorId.toString(),
+        timestamp: timestamp.toString()
       })
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        console.log(response.result);
-      })
-      .catch((error) => {
-        console.error('Error placing pixel');
-        console.error(error);
-      });
+    });
+    if (response.result) {
+      console.log(response.result);
+    }
     props.clearPixelSelection();
     props.setSelectedColorId(-1);
+    props.setLastPlacedTime(timestamp * 1000);
+    // TODO: Fix last placed time if error in placing pixel
   };
   // TODO: Erasing extra pixels
 
   useEffect(() => {
     const hoverColor = (e) => {
-      if (props.selectedColorId === -1) {
+      if (props.selectedColorId === -1 && !props.isEraserMode) {
         return;
       }
       if (props.nftMintingMode) {
@@ -236,7 +253,7 @@ const CanvasContainer = (props) => {
     return () => {
       window.removeEventListener('mousemove', hoverColor);
     };
-  }, [props.selectedColorId, props.nftMintingMode]);
+  }, [props.selectedColorId, props.nftMintingMode, props.isEraserMode]);
 
   const getSelectedColorInverse = () => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
@@ -331,7 +348,7 @@ const CanvasContainer = (props) => {
           colors={props.colors}
           pixelClicked={pixelClicked}
         />
-        {props.extraPixels > 0 && (
+        {props.availablePixels > 0 && (
           <ExtraPixelsCanvas
             extraPixelsCanvasRef={props.extraPixelsCanvasRef}
             width={width}

@@ -1,8 +1,9 @@
 #[starknet::contract]
 pub mod PixelQuest {
-    use starknet::{ContractAddress, get_caller_address};
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{IQuest, IPixelQuest, QuestClaimed};
+    use art_peace::quests::{IQuest, IPixelQuest};
+
+    use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {
@@ -18,12 +19,6 @@ pub mod PixelQuest {
         color: u8,
     }
 
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        QuestClaimed: QuestClaimed,
-    }
-
     #[derive(Drop, Serde)]
     pub struct PixelQuestInitParams {
         pub art_peace: ContractAddress,
@@ -36,7 +31,7 @@ pub mod PixelQuest {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: PixelQuestInitParams,) {
+    fn constructor(ref self: ContractState, init_params: PixelQuestInitParams) {
         self.art_peace.write(IArtPeaceDispatcher { contract_address: init_params.art_peace });
         self.reward.write(init_params.reward);
         self.pixels_needed.write(init_params.pixels_needed);
@@ -87,26 +82,23 @@ pub mod PixelQuest {
                 return false;
             }
 
+            // Daily Pixel Quest
             if self.is_daily.read() {
-                // Daily Pixel Quest
+                let day = art_peace.get_day();
+                if day != self.claim_day.read() {
+                    return false;
+                }
+
                 if self.is_color.read() {
-                    let day = art_peace.get_day();
-                    if day != self.claim_day.read() {
-                        return false;
-                    }
                     let placement_count = art_peace
                         .get_user_pixels_placed_day_color(user, day, self.color.read());
                     return placement_count >= self.pixels_needed.read();
-                } else {
-                    let day = art_peace.get_day();
-                    if day != self.claim_day.read() {
-                        return false;
-                    }
+                } else { // Daily Pixel Quest
                     let placement_count = art_peace.get_user_pixels_placed_day(user, day);
                     return placement_count >= self.pixels_needed.read();
                 }
-            } else {
-                // Main Pixel Quest
+            } // Main Pixel Quest
+            else {
                 if self.is_color.read() {
                     let placement_count = art_peace
                         .get_user_pixels_placed_color(user, self.color.read());
@@ -123,14 +115,11 @@ pub mod PixelQuest {
                 get_caller_address() == self.art_peace.read().contract_address,
                 'Only ArtPeace can claim quests'
             );
-            // TODO: should we revert if the quest is not claimable?
-            if !self.is_claimable(user, calldata) {
-                return 0;
-            }
+
+            assert(self.is_claimable(user, calldata), 'Quest not claimable');
 
             self.claimed.write(user, true);
             let reward = self.reward.read();
-            self.emit(QuestClaimed { user, reward, calldata });
 
             reward
         }

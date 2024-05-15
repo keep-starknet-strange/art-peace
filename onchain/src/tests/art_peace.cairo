@@ -1,9 +1,5 @@
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 use art_peace::ArtPeace::InitParams;
-use art_peace::quests::pixel_quest::PixelQuest::PixelQuestInitParams;
-use art_peace::quests::unruggable_quest::UnruggableQuest::UnruggableQuestInitParams;
-use art_peace::mocks::erc20_mock::SnakeERC20Mock;
-use art_peace::mocks::unruggable_token::UnruggableMock;
 use art_peace::tests::utils;
 use art_peace::nfts::interfaces::{
     IArtPeaceNFTMinterDispatcher, IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTStoreDispatcher,
@@ -29,10 +25,7 @@ const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 const WIDTH: u128 = 100;
 const HEIGHT: u128 = 100;
 const TIME_BETWEEN_PIXELS: u64 = 10;
-
-fn UNRUGGABLE_MOCK_CONTRACT() -> ContractAddress {
-    contract_address_const::<'Unruggable'>()
-}
+const LEANIENCE_MARGIN: u64 = 20;
 
 fn deploy_contract() -> ContractAddress {
     deploy_nft_contract();
@@ -40,6 +33,7 @@ fn deploy_contract() -> ContractAddress {
     let contract = snf::declare("ArtPeace");
     let mut calldata = array![];
     InitParams {
+        host: utils::HOST(),
         canvas_width: WIDTH,
         canvas_height: HEIGHT,
         time_between_pixels: TIME_BETWEEN_PIXELS,
@@ -70,24 +64,25 @@ fn deploy_contract() -> ContractAddress {
             0x888800
         ],
         end_time: 1000000,
-        daily_quests: array![].span(),
-        main_quests: array![].span(),
+        daily_quests_count: 3,
     }
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
-    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
+    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN);
 
     contract_addr
 }
 
-pub fn deploy_with_quests_contract(
+pub(crate) fn deploy_with_quests_contract(
     daily_quests: Span<ContractAddress>, main_quests: Span<ContractAddress>
 ) -> ContractAddress {
     deploy_nft_contract();
 
     let contract = snf::declare("ArtPeace");
+    let daily_quests_count = 3;
     let mut calldata = array![];
     InitParams {
+        host: utils::HOST(),
         canvas_width: WIDTH,
         canvas_height: HEIGHT,
         time_between_pixels: TIME_BETWEEN_PIXELS,
@@ -118,83 +113,37 @@ pub fn deploy_with_quests_contract(
             0x888800
         ],
         end_time: 1000000,
-        daily_quests: daily_quests,
-        main_quests: main_quests,
+        daily_quests_count: daily_quests_count,
     }
         .serialize(ref calldata);
+
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
-    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS);
+
+    snf::start_prank(CheatTarget::One(contract_addr), utils::HOST());
+    let art_peace = IArtPeaceDispatcher { contract_address: contract_addr };
+    let mut i = 0;
+    let mut dayId = 0;
+    let mut days_quests: Array<ContractAddress> = array![];
+    while i < daily_quests
+        .len() {
+            days_quests.append(*daily_quests.at(i));
+            i += 1;
+            if i % daily_quests_count == 0 {
+                art_peace.add_daily_quests(dayId, days_quests.span());
+                dayId += 1;
+                days_quests = array![];
+            }
+        };
+    if days_quests.len() > 0 {
+        art_peace.add_daily_quests(dayId, days_quests.span());
+    }
+
+    art_peace.add_main_quests(main_quests);
+    snf::stop_prank(CheatTarget::One(contract_addr));
+
+    snf::start_warp(CheatTarget::One(contract_addr), TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN);
 
     contract_addr
-}
-
-fn deploy_pixel_quests_daily(pixel_quest: snf::ContractClass) -> Array<ContractAddress> {
-    let mut daily_pixel_calldata = array![];
-    PixelQuestInitParams {
-        art_peace: utils::ART_PEACE_CONTRACT(),
-        reward: 10,
-        pixels_needed: 3,
-        is_daily: true,
-        claim_day: 0,
-        is_color: false,
-        color: 0,
-    }
-        .serialize(ref daily_pixel_calldata);
-    let daily_pixel_quest = pixel_quest.deploy(@daily_pixel_calldata).unwrap();
-
-    let mut daily_color_calldata = array![];
-    PixelQuestInitParams {
-        art_peace: utils::ART_PEACE_CONTRACT(),
-        reward: 10,
-        pixels_needed: 3,
-        is_daily: true,
-        claim_day: 0,
-        is_color: true,
-        color: 0x1,
-    }
-        .serialize(ref daily_color_calldata);
-    let daily_color_quest = pixel_quest.deploy(@daily_color_calldata).unwrap();
-
-    array![daily_pixel_quest, daily_color_quest, utils::EMPTY_QUEST_CONTRACT()]
-}
-
-fn deploy_pixel_quests_main(pixel_quest: snf::ContractClass) -> Array<ContractAddress> {
-    let mut main_pixel_calldata = array![];
-    PixelQuestInitParams {
-        art_peace: utils::ART_PEACE_CONTRACT(),
-        reward: 20,
-        pixels_needed: 4,
-        is_daily: false,
-        claim_day: 0,
-        is_color: false,
-        color: 0,
-    }
-        .serialize(ref main_pixel_calldata);
-    let main_pixel_quest = pixel_quest.deploy(@main_pixel_calldata).unwrap();
-
-    let mut main_color_calldata = array![];
-    PixelQuestInitParams {
-        art_peace: utils::ART_PEACE_CONTRACT(),
-        reward: 20,
-        pixels_needed: 4,
-        is_daily: false,
-        claim_day: 0,
-        is_color: true,
-        color: 0x1,
-    }
-        .serialize(ref main_color_calldata);
-    let main_color_quest = pixel_quest.deploy(@main_color_calldata).unwrap();
-
-    array![main_pixel_quest, main_color_quest]
-}
-
-fn deploy_unruggable_quest_main(unruggable_quest: snf::ContractClass) -> ContractAddress {
-    let mut unruggable_calldata = array![];
-    UnruggableQuestInitParams { art_peace: utils::ART_PEACE_CONTRACT(), reward: 20, }
-        .serialize(ref unruggable_calldata);
-    let main_unruggable_quest = unruggable_quest.deploy(@unruggable_calldata).unwrap();
-
-    main_unruggable_quest
 }
 
 fn deploy_nft_contract() -> ContractAddress {
@@ -226,25 +175,12 @@ fn deploy_erc20_mock() -> ContractAddress {
     contract_addr
 }
 
-fn deploy_unruggable_mock() -> ContractAddress {
-    let contract = snf::declare("UnruggableMock");
-    let name: ByteArray = "Unruggable mock";
-    let symbol: ByteArray = "UNRUGGABLE";
-    let owner: ContractAddress = get_contract_address();
-
-    let mut calldata: Array<felt252> = array![];
-    Serde::serialize(@name, ref calldata);
-    Serde::serialize(@symbol, ref calldata);
-    Serde::serialize(@owner, ref calldata);
-
-    let contract_addr = contract.deploy_at(@calldata, UNRUGGABLE_MOCK_CONTRACT()).unwrap();
-
-    contract_addr
-}
-
-fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
+pub(crate) fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     let last_time = art_peace.get_last_placed_time();
-    snf::start_warp(CheatTarget::One(art_peace.contract_address), last_time + TIME_BETWEEN_PIXELS);
+    snf::start_warp(
+        CheatTarget::One(art_peace.contract_address),
+        last_time + TIME_BETWEEN_PIXELS + LEANIENCE_MARGIN
+    );
 }
 
 fn compute_template_hash(template: Span<u8>) -> felt252 {
@@ -285,7 +221,8 @@ fn place_pixel_test() {
     let y = 20;
     let pos = x + y * WIDTH;
     let color = 0x5;
-    art_peace.place_pixel(pos, color);
+    let now = 10;
+    art_peace.place_pixel(pos, color, now);
     assert!(art_peace.get_pixel_color(pos) == color, "Pixel was not placed correctly at pos");
     assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel was not placed correctly at xy");
 
@@ -294,156 +231,10 @@ fn place_pixel_test() {
     let y = 25;
     let pos = x + y * WIDTH;
     let color = 0x7;
-    art_peace.place_pixel_xy(x, y, color);
+    let now = 20;
+    art_peace.place_pixel_xy(x, y, color, now);
     assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel xy was not placed correctly at xy");
     assert!(art_peace.get_pixel(pos).color == color, "Pixel xy was not placed correctly at pos");
-}
-
-#[test]
-fn deploy_pixel_quest_test() {
-    let pixel_quest = snf::declare("PixelQuest");
-    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
-    let main_quests = deploy_pixel_quests_main(pixel_quest);
-    let art_peace = IArtPeaceDispatcher {
-        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
-    };
-
-    assert!(
-        art_peace.get_days_quests(0) == daily_quests.span(), "Daily quests were not set correctly"
-    );
-    assert!(
-        art_peace.get_main_quests() == main_quests.span(), "Main quests were not set correctly"
-    );
-}
-
-#[test]
-fn deploy_unruggable_quest_test() {
-    let unruggable_quest = snf::declare("UnruggableQuest");
-    let main_unruggable_quest = deploy_unruggable_quest_main(unruggable_quest);
-
-    let art_peace = IArtPeaceDispatcher {
-        contract_address: deploy_with_quests_contract(
-            array![].span(), array![main_unruggable_quest].span()
-        )
-    };
-
-    let zero_address = contract_address_const::<0>();
-
-    assert!(
-        art_peace.get_days_quests(0) == array![zero_address, zero_address, zero_address].span(),
-        "Daily quests were not set correctly"
-    );
-    assert!(
-        art_peace.get_main_quests() == array![main_unruggable_quest].span(),
-        "Main quests were not set correctly"
-    );
-}
-
-#[test]
-fn pixel_quests_test() {
-    let pixel_quest = snf::declare("PixelQuest");
-    let daily_quests = deploy_pixel_quests_daily(pixel_quest);
-    let main_quests = deploy_pixel_quests_main(pixel_quest);
-    let art_peace = IArtPeaceDispatcher {
-        contract_address: deploy_with_quests_contract(daily_quests.span(), main_quests.span())
-    };
-
-    let x = 10;
-    let y = 20;
-    let pos = x + y * WIDTH;
-    let color = 0x5;
-    art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(art_peace.get_extra_pixels_count() == 0, "Extra pixels are wrong after invalid claims");
-
-    warp_to_next_available_time(art_peace);
-    let x = 15;
-    let y = 25;
-    let color = 0x1;
-    art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(art_peace.get_extra_pixels_count() == 0, "Extra pixels are wrong after invalid claims");
-
-    warp_to_next_available_time(art_peace);
-    let x = 20;
-    let y = 30;
-    let pos = x + y * WIDTH;
-    let color = 0x9;
-    art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(
-        art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily quest 1 claim"
-    );
-
-    warp_to_next_available_time(art_peace);
-    let x = 25;
-    let y = 35;
-    let color = 0x1;
-    art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(
-        art_peace.get_extra_pixels_count() == 30, "Extra pixels are wrong after main quest 1 claim"
-    );
-
-    warp_to_next_available_time(art_peace);
-    let x = 30;
-    let y = 40;
-    let pos = x + y * WIDTH;
-    let color = 0x1;
-    art_peace.place_pixel(pos, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(
-        art_peace.get_extra_pixels_count() == 40, "Extra pixels are wrong after daily quest 2 claim"
-    );
-
-    warp_to_next_available_time(art_peace);
-    let x = 35;
-    let y = 45;
-    let color = 0x1;
-    art_peace.place_pixel_xy(x, y, color);
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
-    art_peace.claim_main_quest(1, utils::EMPTY_CALLDATA());
-    assert!(
-        art_peace.get_extra_pixels_count() == 60, "Extra pixels are wrong after main quest 2 claim"
-    );
-}
-
-#[test]
-fn unruggable_quest_test() {
-    let unruggable_quest = snf::declare("UnruggableQuest");
-    let main_unruggable_quest = deploy_unruggable_quest_main(unruggable_quest);
-
-    let art_peace = IArtPeaceDispatcher {
-        contract_address: deploy_with_quests_contract(
-            array![].span(), array![main_unruggable_quest].span()
-        )
-    };
-
-    let unruggable_token = deploy_unruggable_mock();
-
-    let calldata: Span<felt252> = array![unruggable_token.try_into().unwrap()].span();
-    art_peace.claim_main_quest(0, calldata);
-
-    assert!(
-        art_peace.get_extra_pixels_count() == 20, "Extra pixels are wrong after main quest claim"
-    );
 }
 
 #[test]
@@ -486,7 +277,7 @@ fn template_full_basic_test() {
     let y = 0;
     let pos = x + y * WIDTH;
     let color = 1;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -498,7 +289,7 @@ fn template_full_basic_test() {
     let y = 0;
     let pos = x + y * WIDTH;
     let color = 2;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -510,7 +301,7 @@ fn template_full_basic_test() {
     let y = 1;
     let pos = x + y * WIDTH;
     let color = 3;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == false,
@@ -522,7 +313,7 @@ fn template_full_basic_test() {
     let y = 1;
     let pos = x + y * WIDTH;
     let color = 4;
-    art_peace.place_pixel(pos, color);
+    art_peace.place_pixel_blocktime(pos, color);
     template_verifier.complete_template(0, template_image.span());
     assert!(
         template_store.is_template_complete(0) == true,
@@ -566,7 +357,9 @@ fn nft_mint_test() {
     let nft_minter = IArtPeaceNFTMinterDispatcher { contract_address: art_peace.contract_address };
     let nft_store = ICanvasNFTStoreDispatcher { contract_address: utils::NFT_CONTRACT() };
     let nft = IERC721Dispatcher { contract_address: utils::NFT_CONTRACT() };
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::HOST());
     nft_minter.add_nft_contract(utils::NFT_CONTRACT());
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
 
     let mint_params = NFTMintParams { position: 10, width: 16, height: 16, };
     snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::PLAYER1());
