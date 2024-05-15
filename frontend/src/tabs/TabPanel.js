@@ -56,6 +56,7 @@ const TabPanel = (props) => {
           factionPixelsData={props.factionPixelsData}
           setFactionPixelsData={props.setFactionPixelsData}
           extraPixels={props.extraPixels}
+          setPixelSelection={props.setPixelSelection}
           setExtraPixels={props.setExtraPixels}
           availablePixels={props.availablePixels}
           availablePixelsUsed={props.availablePixelsUsed}

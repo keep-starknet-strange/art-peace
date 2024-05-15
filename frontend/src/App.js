@@ -129,7 +129,7 @@ function App() {
     const colorIdx = color;
     const colorHex = `#${colors[colorIdx]}FF`;
     context.fillStyle = colorHex;
-    context.fillRect(x, y, 1, 1);
+    context.fillRect(x, y, 10, 10);
   };
 
   // Pixel selection data
@@ -143,7 +143,7 @@ function App() {
   const [basePixelUp, setBasePixelUp] = useState(false);
   const [factionPixelsData, setFactionPixelsData] = useState([]);
   const [factionPixels, setFactionPixels] = useState([]);
-  const [extraPixels, setExtraPixels] = useState(0);
+  const [extraPixels, setExtraPixels] = useState(4);
   const [availablePixels, setAvailablePixels] = useState(0);
   const [availablePixelsUsed, setAvailablePixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
@@ -302,7 +302,7 @@ function App() {
       const pixel = extraPixelsData[index];
       const x = pixel.x;
       const y = pixel.y;
-      context.clearRect(x, y, 1, 1);
+      context.clearRect(x, y, 4, 4);
     },
     [extraPixelsData, availablePixelsUsed]
   );
@@ -454,6 +454,7 @@ function App() {
           basePixelTimer={basePixelTimer}
           factionPixels={factionPixels}
           setFactionPixels={setFactionPixels}
+          setPixelSelection={setPixelSelection}
           extraPixels={extraPixels}
           setExtraPixels={setExtraPixels}
           availablePixels={availablePixels}
