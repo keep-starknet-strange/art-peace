@@ -7,16 +7,11 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-	"github.com/keep-starknet-strange/art-peace/backend/config"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-func getHttpConfig() config.HttpConfig {
-	return core.ArtPeaceBackend.BackendConfig.Http
-}
-
 func SetupAccessHeaders(w http.ResponseWriter) {
-	config := getHttpConfig()
+	config := core.ArtPeaceBackend.BackendConfig.Http
 
 	// TODO: Process multiple origins in the future.
 	if len(config.AllowOrigin) > 0 {
