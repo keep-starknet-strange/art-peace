@@ -17,7 +17,9 @@ fn deploy_hodl_quest() -> ContractAddress {
 
     let mut hodl_quest_calldata = array![];
     HodlQuestInitParams {
-        art_peace: utils::ART_PEACE_CONTRACT(), reward: reward_amt, extra_pixels_needed: extra_pixels_needed,
+        art_peace: utils::ART_PEACE_CONTRACT(),
+        reward: reward_amt,
+        extra_pixels_needed: extra_pixels_needed,
     }
         .serialize(ref hodl_quest_calldata);
 
