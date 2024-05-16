@@ -9,7 +9,7 @@ use snforge_std as snf;
 use snforge_std::{declare, CheatTarget, ContractClassTrait};
 
 const reward_amt: u32 = 18;
-const user_extra_pixel: u32 = 65;
+const user_extra_pixel: u32 = 18;
 
 
 fn deploy_hodl_quest() -> ContractAddress {
@@ -56,14 +56,15 @@ fn hodl_quest_test() {
     };
 
     let calldata: Array<felt252> = array![];
-    let user = contract_address_const::<1>();
 
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
 
     snf::store(
         art_peace.contract_address,
-        snf::map_entry_address(selector!("extra_pixels"), array![65].span()),
-        array![user.into()].span()
+        snf::map_entry_address(
+            selector!("extra_pixels"), array![(contract_address_const::<1>()).into()].span()
+        ),
+        array![18].span()
     );
 
     art_peace.claim_main_quest(0, calldata.span());
@@ -73,4 +74,20 @@ fn hodl_quest_test() {
         "Extra pixels are wrong after main quest claim"
     );
     snf::stop_prank(CheatTarget::One(art_peace.contract_address));
+}
+
+#[test]
+#[should_panic(expected: 'Quest not claimable')]
+fn hodl_quest_double_claim() {
+    let hodl_quest_contract_address = deploy_hodl_quest();
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(
+            array![].span(), array![hodl_quest_contract_address].span()
+        )
+    };
+
+    let calldata: Array<felt252> = array![0];
+    snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
+
+    art_peace.claim_main_quest(0, calldata.span());
 }
