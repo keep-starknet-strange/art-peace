@@ -9,7 +9,7 @@ pub mod HodlQuest {
     struct Storage {
         art_peace: ContractAddress,
         reward: u32,
-        extra_pixel: u32,
+        extra_pixels_needed: u32,
         claimed: LegacyMap<ContractAddress, bool>,
     }
 
@@ -18,14 +18,14 @@ pub mod HodlQuest {
     pub struct HodlQuestInitParams {
         pub art_peace: ContractAddress,
         pub reward: u32,
-        pub extra_pixel: u32
+        pub extra_pixels_needed: u32
     }
 
     #[constructor]
     fn constructor(ref self: ContractState, init_params: HodlQuestInitParams) {
         self.art_peace.write(init_params.art_peace);
         self.reward.write(init_params.reward);
-        self.extra_pixel.write(init_params.extra_pixel);
+        self.extra_pixels_needed.write(init_params.extra_pixels_needed);
     }
 
     #[abi(embed_v0)]
@@ -41,11 +41,11 @@ pub mod HodlQuest {
                 return false;
             }
 
-            let art_peace_main = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
+            let art_peace_dispatcher = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
 
-            let get_extra_pixels_count = art_peace_main.get_user_extra_pixels_count(user.into());
+            let user_extra_pixels = art_peace_dispatcher.get_user_extra_pixels_count(user.into());
 
-            if get_extra_pixels_count >= self.extra_pixel.read() {
+            if user_extra_pixels >= self.extra_pixels_needed.read() {
                 return true;
             }
 
