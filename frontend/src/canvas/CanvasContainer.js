@@ -266,12 +266,17 @@ const CanvasContainer = (props) => {
     );
 
     if (existingPixel) {
-      props.setSelectedColorId(existingPixel.colorId);
-      return;
+      let color = props.colors[existingPixel.colorId];
+      return(
+        '#' +
+          (255 - parseInt(color[0], 16)).toString(16).padStart(2, '0') +
+          (255 - parseInt(color[1], 16)).toString(16).padStart(2, '0') +
+          (255 - color[2]).toString(16).padStart(2, '0') +
+          color[3].toString(16).padStart(2, '0')
+      );
     }
 
     if (props.selectedColorId === -1) {
-      // TODO: Check if extra pixel placed at position
       let color = props.canvasRef.current
         .getContext('2d')
         .getImageData(
