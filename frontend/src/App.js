@@ -143,7 +143,7 @@ function App() {
   const [basePixelUp, setBasePixelUp] = useState(false);
   const [factionPixelsData, setFactionPixelsData] = useState([]);
   const [factionPixels, setFactionPixels] = useState([]);
-  const [extraPixels, setExtraPixels] = useState(4);
+  const [extraPixels, setExtraPixels] = useState(0);
   const [availablePixels, setAvailablePixels] = useState(0);
   const [availablePixelsUsed, setAvailablePixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
@@ -302,7 +302,7 @@ function App() {
       const pixel = extraPixelsData[index];
       const x = pixel.x;
       const y = pixel.y;
-      context.clearRect(x, y, 4, 4);
+      context.clearRect(x, y, 1, 1);
     },
     [extraPixelsData, availablePixelsUsed]
   );
