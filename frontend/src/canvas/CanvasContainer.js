@@ -267,12 +267,12 @@ const CanvasContainer = (props) => {
 
     if (existingPixel) {
       let color = props.colors[existingPixel.colorId];
-      return(
+      return (
         '#' +
-          (255 - parseInt(color[0], 16)).toString(16).padStart(2, '0') +
-          (255 - parseInt(color[1], 16)).toString(16).padStart(2, '0') +
-          (255 - color[2]).toString(16).padStart(2, '0') +
-          color[3].toString(16).padStart(2, '0')
+        (255 - parseInt(color[0], 16)).toString(16).padStart(2, '0') +
+        (255 - parseInt(color[1], 16)).toString(16).padStart(2, '0') +
+        (255 - color[2]).toString(16).padStart(2, '0') +
+        color[3].toString(16).padStart(2, '0')
       );
     }
 
