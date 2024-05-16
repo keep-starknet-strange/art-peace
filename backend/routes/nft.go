@@ -33,6 +33,7 @@ type NFTData struct {
 	ImageHash   string `json:"imageHash"`
 	BlockNumber int    `json:"blockNumber"`
 	Minter      string `json:"minter"`
+  Owner       string `json:"owner"`
 }
 
 type NFTLikesRequest struct {
@@ -55,7 +56,7 @@ func getNFT(w http.ResponseWriter, r *http.Request) {
 func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	address := r.URL.Query().Get("address")
 
-	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE minter = $1", address)
+	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE owner = $1", address)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
