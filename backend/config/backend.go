@@ -55,7 +55,7 @@ var DefaultBackendConfig = BackendConfig{
 		WriteBufferSize: 1024,
 	},
 	Http: HttpConfig{
-		AllowOrigin:  []string{"*"},
+		AllowOrigin:  []string{"http://localhost:3000"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders: []string{"Content-Type"},
 	},

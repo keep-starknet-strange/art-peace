@@ -14,7 +14,7 @@
     "write_buffer_size": 1024
   },
   "http_config": {
-    "allowOrigin": ["*"],
+    "allowOrigin": ["http://localhost:3000"],
     "allowMethods": "GET, POST, PUT, DELETE, HEAD, OPTIONS",
     "allowHeaders": "application/json"
   }
