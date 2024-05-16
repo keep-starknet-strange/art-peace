@@ -12,7 +12,7 @@ import (
 )
 
 func getHttpConfig() config.HttpConfig {
-	return core.ArtPeaceBackend.BackendConfig.HttpConfigValues
+	return core.ArtPeaceBackend.BackendConfig.Http
 }
 
 func SetupAccessHeaders(w http.ResponseWriter) {

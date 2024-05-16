@@ -28,12 +28,12 @@ type HttpConfig struct {
 }
 
 type BackendConfig struct {
-	Host             string               `json:"host"`
-	Port             int                  `json:"port"`
-	Scripts          BackendScriptsConfig `json:"scripts"`
-	Production       bool                 `json:"production"`
-	WebSocket        WebSocketConfig      `json:"websocket"`
-	HttpConfigValues HttpConfig           `json:"http_config"`
+	Host       string               `json:"host"`
+	Port       int                  `json:"port"`
+	Scripts    BackendScriptsConfig `json:"scripts"`
+	Production bool                 `json:"production"`
+	WebSocket  WebSocketConfig      `json:"websocket"`
+	Http       HttpConfig           `json:"http_config"`
 }
 
 var DefaultBackendConfig = BackendConfig{
@@ -54,7 +54,7 @@ var DefaultBackendConfig = BackendConfig{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	},
-	HttpConfigValues: HttpConfig{
+	Http: HttpConfig{
 		AllowOrigin:  []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders: []string{"Content-Type"},
