@@ -33,7 +33,7 @@ type NFTData struct {
 	ImageHash   string `json:"imageHash"`
 	BlockNumber int    `json:"blockNumber"`
 	Minter      string `json:"minter"`
-  Owner       string `json:"owner"`
+	Owner       string `json:"owner"`
 }
 
 type NFTLikesRequest struct {

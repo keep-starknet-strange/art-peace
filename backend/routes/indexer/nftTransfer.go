@@ -17,13 +17,13 @@ func processNFTTransferEvent(event IndexerEvent, w http.ResponseWriter) {
 	tokenId, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
 	if err != nil {
 		PrintIndexerError("processNFTTransferEvent", "Error converting token id low hex to int", to, tokenIdLowHex)
-		return 
+		return
 	}
 
 	// Set owner
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE NFTs SET owner = $1 WHERE token_id = $2", to, tokenId ) 
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE NFTs SET owner = $1 WHERE token_id = $2", to, tokenId)
 	if err != nil {
 		PrintIndexerError("processNFTTransferEvent", "Error updating owner in postgres", to, tokenIdLowHex)
-		return 
+		return
 	}
 }
