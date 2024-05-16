@@ -18,10 +18,10 @@ func getHttpConfig() config.HttpConfig {
 func SetupAccessHeaders(w http.ResponseWriter) {
 	config := getHttpConfig()
 
-	for _, origin := range config.AllowOrigin {
-		w.Header().Add("Access-Control-Allow-Origin", origin)
+	// TODO: Process multiple origins in the future.
+	if len(config.AllowOrigin) > 0 {
+		w.Header().Set("Access-Control-Allow-Origin", config.AllowOrigin[0])
 	}
-
 	methods := strings.Join(config.AllowMethods, ", ")
 	w.Header().Set("Access-Control-Allow-Methods", methods)
 
