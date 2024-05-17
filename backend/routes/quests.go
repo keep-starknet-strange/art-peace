@@ -252,7 +252,7 @@ func ClaimTodayQuestDevnet(w http.ResponseWriter, r *http.Request) {
 func SendChat(w http.ResponseWriter, r *http.Request) {
 	userAddress := r.URL.Query().Get("address")
 	if userAddress == "" {
-		WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
 		return
 	}
     
@@ -260,7 +260,7 @@ func SendChat(w http.ResponseWriter, r *http.Request) {
     var chat FactionChat
     err := json.NewDecoder(r.Body).Decode(&chat)
     if err != nil {
-        WriteErrorJson(w, http.StatusBadRequest, "Invalid request body")
+        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid request body")
         return
     }
     defer r.Body.Close()
@@ -268,7 +268,7 @@ func SendChat(w http.ResponseWriter, r *http.Request) {
     // Insert chat into database
 	err = core.PostgresExec( r.Context(), "INSERT INTO FactionChats (sender, faction_key, message) VALUES ($1, $2, $3)", chat.Sender, chat.FactionKey, chat.Message)
     if err != nil {
-        WriteErrorJson(w, http.StatusInternalServerError, "Failed to send chat")
+        routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to send chat")
         return
     }
 
@@ -278,14 +278,14 @@ func SendChat(w http.ResponseWriter, r *http.Request) {
 func DeleteChat(w http.ResponseWriter, r *http.Request) {
     userAddress := r.URL.Query().Get("address")
 	if userAddress == "" {
-		WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
 		return
 	}
     
     // Parse query params
     chatID := r.URL.Query().Get("id")
     if chatID == "" {
-        WriteErrorJson(w, http.StatusBadRequest, "Missing chat ID parameter")
+        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing chat ID parameter")
         return
     }
 
@@ -325,7 +325,7 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
     // Delete chat from database
     err = core.PostgresExec(r.Context(), "DELETE FROM FactionChats WHERE id = $1", chatID)
     if err != nil {
-        WriteErrorJson(w, http.StatusInternalServerError, "Failed to delete chat")
+        routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to delete chat")
         return
     }
 	w.WriteHeader(http.StatusOK)
@@ -334,23 +334,23 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 func GetFactionChats(w http.ResponseWriter, r *http.Request) {
     userAddress := r.URL.Query().Get("address")
 	if userAddress == "" {
-		WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
 		return
 	}
     
     // Parse query params
     factionKey := r.URL.Query().Get("faction_key")
     if factionKey == "" {
-        WriteErrorJson(w, http.StatusBadRequest, "Missing faction key parameter")
+        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing faction key parameter")
         return
     }
 
     // Retrieve faction chats from database
     chats, err := core.PostgresQueryJson[FactionChat]("SELECT id, sender, faction_key, message, time FROM FactionChats WHERE faction_key = $1 ORDER BY time ASC", factionKey)
     if err != nil {
-        WriteErrorJson(w, http.StatusInternalServerError, "Failed to get faction chats")
+        routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get faction chats")
         return
     }
 
-    WriteDataJson(w, string(chats))
+    routeutils.WriteDataJson(w, string(chats))
 }
