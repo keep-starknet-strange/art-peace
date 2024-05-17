@@ -4,20 +4,28 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/websocket"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
 func SetupAccessHeaders(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	config := core.ArtPeaceBackend.BackendConfig.Http
+
+	// TODO: Process multiple origins in the future.
+	if len(config.AllowOrigin) > 0 {
+		w.Header().Set("Access-Control-Allow-Origin", config.AllowOrigin[0])
+	}
+	methods := strings.Join(config.AllowMethods, ", ")
+	w.Header().Set("Access-Control-Allow-Methods", methods)
+
+	headers := strings.Join(config.AllowHeaders, ", ")
+	w.Header().Set("Access-Control-Allow-Headers", headers)
 }
 
 func SetupHeaders(w http.ResponseWriter) {
 	SetupAccessHeaders(w)
-
 	w.Header().Set("Content-Type", "application/json")
 }
 
@@ -41,7 +49,6 @@ func WriteResultJson(w http.ResponseWriter, result string) {
 	w.Write(BasicResultJson(result))
 }
 
-// TODO: To string
 func BasicDataJson(data string) []byte {
 	return []byte(`{"data": ` + data + `}`)
 }
@@ -61,8 +68,7 @@ func SendWebSocketMessage(w http.ResponseWriter, message map[string]interface{})
 	for idx, conn := range core.ArtPeaceBackend.WSConnections {
 		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
 			fmt.Println(err)
-			// TODO: Should we always remove connection?
-			// Remove connection
+			// Remove problematic connection
 			conn.Close()
 			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
 		}

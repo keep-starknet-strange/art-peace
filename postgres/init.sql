@@ -141,7 +141,8 @@ CREATE TABLE NFTs (
   height integer NOT NULL,
   image_hash text NOT NULL,
   block_number integer NOT NULL,
-  minter char(64) NOT NULL
+  minter char(64) NOT NULL,
+  owner char(64) NOT NULL
 );
 
 CREATE TABLE NFTLikes (

@@ -68,6 +68,7 @@ const NFTsExpandedSection = (props) => {
 
 const NFTs = (props) => {
   const [setup, setSetup] = React.useState(false);
+  // TODO: Minted nfts view w/ non owned nfts
   const [myNFTs, setMyNFTs] = React.useState([]);
   const [allNFTs, setAllNFTs] = React.useState([]);
 
