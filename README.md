@@ -139,6 +139,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Immanuelolivia1"><img src="https://avatars.githubusercontent.com/u/101520237?v=4?s=100" width="100px;" alt="Immanuelolivia"/><br /><sub><b>Immanuelolivia</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Immanuelolivia1" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/GoSTEAN"><img src="https://avatars.githubusercontent.com/u/63151237?v=4?s=100" width="100px;" alt="Stephanie Nwankwo"/><br /><sub><b>Stephanie Nwankwo</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=GoSTEAN" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Joy-Adah"><img src="https://avatars.githubusercontent.com/u/99573957?v=4?s=100" width="100px;" alt="Joy Adah"/><br /><sub><b>Joy Adah</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Joy-Adah" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Gift-Naomi"><img src="https://avatars.githubusercontent.com/u/149405096?v=4?s=100" width="100px;" alt="Na'omi Emmanuel Gift"/><br /><sub><b>Na'omi Emmanuel Gift</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Gift-Naomi" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
