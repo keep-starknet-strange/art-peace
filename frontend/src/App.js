@@ -129,7 +129,7 @@ function App() {
     const colorIdx = color;
     const colorHex = `#${colors[colorIdx]}FF`;
     context.fillStyle = colorHex;
-    context.fillRect(x, y, 10, 10);
+    context.fillRect(x, y, 1, 1);
   };
 
   // Pixel selection data

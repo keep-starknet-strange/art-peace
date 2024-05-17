@@ -269,13 +269,17 @@ const CanvasContainer = (props) => {
       let color = props.colors[existingPixel.colorId];
       return (
         '#' +
-        (255 - parseInt(color[0], 16)).toString(16).padStart(2, '0') +
-        (255 - parseInt(color[1], 16)).toString(16).padStart(2, '0') +
-        (255 - color[2]).toString(16).padStart(2, '0') +
-        color[3].toString(16).padStart(2, '0')
+        (255 - parseInt(color.substring(0, 2), 16))
+          .toString(16)
+          .padStart(2, '0') +
+        (255 - parseInt(color.substring(2, 4), 16))
+          .toString(16)
+          .padStart(2, '0') +
+        (255 - parseInt(color.substring(4, 6), 16))
+          .toString(16)
+          .padStart(2, '0')
       );
     }
-
     if (props.selectedColorId === -1) {
       let color = props.canvasRef.current
         .getContext('2d')
@@ -293,7 +297,6 @@ const CanvasContainer = (props) => {
         color[3].toString(16).padStart(2, '0')
       );
     }
-
     return '#' + props.colors[props.selectedColorId] + 'FF';
   };
 
