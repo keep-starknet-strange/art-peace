@@ -49,7 +49,7 @@ services:
       context: .
     depends_on:
       - devnet
-    restart: no
+    restart: "no"
     command: bash -c "./initialize.sh"
     environment:
       - SCARB=/root/.local/bin/scarb
@@ -103,6 +103,8 @@ services:
     environment:
       - APIBARA_STREAM_URL=http://art-peace-apibara-1:7171
       - BACKEND_TARGET_URL=http://art-peace-backend-1:8080/consume-indexer-msg
+      - PERSIST_TO_REDIS=redis://redis:6379
+      - INDEXER_ID=seun
     volumes:
       - configs:/configs
     restart: on-failure
