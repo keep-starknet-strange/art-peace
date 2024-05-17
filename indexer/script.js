@@ -117,6 +117,14 @@ export const config = {
         includeTransaction: false,
         includeReceipt: false,
       },
+      {
+        // NFT Transfer Event
+        fromAddress: Deno.env.get("NFT_CONTRACT_ADDRESS"),
+        keys: ["0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false,
+      },
     ],
   },
   sinkType: "webhook",
