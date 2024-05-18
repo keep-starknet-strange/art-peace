@@ -100,28 +100,6 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, string(nfts))
 }
 
-// func getMyNFTs(w http.ResponseWriter, r *http.Request) {
-// 	address := r.URL.Query().Get("address")
-
-// 	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE owner = $1", address)
-// 	if err != nil {
-// 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
-// 		return
-// 	}
-// 	routeutils.WriteDataJson(w, string(nfts))
-// }
-
-// func getNFTs(w http.ResponseWriter, r *http.Request) {
-// 	// TODO: Pagination & Likes
-// 	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts")
-// 	if err != nil {
-// 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
-// 		return
-// 	}
-
-// 	routeutils.WriteDataJson(w, string(nfts))
-// }
-
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
 	if routeutils.NonProductionMiddleware(w, r) {
