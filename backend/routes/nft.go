@@ -76,7 +76,6 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, string(nfts))
 }
 
-// Modify getNFTs function
 func getNFTs(w http.ResponseWriter, r *http.Request) {
 	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
 	if err != nil || pageLength <= 0 {
