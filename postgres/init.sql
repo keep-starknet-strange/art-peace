@@ -160,6 +160,7 @@ CREATE TABLE Factions (
   leader char(64) NOT NULL,
   pixel_pool integer NOT NULL
 );
+
 CREATE INDEX factions_leader_index ON Factions (leader);
 
 CREATE TABLE FactionLinks (
@@ -167,6 +168,7 @@ CREATE TABLE FactionLinks (
   link_url text NOT NULL,
   faction_id integer NOT NULL
 );
+
 CREATE INDEX factionLinks_faction_id_index ON FactionLinks (faction_id);
 
 CREATE TABLE FactionChats (

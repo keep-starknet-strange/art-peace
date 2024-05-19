@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"encoding/json"
 	"context"
 	"net/http"
 	"os"
@@ -45,15 +44,13 @@ type MainQuest struct {
 	Reward      int    `json:"reward"`
 }
 
-type FactionChat struct {
-    ID        int       `json:"id"`
-    Sender    string    `json:"sender"`
-    FactionKey int      `json:"faction_key"`
-    Message   string    `json:"message"`
-    Time      time.Time `json:"time"`
-}
+type FactionChatRequest struct {
+	ID         int       `json:"id"`
+	FactionKey string      `json:"factionKey"`
+	Message   string    `json:"message"`
+  }
 
-func InitFactionRoutes() {
+func InitMemberFactionRoutes() {
 	http.HandleFunc("/send-chat", SendChat)
     http.HandleFunc("/delete-chat", DeleteChat)
     http.HandleFunc("/get-faction-chats", GetFactionChats)
@@ -250,41 +247,61 @@ func ClaimTodayQuestDevnet(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendChat(w http.ResponseWriter, r *http.Request) {
-	userAddress := r.URL.Query().Get("address")
+	userAddress := "0000000000000X432"
+	
+
 	if userAddress == "" {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
 		return
 	}
-    
-    // Parse request body
-    var chat FactionChat
-    err := json.NewDecoder(r.Body).Decode(&chat)
-    if err != nil {
-        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid request body")
-        return
-    }
-    defer r.Body.Close()
+ 
+	chat, err := routeutils.ReadJsonBody[FactionChatRequest](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
 
-    // Insert chat into database
-	err = core.PostgresExec( r.Context(), "INSERT INTO FactionChats (sender, faction_key, message) VALUES ($1, $2, $3)", chat.Sender, chat.FactionKey, chat.Message)
-    if err != nil {
-        routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to send chat")
-        return
-    }
+	query := `
+		SELECT 1
+		FROM FactionMembersInfo
+		WHERE faction_id = $1 AND user_address = $2
+		LIMIT 1
+	`
+	// Variable to hold the result
+	
+	isFactionMember, err := core.PostgresQueryOne[string]( query, chat.FactionKey, userAddress)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
 
+	if isFactionMember != nil {
+		// Insert chat into database
+		err = core.PostgresExec( r.Context(), "INSERT INTO FactionChats (sender, factionKey, message) VALUES ($1, $2, $3)", userAddress, chat.FactionKey, chat.Message)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to send chat")
+			return
+		}
+	}
+ 
     w.WriteHeader(http.StatusCreated)
+	routeutils.WriteResultJson(w, "FactionChat updated successfully")
 }
 
 func DeleteChat(w http.ResponseWriter, r *http.Request) {
-    userAddress := r.URL.Query().Get("address")
+	userAddress := "0000000000000X432"
 	if userAddress == "" {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
 		return
 	}
     
     // Parse query params
-    chatID := r.URL.Query().Get("id")
-    if chatID == "" {
+    chat, err := routeutils.ReadJsonBody[FactionChatRequest](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+    if chat.FactionKey == "" {
         routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing chat ID parameter")
         return
     }
@@ -292,7 +309,7 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 	canDelete := false
 
 	// Retrieve the faction leader from the database
-	leader, err := core.PostgresQueryOne[string]("SELECT ftns.leader FROM Factions ftns INNER JOIN FactionChats ftcs ON ftns.faction_key = ftcs.key WHERE ftcs.id = $1", chatID)
+	leader, err := core.PostgresQueryOne[string]("SELECT ftns.leader FROM Factions ftns INNER JOIN FactionChats ftcs ON ftns.faction_key = ftcs.key WHERE ftcs.id = $1", chat.FactionKey)
 	if err != nil {
 		http.Error(w, "Failed to retrieve faction leader", http.StatusInternalServerError)
 		return
@@ -303,7 +320,7 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !canDelete {
-		sender, err := core.PostgresQueryOne[string]("SELECT sender FROM FactionChats WHERE id = $1", chatID)
+		sender, err := core.PostgresQueryOne[string]("SELECT sender FROM FactionChats WHERE id = $1", chat.ID)
         if err != nil {
             http.Error(w, "Failed to retrieve sender", http.StatusInternalServerError)
             return
@@ -314,7 +331,6 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
     
 	// Check if the authenticated user is the sender or the faction leader
 	if !canDelete {
@@ -323,7 +339,7 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 	}
 
     // Delete chat from database
-    err = core.PostgresExec(r.Context(), "DELETE FROM FactionChats WHERE id = $1", chatID)
+    err = core.PostgresExec(r.Context(), "DELETE FROM FactionChats WHERE id = $1", chat.ID)
     if err != nil {
         routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to delete chat")
         return
@@ -332,21 +348,21 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFactionChats(w http.ResponseWriter, r *http.Request) {
-    userAddress := r.URL.Query().Get("address")
+	userAddress := "0000000000000X432"
 	if userAddress == "" {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
 		return
 	}
     
     // Parse query params
-    factionKey := r.URL.Query().Get("faction_key")
-    if factionKey == "" {
-        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing faction key parameter")
-        return
-    }
+    chat, err := routeutils.ReadJsonBody[FactionChatRequest](r)
+    if err != nil {
+	routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+	return
+}
 
     // Retrieve faction chats from database
-    chats, err := core.PostgresQueryJson[FactionChat]("SELECT id, sender, faction_key, message, time FROM FactionChats WHERE faction_key = $1 ORDER BY time ASC", factionKey)
+    chats, err := core.PostgresQueryJson[FactionChatRequest]("SELECT id, sender, faction_key, message, time FROM FactionChats WHERE faction_key = $1 ORDER BY time ASC", chat.FactionKey)
     if err != nil {
         routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get faction chats")
         return
