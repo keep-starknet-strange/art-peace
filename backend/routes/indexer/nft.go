@@ -57,7 +57,7 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 
 	// Set NFT in postgres
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (token_id, position, width, height, image_hash, block_number, minter) VALUES ($1, $2, $3, $4, $5, $6, $7)", tokenId, position, width, height, imageHashHex, blockNumber, minter)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (token_id, position, width, height, image_hash, block_number, minter, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", tokenId, position, width, height, imageHashHex, blockNumber, minter, minter)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error inserting NFT into postgres", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
