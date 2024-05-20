@@ -42,7 +42,7 @@ pub mod ArtPeace {
         user_memberships: LegacyMap::<(ContractAddress, u32), (u32, u32)>,
         color_count: u8,
         // Map: color index -> color value in RGBA
-        color_palette: LegacyMap::<u8, u32>,
+        color_palette: LegacyMap::<u8, u32>,        
         // Map: (day index) -> number of votable colors
         votable_colors_count: LegacyMap::<u32, u8>,
         // Map: (votable color index, day index) -> color value in RGBA
@@ -51,6 +51,7 @@ pub mod ArtPeace {
         color_votes: LegacyMap::<(u8, u32), u32>,
         // Map: (user's address, day_index) -> color index
         user_votes: LegacyMap::<(ContractAddress, u32), u8>,
+        color_votes_max: u8,
         creation_time: u64,
         end_time: u64,
         day_index: u32,
@@ -218,6 +219,8 @@ pub mod ArtPeace {
             self.votable_colors.write((i + 1, 0), *init_params.votable_colors.at(i.into()));
             i += 1;
         };
+        // TODO: retrieve value from params
+        self.color_votes_max.write(3); 
 
         self.creation_time.write(starknet::get_block_timestamp());
         self.start_day_time.write(starknet::get_block_timestamp());
@@ -987,16 +990,15 @@ pub mod ArtPeace {
 
     /// Internals
     fn finalize_color_votes(ref self: ContractState) {
-        // Should we use a storage variable here ?
-        let nb_max: u8 = 3;
+        let nb_max = self.color_votes_max.read();
 
         let day = self.day_index.read();
+        let next_day = day + 1;
         let votable_colors_count = self.votable_colors_count.read(day);
 
         let mut max_scores: Felt252Dict<u32> = Default::default();
-        let mut max_indexes: Felt252Dict<u8> = Default::default();
         let mut max_index: u8 = 0;
-
+        
         let mut votable_index: u8 = 1; // 0 means no vote
 
         while votable_index <= votable_colors_count {
@@ -1008,22 +1010,16 @@ pub mod ArtPeace {
                 let mut m: felt252 = max_index.into();
                 if (max_scores.get(m) < vote) {
                     let mut old_vote = max_scores.get(m);
-                    let mut old_index = max_indexes.get(m);
                     max_scores.insert(m, vote);
-                    max_indexes.insert(m, index);
                     vote = old_vote;
-                    index = old_index;
 
                     max_index += 1;
                     // update max dict
                     while max_index < nb_max {
                         m = max_index.into();
                         old_vote = max_scores.get(m);
-                        old_index = max_indexes.get(m);
                         max_scores.insert(m, vote);
-                        max_indexes.insert(m, index);
                         vote = old_vote;
-                        index = old_index;
                         max_index += 1;
                     };
                 };
@@ -1032,59 +1028,43 @@ pub mod ArtPeace {
             votable_index += 1;
         };
 
-        // update palette
-        max_index = 0;
-        while max_index < nb_max {
-            if (max_scores.get(max_index.into()) == 0) {
-                // no more max
+        // find threshold
+        let mut threshold: u32 = 0;
+        max_index = nb_max;
+        while max_index > 0 {
+            threshold = max_scores.get(max_index.into());
+            if threshold > 0 {
                 break;
             }
-            let index: u8 = max_indexes.get(max_index.into());
-
-            let color = self.votable_colors.read((index, day));
-            let color_index = self.color_count.read();
-            self.color_palette.write(color_index, color);
-            self.color_count.write(color_index + 1);
-            max_index += 1;
+            max_index -= 1;
         };
 
-        // update votable colors
-        let mut next_day_votable_colors_index: Array<u8> = array![];
-        votable_index = 1; // index 0 is unreachable
+        if threshold == 0 {
+            threshold = max_scores.get(0);
+        }
+        if threshold == 0 {
+            // no vote
+            threshold = 1;
+        }
+
+        // update palette & votable colors
+        let mut color_index = self.color_count.read();
+        let mut next_day_votable_index = 0;
+        votable_index = 1;
         while votable_index <= votable_colors_count {
-            let mut found: u8 = 0;
-            max_index = 0;
-            while max_index < nb_max {
-                if (max_scores.get(max_index.into()) == 0) {
-                    // no more max
-                    break;
-                }
-                let index: u8 = max_indexes.get(max_index.into());
-                if index == votable_index {
-                    found = 1;
-                    break;
-                };
-                max_index += 1;
-            };
-            if found == 0 {
-                next_day_votable_colors_index.append(votable_index);
+            let vote = self.color_votes.read((votable_index, day));
+            let color = self.votable_colors.read((votable_index, day));
+            if vote >= threshold {
+                self.color_palette.write(color_index, color);
+                color_index += 1;
+            } else {
+                next_day_votable_index += 1;
+                self.votable_colors.write((next_day_votable_index, next_day), color);
             }
             votable_index += 1;
         };
-
-        let next_day_votable_colors_count: u8 = next_day_votable_colors_index
-            .len()
-            .try_into()
-            .unwrap();
-        let next_day = day + 1;
-        votable_index = 0;
-        while votable_index < next_day_votable_colors_count {
-            let old_index = next_day_votable_colors_index.at(votable_index.into());
-            let color = self.votable_colors.read((*old_index, day));
-            self.votable_colors.write((votable_index + 1, next_day), color);
-            votable_index += 1;
-        };
-        self.votable_colors_count.write(next_day, next_day_votable_colors_count);
+        self.color_count.write(color_index);
+        self.votable_colors_count.write(next_day, next_day_votable_index);
     }
 }
 
