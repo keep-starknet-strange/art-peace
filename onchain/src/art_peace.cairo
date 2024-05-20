@@ -42,7 +42,7 @@ pub mod ArtPeace {
         user_memberships: LegacyMap::<(ContractAddress, u32), (u32, u32)>,
         color_count: u8,
         // Map: color index -> color value in RGBA
-        color_palette: LegacyMap::<u8, u32>,        
+        color_palette: LegacyMap::<u8, u32>,
         // Map: (day index) -> number of votable colors
         votable_colors_count: LegacyMap::<u32, u8>,
         // Map: (votable color index, day index) -> color value in RGBA
@@ -220,7 +220,7 @@ pub mod ArtPeace {
             self.votable_colors.write((i + 1, 0), *init_params.votable_colors.at(i.into()));
             i += 1;
         };
-        self.color_votes_max.write(init_params.color_max_votes); 
+        self.color_votes_max.write(init_params.color_max_votes);
 
         self.creation_time.write(starknet::get_block_timestamp());
         self.start_day_time.write(starknet::get_block_timestamp());
@@ -998,7 +998,7 @@ pub mod ArtPeace {
 
         let mut max_scores: Felt252Dict<u32> = Default::default();
         let mut max_index: u8 = 0;
-        
+
         let mut votable_index: u8 = 1; // 0 means no vote
 
         while votable_index <= votable_colors_count {
