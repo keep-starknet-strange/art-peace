@@ -49,6 +49,8 @@ type FactionChatRequest struct {
 	Message    string `json:"message"`
 }
 
+
+
 func InitMemberFactionRoutes() {
 	http.HandleFunc("/send-chat", SendChat)
 	http.HandleFunc("/delete-chat", DeleteChat)

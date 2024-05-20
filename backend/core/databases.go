@@ -96,7 +96,7 @@ func PostgresQueryOneJson[RowType any](query string, args ...interface{}) ([]byt
 	return json, nil
 }
 
-func PostgresExec(ctx context.Context, sql string, args ...interface{}) (error){
+func PostgresExec(ctx context.Context, sql string, args ...interface{}) error {
 	_, err := ArtPeaceBackend.Databases.Postgres.Exec(ctx, sql, args)
 	return err
 }
