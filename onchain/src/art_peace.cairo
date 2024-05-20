@@ -190,6 +190,7 @@ pub mod ArtPeace {
         pub votable_colors: Array<u32>,
         pub end_time: u64,
         pub daily_quests_count: u32,
+        pub color_max_votes: u8,
     }
 
     const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
@@ -219,8 +220,7 @@ pub mod ArtPeace {
             self.votable_colors.write((i + 1, 0), *init_params.votable_colors.at(i.into()));
             i += 1;
         };
-        // TODO: retrieve value from params
-        self.color_votes_max.write(3); 
+        self.color_votes_max.write(init_params.color_max_votes); 
 
         self.creation_time.write(starknet::get_block_timestamp());
         self.start_day_time.write(starknet::get_block_timestamp());
