@@ -9,7 +9,7 @@ ENV INDEXER_ID="seun"
 ENV PERSIST_TO_REDIS=redis://redis:6379
 
 WORKDIR /indexer
-COPY script.js 
+COPY ./indexer/script.js .
 
 RUN echo $INDEXER_ID
 CMD ["run", "script.js", "--sink-id", "INDEXER_ID", "--allow-env", "/configs/configs.env", "--allow-env-from-env", "BACKEND_TARGET_URL, APIBARA_STREAM_URL, PERSIST_TO_REDIS"]
