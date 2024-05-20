@@ -271,11 +271,12 @@ fn votable_colors_is_updated_according_to_votes_multi_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
 
-    let expected_colors = array![// 0xDD0000, 
-    // 0x00DD00,
-    // 0x0000DD,
-    // 0xDDDD00,
-    0xDD00DD, 0x00DDDD, 0x880000, 0x008800, 0x000088, 0x888800,];
+    let expected_colors = array![ // 0xDD0000, 
+        // 0x00DD00,
+        // 0x0000DD,
+        // 0xDDDD00,
+        0xDD00DD, 0x00DDDD, 0x880000, 0x008800, 0x000088, 0x888800,
+    ];
 
     let day = art_peace.get_day();
 
