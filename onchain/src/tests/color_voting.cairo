@@ -1,10 +1,16 @@
+use core::traits::Into;
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 
 use art_peace::tests::art_peace::deploy_contract;
 use art_peace::tests::utils;
 
+use art_peace::ArtPeace;
+use art_peace::ArtPeace::color_votesContractMemberStateTrait;
+
 use snforge_std as snf;
 use snforge_std::{CheatTarget, ContractClassTrait};
+
+use starknet::{ContractAddress, storage_access::storage_address_from_base};
 
 const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
 
@@ -135,6 +141,53 @@ fn color_palette_is_updated_according_to_votes_test() {
 }
 
 #[test]
+fn color_palette_is_updated_according_to_votes_multi_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+
+    let old_colors_count = art_peace.get_color_count();
+    let old_colors = art_peace.get_colors();
+
+    let day = art_peace.get_day();
+
+    set_vote(day, 1, 5, art_peace_address);
+    set_vote(day, 2, 8, art_peace_address);
+    set_vote(day, 3, 7, art_peace_address);
+    set_vote(day, 4, 5, art_peace_address);
+    set_vote(day, 5, 4, art_peace_address);
+
+    snf::start_warp(CheatTarget::One(art_peace_address), DAY_IN_SECONDS);
+    art_peace.increase_day_index();
+    let colors_count = art_peace.get_color_count();
+    let colors = art_peace.get_colors().span();
+    assert_eq!(colors_count, old_colors_count + 4, "Number of colors not updated");
+    let mut found: u8 = 0;
+    let mut index: u8 = 0;
+    while index < old_colors_count {
+        assert_eq!(colors.at(index.into()), old_colors.at(index.into()), "Color mistmached");
+        index += 1;
+    };
+    while index < colors_count {
+        let color = colors.at(index.into());
+        if *color == 0xDD0000 {
+            found += 1;
+        }
+        if *color == 0x00DD00 {
+            found += 2;
+        }
+        if *color == 0x0000DD {
+            found += 4;
+        }
+        if *color == 0xDDDD00 {
+            found += 8;
+        }
+        index += 1;
+    };
+    assert_eq!(found, 15, "Missing new color");
+    snf::stop_warp(CheatTarget::One(art_peace_address));
+}
+
+#[test]
 fn player_can_update_his_vote_color_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
@@ -211,4 +264,40 @@ fn votable_colors_is_updated_according_to_votes_test() {
     );
     assert_eq!(votable_colors, expected_colors, "Votable colors mismatch");
     snf::stop_warp(CheatTarget::One(art_peace_address));
+}
+
+#[test]
+fn votable_colors_is_updated_according_to_votes_multi_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+    
+    let expected_colors = array![
+        // 0xDD0000, 
+        // 0x00DD00,
+        // 0x0000DD,
+        // 0xDDDD00,
+        0xDD00DD, 0x00DDDD, 0x880000, 0x008800, 0x000088, 0x888800,
+    ];
+    
+    let day = art_peace.get_day();
+
+    set_vote(day, 1, 5, art_peace_address);
+    set_vote(day, 2, 8, art_peace_address);
+    set_vote(day, 3, 7, art_peace_address);
+    set_vote(day, 4, 5, art_peace_address);
+    set_vote(day, 5, 4, art_peace_address);
+
+    snf::start_warp(CheatTarget::One(art_peace_address), DAY_IN_SECONDS);
+    art_peace.increase_day_index();
+    let votable_colors = art_peace.get_votable_colors();
+    assert_eq!(votable_colors, expected_colors, "Votable colors mismatch");
+    snf::stop_warp(CheatTarget::One(art_peace_address));
+}
+
+fn set_vote(day: u32, color_index: u8, vote: u32, contract_address: ContractAddress) {
+    let mut state = ArtPeace::contract_state_for_testing();
+    let storage_address: felt252 = storage_address_from_base(state.color_votes.address((color_index, day))).into();
+    let mut storage_value: Array<felt252> = ArrayTrait::new();
+    storage_value.append(vote.into());
+    snf::store(contract_address, storage_address, storage_value.span());
 }
