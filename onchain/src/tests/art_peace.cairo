@@ -464,7 +464,6 @@ fn distribute_rewards_test() {
 
     template_verifier.complete_template(
         template_id,
-        erc20_mock,
         template_image_span
     );
 

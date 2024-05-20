@@ -1,5 +1,7 @@
 #[starknet::contract]
 pub mod ArtPeace {
+    use core::traits::Into;
+    use core::dict::Felt252DictTrait;
     use starknet::ContractAddress;
     use art_peace::{IArtPeace, Pixel, Faction, MemberMetadata};
     use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
@@ -937,18 +939,13 @@ pub mod ArtPeace {
     #[abi(embed_v0)]
     impl ArtPeaceTemplateVerifier of ITemplateVerifier<ContractState> {
         // TODO: Check template function
-        fn complete_template(
-            ref self: ContractState,
-            template_id: u32,
-            token: ContractAddress,
-            template_image: Span<u8>
-        ) {
+        fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
             // TODO: ensure template_image matches the template size & hash
             let mut pixel_contributors: Array<ContractAddress> = ArrayTrait::new();
             let mut total_pixels_by_user: Felt252Dict<u32> = Default::default();
-            // let contract_addr: ContractAddress = starknet::get_contract_address();
+            let mut pixel_contributors_indexes: Felt252Dict<u32> = Default::default();
             let template_metadata: TemplateMetadata = self.get_template(template_id);
             let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata
                 .width
@@ -960,7 +957,6 @@ pub mod ArtPeace {
             let canvas_width = self.canvas_width.read();
             let (mut x, mut y) = (0, 0);
             let mut matches = 0;
-            let pixel_contributors_span = pixel_contributors.span();
             while y < template_metadata
                 .height {
                     x = 0;
@@ -974,29 +970,19 @@ pub mod ArtPeace {
                                 matches += 1;
 
                                 let mut pixel_owner = self.canvas.read(pos).owner;
-                                let mut found = false;
-                                let mut user_index = 0;
-                                let mut index = 0;
+                                let user_index = pixel_contributors_indexes.get(pixel_owner.into());
 
-                                while index < pixel_contributors_span
-                                    .len() {
-                                        if *pixel_contributors_span.at(index) == pixel_owner {
-                                            found = true;
-                                            user_index = index;
-                                            break;
-                                        }
-                                        index += 1;
+                                if user_index == 0 {
+                                    let new_index = pixel_contributors.len() + 1;
 
-                                        if !found {
-                                            pixel_contributors.append(pixel_owner);
-                                            total_pixels_by_user.insert(pixel_owner.into(), 1);
-                                        } else {
-                                            let count = total_pixels_by_user
-                                                .get(pixel_owner.into());
-                                            total_pixels_by_user
-                                                .insert(pixel_owner.into(), count + 1);
-                                        }
-                                    };
+                                    pixel_contributors.append(pixel_owner);
+                                    pixel_contributors_indexes
+                                        .insert(pixel_owner.into(), new_index);
+                                    total_pixels_by_user.insert(new_index.into(), 1);
+                                } else {
+                                    let count = total_pixels_by_user.get(user_index.into());
+                                    total_pixels_by_user.insert(user_index.into(), count + 1);
+                                }
                             }
                             x += 1;
                         };
@@ -1012,12 +998,18 @@ pub mod ArtPeace {
 
                     while i < pixel_contributors
                         .len() {
+                            let token = template_metadata.reward_token;
+                            let reward_amount = template_metadata.reward;
+                            let total_pixels = self.total_pixels.read();
+
                             let mut user = *pixel_contributors.at(i).into();
-                            let user_to_felt: felt252 = user.into();
-                            let total_pixels = total_pixels_by_user.get(user_to_felt);
+                            let user_index = (i + 1);
+                            let user_total_pixels = total_pixels_by_user.get(user_index.into());
+                            
+                            let user_reward = (reward_amount * user_total_pixels.into()) / total_pixels.into();
 
                             IERC20Dispatcher { contract_address: token }
-                                .transfer(user, total_pixels.into());
+                                .transfer(user, user_reward);
                         }
                 }
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
