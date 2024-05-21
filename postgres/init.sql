@@ -173,6 +173,7 @@ CREATE INDEX factionLinks_faction_id_index ON FactionLinks (faction_id);
 CREATE TABLE FactionChats (
   sender char(64) NOT NULL,
   faction_id integer NOT NULL,
+  faction_key integer NOT NULL REFERENCES Factions(key),
   message text NOT NULL,
   time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

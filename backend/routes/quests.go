@@ -71,6 +71,12 @@ type QuestsConfig struct {
 	} `json:"main"`
 }
 
+type FactionChat struct {
+	FactionId         int    `json:"factionId"`
+	FactionKey int `json:"factionKey"`
+	Message    string `json:"message"`
+}
+
 func InitQuestsRoutes() {
 	http.HandleFunc("/init-quests", InitQuests)
 	http.HandleFunc("/get-daily-quests", GetDailyQuests)
@@ -259,4 +265,119 @@ func ClaimTodayQuestDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Today quest claimed")
+}
+
+func SendChat(w http.ResponseWriter, r *http.Request) {
+	userAddress := "0000000000000X432"
+
+	chat, err := routeutils.ReadJsonBody[FactionChat](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+
+	type ExistsResult struct {
+		Exists int `db:"exists"`
+	}
+
+	result, err := core.PostgresQueryOne[ExistsResult](`SELECT 1 FROM FactionMembersInfo WHERE faction_id = $1 AND user_address = $2 LIMIT 1`, chat.FactionKey, userAddress)
+
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+
+	if result != nil {
+		// Insert chat into database
+		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO FactionChats (sender, factionKey, message) VALUES ($1, $2, $3)", userAddress, chat.FactionKey, chat.Message)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to send chat")
+			return
+		}
+	}
+	
+	routeutils.WriteResultJson(w, "FactionChat updated successfully")
+}
+
+func DeleteChat(w http.ResponseWriter, r *http.Request) {
+	userAddress := "0000000000000X432"
+
+	// Parse query params
+	chat, err := routeutils.ReadJsonBody[FactionChat](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+
+	canDelete := false
+
+	// Retrieve the faction leader from the database
+	leader, err := core.PostgresQueryOne[string]("SELECT ftns.leader FROM Factions ftns INNER JOIN FactionChats ftcs ON ftns.faction_key = ftcs.key WHERE ftcs.id = $1", chat.FactionKey)
+	if err != nil {
+		http.Error(w, "Failed to retrieve faction leader", http.StatusInternalServerError)
+		return
+	}
+
+	if *leader == userAddress {
+		canDelete = true
+	}
+
+	if !canDelete {
+		sender, err := core.PostgresQueryOne[string]("SELECT sender FROM FactionChats WHERE id = $1", chat.FactionId)
+		if err != nil {
+			http.Error(w, "Failed to retrieve sender", http.StatusInternalServerError)
+			return
+		}
+
+		if *sender == userAddress {
+			canDelete = true
+		}
+
+	}
+
+	// Check if the authenticated user is the sender or the faction leader
+	if !canDelete {
+		http.Error(w, "Not authorized to delete this chat", http.StatusForbidden)
+		return
+	}
+
+	// Delete chat from database
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM FactionChats WHERE id = $1", chat.FactionId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to delete chat")
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func GetFactionChats(w http.ResponseWriter, r *http.Request) {
+	userAddress := "0000000000000X432"
+
+	chat, err := routeutils.ReadJsonBody[FactionChat](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+
+	type ExistsResult struct {
+		Exists int `db:"exists"`
+	}
+
+	result, err := core.PostgresQueryOne[ExistsResult](`SELECT 1 FROM FactionMembersInfo WHERE faction_id = $1 AND user_address = $2 LIMIT 1`, chat.FactionKey, userAddress)
+
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+
+	if result != nil {
+		// Retrieve faction chats from database
+		chats, err := core.PostgresQueryJson[FactionChat]("SELECT id, sender, faction_key, message, time FROM FactionChats WHERE faction_key = $1 ORDER BY time ASC", chat.FactionKey)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get faction chats")
+			return
+		}
+
+		routeutils.WriteDataJson(w, string(chats))
+	}
 }
