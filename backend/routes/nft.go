@@ -2,13 +2,12 @@ package routes
 
 import (
 	"context"
+	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
-
-	"github.com/keep-starknet-strange/art-peace/backend/core"
-	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func InitNFTRoutes() {
@@ -55,8 +54,21 @@ func getNFT(w http.ResponseWriter, r *http.Request) {
 
 func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	address := r.URL.Query().Get("address")
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
 
-	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts WHERE owner = $1", address)
+	query := `SELECT * FROM nfts WHERE owner = $1 LIMIT $2 OFFSET $3`
+	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
@@ -65,13 +77,25 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNFTs(w http.ResponseWriter, r *http.Request) {
-	// TODO: Pagination & Likes
-	nfts, err := core.PostgresQueryJson[NFTData]("SELECT * FROM nfts")
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	query := `SELECT * FROM nfts LIMIT $1 OFFSET $2`
+	nfts, err := core.PostgresQueryJson[NFTData](query, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
 	}
-
 	routeutils.WriteDataJson(w, string(nfts))
 }
 

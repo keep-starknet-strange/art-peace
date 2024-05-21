@@ -13,6 +13,7 @@ import (
 )
 
 func InitUserRoutes() {
+	http.HandleFunc("/get-user-vote", getUserColorVote)
 	http.HandleFunc("/get-username-store-address", getUsernameStoreAddress)
 	http.HandleFunc("/set-username-store-address", setUsernameStoreAddress)
 	http.HandleFunc("/get-last-placed-time", getLastPlacedTime)
@@ -208,4 +209,21 @@ func changeUsernameDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Username changed")
+}
+
+func getUserColorVote(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		return
+	}
+
+	vote, err := core.PostgresQueryOne[int]("SELECT COALESCE((SELECT color_key FROM ColorVotes WHERE user_address = $1 AND day_index = (SELECT MAX(day_index) FROM days)), 0)", address)
+
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get user color vote")
+		return
+	}
+
+	routeutils.WriteDataJson(w, strconv.Itoa(*vote))
 }

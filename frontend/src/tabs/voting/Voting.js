@@ -3,6 +3,7 @@ import BasicTab from '../BasicTab.js';
 import './Voting.css';
 import VoteItem from './VoteItem.js';
 import {
+  fetchWrapper,
   getVotableColors,
   voteColorDevnet
 } from '../../services/apiService.js';
@@ -14,6 +15,19 @@ const Voting = (props) => {
     data: null,
     error: ''
   });
+
+  useEffect(() => {
+    async function fetchUserVote() {
+      let getUserVote = await fetchWrapper(
+        `get-user-vote?address=${props.address}`
+      );
+      if (!getUserVote.data) {
+        return;
+      }
+      setUserVote(getUserVote.data);
+    }
+    fetchUserVote();
+  }, [props.address]);
 
   const castVote = async (index) => {
     if (userVote === index) {

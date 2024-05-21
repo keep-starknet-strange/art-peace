@@ -27,7 +27,7 @@ const HEIGHT: u128 = 100;
 const TIME_BETWEEN_PIXELS: u64 = 10;
 const LEANIENCE_MARGIN: u64 = 20;
 
-fn deploy_contract() -> ContractAddress {
+pub(crate) fn deploy_contract() -> ContractAddress {
     deploy_nft_contract();
 
     let contract = snf::declare("ArtPeace");
@@ -63,6 +63,7 @@ fn deploy_contract() -> ContractAddress {
             0x000088,
             0x888800
         ],
+        daily_new_colors_count: 3,
         end_time: 1000000,
         daily_quests_count: 3,
     }
@@ -112,6 +113,7 @@ pub(crate) fn deploy_with_quests_contract(
             0x000088,
             0x888800
         ],
+        daily_new_colors_count: 3,
         end_time: 1000000,
         daily_quests_count: daily_quests_count,
     }
@@ -478,3 +480,4 @@ fn distribute_rewards_test() {
     let art_token_balance_of_user = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user);
     assert!(art_token_balance_of_user == 4, "incorrect reward amount");
 }
+
