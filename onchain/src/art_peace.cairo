@@ -1030,7 +1030,7 @@ pub mod ArtPeace {
             };
         if threshold == 0 {
             // No votes
-            return;
+            threshold = 1;
         }
 
         // update palette & votable colors
