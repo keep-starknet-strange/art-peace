@@ -1,53 +1,6 @@
-import { connect } from "https://deno.land/x/redis@v0.32.3/mod.ts";
-import { v4 as uuidv4 } from "https://deno.land/std/uuid/mod.ts";
-
-const redis = await connect({ hostname: "redis", port: 6379 });
-
-// Get Indexer ID from environment variables
-const indexerId = Deno.env.get("INDEXER_ID") || "seun"; // or could be UUID generated if needed. import { v4 as uuidv4 } from "https://deno.land/std/uuid/mod.ts", uuidv4.generate()
-
-// Store Indexer ID in Redis
-if (indexerId) {
-  await redis.set("indexer_id", "seun");
-} else {
-  console.error("INDEXER_ID not found in environment variables.");
-  // redis.set("indexer_id",  Deno.env.get("HOSTNAME")); // uuidv4.generate()
-}
-
-// Fetch last processed block number and hash from Redis
-async function getLastProcessedBlock() {
-  try {
-    const cursor = await redis.get("last_processed_block");
-    if (cursor) {
-      const lastProcessedBlock = JSON.parse(cursor);
-      return lastProcessedBlock.blockNumber + 1;
-    } else {
-      return 0; // Start from block 0 if block is non-existent
-    }
-  } catch (error) {
-    console.error("Error fetching last processed block:", error);
-    return 0; // Return 0 in case of error
-  }
-}
-
-// Update last processed block number and hash in Redis
-async function updateLastProcessedBlock(blockNumber, blockHash) {
-  try {
-    await redis.set(
-      "last_processed_block",
-      JSON.stringify({ blockNumber, blockHash }),
-    );
-  } catch (error) {
-    console.error("Error updating last processed block:", error);
-  }
-}
-
-async function createConfig() {
-  const startingBlock = await getLastProcessedBlock();
-
-  return (config = {
+export const config = {
     streamUrl: Deno.env.get("APIBARA_STREAM_URL"),
-    startingBlock: startingBlock,
+    startingBlock: 0,
     network: "starknet",
     finality: "DATA_STATUS_PENDING",
     filter: {
@@ -109,13 +62,8 @@ async function createConfig() {
     sinkOptions: {
       targetUrl: Deno.env.get("BACKEND_TARGET_URL"),
     },
-  });
-}
+  }
 
-export const config = await createConfig();
-
-// This transform update last processed block in Redis.
 export default async function transform(block) {
-  await updateLastProcessedBlock(block.blockNumber, block.blockHash);
   return block;
 }

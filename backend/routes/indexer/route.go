@@ -1,6 +1,7 @@
 package indexer
 
 import (
+	"fmt"
 	"net/http"
 
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
@@ -83,6 +84,10 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(message.Data.Batch) == 0 {
+		fmt.Println("No events in batch")
+		return
+	}
 	for _, event := range message.Data.Batch[0].Events {
 		eventKey := event.Event.Keys[0]
 		eventProcessor, ok := eventProcessors[eventKey]
