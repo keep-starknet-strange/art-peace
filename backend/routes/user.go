@@ -218,13 +218,12 @@ func getUserColorVote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote, err := core.PostgresQueryOne[int]("SELECT color_key FROM ColorVotes WHERE user_address = $1", address);
+	vote, err := core.PostgresQueryOne[int]("SELECT COALESCE((SELECT color_key FROM ColorVotes WHERE user_address = $1 AND day_index = (SELECT MAX(day_index) FROM days)), 0)", address)
 
 	if err != nil {
-		routeutils.WriteDataJson(w, "0")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get user color vote")
 		return
 	}
 
 	routeutils.WriteDataJson(w, strconv.Itoa(*vote))
 }
-

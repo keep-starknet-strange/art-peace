@@ -101,6 +101,7 @@ const TabPanel = (props) => {
                     <Voting
                       timeLeftInDay={timeLeftInDay}
                       setActiveTab={props.setActiveTab}
+                      address={props.address}
                     />
                   )}
                 </TimerInjector>
