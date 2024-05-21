@@ -46,6 +46,7 @@ const TabPanel = (props) => {
           setSelectorMode={props.setSelectorMode}
           isEraserMode={props.isEraserMode}
           setIsEraserMode={props.setIsEraserMode}
+          setIsExtraDeleteMode={props.setIsExtraDeleteMode}
           setSelectedColorId={props.setSelectedColorId}
           setLastPlacedTime={props.setLastPlacedTime}
           basePixelUp={props.basePixelUp}
