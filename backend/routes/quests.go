@@ -73,7 +73,7 @@ type QuestsConfig struct {
 
 type FactionChat struct {
 	Id         int    `json:"id"`
-	FactionKey int `json:"factionKey"`
+	FactionKey int    `json:"factionKey"`
 	Message    string `json:"message"`
 }
 
@@ -295,7 +295,7 @@ func SendChat(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	
+
 	routeutils.WriteResultJson(w, "FactionChat updated successfully")
 }
 
