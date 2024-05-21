@@ -436,7 +436,8 @@ fn distribute_rewards_test() {
     let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
 
     let erc20_mock: ContractAddress = deploy_erc20_mock();
-    let reward_amount: u256 = 1 * utils::pow_256(10, 18);
+    // let reward_amount: u256 = 1 * utils::pow_256(10, 18);
+    let reward_amount: u256 = 4;
 
     let template_image = array![1, 2, 3, 4];
     let template_hash = compute_template_hash(template_image.span());
@@ -460,15 +461,30 @@ fn distribute_rewards_test() {
     let template_id = 0;
 
     let user = 123.try_into().unwrap();
+    let user2 = 1234.try_into().unwrap();
+    let user3 = 12345.try_into().unwrap();
+    let user4 = 123456.try_into().unwrap();
 
     IERC20Dispatcher { contract_address: erc20_mock }.approve(art_peace_address, reward_amount);
+    let allowance = IERC20Dispatcher { contract_address: erc20_mock }.allowance(get_contract_address() ,art_peace_address);
+    println!("Allowance: {}", allowance);
+
     template_store.add_template(template_metadata);
     assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
 
     start_prank(CheatTarget::One(art_peace_address), user);
     art_peace.place_pixel(pos, color, now);
+    stop_prank(CheatTarget::One(art_peace_address));
+
+    start_prank(CheatTarget::One(art_peace_address), user2);
     art_peace.place_pixel(pos, color, now);
+    stop_prank(CheatTarget::One(art_peace_address));
+
+    start_prank(CheatTarget::One(art_peace_address), user3);
     art_peace.place_pixel(pos, color, now);
+    stop_prank(CheatTarget::One(art_peace_address));
+
+    start_prank(CheatTarget::One(art_peace_address), user4);
     art_peace.place_pixel(pos, color, now);
     stop_prank(CheatTarget::One(art_peace_address));
 
@@ -477,7 +493,10 @@ fn distribute_rewards_test() {
         template_image_span
     );
 
+    let art_token_balance_of_contract = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(art_peace_address);
     let art_token_balance_of_user = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user);
-    assert!(art_token_balance_of_user == 4, "incorrect reward amount");
+    println!("user balance: {}", art_token_balance_of_user);
+    println!("Contract balance: {}", art_token_balance_of_contract);
+    assert!(art_token_balance_of_user == 1, "incorrect reward amount");
 }
 

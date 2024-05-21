@@ -12,6 +12,7 @@ pub mod ArtPeace {
     use art_peace::templates::component::TemplateStoreComponent;
     use art_peace::templates::interfaces::{ITemplateVerifier, ITemplateStore, TemplateMetadata};
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use core::num::traits::Zero;
 
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 
@@ -1019,8 +1020,13 @@ pub mod ArtPeace {
                             
                             let user_reward = (reward_amount * user_total_pixels.into()) / total_pixels.into();
 
-                            IERC20Dispatcher { contract_address: reward_token }
-                                .transfer(user, user_reward);
+                            if user == Zero::zero() {
+                                panic!("no user recorded"); // for testing purpose only
+                            } else {
+                                let success = IERC20Dispatcher { contract_address: reward_token }
+                                    .transfer(user, user_reward);
+                                assert(success, 'ERC20 transfer fail!');
+                            }
                         }
                 }
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
