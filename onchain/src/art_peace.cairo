@@ -998,7 +998,7 @@ pub mod ArtPeace {
 
                     while i < pixel_contributors
                         .len() {
-                            let token = template_metadata.reward_token;
+                            let reward_token = template_metadata.reward_token;
                             let reward_amount = template_metadata.reward;
                             let total_pixels = self.total_pixels.read();
 
@@ -1008,7 +1008,7 @@ pub mod ArtPeace {
                             
                             let user_reward = (reward_amount * user_total_pixels.into()) / total_pixels.into();
 
-                            IERC20Dispatcher { contract_address: token }
+                            IERC20Dispatcher { contract_address: reward_token }
                                 .transfer(user, user_reward);
                         }
                 }

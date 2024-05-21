@@ -17,7 +17,7 @@ use openzeppelin::token::erc20::interface::{IERC20, IERC20Dispatcher, IERC20Disp
 use openzeppelin::token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
 
 use snforge_std as snf;
-use snforge_std::{CheatTarget, ContractClassTrait};
+use snforge_std::{CheatTarget, ContractClassTrait, start_prank, stop_prank};
 
 use starknet::{ContractAddress, contract_address_const, get_contract_address, get_caller_address};
 
@@ -457,16 +457,24 @@ fn distribute_rewards_test() {
     let now = 10;
     let template_id = 0;
 
+    let user = 123.try_into().unwrap();
+
     IERC20Dispatcher { contract_address: erc20_mock }.approve(art_peace_address, reward_amount);
     template_store.add_template(template_metadata);
     assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
+
+    start_prank(CheatTarget::One(art_peace_address), user);
     art_peace.place_pixel(pos, color, now);
+    art_peace.place_pixel(pos, color, now);
+    art_peace.place_pixel(pos, color, now);
+    art_peace.place_pixel(pos, color, now);
+    stop_prank(CheatTarget::One(art_peace_address));
 
     template_verifier.complete_template(
         template_id,
         template_image_span
     );
 
-    let art_token_balance_of_user = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(get_caller_address());
-    assert!(art_token_balance_of_user == 1, "incorrect reward amount");
+    let art_token_balance_of_user = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user);
+    assert!(art_token_balance_of_user == 4, "incorrect reward amount");
 }
