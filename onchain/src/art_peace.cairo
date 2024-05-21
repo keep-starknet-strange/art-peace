@@ -51,7 +51,7 @@ pub mod ArtPeace {
         color_votes: LegacyMap::<(u8, u32), u32>,
         // Map: (user's address, day_index) -> color index
         user_votes: LegacyMap::<(ContractAddress, u32), u8>,
-        color_votes_max: u8,
+        daily_new_colors_count: u32,
         creation_time: u64,
         end_time: u64,
         day_index: u32,
@@ -188,9 +188,9 @@ pub mod ArtPeace {
         pub time_between_pixels: u64,
         pub color_palette: Array<u32>,
         pub votable_colors: Array<u32>,
+        pub daily_new_colors_count: u32,
         pub end_time: u64,
         pub daily_quests_count: u32,
-        pub color_max_votes: u8,
     }
 
     const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
@@ -220,7 +220,7 @@ pub mod ArtPeace {
             self.votable_colors.write((i + 1, 0), *init_params.votable_colors.at(i.into()));
             i += 1;
         };
-        self.color_votes_max.write(init_params.color_max_votes);
+        self.daily_new_colors_count.write(init_params.daily_new_colors_count);
 
         self.creation_time.write(starknet::get_block_timestamp());
         self.start_day_time.write(starknet::get_block_timestamp());
@@ -990,66 +990,53 @@ pub mod ArtPeace {
 
     /// Internals
     fn finalize_color_votes(ref self: ContractState) {
-        let nb_max = self.color_votes_max.read();
-
+        let daily_new_colors_count = self.daily_new_colors_count.read();
         let day = self.day_index.read();
-        let next_day = day + 1;
         let votable_colors_count = self.votable_colors_count.read(day);
 
         let mut max_scores: Felt252Dict<u32> = Default::default();
-        let mut max_index: u8 = 0;
-
         let mut votable_index: u8 = 1; // 0 means no vote
-
         while votable_index <= votable_colors_count {
-            max_index = 0;
-            let mut index = votable_index;
-            let mut vote = self.color_votes.read((index, day));
+            let vote = self.color_votes.read((votable_index, day));
+            if vote <= max_scores.get(daily_new_colors_count.into() - 1) {
+                votable_index += 1;
+                continue;
+            }
             // update max scores if needed
-            while max_index < nb_max {
-                let mut m: felt252 = max_index.into();
-                if (max_scores.get(m) < vote) {
-                    let mut old_vote = max_scores.get(m);
-                    max_scores.insert(m, vote);
-                    vote = old_vote;
-
-                    max_index += 1;
-                    // update max dict
-                    while max_index < nb_max {
-                        m = max_index.into();
-                        old_vote = max_scores.get(m);
-                        max_scores.insert(m, vote);
-                        vote = old_vote;
-                        max_index += 1;
+            let mut max_scores_index: u32 = 0;
+            while max_scores_index < daily_new_colors_count {
+                if max_scores.get(max_scores_index.into()) < vote {
+                    // shift scores
+                    let mut i: u32 = daily_new_colors_count - 1;
+                    while i > max_scores_index {
+                        max_scores.insert(i.into(), max_scores.get(i.into() - 1));
+                        i -= 1;
                     };
-                };
-                max_index += 1;
+                    max_scores.insert(max_scores_index.into(), vote);
+                    break;
+                }
+                max_scores_index += 1;
             };
             votable_index += 1;
         };
 
         // find threshold
         let mut threshold: u32 = 0;
-        max_index = nb_max;
-        while max_index > 0 {
-            threshold = max_scores.get(max_index.into());
-            if threshold > 0 {
-                break;
-            }
-            max_index -= 1;
-        };
-
+        let mut min_index = daily_new_colors_count;
+        while threshold == 0
+            && min_index > 0 {
+                min_index -= 1;
+                threshold = max_scores.get(min_index.into());
+            };
         if threshold == 0 {
-            threshold = max_scores.get(0);
-        }
-        if threshold == 0 {
-            // no vote
-            threshold = 1;
+            // No votes
+            return;
         }
 
         // update palette & votable colors
+        let next_day = day + 1;
         let mut color_index = self.color_count.read();
-        let mut next_day_votable_index = 0;
+        let mut next_day_votable_index = 1;
         votable_index = 1;
         while votable_index <= votable_colors_count {
             let vote = self.color_votes.read((votable_index, day));
@@ -1058,13 +1045,13 @@ pub mod ArtPeace {
                 self.color_palette.write(color_index, color);
                 color_index += 1;
             } else {
-                next_day_votable_index += 1;
                 self.votable_colors.write((next_day_votable_index, next_day), color);
+                next_day_votable_index += 1;
             }
             votable_index += 1;
         };
         self.color_count.write(color_index);
-        self.votable_colors_count.write(next_day, next_day_votable_index);
+        self.votable_colors_count.write(next_day, next_day_votable_index - 1);
     }
 }
 

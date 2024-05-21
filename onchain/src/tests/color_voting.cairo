@@ -299,7 +299,6 @@ fn set_vote(day: u32, color_index: u8, vote: u32, contract_address: ContractAddr
         state.color_votes.address((color_index, day))
     )
         .into();
-    let mut storage_value: Array<felt252> = ArrayTrait::new();
-    storage_value.append(vote.into());
-    snf::store(contract_address, storage_address, storage_value.span());
+    let storage_value: Span<felt252> = array![vote.into()].span();
+    snf::store(contract_address, storage_address, storage_value);
 }

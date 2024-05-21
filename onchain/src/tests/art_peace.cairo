@@ -63,9 +63,9 @@ pub(crate) fn deploy_contract() -> ContractAddress {
             0x000088,
             0x888800
         ],
+        daily_new_colors_count: 3,
         end_time: 1000000,
         daily_quests_count: 3,
-        color_max_votes: 3,
     }
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
@@ -113,9 +113,9 @@ pub(crate) fn deploy_with_quests_contract(
             0x000088,
             0x888800
         ],
+        daily_new_colors_count: 3,
         end_time: 1000000,
         daily_quests_count: daily_quests_count,
-        color_max_votes: 3,
     }
         .serialize(ref calldata);
 
