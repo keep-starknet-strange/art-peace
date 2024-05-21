@@ -72,7 +72,6 @@ type QuestsConfig struct {
 }
 
 type FactionChat struct {
-	Id         int    `json:"id"`
 	FactionKey int    `json:"factionKey"`
 	Message    string `json:"message"`
 }
@@ -268,7 +267,7 @@ func ClaimTodayQuestDevnet(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendChat(w http.ResponseWriter, r *http.Request) {
-	userAddress := "0000000000000X432"
+	userAddress := "0"
 
 	chat, err := routeutils.ReadJsonBody[FactionChat](r)
 	if err != nil {
@@ -300,7 +299,7 @@ func SendChat(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteChat(w http.ResponseWriter, r *http.Request) {
-	userAddress := "0000000000000X432"
+	userAddress := "0"
 
 	// Parse query params
 	chat, err := routeutils.ReadJsonBody[FactionChat](r)
@@ -323,7 +322,7 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !canDelete {
-		sender, err := core.PostgresQueryOne[string]("SELECT sender FROM FactionChats WHERE id = $1", chat.Id)
+		sender, err := core.PostgresQueryOne[string]("SELECT sender FROM FactionChats WHERE id = $1", chat.FactionKey)
 		if err != nil {
 			http.Error(w, "Failed to retrieve sender", http.StatusInternalServerError)
 			return
@@ -342,7 +341,7 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete chat from database
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM FactionChats WHERE id = $1", chat.Id)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM FactionChats WHERE id = $1", chat.FactionKey)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to delete chat")
 		return
@@ -351,7 +350,7 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFactionChats(w http.ResponseWriter, r *http.Request) {
-	userAddress := "0000000000000X432"
+	userAddress := "0"
 
 	chat, err := routeutils.ReadJsonBody[FactionChat](r)
 	if err != nil {
