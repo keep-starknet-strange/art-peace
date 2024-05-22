@@ -166,16 +166,6 @@ const NFTSelector = (props) => {
           props.setNftHeight(nftSelectionHeight);
 
           props.setNftSelected(true);
-          // setNftSelectionStarted(false);
-          // setNftSelectionPositionX(-1);
-          // setNftSelectionPositionY(-1);
-          // setNftSelectionWidth(0);
-          // setNftSelectionHeight(0);
-          // setNftSelectionStartX(0);
-          // setNftSelectionStartY(0);
-          // setNftSelectionEndX(0);
-          // setNftSelectionEndY(0);
-          // props.setNftMintingMode(false);
         }
       }
     };
