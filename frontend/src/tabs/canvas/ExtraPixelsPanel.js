@@ -201,7 +201,7 @@ const ExtraPixelsPanel = (props) => {
             className='Text__medium Heading__sub'
             style={{ textAlign: 'center' }}
           >
-            Pixel Types
+            Available
           </p>
           <div
             className={`ExtraPixelsPanel__info__item ${basePixelUsed || !props.basePixelUp ? 'ExtraPixelsPanel__info__item--used' : ''}`}
@@ -276,6 +276,14 @@ const ExtraPixelsPanel = (props) => {
                   className='ExtraPixelsPanel__bubble'
                   style={{
                     backgroundColor: `#${props.colors[pixelData.colorId]}FF`
+                  }}
+                  onMouseOver={() => {
+                    props.setIsExtraDeleteMode(true);
+                    props.setPixelSelection(pixelData.x, pixelData.y);
+                    props.setSelectedColorId(pixelData.colorId);
+                  }}
+                  onMouseOut={() => {
+                    props.setIsExtraDeleteMode(false);
                   }}
                   onClick={() => props.clearExtraPixel(index)}
                 >

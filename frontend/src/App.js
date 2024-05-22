@@ -164,6 +164,7 @@ function App() {
   const [selectorMode, setSelectorMode] = useState(false);
 
   const [isEraserMode, setIsEraserMode] = React.useState(false);
+  const [isExtraDeleteMode, setIsExtraDeleteMode] = React.useState(false);
 
   useEffect(() => {
     const getLastPlacedPixel = `get-last-placed-time?address=${queryAddress}`;
@@ -437,6 +438,7 @@ function App() {
         setNftWidth={setNftWidth}
         setNftHeight={setNftHeight}
         isEraserMode={isEraserMode}
+        isExtraDeleteMode={isExtraDeleteMode}
         setIsEraserMode={setIsEraserMode}
         clearExtraPixel={clearExtraPixel}
         setLastPlacedTime={setLastPlacedTime}
@@ -487,10 +489,12 @@ function App() {
           setSelectorMode={setSelectorMode}
           isEraserMode={isEraserMode}
           setIsEraserMode={setIsEraserMode}
+          setIsExtraDeleteMode={setIsExtraDeleteMode}
           basePixelUp={basePixelUp}
           basePixelTimer={basePixelTimer}
           factionPixels={factionPixels}
           setFactionPixels={setFactionPixels}
+          setPixelSelection={setPixelSelection}
           extraPixels={extraPixels}
           setExtraPixels={setExtraPixels}
           availablePixels={availablePixels}

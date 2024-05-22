@@ -47,10 +47,11 @@ COLOR_COUNT=$(jq -r '.colors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 COLORS=$(jq -r '.colors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 VOTABLE_COLOR_COUNT=$(jq -r '.votableColors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 VOTABLE_COLORS=$(jq -r '.votableColors[]' $CANVAS_CONFIG | sed 's/^/0x/')
+DAILY_NEW_COLORS_COUNT=3
 END_TIME=3000000000
 DAILY_QUESTS_COUNT=$(jq -r '.daily.dailyQuestsCount' $QUESTS_CONFIG)
 
-CALLDATA=$(echo -n $ACCOUNT_ADDRESS $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT $COLORS $VOTABLE_COLOR_COUNT $VOTABLE_COLORS $END_TIME $DAILY_QUESTS_COUNT)
+CALLDATA=$(echo -n $ACCOUNT_ADDRESS $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT $COLORS $VOTABLE_COLOR_COUNT $VOTABLE_COLORS $DAILY_NEW_COLORS_COUNT $END_TIME $DAILY_QUESTS_COUNT)
 
 # Precalculated contract address
 # echo "Precalculating contract address..."

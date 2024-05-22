@@ -52,7 +52,7 @@ const CanvasContainer = (props) => {
       setDragStartX(e.clientX);
       setDragStartY(e.clientY);
     }
-    if (isErasing) {
+    if (props.isEraserMode && isErasing) {
       pixelClicked(e);
     }
   };
@@ -272,6 +272,14 @@ const CanvasContainer = (props) => {
       if (props.nftMintingMode) {
         return;
       }
+      if (
+        !(
+          e.target.classList.contains('ExtraPixelsCanvas') ||
+          e.target.classList.contains('Canvas')
+        )
+      ) {
+        return;
+      }
 
       const canvas = props.canvasRef.current;
       const rect = canvas.getBoundingClientRect();
@@ -299,8 +307,30 @@ const CanvasContainer = (props) => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
       return null;
     }
+
     if (props.selectedColorId === -1) {
-      // TODO: Check if extra pixel placed at position
+      const existingPixel = props.extraPixelsData.find(
+        (pixel) =>
+          pixel.x == props.selectedPositionX &&
+          pixel.y == props.selectedPositionY
+      );
+
+      if (existingPixel) {
+        let color = props.colors[existingPixel.colorId];
+        return (
+          '#' +
+          (255 - parseInt(color.substring(0, 2), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(2, 4), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(4, 6), 16))
+            .toString(16)
+            .padStart(2, '0')
+        );
+      }
+
       let color = props.canvasRef.current
         .getContext('2d')
         .getImageData(
@@ -317,6 +347,31 @@ const CanvasContainer = (props) => {
         color[3].toString(16).padStart(2, '0')
       );
     }
+
+    if (props.isExtraDeleteMode) {
+      const existingPixel = props.extraPixelsData.find(
+        (pixel) =>
+          pixel.x == props.selectedPositionX &&
+          pixel.y == props.selectedPositionY
+      );
+
+      if (existingPixel) {
+        let color = props.colors[existingPixel.colorId];
+        return (
+          '#' +
+          (255 - parseInt(color.substring(0, 2), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(2, 4), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(4, 6), 16))
+            .toString(16)
+            .padStart(2, '0')
+        );
+      }
+    }
+
     return '#' + props.colors[props.selectedColorId] + 'FF';
   };
 
@@ -334,13 +389,18 @@ const CanvasContainer = (props) => {
     if (props.selectedColorId === -1) {
       setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
     } else {
-      setSelectedBackgroundColor(`#${props.colors[props.selectedColorId]}FF`);
+      if (props.isExtraDeleteMode) {
+        setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
+      } else {
+        setSelectedBackgroundColor(`#${props.colors[props.selectedColorId]}FF`);
+      }
     }
   }, [
     canvasScale,
     props.selectedColorId,
     props.selectedPositionX,
-    props.selectedPositionY
+    props.selectedPositionY,
+    props.isExtraDeleteMode
   ]);
 
   return (

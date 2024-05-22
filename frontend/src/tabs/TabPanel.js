@@ -49,6 +49,7 @@ const TabPanel = (props) => {
           setSelectorMode={props.setSelectorMode}
           isEraserMode={props.isEraserMode}
           setIsEraserMode={props.setIsEraserMode}
+          setIsExtraDeleteMode={props.setIsExtraDeleteMode}
           setSelectedColorId={props.setSelectedColorId}
           setLastPlacedTime={props.setLastPlacedTime}
           basePixelUp={props.basePixelUp}
@@ -59,6 +60,7 @@ const TabPanel = (props) => {
           factionPixelsData={props.factionPixelsData}
           setFactionPixelsData={props.setFactionPixelsData}
           extraPixels={props.extraPixels}
+          setPixelSelection={props.setPixelSelection}
           setExtraPixels={props.setExtraPixels}
           availablePixels={props.availablePixels}
           availablePixelsUsed={props.availablePixelsUsed}
@@ -127,6 +129,7 @@ const TabPanel = (props) => {
                     <Voting
                       timeLeftInDay={timeLeftInDay}
                       setActiveTab={props.setActiveTab}
+                      queryAddress={props.queryAddress}
                       address={props.address}
                       artPeaceContract={props.artPeaceContract}
                     />
