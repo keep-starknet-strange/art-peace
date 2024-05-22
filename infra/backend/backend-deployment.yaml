@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: 'brandonjroberts/art-peace-backend:v0.0.1'
+          command: ["./main"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: backend-secret
+                  #          volumeMounts:
+                  #            - mountPath: /app
+                  #              name: backend-data
+                  #      volumes:
+                  #        - name: backend-data
+                  #          persistentVolumeClaim:
+                  #            claimName: backend-volume-claim

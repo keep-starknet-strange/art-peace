@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: indexer
+  template:
+    metadata:
+      labels:
+        app: indexer
+    spec:
+      nodeSelector:
+        cloud.google.com/compute-class: Balanced
+        kubernetes.io/arch: arm64
+      containers:
+        - name: indexer
+          image: 'brandonjroberts/art-peace-indexer:v0.0.1'
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: indexer-secret

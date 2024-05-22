@@ -53,15 +53,15 @@ function App() {
   }, [address]);
 
   // Contracts
-  // TODO: art peace abi & contract address should be in a config
+  // TODO: Pull addrs from api?
   const { contract: artPeaceContract } = useContract({
     address:
-      '0x02e3f41bd135e60c72ebfe57e8964ecc58dbb8f8679b1b4cffeaf5e45ab1defa',
+      process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
     abi: art_peace_abi
   });
   const { contract: usernameContract } = useContract({
     address:
-      '0x00a22891d623bff245535dfbfa2f0db1002a62ef4bd5d405bd1f5712e9df85cd',
+      process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
     abi: username_store_abi
   });
 
