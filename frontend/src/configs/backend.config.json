@@ -1,5 +1,5 @@
 {
-  "host": "localhost",
+  "host": "api.art-peace.net",
   "port": 8080,
   "scripts": {
     "place_pixel_devnet": "../tests/integration/local/place_pixel.sh",
@@ -7,7 +7,7 @@
     "add_template_devnet": "../tests/integration/local/add_template.sh",
     "mint_nft_devnet": "../tests/integration/local/mint_nft.sh"
   },
-  "production": false,
+  "production": true,
   "websocket": {
     "read_buffer_size": 1024,
     "write_buffer_size": 1024

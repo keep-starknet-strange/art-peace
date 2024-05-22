@@ -43,13 +43,15 @@ pub mod ArtPeace {
         color_count: u8,
         // Map: color index -> color value in RGBA
         color_palette: LegacyMap::<u8, u32>,
-        votable_colors_count: u8,
+        // Map: (day index) -> number of votable colors
+        votable_colors_count: LegacyMap::<u32, u8>,
         // Map: (votable color index, day index) -> color value in RGBA
         votable_colors: LegacyMap::<(u8, u32), u32>,
         // Map: (votable color index, day index) -> amount of votes
         color_votes: LegacyMap::<(u8, u32), u32>,
         // Map: (user's address, day_index) -> color index
         user_votes: LegacyMap::<(ContractAddress, u32), u8>,
+        daily_new_colors_count: u32,
         creation_time: u64,
         end_time: u64,
         day_index: u32,
@@ -186,6 +188,7 @@ pub mod ArtPeace {
         pub time_between_pixels: u64,
         pub color_palette: Array<u32>,
         pub votable_colors: Array<u32>,
+        pub daily_new_colors_count: u32,
         pub end_time: u64,
         pub daily_quests_count: u32,
     }
@@ -211,12 +214,13 @@ pub mod ArtPeace {
         };
 
         let votable_colors_count: u8 = init_params.votable_colors.len().try_into().unwrap();
-        self.votable_colors_count.write(votable_colors_count);
+        self.votable_colors_count.write(0, votable_colors_count);
         let mut i: u8 = 0;
         while i < votable_colors_count {
-            self.votable_colors.write((i, 0), *init_params.votable_colors.at(i.into()));
+            self.votable_colors.write((i + 1, 0), *init_params.votable_colors.at(i.into()));
             i += 1;
         };
+        self.daily_new_colors_count.write(init_params.daily_new_colors_count);
 
         self.creation_time.write(starknet::get_block_timestamp());
         self.start_day_time.write(starknet::get_block_timestamp());
@@ -232,7 +236,7 @@ pub mod ArtPeace {
         self.extra_pixels.write(test_address, 1000);
         self
             .init_faction(
-                'StarkNet',
+                'RealmsWorld',
                 test_address,
                 10,
                 array![test_address, test_address, zero_address, zero_address, zero_address].span()
@@ -532,6 +536,7 @@ pub mod ArtPeace {
         }
 
         // TODO: Tests and integration
+        // TODO: Infinite replacement exploit
         fn replace_member(
             ref self: ContractState, faction_id: u32, member_id: u32, new_member: ContractAddress
         ) {
@@ -656,11 +661,11 @@ pub mod ArtPeace {
 
         fn vote_color(ref self: ContractState, color: u8) {
             let now = starknet::get_block_timestamp();
+            let day = self.day_index.read();
             assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             assert(color != 0, 'Color 0 indicates no vote');
-            assert(color <= self.votable_colors_count.read(), 'Color out of bounds');
+            assert(color <= self.votable_colors_count.read(day), 'Color out of bounds');
             let caller = starknet::get_caller_address();
-            let day = self.day_index.read();
             let users_vote = self.user_votes.read((caller, day));
             if users_vote != color {
                 if users_vote != 0 {
@@ -679,11 +684,17 @@ pub mod ArtPeace {
             self.color_votes.read((color, day))
         }
 
-        fn finalize_color_votes(
-            ref self: ContractState
-        ) { // TODO: Make the function internal only & call in the end of the day
-        // TODO: Implement with : adding top X colors to the palette
-        // TODO: Implement with : setting up the next day's votable colors
+        fn get_votable_colors(self: @ContractState) -> Array<u32> {
+            let day = self.day_index.read();
+            let votable_colors_count = self.votable_colors_count.read(day);
+            let mut votable_colors = array![];
+            let mut i = 1;
+            while i <= votable_colors_count {
+                votable_colors.append(self.votable_colors.read((i, day)));
+                i += 1;
+            };
+
+            votable_colors
         }
 
         fn get_creation_time(self: @ContractState) -> u64 {
@@ -704,6 +715,7 @@ pub mod ArtPeace {
             let start_day_time = self.start_day_time.read();
 
             assert(block_timestamp >= start_day_time + DAY_IN_SECONDS, 'day has not passed');
+            finalize_color_votes(ref self);
 
             self.day_index.write(self.day_index.read() + 1);
             self.start_day_time.write(block_timestamp);
@@ -918,7 +930,7 @@ pub mod ArtPeace {
                 .set_canvas_contract(starknet::get_contract_address());
         }
 
-        fn mint_nft(self: @ContractState, mint_params: NFTMintParams) {
+        fn mint_nft(ref self: ContractState, mint_params: NFTMintParams) {
             let metadata = NFTMetadata {
                 position: mint_params.position,
                 width: mint_params.width,
@@ -975,6 +987,72 @@ pub mod ArtPeace {
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
         }
+    }
+
+    /// Internals
+    fn finalize_color_votes(ref self: ContractState) {
+        let daily_new_colors_count = self.daily_new_colors_count.read();
+        let day = self.day_index.read();
+        let votable_colors_count = self.votable_colors_count.read(day);
+
+        let mut max_scores: Felt252Dict<u32> = Default::default();
+        let mut votable_index: u8 = 1; // 0 means no vote
+        while votable_index <= votable_colors_count {
+            let vote = self.color_votes.read((votable_index, day));
+            if vote <= max_scores.get(daily_new_colors_count.into() - 1) {
+                votable_index += 1;
+                continue;
+            }
+            // update max scores if needed
+            let mut max_scores_index: u32 = 0;
+            while max_scores_index < daily_new_colors_count {
+                if max_scores.get(max_scores_index.into()) < vote {
+                    // shift scores
+                    let mut i: u32 = daily_new_colors_count - 1;
+                    while i > max_scores_index {
+                        max_scores.insert(i.into(), max_scores.get(i.into() - 1));
+                        i -= 1;
+                    };
+                    max_scores.insert(max_scores_index.into(), vote);
+                    break;
+                }
+                max_scores_index += 1;
+            };
+            votable_index += 1;
+        };
+
+        // find threshold
+        let mut threshold: u32 = 0;
+        let mut min_index = daily_new_colors_count;
+        while threshold == 0
+            && min_index > 0 {
+                min_index -= 1;
+                threshold = max_scores.get(min_index.into());
+            };
+        if threshold == 0 {
+            // No votes
+            return;
+        }
+
+        // update palette & votable colors
+        let next_day = day + 1;
+        let mut color_index = self.color_count.read();
+        let mut next_day_votable_index = 1;
+        votable_index = 1;
+        while votable_index <= votable_colors_count {
+            let vote = self.color_votes.read((votable_index, day));
+            let color = self.votable_colors.read((votable_index, day));
+            if vote >= threshold {
+                self.color_palette.write(color_index, color);
+                color_index += 1;
+            } else {
+                self.votable_colors.write((next_day_votable_index, next_day), color);
+                next_day_votable_index += 1;
+            }
+            votable_index += 1;
+        };
+        self.color_count.write(color_index);
+        self.votable_colors_count.write(next_day, next_day_votable_index - 1);
     }
 }
 

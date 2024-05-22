@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { useAccount, useContract, useNetwork } from '@starknet-react/core';
 import './App.css';
 import CanvasContainer from './canvas/CanvasContainer.js';
 import PixelSelector from './footer/PixelSelector.js';
 import TabsFooter from './footer/TabsFooter.js';
 import TabPanel from './tabs/TabPanel.js';
 import { usePreventZoom } from './utils/Window.js';
-import { backendUrl, wsUrl } from './utils/Consts.js';
+import { backendUrl, wsUrl, devnetMode } from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper } from './services/apiService.js';
+import art_peace_abi from './contracts/art_peace.abi.json';
+import username_store_abi from './contracts/username_store.abi.json';
 
 function App() {
   // Window management
@@ -35,22 +38,32 @@ function App() {
     };
   };
 
-  // Account
-  const [address, setAddress] = useState('0');
-  const [provider, setProvider] = useState();
-  const [connected, setConnected] = useState(false);
+  // Starknet wallet
+  const { account, address } = useAccount();
+  const { chain } = useNetwork();
+  const [queryAddress, setQueryAddress] = useState('0');
+  useEffect(() => {
+    if (address && devnetMode) {
+      setQueryAddress(
+        '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0'
+      );
+    } else {
+      setQueryAddress(address ? address.slice(2) : '0');
+    }
+  }, [address]);
 
-  const setupStarknet = (addr, prov) => {
-    setAddress(addr);
-    setProvider(prov);
-    setConnected(true);
-  };
-
-  const _starknetData = () => {
-    return {
-      rpc: provider
-    };
-  };
+  // Contracts
+  // TODO: art peace abi & contract address should be in a config
+  const { contract: artPeaceContract } = useContract({
+    address:
+      '0x02e3f41bd135e60c72ebfe57e8964ecc58dbb8f8679b1b4cffeaf5e45ab1defa',
+    abi: art_peace_abi
+  });
+  const { contract: usernameContract } = useContract({
+    address:
+      '0x00a22891d623bff245535dfbfa2f0db1002a62ef4bd5d405bd1f5712e9df85cd',
+    abi: username_store_abi
+  });
 
   // Websocket
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(wsUrl, {
@@ -80,7 +93,7 @@ function App() {
         activeTab === 'NFTs'
       ) {
         // TODO: Compare to user's address
-        if (lastJsonMessage.minter === address) {
+        if (lastJsonMessage.minter === queryAddress) {
           setLatestMintedTokenId(lastJsonMessage.token_id);
         }
       }
@@ -151,9 +164,10 @@ function App() {
   const [selectorMode, setSelectorMode] = useState(false);
 
   const [isEraserMode, setIsEraserMode] = React.useState(false);
+  const [isExtraDeleteMode, setIsExtraDeleteMode] = React.useState(false);
 
   useEffect(() => {
-    const getLastPlacedPixel = `get-last-placed-time?address=${address}`;
+    const getLastPlacedPixel = `get-last-placed-time?address=${queryAddress}`;
     async function fetchGetLastPlacedPixel() {
       const response = await fetchWrapper(getLastPlacedPixel);
       if (!response.data) {
@@ -164,11 +178,11 @@ function App() {
     }
 
     fetchGetLastPlacedPixel();
-  }, [address]);
+  }, [queryAddress]);
 
   const updateInterval = 1000; // 1 second
   // TODO: make this a config
-  const timeBetweenPlacements = 20000; // 20 seconds
+  const timeBetweenPlacements = 120000; // 2 minutes
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
   useEffect(() => {
     const updateBasePixelTimer = () => {
@@ -247,7 +261,7 @@ function App() {
   useEffect(() => {
     async function fetchExtraPixelsEndpoint() {
       let extraPixelsResponse = await fetchWrapper(
-        `get-extra-pixels?address=${address}`
+        `get-extra-pixels?address=${queryAddress}`
       );
       if (!extraPixelsResponse.data) {
         return;
@@ -258,7 +272,7 @@ function App() {
 
     async function fetchFactionPixelsEndpoint() {
       let factionPixelsResponse = await fetchWrapper(
-        `get-faction-pixels?address=${address}`
+        `get-faction-pixels?address=${queryAddress}`
       );
       if (!factionPixelsResponse.data) {
         return;
@@ -266,7 +280,7 @@ function App() {
       setFactionPixelsData(factionPixelsResponse.data);
     }
     fetchFactionPixelsEndpoint();
-  }, [address]);
+  }, [queryAddress]);
 
   const clearPixelSelection = () => {
     setSelectedColorId(-1);
@@ -333,7 +347,7 @@ function App() {
   useEffect(() => {
     async function fetchUserFactions() {
       let userFactionsResponse = await fetchWrapper(
-        `get-my-factions?address=${address}`
+        `get-my-factions?address=${queryAddress}`
       );
       if (!userFactionsResponse.data) {
         return;
@@ -341,10 +355,15 @@ function App() {
       setUserFactions(userFactionsResponse.data);
     }
     fetchUserFactions();
-  }, [address]);
+  }, [queryAddress]);
 
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
+  const [nftSelectionStarted, setNftSelectionStarted] = useState(false);
+  const [nftSelected, setNftSelected] = useState(false);
+  const [nftPosition, setNftPosition] = useState(null);
+  const [nftWidth, setNftWidth] = useState(null);
+  const [nftHeight, setNftHeight] = useState(null);
 
   // Tabs
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
@@ -390,6 +409,8 @@ function App() {
   return (
     <div className='App'>
       <CanvasContainer
+        address={address}
+        artPeaceContract={artPeaceContract}
         colors={colors}
         canvasRef={canvasRef}
         extraPixelsCanvasRef={extraPixelsCanvasRef}
@@ -409,7 +430,15 @@ function App() {
         addExtraPixel={addExtraPixel}
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
+        nftSelectionStarted={nftSelectionStarted}
+        setNftSelectionStarted={setNftSelectionStarted}
+        nftSelected={nftSelected}
+        setNftSelected={setNftSelected}
+        setNftPosition={setNftPosition}
+        setNftWidth={setNftWidth}
+        setNftHeight={setNftHeight}
         isEraserMode={isEraserMode}
+        isExtraDeleteMode={isExtraDeleteMode}
         setIsEraserMode={setIsEraserMode}
         clearExtraPixel={clearExtraPixel}
         setLastPlacedTime={setLastPlacedTime}
@@ -423,15 +452,25 @@ function App() {
         }
       >
         <TabPanel
-          connected={connected}
           address={address}
-          setupStarknet={setupStarknet}
+          queryAddress={queryAddress}
+          account={account}
+          chain={chain}
+          artPeaceContract={artPeaceContract}
+          usernameContract={usernameContract}
           colors={colors}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           getDeviceTypeInfo={getDeviceTypeInfo}
           nftMintingMode={nftMintingMode}
           setNftMintingMode={setNftMintingMode}
+          nftSelectionStarted={nftSelectionStarted}
+          setNftSelectionStarted={setNftSelectionStarted}
+          nftSelected={nftSelected}
+          setNftSelected={setNftSelected}
+          nftPosition={nftPosition}
+          nftWidth={nftWidth}
+          nftHeight={nftHeight}
           showSelectedPixelPanel={
             !isPortrait
               ? pixelSelectedMode || isEraserMode
@@ -450,10 +489,12 @@ function App() {
           setSelectorMode={setSelectorMode}
           isEraserMode={isEraserMode}
           setIsEraserMode={setIsEraserMode}
+          setIsExtraDeleteMode={setIsExtraDeleteMode}
           basePixelUp={basePixelUp}
           basePixelTimer={basePixelTimer}
           factionPixels={factionPixels}
           setFactionPixels={setFactionPixels}
+          setPixelSelection={setPixelSelection}
           extraPixels={extraPixels}
           setExtraPixels={setExtraPixels}
           availablePixels={availablePixels}
@@ -464,6 +505,7 @@ function App() {
           factionPixelTimers={factionPixelTimers}
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
+          setLatestMintedTokenId={setLatestMintedTokenId}
         />
       </div>
       <div className='App__footer'>
@@ -482,6 +524,8 @@ function App() {
           setBasePixelUp={setBasePixelUp}
           lastPlacedTime={lastPlacedTime}
           basePixelTimer={basePixelTimer}
+          queryAddress={queryAddress}
+          setActiveTab={setActiveTab}
         />
         <TabsFooter
           tabs={tabs}

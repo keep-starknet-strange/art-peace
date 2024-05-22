@@ -27,7 +27,7 @@ const HEIGHT: u128 = 100;
 const TIME_BETWEEN_PIXELS: u64 = 10;
 const LEANIENCE_MARGIN: u64 = 20;
 
-fn deploy_contract() -> ContractAddress {
+pub(crate) fn deploy_contract() -> ContractAddress {
     deploy_nft_contract();
 
     let contract = snf::declare("ArtPeace");
@@ -63,6 +63,7 @@ fn deploy_contract() -> ContractAddress {
             0x000088,
             0x888800
         ],
+        daily_new_colors_count: 3,
         end_time: 1000000,
         daily_quests_count: 3,
     }
@@ -112,6 +113,7 @@ pub(crate) fn deploy_with_quests_contract(
             0x000088,
             0x888800
         ],
+        daily_new_colors_count: 3,
         end_time: 1000000,
         daily_quests_count: daily_quests_count,
     }
@@ -425,3 +427,4 @@ fn deposit_reward_test() {
         art_peace_token_balance == reward_amount, "reward wrongly distributed when adding template"
     );
 }
+

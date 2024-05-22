@@ -3,6 +3,7 @@ import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './TabPanel.css';
 import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
 import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
+import NFTMintingPanel from './nfts/NFTMintingPanel.js';
 import Factions from './factions/Factions.js';
 import { TimerInjector } from '../utils/TimerInjector.js';
 import Quests from './quests/Quests.js';
@@ -37,6 +38,8 @@ const TabPanel = (props) => {
         appear
       >
         <ExtraPixelsPanel
+          address={props.address}
+          artPeaceContract={props.artPeaceContract}
           extraPixelsData={props.extraPixelsData}
           colors={props.colors}
           clearExtraPixels={props.clearExtraPixels}
@@ -46,6 +49,7 @@ const TabPanel = (props) => {
           setSelectorMode={props.setSelectorMode}
           isEraserMode={props.isEraserMode}
           setIsEraserMode={props.setIsEraserMode}
+          setIsExtraDeleteMode={props.setIsExtraDeleteMode}
           setSelectedColorId={props.setSelectedColorId}
           setLastPlacedTime={props.setLastPlacedTime}
           basePixelUp={props.basePixelUp}
@@ -56,10 +60,32 @@ const TabPanel = (props) => {
           factionPixelsData={props.factionPixelsData}
           setFactionPixelsData={props.setFactionPixelsData}
           extraPixels={props.extraPixels}
+          setPixelSelection={props.setPixelSelection}
           setExtraPixels={props.setExtraPixels}
           availablePixels={props.availablePixels}
           availablePixelsUsed={props.availablePixelsUsed}
           userFactions={props.userFactions}
+        />
+      </CSSTransition>
+      <CSSTransition
+        in={props.nftMintingMode}
+        timeout={300}
+        classNames='list-transition'
+        unmountOnExit
+        appear
+      >
+        <NFTMintingPanel
+          address={props.address}
+          artPeaceContract={props.artPeaceContract}
+          setNftMintingMode={props.setNftMintingMode}
+          nftSelectionStarted={props.nftSelectionStarted}
+          setNftSelectionStarted={props.setNftSelectionStarted}
+          nftSelected={props.nftSelected}
+          setNftSelected={props.setNftSelected}
+          queryAddress={props.queryAddress}
+          nftPosition={props.nftPosition}
+          nftWidth={props.nftWidth}
+          nftHeight={props.nftHeight}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>
@@ -76,9 +102,11 @@ const TabPanel = (props) => {
                 <TimerInjector>
                   {({ timeLeftInDay }) => (
                     <Quests
+                      address={props.address}
+                      artPeaceContract={props.artPeaceContract}
                       timeLeftInDay={timeLeftInDay}
                       setActiveTab={props.setActiveTab}
-                      address={props.address}
+                      queryAddress={props.queryAddress}
                       setExtraPixels={props.setExtraPixels}
                       extraPixels={props.extraPixels}
                     />
@@ -101,6 +129,9 @@ const TabPanel = (props) => {
                     <Voting
                       timeLeftInDay={timeLeftInDay}
                       setActiveTab={props.setActiveTab}
+                      queryAddress={props.queryAddress}
+                      address={props.address}
+                      artPeaceContract={props.artPeaceContract}
                     />
                   )}
                 </TimerInjector>
@@ -123,16 +154,19 @@ const TabPanel = (props) => {
                   setNftMintingMode={props.setNftMintingMode}
                   setActiveTab={props.setActiveTab}
                   latestMintedTokenId={props.latestMintedTokenId}
+                  setLatestMintedTokenId={props.setLatestMintedTokenId}
+                  queryAddress={props.queryAddress}
                 />
               </div>
             )}
             {props.activeTab === 'Account' && (
               <div>
                 <Account
+                  usernameContract={props.usernameContract}
                   setActiveTab={props.setActiveTab}
-                  connected={props.connected}
+                  queryAddress={props.queryAddress}
                   address={props.address}
-                  setupStarknet={props.setupStarknet}
+                  chain={props.chain}
                 />
               </div>
             )}

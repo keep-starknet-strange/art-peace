@@ -96,7 +96,7 @@ pub trait IArtPeace<TContractState> {
     // Color voting
     fn vote_color(ref self: TContractState, color: u8);
     fn get_color_votes(self: @TContractState, color: u8) -> u32;
-    fn finalize_color_votes(ref self: TContractState);
+    fn get_votable_colors(self: @TContractState) -> Array<u32>;
 
     // Get timing info
     fn get_creation_time(self: @TContractState) -> u64;
