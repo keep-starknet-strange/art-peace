@@ -453,10 +453,6 @@ fn distribute_rewards_test() {
     };
 
     let template_image_span = template_image.span();
-    let x = 10;
-    let y = 20;
-    let pos = x + y * WIDTH;
-    let color = 0x5;
     let now = 10;
     let template_id = 0;
 
@@ -473,7 +469,7 @@ fn distribute_rewards_test() {
     assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
 
     start_prank(CheatTarget::One(art_peace_address), user);
-    art_peace.place_pixel(pos, color, now);
+    art_peace.place_pixel(0, 1, now);
     stop_prank(CheatTarget::One(art_peace_address));
 
     start_prank(CheatTarget::One(art_peace_address), user2);
