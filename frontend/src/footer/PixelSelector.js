@@ -8,7 +8,7 @@ const PixelSelector = (props) => {
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
 
   useEffect(() => {
-    if (props.address === '0') {
+    if (props.queryAddress === '0') {
       setPlacementTimer('Connect Wallet');
       return;
     }
@@ -27,7 +27,12 @@ const PixelSelector = (props) => {
     } else {
       setPlacementTimer(props.basePixelTimer);
     }
-  }, [props.availablePixels, props.availablePixelsUsed, props.basePixelTimer]);
+  }, [
+    props.availablePixels,
+    props.availablePixelsUsed,
+    props.basePixelTimer,
+    props.queryAddress
+  ]);
 
   const toSelectorMode = (event) => {
     event.preventDefault();
@@ -36,7 +41,7 @@ const PixelSelector = (props) => {
       return;
     }
 
-    if (props.address === '0') {
+    if (props.queryAddress === '0') {
       props.setActiveTab('Account');
       return;
     }

@@ -919,7 +919,7 @@ pub mod ArtPeace {
                 .set_canvas_contract(starknet::get_contract_address());
         }
 
-        fn mint_nft(self: @ContractState, mint_params: NFTMintParams) {
+        fn mint_nft(ref self: ContractState, mint_params: NFTMintParams) {
             let metadata = NFTMetadata {
                 position: mint_params.position,
                 width: mint_params.width,

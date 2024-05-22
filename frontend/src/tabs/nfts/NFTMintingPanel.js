@@ -1,14 +1,54 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useContractWrite } from '@starknet-react/core';
 import './NFTMintingPanel.css';
 import canvasConfig from '../../configs/canvas.config.json';
 import { fetchWrapper } from '../../services/apiService.js';
+import { devnetMode } from '../../utils/Consts.js';
 
 const NFTMintingPanel = (props) => {
   const closePanel = () => {
     props.setNftMintingMode(false);
+    props.setNftSelectionStarted(false);
+    props.setNftSelected(false);
   };
 
+  const [calls, setCalls] = useState([]);
+  const mintNftCall = (position, width, height) => {
+    if (devnetMode) return;
+    if (!props.address || !props.artPeaceContract) return;
+    // TODO: Validate the position, width, and height
+    console.log('Minting NFT:', position, width, height);
+    let mintParams = {
+      position: position,
+      width: width,
+      height: height
+    };
+    setCalls(
+      props.artPeaceContract.populateTransaction['mint_nft'](mintParams)
+    );
+  };
+
+  useEffect(() => {
+    const mintNft = async () => {
+      if (devnetMode) return;
+      if (calls.length === 0) return;
+      await writeAsync();
+      console.log('Mint nft successful:', data, isPending);
+      // TODO: Update the UI with the new NFT
+      closePanel();
+    };
+    mintNft();
+  }, [calls]);
+
+  const { writeAsync, data, isPending } = useContractWrite({
+    calls
+  });
+
   const submit = async () => {
+    if (!devnetMode) {
+      mintNftCall(props.nftPosition, props.nftWidth, props.nftHeight);
+      return;
+    }
     let mintNFTEndpoint = 'mint-nft-devnet';
     const response = await fetchWrapper(mintNFTEndpoint, {
       mode: 'cors',
@@ -21,6 +61,7 @@ const NFTMintingPanel = (props) => {
     });
     if (response.result) {
       console.log(response.result);
+      closePanel();
     }
   };
 
@@ -35,9 +76,46 @@ const NFTMintingPanel = (props) => {
       </p>
       <div className='NFTMintingPanel__header'>
         <p className='Text__medium Heading__sub'>art/peace NFT Mint</p>
-        <div className='Button__primary' onClick={() => submit()}>
-          Submit
-        </div>
+        {props.nftSelected && (
+          <div className='Button__primary' onClick={() => submit()}>
+            Submit
+          </div>
+        )}
+      </div>
+      <div className='NFTMintingPanel__notes'>
+        {props.nftSelectionStarted === false && (
+          <p
+            className='Text__xsmall'
+            style={{
+              margin: '0.5rem',
+              padding: '0'
+            }}
+          >
+            Click on the canvas to start...
+          </p>
+        )}
+        {props.nftSelectionStarted && props.nftSelected == false && (
+          <p
+            className='Text__xsmall'
+            style={{
+              margin: '0.5rem',
+              padding: '0'
+            }}
+          >
+            Click to select the nft image area...
+          </p>
+        )}
+        {props.nftSelected && (
+          <p
+            className='Text__xsmall'
+            style={{
+              margin: '0.5rem',
+              padding: '0'
+            }}
+          >
+            Fill out the form and submit...
+          </p>
+        )}
       </div>
       <div className='NFTMintingPanel__body'>
         <div

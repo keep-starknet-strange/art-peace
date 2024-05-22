@@ -38,6 +38,8 @@ const TabPanel = (props) => {
         appear
       >
         <ExtraPixelsPanel
+          address={props.address}
+          artPeaceContract={props.artPeaceContract}
           extraPixelsData={props.extraPixelsData}
           colors={props.colors}
           clearExtraPixels={props.clearExtraPixels}
@@ -71,8 +73,14 @@ const TabPanel = (props) => {
         appear
       >
         <NFTMintingPanel
-          setNftMintingMode={props.setNftMintingMode}
           address={props.address}
+          artPeaceContract={props.artPeaceContract}
+          setNftMintingMode={props.setNftMintingMode}
+          nftSelectionStarted={props.nftSelectionStarted}
+          setNftSelectionStarted={props.setNftSelectionStarted}
+          nftSelected={props.nftSelected}
+          setNftSelected={props.setNftSelected}
+          queryAddress={props.queryAddress}
           nftPosition={props.nftPosition}
           nftWidth={props.nftWidth}
           nftHeight={props.nftHeight}
@@ -92,9 +100,11 @@ const TabPanel = (props) => {
                 <TimerInjector>
                   {({ timeLeftInDay }) => (
                     <Quests
+                      address={props.address}
+                      artPeaceContract={props.artPeaceContract}
                       timeLeftInDay={timeLeftInDay}
                       setActiveTab={props.setActiveTab}
-                      address={props.address}
+                      queryAddress={props.queryAddress}
                       setExtraPixels={props.setExtraPixels}
                       extraPixels={props.extraPixels}
                     />
@@ -117,6 +127,8 @@ const TabPanel = (props) => {
                     <Voting
                       timeLeftInDay={timeLeftInDay}
                       setActiveTab={props.setActiveTab}
+                      address={props.address}
+                      artPeaceContract={props.artPeaceContract}
                     />
                   )}
                 </TimerInjector>
@@ -140,18 +152,18 @@ const TabPanel = (props) => {
                   setActiveTab={props.setActiveTab}
                   latestMintedTokenId={props.latestMintedTokenId}
                   setLatestMintedTokenId={props.setLatestMintedTokenId}
-                  address={props.address}
+                  queryAddress={props.queryAddress}
                 />
               </div>
             )}
             {props.activeTab === 'Account' && (
               <div>
                 <Account
+                  usernameContract={props.usernameContract}
                   setActiveTab={props.setActiveTab}
-                  connected={props.connected}
+                  queryAddress={props.queryAddress}
                   address={props.address}
-                  setupStarknet={props.setupStarknet}
-                  provider={props.provider}
+                  chain={props.chain}
                 />
               </div>
             )}

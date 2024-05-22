@@ -95,7 +95,7 @@ const NFTs = (props) => {
 
   React.useEffect(() => {
     // TODO
-    let getMyNFTsEndpoint = `get-my-nfts?address=${props.address}`;
+    let getMyNFTsEndpoint = `get-my-nfts?address=${props.queryAddress}`;
     async function getMyNfts() {
       const response = await fetchWrapper(getMyNFTsEndpoint, { mode: 'cors' });
       if (response.data) {
@@ -103,7 +103,7 @@ const NFTs = (props) => {
       }
     }
     getMyNfts();
-  }, [props.address]);
+  }, [props.queryAddress]);
 
   const [expanded, setExpanded] = React.useState(false);
   React.useEffect(() => {
@@ -118,7 +118,7 @@ const NFTs = (props) => {
       }
     }
     getNfts();
-  }, [props.address, expanded]);
+  }, [props.queryAddress, expanded]);
 
   return (
     <ExpandableTab

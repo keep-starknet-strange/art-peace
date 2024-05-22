@@ -49,3 +49,26 @@
   width: 100%;
   flex: 1;
 }
+
+.Account__wallet__select {
+  max-height: 0rem;
+  width: 100%;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.Account__wallet__select--expanded {
+  max-height: 40rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.Account__walletmode__separator {
+  margin: 0 0.5rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+.Account__walletmode__connect {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  margin: 2rem;
+}
