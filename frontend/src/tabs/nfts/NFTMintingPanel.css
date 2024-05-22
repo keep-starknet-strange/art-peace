@@ -1,0 +1,214 @@
+.NFTMintingPanel {
+  position: relative;
+  width: 100%;
+  height: 18vh;
+  padding: 1rem 0.5rem 0.5rem 0.5rem;
+  margin-bottom: 0.3rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.9)
+  );
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.3);
+  border: 0.2rem solid rgba(0, 0, 0, 0.4);
+
+  pointer-events: fill;
+}
+
+.NFTMintingPanel__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.NFTMintingPanel__header {
+  margin: 0;
+  padding: 0 3rem 1rem 1rem;
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.NFTMintingPanel__body {
+  margin: 0;
+  padding: 0 0.5rem;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.NFTMintingPanel__item {
+  padding: 0.5rem 2rem;
+  margin: 0.5rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+  border-radius: 1rem;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+}
+
+.NFTMintingPanel__item__text {
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+
+
+
+.ExtraPixelPanel__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* TODO: Fix scrolling */
+  overflow-y: scroll;
+}
+
+/* TODO: Always scroll to bottom when adding new pixel */
+.NFTMintingPanel__pixels {
+  margin: 0;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: 4.25rem;
+  gap: 1rem;
+
+  /* TODO: Fix scrolling */
+  overflow-y: scroll;
+  border-left: 2px solid rgba(0, 0, 0, 0.4);
+}
+
+.NFTMintingPanel__bubble {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 0.5rem 0 0;
+  border-radius: 1rem;
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.4);
+  cursor: pointer;
+  pointer-events: fill;
+}
+
+.NFTMintingPanel__bubble:hover {
+  box-shadow: 0 0 0.7rem rgba(50, 50, 50, 0.6);
+  transform: translateY(-0.2rem) scale(1.03);
+}
+
+.NFTMintingPanel__bubble:active {
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.8);
+  transform: translateY(0) scale(1);
+}
+
+.NFTMintingPanel__bubble__remove {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  display: none;
+  text-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.7);
+}
+
+.NFTMintingPanel__bubble:hover .NFTMintingPanel__bubble__remove {
+  display: block;
+  color: red;
+}
+
+.NFTMintingPanel__info__item {
+  margin: 1rem 0 0.5rem 0;
+  padding: 0.5rem 1rem;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+}
+
+.NFTMintingPanel__info__item--clickable {
+  cursor: pointer;
+  pointer-events: fill;
+  transition: all 0.1s;
+}
+
+.NFTMintingPanel__info__item--clickable:hover {
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.4);
+  transform: translateY(-0.2rem) scale(1.03);
+}
+
+.NFTMintingPanel__info__item--clickable:active {
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  transform: translateY(0) scale(1);
+}
+
+.NFTMintingPanel__info__item--used {
+  background: linear-gradient(
+    to bottom right,
+    rgba(200, 200, 200, 0.6),
+    rgba(200, 200, 200, 0.8)
+  );
+}
+
+.NFTMintingPanel__info__item > p {
+  margin: 0;
+  padding: 0;
+}
+
+.NFTMintingPanel__info__item__details {
+  margin-top: 0.5rem !important;
+}
+
+.NFTMintingPanel__info__item__expand {
+  width: 100%;
+  padding-top: 0.5rem;
+  border-top: 0.1rem solid rgba(0, 0, 0, 0.4);
+  margin-top: 0.5rem;
+}
+
+.NFTMintingPanel__info__item__expand__item {
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+  margin-top: 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}

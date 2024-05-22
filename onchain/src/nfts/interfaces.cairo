@@ -39,5 +39,5 @@ pub trait IArtPeaceNFTMinter<TContractState> {
     // Sets up the contract addresses
     fn add_nft_contract(ref self: TContractState, nft_contract: starknet::ContractAddress);
     // Mints a new NFT from the canvas using init params, and returns the token ID.
-    fn mint_nft(self: @TContractState, mint_params: NFTMintParams);
+    fn mint_nft(ref self: TContractState, mint_params: NFTMintParams);
 }

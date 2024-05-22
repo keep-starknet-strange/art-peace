@@ -30,5 +30,67 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  border-left: 4px solid rgba(0, 0, 0, 0.3);
+  height: 100%;
+  overflow: scroll;
+  /* TODO: border-left: 4px solid rgba(0, 0, 0, 0.3); */
+}
+
+.Factions__joiner {
+  margin: 0.5rem;
+  padding: 2rem 0.5rem;
+  width: calc(100% - 1rem); /* 1rem is the margin */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.Factions__joiner__container {
+  width: 100%;
+  padding: 1rem 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30rem, 1fr));
+  overflow: scroll;
+}
+
+.Factions__joiner__option {
+  padding: 0.5rem 1rem;
+  margin: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.Factions__joiner__option:hover {
+  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.5);
+  transform: scale(1.02) translateY(-0.2rem);
+}
+
+.Factions__joiner__option:active {
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  transform: scale(1) translateY(0);
+}
+
+.Factions__joiner__option__icon {
+  width: 6rem;
+  height: 6rem;
+  margin-right: 0.5rem;
+  /* Stretch the icon to fill the container */
+  object-fit: cover;
+  white-space: nowrap;
+}
+
+.Factions__joiner__option__text {
+  font-size: 1.5rem;
 }
