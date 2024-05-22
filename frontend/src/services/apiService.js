@@ -1,12 +1,10 @@
-import backendConfig from '../configs/backend.config.json';
-export const backendUrlBase =
-  'http://' + backendConfig.host + ':' + backendConfig.port;
+import { backendUrl } from '../utils/Consts.js';
 
 export const fetchWrapper = async (url, options = {}) => {
   const controller = new AbortController();
   const signal = controller.signal;
   try {
-    const response = await fetch(`${backendUrlBase}/${url}`, {
+    const response = await fetch(`${backendUrl}/${url}`, {
       mode: 'cors',
       signal,
       ...options

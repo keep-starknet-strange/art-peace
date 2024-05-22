@@ -14,6 +14,7 @@ const TabsFooter = (props) => {
             'Button__primary Text__large ' +
             (props.activeTab === type ? 'TabsFooter__tab--active ' : ' ')
           }
+          style={{ padding: '0.7rem 1.5rem' }}
         >
           {type}
         </div>
