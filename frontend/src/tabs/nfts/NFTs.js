@@ -67,7 +67,6 @@ const NFTsExpandedSection = (props) => {
 };
 
 const NFTs = (props) => {
-  const [setup, setSetup] = React.useState(false);
   // TODO: Minted nfts view w/ non owned nfts
   const [myNFTs, setMyNFTs] = React.useState([]);
   const [allNFTs, setAllNFTs] = React.useState([]);
@@ -85,22 +84,19 @@ const NFTs = (props) => {
   };
 
   React.useEffect(() => {
-    if (props.latestMintedTokenId !== null) {
+    if (
+      props.latestMintedTokenId !== null &&
+      myNFTs.findIndex((nft) => nft.tokenId === props.latestMintedTokenId) ===
+        -1
+    ) {
       retrieveMyNFTById(props.latestMintedTokenId);
+      props.setLatestMintedTokenId(null);
     }
   }, [props.latestMintedTokenId]);
 
   React.useEffect(() => {
-    if (!setup) {
-      setSetup(true);
-    } else {
-      return;
-    }
-
     // TODO
-    const addr =
-      '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0';
-    let getMyNFTsEndpoint = `get-my-nfts?address=${addr}`;
+    let getMyNFTsEndpoint = `get-my-nfts?address=${props.queryAddress}`;
     async function getMyNfts() {
       const response = await fetchWrapper(getMyNFTsEndpoint, { mode: 'cors' });
       if (response.data) {
@@ -108,8 +104,13 @@ const NFTs = (props) => {
       }
     }
     getMyNfts();
+  }, [props.queryAddress]);
 
-    // TODO: remove setup & do fetch refresh on expand
+  const [expanded, setExpanded] = React.useState(false);
+  React.useEffect(() => {
+    if (!expanded) {
+      return;
+    }
     let getNFTsEndpoint = 'get-nfts';
     async function getNfts() {
       const response = await fetchWrapper(getNFTsEndpoint, { mode: 'cors' });
@@ -118,7 +119,7 @@ const NFTs = (props) => {
       }
     }
     getNfts();
-  }, [setup, setSetup, setMyNFTs, setAllNFTs]);
+  }, [props.queryAddress, expanded]);
 
   return (
     <ExpandableTab
@@ -129,6 +130,8 @@ const NFTs = (props) => {
       nftsCollection={myNFTs}
       allNfts={allNFTs}
       setActiveTab={props.setActiveTab}
+      expanded={expanded}
+      setExpanded={setExpanded}
     />
   );
 };

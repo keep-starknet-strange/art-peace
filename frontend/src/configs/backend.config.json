@@ -1,5 +1,5 @@
 {
-  "host": "34.67.20.46",
+  "host": "api.art-peace.net",
   "port": 8080,
   "scripts": {
     "place_pixel_devnet": "../tests/integration/local/place_pixel.sh",

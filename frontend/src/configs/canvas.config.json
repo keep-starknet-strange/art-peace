@@ -1,26 +1,41 @@
 {
   "canvas": {
     "width": 256,
-    "height": 256
+    "height": 192
   },
-  "colors": ["010001", "FEFDFB", "FA5310", "9DAEB6", "E9C69E"],
+  "colors": [
+    "FAFAFA",
+    "080808",
+    "FF403D",
+    "FF7714",
+    "FFD115",
+    "F5FF05",
+    "9BFF3D",
+    "27FF14",
+    "3DFCFF",
+    "149DFF",
+    "1542FF",
+    "A13DFF",
+    "FF15B8",
+    "FEAFDB",
+    "C1D9E6"
+  ],
   "votableColors": [
-    "FEFDFB",
-    "FA5310",
-    "9DAEB6",
-    "E9C69E",
-    "A8A8A8",
-    "00FCD4",
-    "FF00FF",
-    "FF0000",
-    "00FF00",
-    "0000FF",
-    "FFFF00",
-    "00FFFF",
-    "000000",
-    "FFFFFF",
-    "FF8000",
-    "FF8080"
+    "DD7F70",
+    "DEBF86",
+    "182335",
+    "1991F4",
+    "F20019",
+    "3C3C84",
+    "786EDE",
+    "BA00F0",
+    "46B093",
+    "008A1A",
+    "8A006F",
+    "00208F",
+    "8F6F00",
+    "74401B",
+    "1B4F74"
   ],
   "colorsBitwidth": 5
 }

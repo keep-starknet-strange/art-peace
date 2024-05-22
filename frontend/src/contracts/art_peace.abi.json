@@ -1,0 +1,1569 @@
+[
+  {
+    "type": "impl",
+    "name": "ArtPeaceImpl",
+    "interface_name": "art_peace::interfaces::IArtPeace"
+  },
+  {
+    "type": "struct",
+    "name": "art_peace::interfaces::Pixel",
+    "members": [
+      {
+        "name": "color",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "owner",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::array::Span::<core::integer::u128>",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::integer::u128>"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::array::Span::<core::integer::u8>",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::integer::u8>"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "art_peace::interfaces::Faction",
+    "members": [
+      {
+        "name": "name",
+        "type": "core::felt252"
+      },
+      {
+        "name": "leader",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "pixel_pool",
+        "type": "core::integer::u32"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::array::Span::<core::starknet::contract_address::ContractAddress>",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::starknet::contract_address::ContractAddress>"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::array::Span::<core::felt252>",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "art_peace::interfaces::IArtPeace",
+    "items": [
+      {
+        "type": "function",
+        "name": "get_pixel",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "art_peace::interfaces::Pixel"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_pixel_color",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u8"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_pixel_owner",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_pixel_xy",
+        "inputs": [
+          {
+            "name": "x",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "y",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "art_peace::interfaces::Pixel"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_width",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u128"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_height",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u128"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_total_pixels",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u128"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "check_game_running",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "check_valid_pixel",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "check_timing",
+        "inputs": [
+          {
+            "name": "now",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "place_pixel_inner",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "place_basic_pixel_inner",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          },
+          {
+            "name": "now",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "place_member_pixels_inner",
+        "inputs": [
+          {
+            "name": "faction_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "member_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "positions",
+            "type": "core::array::Span::<core::integer::u128>"
+          },
+          {
+            "name": "colors",
+            "type": "core::array::Span::<core::integer::u8>"
+          },
+          {
+            "name": "offset",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "now",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "place_pixel",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          },
+          {
+            "name": "now",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "place_pixel_xy",
+        "inputs": [
+          {
+            "name": "x",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "y",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          },
+          {
+            "name": "now",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "place_pixel_blocktime",
+        "inputs": [
+          {
+            "name": "pos",
+            "type": "core::integer::u128"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "place_extra_pixels",
+        "inputs": [
+          {
+            "name": "positions",
+            "type": "core::array::Span::<core::integer::u128>"
+          },
+          {
+            "name": "colors",
+            "type": "core::array::Span::<core::integer::u8>"
+          },
+          {
+            "name": "now",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_last_placed_time",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_user_last_placed_time",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_time_between_pixels",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_extra_pixels_count",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_user_extra_pixels_count",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_factions_count",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_faction",
+        "inputs": [
+          {
+            "name": "faction_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "art_peace::interfaces::Faction"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_faction_leader",
+        "inputs": [
+          {
+            "name": "faction_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "init_faction",
+        "inputs": [
+          {
+            "name": "name",
+            "type": "core::felt252"
+          },
+          {
+            "name": "leader",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "pool",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "members",
+            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "replace_member",
+        "inputs": [
+          {
+            "name": "faction_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "member_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "new_member",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_faction_members",
+        "inputs": [
+          {
+            "name": "faction_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_faction_member_count",
+        "inputs": [
+          {
+            "name": "faction_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_faction_members_pixels",
+        "inputs": [
+          {
+            "name": "faction_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "member_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "now",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_color_count",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u8"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_colors",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::integer::u32>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "vote_color",
+        "inputs": [
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_color_votes",
+        "inputs": [
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "finalize_color_votes",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_creation_time",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_end_time",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_day",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "increase_day_index",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_daily_quests_count",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_daily_quest",
+        "inputs": [
+          {
+            "name": "day_index",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "quest_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_days_quests",
+        "inputs": [
+          {
+            "name": "day_index",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_today_quests",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_main_quest_count",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_main_quest",
+        "inputs": [
+          {
+            "name": "quest_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_main_quests",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "add_daily_quests",
+        "inputs": [
+          {
+            "name": "day_index",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "quests",
+            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "add_main_quests",
+        "inputs": [
+          {
+            "name": "quests",
+            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "claim_daily_quest",
+        "inputs": [
+          {
+            "name": "day_index",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "quest_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "calldata",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "claim_today_quest",
+        "inputs": [
+          {
+            "name": "quest_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "calldata",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "claim_main_quest",
+        "inputs": [
+          {
+            "name": "quest_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "calldata",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_nft_contract",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_user_pixels_placed",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_user_pixels_placed_day",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "day",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_user_pixels_placed_color",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_user_pixels_placed_day_color",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "day",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "color",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      }
+    ]
+  },
+  {
+    "type": "impl",
+    "name": "ArtPeaceNFTMinter",
+    "interface_name": "art_peace::nfts::interfaces::IArtPeaceNFTMinter"
+  },
+  {
+    "type": "struct",
+    "name": "art_peace::nfts::interfaces::NFTMintParams",
+    "members": [
+      {
+        "name": "position",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "width",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "height",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "art_peace::nfts::interfaces::IArtPeaceNFTMinter",
+    "items": [
+      {
+        "type": "function",
+        "name": "add_nft_contract",
+        "inputs": [
+          {
+            "name": "nft_contract",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "mint_nft",
+        "inputs": [
+          {
+            "name": "mint_params",
+            "type": "art_peace::nfts::interfaces::NFTMintParams"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "type": "impl",
+    "name": "ArtPeaceTemplateVerifier",
+    "interface_name": "art_peace::templates::interfaces::ITemplateVerifier"
+  },
+  {
+    "type": "interface",
+    "name": "art_peace::templates::interfaces::ITemplateVerifier",
+    "items": [
+      {
+        "type": "function",
+        "name": "complete_template",
+        "inputs": [
+          {
+            "name": "template_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "template_image",
+            "type": "core::array::Span::<core::integer::u8>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "type": "impl",
+    "name": "TemplateStoreComponentImpl",
+    "interface_name": "art_peace::templates::interfaces::ITemplateStore"
+  },
+  {
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "art_peace::templates::interfaces::TemplateMetadata",
+    "members": [
+      {
+        "name": "hash",
+        "type": "core::felt252"
+      },
+      {
+        "name": "name",
+        "type": "core::felt252"
+      },
+      {
+        "name": "position",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "width",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "height",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "reward",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "reward_token",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "creator",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "art_peace::templates::interfaces::ITemplateStore",
+    "items": [
+      {
+        "type": "function",
+        "name": "get_templates_count",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_template",
+        "inputs": [
+          {
+            "name": "template_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "art_peace::templates::interfaces::TemplateMetadata"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_template_hash",
+        "inputs": [
+          {
+            "name": "template_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::felt252"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "add_template",
+        "inputs": [
+          {
+            "name": "template_metadata",
+            "type": "art_peace::templates::interfaces::TemplateMetadata"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "is_template_complete",
+        "inputs": [
+          {
+            "name": "template_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
+        "state_mutability": "view"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "art_peace::art_peace::ArtPeace::InitParams",
+    "members": [
+      {
+        "name": "host",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "canvas_width",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "canvas_height",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "time_between_pixels",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "color_palette",
+        "type": "core::array::Array::<core::integer::u32>"
+      },
+      {
+        "name": "votable_colors",
+        "type": "core::array::Array::<core::integer::u32>"
+      },
+      {
+        "name": "end_time",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "daily_quests_count",
+        "type": "core::integer::u32"
+      }
+    ]
+  },
+  {
+    "type": "constructor",
+    "name": "constructor",
+    "inputs": [
+      {
+        "name": "init_params",
+        "type": "art_peace::art_peace::ArtPeace::InitParams"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::NewDay",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "day_index",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "start_time",
+        "type": "core::integer::u64",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::PixelPlaced",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "placed_by",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "pos",
+        "type": "core::integer::u128",
+        "kind": "key"
+      },
+      {
+        "name": "day",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "color",
+        "type": "core::integer::u8",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::BasicPixelPlaced",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "placed_by",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::MemberPixelsPlaced",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "faction_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "member_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "placed_time",
+        "type": "core::integer::u64",
+        "kind": "data"
+      },
+      {
+        "name": "member_pixels",
+        "type": "core::integer::u32",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::ExtraPixelsPlaced",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "placed_by",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "extra_pixels",
+        "type": "core::integer::u32",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::DailyQuestClaimed",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "day_index",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "quest_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "reward",
+        "type": "core::integer::u32",
+        "kind": "data"
+      },
+      {
+        "name": "calldata",
+        "type": "core::array::Span::<core::felt252>",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::MainQuestClaimed",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "quest_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "reward",
+        "type": "core::integer::u32",
+        "kind": "data"
+      },
+      {
+        "name": "calldata",
+        "type": "core::array::Span::<core::felt252>",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::VoteColor",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "voted_by",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "day",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "color",
+        "type": "core::integer::u8",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::FactionCreated",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "faction_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "name",
+        "type": "core::felt252",
+        "kind": "data"
+      },
+      {
+        "name": "leader",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
+      },
+      {
+        "name": "pool",
+        "type": "core::integer::u32",
+        "kind": "data"
+      },
+      {
+        "name": "members",
+        "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::MemberReplaced",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "faction_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "member_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "new_member",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::templates::component::TemplateStoreComponent::TemplateAdded",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "metadata",
+        "type": "art_peace::templates::interfaces::TemplateMetadata",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::templates::component::TemplateStoreComponent::TemplateCompleted",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::templates::component::TemplateStoreComponent::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "TemplateAdded",
+        "type": "art_peace::templates::component::TemplateStoreComponent::TemplateAdded",
+        "kind": "nested"
+      },
+      {
+        "name": "TemplateCompleted",
+        "type": "art_peace::templates::component::TemplateStoreComponent::TemplateCompleted",
+        "kind": "nested"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "NewDay",
+        "type": "art_peace::art_peace::ArtPeace::NewDay",
+        "kind": "nested"
+      },
+      {
+        "name": "PixelPlaced",
+        "type": "art_peace::art_peace::ArtPeace::PixelPlaced",
+        "kind": "nested"
+      },
+      {
+        "name": "BasicPixelPlaced",
+        "type": "art_peace::art_peace::ArtPeace::BasicPixelPlaced",
+        "kind": "nested"
+      },
+      {
+        "name": "MemberPixelsPlaced",
+        "type": "art_peace::art_peace::ArtPeace::MemberPixelsPlaced",
+        "kind": "nested"
+      },
+      {
+        "name": "ExtraPixelsPlaced",
+        "type": "art_peace::art_peace::ArtPeace::ExtraPixelsPlaced",
+        "kind": "nested"
+      },
+      {
+        "name": "DailyQuestClaimed",
+        "type": "art_peace::art_peace::ArtPeace::DailyQuestClaimed",
+        "kind": "nested"
+      },
+      {
+        "name": "MainQuestClaimed",
+        "type": "art_peace::art_peace::ArtPeace::MainQuestClaimed",
+        "kind": "nested"
+      },
+      {
+        "name": "VoteColor",
+        "type": "art_peace::art_peace::ArtPeace::VoteColor",
+        "kind": "nested"
+      },
+      {
+        "name": "FactionCreated",
+        "type": "art_peace::art_peace::ArtPeace::FactionCreated",
+        "kind": "nested"
+      },
+      {
+        "name": "MemberReplaced",
+        "type": "art_peace::art_peace::ArtPeace::MemberReplaced",
+        "kind": "nested"
+      },
+      {
+        "name": "TemplateEvent",
+        "type": "art_peace::templates::component::TemplateStoreComponent::Event",
+        "kind": "flat"
+      }
+    ]
+  }
+]
