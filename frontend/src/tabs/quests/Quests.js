@@ -145,6 +145,7 @@ const Quests = (props) => {
             markCompleted={markCompleted}
             address={props.address}
             artPeaceContract={props.artPeaceContract}
+            progress={4}
           />
         ))}
 
@@ -161,6 +162,7 @@ const Quests = (props) => {
             markCompleted={markCompleted}
             address={props.address}
             artPeaceContract={props.artPeaceContract}
+            progress={0}
           />
         ))}
       </div>

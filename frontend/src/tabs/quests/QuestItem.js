@@ -132,12 +132,20 @@ const QuestItem = (props) => {
           className={
             'QuestItem__progress ' +
             (props.status != 'completed'
-              ? 'QuestItem__progress--claimable'
+              ? 'QuestItem__progress--claimable '
+              : '') +
+            (props.progress && props.progress == 4
+              ? 'QuestItem__progression--pulsate '
               : '')
           }
         >
           <div
-            className={`QuestItem__progression QuestItem__progression--${props.status}`}
+            className={
+              `QuestItem__progression ` +
+              (props.progress
+                ? `QuestItem__progression--${props.progress} `
+                : '')
+            }
             onClick={claimOrExpand}
           ></div>
           <div className='Text__xsmall QuestItem__reward'>

@@ -73,6 +73,40 @@
   border: 0.1rem solid rgba(0, 0, 0, 0.2);
 }
 
+.QuestItem__progression--0 {
+  background-color: hsla(0, 100%, 60%, 1);
+}
+
+.QuestItem__progression--1 {
+  background-color: hsla(15, 100%, 60%, 1);
+}
+
+.QuestItem__progression--2 {
+  background-color: hsla(30, 100%, 60%, 1);
+}
+
+.QuestItem__progression--3 {
+  background-color: hsla(45, 100%, 60%, 1);
+}
+
+.QuestItem__progression--4 {
+  background-color: hsla(60, 100%, 60%, 1);
+}
+
+.QuestItem__progression--pulsate {
+  animation: pulse 1s infinite;
+  transition: all 0.5s ease-in;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.075);
+    }
+}
+
 .QuestItem__progression--completed {
   background-color: rgba(85, 221, 51, 0.9);
 }
