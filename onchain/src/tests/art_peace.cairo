@@ -477,15 +477,15 @@ fn distribute_rewards_test() {
     stop_prank(CheatTarget::One(art_peace_address));
 
     start_prank(CheatTarget::One(art_peace_address), user2);
-    art_peace.place_pixel(pos, color, now);
+    art_peace.place_pixel(1, 2, now);
     stop_prank(CheatTarget::One(art_peace_address));
 
     start_prank(CheatTarget::One(art_peace_address), user3);
-    art_peace.place_pixel(pos, color, now);
+    art_peace.place_pixel(WIDTH, 3, now);
     stop_prank(CheatTarget::One(art_peace_address));
 
     start_prank(CheatTarget::One(art_peace_address), user4);
-    art_peace.place_pixel(pos, color, now);
+    art_peace.place_pixel(WIDTH + 1, 4, now);
     stop_prank(CheatTarget::One(art_peace_address));
 
     template_verifier.complete_template(
@@ -495,8 +495,20 @@ fn distribute_rewards_test() {
 
     let art_token_balance_of_contract = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(art_peace_address);
     let art_token_balance_of_user = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user);
-    println!("user balance: {}", art_token_balance_of_user);
+    let art_token_balance_of_user2 = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user2);
+    let art_token_balance_of_user3 = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user3);
+    let art_token_balance_of_user4 = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user4);
+
+    println!("User 1 balance: {}", art_token_balance_of_user);
+    println!("User 2 balance: {}", art_token_balance_of_user2);
+    println!("User 3 balance: {}", art_token_balance_of_user3);
+    println!("User 4 balance: {}", art_token_balance_of_user4);
     println!("Contract balance: {}", art_token_balance_of_contract);
-    assert!(art_token_balance_of_user == 1, "incorrect reward amount");
+
+    assert!(art_token_balance_of_user == 1, "User 1 incorrect reward amount");
+    assert!(art_token_balance_of_user2 == 1, "User 2 incorrect reward amount");
+    assert!(art_token_balance_of_user3 == 1, "User 3 incorrect reward amount");
+    assert!(art_token_balance_of_user4 == 1, "User 4 incorrect reward amount");
+    assert!(art_token_balance_of_contract == 0, "Contract should not have any remaining balance");
 }
 

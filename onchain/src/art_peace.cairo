@@ -955,6 +955,7 @@ pub mod ArtPeace {
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
             // TODO: ensure template_image matches the template size & hash
+            let contract = starknet::get_contract_address();
             let mut pixel_contributors: Array<ContractAddress> = ArrayTrait::new();
             let mut total_pixels_by_user: Felt252Dict<u32> = Default::default();
             let mut pixel_contributors_indexes: Felt252Dict<u32> = Default::default();
@@ -1012,22 +1013,26 @@ pub mod ArtPeace {
                         .len() {
                             let reward_token = template_metadata.reward_token;
                             let reward_amount = template_metadata.reward;
-                            let total_pixels = self.total_pixels.read();
+                            let total_pixels_in_template = template_metadata.width
+                                * template_metadata.height;
 
                             let mut user = *pixel_contributors.at(i).into();
                             let user_index = (i + 1);
                             let user_total_pixels = total_pixels_by_user.get(user_index.into());
-                            
-                            let user_reward = (reward_amount * user_total_pixels.into()) / total_pixels.into();
 
-                            if user == Zero::zero() {
-                                panic!("no user recorded"); // for testing purpose only
-                            } else {
-                                let success = IERC20Dispatcher { contract_address: reward_token }
-                                    .transfer(user, user_reward);
-                                assert(success, 'ERC20 transfer fail!');
-                            }
-                        }
+                            let user_reward = (reward_amount * user_total_pixels.into())
+                                / total_pixels_in_template.into();
+
+                            assert(
+                                IERC20Dispatcher { contract_address: reward_token }
+                                    .balance_of(contract) >= user_reward,
+                                'insufficient funds'
+                            );
+                            let success = IERC20Dispatcher { contract_address: reward_token }
+                                .transfer(user, user_reward);
+                            assert(success, 'ERC20 transfer fail!');
+                            i += 1;
+                        };
                 }
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
