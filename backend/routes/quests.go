@@ -286,13 +286,16 @@ func SendChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if result != nil {
-		// Insert chat into database
-		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO FactionChats (sender, factionKey, message) VALUES ($1, $2, $3)", userAddress, chat.FactionKey, chat.Message)
-		if err != nil {
-			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to send chat")
-			return
-		}
+	if result == nil {
+		routeutils.WriteErrorJson(w, http.StatusForbidden, "User is not a member of the faction")
+		return
+
+	}
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO FactionChats (sender, factionKey, message) VALUES ($1, $2, $3)", userAddress, chat.FactionKey, chat.Message)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to send chat")
+		return
 	}
 
 	routeutils.WriteResultJson(w, "FactionChat updated successfully")
@@ -308,30 +311,27 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	type ExistsResult struct {
+		Exists int `db:"exists"`
+	}
+
 	canDelete := false
 
-	// Retrieve the faction leader from the database
-	leader, err := core.PostgresQueryOne[string]("SELECT ftns.leader FROM Factions ftns INNER JOIN FactionChats ftcs ON ftns.faction_key = ftcs.key WHERE ftcs.id = $1", chat.FactionKey)
+	//
+	err = core.PostgresQueryOne(
+		`SELECT 
+			CASE 
+				WHEN f.leader = $2 THEN TRUE 
+				WHEN fc.sender = $2 THEN TRUE 
+				ELSE FALSE 
+			END
+		FROM FactionChats fc
+		JOIN Factions f ON f.faction_key = fc.factionKey
+		WHERE fc.faction_key = $1`, chat.FactionKey, userAddress).Scan(&canDelete)
+
 	if err != nil {
 		http.Error(w, "Failed to retrieve faction leader", http.StatusInternalServerError)
 		return
-	}
-
-	if *leader == userAddress {
-		canDelete = true
-	}
-
-	if !canDelete {
-		sender, err := core.PostgresQueryOne[string]("SELECT sender FROM FactionChats WHERE id = $1", chat.FactionKey)
-		if err != nil {
-			http.Error(w, "Failed to retrieve sender", http.StatusInternalServerError)
-			return
-		}
-
-		if *sender == userAddress {
-			canDelete = true
-		}
-
 	}
 
 	// Check if the authenticated user is the sender or the faction leader
@@ -369,14 +369,16 @@ func GetFactionChats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if result != nil {
-		// Retrieve faction chats from database
-		chats, err := core.PostgresQueryJson[FactionChat]("SELECT id, sender, faction_key, message, time FROM FactionChats WHERE faction_key = $1 ORDER BY time ASC", chat.FactionKey)
-		if err != nil {
-			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get faction chats")
-			return
-		}
+	if result == nil {
+		routeutils.WriteErrorJson(w, http.StatusForbidden, "User is not a member of the faction")
+		return
 
-		routeutils.WriteDataJson(w, string(chats))
 	}
+	chats, err := core.PostgresQueryJson[FactionChat]("SELECT id, sender, faction_key, message, time FROM FactionChats WHERE faction_key = $1 ORDER BY time ASC", chat.FactionKey)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get faction chats")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(chats))
 }
