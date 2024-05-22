@@ -86,7 +86,7 @@ pub mod UsernameStore {
         }
 
         fn get_username(self: @ContractState, address: ContractAddress) -> felt252 {
-            self.user_to_username.read(get_caller_address())
+            self.user_to_username.read(address)
         }
 
         fn get_username_address(self: @ContractState, key: felt252) -> ContractAddress {

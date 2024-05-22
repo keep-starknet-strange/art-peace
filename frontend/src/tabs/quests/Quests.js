@@ -76,7 +76,7 @@ const Quests = (props) => {
       try {
         // Fetching daily quests from backend
         const getTodaysQuestsEndpoint =
-          backendUrl + `/get-todays-user-quests?address=${props.address}`;
+          backendUrl + `/get-todays-user-quests?address=${props.queryAddress}`;
         const dailyResponse = await fetch(getTodaysQuestsEndpoint);
         let dailyData = await dailyResponse.json();
         dailyData = dailyData.data;
@@ -87,7 +87,7 @@ const Quests = (props) => {
 
         // Fetching main quests from backend
         const getMainQuestsEndpoint =
-          backendUrl + `/get-main-user-quests?address=${props.address}`;
+          backendUrl + `/get-main-user-quests?address=${props.queryAddress}`;
         const mainResponse = await fetch(getMainQuestsEndpoint);
         let mainData = await mainResponse.json();
         mainData = mainData.data;
@@ -143,6 +143,8 @@ const Quests = (props) => {
             status={quest.completed ? 'completed' : 'incomplete'}
             args={quest.args}
             markCompleted={markCompleted}
+            address={props.address}
+            artPeaceContract={props.artPeaceContract}
           />
         ))}
 
@@ -157,6 +159,8 @@ const Quests = (props) => {
             status={quest.completed ? 'completed' : 'incomplete'}
             args={quest.args}
             markCompleted={markCompleted}
+            address={props.address}
+            artPeaceContract={props.artPeaceContract}
           />
         ))}
       </div>

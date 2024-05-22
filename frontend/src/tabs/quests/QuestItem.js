@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useContractWrite } from '@starknet-react/core';
 import { encodeToLink } from '../../utils/encodeToLink';
 import './QuestItem.css';
 import '../../utils/Styles.css';
 import { fetchWrapper } from '../../services/apiService';
+import { devnetMode } from '../../utils/Consts.js';
 
 const QuestItem = (props) => {
   // TODO: Flash red on quest if clicked and not completed w/ no args
@@ -61,8 +63,40 @@ const QuestItem = (props) => {
     setInputsValidated(validated);
   };
 
+  const [calls, setCalls] = useState([]);
+  const claimTodayQuestCall = (quest_id, calldata) => {
+    if (devnetMode) return;
+    if (!props.address || !props.artPeaceContract) return;
+    // TODO: Check valid inputs & expand calldata
+    setCalls(
+      props.artPeaceContract.populateTransaction['claim_today_quest'](
+        quest_id,
+        calldata
+      )
+    );
+  };
+
+  useEffect(() => {
+    const claimQuest = async () => {
+      if (devnetMode) return;
+      if (calls.length === 0) return;
+      await writeAsync();
+      console.log('Place Pixel successful:', data, isPending);
+      // TODO: Update the UI with the new state
+    };
+    claimQuest();
+  }, [calls]);
+
+  const { writeAsync, data, isPending } = useContractWrite({
+    calls
+  });
+
   const claimOrExpand = async () => {
     if (props.status == 'completed') {
+      return;
+    }
+    if (!devnetMode) {
+      claimTodayQuestCall(props.questId, []);
       return;
     }
     const response = await fetchWrapper(`claim-today-quest-devnet`, {

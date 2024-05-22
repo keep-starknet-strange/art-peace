@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useContractWrite } from '@starknet-react/core';
 import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
 import NFTSelector from './NFTSelector.js';
 import canvasConfig from '../configs/canvas.config.json';
 import { fetchWrapper } from '../services/apiService.js';
+import { devnetMode } from '../utils/Consts.js';
 
 const CanvasContainer = (props) => {
   // TODO: Handle window resize
@@ -151,6 +153,35 @@ const CanvasContainer = (props) => {
     props.setPixelPlacedBy(getPixelInfoEndpoint.data);
   };
 
+  const [calls, setCalls] = useState([]);
+  const placePixelCall = (position, color, now) => {
+    if (devnetMode) return;
+    if (!props.address || !props.artPeaceContract) return;
+    // TODO: Check valid inputs
+    setCalls(
+      props.artPeaceContract.populateTransaction['place_pixel'](
+        position,
+        color,
+        now
+      )
+    );
+  };
+
+  useEffect(() => {
+    const placePixel = async () => {
+      if (devnetMode) return;
+      if (calls.length === 0) return;
+      await writeAsync();
+      console.log('Place Pixel successful:', data, isPending);
+      // TODO: Update the UI with the new state
+    };
+    placePixel();
+  }, [calls]);
+
+  const { writeAsync, data, isPending } = useContractWrite({
+    calls
+  });
+
   const pixelClicked = async (e) => {
     if (props.nftMintingMode) {
       return;
@@ -205,6 +236,15 @@ const CanvasContainer = (props) => {
     const colorId = props.selectedColorId;
 
     const timestamp = Math.floor(Date.now() / 1000);
+
+    if (!devnetMode) {
+      placePixelCall(position, colorId, timestamp);
+      props.clearPixelSelection();
+      props.setSelectedColorId(-1);
+      props.setLastPlacedTime(timestamp * 1000);
+      return;
+    }
+
     const response = await fetchWrapper(`place-pixel-devnet`, {
       mode: 'cors',
       method: 'POST',
@@ -428,7 +468,14 @@ const CanvasContainer = (props) => {
             width={width}
             height={height}
             nftMintingMode={props.nftMintingMode}
+            nftSelectionStarted={props.nftSelectionStarted}
+            setNftSelectionStarted={props.setNftSelectionStarted}
+            nftSelected={props.nftSelected}
+            setNftSelected={props.setNftSelected}
             setNftMintingMode={props.setNftMintingMode}
+            setNftPosition={props.setNftPosition}
+            setNftWidth={props.setNftWidth}
+            setNftHeight={props.setNftHeight}
           />
         )}
       </div>
