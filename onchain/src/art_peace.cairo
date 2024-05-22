@@ -12,7 +12,6 @@ pub mod ArtPeace {
     use art_peace::templates::component::TemplateStoreComponent;
     use art_peace::templates::interfaces::{ITemplateVerifier, ITemplateStore, TemplateMetadata};
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
-    use core::num::traits::Zero;
 
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 

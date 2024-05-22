@@ -239,89 +239,89 @@ fn place_pixel_test() {
     assert!(art_peace.get_pixel(pos).color == color, "Pixel xy was not placed correctly at pos");
 }
 
-// #[test]
-// fn template_full_basic_test() {
-//     let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
-//     let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
-//     let template_verifier = ITemplateVerifierDispatcher {
-//         contract_address: art_peace.contract_address
-//     };
+#[test]
+fn template_full_basic_test() {
+    let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
+    let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
+    let template_verifier = ITemplateVerifierDispatcher {
+        contract_address: art_peace.contract_address
+    };
 
-//     assert!(template_store.get_templates_count() == 0, "Templates count is not 0");
+    assert!(template_store.get_templates_count() == 0, "Templates count is not 0");
 
-//     let erc20_mock: ContractAddress = deploy_erc20_mock();
+    let erc20_mock: ContractAddress = deploy_erc20_mock();
 
-//     // 2x2 template image
-//     let template_image = array![1, 2, 3, 4];
-//     let template_hash = compute_template_hash(template_image.span());
-//     let template_metadata = TemplateMetadata {
-//         name: 'test',
-//         hash: template_hash,
-//         position: 0,
-//         width: 2,
-//         height: 2,
-//         reward: 0,
-//         reward_token: erc20_mock,
-//         creator: get_caller_address()
-//     };
+    // 2x2 template image
+    let template_image = array![1, 2, 3, 4];
+    let template_hash = compute_template_hash(template_image.span());
+    let template_metadata = TemplateMetadata {
+        name: 'test',
+        hash: template_hash,
+        position: 0,
+        width: 2,
+        height: 2,
+        reward: 0,
+        reward_token: erc20_mock,
+        creator: get_caller_address()
+    };
 
-//     template_store.add_template(template_metadata);
+    template_store.add_template(template_metadata);
 
-//     assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
-//     assert!(template_store.get_template_hash(0) == template_hash, "Template hash is not correct");
-//     assert!(
-//         template_store.is_template_complete(0) == false,
-//         "Template is completed before it should be (base)"
-//     );
+    assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
+    assert!(template_store.get_template_hash(0) == template_hash, "Template hash is not correct");
+    assert!(
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (base)"
+    );
 
-//     warp_to_next_available_time(art_peace);
-//     let x = 0;
-//     let y = 0;
-//     let pos = x + y * WIDTH;
-//     let color = 1;
-//     art_peace.place_pixel_blocktime(pos, color);
-//     template_verifier.complete_template(0, template_image.span());
-//     assert!(
-//         template_store.is_template_complete(0) == false,
-//         "Template is completed before it should be (1)"
-//     );
+    warp_to_next_available_time(art_peace);
+    let x = 0;
+    let y = 0;
+    let pos = x + y * WIDTH;
+    let color = 1;
+    art_peace.place_pixel_blocktime(pos, color);
+    template_verifier.complete_template(0, template_image.span());
+    assert!(
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (1)"
+    );
 
-//     warp_to_next_available_time(art_peace);
-//     let x = 1;
-//     let y = 0;
-//     let pos = x + y * WIDTH;
-//     let color = 2;
-//     art_peace.place_pixel_blocktime(pos, color);
-//     template_verifier.complete_template(0, template_image.span());
-//     assert!(
-//         template_store.is_template_complete(0) == false,
-//         "Template is completed before it should be (2)"
-//     );
+    warp_to_next_available_time(art_peace);
+    let x = 1;
+    let y = 0;
+    let pos = x + y * WIDTH;
+    let color = 2;
+    art_peace.place_pixel_blocktime(pos, color);
+    template_verifier.complete_template(0, template_image.span());
+    assert!(
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (2)"
+    );
 
-//     warp_to_next_available_time(art_peace);
-//     let x = 0;
-//     let y = 1;
-//     let pos = x + y * WIDTH;
-//     let color = 3;
-//     art_peace.place_pixel_blocktime(pos, color);
-//     template_verifier.complete_template(0, template_image.span());
-//     assert!(
-//         template_store.is_template_complete(0) == false,
-//         "Template is completed before it should be (3)"
-//     );
+    warp_to_next_available_time(art_peace);
+    let x = 0;
+    let y = 1;
+    let pos = x + y * WIDTH;
+    let color = 3;
+    art_peace.place_pixel_blocktime(pos, color);
+    template_verifier.complete_template(0, template_image.span());
+    assert!(
+        template_store.is_template_complete(0) == false,
+        "Template is completed before it should be (3)"
+    );
 
-//     warp_to_next_available_time(art_peace);
-//     let x = 1;
-//     let y = 1;
-//     let pos = x + y * WIDTH;
-//     let color = 4;
-//     art_peace.place_pixel_blocktime(pos, color);
-//     template_verifier.complete_template(0, template_image.span());
-//     assert!(
-//         template_store.is_template_complete(0) == true,
-//         "Template is not completed after it should be"
-//     );
-// }
+    warp_to_next_available_time(art_peace);
+    let x = 1;
+    let y = 1;
+    let pos = x + y * WIDTH;
+    let color = 4;
+    art_peace.place_pixel_blocktime(pos, color);
+    template_verifier.complete_template(0, template_image.span());
+    assert!(
+        template_store.is_template_complete(0) == true,
+        "Template is not completed after it should be"
+    );
+}
 
 #[test]
 fn increase_day_test() {
@@ -432,7 +432,9 @@ fn deposit_reward_test() {
 fn distribute_rewards_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
-    let template_verifier = ITemplateVerifierDispatcher { contract_address: art_peace.contract_address };
+    let template_verifier = ITemplateVerifierDispatcher {
+        contract_address: art_peace.contract_address
+    };
     let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
 
     let erc20_mock: ContractAddress = deploy_erc20_mock();
@@ -462,7 +464,8 @@ fn distribute_rewards_test() {
     let user4 = 123456.try_into().unwrap();
 
     IERC20Dispatcher { contract_address: erc20_mock }.approve(art_peace_address, reward_amount);
-    let allowance = IERC20Dispatcher { contract_address: erc20_mock }.allowance(get_contract_address() ,art_peace_address);
+    let allowance = IERC20Dispatcher { contract_address: erc20_mock }
+        .allowance(get_contract_address(), art_peace_address);
     println!("Allowance: {}", allowance);
 
     template_store.add_template(template_metadata);
@@ -484,16 +487,18 @@ fn distribute_rewards_test() {
     art_peace.place_pixel(WIDTH + 1, 4, now);
     stop_prank(CheatTarget::One(art_peace_address));
 
-    template_verifier.complete_template(
-        template_id,
-        template_image_span
-    );
+    template_verifier.complete_template(template_id, template_image_span);
 
-    let art_token_balance_of_contract = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(art_peace_address);
-    let art_token_balance_of_user = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user);
-    let art_token_balance_of_user2 = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user2);
-    let art_token_balance_of_user3 = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user3);
-    let art_token_balance_of_user4 = IERC20Dispatcher { contract_address: erc20_mock }.balance_of(user4);
+    let art_token_balance_of_contract = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(art_peace_address);
+    let art_token_balance_of_user = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(user);
+    let art_token_balance_of_user2 = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(user2);
+    let art_token_balance_of_user3 = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(user3);
+    let art_token_balance_of_user4 = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(user4);
 
     println!("User 1 balance: {}", art_token_balance_of_user);
     println!("User 2 balance: {}", art_token_balance_of_user2);
