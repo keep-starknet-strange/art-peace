@@ -15,5 +15,5 @@
   font-size: 1.8rem;
   font-weight: bold;
   text-shadow: 0 0.2rem 0.5rem rgba(255, 255, 255, 0.9);
-  border: 0.1rem solid rgba(255, 255, 255, 0.8);
+  transform: scale(1.1);
 }
