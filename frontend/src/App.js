@@ -55,13 +55,11 @@ function App() {
   // Contracts
   // TODO: Pull addrs from api?
   const { contract: artPeaceContract } = useContract({
-    address:
-      process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
+    address: process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
     abi: art_peace_abi
   });
   const { contract: usernameContract } = useContract({
-    address:
-      process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
+    address: process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
     abi: username_store_abi
   });
 

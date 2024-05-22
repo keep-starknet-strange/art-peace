@@ -13,7 +13,7 @@ spec:
         app: indexer
     spec:
       nodeSelector:
-        cloud.google.com/compute-class: Balanced
+        cloud.google.com/compute-class: Scale-Out
         kubernetes.io/arch: arm64
       containers:
         - name: indexer
