@@ -99,12 +99,13 @@
 }
 
 @keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    25% {
-        transform: scale(1.075);
-    }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.075);
+  }
 }
 
 .QuestItem__progression--completed {
