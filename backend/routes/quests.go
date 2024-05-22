@@ -311,23 +311,12 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type ExistsResult struct {
-		Exists int `db:"exists"`
+	type Result struct {
+		IsLeaderOrSender bool `db:"is_leader_or_sender"`
 	}
 
-	canDelete := false
-
 	//
-	err = core.PostgresQueryOne(
-		`SELECT 
-			CASE 
-				WHEN f.leader = $2 THEN TRUE 
-				WHEN fc.sender = $2 THEN TRUE 
-				ELSE FALSE 
-			END
-		FROM FactionChats fc
-		JOIN Factions f ON f.faction_key = fc.factionKey
-		WHERE fc.faction_key = $1`, chat.FactionKey, userAddress).Scan(&canDelete)
+	result, err := core.PostgresQueryOne[Result]("SELECT CASE WHEN f.leader = $2 THEN TRUE WHEN fc.sender = $2 THEN TRUE ELSE FALSE END AS is_leader_or_sender FROM FactionChats fc JOIN Factions f ON f.faction_key = fc.factionKey WHERE fc.faction_key = $1;", chat.FactionKey, userAddress)
 
 	if err != nil {
 		http.Error(w, "Failed to retrieve faction leader", http.StatusInternalServerError)
@@ -335,7 +324,7 @@ func DeleteChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the authenticated user is the sender or the faction leader
-	if !canDelete {
+	if result == nil || !result.IsLeaderOrSender {
 		http.Error(w, "Not authorized to delete this chat", http.StatusForbidden)
 		return
 	}
