@@ -1,6 +1,9 @@
 #[starknet::contract]
 pub mod ArtPeace {
+    use core::traits::Into;
     use starknet::ContractAddress;
+    use core::poseidon::PoseidonTrait;
+    use core::hash::{HashStateTrait, HashStateExTrait};
     use art_peace::{IArtPeace, Pixel, Faction, MemberMetadata};
     use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::nfts::interfaces::{
@@ -948,10 +951,36 @@ pub mod ArtPeace {
     #[abi(embed_v0)]
     impl ArtPeaceTemplateVerifier of ITemplateVerifier<ContractState> {
         // TODO: Check template function
+        fn compute_template_hash(ref self: ContractState, template: Span<u8>) -> felt252 {
+            let template_len = template.len();
+            if template_len == 0 {
+                return 0;
+            }
+
+            let mut hasher = PoseidonTrait::new();
+            let mut i = 0;
+            while i < template_len {
+                hasher = hasher.update_with(*template.at(i));
+                i += 1;
+            };
+
+            hasher.finalize()
+        }
         fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
             // TODO: ensure template_image matches the template size & hash
+            let template_hash = compute_template_hash(template_image);
+            assert(template_hash == template_image, 'Template Image Hash is the same');
+
+            let template_store: TemplateMetadata = self.templates.templates.read(template_id);
+
+            let onchain_template_length: u128 = template_store.width * template_store.height;
+
+            assert(
+                onchain_template_length == template_image.into(), 'Template Image Hash is the same'
+            );
+
             let template_metadata: TemplateMetadata = self.get_template(template_id);
             let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata
                 .width

@@ -185,21 +185,21 @@ pub(crate) fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     );
 }
 
-fn compute_template_hash(template: Span<u8>) -> felt252 {
-    let template_len = template.len();
-    if template_len == 0 {
-        return 0;
-    }
+// fn compute_template_hash(template: Span<u8>) -> felt252 {
+//     let template_len = template.len();
+//     if template_len == 0 {
+//         return 0;
+//     }
 
-    let mut hasher = PoseidonTrait::new();
-    let mut i = 0;
-    while i < template_len {
-        hasher = hasher.update_with(*template.at(i));
-        i += 1;
-    };
+//     let mut hasher = PoseidonTrait::new();
+//     let mut i = 0;
+//     while i < template_len {
+//         hasher = hasher.update_with(*template.at(i));
+//         i += 1;
+//     };
 
-    hasher.finalize()
-}
+//     hasher.finalize()
+// }
 
 #[test]
 fn deploy_test() {
@@ -253,7 +253,7 @@ fn template_full_basic_test() {
 
     // 2x2 template image
     let template_image = array![1, 2, 3, 4];
-    let template_hash = compute_template_hash(template_image.span());
+    let template_hash = template_verifier.compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
         name: 'test',
         hash: template_hash,
