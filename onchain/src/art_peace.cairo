@@ -236,7 +236,7 @@ pub mod ArtPeace {
         self.extra_pixels.write(test_address, 1000);
         self
             .init_faction(
-                'StarkNet',
+                'RealmsWorld',
                 test_address,
                 10,
                 array![test_address, test_address, zero_address, zero_address, zero_address].span()
@@ -536,6 +536,7 @@ pub mod ArtPeace {
         }
 
         // TODO: Tests and integration
+        // TODO: Infinite replacement exploit
         fn replace_member(
             ref self: ContractState, faction_id: u32, member_id: u32, new_member: ContractAddress
         ) {
@@ -929,7 +930,7 @@ pub mod ArtPeace {
                 .set_canvas_contract(starknet::get_contract_address());
         }
 
-        fn mint_nft(self: @ContractState, mint_params: NFTMintParams) {
+        fn mint_nft(ref self: ContractState, mint_params: NFTMintParams) {
             let metadata = NFTMetadata {
                 position: mint_params.position,
                 width: mint_params.width,

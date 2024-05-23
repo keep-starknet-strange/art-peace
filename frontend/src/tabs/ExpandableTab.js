@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './ExpandableTab.css';
 import '../utils/Styles.css';
 
 const ExpandableTab = (props) => {
   // TODO: Close pixel selection when expanded
-  const [expanded, setExpanded] = useState(false);
 
   const MainSection = props.mainSection;
   const ExpandedSection = props.expandedSection;
@@ -12,18 +11,21 @@ const ExpandableTab = (props) => {
 
   // Click within the tab and drag to expand
   const handleMouseDown = (e) => {
+    if (props.canExpand === false) {
+      return;
+    }
     const startX = e.clientX;
 
     const handleMouseMove = (e) => {
       const x = e.clientX;
 
-      if (expanded) {
+      if (props.expanded) {
         if (x - startX > 75) {
-          setExpanded(false);
+          props.setExpanded(false);
         }
       } else {
         if (x - startX < -75) {
-          setExpanded(true);
+          props.setExpanded(true);
         }
       }
     };
@@ -37,7 +39,9 @@ const ExpandableTab = (props) => {
 
   return (
     <div
-      className={'ExpandableTab' + (expanded ? ' ExpandableTab--expanded' : '')}
+      className={
+        'ExpandableTab' + (props.expanded ? ' ExpandableTab--expanded' : '')
+      }
       onMouseDown={handleMouseDown}
     >
       <h1 className='Text__xlarge Heading__main ExpandableTab__title'>
@@ -45,14 +49,18 @@ const ExpandableTab = (props) => {
       </h1>
       <div className='ExpandableTab__content'>
         <MainSection {...rest} />
-        {expanded && <ExpandedSection {...rest} />}
+        {props.expanded && <ExpandedSection {...rest} />}
       </div>
-      <div
-        className='Button__primary ExpandableTab__expand'
-        onClick={() => setExpanded(!expanded)}
-      >
-        <p>{expanded ? '>' : '<'}</p>
-      </div>
+      {(props.canExpand === undefined || props.canExpand) && (
+        <div
+          className='Button__primary ExpandableTab__expand'
+          onClick={() => {
+            props.setExpanded(!props.expanded);
+          }}
+        >
+          <p>{props.expanded ? '>' : '<'}</p>
+        </div>
+      )}
       <p
         className='Button__close ExpandedTab__close'
         onClick={() => props.setActiveTab('Canvas')}
