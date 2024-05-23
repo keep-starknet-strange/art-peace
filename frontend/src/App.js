@@ -42,15 +42,24 @@ function App() {
   const { account, address } = useAccount();
   const { chain } = useNetwork();
   const [queryAddress, setQueryAddress] = useState('0');
+  const [connected, setConnected] = useState(false); // TODO: change to only devnet
   useEffect(() => {
-    if (address && devnetMode) {
-      setQueryAddress(
-        '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0'
-      );
+    if (devnetMode) {
+      if (connected) {
+        setQueryAddress(
+          '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0'
+        );
+      } else {
+        setQueryAddress('0');
+      }
     } else {
-      setQueryAddress(address ? address.slice(2) : '0');
+      if (!address) {
+        setQueryAddress('0');
+      } else {
+        setQueryAddress(address ? address.slice(2) : '0');
+      }
     }
-  }, [address]);
+  }, [address, connected]);
 
   // Contracts
   // TODO: art peace abi & contract address should be in a config
@@ -456,6 +465,7 @@ function App() {
           queryAddress={queryAddress}
           account={account}
           chain={chain}
+          setConnected={setConnected}
           artPeaceContract={artPeaceContract}
           usernameContract={usernameContract}
           colors={colors}
