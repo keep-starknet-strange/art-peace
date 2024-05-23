@@ -9,4 +9,3 @@ export const wsUrl = backendConfig.production
   : 'ws://' + backendConfig.host + ':' + backendConfig.port + '/ws';
 
 export const devnetMode = backendConfig.production === false;
-//export const devnetMode = false; //TODO: backendConfig.production === false;

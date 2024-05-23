@@ -67,6 +67,14 @@ const Account = (props) => {
     );
   };
 
+  const connectWallet = async (connector) => {
+    if (devnetMode) {
+      props.setConnected(true);
+      return;
+    }
+    connect({ connector });
+  };
+
   useEffect(() => {
     const usernameCall = async () => {
       if (devnetMode) return;
@@ -234,7 +242,7 @@ const Account = (props) => {
                   <button
                     className='Text__small Button__primary'
                     key={connector.id}
-                    onClick={() => connect({ connector })}
+                    onClick={() => connectWallet(connector)}
                   >
                     {connector.name}
                   </button>
