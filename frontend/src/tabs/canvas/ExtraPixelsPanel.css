@@ -58,7 +58,8 @@
   justify-content: center;
 
   /* TODO: Fix scrolling */
-  overflow-y: scroll;
+  height: 100%;
+  overflow-y: auto;
 }
 
 /* TODO: Always scroll to bottom when adding new pixel */
@@ -73,7 +74,8 @@
   gap: 1rem;
 
   /* TODO: Fix scrolling */
-  overflow-y: scroll;
+  height: 100%;
+  overflow-y: auto;
   border-left: 2px solid rgba(0, 0, 0, 0.4);
 }
 
