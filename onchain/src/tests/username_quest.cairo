@@ -30,7 +30,6 @@ fn deploy_username_quest(username_store_address: ContractAddress) -> ContractAdd
         username_store: username_store_address,
         art_peace: utils::ART_PEACE_CONTRACT(),
         reward: reward_amt,
-        username: username,
     }
         .serialize(ref username_quest_calldata);
 
@@ -91,7 +90,7 @@ fn username_quest_test() {
 
 
 #[test]
-fn username_quest_test() {
+fn username_quest_test_is_claimable() {
     let username_store_address = deploy_username_store_contract();
     let username_quest_contract_address = deploy_username_quest(username_store_address);
 
