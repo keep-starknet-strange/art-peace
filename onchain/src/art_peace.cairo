@@ -1,6 +1,7 @@
 #[starknet::contract]
 pub mod ArtPeace {
-    use core::traits::Into;
+    use core::traits::TryInto;
+use core::traits::Into;
     use starknet::ContractAddress;
     use core::poseidon::PoseidonTrait;
     use core::hash::{HashStateTrait, HashStateExTrait};
@@ -970,15 +971,20 @@ pub mod ArtPeace {
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
             // TODO: ensure template_image matches the template size & hash
-            let template_hash = compute_template_hash(template_image);
-            assert(template_hash == template_image, 'Template Image Hash is the same');
+            let template_hash = self.compute_template_hash(template_image);
+            let  template_image_value = *template_image.at(0);
+
+            let template_image_value: felt252 = template_image_value.into();
+
+            assert(template_hash == template_image_value, 'Template Image Hash is the same');
 
             let template_store: TemplateMetadata = self.templates.templates.read(template_id);
 
             let onchain_template_length: u128 = template_store.width * template_store.height;
+            let template_image_value: u128 = template_image_value.try_into().unwrap();
 
             assert(
-                onchain_template_length == template_image.into(), 'Template Image Hash is the same'
+                onchain_template_length == template_image_value, 'Template Image Hash is the same'
             );
 
             let template_metadata: TemplateMetadata = self.get_template(template_id);
