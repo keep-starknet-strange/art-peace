@@ -14,6 +14,7 @@ mod quests {
     pub mod unruggable_quest;
     pub mod nft_quest;
     pub mod hodl_quest;
+    pub mod vote_quest;
 
     use interfaces::{
         IQuest, IAuthorityQuest, IPixelQuest, IRainbowQuest, IUnruggableQuest, IQuestDispatcher,
