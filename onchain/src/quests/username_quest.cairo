@@ -12,7 +12,6 @@ pub mod UsernameQuest {
         username_store: ContractAddress,
         art_peace: ContractAddress,
         reward: u32,
-        username: felt252,
         claimed: LegacyMap<ContractAddress, bool>,
     }
 
@@ -21,7 +20,6 @@ pub mod UsernameQuest {
     pub struct UsernameQuestInitParams {
         pub username_store: ContractAddress,
         pub art_peace: ContractAddress,
-        pub username: felt252,
         pub reward: u32,
     }
 
@@ -29,7 +27,6 @@ pub mod UsernameQuest {
     fn constructor(ref self: ContractState, init_params: UsernameQuestInitParams) {
         self.username_store.write(init_params.username_store);
         self.art_peace.write(init_params.art_peace);
-        self.username.write(init_params.username);
         self.reward.write(init_params.reward);
     }
 
@@ -53,10 +50,10 @@ pub mod UsernameQuest {
             let claim_username: felt252 = username_store_main.get_username(user);
 
             if claim_username == 0 {
-                return true;
+                return false;
             }
 
-            return false;
+            return true;
         }
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
