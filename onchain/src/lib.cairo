@@ -64,6 +64,7 @@ mod tests {
     pub(crate) mod art_peace;
     pub(crate) mod username_store;
     pub(crate) mod authority_quest;
+    pub(crate) mod username_quest;
     pub(crate) mod nft_quest;
     pub(crate) mod hodl_quest;
     pub(crate) mod pixel_quest;
