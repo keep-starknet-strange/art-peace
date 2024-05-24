@@ -24,24 +24,27 @@ const Quests = (props) => {
 
   const localDailyQuests = [
     {
-      title: 'Place 10 pixels',
+      name: 'Place 10 pixels',
       description:
         'Add 10 pixels on the canvas [art/peace theme](https://www.google.com/)',
       reward: '3',
-      status: 'completed'
+      status: 'incomplete',
+      progress: 0
     },
     {
       name: 'Build a template',
       description: 'Create a template for the community to use',
       reward: '3',
-      status: 'claim'
+      status: 'claim',
+      progress: 1
     },
     {
       name: 'Deploy a Memecoin',
       description: 'Create an Unruggable memecoin',
       reward: '10',
       status: 'incomplete',
-      args: createArgs(['MemeCoin Address'], ['0x1234'], ['address'])
+      args: createArgs(['MemeCoin Address'], ['0x1234'], ['address']),
+      progress: 2
     }
   ];
 
@@ -55,19 +58,22 @@ const Quests = (props) => {
         ['Twitter Handle', 'Address', 'test'],
         ['@test', '0x1234', 'asdioj'],
         ['twitter', 'address', 'text']
-      )
+      ),
+      progress: 3
     },
     {
       name: 'Place 100 pixels',
       description: 'Add 100 pixels on the canvas',
       reward: '10',
-      status: 'completed'
+      status: 'completed',
+      progress: 4
     },
     {
       name: 'Mint art/peace NFT',
       description: 'Mint an NFT using the art/peace theme',
       reward: '5',
-      status: 'incomplete'
+      status: 'incomplete',
+      progress: 5
     }
   ];
 
@@ -83,6 +89,7 @@ const Quests = (props) => {
         if (!dailyData) {
           dailyData = localDailyQuests;
         }
+        dailyData = localDailyQuests;
         setTodaysQuests(sortByCompleted(dailyData));
 
         // Fetching main quests from backend
@@ -95,6 +102,7 @@ const Quests = (props) => {
           // TODO: remove this & use []
           mainData = localMainQuests;
         }
+        mainData = localMainQuests;
         setMainQuests(sortByCompleted(mainData));
       } catch (error) {
         console.error('Failed to fetch quests', error);
@@ -145,7 +153,7 @@ const Quests = (props) => {
             markCompleted={markCompleted}
             address={props.address}
             artPeaceContract={props.artPeaceContract}
-            progress={4}
+            progress={quest.progress}
           />
         ))}
 
@@ -162,7 +170,7 @@ const Quests = (props) => {
             markCompleted={markCompleted}
             address={props.address}
             artPeaceContract={props.artPeaceContract}
-            progress={0}
+            progress={quest.progress}
           />
         ))}
       </div>

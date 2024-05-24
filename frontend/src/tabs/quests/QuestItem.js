@@ -114,6 +114,12 @@ const QuestItem = (props) => {
     // TODO: Expand if not claimable && has args
   };
 
+  if (props.progress == 0) {
+    console.log(
+      props.progress ? `QuestItem__button__progress--${props.progress} ` : ''
+    );
+  }
+
   return (
     <div
       className={
@@ -130,21 +136,19 @@ const QuestItem = (props) => {
         </div>
         <div
           className={
-            'QuestItem__progress ' +
+            'QuestItem__button ' +
             (props.status != 'completed'
-              ? 'QuestItem__progress--claimable '
+              ? 'QuestItem__button--claimable '
               : '') +
             (props.progress && props.progress == 4
-              ? 'QuestItem__progression--pulsate '
+              ? 'QuestItem__button--pulsate '
               : '')
           }
         >
           <div
             className={
-              `QuestItem__progression ` +
-              (props.progress
-                ? `QuestItem__progression--${props.progress} `
-                : '')
+              'QuestItem__button__progress ' +
+              `QuestItem__button__progress--${props.progress} `
             }
             onClick={claimOrExpand}
           ></div>

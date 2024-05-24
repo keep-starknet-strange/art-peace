@@ -41,7 +41,7 @@
   line-height: 1.3rem;
 }
 
-.QuestItem__progress {
+.QuestItem__button {
   position: relative;
   width: 7rem;
   height: 3rem;
@@ -49,17 +49,19 @@
   border-radius: 1rem;
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
   border: 0.1rem solid rgba(0, 0, 0, 0.4);
+
+  background-color: rgba(224, 224, 224, 0.9);
 }
 
-.QuestItem__progress--claimable:hover {
+.QuestItem__button--claimable:hover {
   transform: scale(1.07) translateY(-0.15rem);
 }
 
-.QuestItem__progress--claimable:active {
+.QuestItem__button--claimable:active {
   transform: scale(1) translateY(0);
 }
 
-.QuestItem__progression {
+.QuestItem__button__progress {
   position: absolute;
   top: 0;
   left: 0;
@@ -68,32 +70,35 @@
   width: calc(100% - 2px);
   height: calc(100% - 2px);
 
-  background-color: rgba(221, 85, 51, 0.9);
+  background-color: rgba(224, 224, 224, 0.9);
   border-radius: 0.8rem;
   border: 0.1rem solid rgba(0, 0, 0, 0.2);
 }
 
-.QuestItem__progression--0 {
-  background-color: hsla(0, 100%, 60%, 1);
+.QuestItem__button__progress--0 {
+  background-color: hsla(0, 100%, 60%, 0.9);
 }
 
-.QuestItem__progression--1 {
+.QuestItem__button__progress--1 {
+  width: 25%;
   background-color: hsla(15, 100%, 60%, 1);
 }
 
-.QuestItem__progression--2 {
+.QuestItem__button__progress--2 {
+  width: 50%;
   background-color: hsla(30, 100%, 60%, 1);
 }
 
-.QuestItem__progression--3 {
+.QuestItem__button__progress--3 {
+  width: 75%;
   background-color: hsla(45, 100%, 60%, 1);
 }
 
-.QuestItem__progression--4 {
+.QuestItem__button__progress--4 {
   background-color: hsla(60, 100%, 60%, 1);
 }
 
-.QuestItem__progression--pulsate {
+.QuestItem__button--pulsate {
   animation: pulse 1s infinite;
   transition: all 0.5s ease-in;
 }
