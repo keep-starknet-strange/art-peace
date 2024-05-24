@@ -15,51 +15,60 @@ import (
 )
 
 func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
-	// TODO: combine high and low token ids
 	tokenIdLowHex := event.Event.Keys[1]
-	// TODO: tokenIdHighHex := event.Event.Keys[2]
-
+	tokenIdHighHex := event.Event.Keys[2]
+	
 	positionHex := event.Event.Data[0]
 	widthHex := event.Event.Data[1]
 	heightHex := event.Event.Data[2]
 	imageHashHex := event.Event.Data[3]
 	blockNumberHex := event.Event.Data[4]
 	minter := event.Event.Data[5][2:] // Remove 0x prefix
-
-	tokenId, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
+	
+	tokenIdLowInt, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting token id low hex to int", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting token id low hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
+	tokenIdHighInt, err := strconv.ParseInt(tokenIdHighHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processNFTMintedEvent", "Error converting token id high hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		return
+	}
+
+
 	position, err := strconv.ParseInt(positionHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting position hex to int", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting position hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
 	width, err := strconv.ParseInt(widthHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting width hex to int", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting width hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
 	height, err := strconv.ParseInt(heightHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting height hex to int", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting height hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
 	blockNumber, err := strconv.ParseInt(blockNumberHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting block number hex to int", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting block number hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
+
+	// combine high and low token ids 
+	tokenId := combineLowAndHighTokenId(tokenIdLowInt, tokenIdHighInt)
 
 	// Set NFT in postgres
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (token_id, position, width, height, image_hash, block_number, minter, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", tokenId, position, width, height, imageHashHex, blockNumber, minter, minter)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error inserting NFT into postgres", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error inserting NFT into postgres", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
@@ -67,7 +76,7 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 	ctx := context.Background()
 	canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error getting canvas from redis", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error getting canvas from redis", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
@@ -76,17 +85,17 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 	for idx, colorHex := range colorPaletteHex {
 		r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error converting red hex to int when creating palette", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error converting red hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 		g, err := strconv.ParseInt(colorHex[2:4], 16, 64)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error converting green hex to int when creating palette", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error converting green hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 		b, err := strconv.ParseInt(colorHex[4:6], 16, 64)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error converting blue hex to int when creating palette", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error converting blue hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 		colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
@@ -118,14 +127,14 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 	filename := fmt.Sprintf("nft-%d.png", tokenId)
 	file, err := os.Create(filename)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error creating file", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error creating file", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 	defer file.Close()
 
 	err = png.Encode(file, generatedImage)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error encoding image", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error encoding image", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 

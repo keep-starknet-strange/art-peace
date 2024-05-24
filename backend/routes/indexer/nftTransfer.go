@@ -10,20 +10,28 @@ import (
 
 func processNFTTransferEvent(event IndexerEvent, w http.ResponseWriter) {
 	to := event.Event.Keys[2][2:] // Remove 0x prefix
-	// TODO: combine high and low token ids
 	tokenIdLowHex := event.Event.Keys[3]
-	// TODO tokenIdHighHex := event.Event.Keys[4]
-
-	tokenId, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
+	tokenIdHighHex := event.Event.Keys[4]
+	
+	tokenIdLowInt, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTTransferEvent", "Error converting token id low hex to int", to, tokenIdLowHex)
+		PrintIndexerError("processNFTTransferEvent", "Error converting token id low hex to int", to, tokenIdLowHex, tokenIdHighHex)
 		return
 	}
+
+	tokenIdHighInt, err := strconv.ParseInt(tokenIdHighHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processNFTTransferEvent", "Error converting token id high hex to int", to, tokenIdLowHex, tokenIdHighHex)
+		return
+	}
+
+	// combine high and low token ids
+	tokenId := combineLowAndHighTokenId(tokenIdLowInt, tokenIdHighInt)
 
 	// Set owner
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE NFTs SET owner = $1 WHERE token_id = $2", to, tokenId)
 	if err != nil {
-		PrintIndexerError("processNFTTransferEvent", "Error updating owner in postgres", to, tokenIdLowHex)
+		PrintIndexerError("processNFTTransferEvent", "Error updating owner in postgres", to, tokenIdLowHex, tokenIdHighHex)
 		return
 	}
 }
