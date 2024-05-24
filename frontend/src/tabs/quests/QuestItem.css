@@ -70,7 +70,7 @@
   width: calc(100% - 2px);
   height: calc(100% - 2px);
 
-  background-color: rgba(224, 224, 224, 0.9);
+  background-color: rgba(224, 224, 224, 0.9);    /* Default bg color */
   border-radius: 0.8rem;
   border: 0.1rem solid rgba(0, 0, 0, 0.2);
 }

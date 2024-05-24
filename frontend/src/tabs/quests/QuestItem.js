@@ -114,14 +114,13 @@ const QuestItem = (props) => {
     // TODO: Expand if not claimable && has args
   };
 
-  if (props.progress == 0) {
-    console.log(
-      props.progress ? `QuestItem__button__progress--${props.progress} ` : ''
-    );
+  let progress;
+  // progress cannot be more than needed. So if it is, it will set our progress to -1.
+  if (props.progress > props.needed) {
+    progress = -1;
+  } else {
+    progress = Math.floor((props.progress / props.needed) * 4);
   }
-
-  const progress = Math.floor((props.progress / props.needed) * 4);
-  console.log(props.progress, props.needed, progress);
 
   return (
     <div
