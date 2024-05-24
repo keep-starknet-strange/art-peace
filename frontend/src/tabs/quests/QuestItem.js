@@ -120,6 +120,9 @@ const QuestItem = (props) => {
     );
   }
 
+  const progress = Math.floor((props.progress / props.needed) * 4);
+  console.log(props.progress, props.needed, progress);
+
   return (
     <div
       className={
@@ -140,15 +143,13 @@ const QuestItem = (props) => {
             (props.status != 'completed'
               ? 'QuestItem__button--claimable '
               : '') +
-            (props.progress && props.progress == 4
-              ? 'QuestItem__button--pulsate '
-              : '')
+            (progress == 4 ? 'QuestItem__button--pulsate ' : '')
           }
         >
           <div
             className={
               'QuestItem__button__progress ' +
-              `QuestItem__button__progress--${props.progress} `
+              `QuestItem__button__progress--${progress} `
             }
             onClick={claimOrExpand}
           ></div>

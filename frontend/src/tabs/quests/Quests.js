@@ -29,14 +29,16 @@ const Quests = (props) => {
         'Add 10 pixels on the canvas [art/peace theme](https://www.google.com/)',
       reward: '3',
       status: 'incomplete',
-      progress: 0
+      progress: 0,
+      needed: 13
     },
     {
       name: 'Build a template',
       description: 'Create a template for the community to use',
       reward: '3',
       status: 'claim',
-      progress: 1
+      progress: 3,
+      needed: 13
     },
     {
       name: 'Deploy a Memecoin',
@@ -44,7 +46,8 @@ const Quests = (props) => {
       reward: '10',
       status: 'incomplete',
       args: createArgs(['MemeCoin Address'], ['0x1234'], ['address']),
-      progress: 2
+      progress: 6,
+      needed: 13
     }
   ];
 
@@ -59,21 +62,24 @@ const Quests = (props) => {
         ['@test', '0x1234', 'asdioj'],
         ['twitter', 'address', 'text']
       ),
-      progress: 3
+      progress: 9,
+      needed: 13
     },
     {
       name: 'Place 100 pixels',
       description: 'Add 100 pixels on the canvas',
       reward: '10',
       status: 'completed',
-      progress: 4
+      progress: 12,
+      needed: 13
     },
     {
       name: 'Mint art/peace NFT',
       description: 'Mint an NFT using the art/peace theme',
       reward: '5',
       status: 'incomplete',
-      progress: 5
+      progress: 13,
+      needed: 13
     }
   ];
 
@@ -154,6 +160,7 @@ const Quests = (props) => {
             address={props.address}
             artPeaceContract={props.artPeaceContract}
             progress={quest.progress}
+            needed={quest.needed}
           />
         ))}
 
@@ -171,6 +178,7 @@ const Quests = (props) => {
             address={props.address}
             artPeaceContract={props.artPeaceContract}
             progress={quest.progress}
+            needed={quest.needed}
           />
         ))}
       </div>
