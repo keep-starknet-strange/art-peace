@@ -1,5 +1,5 @@
 .Canvas {
-  background-color: blue;
+  background-color: rgba(120, 120, 120, 1);
   image-rendering: pixelated;
   box-shadow: 0 0 0.05rem 0.01rem rgba(0, 0, 0, 0.4);
 }

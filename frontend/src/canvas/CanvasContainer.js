@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useContractWrite } from '@starknet-react/core';
 import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
 import NFTSelector from './NFTSelector.js';
 import canvasConfig from '../configs/canvas.config.json';
 import { fetchWrapper } from '../services/apiService.js';
+import { devnetMode } from '../utils/Consts.js';
 
 const CanvasContainer = (props) => {
   // TODO: Handle window resize
@@ -50,7 +52,7 @@ const CanvasContainer = (props) => {
       setDragStartX(e.clientX);
       setDragStartY(e.clientY);
     }
-    if (isErasing) {
+    if (props.isEraserMode && isErasing) {
       pixelClicked(e);
     }
   };
@@ -151,6 +153,35 @@ const CanvasContainer = (props) => {
     props.setPixelPlacedBy(getPixelInfoEndpoint.data);
   };
 
+  const [calls, setCalls] = useState([]);
+  const placePixelCall = (position, color, now) => {
+    if (devnetMode) return;
+    if (!props.address || !props.artPeaceContract) return;
+    // TODO: Check valid inputs
+    setCalls(
+      props.artPeaceContract.populateTransaction['place_pixel'](
+        position,
+        color,
+        now
+      )
+    );
+  };
+
+  useEffect(() => {
+    const placePixel = async () => {
+      if (devnetMode) return;
+      if (calls.length === 0) return;
+      await writeAsync();
+      console.log('Place Pixel successful:', data, isPending);
+      // TODO: Update the UI with the new state
+    };
+    placePixel();
+  }, [calls]);
+
+  const { writeAsync, data, isPending } = useContractWrite({
+    calls
+  });
+
   const pixelClicked = async (e) => {
     if (props.nftMintingMode) {
       return;
@@ -205,6 +236,15 @@ const CanvasContainer = (props) => {
     const colorId = props.selectedColorId;
 
     const timestamp = Math.floor(Date.now() / 1000);
+
+    if (!devnetMode) {
+      placePixelCall(position, colorId, timestamp);
+      props.clearPixelSelection();
+      props.setSelectedColorId(-1);
+      props.setLastPlacedTime(timestamp * 1000);
+      return;
+    }
+
     const response = await fetchWrapper(`place-pixel-devnet`, {
       mode: 'cors',
       method: 'POST',
@@ -230,6 +270,14 @@ const CanvasContainer = (props) => {
         return;
       }
       if (props.nftMintingMode) {
+        return;
+      }
+      if (
+        !(
+          e.target.classList.contains('ExtraPixelsCanvas') ||
+          e.target.classList.contains('Canvas')
+        )
+      ) {
         return;
       }
 
@@ -259,8 +307,30 @@ const CanvasContainer = (props) => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
       return null;
     }
+
     if (props.selectedColorId === -1) {
-      // TODO: Check if extra pixel placed at position
+      const existingPixel = props.extraPixelsData.find(
+        (pixel) =>
+          pixel.x == props.selectedPositionX &&
+          pixel.y == props.selectedPositionY
+      );
+
+      if (existingPixel) {
+        let color = props.colors[existingPixel.colorId];
+        return (
+          '#' +
+          (255 - parseInt(color.substring(0, 2), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(2, 4), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(4, 6), 16))
+            .toString(16)
+            .padStart(2, '0')
+        );
+      }
+
       let color = props.canvasRef.current
         .getContext('2d')
         .getImageData(
@@ -277,6 +347,31 @@ const CanvasContainer = (props) => {
         color[3].toString(16).padStart(2, '0')
       );
     }
+
+    if (props.isExtraDeleteMode) {
+      const existingPixel = props.extraPixelsData.find(
+        (pixel) =>
+          pixel.x == props.selectedPositionX &&
+          pixel.y == props.selectedPositionY
+      );
+
+      if (existingPixel) {
+        let color = props.colors[existingPixel.colorId];
+        return (
+          '#' +
+          (255 - parseInt(color.substring(0, 2), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(2, 4), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(4, 6), 16))
+            .toString(16)
+            .padStart(2, '0')
+        );
+      }
+    }
+
     return '#' + props.colors[props.selectedColorId] + 'FF';
   };
 
@@ -294,13 +389,18 @@ const CanvasContainer = (props) => {
     if (props.selectedColorId === -1) {
       setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
     } else {
-      setSelectedBackgroundColor(`#${props.colors[props.selectedColorId]}FF`);
+      if (props.isExtraDeleteMode) {
+        setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
+      } else {
+        setSelectedBackgroundColor(`#${props.colors[props.selectedColorId]}FF`);
+      }
     }
   }, [
     canvasScale,
     props.selectedColorId,
     props.selectedPositionX,
-    props.selectedPositionY
+    props.selectedPositionY,
+    props.isExtraDeleteMode
   ]);
 
   return (
@@ -368,7 +468,14 @@ const CanvasContainer = (props) => {
             width={width}
             height={height}
             nftMintingMode={props.nftMintingMode}
+            nftSelectionStarted={props.nftSelectionStarted}
+            setNftSelectionStarted={props.setNftSelectionStarted}
+            nftSelected={props.nftSelected}
+            setNftSelected={props.setNftSelected}
             setNftMintingMode={props.setNftMintingMode}
+            setNftPosition={props.setNftPosition}
+            setNftWidth={props.setNftWidth}
+            setNftHeight={props.setNftHeight}
           />
         )}
       </div>

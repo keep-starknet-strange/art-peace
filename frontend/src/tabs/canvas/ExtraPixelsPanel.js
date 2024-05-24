@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useContractWrite } from '@starknet-react/core';
 import './ExtraPixelsPanel.css';
 import canvasConfig from '../../configs/canvas.config.json';
 import { fetchWrapper } from '../../services/apiService.js';
+import { devnetMode } from '../../utils/Consts.js';
 
 const ExtraPixelsPanel = (props) => {
   // TODO: Change on isPortrait
@@ -18,23 +20,62 @@ const ExtraPixelsPanel = (props) => {
     props.clearPixelSelection();
   };
 
+  const [calls, setCalls] = useState([]);
+  const extraPixelPlaceCall = (positions, colors, now) => {
+    if (devnetMode) return;
+    if (!props.address || !props.artPeaceContract) return;
+    // TODO: Validate inputs
+    setCalls(
+      props.artPeaceContract.populateTransaction['place_extra_pixels'](
+        positions,
+        colors,
+        now
+      )
+    );
+  };
+
+  useEffect(() => {
+    const extraPixelsPlaced = async () => {
+      if (devnetMode) return;
+      if (calls.length === 0) return;
+      await writeAsync();
+      console.log('Extra pixels placed successful:', data, isPending);
+      // TODO: Update the UI with the new vote count
+    };
+    extraPixelsPlaced();
+  }, [calls]);
+
+  const { writeAsync, data, isPending } = useContractWrite({
+    calls
+  });
+
   // TODO: Is rounding down the time always okay?
   const submit = async () => {
-    let placeExtraPixelsEndpoint = 'place-extra-pixels-devnet';
     let timestamp = Math.floor(Date.now() / 1000);
-    const response = await fetchWrapper(placeExtraPixelsEndpoint, {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({
-        extraPixels: props.extraPixelsData.map((pixel) => ({
-          position: pixel.x + pixel.y * canvasConfig.canvas.width,
-          colorId: pixel.colorId
-        })),
-        timestamp: timestamp
-      })
-    });
-    if (response.result) {
-      console.log(response.result);
+    if (!devnetMode) {
+      extraPixelPlaceCall(
+        props.extraPixelsData.map(
+          (pixel) => pixel.x + pixel.y * canvasConfig.canvas.width
+        ),
+        props.extraPixelsData.map((pixel) => pixel.colorId),
+        timestamp
+      );
+    } else {
+      let placeExtraPixelsEndpoint = 'place-extra-pixels-devnet';
+      const response = await fetchWrapper(placeExtraPixelsEndpoint, {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          extraPixels: props.extraPixelsData.map((pixel) => ({
+            position: pixel.x + pixel.y * canvasConfig.canvas.width,
+            colorId: pixel.colorId
+          })),
+          timestamp: timestamp
+        })
+      });
+      if (response.result) {
+        console.log(response.result);
+      }
     }
     if (basePixelUsed) {
       props.setLastPlacedTime(timestamp * 1000);
@@ -160,7 +201,7 @@ const ExtraPixelsPanel = (props) => {
             className='Text__medium Heading__sub'
             style={{ textAlign: 'center' }}
           >
-            Pixel Types
+            Available
           </p>
           <div
             className={`ExtraPixelsPanel__info__item ${basePixelUsed || !props.basePixelUp ? 'ExtraPixelsPanel__info__item--used' : ''}`}
@@ -235,6 +276,14 @@ const ExtraPixelsPanel = (props) => {
                   className='ExtraPixelsPanel__bubble'
                   style={{
                     backgroundColor: `#${props.colors[pixelData.colorId]}FF`
+                  }}
+                  onMouseOver={() => {
+                    props.setIsExtraDeleteMode(true);
+                    props.setPixelSelection(pixelData.x, pixelData.y);
+                    props.setSelectedColorId(pixelData.colorId);
+                  }}
+                  onMouseOut={() => {
+                    props.setIsExtraDeleteMode(false);
                   }}
                   onClick={() => props.clearExtraPixel(index)}
                 >

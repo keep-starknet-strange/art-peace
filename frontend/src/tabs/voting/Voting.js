@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useContractWrite } from '@starknet-react/core';
 import BasicTab from '../BasicTab.js';
 import './Voting.css';
 import VoteItem from './VoteItem.js';
 import {
+  fetchWrapper,
   getVotableColors,
   voteColorDevnet
 } from '../../services/apiService.js';
+import { devnetMode } from '../../utils/Consts.js';
 
 const Voting = (props) => {
   const [userVote, setUserVote] = useState(-1);
@@ -15,9 +18,52 @@ const Voting = (props) => {
     error: ''
   });
 
+  const [calls, setCalls] = useState([]);
+  const voteCall = (userVote) => {
+    if (devnetMode) return;
+    if (!props.address || !props.artPeaceContract) return;
+    if (userVote === -1) return;
+    setCalls(
+      props.artPeaceContract.populateTransaction['vote_color'](userVote)
+    );
+  };
+
+  useEffect(() => {
+    const voteColor = async () => {
+      if (devnetMode) return;
+      if (calls.length === 0) return;
+      await writeAsync();
+      console.log('Vote successful:', data, isPending);
+      // TODO: Update the UI with the new vote count
+    };
+    voteColor();
+  }, [calls]);
+
+  const { writeAsync, data, isPending } = useContractWrite({
+    calls
+  });
+
+  useEffect(() => {
+    async function fetchUserVote() {
+      let getUserVote = await fetchWrapper(
+        `get-user-vote?address=${props.queryAddress}`
+      );
+      if (!getUserVote.data) {
+        return;
+      }
+      setUserVote(getUserVote.data);
+    }
+    fetchUserVote();
+  }, [props.queryAddress]);
+
   const castVote = async (index) => {
     if (userVote === index) {
       return; // Prevent re-voting for the same index
+    }
+    if (!devnetMode) {
+      setUserVote(index);
+      voteCall(index);
+      return;
     }
     try {
       const result = await voteColorDevnet(index);

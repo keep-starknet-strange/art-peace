@@ -33,6 +33,14 @@ pub(crate) fn PLAYER2() -> ContractAddress {
     contract_address_const::<'Player2'>()
 }
 
+pub(crate) fn PLAYER3() -> ContractAddress {
+    contract_address_const::<'Player3'>()
+}
+
+pub(crate) fn PLAYER4() -> ContractAddress {
+    contract_address_const::<'Player4'>()
+}
+
 // Math
 pub(crate) fn pow_256(self: u256, mut exponent: u8) -> u256 {
     if self.is_zero() {
