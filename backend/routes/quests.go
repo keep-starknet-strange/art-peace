@@ -2,6 +2,8 @@ package routes
 
 import (
 	"context"
+	"encoding/json"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -44,6 +46,27 @@ type MainQuest struct {
 	Reward      int    `json:"reward"`
 }
 
+type UserMainQuest struct {
+		QuestId     int    `json:"questId"`
+}
+
+type UserMainQuestProgress struct {
+		QuestId     int    `json:"questId"`
+		Progress 		int     `json:"progress"`
+		Needed 		  int     `json:"needed"`
+}
+
+type UserDailyQuest struct {
+		QuestId     int    `json:"questId"`
+}
+
+type UserDailyQuestProgress struct {
+		QuestId     int    `json:"questId"`
+		Progress 		int     `json:"progress"`
+		Needed 		  int     `json:"needed"`
+}
+
+
 type QuestContractConfig struct {
 	Type       string   `json:"type"`
 	InitParams []string `json:"initParams"`
@@ -81,6 +104,8 @@ func InitQuestsRoutes() {
 	http.HandleFunc("/get-completed-daily-quests", GetCompletedDailyQuests)
 	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
 	http.HandleFunc("/get-today-start-time", GetTodayStartTime)
+	http.HandleFunc("/get-quest-status", GetMainUserQuestsProgress)
+	http.HandleFunc("/get-daily-quest-status", GetDailyUserQuestsProgress)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/claim-today-quest-devnet", ClaimTodayQuestDevnet)
 	}
@@ -155,6 +180,84 @@ func GetMainUserQuests(w http.ResponseWriter, r *http.Request) {
 
 	routeutils.WriteDataJson(w, string(quests))
 }
+
+func GetMainUserQuestsProgress(w http.ResponseWriter, r *http.Request) {
+	userAddress := r.URL.Query().Get("address")
+	if userAddress == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		return
+	}
+
+	// nft, err := core.PostgresQueryOneJson[NFTData]("SELECT * FROM nfts WHERE token_id = $1", tokenId)
+	quests, err := core.PostgresQueryJson[UserMainQuest]("SELECT questId FROM UserMainQuests where user_address = $1", userAddress)
+	
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests")
+		return
+	}
+	var userMainQuestsProgress = make([]UserMainQuestProgress, len(quests)) //[]UserMainQuestProgress
+	for _, quest := range quests {
+		progress := rand.Intn(100) // Random progress between 0 and 99
+		needed := rand.Intn(100) + 1
+
+		userMainQuestsProgress = append(userMainQuestsProgress, UserMainQuestProgress{
+			QuestId:  quest.QuestId,
+			Progress: progress,
+			Needed:   needed,
+		})
+
+	}
+
+	questsProgressJson, err := json.Marshal(userMainQuestsProgress)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal quests progress")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(questsProgressJson))
+}
+
+func GetDailyUserQuestsProgress(w http.ResponseWriter, r *http.Request) {
+	userAddress := r.URL.Query().Get("address")
+	if userAddress == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		return
+	}
+
+		dayIndex := r.URL.Query().Get("dayIndex")
+	if userAddress == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing day index parameter")
+		return
+	}
+
+	quests, err := core.PostgresQueryJson[UserDailyQuest]("SELECT questId FROM UserDailyQuests where user_address = $1 AND dayIndex = $2 ", userAddress, dayIndex)
+	
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests")
+		return
+	}
+	var userDailyQuestsProgress = make([]UserMainQuestProgress, len(quests)) 
+	for _, quest := range quests {
+		progress := rand.Intn(100) 
+		needed := rand.Intn(100) + 1
+
+		userDailyQuestsProgress = append(userDailyQuestsProgress, UserMainQuestProgress{
+			QuestId:  quest.QuestId,
+			Progress: progress,
+			Needed:   needed,
+		})
+
+	}
+
+	questsProgressJson, err := json.Marshal(userDailyQuestsProgress)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal quests progress")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(questsProgressJson))
+}
+
 
 // Get today's quests based on the current day index.
 func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
