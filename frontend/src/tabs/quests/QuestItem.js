@@ -145,7 +145,7 @@ const QuestItem = (props) => {
             (props.status != 'completed'
               ? 'QuestItem__button--claimable '
               : '') +
-            (progress == 4 ? 'QuestItem__button--pulsate ' : '')
+            (progress == 100 ? 'QuestItem__button--pulsate ' : '')
           }
         >
           <div
