@@ -95,7 +95,6 @@ const Quests = (props) => {
         if (!dailyData) {
           dailyData = localDailyQuests;
         }
-        dailyData = localDailyQuests;
         setTodaysQuests(sortByCompleted(dailyData));
 
         // Fetching main quests from backend
@@ -108,7 +107,6 @@ const Quests = (props) => {
           // TODO: remove this & use []
           mainData = localMainQuests;
         }
-        mainData = localMainQuests;
         setMainQuests(sortByCompleted(mainData));
       } catch (error) {
         console.error('Failed to fetch quests', error);
