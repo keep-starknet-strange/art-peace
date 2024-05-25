@@ -71,6 +71,7 @@ mod tests {
     pub(crate) mod rainbow_quest;
     pub(crate) mod template_quest;
     pub(crate) mod unruggable_quest;
+    pub(crate) mod vote_quest;
     pub(crate) mod utils;
 }
 
