@@ -8,6 +8,7 @@ use art_peace::{
 
 const reward: u32 = 99;
 const day_index: u32 = 0;
+const invalid_day_index: u32 = 1;
 
 
 fn deploy_vote_quest() -> ContractAddress {
@@ -69,4 +70,52 @@ fn vote_quest_test() {
         art_peace_dispatcher.get_user_extra_pixels_count(utils::PLAYER1()) == reward,
         "Extra pixels are wrong after main quest claim"
     );
+}
+
+#[test]
+#[should_panic(expected: 'Quest not claimable')]
+fn vote_quest_test_player_has_not_voted() {
+    let vote_quest_contract_address = deploy_vote_quest();
+    let art_peace_dispatcher = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(
+            array![].span(), array![vote_quest_contract_address].span()
+        )
+    };
+
+    start_prank(CheatTarget::One(art_peace_dispatcher.contract_address), utils::PLAYER1());
+
+    // Set day index in storage
+    store(
+        art_peace_dispatcher.contract_address,
+        selector!("day_index"),
+        array![day_index.into()].span()
+    );
+    // Player claim quest
+    art_peace_dispatcher.claim_main_quest(0, utils::EMPTY_CALLDATA());
+}
+
+#[test]
+// When the `votable_colors` storage variable is not set for a particular day index, trying to 
+// vote for a color at that day panics with 'Color out of bounds' error
+#[should_panic(expected: 'Color out of bounds')]
+fn vote_quest_test_invalid_day_index() {
+    let vote_quest_contract_address = deploy_vote_quest();
+    let art_peace_dispatcher = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(
+            array![].span(), array![vote_quest_contract_address].span()
+        )
+    };
+
+    start_prank(CheatTarget::One(art_peace_dispatcher.contract_address), utils::PLAYER1());
+
+    // Set day index in storage
+    store(
+        art_peace_dispatcher.contract_address,
+        selector!("day_index"),
+        array![invalid_day_index.into()].span()
+    );
+    // Player vote for a color
+    art_peace_dispatcher.vote_color(1);
+    // Player claim quest
+    art_peace_dispatcher.claim_main_quest(0, utils::EMPTY_CALLDATA());
 }
