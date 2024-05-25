@@ -7,7 +7,7 @@ use art_peace::tests::art_peace::deploy_with_quests_contract;
 use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
 
 const reward: u32 = 99;
-const day_index: u32 = 1;
+const day_index: u32 = 0;
 
 
 fn deploy_vote_quest() -> ContractAddress {
@@ -52,8 +52,17 @@ fn vote_quest_test() {
 
     snf::start_prank(CheatTarget::One(art_peace_dispatcher.contract_address), utils::PLAYER1());
 
+    // Set day index in storage
+    snf::store(
+        art_peace_dispatcher.contract_address,
+        selector!("day_index"),
+        array![day_index.into()].span()
+    );
+    // Player vote for a color
     art_peace_dispatcher.vote_color(1);
+    // Player claim quest
     art_peace_dispatcher.claim_main_quest(0, utils::EMPTY_CALLDATA());
+
     snf::stop_prank(CheatTarget::One(art_peace_dispatcher.contract_address));
 
     assert!(
@@ -61,4 +70,3 @@ fn vote_quest_test() {
         "Extra pixels are wrong after main quest claim"
     );
 }
-
