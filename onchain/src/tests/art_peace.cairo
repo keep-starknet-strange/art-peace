@@ -404,7 +404,7 @@ fn deposit_reward_test() {
 
     // 2x2 template image
     let template_image = array![1, 2, 3, 4];
-    let template_hash = template_verifier.compute_template_hash(template_image.span());
+    let template_hash = compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
         name: 'test',
         hash: template_hash,
