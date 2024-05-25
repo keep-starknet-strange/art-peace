@@ -115,11 +115,14 @@ const QuestItem = (props) => {
   };
 
   let progress;
-  // progress cannot be more than needed. So if it is, it will set our progress to -1.
+  // progress cannot be more than needed. So if it is, it will set our progress to 100.
   if (props.progress > props.needed) {
-    progress = -1;
+    progress = 100;
   } else {
-    progress = Math.floor((props.progress / props.needed) * 4);
+    // progress being less than 20 makes
+    // the progress bar look weird so clamping it to inclusive range [20, 100].
+    progress = (props.progress / props.needed) * 100;
+    progress = progress < 20 ? 20 : progress;
   }
 
   return (
@@ -146,10 +149,11 @@ const QuestItem = (props) => {
           }
         >
           <div
-            className={
-              'QuestItem__button__progress ' +
-              `QuestItem__button__progress--${progress} `
-            }
+            className={'QuestItem__button__progress'}
+            style={{
+              width: `calc(${progress}% - 2px)`,
+              backgroundColor: `hsla(${(progress / 100) * 60}, 100%, 60%, 1)`
+            }}
             onClick={claimOrExpand}
           ></div>
           <div className='Text__xsmall QuestItem__reward'>

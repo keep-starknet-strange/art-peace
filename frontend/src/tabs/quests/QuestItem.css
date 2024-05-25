@@ -67,35 +67,12 @@
   left: 0;
 
   margin: 1px;
-  width: calc(100% - 2px);
+  width: calc(100% - 2px);                        /* Default width */
   height: calc(100% - 2px);
 
-  background-color: rgba(224, 224, 224, 0.9);    /* Default bg color */
+  background-color: rgba(224, 224, 224, 0.9);   /* Default bg color */
   border-radius: 0.8rem;
   border: 0.1rem solid rgba(0, 0, 0, 0.2);
-}
-
-.QuestItem__button__progress--0 {
-  background-color: hsla(0, 100%, 60%, 0.9);
-}
-
-.QuestItem__button__progress--1 {
-  width: 25%;
-  background-color: hsla(15, 100%, 60%, 1);
-}
-
-.QuestItem__button__progress--2 {
-  width: 50%;
-  background-color: hsla(30, 100%, 60%, 1);
-}
-
-.QuestItem__button__progress--3 {
-  width: 75%;
-  background-color: hsla(45, 100%, 60%, 1);
-}
-
-.QuestItem__button__progress--4 {
-  background-color: hsla(60, 100%, 60%, 1);
 }
 
 .QuestItem__button--pulsate {
