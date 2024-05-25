@@ -684,6 +684,11 @@ pub mod ArtPeace {
             self.color_votes.read((color, day))
         }
 
+        fn get_user_vote(self: @ContractState, day: u32) -> u8 {
+            let caller = starknet::get_caller_address();
+            self.user_votes.read((caller, day))
+        }
+
         fn get_votable_colors(self: @ContractState) -> Array<u32> {
             let day = self.day_index.read();
             let votable_colors_count = self.votable_colors_count.read(day);
