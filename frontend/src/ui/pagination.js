@@ -59,7 +59,11 @@ export function PaginationView(props) {
           alignItems: 'center'
         }}
       >
-        <button className='Pagination_btn' onClick={handlePreviousPage}>
+        <button
+          title='Previous'
+          className='Pagination_btn'
+          onClick={handlePreviousPage}
+        >
           <ChevronLeft />
         </button>
         {RenderPaginationNumbers(props).map((pageItem, index) => (
@@ -77,7 +81,11 @@ export function PaginationView(props) {
             {pageItem}
           </button>
         ))}
-        <button className='Pagination_btn' onClick={handleNextPage}>
+        <button
+          title='Next'
+          className='Pagination_btn'
+          onClick={handleNextPage}
+        >
           <ChevronRight />
         </button>
       </div>
