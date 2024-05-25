@@ -1,8 +1,3 @@
-// - Check if user has voted for a new color
-// - A daily quest
-// - Take `dayIdx` and store 
-// - Use `dayIdx` in `is_claimable`
-
 #[starknet::contract]
 pub mod VoteQuest {
     use art_peace::{quests::IQuest};
@@ -49,6 +44,7 @@ pub mod VoteQuest {
                 contract_address: self.art_peace.read()
             };
 
+            // 0, if user has not voted for any color
             let user_vote: u8 = art_peace_dispatcher.get_user_vote(day_index);
 
             if user_vote == 0 {
