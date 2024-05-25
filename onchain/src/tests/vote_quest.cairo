@@ -1,10 +1,10 @@
 use starknet::{ContractAddress, get_caller_address, get_contract_address, contract_address_const};
-use snforge_std::{declare, CheatTarget, ContractClassTrait};
-use snforge_std as snf;
-use art_peace::quests::vote_quest::VoteQuest::VoteQuestInitParams;
-use art_peace::tests::utils;
-use art_peace::tests::art_peace::deploy_with_quests_contract;
-use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
+use snforge_std::{declare, store, start_prank, stop_prank, CheatTarget, ContractClassTrait};
+use art_peace::{
+    IArtPeaceDispatcher, IArtPeaceDispatcherTrait,
+    quests::vote_quest::VoteQuest::VoteQuestInitParams,
+    tests::{utils, art_peace::deploy_with_quests_contract},
+};
 
 const reward: u32 = 99;
 const day_index: u32 = 0;
@@ -50,10 +50,10 @@ fn vote_quest_test() {
         )
     };
 
-    snf::start_prank(CheatTarget::One(art_peace_dispatcher.contract_address), utils::PLAYER1());
+    start_prank(CheatTarget::One(art_peace_dispatcher.contract_address), utils::PLAYER1());
 
     // Set day index in storage
-    snf::store(
+    store(
         art_peace_dispatcher.contract_address,
         selector!("day_index"),
         array![day_index.into()].span()
@@ -63,7 +63,7 @@ fn vote_quest_test() {
     // Player claim quest
     art_peace_dispatcher.claim_main_quest(0, utils::EMPTY_CALLDATA());
 
-    snf::stop_prank(CheatTarget::One(art_peace_dispatcher.contract_address));
+    stop_prank(CheatTarget::One(art_peace_dispatcher.contract_address));
 
     assert!(
         art_peace_dispatcher.get_user_extra_pixels_count(utils::PLAYER1()) == reward,
