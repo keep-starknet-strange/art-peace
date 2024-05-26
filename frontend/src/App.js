@@ -14,6 +14,8 @@ import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   // Window management
@@ -115,6 +117,7 @@ function App() {
 
   useEffect(() => {
     const fetchColors = async () => {
+      setNotificationMessage('This is working!');
       try {
         let getColorsEndpoint = backendUrl + '/get-colors';
         let response = await fetch(getColorsEndpoint);
@@ -135,6 +138,15 @@ function App() {
 
     fetchColors();
   }, []);
+
+  const [notificationMessage, setNotificationMessage] = useState('');
+  useEffect(() => {
+    const showToast = () => {
+      if (!notificationMessage) return;
+      toast.success(notificationMessage);
+    };
+    showToast();
+  }, [notificationMessage]);
 
   // Canvas
   const width = canvasConfig.canvas.width;
@@ -543,6 +555,7 @@ function App() {
           setActiveTab={setActiveTab}
           getDeviceTypeInfo={getDeviceTypeInfo}
         />
+        <ToastContainer hideProgressBar={true} />
       </div>
     </div>
   );
