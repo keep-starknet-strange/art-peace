@@ -14,7 +14,7 @@ const NFTItem = (props) => {
         },
         body: JSON.stringify({
           nftkey: props.tokenId,
-          useraddress: 'user_address_here', // Replace with actual user address
+          useraddress: 'user_address_here',
         }),
       });
 
