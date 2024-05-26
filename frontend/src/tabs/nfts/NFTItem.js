@@ -1,11 +1,58 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './NFTItem.css';
 import canvasConfig from '../../configs/canvas.config.json';
-
+//To Do: Add alt text to images
 const NFTItem = (props) => {
-  // TODO: alt text for image
-  const posx = props.position % canvasConfig.canvas.width;
-  const posy = Math.floor(props.position / canvasConfig.canvas.width);
+  const [likes, setLikes] = useState(props.likes);
+  const [liked, setLiked] = useState(false);
+  const handleLike = async () => {
+    try {
+      const response = await fetch('/like-nft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nftkey: props.tokenId,
+          useraddress: 'user_address_here', // Replace with actual user address
+        }),
+      });
+
+      if (response.ok) {
+        setLikes(likes + 1);
+        setLiked(true);
+      } else {
+        console.error('Failed to like NFT');
+      }
+    } catch (error) {
+      console.error('Error liking NFT:', error);
+    }
+  };
+
+  const handleUnlike = async () => {
+    try {
+      const response = await fetch('/unlike-nft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nftkey: props.tokenId,
+          useraddress: 'user_address_here', // Replace with actual user address
+        }),
+      });
+
+      if (response.ok) {
+        setLikes(likes - 1);
+        setLiked(false);
+      } else {
+        console.error('Failed to unlike NFT');
+      }
+    } catch (error) {
+      console.error('Error unliking NFT:', error);
+    }
+  };
+
   return (
     <div className='NFTItem'>
       <div style={{ position: 'relative' }}>
@@ -17,7 +64,10 @@ const NFTItem = (props) => {
           />
         </div>
         <div className='NFTItem__like'>
-          <p>{props.likes}</p>
+          <p>{likes}</p>
+          <button onClick={liked ? handleUnlike : handleLike}>
+            {liked ? 'Unlike' : 'Like'}
+          </button>
         </div>
       </div>
       <div className='NFTItem__info'>
@@ -65,5 +115,4 @@ const NFTItem = (props) => {
     </div>
   );
 };
-
 export default NFTItem;
