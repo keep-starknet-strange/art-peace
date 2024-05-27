@@ -104,7 +104,7 @@ fn username_quest_test_is_claimable() {
         contract_address: username_store_address
     };
 
-    snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
+    snf::start_prank(CheatTarget::Multiple(array![art_peace.contract_address, username_store_address]), utils::PLAYER1());
 
     username_store_dispatcher.claim_username(username);
 
@@ -113,7 +113,7 @@ fn username_quest_test_is_claimable() {
     art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
 
     assert!(initial_username == username, "Username not claim after main quest ");
-    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
+    snf::stop_prank(CheatTarget::Multiple(array![art_peace.contract_address, username_store_address]));
 }
 
 #[test]
