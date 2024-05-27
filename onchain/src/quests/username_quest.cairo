@@ -36,7 +36,7 @@ pub mod UsernameQuest {
             self.reward.read()
         }
 
-        fn is_claimable(
+          fn is_claimable(
             self: @ContractState, user: ContractAddress, calldata: Span<felt252>
         ) -> bool {
             if self.claimed.read(user) {
@@ -47,7 +47,7 @@ pub mod UsernameQuest {
                 contract_address: self.username_store.read()
             };
 
-            let claim_username: felt252 = username_store_main.get_username(user);
+            let claim_username = username_store_main.get_username(get_caller_address());
 
             if claim_username == 0 {
                 return false;
@@ -55,7 +55,6 @@ pub mod UsernameQuest {
 
             return true;
         }
-
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
             assert(get_caller_address() == self.art_peace.read(), 'Only Username can claim quests');
 
