@@ -90,8 +90,10 @@ fn username_quest_test() {
 
 
 #[test]
-fn username_quest_test_is_claimable() {
+fn username_quest_test() {
     let username_store_address = deploy_username_store_contract();
+    println!("username store contract address inside test: {:?}", username_store_address);
+
     let username_quest_contract_address = deploy_username_quest(username_store_address);
 
     let art_peace = IArtPeaceDispatcher {
@@ -109,11 +111,13 @@ fn username_quest_test_is_claimable() {
     username_store_dispatcher.claim_username(username);
 
     let initial_username = username_store_dispatcher.get_username(utils::PLAYER1());
+    println!("initial username: {}", initial_username);
 
     art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
 
-    assert!(initial_username == username, "Username not claim after main quest ");
+    assert!(initial_username == username, "Username not claim after main quest");
     snf::stop_prank(CheatTarget::Multiple(array![art_peace.contract_address, username_store_address]));
+    
 }
 
 #[test]
