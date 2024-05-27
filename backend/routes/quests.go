@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -195,9 +196,12 @@ func GetMainUserQuestsProgress(w http.ResponseWriter, r *http.Request) {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests")
 		return
 	}
+
+	log.Printf("Quest for user: %s, Progress: %d, Needed: %d", quests)
+
 	var userMainQuestsProgress = make([]UserMainQuestProgress, len(quests)) //[]UserMainQuestProgress
 	for _, quest := range quests {
-		progress := rand.Intn(100) // Random progress between 0 and 99
+		progress := rand.Intn(100) 
 		needed := rand.Intn(100) + 1
 
 		userMainQuestsProgress = append(userMainQuestsProgress, UserMainQuestProgress{
@@ -225,7 +229,7 @@ func GetDailyUserQuestsProgress(w http.ResponseWriter, r *http.Request) {
 	}
 
 		dayIndex := r.URL.Query().Get("dayIndex")
-	if userAddress == "" {
+	if dayIndex == "" {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing day index parameter")
 		return
 	}
