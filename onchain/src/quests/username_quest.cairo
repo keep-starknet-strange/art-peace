@@ -42,16 +42,12 @@ pub mod UsernameQuest {
             if self.claimed.read(user) {
                 return false;
             }
-           //  println!("username store contract address inside is_claimable: {:?}", self.username_store.read());
             let username_store_main = IUsernameStoreDispatcher {
                 contract_address: self.username_store.read()
             };
 
             let claim_username = username_store_main.get_username(get_caller_address());
 
-            // println!("claim username in is_claimable: {}", claim_username);
-            // println!("username address inside is_claimable : {:?}", user);
-            // println!("username get_caller_address inside is_claimable : {:?}", get_caller_address());
 
             if claim_username == 0 {
                 return false;
