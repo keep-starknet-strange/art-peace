@@ -9,6 +9,7 @@ mod quests {
     pub mod authority_quest;
     pub mod interfaces;
     pub mod pixel_quest;
+    pub mod username_quest;
     pub mod rainbow_quest;
     pub mod template_quest;
     pub mod unruggable_quest;
