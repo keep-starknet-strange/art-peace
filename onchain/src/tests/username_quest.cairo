@@ -29,7 +29,7 @@ fn deploy_username_quest(username_store_address: ContractAddress) -> ContractAdd
     UsernameQuestInitParams {
         username_store: username_store_address,
         art_peace: utils::ART_PEACE_CONTRACT(),
-        reward: reward_amt,
+        reward: reward_amt
     }
         .serialize(ref username_quest_calldata);
 
@@ -64,6 +64,8 @@ fn deploy_username_quest_test() {
 #[test]
 fn username_quest_test() {
     let username_store_address = deploy_username_store_contract();
+    println!("username store contract address inside test: {:?}", username_store_address);
+
     let username_quest_contract_address = deploy_username_quest(username_store_address);
 
     let art_peace = IArtPeaceDispatcher {
@@ -76,17 +78,26 @@ fn username_quest_test() {
         contract_address: username_store_address
     };
 
-    snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
+    // snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
+
+    snf::start_prank(CheatTarget::Multiple(array![art_peace.contract_address, username_store_address]), utils::PLAYER1());
 
     username_store_dispatcher.claim_username(username);
 
     let initial_username = username_store_dispatcher.get_username(utils::PLAYER1());
+    println!("initial username: {}", initial_username);
+
+    println!("username address before claim_main_quest: {:?}", utils::PLAYER1());
 
     art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
 
-    assert!(initial_username == username, "Username not claim after main quest ");
-    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
+    println!("username address after claim_main_quest: {:?}", utils::PLAYER1());
+
+    assert!(initial_username == username, "Username not claim after main quest");
+    snf::stop_prank(CheatTarget::Multiple(array![art_peace.contract_address, username_store_address]));
+    // snf::stop_prank(CheatTarget::One(art_peace.contract_address));
 }
+
 
 #[test]
 #[should_panic(expected: ('Quest not claimable',))]
@@ -115,3 +126,4 @@ fn test_username_quest_panic() {
     assert!(initial_username == username, "Username not claim after main quest ");
     snf::stop_prank(CheatTarget::One(art_peace.contract_address));
 }
+
