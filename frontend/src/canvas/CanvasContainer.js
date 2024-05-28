@@ -185,6 +185,13 @@ const CanvasContainer = (props) => {
   });
 
   const pixelClicked = async (e) => {
+    // Color Extra Pixel
+    if (props.selectedColorId === -1) {
+      return;
+    }
+    props.setSelectedColorId(-1);
+
+    console.log('props are => ', props);
     if (props.nftMintingMode) {
       return;
     }
@@ -216,11 +223,6 @@ const CanvasContainer = (props) => {
     }
 
     pixelSelect(x, y);
-
-    // Color Extra Pixel
-    if (props.selectedColorId === -1) {
-      return;
-    }
 
     if (props.availablePixels > (props.basePixelUp ? 1 : 0)) {
       if (props.availablePixelsUsed < props.availablePixels) {
