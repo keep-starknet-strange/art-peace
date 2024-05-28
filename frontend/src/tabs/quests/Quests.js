@@ -28,26 +28,26 @@ const Quests = (props) => {
       description:
         'Add 10 pixels on the canvas [art/peace theme](https://www.google.com/)',
       reward: '3',
-      status: 'incomplete',
+      completed: false,
       progress: 0,
-      needed: 13
+      needed: 10
     },
     {
       name: 'Build a template',
       description: 'Create a template for the community to use',
       reward: '3',
-      status: 'claim',
-      progress: 3,
-      needed: 13
+      completed: false,
+      progress: 1,
+      needed: 20
     },
     {
       name: 'Deploy a Memecoin',
       description: 'Create an Unruggable memecoin',
       reward: '10',
-      status: 'incomplete',
+      completed: false,
       args: createArgs(['MemeCoin Address'], ['0x1234'], ['address']),
-      progress: 6,
-      needed: 13
+      progress: 1,
+      needed: 1
     }
   ];
 
@@ -56,28 +56,28 @@ const Quests = (props) => {
       name: 'Tweet #art/peace',
       description: 'Tweet about art/peace using the hashtag & addr',
       reward: '10',
-      status: 'incomplete',
+      completed: true,
       args: createArgs(
         ['Twitter Handle', 'Address', 'test'],
         ['@test', '0x1234', 'asdioj'],
         ['twitter', 'address', 'text']
       ),
-      progress: 9,
+      progress: 13,
       needed: 13
     },
     {
       name: 'Place 100 pixels',
       description: 'Add 100 pixels on the canvas',
       reward: '10',
-      status: 'completed',
-      progress: 12,
-      needed: 13
+      completed: false,
+      progress: 98,
+      needed: 100
     },
     {
       name: 'Mint art/peace NFT',
       description: 'Mint an NFT using the art/peace theme',
       reward: '5',
-      status: 'incomplete',
+      completed: false,
       progress: 14,
       needed: 13
     }
