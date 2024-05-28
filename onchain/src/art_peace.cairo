@@ -686,6 +686,10 @@ pub mod ArtPeace {
             self.color_votes.read((color, day))
         }
 
+        fn get_user_vote(self: @ContractState, user: ContractAddress, day: u32) -> u8 {
+            self.user_votes.read((user, day))
+        }
+
         fn get_votable_colors(self: @ContractState) -> Array<u32> {
             let day = self.day_index.read();
             let votable_colors_count = self.votable_colors_count.read(day);
