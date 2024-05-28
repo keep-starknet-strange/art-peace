@@ -64,8 +64,23 @@ const CanvasContainer = (props) => {
     };
   }, [isDragging, canvasX, canvasY]);
 
+  // Limit the zoom function calls to once every 16 milliseconds (approximately 60 frames per second)
+  const throttle = (func, limit) => {
+    let inThrottle;
+    return function() {
+      const args = arguments;
+      const context = this;
+      if (!inThrottle) {
+        func.apply(context, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    }
+  };
+
+
   // Zoom in/out ( into the cursor position )
-  const zoom = (e) => {
+  const zoom = throttle((e) => {
     // Get the cursor position within the canvas ( note the canvas can go outsid  e the viewport )
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
@@ -97,10 +112,13 @@ const CanvasContainer = (props) => {
     const newPosX = canvasX - (newCursorX - cursorX);
     const newPosY = canvasY - (newCursorY - cursorY);
 
-    setCanvasScale(newScale);
-    setCanvasX(newPosX);
-    setCanvasY(newPosY);
-  };
+    // Ensure updates happen in sync with the browser's refresh rate, resulting in smoother animations
+    requestAnimationFrame(() => {
+      setCanvasScale(newScale);
+      setCanvasX(newPosX);
+      setCanvasY(newPosY);
+    });
+  }, 16);
 
   useEffect(() => {
     canvasContainerRef.current.addEventListener('wheel', zoom);
