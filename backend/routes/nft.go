@@ -2,12 +2,13 @@ package routes
 
 import (
 	"context"
-	"github.com/keep-starknet-strange/art-peace/backend/core"
-	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
+
+	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func InitNFTRoutes() {
@@ -59,7 +60,7 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	query := `
         SELECT 
             nfts.*, 
-            COALESCE(like_count, 0) AS like_count
+            COALESCE(like_count, 0) AS likes
         FROM 
             nfts
         LEFT JOIN (
@@ -70,7 +71,7 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
                 nftlikes
             GROUP BY 
                 nftKey
-        ) likes ON nfts.token_id = likes.nftKey
+        ) nftlikes ON nfts.token_id = nftlikes.nftKey
         WHERE 
             nfts.owner = $1
         LIMIT $2 OFFSET $3`
@@ -110,7 +111,7 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 	query := `
         SELECT 
             nfts.*, 
-            COALESCE(like_count, 0) AS like_count
+            COALESCE(like_count, 0) AS likes
         FROM 
             nfts
         LEFT JOIN (
@@ -121,7 +122,7 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
                 nftlikes
             GROUP BY 
                 nftKey
-        ) likes ON nfts.token_id = likes.nftKey
+        ) nftlikes ON nfts.token_id = nftlikes.nftKey
         LIMIT $1 OFFSET $2`
 	nfts, err := core.PostgresQueryJson[NFTData](query, pageLength, offset)
 	if err != nil {
