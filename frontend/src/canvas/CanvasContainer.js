@@ -260,7 +260,6 @@ const CanvasContainer = (props) => {
       console.log(response.result);
     }
     props.clearPixelSelection();
-    props.setSelectedColorId(-1);
     props.setLastPlacedTime(timestamp * 1000);
     // TODO: Fix last placed time if error in placing pixel
   };
