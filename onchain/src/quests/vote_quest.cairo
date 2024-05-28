@@ -7,23 +7,23 @@ pub mod VoteQuest {
     #[storage]
     struct Storage {
         art_peace: ContractAddress,
-        day_index: u32,
         reward: u32,
+        day_index: u32,
         claimed: LegacyMap<ContractAddress, bool>,
     }
 
     #[derive(Drop, Serde)]
     pub struct VoteQuestInitParams {
         pub art_peace: ContractAddress,
-        pub day_index: u32,
-        pub reward: u32
+        pub reward: u32,
+        pub day_index: u32
     }
 
     #[constructor]
     fn constructor(ref self: ContractState, init_params: VoteQuestInitParams) {
         self.art_peace.write(init_params.art_peace);
-        self.day_index.write(init_params.day_index);
         self.reward.write(init_params.reward);
+        self.day_index.write(init_params.day_index);
     }
 
     #[abi(embed_v0)]
@@ -45,8 +45,7 @@ pub mod VoteQuest {
             };
 
             // 0, if user has not voted for any color
-            let user_vote: u8 = art_peace_dispatcher.get_user_vote(day_index);
-
+            let user_vote: u8 = art_peace_dispatcher.get_user_vote(user, day_index);
             if user_vote == 0 {
                 return false;
             } else {
