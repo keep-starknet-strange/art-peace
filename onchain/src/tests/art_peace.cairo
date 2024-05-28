@@ -185,22 +185,6 @@ pub(crate) fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     );
 }
 
-fn compute_template_hash(template: Span<u8>) -> felt252 {
-    let template_len = template.len();
-    if template_len == 0 {
-        return 0;
-    }
-
-    let mut hasher = PoseidonTrait::new();
-    let mut i = 0;
-    while i < template_len {
-        hasher = hasher.update_with(*template.at(i));
-        i += 1;
-    };
-
-    hasher.finalize()
-}
-
 #[test]
 fn deploy_test() {
     let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
@@ -323,6 +307,8 @@ fn template_full_basic_test() {
     );
 }
 
+// TODO: Invalid template completion tests
+
 #[test]
 fn increase_day_test() {
     let art_peace_address = deploy_contract();
@@ -398,13 +384,16 @@ fn deposit_reward_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
     let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
+    let template_verifier = ITemplateVerifierDispatcher {
+        contract_address: art_peace.contract_address
+    };
 
     let erc20_mock: ContractAddress = deploy_erc20_mock();
     let reward_amount: u256 = 1 * utils::pow_256(10, 18);
 
     // 2x2 template image
     let template_image = array![1, 2, 3, 4];
-    let template_hash = compute_template_hash(template_image.span());
+    let template_hash = template_verifier.compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
         name: 'test',
         hash: template_hash,
@@ -414,7 +403,7 @@ fn deposit_reward_test() {
         reward: reward_amount,
         reward_token: erc20_mock,
         creator: get_caller_address(),
-    };        
+    };
 
     IERC20Dispatcher { contract_address: erc20_mock }.approve(art_peace_address, reward_amount);
 
