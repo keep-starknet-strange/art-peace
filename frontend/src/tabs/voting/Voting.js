@@ -10,6 +10,8 @@ import {
 } from '../../services/apiService.js';
 import { devnetMode } from '../../utils/Consts.js';
 
+// TODO: Other voting options: best nft, best community, etc.
+// TODO: No vote while loading get-user-vote
 const Voting = (props) => {
   const [userVote, setUserVote] = useState(-1);
   const [votableColorApiState, setVotableColorApiState] = useState({
@@ -117,12 +119,19 @@ const Voting = (props) => {
 
   return (
     <BasicTab title='Voting' setActiveTab={props.setActiveTab}>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <p className='Text__small Voting__description'>Vote close:</p>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          margin: '0rem 1rem'
+        }}
+      >
+        <p className='Text__medium'>Vote closes</p>
         <p className='Text__small Voting__timer'>{props.timeLeftInDay}</p>
       </div>
       <p className='Text__small Voting__description'>
-        Vote to add to the color palette.
+        Vote for a new palette color
       </p>
 
       <div className='Voting__grid'>

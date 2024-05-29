@@ -38,8 +38,7 @@ CREATE TABLE Days (
   -- Postgres auto-incrementing primary key
   key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   day_index integer NOT NULL,
-  day_start timestamp NOT NULL,
-  day_end timestamp
+  day_start timestamp NOT NULL
 );
 CREATE INDEX days_day_index_index ON Days (day_index);
 
@@ -49,10 +48,22 @@ CREATE TABLE DailyQuests (
   name text NOT NULL,
   description text NOT NULL,
   reward integer NOT NULL,
+  quest_type text NOT NULL,
   PRIMARY KEY (day_index, quest_id)
 );
 CREATE INDEX dailyQuests_day_index_index ON DailyQuests (day_index);
 CREATE INDEX dailyQuests_quest_id_index ON DailyQuests (quest_id);
+
+CREATE TABLE DailyQuestsInput (
+  day_index integer NOT NULL,
+  quest_id integer NOT NULL,
+  input_key integer NOT NULL,
+  input_value integer NOT NULL,
+  PRIMARY KEY (day_index, quest_id, input_key)
+);
+CREATE INDEX dailyQuestsInput_day_index_index ON DailyQuestsInput (day_index);
+CREATE INDEX dailyQuestsInput_quest_id_index ON DailyQuestsInput (quest_id);
+CREATE INDEX dailyQuestsInput_input_key_index ON DailyQuestsInput (input_key);
 
 -- TODO: Add calldata field
 -- Table for storing the daily quests that the user has completed
@@ -74,8 +85,18 @@ CREATE TABLE MainQuests (
   key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
   description text NOT NULL,
-  reward integer NOT NULL
+  reward integer NOT NULL,
+  quest_type text NOT NULL
 );
+
+CREATE TABLE MainQuestsInput (
+  quest_id integer NOT NULL,
+  input_key integer NOT NULL,
+  input_value integer NOT NULL,
+  PRIMARY KEY (quest_id, input_key)
+);
+CREATE INDEX mainQuestsInput_quest_id_index ON MainQuestsInput (quest_id);
+CREATE INDEX mainQuestsInput_input_key_index ON MainQuestsInput (input_key);
 
 -- Table for storing the main quests that the user has completed
 CREATE TABLE UserMainQuests (

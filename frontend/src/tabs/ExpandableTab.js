@@ -1,6 +1,7 @@
 import React from 'react';
 import './ExpandableTab.css';
 import '../utils/Styles.css';
+import HamburgerIcon from '../resources/icons/Hamburger.png';
 
 const ExpandableTab = (props) => {
   // TODO: Close pixel selection when expanded
@@ -10,7 +11,9 @@ const ExpandableTab = (props) => {
   const { ...rest } = props;
 
   // Click within the tab and drag to expand
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (_e) => {
+    /*
+    TODO
     if (props.canExpand === false) {
       return;
     }
@@ -35,6 +38,7 @@ const ExpandableTab = (props) => {
     document.addEventListener('mouseup', () => {
       document.removeEventListener('mousemove', handleMouseMove);
     });
+    */
   };
 
   return (
@@ -58,7 +62,11 @@ const ExpandableTab = (props) => {
             props.setExpanded(!props.expanded);
           }}
         >
-          <p>{props.expanded ? '>' : '<'}</p>
+          <img
+            src={HamburgerIcon}
+            alt='Expand'
+            className='ExpandableTab__hamburger'
+          />
         </div>
       )}
       <p

@@ -1,6 +1,8 @@
 #[starknet::contract]
 pub mod ArtPeace {
     use starknet::ContractAddress;
+    use core::poseidon::PoseidonTrait;
+    use core::hash::{HashStateTrait, HashStateExTrait};
     use art_peace::{IArtPeace, Pixel, Faction, MemberMetadata};
     use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::nfts::interfaces::{
@@ -684,6 +686,10 @@ pub mod ArtPeace {
             self.color_votes.read((color, day))
         }
 
+        fn get_user_vote(self: @ContractState, user: ContractAddress, day: u32) -> u8 {
+            self.user_votes.read((user, day))
+        }
+
         fn get_votable_colors(self: @ContractState) -> Array<u32> {
             let day = self.day_index.read();
             let votable_colors_count = self.votable_colors_count.read(day);
@@ -947,12 +953,33 @@ pub mod ArtPeace {
 
     #[abi(embed_v0)]
     impl ArtPeaceTemplateVerifier of ITemplateVerifier<ContractState> {
-        // TODO: Check template function
+        fn compute_template_hash(self: @ContractState, template: Span<u8>) -> felt252 {
+            let template_len = template.len();
+            if template_len == 0 {
+                return 0;
+            }
+
+            let mut hasher = PoseidonTrait::new();
+            let mut i = 0;
+            while i < template_len {
+                hasher = hasher.update_with(*template.at(i));
+                i += 1;
+            };
+
+            hasher.finalize()
+        }
+
         fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
-            // TODO: ensure template_image matches the template size & hash
+
+            let template_hash = self.compute_template_hash(template_image);
+
             let template_metadata: TemplateMetadata = self.get_template(template_id);
+            assert(template_hash == template_metadata.hash, 'Template hash mismatch');
+            let template_size = template_metadata.width * template_metadata.height;
+            assert(template_image.len().into() == template_size, 'Template image size mismatch');
+
             let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata
                 .width
                 .try_into()

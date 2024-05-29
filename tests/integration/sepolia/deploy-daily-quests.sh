@@ -81,7 +81,7 @@ echo "Contract class hash: $QUEST_CONTRACT_CLASSHASH"
 # Deploying the contract
 QUESTS_CONFIG=$PROJECT_ROOT/configs/quests.config.json
 
-ART_PEACE='0x02e3f41bd135e60c72ebfe57e8964ecc58dbb8f8679b1b4cffeaf5e45ab1defa'
+ART_PEACE='0x075ceac501d747749d289cd588f07601b3caad223f4fcfcc803a77311118b1cf'
 REWARD=3
 PIXELS_NEEDED=5
 IS_DAILY=1

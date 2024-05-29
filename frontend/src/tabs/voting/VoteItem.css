@@ -7,8 +7,8 @@
   align-items: center;
 
   border-radius: 0.5rem;
-  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
-  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.4);
 }
 
 .VoteItem__vote {
@@ -20,6 +20,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
+  box-shadow: 0 0 0.4rem rgba(0, 0, 0, 0.3);
 }
 
 .VoteItem__vote__mark {
@@ -38,7 +40,7 @@
 
   box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.3);
   border-radius: 1rem;
-  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(0, 0, 0, 0.4);
 }
 
 .VoteItem__votes {
@@ -51,7 +53,7 @@
   justify-content: center;
   align-items: center;
 
-  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.3);
-  border-radius: 1rem;
-  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0.4rem rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.4);
 }
