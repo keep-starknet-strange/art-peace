@@ -56,7 +56,7 @@ function App() {
       if (!address) {
         setQueryAddress('0');
       } else {
-        setQueryAddress(address ? address.slice(2) : '0');
+        setQueryAddress(address.slice(2).toLowerCase().padStart(64, '0'));
       }
     }
   }, [address, connected]);
