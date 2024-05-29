@@ -145,6 +145,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/NueloSE"><img src="https://avatars.githubusercontent.com/u/124416278?v=4?s=100" width="100px;" alt="Emmanuel A Akalo"/><br /><sub><b>Emmanuel A Akalo</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=NueloSE" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/KeneePatel"><img src="https://avatars.githubusercontent.com/u/59523692?v=4?s=100" width="100px;" alt="Kenee Patel"/><br /><sub><b>Kenee Patel</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=KeneePatel" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
