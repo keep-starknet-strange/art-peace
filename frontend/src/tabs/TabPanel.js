@@ -165,6 +165,7 @@ const TabPanel = (props) => {
                   usernameContract={props.usernameContract}
                   setActiveTab={props.setActiveTab}
                   queryAddress={props.queryAddress}
+                  setConnected={props.setConnected}
                   address={props.address}
                   chain={props.chain}
                 />

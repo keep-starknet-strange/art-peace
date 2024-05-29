@@ -293,6 +293,21 @@ fn votable_colors_is_updated_according_to_votes_multi_test() {
     snf::stop_warp(CheatTarget::One(art_peace_address));
 }
 
+#[test]
+fn no_vote_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+    let previous_votable_colors = art_peace.get_votable_colors();
+    let previous_palette = art_peace.get_colors();
+    snf::start_warp(CheatTarget::One(art_peace_address), DAY_IN_SECONDS);
+    art_peace.increase_day_index();
+    let votable_colors = art_peace.get_votable_colors();
+    let palette = art_peace.get_colors();
+    assert_eq!(votable_colors, previous_votable_colors, "Votable colors mismatch");
+    assert_eq!(palette, previous_palette, "Palette colors mismatch");
+    snf::stop_warp(CheatTarget::One(art_peace_address));
+}
+
 fn set_vote(day: u32, color_index: u8, vote: u32, contract_address: ContractAddress) {
     let mut state = ArtPeace::contract_state_for_testing();
     let storage_address: felt252 = storage_address_from_base(
