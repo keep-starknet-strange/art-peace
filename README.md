@@ -143,6 +143,9 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/manlikeHB"><img src="https://avatars.githubusercontent.com/u/109147010?v=4?s=100" width="100px;" alt="Yusuf Habib"/><br /><sub><b>Yusuf Habib</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=manlikeHB" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/drspacemn"><img src="https://avatars.githubusercontent.com/u/16685321?v=4?s=100" width="100px;" alt="drspacemn"/><br /><sub><b>drspacemn</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=drspacemn" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/NueloSE"><img src="https://avatars.githubusercontent.com/u/124416278?v=4?s=100" width="100px;" alt="Emmanuel A Akalo"/><br /><sub><b>Emmanuel A Akalo</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=NueloSE" title="Code">💻</a></td>
+    </tr>
   </tbody>
   <tfoot>
     <tr>
