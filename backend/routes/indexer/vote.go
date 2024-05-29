@@ -33,20 +33,20 @@ func processVoteColorEvent(event IndexerEvent) {
 }
 
 func revertVoteColorEvent(event IndexerEvent) {
-  voter := event.Event.Keys[1][2:] // Remove 0x prefix
-  dayIdxHex := event.Event.Keys[2]
+	voter := event.Event.Keys[1][2:] // Remove 0x prefix
+	dayIdxHex := event.Event.Keys[2]
 
-  dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertVoteColorEvent", "Error converting day index hex to int", voter, dayIdxHex)
-    return
-  }
+	dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertVoteColorEvent", "Error converting day index hex to int", voter, dayIdxHex)
+		return
+	}
 
-  // Remove vote from postgres
-  // TODO: Revert to old vote if it existed before the vote being reverted
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM ColorVotes WHERE user_address = $1 AND day_index = $2", voter, dayIdx)
-  if err != nil {
-    PrintIndexerError("revertVoteColorEvent", "Error deleting color vote from postgres", voter, dayIdxHex)
-    return
-  }
+	// Remove vote from postgres
+	// TODO: Revert to old vote if it existed before the vote being reverted
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM ColorVotes WHERE user_address = $1 AND day_index = $2", voter, dayIdx)
+	if err != nil {
+		PrintIndexerError("revertVoteColorEvent", "Error deleting color vote from postgres", voter, dayIdxHex)
+		return
+	}
 }

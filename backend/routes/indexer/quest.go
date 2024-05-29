@@ -61,7 +61,7 @@ func processDailyQuestClaimedEvent(event IndexerEvent) {
 }
 
 func revertDailyQuestClaimedEvent(event IndexerEvent) {
-  // TODO
+	// TODO
 }
 
 func processMainQuestClaimedEvent(event IndexerEvent) {
@@ -109,5 +109,5 @@ func processMainQuestClaimedEvent(event IndexerEvent) {
 }
 
 func revertMainQuestClaimedEvent(event IndexerEvent) {
-  // TODO
+	// TODO
 }

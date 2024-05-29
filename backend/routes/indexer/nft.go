@@ -111,14 +111,14 @@ func processNFTMintedEvent(event IndexerEvent) {
 			}
 		}
 	}
-  // TODO: Check if file exists
-  if _, err := os.Stat("nfts"); os.IsNotExist(err) {
-    err = os.MkdirAll("nfts", os.ModePerm)
-    if err != nil {
-      PrintIndexerError("processNFTMintedEvent", "Error creating nfts directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
-      return
-    }
-  }
+	// TODO: Check if file exists
+	if _, err := os.Stat("nfts"); os.IsNotExist(err) {
+		err = os.MkdirAll("nfts", os.ModePerm)
+		if err != nil {
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			return
+		}
+	}
 
 	// Save image to disk
 	filename := fmt.Sprintf("nfts/nft-%d.png", tokenId)
@@ -146,19 +146,19 @@ func processNFTMintedEvent(event IndexerEvent) {
 }
 
 func revertNFTMintedEvent(event IndexerEvent) {
-  tokenIdLowHex := event.Event.Keys[1]
+	tokenIdLowHex := event.Event.Keys[1]
 
-  tokenId, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("reverseNFTMintedEvent", "Error converting token id low hex to int", tokenIdLowHex)
-    return
-  }
+	tokenId, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("reverseNFTMintedEvent", "Error converting token id low hex to int", tokenIdLowHex)
+		return
+	}
 
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM NFTs WHERE token_id = $1", tokenId)
-  if err != nil {
-    PrintIndexerError("reverseNFTMintedEvent", "Error deleting NFT from postgres", tokenIdLowHex)
-    return
-  }
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM NFTs WHERE token_id = $1", tokenId)
+	if err != nil {
+		PrintIndexerError("reverseNFTMintedEvent", "Error deleting NFT from postgres", tokenIdLowHex)
+		return
+	}
 
-  // TODO: Mark image as unused?
+	// TODO: Mark image as unused?
 }

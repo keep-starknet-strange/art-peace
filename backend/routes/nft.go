@@ -91,7 +91,7 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
-  // TODO: Join with users table to get minter name if needed
+	// TODO: Join with users table to get minter name if needed
 	query := `SELECT * FROM nfts LIMIT $1 OFFSET $2`
 	nfts, err := core.PostgresQueryJson[NFTData](query, pageLength, offset)
 	if err != nil {

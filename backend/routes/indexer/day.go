@@ -32,18 +32,18 @@ func processNewDayEvent(event IndexerEvent) {
 }
 
 func revertNewDayEvent(event IndexerEvent) {
-  dayIdxHex := event.Event.Keys[1]
+	dayIdxHex := event.Event.Keys[1]
 
-  dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertNewDayEvent", "Error converting day index hex to int", dayIdxHex)
-    return
-  }
+	dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertNewDayEvent", "Error converting day index hex to int", dayIdxHex)
+		return
+	}
 
-  // Delete day from postgres
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Days WHERE day_index = $1", dayIdx)
-  if err != nil {
-    PrintIndexerError("revertNewDayEvent", "Error deleting day from postgres", dayIdx)
-    return
-  }
+	// Delete day from postgres
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Days WHERE day_index = $1", dayIdx)
+	if err != nil {
+		PrintIndexerError("revertNewDayEvent", "Error deleting day from postgres", dayIdx)
+		return
+	}
 }

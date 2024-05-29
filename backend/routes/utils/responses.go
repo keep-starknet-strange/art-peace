@@ -62,7 +62,7 @@ func WriteDataJson(w http.ResponseWriter, data string) {
 func SendWebSocketMessage(message map[string]interface{}) {
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
-    fmt.Println("Failed to marshal websocket message")
+		fmt.Println("Failed to marshal websocket message")
 		return
 	}
 	for idx, conn := range core.ArtPeaceBackend.WSConnections {

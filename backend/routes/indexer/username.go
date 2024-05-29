@@ -38,14 +38,14 @@ func processUsernameClaimedEvent(event IndexerEvent) {
 }
 
 func revertUsernameClaimedEvent(event IndexerEvent) {
-  address := event.Event.Keys[1][2:] // Remove 0x prefix
+	address := event.Event.Keys[1][2:] // Remove 0x prefix
 
-  // Remove username from postgres
-  _, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Users WHERE address = $1", address)
-  if err != nil {
-    PrintIndexerError("revertUsernameClaimedEvent", "Error deleting username from postgres", address, "")
-    return
-  }
+	// Remove username from postgres
+	_, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Users WHERE address = $1", address)
+	if err != nil {
+		PrintIndexerError("revertUsernameClaimedEvent", "Error deleting username from postgres", address, "")
+		return
+	}
 }
 
 func processUsernameChangedEvent(event IndexerEvent) {
@@ -79,5 +79,5 @@ func processUsernameChangedEvent(event IndexerEvent) {
 }
 
 func revertUsernameChangedEvent(event IndexerEvent) {
-  // TODO: Revert username in postgres
+	// TODO: Revert username in postgres
 }

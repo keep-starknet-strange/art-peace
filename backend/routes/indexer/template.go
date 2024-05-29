@@ -79,18 +79,18 @@ func processTemplateAddedEvent(event IndexerEvent) {
 }
 
 func revertTemplateAddedEvent(event IndexerEvent) {
-  templateIdHex := event.Event.Keys[1]
+	templateIdHex := event.Event.Keys[1]
 
-  templateId, err := strconv.ParseInt(templateIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("reverseTemplateAddedEvent", "Error converting template id hex to int", templateIdHex)
-    return
-  }
+	templateId, err := strconv.ParseInt(templateIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("reverseTemplateAddedEvent", "Error converting template id hex to int", templateIdHex)
+		return
+	}
 
-  // Remove template from postgres
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Templates WHERE key = $1", templateId)
-  if err != nil {
-    PrintIndexerError("reverseTemplateAddedEvent", "Error deleting template from postgres", templateIdHex)
-    return
-  }
+	// Remove template from postgres
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Templates WHERE key = $1", templateId)
+	if err != nil {
+		PrintIndexerError("reverseTemplateAddedEvent", "Error deleting template from postgres", templateIdHex)
+		return
+	}
 }

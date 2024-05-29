@@ -70,25 +70,25 @@ func processFactionCreatedEvent(event IndexerEvent) {
 }
 
 func revertFactionCreatedEvent(event IndexerEvent) {
-  factionIdHex := event.Event.Keys[1]
+	factionIdHex := event.Event.Keys[1]
 
-  factionId, err := strconv.ParseInt(factionIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertFactionCreatedEvent", "Failed to parse factionId", factionIdHex)
-    return
-  }
+	factionId, err := strconv.ParseInt(factionIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertFactionCreatedEvent", "Failed to parse factionId", factionIdHex)
+		return
+	}
 
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Factions WHERE id = $1", factionId)
-  if err != nil {
-    PrintIndexerError("revertFactionCreatedEvent", "Failed to delete faction from postgres", factionIdHex)
-    return
-  }
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Factions WHERE id = $1", factionId)
+	if err != nil {
+		PrintIndexerError("revertFactionCreatedEvent", "Failed to delete faction from postgres", factionIdHex)
+		return
+	}
 
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM FactionMembersInfo WHERE faction_id = $1", factionId)
-  if err != nil {
-    PrintIndexerError("revertFactionCreatedEvent", "Failed to delete members from postgres", factionIdHex)
-    return
-  }
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM FactionMembersInfo WHERE faction_id = $1", factionId)
+	if err != nil {
+		PrintIndexerError("revertFactionCreatedEvent", "Failed to delete members from postgres", factionIdHex)
+		return
+	}
 }
 
 func processMemberReplacedEvent(event IndexerEvent) {
@@ -96,5 +96,5 @@ func processMemberReplacedEvent(event IndexerEvent) {
 }
 
 func revertMemberReplacedEvent(event IndexerEvent) {
-  // TODO: Implement
+	// TODO: Implement
 }
