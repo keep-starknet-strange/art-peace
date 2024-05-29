@@ -3,8 +3,6 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -189,28 +187,18 @@ func GetMainUserQuestsProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// nft, err := core.PostgresQueryOneJson[NFTData]("SELECT * FROM nfts WHERE token_id = $1", tokenId)
-	quests, err := core.PostgresQueryJson[UserMainQuest]("SELECT questId FROM UserMainQuests where user_address = $1", userAddress)
+	_, err := core.PostgresQueryJson[UserMainQuest]("SELECT questId FROM UserMainQuests where user_address = $1", userAddress)
 	
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests")
 		return
 	}
 
-	log.Printf("Quest for user: %s, Progress: %d, Needed: %d", quests)
-
-	var userMainQuestsProgress = make([]UserMainQuestProgress, len(quests)) //[]UserMainQuestProgress
-	for _, quest := range quests {
-		progress := rand.Intn(100) 
-		needed := rand.Intn(100) + 1
-
-		userMainQuestsProgress = append(userMainQuestsProgress, UserMainQuestProgress{
-			QuestId:  quest.QuestId,
-			Progress: progress,
-			Needed:   needed,
-		})
-
+	userMainQuestsProgress := []UserMainQuestProgress{
+		{QuestId: 1, Progress: 50, Needed: 50},
+		{QuestId: 2, Progress: 30, Needed: 70},
 	}
+
 
 	questsProgressJson, err := json.Marshal(userMainQuestsProgress)
 	if err != nil {
@@ -234,24 +222,18 @@ func GetDailyUserQuestsProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quests, err := core.PostgresQueryJson[UserDailyQuest]("SELECT questId FROM UserDailyQuests where user_address = $1 AND dayIndex = $2 ", userAddress, dayIndex)
+	_, err := core.PostgresQueryJson[UserDailyQuest]("SELECT questId FROM UserDailyQuests where user_address = $1 AND dayIndex = $2 ", userAddress, dayIndex)
 	
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests")
 		return
 	}
-	var userDailyQuestsProgress = make([]UserMainQuestProgress, len(quests)) 
-	for _, quest := range quests {
-		progress := rand.Intn(100) 
-		needed := rand.Intn(100) + 1
 
-		userDailyQuestsProgress = append(userDailyQuestsProgress, UserMainQuestProgress{
-			QuestId:  quest.QuestId,
-			Progress: progress,
-			Needed:   needed,
-		})
-
+		userDailyQuestsProgress := []UserMainQuestProgress{
+		{QuestId: 4, Progress: 10, Needed: 90},
+		{QuestId: 5, Progress: 20, Needed: 80},
 	}
+
 
 	questsProgressJson, err := json.Marshal(userDailyQuestsProgress)
 	if err != nil {
