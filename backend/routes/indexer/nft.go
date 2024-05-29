@@ -6,7 +6,6 @@ import (
 	"image"
 	"image/color"
 	"image/png"
-	"net/http"
 	"os"
 	"strconv"
 
@@ -14,7 +13,7 @@ import (
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
-func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
+func processNFTMintedEvent(event IndexerEvent) {
 	// TODO: combine high and low token ids
 	tokenIdLowHex := event.Event.Keys[1]
 	// TODO: tokenIdHighHex := event.Event.Keys[2]
@@ -112,10 +111,17 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 			}
 		}
 	}
+	// TODO: Check if file exists
+	if _, err := os.Stat("nfts"); os.IsNotExist(err) {
+		err = os.MkdirAll("nfts", os.ModePerm)
+		if err != nil {
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			return
+		}
+	}
 
-	// TODO: Path to save image
 	// Save image to disk
-	filename := fmt.Sprintf("nft-%d.png", tokenId)
+	filename := fmt.Sprintf("nfts/nft-%d.png", tokenId)
 	file, err := os.Create(filename)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error creating file", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
@@ -134,7 +140,25 @@ func processNFTMintedEvent(event IndexerEvent, w http.ResponseWriter) {
 		"minter":      minter,
 		"messageType": "nftMinted",
 	}
-	routeutils.SendWebSocketMessage(w, message)
+	routeutils.SendWebSocketMessage(message)
 
 	// TODO: Response?
+}
+
+func revertNFTMintedEvent(event IndexerEvent) {
+	tokenIdLowHex := event.Event.Keys[1]
+
+	tokenId, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("reverseNFTMintedEvent", "Error converting token id low hex to int", tokenIdLowHex)
+		return
+	}
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM NFTs WHERE token_id = $1", tokenId)
+	if err != nil {
+		PrintIndexerError("reverseNFTMintedEvent", "Error deleting NFT from postgres", tokenIdLowHex)
+		return
+	}
+
+	// TODO: Mark image as unused?
 }

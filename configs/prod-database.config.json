@@ -1,0 +1,12 @@
+{
+  "redis": {
+    "host": "redis.art-peace-sepolia.svc.cluster.local",
+    "port": 6379
+  },
+  "postgres": {
+    "host": "postgres.art-peace-sepolia.svc.cluster.local",
+    "port": 5432,
+    "user": "art-peace-user",
+    "database": "art-peace-db"
+  }
+}

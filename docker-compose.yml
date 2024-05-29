@@ -33,6 +33,22 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=password
+    volumes:
+      - nfts:/app/nfts
+  consumer:
+    build:
+      dockerfile: backend/Dockerfile.consumer
+      context: .
+    ports:
+      - 8081:8081
+    links:
+      - redis
+      - postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - nfts:/app/nfts
   devnet:
     image: shardlabs/starknet-devnet-rs:0.0.3
     command:
@@ -102,7 +118,7 @@ services:
       - apibara
     environment:
       - APIBARA_STREAM_URL=http://art-peace-apibara-1:7171
-      - BACKEND_TARGET_URL=http://art-peace-backend-1:8080/consume-indexer-msg
+      - CONSUMER_TARGET_URL=http://art-peace-consumer-1:8081/consume-indexer-msg
       - PERSIST_TO_REDIS=redis://art-peace-redis-1:6379
       - INDEXER_ID=art-peace-indexer-id
     volumes:
@@ -130,6 +146,7 @@ services:
 volumes:
   redis:
   postgres:
+  nfts:
   devnet:
   apibara:
   configs:

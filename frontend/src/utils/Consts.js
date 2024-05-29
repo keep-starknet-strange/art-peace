@@ -6,6 +6,6 @@ export const backendUrl = backendConfig.production
 
 export const wsUrl = backendConfig.production
   ? 'wss://' + backendConfig.host + '/ws'
-  : 'ws://' + backendConfig.host + ':' + backendConfig.port + '/ws';
+  : 'ws://' + backendConfig.host + ':' + backendConfig.consumer_port + '/ws';
 
 export const devnetMode = backendConfig.production === false;

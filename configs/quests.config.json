@@ -19,7 +19,8 @@
                 "$DAY_IDX",
                 "0",
                 "0"
-              ]
+              ],
+              "storeParams": [2,3,4,5,6]
             }
           }
         ]
@@ -38,6 +39,7 @@
             "$ART_PEACE_CONTRACT",
             "$REWARD"
           ],
+          "storeParams": [],
           "claimParams": [
             {
               "type": "address",
