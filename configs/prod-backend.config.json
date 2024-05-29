@@ -1,6 +1,7 @@
 {
   "host": "backend.art-peace-sepolia.svc.cluster.local",
   "port": 8080,
+  "consumer_port": 8081,
   "scripts": {
     "place_pixel_devnet": "/scripts/place_pixel.sh",
     "place_extra_pixels_devnet": "/scripts/place_extra_pixels.sh",
@@ -15,5 +16,10 @@
   "websocket": {
     "read_buffer_size": 1024,
     "write_buffer_size": 1024
+  },
+  "http_config": {
+    "allow_origin": ["*"],
+    "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allow_headers": ["Content-Type"]
   }
 }

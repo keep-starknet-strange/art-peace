@@ -38,8 +38,7 @@ CREATE TABLE Days (
   -- Postgres auto-incrementing primary key
   key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   day_index integer NOT NULL,
-  day_start timestamp NOT NULL,
-  day_end timestamp
+  day_start timestamp NOT NULL
 );
 CREATE INDEX days_day_index_index ON Days (day_index);
 

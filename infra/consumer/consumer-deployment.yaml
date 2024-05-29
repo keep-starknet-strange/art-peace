@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: consumer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: consumer
   template:
     metadata:
       labels:
-        app: backend
+        app: consumer
     spec:
       containers:
-        - name: backend
-          image: 'brandonjroberts/art-peace-backend:v0.0.1'
-          command: ["./main"]
+        - name: consumer
+          image: 'brandonjroberts/art-peace-consumer:v0.0.1'
+          command: ["./consumer"]
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 8081
           envFrom:
             - configMapRef:
-                name: backend-secret
+                name: consumer-secret
           volumeMounts:
             - mountPath: /app/nfts
               name: nft-data

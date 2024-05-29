@@ -2,12 +2,13 @@ package routes
 
 import (
 	"context"
-	"github.com/keep-starknet-strange/art-peace/backend/core"
-	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
+
+	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func InitNFTRoutes() {
@@ -21,7 +22,7 @@ func InitNFTRoutes() {
 		http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
 	}
 	// Create a static file server for the nft images
-	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("."))))
+	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts"))))
 }
 
 type NFTData struct {
@@ -90,6 +91,7 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
+  // TODO: Join with users table to get minter name if needed
 	query := `SELECT * FROM nfts LIMIT $1 OFFSET $2`
 	nfts, err := core.PostgresQueryJson[NFTData](query, pageLength, offset)
 	if err != nil {

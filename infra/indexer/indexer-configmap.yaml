@@ -8,7 +8,7 @@ data:
   ART_PEACE_CONTRACT_ADDRESS: 0x02e3f41bd135e60c72ebfe57e8964ecc58dbb8f8679b1b4cffeaf5e45ab1defa
   USERNAME_STORE_ADDRESS: 0x00a22891d623bff245535dfbfa2f0db1002a62ef4bd5d405bd1f5712e9df85cd
   NFT_CONTRACT_ADDRESS: 0x072f12a6056df3e4c683d3a7fba1e1a1a702c51e1b1928fb058e91294c738984
-  BACKEND_TARGET_URL: http://backend.art-peace-sepolia.svc.cluster.local:8080/consume-indexer-msg
+  CONSUMER_TARGET_URL: http://consumer.art-peace-sepolia.svc.cluster.local:8081/consume-indexer-msg
   APIBARA_STREAM_URL: https://sepolia.starknet.a5a.ch
   AUTH_TOKEN: dna_aabbcc
   PERSIST_TO_REDIS: redis://redis.art-peace-sepolia.svc.cluster.local:6379

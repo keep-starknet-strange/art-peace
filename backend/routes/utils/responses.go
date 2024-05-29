@@ -59,10 +59,10 @@ func WriteDataJson(w http.ResponseWriter, data string) {
 	w.Write(BasicDataJson(data))
 }
 
-func SendWebSocketMessage(w http.ResponseWriter, message map[string]interface{}) {
+func SendWebSocketMessage(message map[string]interface{}) {
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
-		WriteErrorJson(w, http.StatusInternalServerError, "Error marshalling message")
+    fmt.Println("Failed to marshal websocket message")
 		return
 	}
 	for idx, conn := range core.ArtPeaceBackend.WSConnections {

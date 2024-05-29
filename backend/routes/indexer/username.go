@@ -3,12 +3,11 @@ package indexer
 import (
 	"context"
 	"encoding/hex"
-	"net/http"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-func processUsernameClaimedEvent(event IndexerEvent, w http.ResponseWriter) {
+func processUsernameClaimedEvent(event IndexerEvent) {
 	address := event.Event.Keys[1][2:]     // Remove 0x prefix
 	usernameHex := event.Event.Data[0][2:] // Remove 0x prefix
 
@@ -38,7 +37,18 @@ func processUsernameClaimedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 }
 
-func processUsernameChangedEvent(event IndexerEvent, w http.ResponseWriter) {
+func revertUsernameClaimedEvent(event IndexerEvent) {
+  address := event.Event.Keys[1][2:] // Remove 0x prefix
+
+  // Remove username from postgres
+  _, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Users WHERE address = $1", address)
+  if err != nil {
+    PrintIndexerError("revertUsernameClaimedEvent", "Error deleting username from postgres", address, "")
+    return
+  }
+}
+
+func processUsernameChangedEvent(event IndexerEvent) {
 	address := event.Event.Keys[1][2:]     // Remove 0x prefix
 	usernameHex := event.Event.Data[1][2:] // Remove 0x prefix
 
@@ -66,4 +76,8 @@ func processUsernameChangedEvent(event IndexerEvent, w http.ResponseWriter) {
 		PrintIndexerError("processUsernameChangedEvent", "Error updating username in postgres", address, username)
 		return
 	}
+}
+
+func revertUsernameChangedEvent(event IndexerEvent) {
+  // TODO: Revert username in postgres
 }

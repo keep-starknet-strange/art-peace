@@ -2,13 +2,12 @@ package indexer
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-func processVoteColorEvent(event IndexerEvent, w http.ResponseWriter) {
+func processVoteColorEvent(event IndexerEvent) {
 	voter := event.Event.Keys[1][2:] // Remove 0x prefix
 	dayIdxHex := event.Event.Keys[2]
 	colorHex := event.Event.Keys[3]
@@ -31,4 +30,23 @@ func processVoteColorEvent(event IndexerEvent, w http.ResponseWriter) {
 		PrintIndexerError("processVoteColorEvent", "Error inserting color vote into postgres", voter, dayIdxHex, colorHex)
 		return
 	}
+}
+
+func revertVoteColorEvent(event IndexerEvent) {
+  voter := event.Event.Keys[1][2:] // Remove 0x prefix
+  dayIdxHex := event.Event.Keys[2]
+
+  dayIdx, err := strconv.ParseInt(dayIdxHex, 0, 64)
+  if err != nil {
+    PrintIndexerError("revertVoteColorEvent", "Error converting day index hex to int", voter, dayIdxHex)
+    return
+  }
+
+  // Remove vote from postgres
+  // TODO: Revert to old vote if it existed before the vote being reverted
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM ColorVotes WHERE user_address = $1 AND day_index = $2", voter, dayIdx)
+  if err != nil {
+    PrintIndexerError("revertVoteColorEvent", "Error deleting color vote from postgres", voter, dayIdxHex)
+    return
+  }
 }

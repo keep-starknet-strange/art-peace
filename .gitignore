@@ -26,6 +26,7 @@ node_modules/
 
 # Backend
 /backend/backend
+/backend/consumer
 
 # Terraform
 .terraform

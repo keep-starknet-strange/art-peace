@@ -3,13 +3,12 @@ package indexer
 import (
 	"context"
 	"encoding/hex"
-	"net/http"
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-func processFactionCreatedEvent(event IndexerEvent, w http.ResponseWriter) {
+func processFactionCreatedEvent(event IndexerEvent) {
 	factionIdHex := event.Event.Keys[1]
 	nameHex := event.Event.Data[0][2:] // Remove 0x prefix
 	leader := event.Event.Data[1][2:]  // Remove 0x prefix
@@ -70,6 +69,32 @@ func processFactionCreatedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 }
 
-func processMemberReplacedEvent(event IndexerEvent, w http.ResponseWriter) {
+func revertFactionCreatedEvent(event IndexerEvent) {
+  factionIdHex := event.Event.Keys[1]
+
+  factionId, err := strconv.ParseInt(factionIdHex, 0, 64)
+  if err != nil {
+    PrintIndexerError("revertFactionCreatedEvent", "Failed to parse factionId", factionIdHex)
+    return
+  }
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Factions WHERE id = $1", factionId)
+  if err != nil {
+    PrintIndexerError("revertFactionCreatedEvent", "Failed to delete faction from postgres", factionIdHex)
+    return
+  }
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM FactionMembersInfo WHERE faction_id = $1", factionId)
+  if err != nil {
+    PrintIndexerError("revertFactionCreatedEvent", "Failed to delete members from postgres", factionIdHex)
+    return
+  }
+}
+
+func processMemberReplacedEvent(event IndexerEvent) {
 	// TODO: Implement
+}
+
+func revertMemberReplacedEvent(event IndexerEvent) {
+  // TODO: Implement
 }
