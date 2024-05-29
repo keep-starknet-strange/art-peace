@@ -52,5 +52,5 @@ func main() {
 
 	routes.InitRoutes()
 
-	core.ArtPeaceBackend.Start()
+	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.Port)
 }

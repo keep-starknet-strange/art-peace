@@ -22,7 +22,7 @@ func InitNFTRoutes() {
 		http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
 	}
 	// Create a static file server for the nft images
-	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("."))))
+	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts"))))
 }
 
 type NFTData struct {
@@ -108,6 +108,7 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
+	// TODO: Join with users table to get minter name if needed
 	query := `
         SELECT 
             nfts.*, 

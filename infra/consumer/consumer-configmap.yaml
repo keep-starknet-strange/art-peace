@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consumer-secret
+  labels:
+    app: consumer
+data:
+  ART_PEACE_CONTRACT_ADDRESS: 0x02e3f41bd135e60c72ebfe57e8964ecc58dbb8f8679b1b4cffeaf5e45ab1defa
+  USERNAME_STORE_CONTRACT_ADDRESS: 0x00a22891d623bff245535dfbfa2f0db1002a62ef4bd5d405bd1f5712e9df85cd
+  POSTGRES_PASSWORD: ArtPeacePassword1234
