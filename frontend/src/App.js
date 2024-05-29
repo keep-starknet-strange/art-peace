@@ -273,6 +273,7 @@ function App() {
         `get-extra-pixels?address=${queryAddress}`
       );
       if (!extraPixelsResponse.data) {
+        setExtraPixels(0);
         return;
       }
       setExtraPixels(extraPixelsResponse.data);
@@ -284,6 +285,7 @@ function App() {
         `get-faction-pixels?address=${queryAddress}`
       );
       if (!factionPixelsResponse.data) {
+        setFactionPixelsData([]);
         return;
       }
       setFactionPixelsData(factionPixelsResponse.data);
