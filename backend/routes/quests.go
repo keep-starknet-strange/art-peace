@@ -48,9 +48,9 @@ type MainQuest struct {
 }
 
 type QuestContractConfig struct {
-	Type       string   `json:"type"`
-	InitParams []string `json:"initParams"`
-  StoreParams []int `json:"storeParams"`
+	Type        string   `json:"type"`
+	InitParams  []string `json:"initParams"`
+	StoreParams []int    `json:"storeParams"`
 }
 
 type QuestConfig struct {
@@ -76,8 +76,8 @@ type QuestsConfig struct {
 }
 
 type QuestStatus struct {
-  Progress int `json:"progress"`
-  Needed int `json:"needed"`
+	Progress int `json:"progress"`
+	Needed   int `json:"needed"`
 }
 
 func InitQuestsRoutes() {
@@ -89,13 +89,12 @@ func InitQuestsRoutes() {
 	http.HandleFunc("/get-todays-user-quests", getTodaysUserQuests)
 	http.HandleFunc("/get-completed-daily-quests", GetCompletedDailyQuests)
 	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
-  http.HandleFunc("/get-user-quest-status", GetUserQuestStatus)
+	http.HandleFunc("/get-user-quest-status", GetUserQuestStatus)
 	http.HandleFunc("/get-today-start-time", GetTodayStartTime)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/claim-today-quest-devnet", ClaimTodayQuestDevnet)
 	}
 }
-
 
 func InitQuests(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to initialize colors
@@ -110,7 +109,7 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  // Setup daily quests tables
+	// Setup daily quests tables
 	for _, dailyQuestConfig := range questJson.DailyQuests.Quests {
 		for idx, questConfig := range dailyQuestConfig.Quests {
 			_, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO DailyQuests (name, description, reward, day_index, quest_id, quest_type) VALUES ($1, $2, $3, $4, $5, $6)", questConfig.Name, questConfig.Description, questConfig.Reward, dailyQuestConfig.Day-1, idx, questConfig.ContractConfig.Type)
@@ -119,58 +118,58 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-      paramIdx := 0
-      for _, storeParam := range questConfig.ContractConfig.StoreParams {
-        paramStr := questConfig.ContractConfig.InitParams[storeParam]
-        // TODO: More generic
-        if paramStr == "$DAY_IDX" {
-          paramStr = strconv.Itoa(dailyQuestConfig.Day-1)
-        }
+			paramIdx := 0
+			for _, storeParam := range questConfig.ContractConfig.StoreParams {
+				paramStr := questConfig.ContractConfig.InitParams[storeParam]
+				// TODO: More generic
+				if paramStr == "$DAY_IDX" {
+					paramStr = strconv.Itoa(dailyQuestConfig.Day - 1)
+				}
 
-        param, err := strconv.Atoi(paramStr)
-        if err != nil {
-          routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid store param")
-          fmt.Println(paramIdx, paramStr, err, questConfig.Name)
-          return
-        }
+				param, err := strconv.Atoi(paramStr)
+				if err != nil {
+					routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid store param")
+					fmt.Println(paramIdx, paramStr, err, questConfig.Name)
+					return
+				}
 
-        _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO DailyQuestsInput (day_index, quest_id, input_key, input_value) VALUES ($1, $2, $3, $4)", dailyQuestConfig.Day-1, idx, paramIdx, param)
-        if err != nil {
-          routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert daily quest input")
-          return
-        }
+				_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO DailyQuestsInput (day_index, quest_id, input_key, input_value) VALUES ($1, $2, $3, $4)", dailyQuestConfig.Day-1, idx, paramIdx, param)
+				if err != nil {
+					routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert daily quest input")
+					return
+				}
 
-        paramIdx++
-      }
+				paramIdx++
+			}
 		}
 	}
 
-  // Setup main quests tables
+	// Setup main quests tables
 	for _, questConfig := range questJson.MainQuests.Quests {
-		_, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuests (name, description, reward, quest_type) VALUES ($1, $2, $3, $4)", questConfig.Name, questConfig.Description, questConfig.Reward,  questConfig.ContractConfig.Type)
+		_, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuests (name, description, reward, quest_type) VALUES ($1, $2, $3, $4)", questConfig.Name, questConfig.Description, questConfig.Reward, questConfig.ContractConfig.Type)
 		if err != nil {
 			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest")
 			return
 		}
 
-    paramIdx := 0
-    for _, storeParam := range questConfig.ContractConfig.StoreParams {
-      paramStr := questConfig.ContractConfig.InitParams[storeParam]
-      param, err := strconv.Atoi(paramStr)
-      if err != nil {
-        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid store param")
-        fmt.Println(paramIdx, paramStr, err, questConfig.Name)
-        return
-      }
+		paramIdx := 0
+		for _, storeParam := range questConfig.ContractConfig.StoreParams {
+			paramStr := questConfig.ContractConfig.InitParams[storeParam]
+			param, err := strconv.Atoi(paramStr)
+			if err != nil {
+				routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid store param")
+				fmt.Println(paramIdx, paramStr, err, questConfig.Name)
+				return
+			}
 
-      _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuestsInput (quest_id, input_key, input_value) VALUES ($1, $2, $3)", questConfig.Name, paramIdx, param)
-      if err != nil {
-        routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest input")
-        return
-      }
+			_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuestsInput (quest_id, input_key, input_value) VALUES ($1, $2, $3)", questConfig.Name, paramIdx, param)
+			if err != nil {
+				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest input")
+				return
+			}
 
-      paramIdx++
-    }
+			paramIdx++
+		}
 	}
 
 	routeutils.WriteResultJson(w, "Initialized quests successfully")
@@ -318,78 +317,78 @@ func ClaimTodayQuestDevnet(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserQuestStatus(w http.ResponseWriter, r *http.Request) {
-  userAddress := r.URL.Query().Get("address")
-  if userAddress == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
-    return
-  }
+	userAddress := r.URL.Query().Get("address")
+	if userAddress == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		return
+	}
 
-  questType := r.URL.Query().Get("type")
-  if questType == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing type parameter")
-    return
-  }
+	questType := r.URL.Query().Get("type")
+	if questType == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing type parameter")
+		return
+	}
 
-  questIdStr := r.URL.Query().Get("questId")
-  if questIdStr == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing questId parameter")
-    return
-  }
+	questIdStr := r.URL.Query().Get("questId")
+	if questIdStr == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing questId parameter")
+		return
+	}
 
-  questId, err := strconv.Atoi(questIdStr)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid questId parameter")
-    return
-  }
+	questId, err := strconv.Atoi(questIdStr)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid questId parameter")
+		return
+	}
 
-  if questType == "daily" {
-    dayIndexStr := r.URL.Query().Get("dayIndex")
-    if dayIndexStr == "" {
-      routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing dayIndex parameter")
-      return
-    }
+	if questType == "daily" {
+		dayIndexStr := r.URL.Query().Get("dayIndex")
+		if dayIndexStr == "" {
+			routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing dayIndex parameter")
+			return
+		}
 
-    dayIndex, err := strconv.Atoi(dayIndexStr)
-    if err != nil {
-      routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid dayIndex parameter")
-      return
-    }
-    
-    quest := quests.NewDailyQuest(questId, dayIndex)
-    if quest == nil {
-      routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get daily quest")
-      return
-    }
-    
-    progress, needed := quest.CheckStatus(userAddress)    
-    questStatus := QuestStatus{Progress: progress, Needed: needed}
-    questStatusBytes, err := json.Marshal(questStatus)
-    if err != nil {
-      routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal quest status")
-      return
-    }
+		dayIndex, err := strconv.Atoi(dayIndexStr)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid dayIndex parameter")
+			return
+		}
 
-    routeutils.WriteDataJson(w, string(questStatusBytes))
-    return
-  } else if questType == "main" {
-    quest := quests.NewMainQuest(questId)
-    if quest == nil {
-      routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main quest")
-      return
-    }
+		quest := quests.NewDailyQuest(questId, dayIndex)
+		if quest == nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get daily quest")
+			return
+		}
 
-    progress, needed := quest.CheckStatus(userAddress)
-    questStatus := QuestStatus{Progress: progress, Needed: needed}
-    questStatusBytes, err := json.Marshal(questStatus)
-    if err != nil {
-      routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal quest status")
-      return
-    }
+		progress, needed := quest.CheckStatus(userAddress)
+		questStatus := QuestStatus{Progress: progress, Needed: needed}
+		questStatusBytes, err := json.Marshal(questStatus)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal quest status")
+			return
+		}
 
-    routeutils.WriteDataJson(w, string(questStatusBytes))
-    return
-  } else {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid quest type")
-    return
-  }
+		routeutils.WriteDataJson(w, string(questStatusBytes))
+		return
+	} else if questType == "main" {
+		quest := quests.NewMainQuest(questId)
+		if quest == nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main quest")
+			return
+		}
+
+		progress, needed := quest.CheckStatus(userAddress)
+		questStatus := QuestStatus{Progress: progress, Needed: needed}
+		questStatusBytes, err := json.Marshal(questStatus)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal quest status")
+			return
+		}
+
+		routeutils.WriteDataJson(w, string(questStatusBytes))
+		return
+	} else {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid quest type")
+		return
+	}
 }
