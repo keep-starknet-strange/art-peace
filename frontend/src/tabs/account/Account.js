@@ -9,20 +9,27 @@ import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl, devnetMode } from '../../utils/Consts.js';
 import { fetchWrapper } from '../../services/apiService.js';
-import ColoredIcon from '../../icons/ColoredIcon.js';
+import BeggarRankImg from '../../resources/ranks/Beggar.png';
+import OwlRankImg from '../../resources/ranks/Owl.png';
+import CrownRankImg from '../../resources/ranks/Crown.png';
+import WolfRankImg from '../../resources/ranks/Wolf.png';
+import EditIcon from '../../resources/icons/Edit.png';
+import SearchIcon from '../../resources/icons/Search.png';
 
 const Account = (props) => {
-  // TODO: Icons for each rank & buttons
   const [username, setUsername] = useState('');
   const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState('');
+  // TODO: Mint rank images when reached w/ button
+  const [rankBackground, setRankBackground] = useState({
+    background:
+      'linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1))'
+  });
+  const [accountRankImg, setAccountRankImg] = useState(null);
 
   const [usernameSaved, setUsernameSaved] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
-  const [rankColor, setRankColor] = useState('');
-  const path =
-    'm5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275z';
 
   const toHex = (str) => {
     let hex = '0x';
@@ -32,12 +39,15 @@ const Account = (props) => {
     return hex;
   };
 
+  // TODO: Connect wallet page if no connectors
+  // TODO: Reconnect on refresh if permitted
   const { connect, connectors } = useConnect();
   // TODO: Add disconnect button
   const { _disconnect } = useDisconnect();
 
   const [addressShort, setAddressShort] = useState('');
   useEffect(() => {
+    if (!props.address) return;
     setAddressShort(
       props.address
         ? `${props.address.slice(0, 6)}...${props.address.slice(-4)}`
@@ -140,6 +150,7 @@ const Account = (props) => {
     }
   };
 
+  // TODO: Non editable while loading get-username
   const editUsername = () => {
     setIsEditing(true);
     setUsernameBeforeEdit(username);
@@ -181,19 +192,44 @@ const Account = (props) => {
     fetchPixelCount();
   }, [props.queryAddress]);
 
+  const [animatedRankColor, setAnimatedRankColor] = React.useState(0);
+  const btrColorOffset = 1000;
+  useEffect(() => {
+    if (pixelCount < 50) return;
+    const interval = setInterval(() => {
+      setAnimatedRankColor((animatedRankColor + 3) % 360);
+      setRankBackground({
+        background: `linear-gradient(45deg, hsl(${animatedRankColor}, 100%, 50%), hsl(${(animatedRankColor + btrColorOffset) % 360}, 100%, 50%))`
+      });
+    }, 50);
+    return () => clearInterval(interval);
+  }, [animatedRankColor, pixelCount]);
+
   useEffect(() => {
     if (pixelCount >= 50) {
       setAccountRank('Alpha Wolf');
-      setRankColor('#B9F2FF');
+      setAccountRankImg(WolfRankImg);
     } else if (pixelCount >= 30) {
       setAccountRank('Degen Artist');
-      setRankColor('#FFAA00');
+      setRankBackground({
+        background:
+          'linear-gradient(45deg, rgba(255, 215, 0, 0.9), rgba(255, 215, 0, 0.6))'
+      });
+      setAccountRankImg(CrownRankImg);
     } else if (pixelCount >= 10) {
-      setAccountRank('Pixel Sensei');
-      setRankColor('#C0C0C0');
+      setAccountRank('Pixel Wizard');
+      setRankBackground({
+        background:
+          'linear-gradient(45deg, rgba(192, 192, 200, 0.9), rgba(192, 192, 200, 0.6))'
+      });
+      setAccountRankImg(OwlRankImg);
     } else {
       setAccountRank('Art Beggar');
-      setRankColor('#CD7F32');
+      setRankBackground({
+        background:
+          'linear-gradient(45deg, rgba(205, 127, 50, 0.9), rgba(205, 127, 50, 0.6))'
+      });
+      setAccountRankImg(BeggarRankImg);
     }
   }, [pixelCount]);
 
@@ -202,10 +238,13 @@ const Account = (props) => {
     setStarknetWalletMode(true);
   };
 
-  // TODO: Ethereum login
-  // TODO: Add a shimmer effect to the rank icon
+  const showPixelHistory = () => {
+    // TODO: Show pixel history
+    console.log('Show pixel history');
+  };
 
-  // TODO: Space between account info fields
+  // TODO: Ethereum login
+
   return (
     <BasicTab
       title='Account'
@@ -222,12 +261,11 @@ const Account = (props) => {
         >
           <div className='Account__login'>
             <div
-              className='Text__small Button__primary'
+              className='Text__medium Button__primary Account__login__button'
               onClick={connectStarknetWallet}
             >
               StarkNet Login
             </div>
-            <div className='Text__small Button__primary'>Ethereum Login</div>
           </div>
           <div
             className={
@@ -240,7 +278,7 @@ const Account = (props) => {
               {connectors.map((connector) => {
                 return (
                   <button
-                    className='Text__small Button__primary'
+                    className='Text__medium Button__primary Account__walletlogin__button'
                     key={connector.id}
                     onClick={() => connectWallet(connector)}
                   >
@@ -255,27 +293,26 @@ const Account = (props) => {
       {props.queryAddress !== '0' && (
         <div>
           <h2 className='Text__medium Heading__sub Account__subheader'>Info</h2>
-          <p className='Text__small Account__item Account__address'>
-            Address: {addressShort}
-          </p>
-          {devnetMode && (
-            <p className='Text__small Account__item Account__address'>
-              Devnet Mode: {props.queryAddress.slice(0, 6)}...
-            </p>
-          )}
           {usernameSaved && !isEditing ? (
-            <div className='Text__small Account__special Account__username'>
-              <p style={{ margin: 0, padding: 0 }}>Username: {username}</p>
-              <div
-                className='Text__small Button__primary Account__username__button'
-                onClick={editUsername}
-              >
-                edit
+            <div className='Account__item__user'>
+              <p className='Text__small Account__item__label'>Username</p>
+              <div className='Account__item__username'>
+                <p className='Text__small Account__item__label'>{username}</p>
+                <div
+                  className='Text__small Button__primary Account__item__button'
+                  onClick={editUsername}
+                >
+                  <img
+                    className='Account__item__icon'
+                    src={EditIcon}
+                    alt='edit'
+                  />
+                </div>
               </div>
             </div>
           ) : (
-            <div>
-              <p className='Text__small Account__item'>Username:&nbsp;</p>
+            <div className='Account__form'>
+              <p className='Text__small Account__form__label'>Username</p>
               <form
                 className='Account__item Account__username__form'
                 onSubmit={handleSubmit}
@@ -287,45 +324,75 @@ const Account = (props) => {
                   required
                   onChange={(e) => setUsername(e.target.value)}
                 />
-                <div>
+                <div className='Account__item__pair'>
+                  <button className='Text__small Button__primary' type='submit'>
+                    submit
+                  </button>
                   {isEditing && (
                     <button
-                      className='Text__small Button__primary Account__username__button'
+                      className='Text__small Button__primary Account__cancel__button'
                       onClick={handleCancelEdit}
                       type='button'
                     >
-                      cancel
+                      X
                     </button>
                   )}
-                  <button
-                    className='Text__small Button__primary Account__username__button'
-                    type='submit'
-                  >
-                    submit
-                  </button>
                 </div>
               </form>
             </div>
           )}
-          <p className='Text__small Account__item'>
-            Network: {props.chain.network.toUpperCase()}
-          </p>
+
+          <div className='Text__small Account__rank'>
+            <div className='Account__rank__outer' style={rankBackground}>
+              <div className='Account__rank__inner'>
+                <img
+                  className='Account__rank__img'
+                  src={accountRankImg}
+                  alt='rank'
+                />
+                <p className='Text__small Account__rank__text'>{accountRank}</p>
+              </div>
+            </div>
+          </div>
+          <div className='Account__item'>
+            <p className='Text__small Account__item__label'>Address</p>
+            <p className='Text__small Account__item__text'>{addressShort}</p>
+          </div>
+          {devnetMode && (
+            <div className='Account__item'>
+              <p className='Text__small Account__item__label'>Dev Account</p>
+              <p className='Text__small Account__item__text'>
+                0x{props.queryAddress.slice(0, 4)}...
+                {props.queryAddress.slice(-4)}
+              </p>
+            </div>
+          )}
+          <div className='Account__item'>
+            <p className='Text__small Account__item__label'>Network</p>
+            <p className='Text__small Account__item__text'>
+              {props.chain.network.toUpperCase()}
+            </p>
+          </div>
 
           <h2 className='Text__medium Heading__sub Account__subheader'>
             Stats
           </h2>
-          <p className='Text__small Account__item'>
-            Pixels placed: {pixelCount}
-          </p>
-          <p className='Text__small Account__item'>
-            Rank: {accountRank}
-            <ColoredIcon
-              width='3rem'
-              color={rankColor}
-              path={path}
-              style={{ marginLeft: '0.5rem' }}
-            />
-          </p>
+          <div className='Account__item'>
+            <p className='Text__small Account__item__label'>Pixels placed</p>
+            <div className='Account__item__pair'>
+              <p className='Text__small Account__item__label'>{pixelCount}</p>
+              <div
+                className='Button__primary Account__item__button'
+                onClick={showPixelHistory}
+              >
+                <img
+                  className='Account__item__icon'
+                  src={SearchIcon}
+                  alt='show'
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </BasicTab>

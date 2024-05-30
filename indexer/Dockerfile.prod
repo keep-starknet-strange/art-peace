@@ -1,0 +1,7 @@
+FROM quay.io/apibara/sink-webhook:0.6.0 as sink-webhook
+
+WORKDIR /indexer
+COPY ./indexer/prod-script.js .
+
+# TODO: Allow net only on the required domains
+CMD ["run", "prod-script.js", "--allow-env-from-env", "CONSUMER_TARGET_URL,APIBARA_STREAM_URL,PERSIST_TO_REDIS,INDEXER_ID,ART_PEACE_CONTRACT_ADDRESS,NFT_CONTRACT_ADDRESS,USERNAME_STORE_ADDRESS", "--allow-net", "--sink-id", "art-peace-sink-id"]

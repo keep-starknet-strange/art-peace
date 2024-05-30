@@ -1,0 +1,22 @@
+FROM --platform=linux/amd64 golang:1.22.2-alpine
+
+RUN apk add --no-cache bash curl git jq
+
+# Copy over the configs
+WORKDIR /configs
+COPY ./configs/ .
+COPY ./configs/prod-database.config.json ./database.config.json
+COPY ./configs/prod-backend.config.json ./backend.config.json
+
+# Copy over the app
+WORKDIR /app
+COPY ./backend/go.mod ./backend/go.sum ./
+RUN go mod download
+COPY ./backend .
+
+# Build the app & run it
+RUN go build -o consumer ./cmd/consumer/consumer.go
+
+EXPOSE 8081
+
+CMD ["./consumer"]

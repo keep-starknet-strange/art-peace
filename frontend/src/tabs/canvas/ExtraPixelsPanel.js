@@ -4,6 +4,7 @@ import './ExtraPixelsPanel.css';
 import canvasConfig from '../../configs/canvas.config.json';
 import { fetchWrapper } from '../../services/apiService.js';
 import { devnetMode } from '../../utils/Consts.js';
+import EraserIcon from '../../resources/icons/Eraser.png';
 
 const ExtraPixelsPanel = (props) => {
   // TODO: Change on isPortrait
@@ -18,6 +19,7 @@ const ExtraPixelsPanel = (props) => {
     props.setIsEraserMode(!props.isEraserMode);
     props.setSelectorMode(false);
     props.clearPixelSelection();
+    props.setSelectedColorId(-1);
   };
 
   const [calls, setCalls] = useState([]);
@@ -188,8 +190,11 @@ const ExtraPixelsPanel = (props) => {
       </p>
       <div className='ExtraPixelsPanel__header'>
         <p className='Text__medium Heading__sub'>Extra Pixels</p>
-        <div className='Button__primary' onClick={() => eraserMode()}>
-          Eraser
+        <div
+          className={`Button__primary ${props.isEraserMode ? 'Eraser__button--selected' : ''}`}
+          onClick={() => eraserMode()}
+        >
+          <img className='Eraser__icon' src={EraserIcon} alt='eraser' />
         </div>
         <div className='Button__primary' onClick={() => submit()}>
           Submit
@@ -280,7 +285,6 @@ const ExtraPixelsPanel = (props) => {
                   onMouseOver={() => {
                     props.setIsExtraDeleteMode(true);
                     props.setPixelSelection(pixelData.x, pixelData.y);
-                    props.setSelectedColorId(pixelData.colorId);
                   }}
                   onMouseOut={() => {
                     props.setIsExtraDeleteMode(false);
