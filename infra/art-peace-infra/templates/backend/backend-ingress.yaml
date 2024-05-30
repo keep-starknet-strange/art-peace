@@ -12,15 +12,15 @@ spec:
     pathType: Exact
     backend:
       service:
-        name: consumer
+        name: {{ .Values.labels.consumer.name }}
         port:
-          number: 8081
+          number: {{ .Values.ports.consumer }}
   - http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: backend
+            name: {{ .Values.labels.backend.name }}
             port:
-              number: 8080
+              number: {{ .Values.ports.backend }}

@@ -2,6 +2,7 @@ docker
 docker compose
 make
 jq
+yq
 
 redis: https://redis.io/docs/install/install-redis/
 postgresql: https://www.postgresql.org/download/
