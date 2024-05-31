@@ -43,7 +43,7 @@ const Account = (props) => {
   // TODO: Reconnect on refresh if permitted
   const { connect, connectors } = useConnect();
   // TODO: Add disconnect button
-  const { _disconnect } = useDisconnect();
+  const { disconnect } = useDisconnect();
 
   const [addressShort, setAddressShort] = useState('');
   useEffect(() => {
@@ -341,6 +341,10 @@ const Account = (props) => {
               </form>
             </div>
           )}
+
+          <p className='Disconnect__button' onClick={() => disconnect()}>
+            Disconnect Wallet
+          </p>
 
           <div className='Text__small Account__rank'>
             <div className='Account__rank__outer' style={rankBackground}>
