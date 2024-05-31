@@ -64,27 +64,24 @@ const CanvasContainer = (props) => {
     };
   }, [isDragging, canvasX, canvasY]);
 
-  // Limit the zoom function calls to once every 16 milliseconds (approximately 60 frames per second)
-  const throttle = (func, limit) => {
-    let inThrottle;
-    return function() {
-      const args = arguments;
-      const context = this;
-      if (!inThrottle) {
-        func.apply(context, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
+  let targetScale = canvasScale;
+  let targetX = canvasX;
+  let targetY = canvasY;
+
+  const animateZoom = () => {
+    if (Math.abs(canvasScale - targetScale) > 0.01) {
+      setCanvasScale(canvasScale + (targetScale - canvasScale) * 0.1);
+      setCanvasX(canvasX + (targetX - canvasX) * 0.1);
+      setCanvasY(canvasY + (targetY - canvasY) * 0.1);
+      requestAnimationFrame(animateZoom);
     }
   };
 
-
-  // Zoom in/out ( into the cursor position )
-  const zoom = throttle((e) => {
-    // Get the cursor position within the canvas ( note the canvas can go outsid  e the viewport )
+  const zoom = (e) => {
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
+
     if (cursorX < 0) {
       cursorX = 0;
     } else if (cursorX > rect.width) {
@@ -96,7 +93,6 @@ const CanvasContainer = (props) => {
       cursorY = rect.height;
     }
 
-    // Calculate new left and top position to keep cursor over the same rect pos  ition
     let newScale = canvasScale * (1 + e.deltaY * -0.01);
     if (newScale < minScale) {
       newScale = minScale;
@@ -112,13 +108,12 @@ const CanvasContainer = (props) => {
     const newPosX = canvasX - (newCursorX - cursorX);
     const newPosY = canvasY - (newCursorY - cursorY);
 
-    // Ensure updates happen in sync with the browser's refresh rate, resulting in smoother animations
-    requestAnimationFrame(() => {
-      setCanvasScale(newScale);
-      setCanvasX(newPosX);
-      setCanvasY(newPosY);
-    });
-  }, 16);
+    targetScale = newScale;
+    targetX = newPosX;
+    targetY = newPosY;
+
+    requestAnimationFrame(animateZoom);
+  };
 
   useEffect(() => {
     canvasContainerRef.current.addEventListener('wheel', zoom);
