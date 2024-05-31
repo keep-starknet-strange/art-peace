@@ -3,29 +3,25 @@ import './pagination.css';
 
 /**
  * PaginationView component for handling pagination controls.
- *
+ * When LoadMore button is clicked 10 items is added to the pageLength.
  * @param {Object} props - The properties object.
- * @param {number} props.pageLength - The number of data to be returned per page.
- * @param {number} props.page - The page number.
- * @param {number} props.totalPages - The total number of pages.
- * @param {number} props.currentPage - The current page.
+ * @param {function} props.data - The returned data.
  * @param {function} props.setState - Function to update the state.
  * @param {function} props.stateValue - The state value {pageLength and page}
  */
 
 export function PaginationView(props) {
+  const isDataSame = props.data.length === props.stateValue.pageLength;
   const handleLoadmore = () => {
-    //Add constriant so its not more than totalPages
-    const nextNumber =
-      props.stateValue.page !== props.totalPages
-        ? props.stateValue.page + 1
-        : props.totalPages;
-    props.setState((item) => ({ ...item, page: nextNumber }));
+    const newPageLentgh = props.data
+      ? props.stateValue.pageLength + 10
+      : props.stateValue.pageLength;
+    props.setState((item) => ({ ...item, page: 1, pageLength: newPageLentgh }));
   };
 
   return (
     <div className='PaginationContainer'>
-      {props.stateValue.page !== props.totalPages && (
+      {isDataSame && (
         <button
           title='Load More'
           className='Pagination_btn'

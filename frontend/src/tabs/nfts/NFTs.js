@@ -10,13 +10,6 @@ import {
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
 
-//Expected shape of data from backend.
-const mockNftData = {
-  data: [],
-  totalPages: 2,
-  pageLength: 10
-};
-
 const NFTsMainSection = (props) => {
   const imageURL = backendUrl + '/nft-images/';
   return (
@@ -51,9 +44,7 @@ const NFTsMainSection = (props) => {
           })}
         </div>
         <PaginationView
-          totalPages={mockNftData.totalPages}
-          pageLength={mockNftData.pageLength}
-          currentPage={mockNftData.currentPage}
+          data={props.nftsCollection}
           stateValue={props.myNftPagination}
           setState={props.setMyNftPagination}
         />
@@ -107,10 +98,7 @@ const NFTsExpandedSection = (props) => {
           })}
         </div>
         <PaginationView
-          totalPages={mockNftData.totalPages}
-          pageLength={mockNftData.pageLength}
-          page={mockNftData.page}
-          currentPage={mockNftData.currentPage}
+          data={props.allNfts}
           setState={props.setAllNftPagination}
           stateValue={props.allNftPagination}
         />
@@ -164,6 +152,7 @@ const NFTs = (props) => {
           pageLength: myNftPagination.pageLength,
           queryAddress: props.queryAddress
         });
+
         if (result.data) {
           setMyNFTs(result.data);
         }
