@@ -54,6 +54,12 @@ const NFTItem = (props) => {
   const posy = Math.floor(props.position / canvasConfig.canvas.width);
 
   const [minterText, setMinterText] = React.useState('');
+
+  function handleShare(){
+    const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent("Hey, check out my nft")}&url=${encodeURIComponent(props.image)}`
+    window.open(twitterShareUrl, '_blank');
+  }
+
   // TODO: Load name from initial query instead of fetching it again
   useEffect(() => {
     async function fetchUsernameUrl() {
@@ -94,9 +100,9 @@ const NFTItem = (props) => {
           />
           <div className='NFTItem__overlay'>
             <div className='NFTItem__buttons'>
-              <div className='NFTItem__button'>
+              <button onClick={handleShare} className='NFTItem__button'>
                 <img className='Share__icon' src={ShareIcon} alt='Share' />
-              </div>
+              </button>
               <div
                 className={`NFTItem__button ${liked ? 'Like__button--liked' : ''}`}
                 onClick={liked ? handleUnlike : handleLike}
