@@ -38,20 +38,22 @@ pub mod FactionQuest {
         }
 
 
-
         fn is_claimable(
             self: @ContractState, user: ContractAddress, calldata: Span<felt252>
         ) -> bool {
             if self.claimed.read(user) {
                 return false;
             }
+
             let art_piece = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
+
             let has_joined_faction = art_peace.get_has_joined_faction();
-            if(has_joined_faction > 0){
+
+            if (has_joined_faction > 0) {
                 return true;
             }
-            return false
-            
+
+            false;
         }
 
 
