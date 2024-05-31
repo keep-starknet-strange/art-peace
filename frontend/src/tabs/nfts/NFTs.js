@@ -29,9 +29,10 @@ const NFTsMainSection = (props) => {
               width={nft.width}
               height={nft.height}
               blockNumber={nft.blockNumber}
-              likes={Math.floor(Math.random() * 1000)}
-              liked={Math.random() > 0.5}
+              likes={nft.likes}
+              liked={nft.liked}
               minter={nft.minter}
+              queryAddress={props.queryAddress}
             />
           );
         })}
@@ -74,9 +75,10 @@ const NFTsExpandedSection = (props) => {
               width={nft.width}
               height={nft.height}
               blockNumber={nft.blockNumber}
-              likes={Math.floor(Math.random() * 1000)}
-              liked={Math.random() > 0.5}
+              likes={nft.likes}
+              liked={nft.liked}
               minter={nft.minter}
+              queryAddress={props.queryAddress}
             />
           );
         })}
@@ -114,7 +116,6 @@ const NFTs = (props) => {
   }, [props.latestMintedTokenId]);
 
   React.useEffect(() => {
-    // TODO
     let getMyNFTsEndpoint = `get-my-nfts?address=${props.queryAddress}`;
     async function getMyNfts() {
       const response = await fetchWrapper(getMyNFTsEndpoint, { mode: 'cors' });
@@ -130,7 +131,7 @@ const NFTs = (props) => {
     if (!expanded) {
       return;
     }
-    let getNFTsEndpoint = 'get-nfts';
+    let getNFTsEndpoint = `get-nfts?address=${props.queryAddress}`;
     async function getNfts() {
       const response = await fetchWrapper(getNFTsEndpoint, { mode: 'cors' });
       if (response.data) {
@@ -152,6 +153,7 @@ const NFTs = (props) => {
       setActiveTab={props.setActiveTab}
       expanded={expanded}
       setExpanded={setExpanded}
+      queryAddress={props.queryAddress}
     />
   );
 };
