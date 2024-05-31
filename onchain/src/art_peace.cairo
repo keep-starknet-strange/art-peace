@@ -167,7 +167,7 @@ pub mod ArtPeace {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct VotableColorAdded{
+    struct VotableColorAdded {
         #[key]
         day: u32,
         #[key]
@@ -1176,7 +1176,7 @@ pub mod ArtPeace {
                 color_index += 1;
             } else {
                 self.votable_colors.write((next_day_votable_index, next_day), color);
-                self.emit(VotableColorAdded { day: next_day, color});
+                self.emit(VotableColorAdded { day: next_day, color });
                 next_day_votable_index += 1;
             }
             votable_index += 1;
