@@ -33,4 +33,8 @@ pub trait ITemplateVerifier<TContractState> {
     // If there was a reward escrowed, it is transferred to the builders.
     // Passed template_image contains the full image, and is used to verify the template.
     fn complete_template(ref self: TContractState, template_id: u32, template_image: Span<u8>);
+    fn complete_template_with_rewards(
+        ref self: TContractState, template_id: u32, template_image: Span<u8>
+    );
+    fn compute_template_hash(self: @TContractState, template: Span<u8>) -> felt252;
 }

@@ -2,13 +2,12 @@ package indexer
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-func processDailyQuestClaimedEvent(event IndexerEvent, w http.ResponseWriter) {
+func processDailyQuestClaimedEvent(event IndexerEvent) {
 	dayIndexHex := event.Event.Keys[1]
 	questIdHex := event.Event.Keys[2]
 	user := event.Event.Keys[3][2:] // Remove 0x prefix
@@ -61,7 +60,11 @@ func processDailyQuestClaimedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 }
 
-func processMainQuestClaimedEvent(event IndexerEvent, w http.ResponseWriter) {
+func revertDailyQuestClaimedEvent(event IndexerEvent) {
+	// TODO
+}
+
+func processMainQuestClaimedEvent(event IndexerEvent) {
 	questIdHex := event.Event.Keys[1]
 	user := event.Event.Keys[2][2:] // Remove 0x prefix
 	rewardHex := event.Event.Data[0]
@@ -103,4 +106,8 @@ func processMainQuestClaimedEvent(event IndexerEvent, w http.ResponseWriter) {
 		PrintIndexerError("processMainQuestClaimedEvent", "Failed to update user's extra pixels", questIdHex, user, rewardHex, calldataLenHex, calldata)
 		return
 	}
+}
+
+func revertMainQuestClaimedEvent(event IndexerEvent) {
+	// TODO
 }

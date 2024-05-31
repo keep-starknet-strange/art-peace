@@ -3,13 +3,12 @@ package indexer
 import (
 	"context"
 	"encoding/hex"
-	"net/http"
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 )
 
-func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
+func processTemplateAddedEvent(event IndexerEvent) {
 	templateIdHex := event.Event.Keys[1]
 	templateHashHex := event.Event.Data[0]
 	templateNameHex := event.Event.Data[1][2:] // Remove 0x prefix
@@ -77,4 +76,21 @@ func processTemplateAddedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 
 	// TODO: Ws message to all clients
+}
+
+func revertTemplateAddedEvent(event IndexerEvent) {
+	templateIdHex := event.Event.Keys[1]
+
+	templateId, err := strconv.ParseInt(templateIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("reverseTemplateAddedEvent", "Error converting template id hex to int", templateIdHex)
+		return
+	}
+
+	// Remove template from postgres
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Templates WHERE key = $1", templateId)
+	if err != nil {
+		PrintIndexerError("reverseTemplateAddedEvent", "Error deleting template from postgres", templateIdHex)
+		return
+	}
 }

@@ -1,13 +1,125 @@
 .Account__subheader {
   padding: 0.5rem;
+  margin: 1rem 0rem 0.5rem 0rem;
 }
 
 .Account__item {
-  padding: 0 0.5rem 0 1rem;
-  margin: 1rem 0;
+  padding: 0.5rem;
+  margin: 0.5rem;
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
+}
+
+.Account__item__user {
+  padding: 0 0.5rem;
+  margin: 0 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.Account__item__text {
+  margin: 0rem;
+  padding: 0rem;
+}
+
+.Account__item__label {
+  margin: 0rem;
+  padding: 0 1rem 0 0;
+}
+
+.Account__item__username {
+  margin: 0rem;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.Account__item__icon {
+  padding: 0;
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+}
+
+.Account__item__button {
+  margin: 0;
+  padding: 0.5rem;
+}
+
+.Account__cancel__button:hover {
+  color: red;
+}
+
+.Account__item__pair {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.Account__rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.5rem;
+  margin: 0 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.Account__rank__outer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.Account__rank__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 1),
+    rgba(255, 255, 255, 0.9)
+  );
+}
+
+.Account__rank__img {
+  padding: 0.5rem 0.5rem 0rem 0.5rem;
+  width: 12rem;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.Account__rank__text {
+  padding: 0;
+  margin: 0.5rem;
+}
+
+.Account__form {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.Account__form__label {
+  margin: 0rem;
+  padding: 0 0 2px 1rem;
 }
 
 .Account__special {
@@ -24,27 +136,18 @@
   justify-content: space-evenly;
 }
 
-.Account__address {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.Account__username {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .Account__username__form {
   display: flex;
   align-items: center;
   width: 100%;
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 .Account__username__input {
-  margin-right: 0.5rem;
+  margin: 0.5rem 0.5rem 0.5rem 1rem;
+  padding: 0.5rem 1rem;
   height: 2.4rem;
   width: 100%;
   flex: 1;
@@ -70,5 +173,15 @@
 .Account__walletmode__connect {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-  margin: 2rem;
+  margin: 1.5rem;
+}
+
+.Account__walletlogin__button {
+  margin: 1rem;
+  padding: 0.7rem 0.5rem;
+}
+
+.Account__login__button {
+  margin: 0;
+  padding: 0.7rem 1rem;
 }
