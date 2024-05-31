@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"rand"
 	"strconv"
 	"time"
 
@@ -81,12 +80,9 @@ type QuestStatus struct {
 	Needed   int `json:"needed"`
 }
 
-type UserQuest struct {
-  QuestId int `json:"questId"`
-}
-
 type QuestProgress struct {
   QuestId  int `json:"questId"`
+	QuestType int `json:"questType"`
   Progress int `json:"progress"`
   Needed   int `json:"needed"`
 }
@@ -102,7 +98,8 @@ func InitQuestsRoutes() {
 	http.HandleFunc("/get-completed-main-quests", GetCompletedMainQuests)
 	http.HandleFunc("/get-user-quest-status", GetUserQuestStatus)
 	http.HandleFunc("/get-today-start-time", GetTodayStartTime)
-	http.HandleFunc("/get-daily-quest-status", GetDailyUserQuestsProgress)
+	http.HandleFunc("/get-daily-quest-progress", GetDailyQuestStatusProgress)
+	http.HandleFunc("/get-main-quest-progress", GetMainQuestStatusProgress)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/claim-today-quest-devnet", ClaimTodayQuestDevnet)
 	}
@@ -223,6 +220,58 @@ func GetMainUserQuests(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, string(quests))
 }
 
+func GetDailyQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
+    userAddress := r.URL.Query().Get("address")
+    if userAddress == "" {
+        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+        return
+    }
+
+    dayIndexStr := r.URL.Query().Get("dayIndex")
+    if dayIndexStr == "" {
+        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing dayIndex parameter")
+        return
+    }
+
+    dayIndex, err := strconv.Atoi(dayIndexStr)
+    if err != nil {
+        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid dayIndex parameter")
+        return
+    }
+
+    quests, err := core.PostgresQueryJson[QuestProgress](
+        `SELECT quest_id AS QuestId, 0 AS Progress, 100 AS Needed, quest_type as QuestType
+         FROM DailyQuests
+         WHERE day_index = $1`,
+        dayIndex,
+    )
+    if err != nil {
+        routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get daily quest status")
+        return
+    }
+
+    routeutils.WriteDataJson(w, string(quests))
+}
+
+func GetMainQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
+    userAddress := r.URL.Query().Get("address")
+    if userAddress == "" {
+        routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+        return
+    }
+
+    quests, err := core.PostgresQueryJson[QuestProgress](
+        `SELECT key AS QuestId, 0 AS Progress, 100 AS needed, quest_type as QuestType
+         FROM MainQuests`,
+    )
+    if err != nil {
+        routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get quest status")
+        return
+    }
+
+    routeutils.WriteDataJson(w, string(quests))
+}
+
 // Get today's quests based on the current day index.
 func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
 	quests, err := core.PostgresQueryJson[DailyQuest]("SELECT name, description, reward, day_index, quest_id FROM DailyQuests WHERE day_index = (SELECT MAX(day_index) FROM Days) ORDER BY quest_id ASC")
@@ -238,46 +287,6 @@ func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, string(quests))
 }
 
-func GetDailyUserQuestsProgress(w http.ResponseWriter, r *http.Request) {
-  userAddress := r.URL.Query().Get("address")
-  if userAddress == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
-    return
-  }
-
-  dayIndex := r.URL.Query().Get("dayIndex")
-  if dayIndex == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing day index parameter")
-    return
-  }
-
-  quests, err := core.PostgresQueryJson[UserQuest]("SELECT quest_id FROM DailyQuests where dayIndex = $1 ",  dayIndex)
-
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests")
-    return
-  }
-
-	var userDailyQuestsProgress = make([]QuestProgress, 0, len(quests)) 
-  for _, quest := range quests {
-    progress := rand.Intn(100) 
-    needed := rand.Intn(100) + 1
-    userDailyQuestsProgress = append(userDailyQuestsProgress, QuestProgress{
-      QuestId:  quest.QuestId,
-      Progress: progress,
-      Needed:   needed,
-    })
-
-  }
-
-  questsProgressJson, err := json.Marshal(userDailyQuestsProgress)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal quests progress")
-    return
-  }
-
-  routeutils.WriteDataJson(w, string(questsProgressJson))
-}
 
 
 func getTodaysUserQuests(w http.ResponseWriter, r *http.Request) {
