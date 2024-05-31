@@ -14,27 +14,21 @@ import (
 )
 
 func processNFTMintedEvent(event IndexerEvent) {
-	tokenIdLowHex := event.Event.Keys[1]
-	tokenIdHighHex := event.Event.Keys[2]
+	tokenIdLowHex := event.Event.Keys[1][2:]  // Remove 0x prefix
+	tokenIdHighHex := event.Event.Keys[2][2:] // Remove 0x prefix
 	positionHex := event.Event.Data[0]
 	widthHex := event.Event.Data[1]
 	heightHex := event.Event.Data[2]
 	imageHashHex := event.Event.Data[3]
 	blockNumberHex := event.Event.Data[4]
 	minter := event.Event.Data[5][2:] // Remove 0x prefix
-	
-	tokenIdLowInt, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
+
+	// combine high and low token ids
+	tokenId, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting token id low hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error combining high and low tokenId hex", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
-
-	tokenIdHighInt, err := strconv.ParseInt(tokenIdHighHex, 0, 64)
-	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting token id high hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
-		return
-	}
-
 
 	position, err := strconv.ParseInt(positionHex, 0, 64)
 	if err != nil {
@@ -59,9 +53,6 @@ func processNFTMintedEvent(event IndexerEvent) {
 		PrintIndexerError("processNFTMintedEvent", "Error converting block number hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
-
-	// combine high and low token ids 
-	tokenId := combineLowAndHighTokenId(tokenIdLowInt, tokenIdHighInt)
 
 	// Set NFT in postgres
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (token_id, position, width, height, image_hash, block_number, minter, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", tokenId, position, width, height, imageHashHex, blockNumber, minter, minter)
