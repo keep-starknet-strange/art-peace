@@ -1,12 +1,12 @@
 package indexer
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
-	"database/sql"
-	"os"
 
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
