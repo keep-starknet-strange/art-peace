@@ -496,6 +496,11 @@ pub mod ArtPeace {
             self.factions_count.read()
         }
 
+        fn get_has_joined_faction(self: @ContractState) -> u32 {
+            let caller = starknet::get_caller_address();
+            self.user_memberships_count.read(caller)
+        }
+
         fn get_faction(self: @ContractState, faction_id: u32) -> Faction {
             self.factions.read(faction_id)
         }
