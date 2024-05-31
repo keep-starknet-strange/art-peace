@@ -171,7 +171,7 @@ pub mod ArtPeace {
         #[key]
         day: u32,
         #[key]
-        newcolor: u8,
+        color: u8,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -1176,7 +1176,7 @@ pub mod ArtPeace {
                 color_index += 1;
             } else {
                 self.votable_colors.write((next_day_votable_index, next_day), color);
-                self.emit(VotableColorAdded {day: next_day, newcolor: color})
+                self.emit(VotableColorAdded {day: next_day, newcolor: color_index})
                 next_day_votable_index += 1;
             }
             votable_index += 1;
