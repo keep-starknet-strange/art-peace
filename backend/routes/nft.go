@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -36,7 +35,7 @@ type NFTData struct {
 	Minter      string `json:"minter"`
 	Owner       string `json:"owner"`
 	Likes       int    `json:"likes"`
-  Liked       bool   `json:"liked"`
+	Liked       bool   `json:"liked"`
 }
 
 type NFTLikesRequest struct {
@@ -99,7 +98,6 @@ func getNFT(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNFTs(w http.ResponseWriter, r *http.Request) {
-  fmt.Println("getNFTs")
 	address := r.URL.Query().Get("address")
 	if address == "" {
 		address = "0"
