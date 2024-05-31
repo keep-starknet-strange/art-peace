@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+        - name: consumer
+          image: 'brandonjroberts/art-peace-consumer:v0.0.1'
+          command: ["./consumer"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: consumer-secret
+          volumeMounts:
+            - mountPath: /app/nfts
+              name: nft-data
+      volumes:
+        - name: nft-data
+          persistentVolumeClaim:
+            claimName: nft-volume-claim

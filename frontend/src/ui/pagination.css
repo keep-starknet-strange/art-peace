@@ -1,0 +1,14 @@
+/* Pagination Styles */
+.PaginationContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.5s ease-in-out;
+  user-select: none;
+}
+.Pagination_btn {
+  cursor: pointer;
+  height: 3rem;
+  padding: 0 10px;
+  transition: all 0.2s ease-in-out;
+}

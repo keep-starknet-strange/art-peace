@@ -129,7 +129,7 @@ export const config = {
   },
   sinkType: "webhook",
   sinkOptions: {
-    targetUrl: Deno.env.get("BACKEND_TARGET_URL"),
+    targetUrl: Deno.env.get("CONSUMER_TARGET_URL"),
   },
 };
 

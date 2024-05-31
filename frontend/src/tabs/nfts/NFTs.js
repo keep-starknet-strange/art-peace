@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './NFTs.css';
 import ExpandableTab from '../ExpandableTab.js';
-import CollectionItem from './CollectionItem.js';
 import NFTItem from './NFTItem.js';
 import { backendUrl } from '../../utils/Consts.js';
 import {
@@ -14,7 +13,7 @@ import { PaginationView } from '../../ui/pagination.js';
 //Expected shape of data from backend.
 const mockNftData = {
   data: [],
-  totalPages: 4,
+  totalPages: 2,
   pageLength: 10
 };
 
@@ -25,7 +24,7 @@ const NFTsMainSection = (props) => {
       <div className='NFTs__header'>
         <h2 className='NFTs__heading'>My Collection</h2>
         <div
-          className='NFTs__mint'
+          className={`NFTs__button ${props.nftMintingMode ? 'NFTs__button--selected' : ''}`}
           onClick={() => props.setNftMintingMode(true)}
         >
           Mint
@@ -35,7 +34,7 @@ const NFTsMainSection = (props) => {
         <div className='NFTs__container'>
           {props.nftsCollection.map((nft, index) => {
             return (
-              <CollectionItem
+              <NFTItem
                 key={index}
                 tokenId={nft.tokenId}
                 position={nft.position}
@@ -43,6 +42,9 @@ const NFTsMainSection = (props) => {
                 width={nft.width}
                 height={nft.height}
                 blockNumber={nft.blockNumber}
+                likes={Math.floor(Math.random() * 1000)}
+                liked={Math.random() > 0.5}
+                minter={nft.minter}
               />
             );
           })}
@@ -61,10 +63,26 @@ const NFTsMainSection = (props) => {
 
 const NFTsExpandedSection = (props) => {
   const imageURL = backendUrl + '/nft-images/';
+  // TODO: Implement filters
+  const filters = ['hot', 'new', 'top'];
+  const [activeFilter, setActiveFilter] = React.useState(filters[0]);
   return (
     <div className='NFTs__all'>
       <div className='NFTs__header'>
-        <h2 className='NFTs__heading'>All NFTs</h2>
+        <h2 className='NFTs__heading'>Explore</h2>
+        <div className='NFTs__filters'>
+          {filters.map((filter, index) => {
+            return (
+              <div
+                key={index}
+                className={`NFTs__button NFTs__filter ${activeFilter === filter ? 'NFTs__button--selected' : ''}`}
+                onClick={() => setActiveFilter(filter)}
+              >
+                {filter}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <>
@@ -113,7 +131,7 @@ const NFTs = (props) => {
 
   const retrieveMyNFTById = async (tokenId) => {
     try {
-      let getNFTBtTokenId = `get-nfts?tokenId=${tokenId}`;
+      let getNFTBtTokenId = `get-nft?tokenId=${tokenId}`;
       const response = await fetchWrapper(getNFTBtTokenId, { mode: 'cors' });
       if (response.data) {
         setMyNFTs((prev) => [response.data, ...prev]);
@@ -184,6 +202,7 @@ const NFTs = (props) => {
       title='NFTs'
       mainSection={NFTsMainSection}
       expandedSection={NFTsExpandedSection}
+      nftMintingMode={props.nftMintingMode}
       setNftMintingMode={props.setNftMintingMode}
       nftsCollection={myNFTs}
       setMyNftPagination={setMyNftPagination}

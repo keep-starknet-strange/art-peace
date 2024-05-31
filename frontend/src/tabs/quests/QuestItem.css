@@ -41,25 +41,28 @@
   line-height: 1.3rem;
 }
 
-.QuestItem__progress {
+.QuestItem__button {
   position: relative;
   width: 7rem;
   height: 3rem;
 
   border-radius: 1rem;
-  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
   border: 0.1rem solid rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease-in-out;
 }
 
-.QuestItem__progress--claimable:hover {
-  transform: scale(1.07) translateY(-0.15rem);
+.QuestItem__button--claimable:hover {
+  transform: scale(1.05) translateY(-0.1rem);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.5);
 }
 
-.QuestItem__progress--claimable:active {
+.QuestItem__button--claimable:active {
   transform: scale(1) translateY(0);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
 }
 
-.QuestItem__progression {
+.QuestItem__button__progress {
   position: absolute;
   top: 0;
   left: 0;
@@ -68,9 +71,36 @@
   width: calc(100% - 2px);
   height: calc(100% - 2px);
 
-  background-color: rgba(221, 85, 51, 0.9);
+  background-color: rgba(224, 224, 224, 0.9);
   border-radius: 0.8rem;
-  border: 0.1rem solid rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.QuestItem__button__progression {
+  background-color: rgba(255, 255, 255, 0.6);
+  height: 100%;
+}
+
+.QuestItem__button--pulsate {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  40%,
+  80%,
+  100% {
+    box-shadow: 0 0 0.3rem rgba(0, 0, 0, 0.5);
+    background-color: rgba(100, 100, 200, 0.4);
+    scale: 1;
+  }
+  20%,
+  60% {
+    box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.5);
+    background-color: rgba(100, 100, 100, 0.2);
+    scale: 1.02;
+  }
 }
 
 .QuestItem__progression--completed {

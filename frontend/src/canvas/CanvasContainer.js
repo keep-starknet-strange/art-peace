@@ -29,6 +29,7 @@ const CanvasContainer = (props) => {
   const [isErasing, setIsErasing] = useState(false);
 
   const handlePointerDown = (e) => {
+    // TODO: Require over canvas?
     if (!props.isEraserMode) {
       setIsDragging(true);
       setDragStartX(e.clientX);

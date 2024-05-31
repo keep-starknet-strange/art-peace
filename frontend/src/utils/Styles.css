@@ -149,36 +149,3 @@
   box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.6);
   transform: translateY(-0.1rem) scale(1.02);
 }
-
-.Select_Input:focus {
-  border: 0.1rem solid rgba(0, 0, 0, 0.6);
-  outline: none;
-}
-.Select_Input {
-  border-radius: 2px;
-}
-
-/* Pagination Styles */
-.PaginationContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.5s ease-in-out;
-  user-select: none;
-}
-
-.Pagination_btn_active {
-  background-color: black;
-  color: white;
-  border: none;
-  transition: all 0.2s ease-in-out;
-  border-radius: 2px;
-}
-.Pagination_btn {
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-.Pagination_btn:disabled {
-  color: black;
-  cursor: not-allowed;
-}
