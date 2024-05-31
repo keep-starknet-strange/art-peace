@@ -42,9 +42,10 @@ const NFTsMainSection = (props) => {
                 width={nft.width}
                 height={nft.height}
                 blockNumber={nft.blockNumber}
-                likes={Math.floor(Math.random() * 1000)}
-                liked={Math.random() > 0.5}
+                likes={nft.likes}
+                liked={nft.liked}
                 minter={nft.minter}
+                queryAddress={props.queryAddress}
               />
             );
           })}
@@ -98,7 +99,9 @@ const NFTsExpandedSection = (props) => {
                 height={nft.height}
                 blockNumber={nft.blockNumber}
                 likes={nft.likes}
+                liked={nft.liked}
                 minter={nft.minter}
+                queryAddress={props.queryAddress}
               />
             );
           })}
@@ -213,6 +216,7 @@ const NFTs = (props) => {
       setActiveTab={props.setActiveTab}
       expanded={expanded}
       setExpanded={setExpanded}
+      queryAddress={props.queryAddress}
     />
   );
 };
