@@ -95,8 +95,13 @@ func revertPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
-	oldColor, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), "SELECT color FROM Pixels WHERE address = $1 AND position = $2 ORDER BY time limit 1", address, position)
-
+	// Retrieve the old color
+	var oldColor int64
+	err = core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT color FROM Pixels WHERE address = $1 AND position = $2 ORDER BY time DESC LIMIT 1", address, position).Scan(&oldColor)
+	if err != nil {
+		PrintIndexerError("revertPixelPlacedEvent", "Error retrieving old color from postgres", address, posHex)
+		return
+	}
 	// Reset pixel in redis
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
