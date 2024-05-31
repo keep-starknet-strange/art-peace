@@ -59,7 +59,8 @@
 
   /* TODO: Fix scrolling */
   height: 100%;
-  overflow-y: auto;
+  max-height: 240px;
+  overflow-y: scroll;
 }
 
 /* TODO: Always scroll to bottom when adding new pixel */
@@ -75,7 +76,8 @@
 
   /* TODO: Fix scrolling */
   height: 100%;
-  overflow-y: auto;
+  max-height: 240px;
+  overflow-y: scroll;
   border-left: 2px solid rgba(0, 0, 0, 0.4);
 }
 
