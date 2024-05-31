@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"database/sql"
+	"os"
 
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
@@ -330,6 +332,41 @@ func StartMessageProcessor() {
 			time.Sleep(1 * time.Second)
 		}
 	}()
+}
+
+func AddVotableColor(hex string, dayIndex int) error {
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
+
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		return err
+	}
+
+	sqlStatement := `
+		INSERT INTO VotableColors (hex, day_index)
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING;
+	`
+
+	_, err = db.Exec(sqlStatement, hex, dayIndex)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // TODO: User might miss some messages between loading canvas and connecting to websocket?

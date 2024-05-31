@@ -121,7 +121,8 @@ CREATE TABLE Colors (
 CREATE TABLE VotableColors (
   -- Postgres auto-incrementing primary key
   key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  hex text NOT NULL
+  hex text NOT NULL,
+  day_index integer NOT NULL
 );
 
 CREATE TABLE ColorVotes (

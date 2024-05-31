@@ -86,6 +86,7 @@ pub mod ArtPeace {
         VoteColor: VoteColor,
         FactionCreated: FactionCreated,
         MemberReplaced: MemberReplaced,
+        VotableColorAdded: VotableColorAdded,
         // TODO: Integrate template event
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
@@ -163,6 +164,14 @@ pub mod ArtPeace {
         day: u32,
         #[key]
         color: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct VotableColorAdded{
+        #[key]
+        day: u32,
+        #[key]
+        necolor: u8,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -1167,6 +1176,7 @@ pub mod ArtPeace {
                 color_index += 1;
             } else {
                 self.votable_colors.write((next_day_votable_index, next_day), color);
+                self.emit(VotableColorAdded {day: next_day, color})
                 next_day_votable_index += 1;
             }
             votable_index += 1;
