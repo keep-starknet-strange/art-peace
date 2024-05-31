@@ -19,7 +19,8 @@
                 "$DAY_IDX",
                 "0",
                 "0"
-              ]
+              ],
+              "storeParams": [2,3,4,5,6]
             }
           },
           {
@@ -31,7 +32,8 @@
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD"
-              ]
+              ],
+              "storeParams": []
             }
           },
           {
@@ -43,7 +45,8 @@
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD"
-              ]
+              ],
+              "storeParams": []
             }
           }
         ]
@@ -65,7 +68,8 @@
                 "$DAY_IDX",
                 "1",
                 "1"
-              ]
+              ],
+              "storeParams": [2,3,4,5,6]
             }
           },
           {
@@ -77,7 +81,8 @@
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD"
-              ]
+              ],
+              "storeParams": []
             }
           },
           {
@@ -89,7 +94,8 @@
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD"
-              ]
+              ],
+              "storeParams": []
             }
           }
         ]
@@ -107,7 +113,8 @@
                 "$ART_PEACE_CONTRACT",
                 "$REWARD",
                 "$DAY_IDX"
-              ]
+              ],
+              "storeParams": [2]
             }
           },
           {
@@ -119,7 +126,8 @@
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD"
-              ]
+              ],
+              "storeParams": []
             }
           },
           {
@@ -131,7 +139,8 @@
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD"
-              ]
+              ],
+              "storeParams": []
             }
           }
         ]
@@ -150,7 +159,8 @@
             "$ART_PEACE_CONTRACT",
             "$REWARD",
             "$AUTHORITY"
-          ]
+          ],
+          "storeParams": []
         }
       },
       {
@@ -163,7 +173,8 @@
             "$ART_PEACE_CONTRACT",
             "$REWARD",
             "20"
-          ]
+          ],
+          "storeParams": [2]
         }
       },
       {
@@ -176,6 +187,7 @@
             "$ART_PEACE_CONTRACT",
             "$REWARD"
           ],
+          "storeParams": [],
           "claimParams": [
             {
               "type": "address",
@@ -199,7 +211,8 @@
             "0",
             "0",
             "0"
-          ]
+          ],
+          "storeParams": [2,3,4,5,6]
         }
       },
       {
@@ -211,7 +224,8 @@
           "initParams": [
             "$ART_PEACE_CONTRACT",
             "$REWARD"
-          ]
+          ],
+          "storeParams": []
         }
       }
     ]

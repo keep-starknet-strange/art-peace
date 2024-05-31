@@ -114,6 +114,42 @@ const QuestItem = (props) => {
     // TODO: Expand if not claimable && has args
   };
 
+  const [percentCompletion, setPercentCompletion] = useState(0);
+  const [progressionColor, setProgressionColor] =
+    useState('rgba(0, 0, 0, 0.4)');
+  useEffect(() => {
+    if (!props.needed || props.needed == 0) {
+      setPercentCompletion(0);
+      if (props.status === 'completed') {
+        setProgressionColor('rgba(32, 225, 32, 0.80)');
+      } else {
+        setProgressionColor('hsla(0, 100%, 60%, 0.78)');
+      }
+      return;
+    }
+    let progress = props.progress;
+    let percent = Math.floor((progress / props.needed) * 100);
+    if (percent >= 100) {
+      percent = 100;
+    } else if (percent <= 0) {
+      percent = 0;
+    } else if (percent < 8) {
+      // Minimum width for progress bar
+      percent = 8;
+    } else if (percent > 92) {
+      // Maximum width for progress bar
+      percent = 92;
+    }
+    if (props.status === 'completed') {
+      setProgressionColor('rgba(32, 225, 32, 0.80)');
+    } else {
+      setProgressionColor(`hsla(${(percent / 100) * 60}, 100%, 60%, 0.78)`);
+    }
+    setPercentCompletion(percent);
+  }, [props.progress, props.needed, props.status]);
+
+  // TODO: Claimable if progress >= needed
+  // TODO: 100% to the top of list
   return (
     <div
       className={
@@ -130,16 +166,25 @@ const QuestItem = (props) => {
         </div>
         <div
           className={
-            'QuestItem__progress ' +
+            'QuestItem__button ' +
             (props.status != 'completed'
-              ? 'QuestItem__progress--claimable'
+              ? 'QuestItem__button--claimable '
+              : '') +
+            (percentCompletion == 100 && props.status !== 'completed'
+              ? 'QuestItem__button--pulsate '
               : '')
           }
+          onClick={claimOrExpand}
         >
-          <div
-            className={`QuestItem__progression QuestItem__progression--${props.status}`}
-            onClick={claimOrExpand}
-          ></div>
+          <div className='QuestItem__button__progress'>
+            <div
+              className='QuestItem__button__progression'
+              style={{
+                width: `${percentCompletion === 0 || props.status === 'completed' ? 100 : percentCompletion}%`,
+                backgroundColor: progressionColor
+              }}
+            ></div>
+          </div>
           <div className='Text__xsmall QuestItem__reward'>
             +{props.reward}px
           </div>

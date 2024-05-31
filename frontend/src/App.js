@@ -42,26 +42,33 @@ function App() {
   const { account, address } = useAccount();
   const { chain } = useNetwork();
   const [queryAddress, setQueryAddress] = useState('0');
+  const [connected, setConnected] = useState(false); // TODO: change to only devnet
   useEffect(() => {
-    if (address && devnetMode) {
-      setQueryAddress(
-        '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0'
-      );
+    if (devnetMode) {
+      if (connected) {
+        setQueryAddress(
+          '0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0'
+        );
+      } else {
+        setQueryAddress('0');
+      }
     } else {
-      setQueryAddress(address ? address.slice(2) : '0');
+      if (!address) {
+        setQueryAddress('0');
+      } else {
+        setQueryAddress(address.slice(2).toLowerCase().padStart(64, '0'));
+      }
     }
-  }, [address]);
+  }, [address, connected]);
 
   // Contracts
-  // TODO: art peace abi & contract address should be in a config
+  // TODO: Pull addrs from api?
   const { contract: artPeaceContract } = useContract({
-    address:
-      '0x02e3f41bd135e60c72ebfe57e8964ecc58dbb8f8679b1b4cffeaf5e45ab1defa',
+    address: process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
     abi: art_peace_abi
   });
   const { contract: usernameContract } = useContract({
-    address:
-      '0x00a22891d623bff245535dfbfa2f0db1002a62ef4bd5d405bd1f5712e9df85cd',
+    address: process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
     abi: username_store_abi
   });
 
@@ -264,6 +271,7 @@ function App() {
         `get-extra-pixels?address=${queryAddress}`
       );
       if (!extraPixelsResponse.data) {
+        setExtraPixels(0);
         return;
       }
       setExtraPixels(extraPixelsResponse.data);
@@ -275,6 +283,7 @@ function App() {
         `get-faction-pixels?address=${queryAddress}`
       );
       if (!factionPixelsResponse.data) {
+        setFactionPixelsData([]);
         return;
       }
       setFactionPixelsData(factionPixelsResponse.data);
@@ -456,6 +465,7 @@ function App() {
           queryAddress={queryAddress}
           account={account}
           chain={chain}
+          setConnected={setConnected}
           artPeaceContract={artPeaceContract}
           usernameContract={usernameContract}
           colors={colors}

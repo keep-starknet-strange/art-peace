@@ -185,22 +185,6 @@ pub(crate) fn warp_to_next_available_time(art_peace: IArtPeaceDispatcher) {
     );
 }
 
-fn compute_template_hash(template: Span<u8>) -> felt252 {
-    let template_len = template.len();
-    if template_len == 0 {
-        return 0;
-    }
-
-    let mut hasher = PoseidonTrait::new();
-    let mut i = 0;
-    while i < template_len {
-        hasher = hasher.update_with(*template.at(i));
-        i += 1;
-    };
-
-    hasher.finalize()
-}
-
 #[test]
 fn deploy_test() {
     let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
@@ -253,7 +237,7 @@ fn template_full_basic_test() {
 
     // 2x2 template image
     let template_image = array![1, 2, 3, 4];
-    let template_hash = compute_template_hash(template_image.span());
+    let template_hash = template_verifier.compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
         name: 'test',
         hash: template_hash,
@@ -322,6 +306,8 @@ fn template_full_basic_test() {
         "Template is not completed after it should be"
     );
 }
+
+// TODO: Invalid template completion tests
 
 #[test]
 fn increase_day_test() {
@@ -398,13 +384,16 @@ fn deposit_reward_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
     let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
+    let template_verifier = ITemplateVerifierDispatcher {
+        contract_address: art_peace.contract_address
+    };
 
     let erc20_mock: ContractAddress = deploy_erc20_mock();
     let reward_amount: u256 = 1 * utils::pow_256(10, 18);
 
     // 2x2 template image
     let template_image = array![1, 2, 3, 4];
-    let template_hash = compute_template_hash(template_image.span());
+    let template_hash = template_verifier.compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
         name: 'test',
         hash: template_hash,
@@ -438,11 +427,10 @@ fn distribute_rewards_test() {
     let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
 
     let erc20_mock: ContractAddress = deploy_erc20_mock();
-    // let reward_amount: u256 = 1 * utils::pow_256(10, 18);
     let reward_amount: u256 = 4;
 
     let template_image = array![1, 2, 3, 4];
-    let template_hash = compute_template_hash(template_image.span());
+    let template_hash = template_verifier.compute_template_hash(template_image.span());
     let template_metadata = TemplateMetadata {
         name: 'test',
         hash: template_hash,
@@ -464,9 +452,6 @@ fn distribute_rewards_test() {
     let user4 = 123456.try_into().unwrap();
 
     IERC20Dispatcher { contract_address: erc20_mock }.approve(art_peace_address, reward_amount);
-    let allowance = IERC20Dispatcher { contract_address: erc20_mock }
-        .allowance(get_contract_address(), art_peace_address);
-    println!("Allowance: {}", allowance);
 
     template_store.add_template(template_metadata);
     assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
@@ -487,7 +472,7 @@ fn distribute_rewards_test() {
     art_peace.place_pixel(WIDTH + 1, 4, now);
     stop_prank(CheatTarget::One(art_peace_address));
 
-    template_verifier.complete_template(template_id, template_image_span);
+    template_verifier.complete_template_with_rewards(template_id, template_image_span);
 
     let art_token_balance_of_contract = IERC20Dispatcher { contract_address: erc20_mock }
         .balance_of(art_peace_address);
@@ -499,12 +484,6 @@ fn distribute_rewards_test() {
         .balance_of(user3);
     let art_token_balance_of_user4 = IERC20Dispatcher { contract_address: erc20_mock }
         .balance_of(user4);
-
-    println!("User 1 balance: {}", art_token_balance_of_user);
-    println!("User 2 balance: {}", art_token_balance_of_user2);
-    println!("User 3 balance: {}", art_token_balance_of_user3);
-    println!("User 4 balance: {}", art_token_balance_of_user4);
-    println!("Contract balance: {}", art_token_balance_of_contract);
 
     assert!(art_token_balance_of_user == 1, "User 1 incorrect reward amount");
     assert!(art_token_balance_of_user2 == 1, "User 2 incorrect reward amount");

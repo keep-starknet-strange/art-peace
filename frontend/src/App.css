@@ -31,7 +31,7 @@
 }
 
 .App__panel--portrait {
-  width: max(28rem, 60%);
+  width: max(30rem, 50%);
 }
 
 .App__footer {

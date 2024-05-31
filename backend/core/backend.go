@@ -28,7 +28,8 @@ func NewBackend(databases *Databases, canvasConfig *config.CanvasConfig, backend
 	}
 }
 
-func (b *Backend) Start() {
-	fmt.Println("Listening on port", b.BackendConfig.Port)
-	http.ListenAndServe(fmt.Sprintf(":%d", b.BackendConfig.Port), nil)
+func (b *Backend) Start(port int) {
+	fmt.Println("Listening on port", port)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	fmt.Println("Port closed")
 }
