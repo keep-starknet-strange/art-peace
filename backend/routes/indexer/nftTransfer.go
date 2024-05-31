@@ -7,8 +7,8 @@ import (
 )
 
 func processNFTTransferEvent(event IndexerEvent) {
-	to := event.Event.Keys[2][2:] // Remove 0x prefix
-	tokenIdLowHex := event.Event.Keys[3][2:] // Remove 0x prefix
+	to := event.Event.Keys[2][2:]             // Remove 0x prefix
+	tokenIdLowHex := event.Event.Keys[3][2:]  // Remove 0x prefix
 	tokenIdHighHex := event.Event.Keys[4][2:] // Remove 0x prefix
 
 	// combine high and low token ids
@@ -27,8 +27,8 @@ func processNFTTransferEvent(event IndexerEvent) {
 }
 
 func revertNFTTransferEvent(event IndexerEvent) {
-	from := event.Event.Keys[1][2:] // Remove 0x prefix
-	tokenIdLowHex := event.Event.Keys[3][2:] // Remove 0x prefix
+	from := event.Event.Keys[1][2:]           // Remove 0x prefix
+	tokenIdLowHex := event.Event.Keys[3][2:]  // Remove 0x prefix
 	tokenIdHighHex := event.Event.Keys[4][2:] // Remove 0x prefix
 
 	// combine high and low token ids
