@@ -11,24 +11,30 @@ import './pagination.css';
  */
 
 export function PaginationView(props) {
-  const isDataSame = props.data.length === props.stateValue.pageLength;
+  const hasMore = () => {
+    return (
+      props.data.length >= props.stateValue.pageLength * props.stateValue.page
+    );
+  };
+
   const handleLoadmore = () => {
-    const newPageLength = props.data
-      ? props.stateValue.pageLength + 10
-      : props.stateValue.pageLength;
-    props.setState((item) => ({ ...item, page: 1, pageLength: newPageLength }));
+    props.setState((item) => ({
+      ...item,
+      page: props.stateValue.page + 1,
+      pageLength: props.stateValue.pageLength
+    }));
   };
 
   return (
     <div className='PaginationContainer'>
-      {isDataSame && (
-        <button
-          title='Load More'
-          className='Pagination_btn'
+      {hasMore() && (
+        <div
+          title='More'
+          className='Text__medium Button__primary'
           onClick={handleLoadmore}
         >
-          Load More
-        </button>
+          more...
+        </div>
       )}
     </div>
   );

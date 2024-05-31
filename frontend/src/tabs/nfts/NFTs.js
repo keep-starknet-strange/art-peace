@@ -23,32 +23,30 @@ const NFTsMainSection = (props) => {
           Mint
         </div>
       </div>
-      <>
-        <div className='NFTs__container'>
-          {props.nftsCollection.map((nft, index) => {
-            return (
-              <NFTItem
-                key={index}
-                tokenId={nft.tokenId}
-                position={nft.position}
-                image={imageURL + 'nft-' + nft.tokenId + '.png'}
-                width={nft.width}
-                height={nft.height}
-                blockNumber={nft.blockNumber}
-                likes={nft.likes}
-                liked={nft.liked}
-                minter={nft.minter}
-                queryAddress={props.queryAddress}
-              />
-            );
-          })}
-        </div>
+      <div className='NFTs__container'>
+        {props.nftsCollection.map((nft, index) => {
+          return (
+            <NFTItem
+              key={index}
+              tokenId={nft.tokenId}
+              position={nft.position}
+              image={imageURL + 'nft-' + nft.tokenId + '.png'}
+              width={nft.width}
+              height={nft.height}
+              blockNumber={nft.blockNumber}
+              likes={nft.likes}
+              liked={nft.liked}
+              minter={nft.minter}
+              queryAddress={props.queryAddress}
+            />
+          );
+        })}
         <PaginationView
           data={props.nftsCollection}
           stateValue={props.myNftPagination}
           setState={props.setMyNftPagination}
         />
-      </>
+      </div>
     </div>
   );
 };
@@ -77,7 +75,7 @@ const NFTsExpandedSection = (props) => {
         </div>
       </div>
 
-      <>
+      <div className='NFTs__all__container'>
         <div className='NFTs__all__grid'>
           {props.allNfts.map((nft, index) => {
             return (
@@ -102,7 +100,7 @@ const NFTsExpandedSection = (props) => {
           setState={props.setAllNftPagination}
           stateValue={props.allNftPagination}
         />
-      </>
+      </div>
     </div>
   );
 };
@@ -112,11 +110,11 @@ const NFTs = (props) => {
   const [myNFTs, setMyNFTs] = React.useState([]);
   const [allNFTs, setAllNFTs] = React.useState([]);
   const [myNftPagination, setMyNftPagination] = useState({
-    pageLength: 10,
+    pageLength: 6,
     page: 1
   });
   const [allNftPagination, setAllNftPagination] = useState({
-    pageLength: 10,
+    pageLength: 24,
     page: 1
   });
 
@@ -154,7 +152,11 @@ const NFTs = (props) => {
         });
 
         if (result.data) {
-          setMyNFTs(result.data);
+          if (myNftPagination.page === 1) {
+            setMyNFTs(result.data);
+          } else {
+            setMyNFTs([...myNFTs, ...result.data]);
+          }
         }
       } catch (error) {
         console.log('Error fetching Nfts', error);
@@ -175,7 +177,11 @@ const NFTs = (props) => {
           pageLength: allNftPagination.pageLength
         });
         if (result.data) {
-          setAllNFTs(result.data);
+          if (allNftPagination.page === 1) {
+            setAllNFTs(result.data);
+          } else {
+            setAllNFTs([...allNFTs, ...result.data]);
+          }
         }
       } catch (error) {
         console.log('Error fetching Nfts', error);
