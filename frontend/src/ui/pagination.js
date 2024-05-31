@@ -13,10 +13,10 @@ import './pagination.css';
 export function PaginationView(props) {
   const isDataSame = props.data.length === props.stateValue.pageLength;
   const handleLoadmore = () => {
-    const newPageLentgh = props.data
+    const newPageLength = props.data
       ? props.stateValue.pageLength + 10
       : props.stateValue.pageLength;
-    props.setState((item) => ({ ...item, page: 1, pageLength: newPageLentgh }));
+    props.setState((item) => ({ ...item, page: 1, pageLength: newPageLength }));
   };
 
   return (
