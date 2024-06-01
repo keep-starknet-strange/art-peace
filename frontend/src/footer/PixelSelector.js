@@ -1,31 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import './PixelSelector.css';
 import '../utils/Styles.css';
 
 const PixelSelector = (props) => {
   // Track when a placement is available
 
-  const [placementTimer, setPlacementTimer] = useState('XX:XX');
-
   useEffect(() => {
     if (props.queryAddress === '0') {
-      setPlacementTimer('Connect Wallet');
+      props.setPlacementTimer('Connect Wallet');
       return;
     }
     if (props.availablePixels > 0) {
       let amountAvailable = props.availablePixels - props.availablePixelsUsed;
       if (amountAvailable > 1) {
-        setPlacementTimer('Place Pixels');
+        props.setPlacementTimer('Place Pixels');
         return;
       } else if (amountAvailable === 1) {
-        setPlacementTimer('Place Pixel');
+        props.setPlacementTimer('Place Pixel');
         return;
       } else {
-        setPlacementTimer('Out of Pixels');
+        props.setPlacementTimer('Out of Pixels');
         return;
       }
     } else {
-      setPlacementTimer(props.basePixelTimer);
+      props.setPlacementTimer(props.basePixelTimer);
     }
   }, [
     props.availablePixels,
@@ -93,7 +91,7 @@ const PixelSelector = (props) => {
           }
           onClick={toSelectorMode}
         >
-          <p className='PixelSelector__text'>{placementTimer}</p>
+          <p className='PixelSelector__text'>{props.placementTimer}</p>
           {props.availablePixels > (props.basePixelUp ? 1 : 0) && (
             <div className='PixelSelector__extras'>
               <div
