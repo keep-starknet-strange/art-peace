@@ -137,11 +137,14 @@ func processNFTMintedEvent(event IndexerEvent) {
 	}
 
 	// Create a NFT JSON metadata file
+	x := position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
+	y := position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
+	minterAddress := minter
 	metadata := map[string]interface{}{
 		"name":        fmt.Sprintf("NFT #%d", tokenId),
 		"description": "This is an NFT minted on the blockchain.",
-		"image":       fmt.Sprintf("ipfs://%s", imageHashHex),
-		"attributes": []map[string]string{
+		"image":       fmt.Sprintf("http://localhost:3000/nft-images/nft-%d.png", tokenId),
+		"attributes": []map[string]interface{}{
 			{
 				"trait_type": "Width",
 				"value":      fmt.Sprintf("%d", width),
@@ -149,6 +152,14 @@ func processNFTMintedEvent(event IndexerEvent) {
 			{
 				"trait_type": "Height",
 				"value":      fmt.Sprintf("%d", height),
+			},
+			{
+				"trait_type": "position",
+				"value":      fmt.Sprintf("(%d, %d)", x, y),
+			},
+			{
+				"trait_type": "Minter",
+				"value":      minterAddress,
 			},
 		},
 	}
