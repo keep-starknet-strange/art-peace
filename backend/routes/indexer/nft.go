@@ -137,7 +137,6 @@ func processNFTMintedEvent(event IndexerEvent) {
 	}
 
 	// Create a NFT JSON metadata file
-
 	x := position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	y := position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	minterAddress := minter
