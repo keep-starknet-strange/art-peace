@@ -239,18 +239,41 @@ func GetDailyQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quests, err := core.PostgresQueryJson[QuestProgress](
-		`SELECT quest_id AS QuestId, 0 AS Progress, 100 AS Needed, quest_type as QuestType
+	questJsons, err := core.PostgresQueryJson[QuestProgress](
+		`SELECT quest_id AS QuestId, quest_type as QuestType
          FROM DailyQuests
          WHERE day_index = $1`,
 		dayIndex,
 	)
+
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get daily quest status")
 		return
 	}
 
-	routeutils.WriteDataJson(w, string(quests))
+	var quests []QuestProgress
+	err = json.Unmarshal([]byte(questJsons), &quests)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unmarshal response")
+		return
+	}
+
+	var result []QuestProgress
+	for _, quest := range quests {
+		result = append(result, QuestProgress{
+			QuestId:  quest.QuestId,
+			Progress: 60,
+			Needed:   40,
+		})
+	}
+
+	jsonResult, err := json.Marshal(result)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal response")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(jsonResult))
 }
 
 func GetMainQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
@@ -260,8 +283,8 @@ func GetMainQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quests, err := core.PostgresQueryJson[QuestProgress](
-		`SELECT key AS QuestId, 0 AS Progress, 100 AS needed, quest_type as QuestType
+	questJsons, err := core.PostgresQueryJson[QuestProgress](
+		`SELECT key AS QuestId, quest_type as QuestType
          FROM MainQuests`,
 	)
 	if err != nil {
@@ -269,7 +292,29 @@ func GetMainQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	routeutils.WriteDataJson(w, string(quests))
+	var quests []QuestProgress
+	err = json.Unmarshal([]byte(questJsons), &quests)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unmarshal response")
+		return
+	}
+
+	var result []QuestProgress
+	for _, quest := range quests {
+		result = append(result, QuestProgress{
+			QuestId:  quest.QuestId,
+			Progress: 40,
+			Needed:   60,
+		})
+	}
+
+	jsonResult, err := json.Marshal(result)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal response")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(jsonResult))
 }
 
 // Get today's quests based on the current day index.
