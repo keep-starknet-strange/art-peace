@@ -3,23 +3,29 @@ package indexer
 import (
 	"fmt"
 	"math/big"
-	"strings"
 )
 
-func combineLowHigh(tokenIdLowHex, tokenIdHighHex string) (*big.Int, error) {
-	// Remove leading zeros from the hex strings
-	tokenIdLowHex = strings.TrimLeft(tokenIdLowHex, "0")
-	tokenIdHighHex = strings.TrimLeft(tokenIdHighHex, "0")
+func combineLowHigh(lowHex, highHex string) (string, error) {
+	// Convert the high and low hex strings to big.Int
+	low := new(big.Int)
+	high := new(big.Int)
 
-	// Combine the low and high hex strings
-	combinedHex := tokenIdHighHex + tokenIdLowHex
-
-	// Convert the combined hex string to a big.Int
-	tokenId := new(big.Int)
-	tokenId, ok := tokenId.SetString(combinedHex, 16)
+	// Set the big.Int values
+	low, ok := low.SetString(lowHex, 16)
 	if !ok {
-		return nil, fmt.Errorf("invalid hex string: %s", combinedHex)
+		return "", fmt.Errorf("invalid low hex string: %s", lowHex)
 	}
 
-	return tokenId, nil
+	high, ok = high.SetString(highHex, 16)
+	if !ok {
+		return "", fmt.Errorf("invalid high hex string: %s", highHex)
+	}
+
+	// Shift the high part by 128 bits to the left (16 hex digits)
+	high.Lsh(high, 128)
+
+	// Add the low part to the shifted high part
+	combinedHex := new(big.Int).Add(low, high).Text(16)
+
+	return combinedHex, nil
 }
