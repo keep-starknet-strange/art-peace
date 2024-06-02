@@ -19,7 +19,7 @@ const ExtraPixelsPanel = (props) => {
     props.setSelectorMode(false);
     props.clearPixelSelection();
   };
-  console.log{props.isEraserMode}
+  console.log (props.isEraserMode)
 
   const [calls, setCalls] = useState([]);
   const extraPixelPlaceCall = (positions, colors, now) => {
