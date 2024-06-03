@@ -29,6 +29,7 @@ const CanvasContainer = (props) => {
   const [isErasing, setIsErasing] = useState(false);
 
   const handlePointerDown = (e) => {
+    // TODO: Require over canvas?
     if (!props.isEraserMode) {
       setIsDragging(true);
       setDragStartX(e.clientX);
@@ -64,55 +65,47 @@ const CanvasContainer = (props) => {
     };
   }, [isDragging, canvasX, canvasY]);
 
-  let targetScale = canvasScale;
-  let targetX = canvasX;
-  let targetY = canvasY;
-
-  const animateZoom = () => {
-    if (Math.abs(canvasScale - targetScale) > 0.01) {
-      setCanvasScale(canvasScale + (targetScale - canvasScale) * 0.1);
-      setCanvasX(canvasX + (targetX - canvasX) * 0.1);
-      setCanvasY(canvasY + (targetY - canvasY) * 0.1);
-      requestAnimationFrame(animateZoom);
-    }
-  };
-
+  // Zoom in/out ( into the cursor position )
   const zoom = (e) => {
+    // Get the cursor position within the canvas
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
 
-    if (cursorX < 0) {
-      cursorX = 0;
-    } else if (cursorX > rect.width) {
-      cursorX = rect.width;
-    }
-    if (cursorY < 0) {
-      cursorY = 0;
-    } else if (cursorY > rect.height) {
-      cursorY = rect.height;
-    }
+    // Ensure cursor is within the canvas
+    cursorX = Math.max(0, Math.min(cursorX, rect.width));
+    cursorY = Math.max(0, Math.min(cursorY, rect.height));
 
-    let newScale = canvasScale * (1 + e.deltaY * -0.01);
-    if (newScale < minScale) {
-      newScale = minScale;
-    } else if (newScale > maxScale) {
-      newScale = maxScale;
+    if (Math.abs(e.deltaY) >= 8) {
+      let newScale = canvasScale * (1 + e.deltaY * -0.01);
+      newScale = Math.max(minScale, Math.min(newScale, maxScale));
+      const newWidth = width * newScale;
+      const newHeight = height * newScale;
+      const oldCursorXRelative = cursorX / rect.width;
+      const oldCursorYRelative = cursorY / rect.height;
+      const newCursorX = oldCursorXRelative * newWidth;
+      const newCursorY = oldCursorYRelative * newHeight;
+      const newPosX = canvasX - (newCursorX - cursorX);
+      const newPosY = canvasY - (newCursorY - cursorY);
+
+      // Interpolate the zoom over time
+      const duration = 200; // duration in milliseconds
+      const startTime = performance.now();
+      const animate = () => {
+        const elapsed = performance.now() - startTime;
+        const t = Math.min(1, elapsed / duration);
+        const currentScale = canvasScale + t * (newScale - canvasScale);
+        const currentPosX = canvasX + t * (newPosX - canvasX);
+        const currentPosY = canvasY + t * (newPosY - canvasY);
+        setCanvasScale(currentScale);
+        setCanvasX(currentPosX);
+        setCanvasY(currentPosY);
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      animate();
     }
-    const newWidth = width * newScale;
-    const newHeight = height * newScale;
-    const oldCursorXRelative = cursorX / rect.width;
-    const oldCursorYRelative = cursorY / rect.height;
-    const newCursorX = oldCursorXRelative * newWidth;
-    const newCursorY = oldCursorYRelative * newHeight;
-    const newPosX = canvasX - (newCursorX - cursorX);
-    const newPosY = canvasY - (newCursorY - cursorY);
-
-    targetScale = newScale;
-    targetX = newPosX;
-    targetY = newPosY;
-
-    requestAnimationFrame(animateZoom);
   };
 
   useEffect(() => {
