@@ -91,6 +91,14 @@ pub mod ArtPeace {
         TemplateEvent: TemplateStoreComponent::Event,
     }
 
+    // Add color
+    #[derive(Drop, starknet::Event)]
+    struct ColorAdded {
+        #[key]
+        color: u32,
+    }    
+    
+
     #[derive(Drop, starknet::Event)]
     struct NewDay {
         #[key]
