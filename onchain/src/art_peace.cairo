@@ -77,6 +77,7 @@ pub mod ArtPeace {
     #[derive(Drop, starknet::Event)]
     enum Event {
         NewDay: NewDay,
+        ColorAdded: ColorAdded,
         PixelPlaced: PixelPlaced,
         BasicPixelPlaced: BasicPixelPlaced,
         MemberPixelsPlaced: MemberPixelsPlaced,
@@ -95,7 +96,7 @@ pub mod ArtPeace {
     #[derive(Drop, starknet::Event)]
     struct ColorAdded {
         #[key]
-        color_index: u32,
+        color_index: u8,
         color: u32,
     }
 
