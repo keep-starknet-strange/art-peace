@@ -259,8 +259,8 @@ func GetDailyQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 	for _, quest := range quests {
 		result = append(result, QuestProgress{
 			QuestId:  quest.QuestId,
-			Progress: 60,
-			Needed:   40,
+			Progress: 40,
+			Needed:   60,
 		})
 	}
 
@@ -293,8 +293,8 @@ func GetMainQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 	for _, quest := range quests {
 		result = append(result, QuestProgress{
 			QuestId:  quest.QuestId,
-			Progress: 40,
-			Needed:   60,
+			Progress: 45,
+			Needed:   55,
 		})
 	}
 
