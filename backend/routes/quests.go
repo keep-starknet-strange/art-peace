@@ -80,11 +80,15 @@ type QuestStatus struct {
 	Needed   int `json:"needed"`
 }
 
-type QuestProgress struct {
+type QuestTypes struct {
 	QuestId   int `json:"questId"`
 	QuestType int `json:"questType"`
-	Progress  int `json:"progress"`
-	Needed    int `json:"needed"`
+}
+
+type QuestProgress struct {
+	QuestId  int `json:"questId"`
+	Progress int `json:"progress"`
+	Needed   int `json:"needed"`
 }
 
 func InitQuestsRoutes() {
@@ -239,7 +243,7 @@ func GetDailyQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	questJsons, err := core.PostgresQueryJson[QuestProgress](
+	questJsons, err := core.PostgresQueryJson[QuestTypes](
 		`SELECT quest_id AS QuestId, quest_type as QuestType
          FROM DailyQuests
          WHERE day_index = $1`,
@@ -251,7 +255,7 @@ func GetDailyQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var quests []QuestProgress
+	var quests []QuestTypes
 	err = json.Unmarshal([]byte(questJsons), &quests)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unmarshal response")
