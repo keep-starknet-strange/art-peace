@@ -243,7 +243,7 @@ func GetDailyQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	questJsons, err := core.PostgresQueryJson[QuestTypes](
+	quests, err := core.PostgresQuery[QuestTypes](
 		`SELECT quest_id AS QuestId, quest_type as QuestType
          FROM DailyQuests
          WHERE day_index = $1`,
@@ -252,13 +252,6 @@ func GetDailyQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get daily quest status")
-		return
-	}
-
-	var quests []QuestTypes
-	err = json.Unmarshal([]byte(questJsons), &quests)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unmarshal response")
 		return
 	}
 
@@ -287,19 +280,12 @@ func GetMainQuestStatusProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	questJsons, err := core.PostgresQueryJson[QuestProgress](
+	quests, err := core.PostgresQuery[QuestTypes](
 		`SELECT key AS QuestId, quest_type as QuestType
          FROM MainQuests`,
 	)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get quest status")
-		return
-	}
-
-	var quests []QuestProgress
-	err = json.Unmarshal([]byte(questJsons), &quests)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unmarshal response")
 		return
 	}
 
