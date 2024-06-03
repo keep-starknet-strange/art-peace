@@ -72,7 +72,7 @@ const (
 
 var eventProcessors = map[string](func(IndexerEvent)){
 	newDayEvent:             processNewDayEvent,
-	colorAddedEvent:		 processColorAddedEvent,
+	colorAddedEvent:         processColorAddedEvent,
 	pixelPlacedEvent:        processPixelPlacedEvent,
 	basicPixelPlacedEvent:   processBasicPixelPlacedEvent,
 	memberPixelsPlacedEvent: processMemberPixelsPlacedEvent,
@@ -110,7 +110,7 @@ var eventReverters = map[string](func(IndexerEvent)){
 // TODO: Think about this more
 var eventRequiresOrdering = map[string]bool{
 	newDayEvent:             false,
-	colorAddedEvent:		 false,
+	colorAddedEvent:         false,
 	pixelPlacedEvent:        true,
 	basicPixelPlacedEvent:   false,
 	memberPixelsPlacedEvent: false,

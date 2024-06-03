@@ -17,11 +17,10 @@ func processColorAddedEvent(event IndexerEvent) {
 		return
 	}
 
-
 	// Set color in postgres
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Colors (hex) VALUES ($1))", colorHexHex)
 	if err != nil {
-		PrintIndexerError("processColorAddedEvent", "Error inserting day into postgres", colorHexHex )
+		PrintIndexerError("processColorAddedEvent", "Error inserting day into postgres", colorHexHex)
 		return
 	}
 }
