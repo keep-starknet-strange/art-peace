@@ -95,6 +95,7 @@ pub mod ArtPeace {
     #[derive(Drop, starknet::Event)]
     struct ColorAdded {
         #[key]
+        color_index: u32,
         color: u32,
     }
 
