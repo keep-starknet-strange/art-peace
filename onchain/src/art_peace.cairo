@@ -96,8 +96,8 @@ pub mod ArtPeace {
     struct ColorAdded {
         #[key]
         color: u32,
-    }    
-    
+    }
+
 
     #[derive(Drop, starknet::Event)]
     struct NewDay {
@@ -1173,7 +1173,7 @@ pub mod ArtPeace {
             if vote >= threshold {
                 self.color_palette.write(color_index, color);
                 color_index += 1;
-                self.Emit (ColorAdded {color_index,color});
+                self.Emit(ColorAdded { color_index, color });
             } else {
                 self.votable_colors.write((next_day_votable_index, next_day), color);
                 next_day_votable_index += 1;
