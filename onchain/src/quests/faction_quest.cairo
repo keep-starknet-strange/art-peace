@@ -1,7 +1,7 @@
 #[starknet::contract]
 pub mod FactionQuest {
     use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
-    use art_peace::quests::{IQuest, IFactionQuest};
+    use art_peace::quests::{IQuest};
 
     use starknet::{ContractAddress, get_caller_address};
 
@@ -24,19 +24,13 @@ pub mod FactionQuest {
         self.reward.write(init_params.reward);
     }
 
-    #[abi(embed_v0)]
-    impl FactionQuestImpl of IFactionQuest<ContractState> {
-        fn is_claimed(self: @ContractState, user: ContractAddress) -> bool {
-            self.claimed.read(user)
-        }
-    }
+
 
     #[abi(embed_v0)]
     impl FactionQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
             self.reward.read()
         }
-
 
         fn is_claimable(
             self: @ContractState, user: ContractAddress, calldata: Span<felt252>
@@ -45,15 +39,15 @@ pub mod FactionQuest {
                 return false;
             }
 
-            let art_piece = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
+            let art_peace_dispatcher = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
 
-            let has_joined_faction = art_peace.get_has_joined_faction();
-
+            let has_joined_faction = art_peace_dispatcher.get_has_joined_faction(user);
+            
             if (has_joined_faction > 0) {
                 return true;
             }
 
-            false;
+            return false;
         }
 
 
@@ -67,6 +61,8 @@ pub mod FactionQuest {
 
             reward
         }
+
+        
     }
 }
 
