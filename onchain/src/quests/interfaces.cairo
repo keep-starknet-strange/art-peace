@@ -32,7 +32,6 @@ pub trait IRainbowQuest<TContractState> {
 }
 
 
-
 #[starknet::interface]
 pub trait IFactionQuest<TContractState> {
     fn is_claimed(self: @TContractState, user: starknet::ContractAddress) -> bool;

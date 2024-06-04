@@ -25,7 +25,6 @@ pub mod FactionQuest {
     }
 
 
-
     #[abi(embed_v0)]
     impl FactionQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
@@ -39,10 +38,12 @@ pub mod FactionQuest {
                 return false;
             }
 
-            let art_peace_dispatcher = IArtPeaceDispatcher { contract_address: self.art_peace.read() };
+            let art_peace_dispatcher = IArtPeaceDispatcher {
+                contract_address: self.art_peace.read()
+            };
 
             let has_joined_faction = art_peace_dispatcher.get_has_joined_faction(user);
-            
+
             if (has_joined_faction > 0) {
                 return true;
             }
@@ -61,8 +62,6 @@ pub mod FactionQuest {
 
             reward
         }
-
-        
     }
 }
 
