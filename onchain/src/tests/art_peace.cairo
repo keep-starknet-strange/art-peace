@@ -14,7 +14,10 @@ use core::poseidon::PoseidonTrait;
 use core::hash::{HashStateTrait, HashStateExTrait};
 
 use openzeppelin::token::erc20::interface::{IERC20, IERC20Dispatcher, IERC20DispatcherTrait};
-use openzeppelin::token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
+use openzeppelin::token::erc721::interface::{
+    IERC721Dispatcher, IERC721DispatcherTrait, IERC721MetadataDispatcher,
+    IERC721MetadataDispatcherTrait
+};
 
 use snforge_std as snf;
 use snforge_std::{CheatTarget, ContractClassTrait, start_prank, stop_prank};
@@ -377,6 +380,10 @@ fn nft_mint_test() {
     assert!(nft.owner_of(0) == utils::PLAYER2(), "NFT owner is not correct after transfer");
     assert!(nft.balance_of(utils::PLAYER1()) == 0, "NFT balance is not correct after transfer");
     assert!(nft.balance_of(utils::PLAYER2()) == 1, "NFT balance is not correct after transfer");
+
+    let nft_meta = IERC721MetadataDispatcher { contract_address: nft.contract_address };
+    let expected_uri = "https://api.art-peace.net/nft-meta/nft-0.json";
+    assert!(nft_meta.token_uri(0) == expected_uri, "NFT URI is not correct");
 }
 
 #[test]

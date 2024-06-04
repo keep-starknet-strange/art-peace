@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -120,8 +121,24 @@ func processNFTMintedEvent(event IndexerEvent) {
 		}
 	}
 
+	if _, err := os.Stat("nfts/images"); os.IsNotExist(err) {
+		err = os.MkdirAll("nfts/images", os.ModePerm)
+		if err != nil {
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/images directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			return
+		}
+	}
+
+	if _, err := os.Stat("nfts/meta"); os.IsNotExist(err) {
+		err = os.MkdirAll("nfts/meta", os.ModePerm)
+		if err != nil {
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/meta directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			return
+		}
+	}
+
 	// Save image to disk
-	filename := fmt.Sprintf("nfts/nft-%d.png", tokenId)
+	filename := fmt.Sprintf("nfts/images/nft-%d.png", tokenId)
 	file, err := os.Create(filename)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error creating file", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
@@ -132,6 +149,48 @@ func processNFTMintedEvent(event IndexerEvent) {
 	err = png.Encode(file, generatedImage)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error encoding image", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		return
+	}
+
+	// Create a NFT JSON metadata file
+
+	x := position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
+	y := position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
+	// TODO: Name from onchain mint event
+	metadata := map[string]interface{}{
+		"name":        fmt.Sprintf("art/peace #%d", tokenId),
+		"description": "User minted art/peace NFT from the canvas.",
+		"image":       fmt.Sprintf("%s/nft-images/nft-%d.png", core.ArtPeaceBackend.GetBackendUrl(), tokenId),
+		"attributes": []map[string]interface{}{
+			{
+				"trait_type": "Width",
+				"value":      fmt.Sprintf("%d", width),
+			},
+			{
+				"trait_type": "Height",
+				"value":      fmt.Sprintf("%d", height),
+			},
+			{
+				"trait_type": "position",
+				"value":      fmt.Sprintf("(%d, %d)", x, y),
+			},
+			{
+				"trait_type": "Minter",
+				"value":      minter,
+			},
+		},
+	}
+
+	metadataFile, err := json.MarshalIndent(metadata, "", "  ")
+	if err != nil {
+		PrintIndexerError("processNFTMintedEvent", "Error generating NFT metadata", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		return
+	}
+
+	metadataFilename := fmt.Sprintf("nfts/meta/nft-%d.json", tokenId)
+	err = os.WriteFile(metadataFilename, metadataFile, 0644)
+	if err != nil {
+		PrintIndexerError("processNFTMintedEvent", "Error writing NFT metadata file", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
