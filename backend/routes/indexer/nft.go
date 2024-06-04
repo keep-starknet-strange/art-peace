@@ -24,11 +24,12 @@ func processNFTMintedEvent(event IndexerEvent) {
 	minter := event.Event.Data[5][2:] // Remove 0x prefix
 
 	// combine high and low token ids
-	tokenId, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
+	tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error combining high and low tokenId hex", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
+	tokenId := tokenIdU256.Uint64()
 
 	position, err := strconv.ParseInt(positionHex, 0, 64)
 	if err != nil {
@@ -145,13 +146,15 @@ func processNFTMintedEvent(event IndexerEvent) {
 }
 
 func revertNFTMintedEvent(event IndexerEvent) {
-	tokenIdLowHex := event.Event.Keys[1]
+	tokenIdLowHex := event.Event.Keys[1][2:]  // Remove 0x prefix
+	tokenIdHighHex := event.Event.Keys[2][2:] // Remove 0x prefix
 
-	tokenId, err := strconv.ParseInt(tokenIdLowHex, 0, 64)
+	tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
 	if err != nil {
-		PrintIndexerError("reverseNFTMintedEvent", "Error converting token id low hex to int", tokenIdLowHex)
+		PrintIndexerError("revertNFTMintedEvent", "Error converting tokenId hex to int", tokenIdLowHex)
 		return
 	}
+	tokenId := tokenIdU256.Uint64()
 
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM NFTs WHERE token_id = $1", tokenId)
 	if err != nil {
