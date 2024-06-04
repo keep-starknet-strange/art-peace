@@ -1174,8 +1174,8 @@ pub mod ArtPeace {
             let color = self.votable_colors.read((votable_index, day));
             if vote >= threshold {
                 self.color_palette.write(color_index, color);
-                color_index += 1;
                 self.emit(ColorAdded { color_index, color });
+                color_index += 1;
             } else {
                 self.votable_colors.write((next_day_votable_index, next_day), color);
                 next_day_votable_index += 1;
