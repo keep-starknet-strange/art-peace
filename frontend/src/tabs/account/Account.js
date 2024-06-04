@@ -342,7 +342,7 @@ const Account = (props) => {
             </div>
           )}
 
-          <p className='Disconnect__button' onClick={() => disconnect()}>
+          <p className='Text__medium Button__primary Account__login__button' onClick={() => disconnect()}>
             Disconnect Wallet
           </p>
 
