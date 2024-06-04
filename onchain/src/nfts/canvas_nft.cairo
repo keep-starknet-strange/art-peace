@@ -1,6 +1,7 @@
 #[starknet::contract]
 mod CanvasNFT {
     use openzeppelin::token::erc721::ERC721Component;
+    use openzeppelin::token::erc721::interface::IERC721Metadata;
     use openzeppelin::introspection::src5::SRC5Component;
     use starknet::ContractAddress;
     use art_peace::nfts::component::CanvasNFTStoreComponent;
@@ -14,7 +15,10 @@ mod CanvasNFT {
     #[abi(embed_v0)]
     impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
     #[abi(embed_v0)]
-    impl ERC721MetadataImpl = ERC721Component::ERC721MetadataImpl<ContractState>;
+    impl ERC721CamelOnly = ERC721Component::ERC721CamelOnlyImpl<ContractState>;
+    #[abi(embed_v0)]
+    impl ERC721MetadataCamelOnly =
+        ERC721Component::ERC721MetadataCamelOnlyImpl<ContractState>;
     #[abi(embed_v0)]
     impl SRC5Impl = SRC5Component::SRC5Impl<ContractState>;
     #[abi(embed_v0)]
@@ -47,8 +51,30 @@ mod CanvasNFT {
 
     #[constructor]
     fn constructor(ref self: ContractState, name: ByteArray, symbol: ByteArray) {
-        let base_uri = "test"; // TODO: change to real base uri
+        // TODO: allow changing base_uri
+        let base_uri = "https://api.art-peace.net/nft-meta/nft-";
         self.erc721.initializer(name, symbol, base_uri);
+    }
+
+    #[abi(embed_v0)]
+    impl ERC721Metadata of IERC721Metadata<ContractState> {
+        fn name(self: @ContractState) -> ByteArray {
+            self.erc721.ERC721_name.read()
+        }
+
+        fn symbol(self: @ContractState) -> ByteArray {
+            self.erc721.ERC721_symbol.read()
+        }
+
+        fn token_uri(self: @ContractState, token_id: u256) -> ByteArray {
+            assert(self.erc721._exists(token_id), 'Token does not exist');
+            let base_uri = self.erc721._base_uri();
+            if base_uri.len() == 0 {
+                return "";
+            } else {
+                return format!("{}{}.json", base_uri, token_id);
+            }
+        }
     }
 
     #[abi(embed_v0)]

@@ -121,8 +121,24 @@ func processNFTMintedEvent(event IndexerEvent) {
 		}
 	}
 
+	if _, err := os.Stat("nfts/images"); os.IsNotExist(err) {
+		err = os.MkdirAll("nfts/images", os.ModePerm)
+		if err != nil {
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/images directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			return
+		}
+	}
+
+	if _, err := os.Stat("nfts/meta"); os.IsNotExist(err) {
+		err = os.MkdirAll("nfts/meta", os.ModePerm)
+		if err != nil {
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/meta directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			return
+		}
+	}
+
 	// Save image to disk
-	filename := fmt.Sprintf("nfts/nft-%d.png", tokenId)
+	filename := fmt.Sprintf("nfts/images/nft-%d.png", tokenId)
 	file, err := os.Create(filename)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error creating file", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
@@ -140,11 +156,11 @@ func processNFTMintedEvent(event IndexerEvent) {
 
 	x := position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	y := position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
-	minterAddress := minter
+	// TODO: Name from onchain mint event
 	metadata := map[string]interface{}{
-		"name":        fmt.Sprintf("NFT #%d", tokenId),
-		"description": "This is an NFT minted on the blockchain.",
-		"image":       fmt.Sprintf("http://localhost:3000/nft-images/nft-%d.png", tokenId),
+		"name":        fmt.Sprintf("art/peace #%d", tokenId),
+		"description": "User minted art/peace NFT from the canvas.",
+		"image":       fmt.Sprintf("%s/nft-images/nft-%d.png", core.ArtPeaceBackend.GetBackendUrl(), tokenId),
 		"attributes": []map[string]interface{}{
 			{
 				"trait_type": "Width",
@@ -160,7 +176,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 			},
 			{
 				"trait_type": "Minter",
-				"value":      minterAddress,
+				"value":      minter,
 			},
 		},
 	}
@@ -171,7 +187,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 		return
 	}
 
-	metadataFilename := fmt.Sprintf("nfts/nft-%d.json", tokenId)
+	metadataFilename := fmt.Sprintf("nfts/meta/nft-%d.json", tokenId)
 	err = os.WriteFile(metadataFilename, metadataFile, 0644)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error writing NFT metadata file", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)

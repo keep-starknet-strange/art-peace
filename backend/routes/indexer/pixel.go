@@ -96,8 +96,7 @@ func revertPixelPlacedEvent(event IndexerEvent) {
 	}
 
 	// Retrieve the old color
-	var oldColor int64
-	err = core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), "SELECT color FROM Pixels WHERE address = $1 AND position = $2 ORDER BY time DESC LIMIT 1", address, position).Scan(&oldColor)
+	oldColor, err := core.PostgresQueryOne[int]("SELECT color FROM Pixels WHERE address = $1 AND position = $2 ORDER BY time DESC LIMIT 1", address, position)
 	if err != nil {
 		PrintIndexerError("revertPixelPlacedEvent", "Error retrieving old color from postgres", address, posHex)
 		return

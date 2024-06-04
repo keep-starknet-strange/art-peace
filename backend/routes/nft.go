@@ -22,7 +22,9 @@ func InitNFTRoutes() {
 		http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
 	}
 	// Create a static file server for the nft images
-	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts"))))
+	// TODO: Versioning here?
+	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts/images"))))
+	http.Handle("/nft-meta/", http.StripPrefix("/nft-meta/", http.FileServer(http.Dir("./nfts/meta"))))
 }
 
 type NFTData struct {
