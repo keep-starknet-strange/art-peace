@@ -3,6 +3,7 @@ import { useContractWrite } from '@starknet-react/core';
 import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
+import TemplateOverlay from './TemplateOverlay.js';
 import NFTSelector from './NFTSelector.js';
 import canvasConfig from '../configs/canvas.config.json';
 import { fetchWrapper } from '../services/apiService.js';
@@ -460,6 +461,18 @@ const CanvasContainer = (props) => {
             }}
             colors={props.colors}
             pixelClicked={pixelClicked}
+          />
+        )}
+        {props.templateOverlayMode && props.overlayTemplate && (
+          <TemplateOverlay
+            canvasRef={props.canvasRef}
+            width={width}
+            height={height}
+            canvasScale={canvasScale}
+            overlayTemplate={props.overlayTemplate}
+            setTemplateOverlayMode={props.setTemplateOverlayMode}
+            setOverlayTemplate={props.setOverlayTemplate}
+            colors={props.colors}
           />
         )}
         {props.nftMintingMode && (

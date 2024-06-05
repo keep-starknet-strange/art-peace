@@ -238,17 +238,6 @@ pub mod ArtPeace {
         >();
         let zero_address = starknet::contract_address_const::<0>();
         self.extra_pixels.write(test_address, 1000);
-        self
-            .init_faction(
-                'RealmsWorld',
-                test_address,
-                10,
-                array![test_address, test_address, zero_address, zero_address, zero_address].span()
-            );
-        self
-            .init_faction(
-                'briq', test_address, 9, array![test_address, zero_address, zero_address].span()
-            );
 
         self.daily_quests_count.write(init_params.daily_quests_count);
     }

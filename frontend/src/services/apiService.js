@@ -65,3 +65,9 @@ export const getNftsFn = async (query) => {
     `get-nfts?pageLength=${query.pageLength}&page=${query.page}`
   );
 };
+
+export const getFactions = async (query) => {
+  return await fetchWrapper(
+    `get-factions?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
+  );
+};
