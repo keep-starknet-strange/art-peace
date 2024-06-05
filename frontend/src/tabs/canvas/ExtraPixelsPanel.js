@@ -208,6 +208,7 @@ const ExtraPixelsPanel = (props) => {
           >
             Available
           </p>
+          <div className='ExtraPixelsPanel__info__main'>
           <div
             className={`ExtraPixelsPanel__info__item ${basePixelUsed || !props.basePixelUp ? 'ExtraPixelsPanel__info__item--used' : ''}`}
           >
@@ -272,6 +273,7 @@ const ExtraPixelsPanel = (props) => {
               </p>
             </div>
           )}
+        </div>
         </div>
         <div className='ExtraPixelsPanel__pixels'>
           {props.extraPixelsData.map((pixelData, index) => {
