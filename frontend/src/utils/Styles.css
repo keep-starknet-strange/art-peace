@@ -68,7 +68,7 @@
     rgba(255, 255, 255, 0.8)
   );
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
-  border-radius: 1rem;
+  border-radius: 2rem;
   border: 0.1rem solid rgba(0, 0, 0, 0.4);
 
   cursor: pointer;
@@ -106,16 +106,19 @@
   pointer-events: fill;
   font-size: 1.5rem;
   color: rgba(0, 0, 0, 0.9);
+  transition: 0.2s;
 }
 
 .Button__close:hover {
   transform: translateY(-0.3rem) scale(1.05);
   color: rgba(200, 0, 0, 0.9);
+  text-shadow: 0 0.1rem 0.5rem rgba(0, 0, 0, 0.4);
 }
 
 .Button__close:active {
   transform: translateY(0) scale(1);
   color: rgba(200, 0, 0, 0.9);
+  text-shadow: 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1);
 }
 
 .Button__disabled {

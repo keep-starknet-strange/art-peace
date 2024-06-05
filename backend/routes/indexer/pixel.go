@@ -2,14 +2,13 @@ package indexer
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
-func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
+func processPixelPlacedEvent(event IndexerEvent) {
 	address := event.Event.Keys[1][2:] // Remove 0x prefix
 	posHex := event.Event.Keys[2]
 	dayIdxHex := event.Event.Keys[3]
@@ -75,10 +74,54 @@ func processPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 		"color":       color,
 		"messageType": "colorPixel",
 	}
-	routeutils.SendWebSocketMessage(w, message)
+	routeutils.SendWebSocketMessage(message)
 }
 
-func processBasicPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
+func revertPixelPlacedEvent(event IndexerEvent) {
+	address := event.Event.Keys[1][2:] // Remove 0x prefix
+	posHex := event.Event.Keys[2]
+
+	// Convert hex to int
+	position, err := strconv.ParseInt(posHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertPixelPlacedEvent", "Error converting position hex to int", address, posHex)
+		return
+	}
+
+	// Delete pixel from postgres ( last one )
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Pixels WHERE address = $1 AND position = $2 ORDER BY time limit 1", address, position)
+	if err != nil {
+		PrintIndexerError("revertPixelPlacedEvent", "Error deleting pixel from postgres", address, posHex)
+		return
+	}
+
+	// Retrieve the old color
+	oldColor, err := core.PostgresQueryOne[int]("SELECT color FROM Pixels WHERE address = $1 AND position = $2 ORDER BY time DESC LIMIT 1", address, position)
+	if err != nil {
+		PrintIndexerError("revertPixelPlacedEvent", "Error retrieving old color from postgres", address, posHex)
+		return
+	}
+	// Reset pixel in redis
+	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
+	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+
+	ctx := context.Background()
+	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "SET", bitfieldType, pos, oldColor).Err()
+	if err != nil {
+		PrintIndexerError("revertPixelPlacedEvent", "Error resetting pixel in redis", address, posHex)
+		return
+	}
+
+	// Send message to all connected clients
+	var message = map[string]interface{}{
+		"position":    position,
+		"color":       oldColor,
+		"messageType": "colorPixel",
+	}
+	routeutils.SendWebSocketMessage(message)
+}
+
+func processBasicPixelPlacedEvent(event IndexerEvent) {
 	address := event.Event.Keys[1][2:] // Remove 0x prefix
 	timestampHex := event.Event.Data[0]
 
@@ -95,7 +138,20 @@ func processBasicPixelPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 }
 
-func processMemberPixelsPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
+func revertBasicPixelPlacedEvent(event IndexerEvent) {
+	address := event.Event.Keys[1][2:] // Remove 0x prefix
+
+	// Reset last placed time to time of last pixel placed
+	_, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE LastPlacedTime SET time = (SELECT time FROM Pixels WHERE address = $1 ORDER BY time DESC LIMIT 1) WHERE address = $1", address)
+	if err != nil {
+		PrintIndexerError("revertBasicPixelPlacedEvent", "Error resetting last placed time in postgres", address)
+		return
+	}
+
+	// TODO: check ordering of this and revertPixelPlacedEvent
+}
+
+func processMemberPixelsPlacedEvent(event IndexerEvent) {
 	factionIdHex := event.Event.Keys[1]
 	memberIdHex := event.Event.Keys[2]
 	timestampHex := event.Event.Data[0]
@@ -132,7 +188,11 @@ func processMemberPixelsPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	}
 }
 
-func processExtraPixelsPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
+func revertMemberPixelsPlacedEvent(event IndexerEvent) {
+	// TODO
+}
+
+func processExtraPixelsPlacedEvent(event IndexerEvent) {
 	address := event.Event.Keys[1][2:] // Remove 0x prefix
 	extraPixelsHex := event.Event.Data[0]
 
@@ -145,6 +205,23 @@ func processExtraPixelsPlacedEvent(event IndexerEvent, w http.ResponseWriter) {
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE ExtraPixels SET available = available - $1, used = used + $1 WHERE address = $2", extraPixels, address)
 	if err != nil {
 		PrintIndexerError("processExtraPixelsPlacedEvent", "Error updating extra pixels in postgres", address, extraPixelsHex)
+		return
+	}
+}
+
+func revertExtraPixelsPlacedEvent(event IndexerEvent) {
+	address := event.Event.Keys[1][2:] // Remove 0x prefix
+	extraPixelsHex := event.Event.Data[0]
+
+	extraPixels, err := strconv.ParseInt(extraPixelsHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertExtraPixelsPlacedEvent", "Error converting extra pixels hex to int", address, extraPixelsHex)
+		return
+	}
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE ExtraPixels SET available = available + $1, used = used - $1 WHERE address = $2", extraPixels, address)
+	if err != nil {
+		PrintIndexerError("revertExtraPixelsPlacedEvent", "Error updating extra pixels in postgres", address, extraPixelsHex)
 		return
 	}
 }

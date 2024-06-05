@@ -27,7 +27,7 @@
   height: 41vh;
 
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
   grid-gap: 0rem 2rem;
   overflow-y: scroll;
 }

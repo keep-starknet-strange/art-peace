@@ -205,3 +205,29 @@
   align-items: center;
   justify-content: space-between;
 }
+
+/* Change the color of the selected button & create pulse effect */
+.Eraser__button--selected {
+  background-color: rgba(30, 30, 70, 0.5);
+  transform: scale(1.02);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(30, 30, 70, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 0.7rem rgba(30, 30, 70, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 30, 70, 0);
+  }
+}
+
+.Eraser__icon {
+  padding: 0;
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+}

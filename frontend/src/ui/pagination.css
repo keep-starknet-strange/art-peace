@@ -1,0 +1,10 @@
+/* Pagination Styles */
+.PaginationContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.5s ease-in-out;
+  user-select: none;
+  padding-top: 1rem;
+  width: 100%;
+}

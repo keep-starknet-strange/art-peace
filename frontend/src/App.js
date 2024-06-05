@@ -58,21 +58,19 @@ function App() {
       if (!address) {
         setQueryAddress('0');
       } else {
-        setQueryAddress(address ? address.slice(2) : '0');
+        setQueryAddress(address.slice(2).toLowerCase().padStart(64, '0'));
       }
     }
   }, [address, connected]);
 
   // Contracts
-  // TODO: art peace abi & contract address should be in a config
+  // TODO: Pull addrs from api?
   const { contract: artPeaceContract } = useContract({
-    address:
-      '0x02e3f41bd135e60c72ebfe57e8964ecc58dbb8f8679b1b4cffeaf5e45ab1defa',
+    address: process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
     abi: art_peace_abi
   });
   const { contract: usernameContract } = useContract({
-    address:
-      '0x00a22891d623bff245535dfbfa2f0db1002a62ef4bd5d405bd1f5712e9df85cd',
+    address: process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
     abi: username_store_abi
   });
 
@@ -287,6 +285,7 @@ function App() {
         `get-extra-pixels?address=${queryAddress}`
       );
       if (!extraPixelsResponse.data) {
+        setExtraPixels(0);
         return;
       }
       setExtraPixels(extraPixelsResponse.data);
@@ -298,6 +297,7 @@ function App() {
         `get-faction-pixels?address=${queryAddress}`
       );
       if (!factionPixelsResponse.data) {
+        setFactionPixelsData([]);
         return;
       }
       setFactionPixelsData(factionPixelsResponse.data);
@@ -366,6 +366,7 @@ function App() {
   );
 
   // Factions
+  const [chainFaction, setChainFaction] = useState(null);
   const [userFactions, setUserFactions] = useState([]);
   useEffect(() => {
     async function fetchUserFactions() {
@@ -379,6 +380,10 @@ function App() {
     }
     fetchUserFactions();
   }, [queryAddress]);
+
+  // Templates
+  const [templateOverlayMode, setTemplateOverlayMode] = useState(false);
+  const [overlayTemplate, setOverlayTemplate] = useState(null);
 
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
@@ -451,6 +456,10 @@ function App() {
         basePixelUp={basePixelUp}
         availablePixelsUsed={availablePixelsUsed}
         addExtraPixel={addExtraPixel}
+        templateOverlayMode={templateOverlayMode}
+        setTemplateOverlayMode={setTemplateOverlayMode}
+        overlayTemplate={overlayTemplate}
+        setOverlayTemplate={setOverlayTemplate}
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
         nftSelectionStarted={nftSelectionStarted}
@@ -486,6 +495,10 @@ function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           getDeviceTypeInfo={getDeviceTypeInfo}
+          templateOverlayMode={templateOverlayMode}
+          setTemplateOverlayMode={setTemplateOverlayMode}
+          overlayTemplate={overlayTemplate}
+          setOverlayTemplate={setOverlayTemplate}
           nftMintingMode={nftMintingMode}
           setNftMintingMode={setNftMintingMode}
           nftSelectionStarted={nftSelectionStarted}
@@ -527,6 +540,8 @@ function App() {
           factionPixelsData={factionPixelsData}
           setFactionPixelsData={setFactionPixelsData}
           factionPixelTimers={factionPixelTimers}
+          chainFaction={chainFaction}
+          setChainFaction={setChainFaction}
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
           setLatestMintedTokenId={setLatestMintedTokenId}
