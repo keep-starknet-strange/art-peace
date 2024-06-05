@@ -1,11 +1,16 @@
 .TemplateItem {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  display: flex;
+  flex-direction: row;
   padding: 0;
-  margin: 0.5rem;
-  border-radius: 0.3rem;
+  margin: 1rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.4);
   box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
   position: relative;
+  height: 22rem;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s;
 }
 
 .TemplateItem:hover {
@@ -18,102 +23,146 @@
   box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
 }
 
-.TemplateItem__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  margin: 0;
+.TemplateItem__imagecontainer {
+  display: flex;
+  justify-content: center;
   padding: 0;
-  display: block;
-  border: 2px solid rgba(0, 0, 150, 0.1);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  image-rendering: pixelated;
+  margin: 0;
+  width: 100%;
+  height: 22rem;
 }
 
-.TemplateItem__desc {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  padding: 0 0.5rem;
-  margin: 0.5rem;
-  display: flex;
-  flex-direction: row;
-  justify-content: right;
-  width: 95%;
+.TemplateItem__image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
+  image-rendering: pixelated;
 }
 
 /* TODO: Fix ellipsis */
 .TemplateItem__name {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 0.3rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  margin-right: 0.5rem;
-  padding: 0 0.5rem;
+  margin-right: 1rem;
+  max-width: 80%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.9)
+  );
+  border-radius: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  padding: 1rem;
 }
 
-.TemplateItem__users {
-  min-width: 3rem;
+.TemplateItem__overlay {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 0.5rem 0;
+}
+
+.list-transition-enter,
+.list-transition-appear {
+  transform: translateX(120%);
+}
+
+/* This is where we can add the transition*/
+.list-transition-enter-active,
+.list-transition-appear-active {
+  transform: translateX(0);
+  transition: all 150ms;
+}
+
+/* This fires as soon as the this.state.showList is false */
+.list-transition-exit {
+}
+
+/* fires as element leaves the DOM*/
+.list-transition-exit-active {
+  transform: translateX(120%);
+  transition: all 150ms;
+}
+
+.TemplateItem__footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}
+
+.TemplateItem__button {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 1rem 0 0;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 0.3rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  font-size: 1rem;
-  margin-right: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
 }
 
-.TemplateItem__like {
-  min-width: 3rem;
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 0.3rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  font-size: 1rem;
+.TemplateItem__button:hover {
+  transform: scale(1.05) translateY(-0.1rem);
+  box-shadow: 0 0 1.2rem rgba(0, 0, 0, 0.5);
 }
 
-.TemplateItem__like:hover {
-  background-color: rgba(255, 255, 255, 0.8);
-  transform: scale(1.1) translateY(-0.2rem);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.TemplateItem__like:active {
+.TemplateItem__button:active {
   transform: scale(1) translateY(0);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-/* TODO: icon */
-
 .TemplateItem__info {
-  font-size: 1rem;
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   padding: 0;
-  margin: 0;
+  margin: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .TemplateItem__info__item {
   flex-grow: 1;
   text-align: center;
-  border: 2px solid rgba(0, 0, 150, 0.1);
-  padding: 0.5rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0 0.5rem;
   margin: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.TemplateItem__info__item:first-child {
+  border: none;
 }
 
 /* Style children of .TemplateItem__info__item */
 .TemplateItem__info__item > * {
   margin: 0;
-  padding: 0.3rem;
+  padding: 0.5rem;
 }
 
 /* Underline the first child of .TemplateItem__info__item */
-.TemplateItem__info__item > *:first-child {
+.TemplateItem__info__item > p:first-child {
   text-decoration: underline;
 }

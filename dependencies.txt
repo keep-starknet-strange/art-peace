@@ -1,7 +1,9 @@
-docker
+docker 25.0.3
 docker compose
 make
 jq
+yq
+xxd
 
 redis: https://redis.io/docs/install/install-redis/
 postgresql: https://www.postgresql.org/download/
