@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '.';
+import './NotificationPanel.css';
 
 const NotificationPanel = ({ message, onClose, animationDuration = 3000 }) => {
   const [isVisible, setIsVisible] = useState(false);
