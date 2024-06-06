@@ -66,6 +66,7 @@ pub trait IArtPeace<TContractState> {
 
     // Faction stuff
     fn get_factions_count(self: @TContractState) -> u32;
+    fn get_user_factions_count(self: @TContractState, user: starknet::ContractAddress) -> u32;
     fn get_faction(self: @TContractState, faction_id: u32) -> Faction;
     fn get_faction_leader(self: @TContractState, faction_id: u32) -> starknet::ContractAddress;
     fn init_faction(
