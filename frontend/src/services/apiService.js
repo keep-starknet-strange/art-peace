@@ -4,7 +4,7 @@ export const fetchWrapper = async (url, options = {}) => {
   const controller = new AbortController();
   const signal = controller.signal;
   try {
-    const response = await fetch(`${backendUrl}/${url}`, {
+    const response = await fetch(url, {
       mode: 'cors',
       signal,
       ...options
@@ -22,15 +22,15 @@ export const fetchWrapper = async (url, options = {}) => {
 };
 
 export const getTodaysStartTime = async () => {
-  return await fetchWrapper('get-today-start-time');
+  return await fetchWrapper(`${backendUrl}/get-today-start-time`);
 };
 
 export const getVotableColors = async () => {
-  return await fetchWrapper('votable-colors');
+  return await fetchWrapper(`${backendUrl}/votable-colors`);
 };
 
 export const voteColorDevnet = async (colorIdx) => {
-  return await fetchWrapper('vote-color-devnet', {
+  return await fetchWrapper(`${backendUrl}/vote-color-devnet`, {
     method: 'POST',
     body: JSON.stringify({ colorIndex: colorIdx })
   });
@@ -48,7 +48,7 @@ export const voteColorDevnet = async (colorIdx) => {
  */
 export const getMyNftsFn = async (query) => {
   return await fetchWrapper(
-    `get-my-nfts?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
+    `${backendUrl}/get-my-nfts?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
   );
 };
 
@@ -62,12 +62,19 @@ export const getMyNftsFn = async (query) => {
  */
 export const getNftsFn = async (query) => {
   return await fetchWrapper(
-    `get-nfts?pageLength=${query.pageLength}&page=${query.page}`
+    `${backendUrl}/get-nfts?pageLength=${query.pageLength}&page=${query.page}`
   );
 };
 
 export const getFactions = async (query) => {
   return await fetchWrapper(
-    `get-factions?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
+    `${backendUrl}/get-factions?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
   );
+};
+
+//Top NFTs
+export const getTopNftsFn = async (params) => {
+  const { page, pageLength } = params;
+  const url = `${backendUrl}/get-top-nfts?page=${page}&pageLength=${pageLength}`;
+  return await fetchWrapper(url, { mode: 'cors' });
 };

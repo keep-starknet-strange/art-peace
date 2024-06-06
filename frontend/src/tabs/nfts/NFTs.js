@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './NFTs.css';
 import ExpandableTab from '../ExpandableTab.js';
 import NFTItem from './NFTItem.js';
@@ -6,7 +6,8 @@ import { backendUrl } from '../../utils/Consts.js';
 import {
   fetchWrapper,
   getMyNftsFn,
-  getNftsFn
+  getNftsFn,
+  getTopNftsFn
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
 
@@ -53,9 +54,39 @@ const NFTsMainSection = (props) => {
 
 const NFTsExpandedSection = (props) => {
   const imageURL = backendUrl + '/nft-images/';
-  // TODO: Implement filters
   const filters = ['hot', 'new', 'top'];
-  const [activeFilter, setActiveFilter] = React.useState(filters[0]);
+  const [activeFilter, setActiveFilter] = useState(filters[0]);
+
+  useEffect(() => {
+    async function fetchNfts() {
+      try {
+        let result;
+        if (activeFilter === 'top') {
+          result = await getTopNftsFn({
+            page: props.allNftPagination.page,
+            pageLength: props.allNftPagination.pageLength
+          });
+        } else {
+          result = await getNftsFn({
+            page: props.allNftPagination.page,
+            pageLength: props.allNftPagination.pageLength
+          });
+        }
+
+        if (result.data) {
+          if (props.allNftPagination.page === 1) {
+            props.setAllNFTs(result.data);
+          } else {
+            props.setAllNFTs([...props.allNfts, ...result.data]);
+          }
+        }
+      } catch (error) {
+        console.log('Error fetching NFTs', error);
+      }
+    }
+    fetchNfts();
+  }, [activeFilter, props.allNftPagination.page, props.allNftPagination.pageLength]);
+
   return (
     <div className='NFTs__all'>
       <div className='NFTs__header'>
@@ -106,9 +137,8 @@ const NFTsExpandedSection = (props) => {
 };
 
 const NFTs = (props) => {
-  // TODO: Minted nfts view w/ non owned nfts
-  const [myNFTs, setMyNFTs] = React.useState([]);
-  const [allNFTs, setAllNFTs] = React.useState([]);
+  const [myNFTs, setMyNFTs] = useState([]);
+  const [allNFTs, setAllNFTs] = useState([]);
   const [myNftPagination, setMyNftPagination] = useState({
     pageLength: 6,
     page: 1
@@ -130,7 +160,7 @@ const NFTs = (props) => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       props.latestMintedTokenId !== null &&
       myNFTs.findIndex((nft) => nft.tokenId === props.latestMintedTokenId) ===
@@ -141,8 +171,7 @@ const NFTs = (props) => {
     }
   }, [props.latestMintedTokenId]);
 
-  React.useEffect(() => {
-    // TODO
+  useEffect(() => {
     async function getMyNfts() {
       try {
         const result = await getMyNftsFn({
@@ -159,14 +188,15 @@ const NFTs = (props) => {
           }
         }
       } catch (error) {
-        console.log('Error fetching Nfts', error);
+        console.log('Error fetching NFTs', error);
       }
     }
     getMyNfts();
   }, [props.queryAddress, myNftPagination.page, myNftPagination.pageLength]);
 
-  const [expanded, setExpanded] = React.useState(false);
-  React.useEffect(() => {
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
     if (!expanded) {
       return;
     }
@@ -174,7 +204,7 @@ const NFTs = (props) => {
       try {
         const result = await getNftsFn({
           page: allNftPagination.page,
-          pageLength: allNftPagination.pageLength
+          pageLength: allNftPagination.page
         });
         if (result.data) {
           if (allNftPagination.page === 1) {
@@ -184,7 +214,7 @@ const NFTs = (props) => {
           }
         }
       } catch (error) {
-        console.log('Error fetching Nfts', error);
+        console.log('Error fetching NFTs', error);
       }
     }
     getNfts();
@@ -212,6 +242,7 @@ const NFTs = (props) => {
       expanded={expanded}
       setExpanded={setExpanded}
       queryAddress={props.queryAddress}
+      setAllNFTs={setAllNFTs}
     />
   );
 };
