@@ -182,13 +182,8 @@ const CanvasContainer = (props) => {
     calls
   });
 
+  let canvasClicked = null;
   const pixelClicked = async (e) => {
-    // Color Extra Pixel
-    if (props.selectedColorId === -1) {
-      return;
-    }
-    props.setSelectedColorId(-1);
-
     console.log('props are => ', props);
     if (props.nftMintingMode) {
       return;
@@ -222,6 +217,11 @@ const CanvasContainer = (props) => {
 
     pixelSelect(x, y);
 
+    // Color Extra Pixel
+    if (props.selectedColorId === -1) {
+      return;
+    }
+
     if (props.availablePixels > (props.basePixelUp ? 1 : 0)) {
       if (props.availablePixelsUsed < props.availablePixels) {
         props.addExtraPixel(x, y);
@@ -247,20 +247,24 @@ const CanvasContainer = (props) => {
       return;
     }
 
-    const response = await fetchWrapper(`place-pixel-devnet`, {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({
-        position: position.toString(),
-        color: colorId.toString(),
-        timestamp: timestamp.toString()
-      })
-    });
-    if (response.result) {
-      console.log(response.result);
+    if (!canvasClicked && props.selectedColorId !== -1) {
+      canvasClicked = await fetchWrapper(`place-pixel-devnet`, {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          position: position.toString(),
+          color: colorId.toString(),
+          timestamp: timestamp.toString()
+        })
+      });
+      if (canvasClicked.result) {
+        console.log(canvasClicked.result);
+      }
+      props.clearPixelSelection();
+      props.setSelectedColorId(-1);
+      props.setLastPlacedTime(timestamp * 1000);
+      canvasClicked = null;
     }
-    props.clearPixelSelection();
-    props.setLastPlacedTime(timestamp * 1000);
     // TODO: Fix last placed time if error in placing pixel
   };
   // TODO: Erasing extra pixels
