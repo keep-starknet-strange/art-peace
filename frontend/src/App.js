@@ -14,7 +14,6 @@ import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
-import 'react-toastify/dist/ReactToastify.css';
 import NotificationPanel from './tabs/NotificationPanel.js';
 
 function App() {
