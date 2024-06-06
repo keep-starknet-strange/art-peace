@@ -237,7 +237,6 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), query, factionID, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve faction members")
-		fmt.Println(err)
 		return
 	}
 	defer rows.Close()
