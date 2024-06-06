@@ -184,9 +184,8 @@ const CanvasContainer = (props) => {
     calls
   });
 
-  let canvasClicked = null;
+  let canvasClicked = 0;
   const pixelClicked = async (e) => {
-    console.log('props are => ', props);
     if (props.nftMintingMode) {
       return;
     }
@@ -244,8 +243,10 @@ const CanvasContainer = (props) => {
       return;
     }
 
-    if (!canvasClicked && props.selectedColorId !== -1) {
-      canvasClicked = await fetchWrapper(`place-pixel-devnet`, {
+    if (canvasClicked === 0 && props.selectedColorId !== -1) {
+      canvasClicked = 1;
+      props.setSelectedColorId(-1);
+      const response = await fetchWrapper(`place-pixel-devnet`, {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
@@ -254,13 +255,12 @@ const CanvasContainer = (props) => {
           timestamp: timestamp.toString()
         })
       });
-      if (canvasClicked.result) {
-        console.log(canvasClicked.result);
+      if (response.result) {
+        console.log(response.result);
       }
       props.clearPixelSelection();
-      props.setSelectedColorId(-1);
       props.setLastPlacedTime(timestamp * 1000);
-      canvasClicked = null;
+      canvasClicked = 0;
     }
     // TODO: Fix last placed time if error in placing pixel
   };
