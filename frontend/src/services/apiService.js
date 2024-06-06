@@ -75,6 +75,6 @@ export const getFactions = async (query) => {
 //Top NFTs
 export const getTopNftsFn = async (params) => {
   const { page, pageLength, address} = params;
-  const url = `${backendUrl}/get-top-nfts?page=${page}&pageLength=${pageLength}`;
+  const url = `${backendUrl}/get-top-nfts?address=${address}&page=${page}&pageLength=${pageLength}`;
   return await fetchWrapper(url, { mode: 'cors' });
 };
