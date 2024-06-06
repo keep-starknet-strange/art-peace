@@ -10,7 +10,6 @@ type PixelQuestInputs struct {
 
 type VoteQuestInputs struct {
 	DayIndex uint32
-	Color    uint8
 }
 
 func NewPixelQuestInputs(encodedInputs []int) *PixelQuestInputs {
@@ -26,6 +25,5 @@ func NewPixelQuestInputs(encodedInputs []int) *PixelQuestInputs {
 func NewVoteQuestInputs(encodedInputs []int) *VoteQuestInputs {
 	return &VoteQuestInputs{
 		DayIndex: uint32(encodedInputs[0]),
-		Color:    uint8(encodedInputs[1]),
 	}
 }

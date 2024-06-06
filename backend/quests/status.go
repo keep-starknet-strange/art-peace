@@ -74,12 +74,12 @@ func CheckPixelStatus(q *Quest, user string) (progress int, needed int) {
 func CheckVoteStatus(q *Quest, user string) (progress int, needed int) {
 	voteQuestInputs := NewVoteQuestInputs(q.InputData)
 
-	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM ColorVotes WHERE user_address = $1 AND day_index = $2 AND color_key = $3", user, voteQuestInputs.DayIndex, voteQuestInputs.Color)
+	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM ColorVotes WHERE user_address = $1 AND day_index = $2", user, voteQuestInputs.DayIndex)
 	if err != nil {
 		return 0, 1
-	} else {
-		return *count, 1
 	}
+
+	return *count, 1
 }
 
 func CheckRainbowStatus(q *Quest, user string) (progress int, needed int) {
