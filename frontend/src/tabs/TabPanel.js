@@ -118,7 +118,13 @@ const TabPanel = (props) => {
               <div>
                 <Factions
                   setActiveTab={props.setActiveTab}
+                  chainFaction={props.chainFaction}
+                  setChainFaction={props.setChainFaction}
                   userFactions={props.userFactions}
+                  factionPixels={props.factionPixels}
+                  factionPixelsData={props.factionPixelsData}
+                  setTemplateOverlayMode={props.setTemplateOverlayMode}
+                  setOverlayTemplate={props.setOverlayTemplate}
                 />
               </div>
             )}

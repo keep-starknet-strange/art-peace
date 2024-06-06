@@ -2,139 +2,160 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
-}
-
-.FactionItem__heading {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.3);
-}
-
-.FactionItem__icon {
-  margin-right: 2rem;
+  height: fill;
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.9)
+  );
+  border-radius: 1rem;
+  box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  padding: 0;
 }
 
 .FactionItem__close {
   position: absolute;
-  top: 0rem;
-  right: 0rem;
+  top: 0.5rem;
+  right: 0.5rem;
 }
 
-.FactionItem__subheading {
+.FactionItem__heading__inner {
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
   display: flex;
   flex-direction: row;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  height: 12rem;
+}
 
-  padding: 0.5rem 0;
+.FactionItem__heading {
+  background: url('../../resources/assets/pixel-gradient-diagonal.png');
+  /* stretch the background */
+  image-rendering: pixelated;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: 100% 0;
   border-bottom: 2px solid rgba(0, 0, 0, 0.3);
 }
 
-.FactionItem__links {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-left: 0.5rem;
-}
-
-.FactionItem__link {
-  margin-right: 1rem;
-  cursor: pointer;
-  pointer-events: fill;
-}
-
-.FactionItem__link:hover {
-  transform: scale(1.05) translateY(-0.1rem);
-}
-
-.FactionItem__link:active {
-  transform: scale(1) translateY(0);
-}
-
-.FactionItem__tabs {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.FactionItem__content {
-  flex-grow: 1;
-}
-
-.FactionItem__chat {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-.FactionItem__messages {
-  position: absolute;
-  bottom: 3.5rem;
-  left: 0;
-  overflow-y: scroll;
-  width: 100%;
-  height: calc(100% - 3.5rem); /* Subtract bottom offset */
-}
-
-.FactionItem__messager {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3.5rem;
-  padding-top: 0.5rem;
-  width: 100%;
-
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-
-  border-top: 2px solid rgba(0, 0, 0, 0.3);
-}
-
-.FactionItem__message {
-  display: flex;
-  flex-direction: column;
-
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 0, 0, 0.3);
-}
-
-.FactionItem__message__sender {
-  margin: 0 0 0.25rem 0;
-  padding: 0 0 3px 0;
-
-  max-width: 10rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.FactionItem__icon {
+  width: 7.5rem;
+  height: 7.5rem;
+  margin-right: 0.5rem;
+  /* Stretch the icon to fill the container */
+  object-fit: cover;
   white-space: nowrap;
-
-  font-weight: bold;
-  text-decoration: underline;
+  image-rendering: pixelated;
+  /* TODO: Box shadow */
 }
 
-.FactionItem__message__text {
-  margin: 0;
+.FactionItem__header__info {
+  padding: 0.5rem;
+  margin-right: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.FactionItem__header__info__links {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   padding: 0;
 }
 
-.FactionItem__chat__input {
-  margin: 0 0.5rem;
-  height: 2.4rem;
-  width: 100%;
-  flex: 1;
+.FactionItem__link__icon {
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
-.FactionItem__chat__button {
-  margin-right: 0.5rem;
+.FactionItem__link {
+  margin: 0.25rem 0 0.25rem 0.5rem;
+  pointer-events: fill;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
+  border-radius: 100%;
+}
+
+.FactionItem__link:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.6);
+}
+
+.FactionItem__link:active {
+  transform: scale(1);
+  box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.4);
+}
+
+.FactionItem__name {
+  padding: 0.5rem 0;
+  margin: 0;
+  text-align: right;
+}
+
+.FactionItem__description {
+  padding: 0;
+  margin: 0;
+}
+
+.FactionItem__info {
+  width: 100%;
+  overflow-y: scroll;
+  padding: 0.5rem;
+}
+
+.FactionItem__header__template__button {
+  margin: 0;
+  padding: 2px;
+  border-radius: 2rem;
+}
+
+.FactionItem__header__button--selected {
+  background-color: rgba(30, 30, 70, 0.15);
+  transform: scale(1.02);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(30, 30, 70, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 0.7rem rgba(30, 30, 70, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 30, 70, 0);
+  }
+}
+
+.FactionItem__info__header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.FactionItem__info__members {
+
+}
+
+.FactionItem__info__text {
+  padding: 0;
+  margin: 0;
+}
+
+.FactionItem__info__member {
+  width: 100%;
+  padding: 0.5rem 1rem 0.5rem 0.5rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.3);
 }

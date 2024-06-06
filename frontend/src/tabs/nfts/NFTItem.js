@@ -6,6 +6,7 @@ import canvasConfig from '../../configs/canvas.config.json';
 import ShareIcon from '../../resources/icons/Share.png';
 import LikeIcon from '../../resources/icons/Like.png';
 import LikedIcon from '../../resources/icons/Liked.png';
+import Info from '../../resources/icons/Info.png';
 
 const NFTItem = (props) => {
   const [likes, setLikes] = useState(props.likes);
@@ -54,6 +55,12 @@ const NFTItem = (props) => {
   const posy = Math.floor(props.position / canvasConfig.canvas.width);
 
   const [minterText, setMinterText] = React.useState('');
+
+  function handleShare() {
+    const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent('Just minted my #ArtPeace')}&url=${encodeURIComponent(props.image)}`;
+    window.open(twitterShareUrl, '_blank');
+  }
+
   // TODO: Load name from initial query instead of fetching it again
   useEffect(() => {
     async function fetchUsernameUrl() {
@@ -94,7 +101,7 @@ const NFTItem = (props) => {
           />
           <div className='NFTItem__overlay'>
             <div className='NFTItem__buttons'>
-              <div className='NFTItem__button'>
+              <div onClick={handleShare} className='NFTItem__button'>
                 <img className='Share__icon' src={ShareIcon} alt='Share' />
               </div>
               <div
@@ -109,15 +116,29 @@ const NFTItem = (props) => {
                 <p className='Like__count'>{likes}</p>
               </div>
               <div
-                className='NFTItem__button'
                 onClick={() => setShowInfo(!showInfo)}
+                className='TemplateItem__button'
               >
-                <p
-                  className='Text__xsmall'
-                  style={{ margin: '0', padding: '0', width: '1rem' }}
-                >
-                  {showInfo ? 'X' : 'i'}
-                </p>
+                {showInfo ? (
+                  <p
+                    className='Text__xsmall'
+                    style={{ margin: '0', padding: '0' }}
+                  >
+                    X
+                  </p>
+                ) : (
+                  <img
+                    src={Info}
+                    alt='Info'
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                      borderRadius: '50%',
+                      padding: '0.2rem',
+                      width: '3rem',
+                      height: '3rem'
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>

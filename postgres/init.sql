@@ -178,25 +178,21 @@ CREATE TABLE Factions (
   -- Postgres auto-incrementing primary key
   key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
-  icon text,
   leader char(64) NOT NULL,
   pixel_pool integer NOT NULL
 );
 CREATE INDEX factions_leader_index ON Factions (leader);
 
 CREATE TABLE FactionLinks (
-  link_type text NOT NULL,
-  link_url text NOT NULL,
-  faction_id integer NOT NULL
+  faction_id integer NOT NULL,
+  icon text NOT NULL,
+  telegram text,
+  twitter text,
+  github text,
+  site text,
+  PRIMARY KEY (faction_id)
 );
 CREATE INDEX factionLinks_faction_id_index ON FactionLinks (faction_id);
-
-CREATE TABLE FactionChats (
-  sender char(64) NOT NULL,
-  faction_id integer NOT NULL,
-  message text NOT NULL,
-  time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
 
 -- TODO: Should allocation be here or somewhere else?
 CREATE TABLE FactionMembersInfo (
