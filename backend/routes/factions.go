@@ -71,8 +71,9 @@ type FactionsConfig struct {
 }
 
 type FactionMemberData struct {
+	Username string `json:"username"`
 	UserAddress string `json:"user_address"`
-	Allocation  int    `json:"allocation"`
+	TotalAllocation  int    `json:"total_allocation"`
 }
 
 func initFactions(w http.ResponseWriter, r *http.Request) {
@@ -231,11 +232,14 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * pageLength
 
 	query := `
-		SELECT user_address, allocation
-		FROM FactionMembersInfo
-		WHERE faction_id = $1
-		ORDER BY allocation DESC
-		LIMIT $2 OFFSET $3
+	SELECT 
+    FMI.user_address AS user_address, U.name AS username, SUM(FMI.allocation) AS total_allocation
+	FROM FactionMembersInfo FMI
+	JOIN Users U ON FMI.user_address = U.address
+	WHERE FMI.faction_id = $1
+	GROUP BY FMI.user_address, U.name
+	ORDER BY total_allocation DESC
+	LIMIT $2 OFFSET $3;
 	`
 
 	members, err := core.PostgresQueryJson[FactionMemberData](query, factionID, pageLength, offset)
