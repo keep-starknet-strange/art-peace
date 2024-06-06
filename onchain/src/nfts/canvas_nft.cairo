@@ -1,6 +1,7 @@
 #[starknet::contract]
 mod CanvasNFT {
-    use openzeppelin::token::erc721::ERC721Component;
+    use art_peace::nfts::interfaces::ICanvasNFTStore;
+use openzeppelin::token::erc721::ERC721Component;
     use openzeppelin::token::erc721::interface::IERC721Metadata;
     use openzeppelin::introspection::src5::SRC5Component;
     use starknet::ContractAddress;
@@ -118,6 +119,11 @@ mod CanvasNFT {
     #[abi(embed_v0)]
     impl CanvasNFTLikeAndUnlike of ICanvasNFTLikeAndUnlike<ContractState> {
         fn like_nft(ref self: ContractState, token_id: u256) {
+            assert(
+                token_id < self.get_nfts_count(),
+                'NFT Does not Exist in the Store'
+            );
+
             self
                 .emit(
                     NFTLiked { user_address: starknet::get_caller_address(), token_id: token_id }
@@ -125,6 +131,10 @@ mod CanvasNFT {
         }
 
         fn unlike_nft(ref self: ContractState, token_id: u256) {
+            assert(
+                token_id < self.get_nfts_count(),
+                'NFT Does not Exist in the Store'
+            );
             self
                 .emit(
                     NFTUnliked { user_address: starknet::get_caller_address(), token_id: token_id }
