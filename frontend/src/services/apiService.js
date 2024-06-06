@@ -3,12 +3,12 @@ import { backendUrl } from '../utils/Consts.js';
 export const fetchWrapper = async (url, options = {}) => {
   const controller = new AbortController();
   const signal = controller.signal;
-  try {
-    const response = await fetch(url, {
-      mode: 'cors',
-      signal,
-      ...options
-    });
+    try {
+      const response = await fetch(`${backendUrl}/${url}`, {
+        mode: 'cors',
+        signal,
+        ...options
+      });
     if (!response.ok) {
       throw new Error(`Failed to fetch ${url}`);
     }
