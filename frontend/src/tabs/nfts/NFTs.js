@@ -57,6 +57,13 @@ const NFTsExpandedSection = (props) => {
   const filters = ['hot', 'new', 'top'];
   const [activeFilter, setActiveFilter] = useState(filters[0]);
 
+  const resetPagination = () => {
+    props.setAllNftPagination((prev) => ({
+      ...prev,
+      page: 1
+    }));
+  };
+
   useEffect(() => {
     async function fetchNfts() {
       try {
@@ -77,7 +84,10 @@ const NFTsExpandedSection = (props) => {
           if (props.allNftPagination.page === 1) {
             props.setAllNFTs(result.data);
           } else {
-            props.setAllNFTs([...props.allNfts, ...result.data]);
+            const newNfts = result.data.filter(
+              (nft) => !props.allNfts.some((existingNft) => existingNft.tokenId === nft.tokenId)
+            );
+            props.setAllNFTs([...props.allNfts, ...newNfts]);
           }
         }
       } catch (error) {
@@ -86,6 +96,10 @@ const NFTsExpandedSection = (props) => {
     }
     fetchNfts();
   }, [activeFilter, props.allNftPagination.page, props.allNftPagination.pageLength]);
+
+  useEffect(() => {
+    resetPagination();
+  }, [activeFilter]);
 
   return (
     <div className='NFTs__all'>
@@ -204,13 +218,16 @@ const NFTs = (props) => {
       try {
         const result = await getNftsFn({
           page: allNftPagination.page,
-          pageLength: allNftPagination.page
+          pageLength: allNftPagination.pageLength
         });
         if (result.data) {
           if (allNftPagination.page === 1) {
             setAllNFTs(result.data);
           } else {
-            setAllNFTs([...allNFTs, ...result.data]);
+            const newNfts = result.data.filter(
+              (nft) => !allNFTs.some((existingNft) => existingNft.tokenId === nft.tokenId)
+            );
+            setAllNFTs([...allNFTs, ...newNfts]);
           }
         }
       } catch (error) {
