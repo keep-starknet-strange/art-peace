@@ -185,3 +185,14 @@
   margin: 0;
   padding: 0.7rem 1rem;
 }
+
+.Account__disconnect__button__separator {
+  margin: 0.5rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+.Account__disconnect__button {
+  margin: auto;
+  padding: 0.7rem 1rem;
+  width: 50%;
+}
