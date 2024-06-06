@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"encoding/json"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
@@ -69,6 +68,11 @@ type FactionsConfigItem struct {
 
 type FactionsConfig struct {
 	Factions []FactionsConfigItem `json:"factions"`
+}
+
+type FactionMemberData struct {
+	UserAddress string `json:"user_address"`
+	Allocation  int    `json:"allocation"`
 }
 
 func initFactions(w http.ResponseWriter, r *http.Request) {
@@ -234,38 +238,13 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 		LIMIT $2 OFFSET $3
 	`
 
-	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), query, factionID, pageLength, offset)
+	members, err := core.PostgresQueryJson[FactionMemberData](query, factionID, pageLength, offset)
+
 	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve faction members")
-		return
-	}
-	defer rows.Close()
-
-	type FactionMember struct {
-		UserAddress string `json:"userAddress"`
-		Allocation  int    `json:"allocation"`
-	}
-
-	var members []FactionMember
-	for rows.Next() {
-		var member FactionMember
-		if err := rows.Scan(&member.UserAddress, &member.Allocation); err != nil {
-			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to scan faction member")
-			return
-		}
-		members = append(members, member)
-	}
-
-	if err := rows.Err(); err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error during rows iteration")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve factions")
+		fmt.Println(err)
 		return
 	}
 
-	membersJson, err := json.Marshal(members)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to serialize members")
-		return
-	}
-
-	routeutils.WriteDataJson(w, string(membersJson))
+	routeutils.WriteDataJson(w, string(members))
 }
