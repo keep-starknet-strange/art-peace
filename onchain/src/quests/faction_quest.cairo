@@ -42,13 +42,13 @@ pub mod FactionQuest {
                 contract_address: self.art_peace.read()
             };
 
-            let has_joined_faction = art_peace_dispatcher.get_has_joined_faction(user);
+            let user_factions_count = art_peace_dispatcher.get_user_factions_count(user);
 
-            if (has_joined_faction > 0) {
-                return true;
+            if (user_factions_count == 0) {
+                return false;
             }
 
-            return false;
+            return true;
         }
 
 

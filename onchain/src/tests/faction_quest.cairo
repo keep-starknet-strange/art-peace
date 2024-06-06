@@ -52,11 +52,7 @@ fn faction_quest_test() {
 
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
 
-    let test_address = starknet::contract_address_const::<
-        0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
-    >();
-
-    art_peace.init_faction('TestFaction', test_address, 20, array![utils::PLAYER1()].span());
+    art_peace.init_faction('TestFaction', utils::HOST(), 20, array![utils::PLAYER1()].span());
 
     art_peace.claim_main_quest(0, utils::EMPTY_CALLDATA());
 
