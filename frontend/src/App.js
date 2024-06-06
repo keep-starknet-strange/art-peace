@@ -117,7 +117,7 @@ function App() {
 
   useEffect(() => {
     const fetchColors = async () => {
-      setNotificationMessage('This is ');
+      setNotificationMessage('This is Working');
       try {
         let getColorsEndpoint = backendUrl + '/get-colors';
         let response = await fetch(getColorsEndpoint);
@@ -569,7 +569,6 @@ function App() {
           setActiveTab={setActiveTab}
           getDeviceTypeInfo={getDeviceTypeInfo}
         />
-        {/* <ToastContainer hideProgressBar={true} /> */}
       </div>
     </div>
   );

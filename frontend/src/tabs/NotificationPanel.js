@@ -27,7 +27,7 @@ const NotificationPanel = ({ message, onClose, animationDuration = 3000 }) => {
             if (onClose) onClose();
           }}
         >
-          Close
+          X
         </button>
       </div>
     </div>
