@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"encoding/json"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
@@ -17,6 +18,7 @@ func InitFactionRoutes() {
 	http.HandleFunc("/upload-faction-icon", uploadFactionIcon)
 	http.HandleFunc("/get-my-factions", getMyFactions)
 	http.HandleFunc("/get-factions", getFactions)
+	http.HandleFunc("/get-faction-members", getFactionMembers)
 	// Create a static file server for the nft images
 	http.Handle("/faction-images/", http.StripPrefix("/faction-images/", http.FileServer(http.Dir("./factions"))))
 }
@@ -201,4 +203,70 @@ func getFactions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	routeutils.WriteDataJson(w, string(factions))
+}
+
+func getFactionMembers(w http.ResponseWriter, r *http.Request) {
+	factionID, err := strconv.Atoi(r.URL.Query().Get("factionID"))
+	if err != nil || factionID < 0 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
+
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 10
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	query := `
+		SELECT user_address, allocation
+		FROM FactionMembersInfo
+		WHERE faction_id = $1
+		ORDER BY allocation DESC
+		LIMIT $2 OFFSET $3
+	`
+
+	rows, err := core.ArtPeaceBackend.Databases.Postgres.Query(context.Background(), query, factionID, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve faction members")
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+
+	type FactionMember struct {
+		UserAddress string `json:"userAddress"`
+		Allocation  int    `json:"allocation"`
+	}
+
+	var members []FactionMember
+	for rows.Next() {
+		var member FactionMember
+		if err := rows.Scan(&member.UserAddress, &member.Allocation); err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to scan faction member")
+			return
+		}
+		members = append(members, member)
+	}
+
+	if err := rows.Err(); err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error during rows iteration")
+		return
+	}
+
+	membersJson, err := json.Marshal(members)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to serialize members")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(membersJson))
 }
