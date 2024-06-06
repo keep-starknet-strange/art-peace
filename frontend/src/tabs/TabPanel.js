@@ -86,6 +86,7 @@ const TabPanel = (props) => {
           nftPosition={props.nftPosition}
           nftWidth={props.nftWidth}
           nftHeight={props.nftHeight}
+          setNotificationMessage={props.setNotificationMessage}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>

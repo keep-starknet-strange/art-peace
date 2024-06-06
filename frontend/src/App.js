@@ -113,9 +113,11 @@ function App() {
   const staticColors = canvasConfig.colors;
   const [colors, setColors] = useState([]);
 
+  const [notificationMessage, setNotificationMessage] = useState('');
+
   useEffect(() => {
     const fetchColors = async () => {
-      setNotificationMessage('This is working!');
+      setNotificationMessage('This is ');
       try {
         let getColorsEndpoint = backendUrl + '/get-colors';
         let response = await fetch(getColorsEndpoint);
@@ -136,17 +138,6 @@ function App() {
 
     fetchColors();
   }, []);
-
-  const [notificationMessage, setNotificationMessage] = useState('');
-  {
-    notificationMessage && (
-      <NotificationPanel
-        message={notificationMessage}
-        // onClose={handleClose}
-        animationDuration={3000}
-      />
-    );
-  }
 
   // Canvas
   const width = canvasConfig.canvas.width;
@@ -436,6 +427,11 @@ function App() {
 
   return (
     <div className='App'>
+      {/* Notification Panel */}
+      <NotificationPanel
+        message={notificationMessage}
+        animationDuration={5000}
+      />
       <CanvasContainer
         address={address}
         artPeaceContract={artPeaceContract}
@@ -545,6 +541,7 @@ function App() {
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
           setLatestMintedTokenId={setLatestMintedTokenId}
+          setNotificationMessage={setNotificationMessage}
         />
       </div>
       <div className='App__footer'>
