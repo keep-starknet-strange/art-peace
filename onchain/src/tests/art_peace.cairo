@@ -14,10 +14,13 @@ use core::poseidon::PoseidonTrait;
 use core::hash::{HashStateTrait, HashStateExTrait};
 
 use openzeppelin::token::erc20::interface::{IERC20, IERC20Dispatcher, IERC20DispatcherTrait};
-use openzeppelin::token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
+use openzeppelin::token::erc721::interface::{
+    IERC721Dispatcher, IERC721DispatcherTrait, IERC721MetadataDispatcher,
+    IERC721MetadataDispatcherTrait
+};
 
 use snforge_std as snf;
-use snforge_std::{CheatTarget, ContractClassTrait};
+use snforge_std::{CheatTarget, ContractClassTrait, start_prank, stop_prank};
 
 use starknet::{ContractAddress, contract_address_const, get_contract_address, get_caller_address};
 
@@ -377,6 +380,10 @@ fn nft_mint_test() {
     assert!(nft.owner_of(0) == utils::PLAYER2(), "NFT owner is not correct after transfer");
     assert!(nft.balance_of(utils::PLAYER1()) == 0, "NFT balance is not correct after transfer");
     assert!(nft.balance_of(utils::PLAYER2()) == 1, "NFT balance is not correct after transfer");
+
+    let nft_meta = IERC721MetadataDispatcher { contract_address: nft.contract_address };
+    let expected_uri = "https://api.art-peace.net/nft-meta/nft-0.json";
+    assert!(nft_meta.token_uri(0) == expected_uri, "NFT URI is not correct");
 }
 
 #[test]
@@ -415,5 +422,80 @@ fn deposit_reward_test() {
     assert!(
         art_peace_token_balance == reward_amount, "reward wrongly distributed when adding template"
     );
+}
+
+#[test]
+fn distribute_rewards_test() {
+    let art_peace_address = deploy_contract();
+    let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
+    let template_verifier = ITemplateVerifierDispatcher {
+        contract_address: art_peace.contract_address
+    };
+    let template_store = ITemplateStoreDispatcher { contract_address: art_peace.contract_address };
+
+    let erc20_mock: ContractAddress = deploy_erc20_mock();
+    let reward_amount: u256 = 4;
+
+    let template_image = array![1, 2, 3, 4];
+    let template_hash = template_verifier.compute_template_hash(template_image.span());
+    let template_metadata = TemplateMetadata {
+        name: 'test',
+        hash: template_hash,
+        position: 0,
+        width: 2,
+        height: 2,
+        reward: reward_amount,
+        reward_token: erc20_mock,
+        creator: get_caller_address(),
+    };
+
+    let template_image_span = template_image.span();
+    let now = 10;
+    let template_id = 0;
+
+    let user = 123.try_into().unwrap();
+    let user2 = 1234.try_into().unwrap();
+    let user3 = 12345.try_into().unwrap();
+    let user4 = 123456.try_into().unwrap();
+
+    IERC20Dispatcher { contract_address: erc20_mock }.approve(art_peace_address, reward_amount);
+
+    template_store.add_template(template_metadata);
+    assert!(template_store.get_templates_count() == 1, "Templates count is not 1");
+
+    start_prank(CheatTarget::One(art_peace_address), user);
+    art_peace.place_pixel(0, 1, now);
+    stop_prank(CheatTarget::One(art_peace_address));
+
+    start_prank(CheatTarget::One(art_peace_address), user2);
+    art_peace.place_pixel(1, 2, now);
+    stop_prank(CheatTarget::One(art_peace_address));
+
+    start_prank(CheatTarget::One(art_peace_address), user3);
+    art_peace.place_pixel(WIDTH, 3, now);
+    stop_prank(CheatTarget::One(art_peace_address));
+
+    start_prank(CheatTarget::One(art_peace_address), user4);
+    art_peace.place_pixel(WIDTH + 1, 4, now);
+    stop_prank(CheatTarget::One(art_peace_address));
+
+    template_verifier.complete_template_with_rewards(template_id, template_image_span);
+
+    let art_token_balance_of_contract = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(art_peace_address);
+    let art_token_balance_of_user = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(user);
+    let art_token_balance_of_user2 = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(user2);
+    let art_token_balance_of_user3 = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(user3);
+    let art_token_balance_of_user4 = IERC20Dispatcher { contract_address: erc20_mock }
+        .balance_of(user4);
+
+    assert!(art_token_balance_of_user == 1, "User 1 incorrect reward amount");
+    assert!(art_token_balance_of_user2 == 1, "User 2 incorrect reward amount");
+    assert!(art_token_balance_of_user3 == 1, "User 3 incorrect reward amount");
+    assert!(art_token_balance_of_user4 == 1, "User 4 incorrect reward amount");
+    assert!(art_token_balance_of_contract == 0, "Contract should not have any remaining balance");
 }
 

@@ -1,3 +1,4 @@
+// TODO: Quests history
 import React, { useState, useEffect } from 'react';
 import './Quests.css';
 import BasicTab from '../BasicTab.js';
@@ -141,8 +142,15 @@ const Quests = (props) => {
   return (
     <BasicTab title='Quests' setActiveTab={props.setActiveTab}>
       <div className='Quests'>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <h2 className='Text__large Heading__sub Quests__header'>Dailys</h2>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingRight: '1rem'
+          }}
+        >
+          <h2 className='Text__large Heading__sub Quests__header'>Todays</h2>
           <p className='Text__small Quests__timer'>{props.timeLeftInDay}</p>
         </div>
         {todaysQuests.map((quest, index) => (

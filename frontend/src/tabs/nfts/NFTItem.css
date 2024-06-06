@@ -1,11 +1,15 @@
 .NFTItem {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  display: flex;
+  flex-direction: row;
   padding: 0;
   margin: 0.5rem;
-  border-radius: 0.3rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.4);
   box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
   position: relative;
+  height: 22rem;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .NFTItem__imagecontainer {
@@ -15,8 +19,6 @@
   margin: 0;
   width: 100%;
   height: 20rem;
-  border: 2px solid rgba(0, 0, 150, 0.1);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .NFTItem__image {
@@ -29,57 +31,133 @@
   image-rendering: pixelated;
 }
 
-.NFTItem__like {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  padding: 0 0.5rem;
-  min-width: 3rem;
-  text-align: center;
-  margin: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 0.3rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  font-size: 1rem;
+.NFTItem__buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  padding: 0;
+  margin: 0;
 }
 
-.NFTItem__like:hover {
-  background-color: rgba(255, 255, 255, 0.8);
-  transform: scale(1.1) translateY(-0.2rem);
+.NFTItem__button {
+  position: relative;
+  padding: 0.5rem;
+  text-align: center;
+  margin: 0 0.5rem 0 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.NFTItem__button:hover {
+  transform: scale(1.05) translateY(-0.1rem);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-.NFTItem__like:active {
+.NFTItem__button:active {
   transform: scale(1) translateY(0);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-/* TODO: icon */
-
 .NFTItem__info {
-  font-size: 1rem;
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   padding: 0;
-  margin: 0;
+  margin: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .NFTItem__info__item {
   flex-grow: 1;
   text-align: center;
-  border: 2px solid rgba(0, 0, 150, 0.1);
-  padding: 0.5rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0 0.5rem;
   margin: 0;
   overflow: hidden;
+}
+
+.NFTItem__info__item:first-child {
+  border: none;
 }
 
 /* Style children of .NFTItem__info__item */
 .NFTItem__info__item > * {
   margin: 0;
-  padding: 0.3rem;
+  padding: 0.5rem;
 }
 
 /* Underline the first child of .NFTItem__info__item */
-.NFTItem__info__item > *:first-child {
+.NFTItem__info__item > p:first-child {
   text-decoration: underline;
+}
+
+.Share__icon {
+  padding: 0;
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+}
+
+.Like__icon {
+  padding: 0;
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+}
+
+.Like__count {
+  font-size: 1rem;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  width: 3.5rem;
+}
+
+.Like__button--liked {
+  background-color: rgba(255, 64, 61, 0.05);
+  border: 1px solid rgba(255, 64, 61, 0.5);
+}
+
+.NFTItem__overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 0.5rem 0;
+}
+
+.list-transition-enter,
+.list-transition-appear {
+  transform: translateX(120%);
+}
+
+/* This is where we can add the transition*/
+.list-transition-enter-active,
+.list-transition-appear-active {
+  transform: translateX(0);
+  transition: all 150ms;
+}
+
+/* This fires as soon as the this.state.showList is false */
+.list-transition-exit {
+}
+
+/* fires as element leaves the DOM*/
+.list-transition-exit-active {
+  transform: translateX(120%);
+  transition: all 150ms;
 }

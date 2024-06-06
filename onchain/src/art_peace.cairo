@@ -1,5 +1,6 @@
 #[starknet::contract]
 pub mod ArtPeace {
+    use core::dict::Felt252DictTrait;
     use starknet::ContractAddress;
     use core::poseidon::PoseidonTrait;
     use core::hash::{HashStateTrait, HashStateExTrait};
@@ -11,6 +12,7 @@ pub mod ArtPeace {
     };
     use art_peace::templates::component::TemplateStoreComponent;
     use art_peace::templates::interfaces::{ITemplateVerifier, ITemplateStore, TemplateMetadata};
+    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 
@@ -236,17 +238,6 @@ pub mod ArtPeace {
         >();
         let zero_address = starknet::contract_address_const::<0>();
         self.extra_pixels.write(test_address, 1000);
-        self
-            .init_faction(
-                'RealmsWorld',
-                test_address,
-                10,
-                array![test_address, test_address, zero_address, zero_address, zero_address].span()
-            );
-        self
-            .init_faction(
-                'briq', test_address, 9, array![test_address, zero_address, zero_address].span()
-            );
 
         self.daily_quests_count.write(init_params.daily_quests_count);
     }
@@ -492,6 +483,10 @@ pub mod ArtPeace {
 
         fn get_factions_count(self: @ContractState) -> u32 {
             self.factions_count.read()
+        }
+
+        fn get_user_factions_count(self: @ContractState, user: ContractAddress) -> u32 {
+            self.user_memberships_count.read(user)
         }
 
         fn get_faction(self: @ContractState, faction_id: u32) -> Faction {
@@ -972,10 +967,9 @@ pub mod ArtPeace {
         fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
-
-            let template_hash = self.compute_template_hash(template_image);
-
             let template_metadata: TemplateMetadata = self.get_template(template_id);
+            assert(template_metadata.reward == 0, 'Template has a reward');
+            let template_hash = self.compute_template_hash(template_image);
             assert(template_hash == template_metadata.hash, 'Template hash mismatch');
             let template_size = template_metadata.width * template_metadata.height;
             assert(template_image.len().into() == template_size, 'Template image size mismatch');
@@ -1010,7 +1004,99 @@ pub mod ArtPeace {
             // TODO: Allow some threshold?
             if matches == template_metadata.width * template_metadata.height {
                 self.templates.completed_templates.write(template_id, true);
-            // TODO: Distribute rewards
+            // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
+            }
+        }
+
+        // TODO: Change to have users claim rewards
+        fn complete_template_with_rewards(
+            ref self: ContractState, template_id: u32, template_image: Span<u8>
+        ) {
+            assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
+            assert(!self.is_template_complete(template_id), 'Template already completed');
+            let template_metadata: TemplateMetadata = self.get_template(template_id);
+            assert(template_metadata.reward > 0, 'Template has no reward');
+            let template_hash = self.compute_template_hash(template_image);
+            assert(template_hash == template_metadata.hash, 'Template hash mismatch');
+            let template_size = template_metadata.width * template_metadata.height;
+            assert(template_image.len().into() == template_size, 'Template image size mismatch');
+
+            let contract = starknet::get_contract_address();
+            let mut pixel_contributors: Array<ContractAddress> = ArrayTrait::new();
+            let mut total_pixels_by_user: Felt252Dict<u32> = Default::default();
+            let mut pixel_contributors_indexes: Felt252Dict<u32> = Default::default();
+            let non_zero_width: core::zeroable::NonZero::<u128> = template_metadata
+                .width
+                .try_into()
+                .unwrap();
+            let (template_pos_y, template_pos_x) = DivRem::div_rem(
+                template_metadata.position, non_zero_width
+            );
+            let canvas_width = self.canvas_width.read();
+            let (mut x, mut y) = (0, 0);
+            let mut matches = 0;
+            while y < template_metadata
+                .height {
+                    x = 0;
+                    while x < template_metadata
+                        .width {
+                            let pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
+                            let color = *template_image
+                                .at((x + y * template_metadata.width).try_into().unwrap());
+                            // TODO: Check if the color is transparent
+                            if color == self.canvas.read(pos).color {
+                                matches += 1;
+
+                                let mut pixel_owner = self.canvas.read(pos).owner;
+                                let user_index = pixel_contributors_indexes.get(pixel_owner.into());
+
+                                if user_index == 0 {
+                                    let new_index = pixel_contributors.len() + 1;
+
+                                    pixel_contributors.append(pixel_owner);
+                                    pixel_contributors_indexes
+                                        .insert(pixel_owner.into(), new_index);
+                                    total_pixels_by_user.insert(new_index.into(), 1);
+                                } else {
+                                    let count = total_pixels_by_user.get(user_index.into());
+                                    total_pixels_by_user.insert(user_index.into(), count + 1);
+                                }
+                            }
+                            x += 1;
+                        };
+                    y += 1;
+                };
+
+            // TODO: Allow some threshold?
+            if matches == template_metadata.width * template_metadata.height {
+                self.templates.completed_templates.write(template_id, true);
+                // Distribute rewards
+                let mut i = 0;
+                while i < pixel_contributors
+                    .len() {
+                        let reward_token = template_metadata.reward_token;
+                        let reward_amount = template_metadata.reward;
+                        let total_pixels_in_template = template_metadata.width
+                            * template_metadata.height;
+
+                        let mut user = *pixel_contributors.at(i).into();
+                        let user_index = (i + 1);
+                        let user_total_pixels = total_pixels_by_user.get(user_index.into());
+
+                        // TODO: Handle remainder of funds
+                        let user_reward = (reward_amount * user_total_pixels.into())
+                            / total_pixels_in_template.into();
+
+                        assert(
+                            IERC20Dispatcher { contract_address: reward_token }
+                                .balance_of(contract) >= user_reward,
+                            'insufficient funds'
+                        );
+                        let success = IERC20Dispatcher { contract_address: reward_token }
+                            .transfer(user, user_reward);
+                        assert(success, 'ERC20 transfer fail!');
+                        i += 1;
+                    };
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
         }

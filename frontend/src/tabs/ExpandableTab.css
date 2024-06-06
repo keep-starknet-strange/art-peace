@@ -37,17 +37,25 @@
   width: 100%;
 }
 
+.ExpandableTab__divider {
+  width: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 0.25rem;
+}
+
 .ExpandableTab__expand {
   position: absolute;
   top: 0.7rem;
   left: 0.7rem;
 
-  width: 3rem;
-  height: 3rem;
+  width: 3.5rem;
+  height: 3.5rem;
 
   display: flex;
   justify-content: center;
   align-items: center;
+
+  border-radius: 1rem;
 }
 
 .ExpandableTab__expand p {
@@ -59,4 +67,11 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
+}
+
+.ExpandableTab__hamburger {
+  padding: 0;
+  margin: 0;
+  width: 2.8rem;
+  height: 2.8rem;
 }
