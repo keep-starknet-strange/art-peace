@@ -71,9 +71,6 @@ export const getFactions = async (query) => {
     `get-factions?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
   );
 };
-
-//Top NFTs
-
 /**
  * Fetches top NFTs with pagination.
  *
