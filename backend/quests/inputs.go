@@ -8,6 +8,8 @@ type PixelQuestInputs struct {
 	Color        uint8
 }
 
+
+
 func NewPixelQuestInputs(encodedInputs []int) *PixelQuestInputs {
 	return &PixelQuestInputs{
 		PixelsNeeded: uint32(encodedInputs[0]),
@@ -17,3 +19,7 @@ func NewPixelQuestInputs(encodedInputs []int) *PixelQuestInputs {
 		Color:        uint8(encodedInputs[4]),
 	}
 }
+
+
+
+
