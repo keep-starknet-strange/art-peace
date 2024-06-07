@@ -43,8 +43,8 @@ mod nfts {
     use interfaces::{
         NFTMintParams, NFTMetadata, IArtPeaceNFTMinter, ICanvasNFTStoreDispatcher,
         ICanvasNFTStoreDispatcherTrait, IArtPeaceNFTMinterDispatcher,
-        IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTAdditional, ICanvasNFTAdditionalDispatcher,
-        ICanvasNFTAdditionalDispatcherTrait
+        IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTAdditional, ICanvasNFTLikeAndUnlike,
+        ICanvasNFTAdditionalDispatcher, ICanvasNFTAdditionalDispatcherTrait
     };
 }
 
