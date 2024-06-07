@@ -3,12 +3,12 @@ import { backendUrl } from '../utils/Consts.js';
 export const fetchWrapper = async (url, options = {}) => {
   const controller = new AbortController();
   const signal = controller.signal;
-    try {
-      const response = await fetch(`${backendUrl}/${url}`, {
-        mode: 'cors',
-        signal,
-        ...options
-      });
+  try {
+    const response = await fetch(`${backendUrl}/${url}`, {
+      mode: 'cors',
+      signal,
+      ...options
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch ${url}`);
     }
@@ -22,15 +22,15 @@ export const fetchWrapper = async (url, options = {}) => {
 };
 
 export const getTodaysStartTime = async () => {
-  return await fetchWrapper(`${backendUrl}/get-today-start-time`);
+  return await fetchWrapper('get-today-start-time');
 };
 
 export const getVotableColors = async () => {
-  return await fetchWrapper(`${backendUrl}/votable-colors`);
+  return await fetchWrapper('votable-colors');
 };
 
 export const voteColorDevnet = async (colorIdx) => {
-  return await fetchWrapper(`${backendUrl}/vote-color-devnet`, {
+  return await fetchWrapper('vote-color-devnet', {
     method: 'POST',
     body: JSON.stringify({ colorIndex: colorIdx })
   });
@@ -48,7 +48,7 @@ export const voteColorDevnet = async (colorIdx) => {
  */
 export const getMyNftsFn = async (query) => {
   return await fetchWrapper(
-    `${backendUrl}/get-my-nfts?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
+    `get-my-nfts?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
   );
 };
 
@@ -62,17 +62,27 @@ export const getMyNftsFn = async (query) => {
  */
 export const getNftsFn = async (query) => {
   return await fetchWrapper(
-    `${backendUrl}/get-nfts?pageLength=${query.pageLength}&page=${query.page}`
+    `get-nfts?pageLength=${query.pageLength}&page=${query.page}`
   );
 };
 
 export const getFactions = async (query) => {
   return await fetchWrapper(
-    `${backendUrl}/get-factions?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
+    `get-factions?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
   );
 };
 
 //Top NFTs
+
+/**
+ * Fetches top NFTs with pagination.
+ *
+ * @param {Object} params - The query parameters for fetching top NFTs.
+ * @param {string} params.address - The address to fetch top NFTs for.
+ * @param {number} params.pageLength - The number of top NFTs to fetch per page.
+ * @param {number} params.page - The page number to fetch.
+ * @returns {Promise<Object>} The response from the fetch call.
+ */
 export const getTopNftsFn = async (params) => {
   const { page, pageLength, address} = params;
   const url = `${backendUrl}/get-top-nfts?address=${address}&page=${page}&pageLength=${pageLength}`;
