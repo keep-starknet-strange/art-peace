@@ -233,9 +233,11 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 
 	query := `
 	SELECT 
-    FMI.user_address AS user_address, U.name AS username, SUM(FMI.allocation) AS total_allocation
+    FMI.user_address AS user_address, 
+    COALESCE(U.name, '') AS username, 
+    SUM(FMI.allocation) AS total_allocation
 	FROM FactionMembersInfo FMI
-	JOIN Users U ON FMI.user_address = U.address
+	LEFT JOIN Users U ON FMI.user_address = U.address
 	WHERE FMI.faction_id = $1
 	GROUP BY FMI.user_address, U.name
 	ORDER BY total_allocation DESC
