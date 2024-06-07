@@ -246,7 +246,11 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve factions")
-		fmt.Println(err)
+		return
+	}
+
+	if string(members) == "null" {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Could not get any users for given faction")
 		return
 	}
 
