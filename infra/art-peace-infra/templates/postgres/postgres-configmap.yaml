@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.labels.postgres.name }}-secret
+  labels:
+    app: {{ .Values.labels.postgres.name }}
+data:
+  POSTGRES_DB: {{ .Values.postgres.db }}
+  POSTGRES_USER: {{ .Values.postgres.user }}
+  POSTGRES_PASSWORD: {{ .Values.postgres.password }}
+  PGDATA: /var/lib/postgresql/data/db-files/

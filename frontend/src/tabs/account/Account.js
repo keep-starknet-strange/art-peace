@@ -42,8 +42,7 @@ const Account = (props) => {
   // TODO: Connect wallet page if no connectors
   // TODO: Reconnect on refresh if permitted
   const { connect, connectors } = useConnect();
-  // TODO: Add disconnect button
-  const { _disconnect } = useDisconnect();
+  const { disconnect } = useDisconnect();
 
   const [addressShort, setAddressShort] = useState('');
   useEffect(() => {
@@ -100,6 +99,14 @@ const Account = (props) => {
       return;
     }
     connect({ connector });
+  };
+
+  const disconnectWallet = () => {
+    if (devnetMode) {
+      props.setConnected(false);
+      return;
+    }
+    disconnect();
   };
 
   useEffect(() => {
@@ -409,6 +416,13 @@ const Account = (props) => {
                 />
               </div>
             </div>
+          </div>
+          <div className='Account__disconnect__button__separator'></div>
+          <div
+            className='Text__medium Button__primary Account__disconnect__button'
+            onClick={() => disconnectWallet()}
+          >
+            Logout
           </div>
         </div>
       )}

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.labels.consumer.name }}
+  labels:
+    app: {{ .Values.labels.consumer.name }}
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.ports.consumer }}
+  selector:
+    app: {{ .Values.labels.consumer.name }}

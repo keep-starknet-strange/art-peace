@@ -485,6 +485,10 @@ pub mod ArtPeace {
             self.factions_count.read()
         }
 
+        fn get_user_factions_count(self: @ContractState, user: ContractAddress) -> u32 {
+            self.user_memberships_count.read(user)
+        }
+
         fn get_faction(self: @ContractState, faction_id: u32) -> Faction {
             self.factions.read(faction_id)
         }
