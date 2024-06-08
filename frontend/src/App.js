@@ -352,6 +352,7 @@ function App() {
   );
 
   // Factions
+  const [chainFaction, setChainFaction] = useState(null);
   const [userFactions, setUserFactions] = useState([]);
   useEffect(() => {
     async function fetchUserFactions() {
@@ -365,6 +366,10 @@ function App() {
     }
     fetchUserFactions();
   }, [queryAddress]);
+
+  // Templates
+  const [templateOverlayMode, setTemplateOverlayMode] = useState(false);
+  const [overlayTemplate, setOverlayTemplate] = useState(null);
 
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
@@ -437,6 +442,10 @@ function App() {
         basePixelUp={basePixelUp}
         availablePixelsUsed={availablePixelsUsed}
         addExtraPixel={addExtraPixel}
+        templateOverlayMode={templateOverlayMode}
+        setTemplateOverlayMode={setTemplateOverlayMode}
+        overlayTemplate={overlayTemplate}
+        setOverlayTemplate={setOverlayTemplate}
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
         nftSelectionStarted={nftSelectionStarted}
@@ -472,6 +481,10 @@ function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           getDeviceTypeInfo={getDeviceTypeInfo}
+          templateOverlayMode={templateOverlayMode}
+          setTemplateOverlayMode={setTemplateOverlayMode}
+          overlayTemplate={overlayTemplate}
+          setOverlayTemplate={setOverlayTemplate}
           nftMintingMode={nftMintingMode}
           setNftMintingMode={setNftMintingMode}
           nftSelectionStarted={nftSelectionStarted}
@@ -513,6 +526,8 @@ function App() {
           factionPixelsData={factionPixelsData}
           setFactionPixelsData={setFactionPixelsData}
           factionPixelTimers={factionPixelTimers}
+          chainFaction={chainFaction}
+          setChainFaction={setChainFaction}
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
           setLatestMintedTokenId={setLatestMintedTokenId}

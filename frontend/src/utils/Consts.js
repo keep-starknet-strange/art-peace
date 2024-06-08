@@ -9,3 +9,10 @@ export const wsUrl = backendConfig.production
   : 'ws://' + backendConfig.host + ':' + backendConfig.consumer_port + '/ws';
 
 export const devnetMode = backendConfig.production === false;
+
+export const convertUrl = (url) => {
+  if (!url) {
+    return url;
+  }
+  return url.replace('$BACKEND_URL', backendUrl);
+};

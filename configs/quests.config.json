@@ -1,6 +1,6 @@
 {
   "daily": {
-    "dailyQuestsCount": 1,
+    "dailyQuestsCount": 2,
     "dailyQuests": [
       {
         "day": 1,
@@ -21,6 +21,20 @@
                 "0"
               ],
               "storeParams": [2,3,4,5,6]
+            }
+          },
+          {
+            "name": "Make your vote",
+            "description": "Vote for a new color in the Vote tab",
+            "reward": 3,
+            "questContract": {
+              "type": "VoteQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "$DAY_IDX"
+              ],
+              "storeParams": [2]
             }
           }
         ]

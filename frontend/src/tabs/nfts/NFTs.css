@@ -11,7 +11,8 @@
   display: grid;
   grid-template-columns: minmax(25rem, 1fr);
   grid-template-rows: min-content;
-  margin-top: 0.5rem;
+  margin: 0.5rem;
+  padding: 0.5rem;
   overflow: scroll;
 }
 
@@ -38,7 +39,7 @@
   padding: 1rem;
   font-size: 1.2rem;
   text-align: center;
-  border-radius: 1rem;
+  border-radius: 2rem;
   background-color: rgba(255, 255, 255, 0.8);
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
   border: 0.1rem solid rgba(0, 0, 0, 0.5);
@@ -78,17 +79,19 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  border-left: 4px solid rgba(0, 0, 0, 0.3);
 }
 
-.NFTs__all__grid {
+.NFTs__all__container {
   margin-top: 0.5rem;
   height: 55vh;
   width: 100%;
+  overflow: scroll;
+}
+
+.NFTs__all__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
   grid-template-rows: min-content;
-  overflow: scroll;
 }
 
 .NFTs__all__item {

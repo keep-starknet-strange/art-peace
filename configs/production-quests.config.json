@@ -93,9 +93,10 @@
               "type": "VoteQuest",
               "initParams": [
                 "$ART_PEACE_CONTRACT",
-                "$REWARD"
+                "$REWARD",
+                "$DAY_IDX"
               ],
-              "storeParams": []
+              "storeParams": [2]
             }
           }
         ]

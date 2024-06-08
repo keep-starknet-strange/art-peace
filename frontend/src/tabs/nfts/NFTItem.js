@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import './NFTItem.css';
 import { fetchWrapper } from '../../services/apiService';
@@ -6,13 +6,61 @@ import canvasConfig from '../../configs/canvas.config.json';
 import ShareIcon from '../../resources/icons/Share.png';
 import LikeIcon from '../../resources/icons/Like.png';
 import LikedIcon from '../../resources/icons/Liked.png';
+import Info from '../../resources/icons/Info.png';
 
 const NFTItem = (props) => {
-  // TODO: alt text for image
+  const [likes, setLikes] = useState(props.likes);
+  const [liked, setLiked] = useState(props.liked);
+  useEffect(() => {
+    setLikes(props.likes);
+    setLiked(props.liked);
+  }, [props.likes, props.liked]);
+
+  const handleLike = async () => {
+    async function fetchLikeNFT() {
+      const response = await fetchWrapper('like-nft', {
+        method: 'POST',
+        body: JSON.stringify({
+          nftkey: props.tokenId,
+          useraddress: props.queryAddress
+        })
+      });
+      if (response.result) {
+        // TODO: Update likes on my nfts tab || explore tab if they are the same
+        setLikes(likes + 1);
+        setLiked(true);
+      }
+    }
+    fetchLikeNFT();
+  };
+
+  const handleUnlike = async () => {
+    async function fetchUnlikeNFT() {
+      const response = await fetchWrapper('unlike-nft', {
+        method: 'POST',
+        body: JSON.stringify({
+          nftkey: props.tokenId,
+          useraddress: props.queryAddress
+        })
+      });
+      if (response.result) {
+        setLikes(likes - 1);
+        setLiked(false);
+      }
+    }
+    fetchUnlikeNFT();
+  };
+
   const posx = props.position % canvasConfig.canvas.width;
   const posy = Math.floor(props.position / canvasConfig.canvas.width);
 
   const [minterText, setMinterText] = React.useState('');
+
+  function handleShare() {
+    const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent('Just minted my #ArtPeace')}&url=${encodeURIComponent(props.image)}`;
+    window.open(twitterShareUrl, '_blank');
+  }
+
   // TODO: Load name from initial query instead of fetching it again
   useEffect(() => {
     async function fetchUsernameUrl() {
@@ -53,29 +101,44 @@ const NFTItem = (props) => {
           />
           <div className='NFTItem__overlay'>
             <div className='NFTItem__buttons'>
-              <div className='NFTItem__button'>
+              <div onClick={handleShare} className='NFTItem__button'>
                 <img className='Share__icon' src={ShareIcon} alt='Share' />
               </div>
               <div
-                className={`NFTItem__button ${props.liked ? 'Like__button--liked' : ''}`}
+                className={`NFTItem__button ${liked ? 'Like__button--liked' : ''}`}
+                onClick={liked ? handleUnlike : handleLike}
               >
                 <img
                   className='Like__icon'
-                  src={props.liked ? LikedIcon : LikeIcon}
+                  src={liked ? LikedIcon : LikeIcon}
                   alt='Like'
                 />
-                <p className='Like__count'>{props.likes}</p>
+                <p className='Like__count'>{likes}</p>
               </div>
               <div
-                className='NFTItem__button'
                 onClick={() => setShowInfo(!showInfo)}
+                className='TemplateItem__button'
               >
-                <p
-                  className='Text__xsmall'
-                  style={{ margin: '0', padding: '0', width: '1rem' }}
-                >
-                  {showInfo ? 'X' : 'i'}
-                </p>
+                {showInfo ? (
+                  <p
+                    className='Text__xsmall'
+                    style={{ margin: '0', padding: '0' }}
+                  >
+                    X
+                  </p>
+                ) : (
+                  <img
+                    src={Info}
+                    alt='Info'
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                      borderRadius: '50%',
+                      padding: '0.2rem',
+                      width: '3rem',
+                      height: '3rem'
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -119,5 +182,4 @@ const NFTItem = (props) => {
     </div>
   );
 };
-
 export default NFTItem;
