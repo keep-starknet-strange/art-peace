@@ -20,7 +20,8 @@ const CanvasContainer = (props) => {
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
   const [canvasScale, setCanvasScale] = useState(3.85);
-
+  const [touchInitialDistance, setInitialTouchDistance] = useState(0);
+  const [touchScale, setTouchScale] = useState(0);
   const canvasContainerRef = useRef(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -48,6 +49,7 @@ const CanvasContainer = (props) => {
   };
 
   const handlePointerMove = (e) => {
+    if (props.nftMintingMode) return;
     if (isDragging) {
       setCanvasX(canvasX + e.clientX - dragStartX);
       setCanvasY(canvasY + e.clientY - dragStartY);
@@ -104,12 +106,73 @@ const CanvasContainer = (props) => {
     setCanvasY(newPosY);
   };
 
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const initialDistance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      setTouchScale(canvasScale);
+      setInitialTouchDistance(initialDistance);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2) {
+      const [touch1, touch2] = e.touches;
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      const scale = (distance / touchInitialDistance) * touchScale;
+      const rect = props.canvasRef.current.getBoundingClientRect();
+      const midX = (touch1.clientX + touch2.clientX) / 2;
+      const midY = (touch1.clientY + touch2.clientY) / 2;
+
+      const cursorX = midX - rect.left;
+      const cursorY = midY - rect.top;
+
+      const oldCursorXRelative = cursorX / rect.width;
+      const oldCursorYRelative = cursorY / rect.height;
+
+      const newWidth = width * scale;
+      const newHeight = height * scale;
+      const newCursorX = oldCursorXRelative * newWidth;
+      const newCursorY = oldCursorYRelative * newHeight;
+
+      const newPosX = canvasX - (newCursorX - cursorX);
+      const newPosY = canvasY - (newCursorY - cursorY);
+
+      if (scale < minScale) {
+        setCanvasScale(minScale);
+      } else if (scale > maxScale) {
+        setCanvasScale(maxScale);
+      } else {
+        setCanvasScale(scale);
+      }
+      setCanvasX(newPosX);
+      setCanvasY(newPosY);
+    }
+  };
+
   useEffect(() => {
     canvasContainerRef.current.addEventListener('wheel', zoom);
+    canvasContainerRef.current.addEventListener('touchstart', handleTouchStart);
+    canvasContainerRef.current.addEventListener('touchmove', handleTouchMove);
     return () => {
       canvasContainerRef.current.removeEventListener('wheel', zoom);
+      canvasContainerRef.current.removeEventListener(
+        'touchstart',
+        handleTouchStart
+      );
+      canvasContainerRef.current.removeEventListener(
+        'touchmove',
+        handleTouchMove
+      );
     };
-  }, [canvasScale, canvasX, canvasY]);
+  }, [canvasScale, canvasX, canvasY, touchInitialDistance]);
 
   // Init canvas transform to center of the viewport
   useEffect(() => {

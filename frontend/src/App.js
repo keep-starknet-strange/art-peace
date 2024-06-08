@@ -14,6 +14,7 @@ import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
+import { useLockScroll } from './utils/Window.js';
 
 function App() {
   // Window management
@@ -22,6 +23,8 @@ function App() {
   const isDesktopOrLaptop = useMediaQuery({
     query: '(min-width: 1224px)'
   });
+  // const containerRef = useRef();
+  // usePreventPullToRefresh(containerRef);
   const isBigScreen = useMediaQuery({ query: '(min-width: 1824px)' });
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1224px)' });
   const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });
@@ -419,6 +422,8 @@ function App() {
     availablePixelsUsed,
     basePixelUp
   ]);
+
+  useLockScroll(activeTab);
 
   return (
     <div className='App'>

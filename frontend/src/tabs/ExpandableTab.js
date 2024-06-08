@@ -52,7 +52,11 @@ const ExpandableTab = (props) => {
         {props.title}
       </h1>
       <div className='ExpandableTab__content'>
-        <MainSection {...rest} />
+        <div
+          className={`${props.expanded ? 'NFTs__main_hidden_mobile' : ''} NFTs__main`}
+        >
+          <MainSection {...rest} />
+        </div>
         {props.expanded &&
           (props.canExpand === undefined || props.canExpand) && (
             <div className='ExpandableTab__divider' />
