@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.labels.indexer.name }}
+spec:
+  replicas: {{ .Values.deployments.indexer.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.labels.indexer.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.labels.indexer.name }}
+    spec:
+      nodeSelector:
+        cloud.google.com/compute-class: Scale-Out
+        kubernetes.io/arch: arm64
+      containers:
+        - name: {{ .Values.labels.indexer.name }}
+          image: {{ .Values.deployments.indexer.image }}:{{ .Chart.AppVersion }}-{{ .Values.deployments.sha }}
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.labels.indexer.name }}-secret

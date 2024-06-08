@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.labels.redis.name }}
+spec:
+  replicas: {{ .Values.deployments.redis.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.labels.redis.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.labels.redis.name }}
+    spec:
+      containers:
+        - name: {{ .Values.labels.redis.name }}
+          image: {{ .Values.deployments.redis.image }}:{{ .Values.deployments.redis.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.ports.redis }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.labels.redis.name }}-secret
+          volumeMounts:
+            - mountPath: /data
+              name: {{ .Values.volumes.redis.name }}
+      volumes:
+        - name: {{ .Values.volumes.redis.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.labels.redis.name }}-volume-claim

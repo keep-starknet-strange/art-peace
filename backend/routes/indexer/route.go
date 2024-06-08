@@ -51,6 +51,9 @@ var PendingMessageLock = &sync.Mutex{}
 var LastAcceptedEndKey int
 var AcceptedMessageQueue []IndexerMessage
 var AcceptedMessageLock = &sync.Mutex{}
+var LastFinalizedCursor int
+var FinalizedMessageQueue []IndexerMessage
+var FinalizedMessageLock = &sync.Mutex{}
 
 const (
 	newDayEvent             = "0x00df776faf675d0c64b0f2ec596411cf1509d3966baba3478c84771ddbac1784"
@@ -145,7 +148,9 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 
 	if message.Data.Finality == DATA_STATUS_FINALIZED {
 		// TODO: Track diffs with accepted messages? / check if accepted message processed
-		fmt.Println("Finalized message")
+		FinalizedMessageLock.Lock()
+		FinalizedMessageQueue = append(FinalizedMessageQueue, *message)
+		FinalizedMessageLock.Unlock()
 		return
 	} else if message.Data.Finality == DATA_STATUS_ACCEPTED {
 		AcceptedMessageLock.Lock()
@@ -286,6 +291,24 @@ func ProcessMessage(message IndexerMessage) {
 	}
 }
 
+func TryProcessFinalizedMessages() bool {
+	FinalizedMessageLock.Lock()
+	defer FinalizedMessageLock.Unlock()
+
+	if len(FinalizedMessageQueue) > 0 {
+		message := FinalizedMessageQueue[0]
+		FinalizedMessageQueue = FinalizedMessageQueue[1:]
+		if message.Data.Cursor.OrderKey <= LastFinalizedCursor {
+			// Skip message
+			return true
+		}
+		ProcessMessage(message)
+		LastFinalizedCursor = message.Data.Cursor.OrderKey
+		return true
+	}
+	return false
+}
+
 func TryProcessAcceptedMessages() bool {
 	AcceptedMessageLock.Lock()
 	defer AcceptedMessageLock.Unlock()
@@ -293,7 +316,10 @@ func TryProcessAcceptedMessages() bool {
 	if len(AcceptedMessageQueue) > 0 {
 		message := AcceptedMessageQueue[0]
 		AcceptedMessageQueue = AcceptedMessageQueue[1:]
+		// TODO: Check if message is already processed?
 		ProcessMessage(message)
+		// TODO
+		LastFinalizedCursor = message.Data.Cursor.OrderKey
 		return true
 	}
 	return false
@@ -317,6 +343,11 @@ func StartMessageProcessor() {
 	// Goroutine to process pending/accepted messages
 	go func() {
 		for {
+			// Check Finalized messages ( for initial load )
+			if TryProcessFinalizedMessages() {
+				continue
+			}
+
 			// Prioritize accepted messages
 			if TryProcessAcceptedMessages() {
 				continue

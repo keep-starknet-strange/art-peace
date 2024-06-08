@@ -51,6 +51,7 @@ func main() {
 
 	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig)
 
+	routes.InitBaseRoutes()
 	indexer.InitIndexerRoutes()
 	routes.InitWebsocketRoutes()
 	indexer.StartMessageProcessor()
