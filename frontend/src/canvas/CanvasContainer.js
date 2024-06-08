@@ -67,51 +67,50 @@ const CanvasContainer = (props) => {
 
   // Zoom in/out ( into the cursor position )
   const zoom = (e) => {
-  const rect = props.canvasRef.current.getBoundingClientRect();
-  let cursorX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-  let cursorY = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+    const rect = props.canvasRef.current.getBoundingClientRect();
+    let cursorX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    let cursorY = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
 
-  const calculateNewScale = (deltaY) => {
-    let newScale = canvasScale * (1 + deltaY * -0.01);
-    newScale = Math.max(minScale, Math.min(newScale, maxScale));
-    const newWidth = width * newScale;
-    const newHeight = height * newScale;
-    const oldCursorXRelative = cursorX / rect.width;
-    const oldCursorYRelative = cursorY / rect.height;
-    const newCursorX = oldCursorXRelative * newWidth;
-    const newCursorY = oldCursorYRelative * newHeight;
-    const newPosX = canvasX - (newCursorX - cursorX);
-    const newPosY = canvasY - (newCursorY - cursorY);
-    return { newScale, newPosX, newPosY };
-  };
-
-  const { newScale, newPosX, newPosY } = calculateNewScale(e.deltaY);
-
-  // inTerpolate zoom when using mouse
-  if (Math.abs(e.deltaY) >= 20) {
-    const duration = 300; 
-    const startTime = performance.now();
-
-    const animate = () => {
-      const elapsed = performance.now() - startTime;
-      const t = Math.min(1, elapsed / duration);
-      const currentScale = canvasScale + t * (newScale - canvasScale);
-      const currentPosX = canvasX + t * (newPosX - canvasX);
-      const currentPosY = canvasY + t * (newPosY - canvasY);
-      setCanvasScale(currentScale);
-      setCanvasX(currentPosX);
-      setCanvasY(currentPosY);
-      if (t < 1) requestAnimationFrame(animate);
+    const calculateNewScale = (deltaY) => {
+      let newScale = canvasScale * (1 + deltaY * -0.01);
+      newScale = Math.max(minScale, Math.min(newScale, maxScale));
+      const newWidth = width * newScale;
+      const newHeight = height * newScale;
+      const oldCursorXRelative = cursorX / rect.width;
+      const oldCursorYRelative = cursorY / rect.height;
+      const newCursorX = oldCursorXRelative * newWidth;
+      const newCursorY = oldCursorYRelative * newHeight;
+      const newPosX = canvasX - (newCursorX - cursorX);
+      const newPosY = canvasY - (newCursorY - cursorY);
+      return { newScale, newPosX, newPosY };
     };
 
-    animate();
-  } else {
-    setCanvasScale(newScale);
-    setCanvasX(newPosX);
-    setCanvasY(newPosY);
-  }
-};
+    const { newScale, newPosX, newPosY } = calculateNewScale(e.deltaY);
 
+    // inTerpolate zoom when using mouse
+    if (Math.abs(e.deltaY) >= 20) {
+      const duration = 300;
+      const startTime = performance.now();
+
+      const animate = () => {
+        const elapsed = performance.now() - startTime;
+        const t = Math.min(1, elapsed / duration);
+        const currentScale = canvasScale + t * (newScale - canvasScale);
+        const currentPosX = canvasX + t * (newPosX - canvasX);
+        const currentPosY = canvasY + t * (newPosY - canvasY);
+        setCanvasScale(currentScale);
+        setCanvasX(currentPosX);
+        setCanvasY(currentPosY);
+        if (t < 1) requestAnimationFrame(animate);
+      };
+
+      animate();
+    } else {
+      setCanvasScale(newScale);
+      setCanvasX(newPosX);
+      setCanvasY(newPosY);
+    }
+  };
 
   useEffect(() => {
     canvasContainerRef.current.addEventListener('wheel', zoom);
