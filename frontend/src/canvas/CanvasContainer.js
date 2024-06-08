@@ -3,6 +3,7 @@ import { useContractWrite } from '@starknet-react/core';
 import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
+import TemplateOverlay from './TemplateOverlay.js';
 import NFTSelector from './NFTSelector.js';
 import canvasConfig from '../configs/canvas.config.json';
 import { fetchWrapper } from '../services/apiService.js';
@@ -67,6 +68,7 @@ const CanvasContainer = (props) => {
 
   // Zoom in/out ( into the cursor position )
   const zoom = (e) => {
+    // Get the cursor position within the canvas ( note the canvas can go outside the viewport )
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     let cursorY = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
@@ -469,6 +471,18 @@ const CanvasContainer = (props) => {
             }}
             colors={props.colors}
             pixelClicked={pixelClicked}
+          />
+        )}
+        {props.templateOverlayMode && props.overlayTemplate && (
+          <TemplateOverlay
+            canvasRef={props.canvasRef}
+            width={width}
+            height={height}
+            canvasScale={canvasScale}
+            overlayTemplate={props.overlayTemplate}
+            setTemplateOverlayMode={props.setTemplateOverlayMode}
+            setOverlayTemplate={props.setOverlayTemplate}
+            colors={props.colors}
           />
         )}
         {props.nftMintingMode && (

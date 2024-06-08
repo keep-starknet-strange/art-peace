@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-secret
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: art-peace-db
+  POSTGRES_USER: art-peace-user
+  POSTGRES_PASSWORD: ArtPeacePassword1234
+  PGDATA: /var/lib/postgresql/data/db-files/

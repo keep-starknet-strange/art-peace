@@ -41,3 +41,10 @@ pub trait IArtPeaceNFTMinter<TContractState> {
     // Mints a new NFT from the canvas using init params, and returns the token ID.
     fn mint_nft(ref self: TContractState, mint_params: NFTMintParams);
 }
+
+#[starknet::interface]
+pub trait ICanvasNFTLikeAndUnlike<TContractState> {
+    fn like_nft(ref self: TContractState, token_id: u256);
+    fn unlike_nft(ref self: TContractState, token_id: u256);
+}
+

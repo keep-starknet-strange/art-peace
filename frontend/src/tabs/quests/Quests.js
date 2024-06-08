@@ -1,3 +1,4 @@
+// TODO: Quests history
 import React, { useState, useEffect } from 'react';
 import './Quests.css';
 import BasicTab from '../BasicTab.js';
@@ -24,24 +25,30 @@ const Quests = (props) => {
 
   const localDailyQuests = [
     {
-      title: 'Place 10 pixels',
+      name: 'Place 10 pixels',
       description:
         'Add 10 pixels on the canvas [art/peace theme](https://www.google.com/)',
       reward: '3',
-      status: 'completed'
+      completed: false,
+      progress: 0,
+      needed: 10
     },
     {
       name: 'Build a template',
       description: 'Create a template for the community to use',
       reward: '3',
-      status: 'claim'
+      completed: false,
+      progress: 1,
+      needed: 20
     },
     {
       name: 'Deploy a Memecoin',
       description: 'Create an Unruggable memecoin',
       reward: '10',
-      status: 'incomplete',
-      args: createArgs(['MemeCoin Address'], ['0x1234'], ['address'])
+      completed: false,
+      args: createArgs(['MemeCoin Address'], ['0x1234'], ['address']),
+      progress: 1,
+      needed: 1
     }
   ];
 
@@ -50,24 +57,30 @@ const Quests = (props) => {
       name: 'Tweet #art/peace',
       description: 'Tweet about art/peace using the hashtag & addr',
       reward: '10',
-      status: 'incomplete',
+      completed: true,
       args: createArgs(
         ['Twitter Handle', 'Address', 'test'],
         ['@test', '0x1234', 'asdioj'],
         ['twitter', 'address', 'text']
-      )
+      ),
+      progress: 13,
+      needed: 13
     },
     {
       name: 'Place 100 pixels',
       description: 'Add 100 pixels on the canvas',
       reward: '10',
-      status: 'completed'
+      completed: false,
+      progress: 98,
+      needed: 100
     },
     {
       name: 'Mint art/peace NFT',
       description: 'Mint an NFT using the art/peace theme',
       reward: '5',
-      status: 'incomplete'
+      completed: false,
+      progress: 14,
+      needed: 13
     }
   ];
 
@@ -129,8 +142,15 @@ const Quests = (props) => {
   return (
     <BasicTab title='Quests' setActiveTab={props.setActiveTab}>
       <div className='Quests'>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <h2 className='Text__large Heading__sub Quests__header'>Dailys</h2>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingRight: '1rem'
+          }}
+        >
+          <h2 className='Text__large Heading__sub Quests__header'>Todays</h2>
           <p className='Text__small Quests__timer'>{props.timeLeftInDay}</p>
         </div>
         {todaysQuests.map((quest, index) => (
@@ -145,6 +165,8 @@ const Quests = (props) => {
             markCompleted={markCompleted}
             address={props.address}
             artPeaceContract={props.artPeaceContract}
+            progress={quest.progress}
+            needed={quest.needed}
           />
         ))}
 
@@ -161,6 +183,8 @@ const Quests = (props) => {
             markCompleted={markCompleted}
             address={props.address}
             artPeaceContract={props.artPeaceContract}
+            progress={quest.progress}
+            needed={quest.needed}
           />
         ))}
       </div>

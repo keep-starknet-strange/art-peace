@@ -14,37 +14,148 @@
   );
   border-radius: 0.3rem;
   box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
-  border: 0.2rem solid rgba(0, 0, 0, 0.4);
-
-  pointer-events: fill;
+  outline: 0.2rem solid rgba(0, 0, 0, 0.4);
 }
 
-.FactionSelector:hover {
-  background-image: linear-gradient(
-    to bottom right,
-    rgba(255, 255, 255, 0.8),
-    rgba(255, 255, 255, 0.95)
-  );
+.FactionSelector__container:hover {
   box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.6);
   transform: translateY(-0.2rem);
 }
 
-.FactionSelector:active {
-  background-image: linear-gradient(
-    to bottom right,
-    rgba(255, 255, 255, 0.6),
-    rgba(255, 255, 255, 0.8)
-  );
+.FactionSelector__container:active {
   box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.4);
   transform: translateY(0.1rem);
 }
 
+.FactionSelector__container {
+  margin: 0 0.5rem 1rem 0.5rem;
+  border-radius: 1rem;
+  /* background-color: rgba(255, 255, 255, 0.8); */
+  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  outline: 2px solid rgba(0, 0, 0, 0.3);
+  flex-grow: 1;
+  transition: all 0.3s;
+  cursor: pointer;
+  pointer-events: fill;
+  overflow: hidden;
+}
+
+.FactionSelector__inner {
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 12rem;
+}
+
+.FactionSelector__main {
+  background: url('../../resources/assets/pixel-gradient-diagonal.png');
+  /* stretch the background */
+  image-rendering: pixelated;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: 100% 0;
+}
+
 .FactionSelector__icon {
-  margin: 0.5rem;
-  width: 5rem;
-  height: 5rem;
+  width: 6rem;
+  height: 6rem;
+  margin-right: 0.5rem;
+  /* Stretch the icon to fill the container */
+  object-fit: cover;
+  white-space: nowrap;
+  image-rendering: pixelated;
+}
+
+.FactionSelector__info {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.FactionSelector__info__expanded {
+  border-top: 2px solid rgba(0, 0, 0, 0.3);
+  padding: 0 0.5rem 0 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.FactionSelector__info__links {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0.5rem 0 0 0;
+}
+
+.FactionSelector__link__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.FactionSelector__link {
+  margin: 0.5rem 0 0.5rem 0.5rem;
+  pointer-events: fill;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
+  border-radius: 100%;
+}
+
+.FactionSelector__link:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.6);
+}
+
+.FactionSelector__link:active {
+  transform: scale(1);
+  box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.4);
+}
+
+.FactionSelector__info__button {
+  width: 3rem;
+  height: 3rem;
+
+  margin: 0.5rem 0.7rem;
+  pointer-events: fill;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
+  border-radius: 100%;
+  outline: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.FactionSelector__info__button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.6);
+}
+
+.FactionSelector__info__button:active {
+  transform: scale(1);
+  box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.4);
+}
+
+.FactionSelector__info__button__icon {
+  width: 4rem;
+  height: 4rem;
+  margin: -.5rem;
 }
 
 .FactionSelector__name {
-  padding: 0 1rem;
+  padding: 0.5rem 0;
+  margin: 0;
+  text-align: right;
+}
+
+.FactionSelector__description {
+  padding: 0;
+  margin: 0;
 }

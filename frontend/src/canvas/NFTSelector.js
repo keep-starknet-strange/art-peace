@@ -13,6 +13,14 @@ const NFTSelector = (props) => {
 
   useEffect(() => {
     const updateFromEvent = (event) => {
+      if (
+        !(
+          event.target.classList.contains('ExtraPixelsCanvas') ||
+          event.target.classList.contains('Canvas')
+        )
+      ) {
+        return;
+      }
       if (!props.nftSelectionStarted) {
         // TODO: To function
         const canvas = props.canvasRef.current;
@@ -98,6 +106,14 @@ const NFTSelector = (props) => {
   // TODO: Fix one off issues with the selection
   useEffect(() => {
     const mouseUp = async (event) => {
+      if (
+        !(
+          event.target.classList.contains('ExtraPixelsCanvas') ||
+          event.target.classList.contains('Canvas')
+        )
+      ) {
+        return;
+      }
       // TODO: Do nothing if dragging the canvas
       if (props.nftSelected) {
         return;

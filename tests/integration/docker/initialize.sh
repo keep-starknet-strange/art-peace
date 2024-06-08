@@ -28,3 +28,13 @@ curl http://backend:8080/init-votable-colors -X POST -d "[$VOTABLE_COLORS]"
 echo "Setup the quests from the quest config"
 QUESTS_CONFIG_FILE="/configs/quests.config.json"
 curl http://backend:8080/init-quests -X POST -d "@$QUESTS_CONFIG_FILE"
+
+echo "Setup the factions from the faction config"
+FACTIONS_CONFIG_FILE="/configs/factions.config.json"
+curl http://backend:8080/init-factions -X POST -d "@$FACTIONS_CONFIG_FILE"
+
+echo "Setup the faction icons"
+FACTION_ICONS="/icons/"
+for icon in $FACTION_ICONS*.png; do
+  curl http://backend:8080/upload-faction-icon -X POST -F "icon=@$icon"
+done

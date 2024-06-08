@@ -66,6 +66,7 @@ pub trait IArtPeace<TContractState> {
 
     // Faction stuff
     fn get_factions_count(self: @TContractState) -> u32;
+    fn get_user_factions_count(self: @TContractState, user: starknet::ContractAddress) -> u32;
     fn get_faction(self: @TContractState, faction_id: u32) -> Faction;
     fn get_faction_leader(self: @TContractState, faction_id: u32) -> starknet::ContractAddress;
     fn init_faction(
@@ -96,6 +97,7 @@ pub trait IArtPeace<TContractState> {
     // Color voting
     fn vote_color(ref self: TContractState, color: u8);
     fn get_color_votes(self: @TContractState, color: u8) -> u32;
+    fn get_user_vote(self: @TContractState, user: starknet::ContractAddress, day: u32) -> u8;
     fn get_votable_colors(self: @TContractState) -> Array<u32>;
 
     // Get timing info
