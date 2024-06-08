@@ -1,10 +1,8 @@
 package indexer
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
@@ -63,6 +61,7 @@ const (
 	dailyQuestClaimedEvent  = "0x02025eddbc0f68a923d76519fb336e0fe1e0d6b9053ab3a504251bbd44201b10"
 	mainQuestClaimedEvent   = "0x0121172d5bc3847c8c39069075125e53d3225741d190df6d52194cb5dd5d2049"
 	voteColorEvent          = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
+	votableColorEvent       = "0x03a17e93c1efb3d7287b186ca6b041e44fefbc4a97fabdf45bc2d6e9a9875b51"
 	factionCreatedEvent     = "0x00f3878d4c85ed94271bb611f83d47ea473bae501ffed34cd21b73206149f692"
 	memberReplacedEvent     = "0x01f8936599822d668e09401ffcef1989aca342fb1f003f9b3b1fd1cbf605ed6b"
 	nftMintedEvent          = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
@@ -81,6 +80,7 @@ var eventProcessors = map[string](func(IndexerEvent)){
 	dailyQuestClaimedEvent:  processDailyQuestClaimedEvent,
 	mainQuestClaimedEvent:   processMainQuestClaimedEvent,
 	voteColorEvent:          processVoteColorEvent,
+	votableColorEvent:       processVotableColorEvent,
 	factionCreatedEvent:     processFactionCreatedEvent,
 	memberReplacedEvent:     processMemberReplacedEvent,
 	nftMintedEvent:          processNFTMintedEvent,
@@ -99,6 +99,7 @@ var eventReverters = map[string](func(IndexerEvent)){
 	dailyQuestClaimedEvent:  revertDailyQuestClaimedEvent,
 	mainQuestClaimedEvent:   revertMainQuestClaimedEvent,
 	voteColorEvent:          revertVoteColorEvent,
+	votableColorEvent:       revertVotableColorEvent,
 	factionCreatedEvent:     revertFactionCreatedEvent,
 	memberReplacedEvent:     revertMemberReplacedEvent,
 	nftMintedEvent:          revertNFTMintedEvent,
@@ -118,6 +119,7 @@ var eventRequiresOrdering = map[string]bool{
 	dailyQuestClaimedEvent:  false,
 	mainQuestClaimedEvent:   false,
 	voteColorEvent:          true,
+	votableColorEvent:       true,
 	factionCreatedEvent:     false,
 	memberReplacedEvent:     true,
 	nftMintedEvent:          false,
@@ -332,41 +334,6 @@ func StartMessageProcessor() {
 			time.Sleep(1 * time.Second)
 		}
 	}()
-}
-
-func AddVotableColor(hex string, dayIndex int) error {
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		dbHost, dbPort, dbUser, dbPassword, dbName)
-
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	err = db.Ping()
-	if err != nil {
-		return err
-	}
-
-	sqlStatement := `
-		INSERT INTO VotableColors (hex, day_index)
-		VALUES ($1, $2)
-		ON CONFLICT DO NOTHING;
-	`
-
-	_, err = db.Exec(sqlStatement, hex, dayIndex)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // TODO: User might miss some messages between loading canvas and connecting to websocket?
