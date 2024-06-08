@@ -1,6 +1,6 @@
 {
   "daily": {
-    "dailyQuestsCount": 1,
+    "dailyQuestsCount": 3,
     "dailyQuests": [
       {
         "day": 1,
@@ -22,6 +22,144 @@
               ],
               "storeParams": [2,3,4,5,6]
             }
+          },
+          {
+            "name": "Create a username",
+            "description": "Claim a username in the accounts tab",
+            "reward": 3,
+            "questContract": {
+              "type": "UsernameQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "$USERNAME_STORE_CONTRACT"
+              ],
+              "storeParams": []
+            }
+          },
+          {
+            "name": "Join a faction",
+            "description": "Represent a community by joining their faction on the factions tab",
+            "reward": 3,
+            "questContract": {
+              "type": "FactionQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ],
+              "storeParams": []
+            }
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "quests": [
+          {
+            "name": "The Void",
+            "description": "Place 10 black pixels and spread the void",
+            "reward": 5,
+            "questContract": {
+              "type": "PixelQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "10",
+                "1",
+                "$DAY_IDX",
+                "1",
+                "1"
+              ],
+              "storeParams": [2,3,4,5,6]
+            }
+          },
+          {
+            "name": "Mint art/peace NFT",
+            "description": "Mint your artwork from the canvas under the NFT tab",
+            "reward": 5,
+            "questContract": {
+              "type": "NFTQuest",
+              "initParams": [
+                "$CANVAS_NFT_CONTRACT",
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ],
+              "storeParams": []
+            }
+          },
+          {
+            "name": "Cast your vote",
+            "description": "Vote to add a color to the palette in the vote tab",
+            "reward": 3,
+            "questContract": {
+              "type": "VoteQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "$DAY_IDX"
+              ],
+              "storeParams": [2]
+            }
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "quests": [
+          {
+            "name": "Place 5 pixels",
+            "description": "Add 5 pixels on the canvas",
+            "reward": 3,
+            "questContract": {
+              "type": "PixelQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "5",
+                "1",
+                "$DAY_IDX",
+                "0",
+                "0"
+              ],
+              "storeParams": [2,3,4,5,6]
+            }
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "quests": [
+          {
+            "name": "Endgame Pixels",
+            "description": "Place 5 pixels on the canvas to try and appear on the final snapshot",
+            "reward": 3,
+            "questContract": {
+              "type": "PixelQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "5",
+                "1",
+                "$DAY_IDX",
+                "0",
+                "0"
+              ],
+              "storeParams": [2,3,4,5,6]
+            }
+          },
+          {
+            "name": "Finalize your art piece",
+            "description": "Mint an NFT of your artwork to keep it forever",
+            "reward": 5,
+            "questContract": {
+              "type": "NFTQuest",
+              "initParams": [
+                "$CANVAS_NFT_CONTRACT",
+                "$ART_PEACE_CONTRACT",
+                "$REWARD"
+              ],
+              "storeParams": []
+            }
           }
         ]
       }
@@ -30,8 +168,48 @@
   "main": {
     "mainQuests": [
       {
+        "name": "HODL",
+        "description": "Accumulate 10 extra pixels in your account",
+        "reward": 5,
+        "questContract": {
+          "type": "HodlQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD",
+            "10"
+          ],
+          "storeParams": [2]
+        }
+      },
+      {
+        "name": "Represent your chain",
+        "description": "Join a faction to represent your favorite chain in the factions tab",
+        "reward": 5,
+        "questContract": {
+          "type": "ChainFactionQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD"
+          ],
+          "storeParams": []
+        }
+      },
+      {
+        "name": "The Rainbow",
+        "description": "Place at least 1 pixel of each color",
+        "reward": 10,
+        "questContract": {
+          "type": "RainbowQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD"
+          ],
+          "storeParams": []
+        }
+      },
+      {
         "name": "Deploy a Memecoin",
-        "description": "Create an Unruggable memecoin",
+        "description": "Create your own [Unruggable memecoin](https://www.unruggable.meme/)",
         "reward": 15,
         "questContract": {
           "type": "UnruggableQuest",
@@ -47,6 +225,24 @@
               "example": "0x02D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23"
             }
           ]
+        }
+      },
+      {
+        "name": "Place 100 pixels",
+        "description": "Add 100 pixels on the canvas",
+        "reward": 15,
+        "questContract": {
+          "type": "PixelQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD",
+            "100",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "storeParams": [2,3,4,5,6]
         }
       }
     ]

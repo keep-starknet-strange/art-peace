@@ -49,7 +49,7 @@ func main() {
 	databases := core.NewDatabases(databaseConfig)
 	defer databases.Close()
 
-	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig)
+	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig, false)
 
 	indexer.InitIndexerRoutes()
 	routes.InitWebsocketRoutes()

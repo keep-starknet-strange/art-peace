@@ -77,6 +77,23 @@ const Account = (props) => {
     );
   };
 
+  useEffect(() => {
+    if (devnetMode) return;
+    if (!connectors) return;
+    if (connectors.length === 0) return;
+
+    const connectIfReady = async () => {
+      for (let i = 0; i < connectors.length; i++) {
+        let ready = await connectors[i].ready();
+        if (ready) {
+          connectWallet(connectors[i]);
+          break;
+        }
+      }
+    };
+    connectIfReady();
+  }, [connectors]);
+
   const connectWallet = async (connector) => {
     if (devnetMode) {
       props.setConnected(true);

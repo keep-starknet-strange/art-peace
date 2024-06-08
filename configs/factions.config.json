@@ -68,7 +68,7 @@
       "name": "Ducks Everywhere",
       "icon": "$BACKEND_URL/faction-images/ducks-everywhere.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 20,
+      "pool": 4,
       "per_member": false,
       "joinable": true,
       "links": {
@@ -87,7 +87,7 @@
       "name": "PixeLaw",
       "icon": "$BACKEND_URL/faction-images/pixelaw.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 10,
+      "pool": 4,
       "per_member": false,
       "joinable": true,
       "links": {
@@ -106,7 +106,7 @@
       "name": "WASD",
       "icon": "$BACKEND_URL/faction-images/wasd.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 30,
+      "pool": 6,
       "per_member": false,
       "joinable": true,
       "links": {

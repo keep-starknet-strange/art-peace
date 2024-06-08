@@ -264,7 +264,6 @@ const CanvasContainer = (props) => {
     props.setLastPlacedTime(timestamp * 1000);
     // TODO: Fix last placed time if error in placing pixel
   };
-  // TODO: Erasing extra pixels
 
   useEffect(() => {
     const hoverColor = (e) => {

@@ -171,7 +171,6 @@ const ExtraPixelsPanel = (props) => {
   const [factionPixelsExpanded, setFactionPixelsExpanded] =
     React.useState(false);
   const getFactionName = (index) => {
-    /* TODO: Black out spent pixels */
     /* TODO: Animate expanding */
     const id = props.userFactions.findIndex(
       (faction) =>

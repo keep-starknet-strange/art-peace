@@ -93,7 +93,6 @@ func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 
 func voteColorDevnet(w http.ResponseWriter, r *http.Request) {
 	if routeutils.NonProductionMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusUnauthorized, "Method only allowed in non-production mode")
 		return
 	}
 

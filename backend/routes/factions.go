@@ -72,7 +72,6 @@ type FactionsConfig struct {
 func initFactions(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to initialize colors
 	if routeutils.AdminMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
@@ -98,7 +97,6 @@ func initFactions(w http.ResponseWriter, r *http.Request) {
 func uploadFactionIcon(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to initialize colors
 	if routeutils.AdminMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 

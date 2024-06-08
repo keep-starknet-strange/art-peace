@@ -13,7 +13,6 @@ import Account from './account/Account.js';
 import Templates from './templates/Templates.js';
 
 const TabPanel = (props) => {
-  // TODO: Speed up timer injection by using a context
   return (
     <div className='TabPanel'>
       <CSSTransition

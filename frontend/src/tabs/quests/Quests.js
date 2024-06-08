@@ -9,7 +9,6 @@ const Quests = (props) => {
   const [todaysQuests, setTodaysQuests] = useState([]);
   const [mainQuests, setMainQuests] = useState([]);
 
-  // TODO: Links in descriptions
   // TODO: remove local quests
   const createArgs = (labels, placeholders, types) => {
     const args = [];

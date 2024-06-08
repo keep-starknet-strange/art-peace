@@ -99,7 +99,6 @@ function App() {
         lastJsonMessage.messageType === 'nftMinted' &&
         activeTab === 'NFTs'
       ) {
-        // TODO: Compare to user's address
         if (lastJsonMessage.minter === queryAddress) {
           setLatestMintedTokenId(lastJsonMessage.token_id);
         }
@@ -315,7 +314,6 @@ function App() {
     context.clearRect(0, 0, width, height);
   }, [width, height]);
 
-  // TODO: thread safety?
   const clearExtraPixel = useCallback(
     (index) => {
       setAvailablePixelsUsed(availablePixelsUsed - 1);

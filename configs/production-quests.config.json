@@ -25,13 +25,14 @@
           },
           {
             "name": "Create a username",
-            "description": "Add a username in the Accounts tab",
+            "description": "Claim a username in the accounts tab",
             "reward": 3,
             "questContract": {
               "type": "UsernameQuest",
               "initParams": [
                 "$ART_PEACE_CONTRACT",
-                "$REWARD"
+                "$REWARD",
+                "$USERNAME_STORE_CONTRACT"
               ],
               "storeParams": []
             }
