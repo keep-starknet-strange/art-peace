@@ -24,7 +24,7 @@ var OnchainQuestTypes = map[string]int{
 	"TemplateQuest":   TemplateQuestType,
 	"UnruggableQuest": UnruggableQuestType,
 	"VoteQuest":       VoteQuestType,
-	"UsernameQuest": 	 UsernameQuestType,
+	"UsernameQuest":   UsernameQuestType,
 }
 
 type Quest struct {

@@ -98,11 +98,11 @@ func CheckUnruggableStatus(q *Quest, user string) (progress int, needed int) {
 	return 0, 1
 }
 
-func CheckUsernameStatus(q *Quest,  user string) (progress int, needed int) {
+func CheckUsernameStatus(q *Quest, user string) (progress int, needed int) {
 
 	count, err := core.PostgresQueryOne[int]("SELECT COUNT (*) FROM Users where address = $1", user)
 
-	if err != nil{
+	if err != nil {
 		return 0, 1
 	} else {
 		return *count, 1
