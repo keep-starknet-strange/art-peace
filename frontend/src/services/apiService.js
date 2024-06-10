@@ -71,6 +71,7 @@ export const getFactions = async (query) => {
     `get-factions?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
   );
 };
+
 /**
  * Fetches top NFTs with pagination.
  *
@@ -81,7 +82,8 @@ export const getFactions = async (query) => {
  * @returns {Promise<Object>} The response from the fetch call.
  */
 export const getTopNftsFn = async (params) => {
-  const { page, pageLength, address} = params;
-  const url = `${backendUrl}/get-top-nfts?address=${address}&page=${page}&pageLength=${pageLength}`;
-  return await fetchWrapper(url, { mode: 'cors' });
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-top-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
 };
