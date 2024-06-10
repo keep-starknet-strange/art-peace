@@ -49,7 +49,7 @@ const CanvasContainer = (props) => {
   };
 
   const handlePointerMove = (e) => {
-    if (props.nftMintingMode) return;
+    if (props.nftMintingMode && !props.nftSelected) return;
     if (isDragging) {
       setCanvasX(canvasX + e.clientX - dragStartX);
       setCanvasY(canvasY + e.clientY - dragStartY);

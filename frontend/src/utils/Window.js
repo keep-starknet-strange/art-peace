@@ -53,8 +53,8 @@ export function usePreventZoom(scrollCheck = true, keyboardCheck = true) {
   }, [scrollCheck, keyboardCheck]);
 }
 
-export const useLockScroll = (activeString = '', lockedString = 'Canvas') => {
-  const shouldLockScroll = activeString === lockedString || 'NFTs';
+export const useLockScroll = (activeTab = '', lockedTab = 'Canvas') => {
+  const shouldLockScroll = activeTab === lockedTab || 'NFTs';
 
   useEffect(() => {
     const handleScroll = (e) => {

@@ -23,8 +23,7 @@ function App() {
   const isDesktopOrLaptop = useMediaQuery({
     query: '(min-width: 1224px)'
   });
-  // const containerRef = useRef();
-  // usePreventPullToRefresh(containerRef);
+
   const isBigScreen = useMediaQuery({ query: '(min-width: 1824px)' });
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1224px)' });
   const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });

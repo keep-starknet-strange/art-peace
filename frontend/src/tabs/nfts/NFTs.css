@@ -5,10 +5,8 @@
 
   transition: all 0.5s;
 }
-@media screen and (max-width: 767px) {
-  .NFTs__main_hidden_mobile {
-    display: none;
-  }
+.App__panel--tablet .NFTs__main_hidden_mobile {
+  display: none;
 }
 
 .NFTs__container {

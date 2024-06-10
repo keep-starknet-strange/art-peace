@@ -14,7 +14,9 @@ import { PaginationView } from '../../ui/pagination.js';
 const NFTsMainSection = (props) => {
   const imageURL = backendUrl + '/nft-images/';
   return (
-    <div className='NFTs__main'>
+    <div
+      className={`${props.expanded ? 'NFTs__main_hidden_mobile' : ''} NFTs__main`}
+    >
       <div className='NFTs__header'>
         <h2 className='NFTs__heading'>My Collection</h2>
         <div
