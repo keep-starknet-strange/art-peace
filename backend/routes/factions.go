@@ -71,9 +71,9 @@ type FactionsConfig struct {
 }
 
 type FactionMemberData struct {
-	Username string `json:"username"`
-	UserAddress string `json:"user_address"`
-	TotalAllocation  int    `json:"total_allocation"`
+	Username        string `json:"username"`
+	UserAddress     string `json:"userAddress"`
+	TotalAllocation int    `json:"totalAllocation"`
 }
 
 func initFactions(w http.ResponseWriter, r *http.Request) {
@@ -211,7 +211,7 @@ func getFactions(w http.ResponseWriter, r *http.Request) {
 }
 
 func getFactionMembers(w http.ResponseWriter, r *http.Request) {
-	factionID, err := strconv.Atoi(r.URL.Query().Get("factionID"))
+	factionID, err := strconv.Atoi(r.URL.Query().Get("factionId"))
 	if err != nil || factionID < 0 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
 		return
@@ -248,11 +248,6 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve factions")
-		return
-	}
-
-	if string(members) == "null" {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Could not get any users for given faction")
 		return
 	}
 
