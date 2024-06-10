@@ -89,7 +89,7 @@ export const config = {
         // Votable Color Event
         fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
         keys: [
-          "0x03a17e93c1efb3d7287b186ca6b041e44fefbc4a97fabdf45bc2d6e9a9875b51"
+          "0x0115b3bc605487276e022f4bec68b316e7a6b3615fb01afee58241fd1d40e3e5"
         ],
         includeReverted: false,
         includeTransaction: false,
