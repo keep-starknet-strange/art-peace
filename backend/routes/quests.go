@@ -107,6 +107,7 @@ func InitQuestsRoutes() {
 	http.HandleFunc("/get-main-quest-progress", GetMainQuestProgress)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/claim-today-quest-devnet", ClaimTodayQuestDevnet)
+		http.HandleFunc("/increase-day-devnet", IncreaseDayDevnet)
 	}
 }
 
@@ -456,6 +457,25 @@ func ClaimTodayQuestDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Today quest claimed")
+}
+
+func IncreaseDayDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.IncreaseDayDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+
+	cmd := exec.Command(shellCmd, contract, "increase_day_index")
+	_, err := cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to increase day on devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Day increased")
 }
 
 func GetUserQuestStatus(w http.ResponseWriter, r *http.Request) {

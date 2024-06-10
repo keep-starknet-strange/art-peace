@@ -60,7 +60,7 @@ for entry in $(echo $DAILY_QUESTS | jq -r '.[] | @base64'); do
     QUEST_TYPE=$(_jq '.questContract.type')
     QUEST_INIT_PARAMS=$(_jq '.questContract.initParams')
     # Do init params substitutions for $ART_PEACE_CONTRACT,$REWARD,$DAY_IDX
-    QUEST_INIT_PARAMS=$(echo $QUEST_INIT_PARAMS | sed "s/\$ART_PEACE_CONTRACT/$ART_PEACE_CONTRACT_ADDRESS/g" | sed "s/\$REWARD/$QUEST_REWARD/g" | sed "s/\$DAY_IDX/$DAY_IDX/g")
+    QUEST_INIT_PARAMS=$(echo $QUEST_INIT_PARAMS | sed "s/\$ART_PEACE_CONTRACT/$ART_PEACE_CONTRACT_ADDRESS/g" | sed "s/\$REWARD/$QUEST_REWARD/g" | sed "s/\$DAY_IDX/$DAY_IDX/g" | sed "s/\$USERNAME_STORE_CONTRACT/$USERNAME_STORE_CONTRACT/g" | sed "s/\$CANVAS_NFT_CONTRACT/$CANVAS_NFT_CONTRACT/g")
     if [[ ! " ${DECLARED_CONTRACT_TYPES[@]} " =~ " ${QUEST_TYPE} " ]]; then
       echo "    Contract type \"$QUEST_TYPE\" not declared, skipping deployment..."
       DAILY_QUEST_CONTRACTS+=( "0x0" )
@@ -82,7 +82,7 @@ for entry in $(echo $DAILY_QUESTS | jq -r '.[] | @base64'); do
     DAILY_QUEST_CONTRACTS+=( $CONTRACT_ADDRESS )
     echo
   done
-  echo "  Deployed daily quest contracts: ${DAILY_QUEST_CONTRACTS[@]}"
+  echo "  Deployed daily quest contracts: ${DAY_IDX} -- ${DAILY_QUEST_CONTRACTS[@]}"
   echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function add_daily_quests --calldata $DAY_IDX ${#DAILY_QUEST_CONTRACTS[@]} ${DAILY_QUEST_CONTRACTS[@]}"
   /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function add_daily_quests --calldata $DAY_IDX ${#DAILY_QUEST_CONTRACTS[@]} ${DAILY_QUEST_CONTRACTS[@]}
   DAILY_QUEST_CONTRACTS=( )

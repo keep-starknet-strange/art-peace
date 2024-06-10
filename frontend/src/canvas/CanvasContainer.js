@@ -145,6 +145,14 @@ const CanvasContainer = (props) => {
     const position = y * width + x;
     // TODO: Cache pixel info & clear cache on update from websocket
     // TODO: Dont query if hover select ( until 1s after hover? )
+    if (
+      props.selectedColorId !== -1 ||
+      props.isEraserMode ||
+      props.isExtraDeleteMode
+    ) {
+      props.setPixelPlacedBy(null);
+      return;
+    }
     const getPixelInfoEndpoint = await fetchWrapper(
       `get-pixel-info?position=${position.toString()}`
     );

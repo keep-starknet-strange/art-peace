@@ -288,7 +288,10 @@ const ExtraPixelsPanel = (props) => {
                   onMouseOut={() => {
                     props.setIsExtraDeleteMode(false);
                   }}
-                  onClick={() => props.clearExtraPixel(index)}
+                  onClick={() => {
+                    props.clearExtraPixel(index);
+                    props.setIsExtraDeleteMode(false);
+                  }}
                 >
                   <p className='ExtraPixelsPanel__bubble__remove'>X</p>
                 </div>

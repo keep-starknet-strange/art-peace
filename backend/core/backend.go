@@ -17,7 +17,7 @@ type Backend struct {
 	CanvasConfig  *config.CanvasConfig
 	BackendConfig *config.BackendConfig
 
-  AdminMode bool
+	AdminMode bool
 }
 
 var ArtPeaceBackend *Backend
@@ -27,7 +27,7 @@ func NewBackend(databases *Databases, canvasConfig *config.CanvasConfig, backend
 		Databases:     databases,
 		CanvasConfig:  canvasConfig,
 		BackendConfig: backendConfig,
-    AdminMode: adminMode,
+		AdminMode:     adminMode,
 	}
 }
 

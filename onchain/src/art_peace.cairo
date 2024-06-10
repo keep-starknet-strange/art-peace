@@ -69,6 +69,7 @@ pub mod ArtPeace {
         nft_contract: ContractAddress,
         // Map: (day_index, user's address, color index) -> amount of pixels placed
         user_pixels_placed: LegacyMap::<(u32, ContractAddress, u8), u32>,
+        devmode: bool,
         #[substorage(v0)]
         templates: TemplateStoreComponent::Storage,
     }
@@ -195,6 +196,7 @@ pub mod ArtPeace {
         pub daily_new_colors_count: u32,
         pub end_time: u64,
         pub daily_quests_count: u32,
+        pub devmode: bool,
     }
 
     const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
@@ -232,12 +234,13 @@ pub mod ArtPeace {
         self.day_index.write(0);
         self.emit(NewDay { day_index: 0, start_time: starknet::get_block_timestamp() });
 
-        // TODO: Dev only - remove
-        let test_address = starknet::contract_address_const::<
-            0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
-        >();
-        let zero_address = starknet::contract_address_const::<0>();
-        self.extra_pixels.write(test_address, 1000);
+        if init_params.devmode {
+          let test_address = starknet::contract_address_const::<
+              0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
+          >();
+          self.extra_pixels.write(test_address, 1000);
+        }
+        self.devmode.write(init_params.devmode);
 
         self.daily_quests_count.write(init_params.daily_quests_count);
     }
@@ -715,7 +718,9 @@ pub mod ArtPeace {
             let block_timestamp = starknet::get_block_timestamp();
             let start_day_time = self.start_day_time.read();
 
-            assert(block_timestamp >= start_day_time + DAY_IN_SECONDS, 'day has not passed');
+            if !self.devmode.read() {
+                assert(block_timestamp >= start_day_time + DAY_IN_SECONDS, 'day has not passed');
+            }
             finalize_color_votes(ref self);
 
             self.day_index.write(self.day_index.read() + 1);
@@ -832,6 +837,7 @@ pub mod ArtPeace {
             assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             let day_index = self.day_index.read();
             let quest = self.daily_quests.read((day_index, quest_id));
+            assert(quest != starknet::contract_address_const::<0>(), 'This quest is unavailable');
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
             if reward > 0 {

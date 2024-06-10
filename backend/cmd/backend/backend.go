@@ -23,7 +23,7 @@ func main() {
 	databaseConfigFilename := flag.String("database-config", config.DefaultDatabaseConfigPath, "Database config file")
 	backendConfigFilename := flag.String("backend-config", config.DefaultBackendConfigPath, "Backend config file")
 	production := flag.Bool("production", false, "Production mode")
-  admin := flag.Bool("admin", false, "Admin mode")
+	admin := flag.Bool("admin", false, "Admin mode")
 
 	flag.Parse()
 

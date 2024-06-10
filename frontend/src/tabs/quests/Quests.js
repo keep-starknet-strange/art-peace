@@ -9,6 +9,28 @@ const Quests = (props) => {
   const [todaysQuests, setTodaysQuests] = useState([]);
   const [mainQuests, setMainQuests] = useState([]);
 
+  const [todaysQuestsInfo, setTodaysQuestsInfo] = useState([]);
+  const [mainQuestsInfo, setMainQuestsInfo] = useState([]);
+  const [todaysQuestsStatus, setTodaysQuestsStatus] = useState([]);
+  const [mainQuestsStatus, setMainQuestsStatus] = useState([]);
+
+  useEffect(() => {
+    // Combine quests with their status on questId
+    const combineQuests = (quests, status) => {
+      if (!quests || !status) return [];
+      return quests.map((quest) => {
+        const questStatus = status.find(
+          (status) => status.questId === quest.questId
+        );
+        if (!questStatus) return quest;
+        return { ...quest, ...questStatus };
+      });
+    };
+
+    setTodaysQuests(combineQuests(todaysQuestsInfo, todaysQuestsStatus));
+    setMainQuests(combineQuests(mainQuestsInfo, mainQuestsStatus));
+  }, [todaysQuestsInfo, mainQuestsInfo, todaysQuestsStatus, mainQuestsStatus]);
+
   // TODO: remove local quests
   const createArgs = (labels, placeholders, types) => {
     const args = [];
@@ -95,7 +117,7 @@ const Quests = (props) => {
         if (!dailyData) {
           dailyData = localDailyQuests;
         }
-        setTodaysQuests(sortByCompleted(dailyData));
+        setTodaysQuestsInfo(sortByCompleted(dailyData));
 
         // Fetching main quests from backend
         const getMainQuestsEndpoint =
@@ -107,13 +129,41 @@ const Quests = (props) => {
           // TODO: remove this & use []
           mainData = localMainQuests;
         }
-        setMainQuests(sortByCompleted(mainData));
+        setMainQuestsInfo(sortByCompleted(mainData));
+      } catch (error) {
+        console.error('Failed to fetch quests', error);
+      }
+    };
+
+    const fetchQuestsStatus = async () => {
+      try {
+        // Fetching daily quests from backend
+        const getTodaysQuestsEndpoint =
+          backendUrl +
+          `/get-today-quest-progress?address=${props.queryAddress}`;
+        const dailyResponse = await fetch(getTodaysQuestsEndpoint);
+        let dailyData = await dailyResponse.json();
+        dailyData = dailyData.data;
+        if (dailyData) {
+          setTodaysQuestsStatus(dailyData);
+        }
+
+        // Fetching main quests from backend
+        const getMainQuestsEndpoint =
+          backendUrl + `/get-main-quest-progress?address=${props.queryAddress}`;
+        const mainResponse = await fetch(getMainQuestsEndpoint);
+        let mainData = await mainResponse.json();
+        mainData = mainData.data;
+        if (mainData) {
+          setMainQuestsStatus(mainData);
+        }
       } catch (error) {
         console.error('Failed to fetch quests', error);
       }
     };
 
     fetchQuests();
+    fetchQuestsStatus();
   }, []);
 
   const sortByCompleted = (arr) => {
@@ -127,14 +177,14 @@ const Quests = (props) => {
 
   const markCompleted = (questId) => {
     let questReward = 0;
-    const newQuests = todaysQuests.map((quest) => {
+    const newQuests = todaysQuestsInfo.map((quest) => {
       if (quest.questId === questId) {
         questReward = quest.reward;
         return { ...quest, completed: true };
       }
       return quest;
     });
-    setTodaysQuests(newQuests);
+    setTodaysQuestsInfo(newQuests);
     props.setExtraPixels(props.extraPixels + questReward);
   };
 
@@ -150,7 +200,12 @@ const Quests = (props) => {
           }}
         >
           <h2 className='Text__large Heading__sub Quests__header'>Todays</h2>
-          <p className='Text__small Quests__timer'>{props.timeLeftInDay}</p>
+          <p
+            className={`Text__small Quests__timer ${props.newDayAvailable ? 'Quests__timer--active' : ''}`}
+            onClick={() => props.startNextDay()}
+          >
+            {props.timeLeftInDay}
+          </p>
         </div>
         {todaysQuests.map((quest, index) => (
           <QuestItem
