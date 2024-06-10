@@ -11,6 +11,7 @@ var QuestChecks = map[int]func(*Quest, string) (int, int){
 	TemplateQuestType:   CheckTemplateStatus,
 	UnruggableQuestType: CheckUnruggableStatus,
 	VoteQuestType:       CheckVoteStatus,
+	UsernameQuestType:   CheckUsernameStatus,
 }
 
 func (q *Quest) CheckStatus(user string) (progress int, needed int) {
@@ -95,4 +96,15 @@ func CheckTemplateStatus(q *Quest, user string) (progress int, needed int) {
 func CheckUnruggableStatus(q *Quest, user string) (progress int, needed int) {
 	// TODO: Implement this
 	return 0, 1
+}
+
+func CheckUsernameStatus(q *Quest, user string) (progress int, needed int) {
+
+	count, err := core.PostgresQueryOne[int]("SELECT COUNT (*) FROM Users where address = $1", user)
+
+	if err != nil {
+		return 0, 1
+	} else {
+		return *count, 1
+	}
 }
