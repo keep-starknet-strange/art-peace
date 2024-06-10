@@ -1,5 +1,5 @@
 .notification-panel {
-  position: fixed;
+  position: relative;
   right: -100%;
   top: 20px;
   width: 300px;
@@ -10,7 +10,7 @@
   justify-content: center;
   align-content: center;
 
-  background-color: #444;
+  background-color: rgba(255, 255, 255, 0.7);
   color: #fff;
   border-radius: 1rem;
   box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.1);
