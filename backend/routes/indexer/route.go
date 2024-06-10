@@ -51,6 +51,9 @@ var PendingMessageLock = &sync.Mutex{}
 var LastAcceptedEndKey int
 var AcceptedMessageQueue []IndexerMessage
 var AcceptedMessageLock = &sync.Mutex{}
+var LastFinalizedCursor int
+var FinalizedMessageQueue []IndexerMessage
+var FinalizedMessageLock = &sync.Mutex{}
 
 const (
 	newDayEvent             = "0x00df776faf675d0c64b0f2ec596411cf1509d3966baba3478c84771ddbac1784"
@@ -61,6 +64,7 @@ const (
 	dailyQuestClaimedEvent  = "0x02025eddbc0f68a923d76519fb336e0fe1e0d6b9053ab3a504251bbd44201b10"
 	mainQuestClaimedEvent   = "0x0121172d5bc3847c8c39069075125e53d3225741d190df6d52194cb5dd5d2049"
 	voteColorEvent          = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
+	votableColorAddedEvent  = "0x0115b3bc605487276e022f4bec68b316e7a6b3615fb01afee58241fd1d40e3e5"
 	factionCreatedEvent     = "0x00f3878d4c85ed94271bb611f83d47ea473bae501ffed34cd21b73206149f692"
 	memberReplacedEvent     = "0x01f8936599822d668e09401ffcef1989aca342fb1f003f9b3b1fd1cbf605ed6b"
 	nftMintedEvent          = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
@@ -79,6 +83,7 @@ var eventProcessors = map[string](func(IndexerEvent)){
 	dailyQuestClaimedEvent:  processDailyQuestClaimedEvent,
 	mainQuestClaimedEvent:   processMainQuestClaimedEvent,
 	voteColorEvent:          processVoteColorEvent,
+	votableColorAddedEvent:  processVotableColorAddedEvent,
 	factionCreatedEvent:     processFactionCreatedEvent,
 	memberReplacedEvent:     processMemberReplacedEvent,
 	nftMintedEvent:          processNFTMintedEvent,
@@ -97,6 +102,7 @@ var eventReverters = map[string](func(IndexerEvent)){
 	dailyQuestClaimedEvent:  revertDailyQuestClaimedEvent,
 	mainQuestClaimedEvent:   revertMainQuestClaimedEvent,
 	voteColorEvent:          revertVoteColorEvent,
+	votableColorAddedEvent:  revertVotableColorAddedEvent,
 	factionCreatedEvent:     revertFactionCreatedEvent,
 	memberReplacedEvent:     revertMemberReplacedEvent,
 	nftMintedEvent:          revertNFTMintedEvent,
@@ -116,6 +122,7 @@ var eventRequiresOrdering = map[string]bool{
 	dailyQuestClaimedEvent:  false,
 	mainQuestClaimedEvent:   false,
 	voteColorEvent:          true,
+	votableColorAddedEvent:  true,
 	factionCreatedEvent:     false,
 	memberReplacedEvent:     true,
 	nftMintedEvent:          false,
@@ -145,7 +152,9 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 
 	if message.Data.Finality == DATA_STATUS_FINALIZED {
 		// TODO: Track diffs with accepted messages? / check if accepted message processed
-		fmt.Println("Finalized message")
+		FinalizedMessageLock.Lock()
+		FinalizedMessageQueue = append(FinalizedMessageQueue, *message)
+		FinalizedMessageLock.Unlock()
 		return
 	} else if message.Data.Finality == DATA_STATUS_ACCEPTED {
 		AcceptedMessageLock.Lock()
@@ -286,6 +295,24 @@ func ProcessMessage(message IndexerMessage) {
 	}
 }
 
+func TryProcessFinalizedMessages() bool {
+	FinalizedMessageLock.Lock()
+	defer FinalizedMessageLock.Unlock()
+
+	if len(FinalizedMessageQueue) > 0 {
+		message := FinalizedMessageQueue[0]
+		FinalizedMessageQueue = FinalizedMessageQueue[1:]
+		if message.Data.Cursor.OrderKey <= LastFinalizedCursor {
+			// Skip message
+			return true
+		}
+		ProcessMessage(message)
+		LastFinalizedCursor = message.Data.Cursor.OrderKey
+		return true
+	}
+	return false
+}
+
 func TryProcessAcceptedMessages() bool {
 	AcceptedMessageLock.Lock()
 	defer AcceptedMessageLock.Unlock()
@@ -293,7 +320,10 @@ func TryProcessAcceptedMessages() bool {
 	if len(AcceptedMessageQueue) > 0 {
 		message := AcceptedMessageQueue[0]
 		AcceptedMessageQueue = AcceptedMessageQueue[1:]
+		// TODO: Check if message is already processed?
 		ProcessMessage(message)
+		// TODO
+		LastFinalizedCursor = message.Data.Cursor.OrderKey
 		return true
 	}
 	return false
@@ -317,6 +347,11 @@ func StartMessageProcessor() {
 	// Goroutine to process pending/accepted messages
 	go func() {
 		for {
+			// Check Finalized messages ( for initial load )
+			if TryProcessFinalizedMessages() {
+				continue
+			}
+
 			// Prioritize accepted messages
 			if TryProcessAcceptedMessages() {
 				continue

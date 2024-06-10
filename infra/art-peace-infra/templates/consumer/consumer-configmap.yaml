@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.labels.consumer.name }}-secret
+  labels:
+    app: {{ .Values.labels.consumer.name }}
+data:
+  ART_PEACE_CONTRACT_ADDRESS: {{ .Values.contracts.artPeace }}
+  USERNAME_STORE_CONTRACT_ADDRESS: {{ .Values.contracts.usernameStore }}
+  POSTGRES_PASSWORD: {{ .Values.postgres.password }}

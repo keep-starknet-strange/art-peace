@@ -86,6 +86,7 @@ pub mod ArtPeace {
         VoteColor: VoteColor,
         FactionCreated: FactionCreated,
         MemberReplaced: MemberReplaced,
+        VotableColorAdded: VotableColorAdded,
         // TODO: Integrate template event
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
@@ -166,6 +167,15 @@ pub mod ArtPeace {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct VotableColorAdded {
+        #[key]
+        day: u32,
+        #[key]
+        color_key: u8,
+        color: u32,
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct FactionCreated {
         #[key]
         faction_id: u32,
@@ -221,7 +231,9 @@ pub mod ArtPeace {
         self.votable_colors_count.write(0, votable_colors_count);
         let mut i: u8 = 0;
         while i < votable_colors_count {
-            self.votable_colors.write((i + 1, 0), *init_params.votable_colors.at(i.into()));
+            let new_color = *init_params.votable_colors.at(i.into());
+            self.votable_colors.write((i + 1, 0), new_color);
+            self.emit(VotableColorAdded { day: 0, color_key: i + 1, color: new_color });
             i += 1;
         };
         self.daily_new_colors_count.write(init_params.daily_new_colors_count);
@@ -1160,6 +1172,12 @@ pub mod ArtPeace {
                 color_index += 1;
             } else {
                 self.votable_colors.write((next_day_votable_index, next_day), color);
+                self
+                    .emit(
+                        VotableColorAdded {
+                            day: next_day, color_key: next_day_votable_index, color
+                        }
+                    );
                 next_day_votable_index += 1;
             }
             votable_index += 1;

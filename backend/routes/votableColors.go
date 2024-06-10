@@ -50,11 +50,11 @@ func InitVotableColors(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Proceed with inserting unique colors into the VotableColors table
-	for _, colorHex := range *colors {
+	for idx, colorHex := range *colors {
 		_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), `
-			INSERT INTO VotableColors (hex)
-			VALUES ($1)
-		`, colorHex)
+			INSERT INTO VotableColors (day_index, color_key, hex)
+			VALUES ($1, $2, $3)
+		`, 0, idx+1, colorHex)
 		if err != nil {
 			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error inserting votable color: "+colorHex)
 			return
@@ -67,14 +67,14 @@ func InitVotableColors(w http.ResponseWriter, r *http.Request) {
 func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 
 	votableColors, err := core.PostgresQueryJson[VotableColor](`
-	  SELECT vc.key, vc.hex, COALESCE(cv.votes, 0) AS votes
+	  SELECT vc.color_key as key, vc.hex, COALESCE(cv.votes, 0) AS votes
 	  FROM VotableColors vc
 	  LEFT JOIN (
 	  	SELECT color_key, COUNT(DISTINCT user_address) AS votes
 	  	FROM ColorVotes
 	  	WHERE day_index = (SELECT MAX(day_index) FROM Days)
 	  	GROUP BY color_key
-	  ) cv ON vc.key = cv.color_key
+	  ) cv ON vc.color_key = cv.color_key
 	`)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error fetching votable colors")
@@ -110,6 +110,7 @@ func voteColorDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate color format
+	// TODO: Get length from postgres
 	votableColorsLength := len(core.ArtPeaceBackend.CanvasConfig.VotableColors)
 	if colorIndex <= 0 || colorIndex > votableColorsLength {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid colorIndex, out of range")
