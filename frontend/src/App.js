@@ -173,6 +173,8 @@ function App() {
   const [isEraserMode, setIsEraserMode] = React.useState(false);
   const [isExtraDeleteMode, setIsExtraDeleteMode] = React.useState(false);
 
+  const [placementTimer, setPlacementTimer] = useState('XX:XX');
+
   useEffect(() => {
     const getLastPlacedPixel = `get-last-placed-time?address=${queryAddress}`;
     async function fetchGetLastPlacedPixel() {
@@ -303,6 +305,11 @@ function App() {
     setSelectedPositionX(x);
     setSelectedPositionY(y);
     setPixelSelectedMode(true);
+
+    if (placementTimer == 'Place Pixel') {
+      setSelectorMode(true);
+      setIsEraserMode(false);
+    }
     // TODO: move http fetch for pixel data here?
   };
 
@@ -551,6 +558,8 @@ function App() {
           basePixelTimer={basePixelTimer}
           queryAddress={queryAddress}
           setActiveTab={setActiveTab}
+          placementTimer={placementTimer}
+          setPlacementTimer={setPlacementTimer}
         />
         <TabsFooter
           tabs={tabs}
