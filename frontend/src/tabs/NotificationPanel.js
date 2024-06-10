@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './NotificationPanel.css';
+// import '../utils/Styles.css'; // Ensure this import is correct
 
 const NotificationPanel = ({ message, onClose, animationDuration = 3000 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -20,15 +21,16 @@ const NotificationPanel = ({ message, onClose, animationDuration = 3000 }) => {
       className={`notification-panel ${isVisible ? 'slide-in' : 'slide-out'}`}
     >
       <div className='notification-content'>
-        {message}
-        <button
+        <p>{message}</p>
+        <p
+          className='NotificationPanel__close'
           onClick={() => {
             setIsVisible(false);
             if (onClose) onClose();
           }}
         >
           X
-        </button>
+        </p>
       </div>
     </div>
   );
