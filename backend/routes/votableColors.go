@@ -75,6 +75,7 @@ func GetVotableColorsWithVoteCount(w http.ResponseWriter, r *http.Request) {
 	  	WHERE day_index = (SELECT MAX(day_index) FROM Days)
 	  	GROUP BY color_key
 	  ) cv ON vc.color_key = cv.color_key
+    WHERE vc.day_index = (SELECT MAX(day_index) FROM Days)
 	`)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error fetching votable colors")
