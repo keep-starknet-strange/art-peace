@@ -191,9 +191,9 @@ function App() {
     fetchGetLastPlacedPixel();
   }, [queryAddress]);
 
-  const updateInterval = 120000; // 1 second
+  const updateInterval = 1000; // 1 second
   // TODO: make this a config
-  const timeBetweenPlacements = 1000; // 2 minutes
+  const timeBetweenPlacements = 120000; // 2 minutes
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
   useEffect(() => {
     const updateBasePixelTimer = () => {
