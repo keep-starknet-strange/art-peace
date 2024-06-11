@@ -120,8 +120,13 @@ CREATE TABLE Colors (
 CREATE TABLE VotableColors (
   -- Postgres auto-incrementing primary key
   key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  hex text NOT NULL
+  day_index integer NOT NULL,
+  color_key integer NOT NULL,
+  hex text NOT NULL,
+  UNIQUE (day_index, color_key)
 );
+CREATE INDEX votableColors_day_index_index ON VotableColors (day_index);
+CREATE INDEX votableColors_color_key_index ON VotableColors (color_key);
 
 CREATE TABLE ColorVotes (
   -- Postgres auto-incrementing primary key

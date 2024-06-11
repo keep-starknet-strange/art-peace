@@ -248,28 +248,30 @@ const CanvasContainer = (props) => {
     const timestamp = Math.floor(Date.now() / 1000);
 
     if (!devnetMode) {
+      props.setSelectedColorId(-1);
       placePixelCall(position, colorId, timestamp);
       props.clearPixelSelection();
-      props.setSelectedColorId(-1);
       props.setLastPlacedTime(timestamp * 1000);
       return;
     }
 
-    const response = await fetchWrapper(`place-pixel-devnet`, {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({
-        position: position.toString(),
-        color: colorId.toString(),
-        timestamp: timestamp.toString()
-      })
-    });
-    if (response.result) {
-      console.log(response.result);
+    if (props.selectedColorId !== -1) {
+      props.setSelectedColorId(-1);
+      const response = await fetchWrapper(`place-pixel-devnet`, {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          position: position.toString(),
+          color: colorId.toString(),
+          timestamp: timestamp.toString()
+        })
+      });
+      if (response.result) {
+        console.log(response.result);
+      }
+      props.clearPixelSelection();
+      props.setLastPlacedTime(timestamp * 1000);
     }
-    props.clearPixelSelection();
-    props.setSelectedColorId(-1);
-    props.setLastPlacedTime(timestamp * 1000);
     // TODO: Fix last placed time if error in placing pixel
   };
 
