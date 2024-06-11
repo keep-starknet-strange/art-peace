@@ -13,7 +13,6 @@ import Account from './account/Account.js';
 import Templates from './templates/Templates.js';
 
 const TabPanel = (props) => {
-  // TODO: Speed up timer injection by using a context
   return (
     <div className='TabPanel'>
       <CSSTransition
@@ -99,12 +98,17 @@ const TabPanel = (props) => {
           <div>
             {props.activeTab === 'Quests' && (
               <div>
-                <TimerInjector>
-                  {({ timeLeftInDay }) => (
+                <TimerInjector
+                  address={props.address}
+                  artPeaceContract={props.artPeaceContract}
+                >
+                  {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Quests
                       address={props.address}
                       artPeaceContract={props.artPeaceContract}
                       timeLeftInDay={timeLeftInDay}
+                      newDayAvailable={newDayAvailable}
+                      startNextDay={startNextDay}
                       setActiveTab={props.setActiveTab}
                       queryAddress={props.queryAddress}
                       setExtraPixels={props.setExtraPixels}
@@ -130,10 +134,15 @@ const TabPanel = (props) => {
             )}
             {props.activeTab === 'Vote' && (
               <div>
-                <TimerInjector>
-                  {({ timeLeftInDay }) => (
+                <TimerInjector
+                  address={props.address}
+                  artPeaceContract={props.artPeaceContract}
+                >
+                  {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Voting
                       timeLeftInDay={timeLeftInDay}
+                      newDayAvailable={newDayAvailable}
+                      startNextDay={startNextDay}
                       setActiveTab={props.setActiveTab}
                       queryAddress={props.queryAddress}
                       address={props.address}
@@ -174,6 +183,8 @@ const TabPanel = (props) => {
                   setConnected={props.setConnected}
                   address={props.address}
                   chain={props.chain}
+                  connectWallet={props.connectWallet}
+                  connectors={props.connectors}
                 />
               </div>
             )}

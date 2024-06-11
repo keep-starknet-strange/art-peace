@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-backend
+  template:
+    metadata:
+      labels:
+        app: admin-backend
+    spec:
+      containers:
+        - name: admin-backend
+          image: 'brandonjroberts/art-peace-backend:v0.0.1'
+          command: ["./main", "--admin"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: backend-secret
+          volumeMounts:
+            - mountPath: /app/nfts
+              name: nft-data
+      volumes:
+        - name: nft-data
+          persistentVolumeClaim:
+            claimName: nft-volume-claim

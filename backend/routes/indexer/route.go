@@ -9,8 +9,6 @@ import (
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
-// TODO: Remove error json messages
-
 func InitIndexerRoutes() {
 	http.HandleFunc("/consume-indexer-msg", consumeIndexerMsg)
 }
@@ -112,7 +110,6 @@ var eventReverters = map[string](func(IndexerEvent)){
 	nftTransferEvent:        revertNFTTransferEvent,
 }
 
-// TODO: Think about this more
 var eventRequiresOrdering = map[string]bool{
 	newDayEvent:             false,
 	pixelPlacedEvent:        true,
@@ -369,4 +366,3 @@ func StartMessageProcessor() {
 
 // TODO: User might miss some messages between loading canvas and connecting to websocket?
 // TODO: Check thread safety of these things
-// TODO: only allow indexer to call this endpoint

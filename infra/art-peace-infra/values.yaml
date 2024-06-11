@@ -5,6 +5,8 @@ labels:
     name: postgres
   backend:
     name: backend
+  adminBackend:
+    name: admin-backend
   consumer:
     name: consumer
   indexer:
@@ -14,6 +16,7 @@ ports:
   redis: 6379
   postgres: 5432
   backend: 8080
+  adminBackend: 8082
   consumer: 8081
 
 volumes:
@@ -42,6 +45,9 @@ deployments:
     image: postgres
     tag: 14.11-alpine
   backend:
+    replicas: 1
+    image: brandonjroberts/art-peace-backend
+  adminBackend:
     replicas: 1
     image: brandonjroberts/art-peace-backend
   consumer:

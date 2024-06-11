@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { useAccount, useContract, useNetwork } from '@starknet-react/core';
+import {
+  useAccount,
+  useContract,
+  useNetwork,
+  useConnect
+} from '@starknet-react/core';
 import './App.css';
 import CanvasContainer from './canvas/CanvasContainer.js';
 import PixelSelector from './footer/PixelSelector.js';
@@ -99,7 +104,6 @@ function App() {
         lastJsonMessage.messageType === 'nftMinted' &&
         activeTab === 'NFTs'
       ) {
-        // TODO: Compare to user's address
         if (lastJsonMessage.minter === queryAddress) {
           setLatestMintedTokenId(lastJsonMessage.token_id);
         }
@@ -189,7 +193,7 @@ function App() {
 
   const updateInterval = 1000; // 1 second
   // TODO: make this a config
-  const timeBetweenPlacements = 120000; // 2 minutes
+  const timeBetweenPlacements = 1000; // 2 minutes
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
   useEffect(() => {
     const updateBasePixelTimer = () => {
@@ -315,7 +319,6 @@ function App() {
     context.clearRect(0, 0, width, height);
   }, [width, height]);
 
-  // TODO: thread safety?
   const clearExtraPixel = useCallback(
     (index) => {
       setAvailablePixelsUsed(availablePixelsUsed - 1);
@@ -378,6 +381,32 @@ function App() {
   const [nftPosition, setNftPosition] = useState(null);
   const [nftWidth, setNftWidth] = useState(null);
   const [nftHeight, setNftHeight] = useState(null);
+
+  // Account
+  const { connect, connectors } = useConnect();
+  const connectWallet = async (connector) => {
+    if (devnetMode) {
+      setConnected(true);
+      return;
+    }
+    connect({ connector });
+  };
+  useEffect(() => {
+    if (devnetMode) return;
+    if (!connectors) return;
+    if (connectors.length === 0) return;
+
+    const connectIfReady = async () => {
+      for (let i = 0; i < connectors.length; i++) {
+        let ready = await connectors[i].ready();
+        if (ready) {
+          connectWallet(connectors[i]);
+          break;
+        }
+      }
+    };
+    connectIfReady();
+  }, [connectors]);
 
   // Tabs
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
@@ -531,6 +560,8 @@ function App() {
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
           setLatestMintedTokenId={setLatestMintedTokenId}
+          connectWallet={connectWallet}
+          connectors={connectors}
         />
       </div>
       <div className='App__footer'>

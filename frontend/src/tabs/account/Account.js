@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  useConnect,
-  useDisconnect,
-  useContractWrite
-} from '@starknet-react/core';
+import { useDisconnect, useContractWrite } from '@starknet-react/core';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
@@ -40,8 +36,7 @@ const Account = (props) => {
   };
 
   // TODO: Connect wallet page if no connectors
-  // TODO: Reconnect on refresh if permitted
-  const { connect, connectors } = useConnect();
+  let [availableConnectors, setAvailableConnectors] = useState([]);
   const { disconnect } = useDisconnect();
 
   const [addressShort, setAddressShort] = useState('');
@@ -76,13 +71,24 @@ const Account = (props) => {
     );
   };
 
-  const connectWallet = async (connector) => {
+  useEffect(() => {
     if (devnetMode) {
-      props.setConnected(true);
+      setAvailableConnectors(props.connectors);
       return;
     }
-    connect({ connector });
-  };
+
+    const checkIfAvailable = async () => {
+      let availableConnectors = [];
+      for (let i = 0; i < props.connectors.length; i++) {
+        let available = await props.connectors[i].available();
+        if (available) {
+          availableConnectors.push(props.connectors[i]);
+        }
+      }
+      setAvailableConnectors(availableConnectors);
+    };
+    checkIfAvailable();
+  }, [props.connectors]);
 
   const disconnectWallet = () => {
     if (devnetMode) {
@@ -282,17 +288,48 @@ const Account = (props) => {
           >
             <div className='Account__walletmode__separator'></div>
             <div className='Account__walletmode__connect'>
-              {connectors.map((connector) => {
+              {availableConnectors.map((connector) => {
                 return (
                   <button
                     className='Text__medium Button__primary Account__walletlogin__button'
                     key={connector.id}
-                    onClick={() => connectWallet(connector)}
+                    onClick={() => props.connectWallet(connector)}
                   >
                     {connector.name}
                   </button>
                 );
               })}
+              {availableConnectors.length === 0 && (
+                <div>
+                  <p className='Text__small Account__wallet__noconnectors'>
+                    Please install a Starknet wallet extension
+                  </p>
+                  <div
+                    className='Text__medium Button__primary Account__walletlogin__button'
+                    onClick={() =>
+                      window.open(
+                        'https://www.argent.xyz/argent-x/',
+                        '_blank',
+                        'noreferrer'
+                      )
+                    }
+                  >
+                    Argent X
+                  </div>
+                  <div
+                    className='Text__medium Button__primary Account__walletlogin__button'
+                    onClick={() =>
+                      window.open(
+                        'https://braavos.app/download-braavos-wallet/',
+                        '_blank',
+                        'noreferrer'
+                      )
+                    }
+                  >
+                    Braavos
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

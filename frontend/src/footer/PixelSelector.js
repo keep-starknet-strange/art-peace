@@ -9,7 +9,7 @@ const PixelSelector = (props) => {
 
   useEffect(() => {
     if (props.queryAddress === '0') {
-      setPlacementTimer('Connect Wallet');
+      setPlacementTimer('Login to Play');
       return;
     }
     if (props.availablePixels > 0) {
