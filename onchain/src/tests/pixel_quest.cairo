@@ -106,7 +106,7 @@ fn pixel_quests_daily_no_color_test() {
     warp_to_next_available_time(art_peace);
     art_peace.place_pixel_blocktime(pos, color);
 
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_today_quest(0, utils::EMPTY_CALLDATA());
 
     assert!(
         art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily color claim"
@@ -132,7 +132,7 @@ fn pixel_quests_daily_color_test() {
     warp_to_next_available_time(art_peace);
     art_peace.place_pixel_blocktime(pos, color);
 
-    art_peace.claim_daily_quest(0, 1, utils::EMPTY_CALLDATA());
+    art_peace.claim_today_quest(1, utils::EMPTY_CALLDATA());
 
     assert!(
         art_peace.get_extra_pixels_count() == 10, "Extra pixels are wrong after daily color claim"
@@ -215,8 +215,8 @@ fn pixel_quests_daily_no_color_double_invalid_claim_test() {
     warp_to_next_available_time(art_peace);
     art_peace.place_pixel_blocktime(pos, color);
 
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_today_quest(0, utils::EMPTY_CALLDATA());
+    art_peace.claim_today_quest(0, utils::EMPTY_CALLDATA());
 }
 
 #[test]
@@ -237,7 +237,7 @@ fn pixel_quests_daily_no_color_claim_if_not_claimable_test() {
     warp_to_next_available_time(art_peace);
     art_peace.place_pixel_blocktime(pos, color);
 
-    art_peace.claim_daily_quest(0, 0, utils::EMPTY_CALLDATA());
+    art_peace.claim_today_quest(0, utils::EMPTY_CALLDATA());
 }
 
 #[test]

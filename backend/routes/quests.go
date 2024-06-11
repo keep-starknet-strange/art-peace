@@ -33,7 +33,7 @@ type DailyQuest struct {
 }
 
 type MainUserQuest struct {
-	Key         int    `json:"key"`
+	QuestId     int    `json:"questId"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Reward      int    `json:"reward"`
@@ -41,7 +41,7 @@ type MainUserQuest struct {
 }
 
 type MainQuest struct {
-	Key         int    `json:"key"`
+	QuestId     int    `json:"questId"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Reward      int    `json:"reward"`
@@ -107,6 +107,7 @@ func InitQuestsRoutes() {
 	http.HandleFunc("/get-main-quest-progress", GetMainQuestProgress)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/claim-today-quest-devnet", ClaimTodayQuestDevnet)
+		http.HandleFunc("/claim-main-quest-devnet", ClaimMainQuestDevnet)
 		http.HandleFunc("/increase-day-devnet", IncreaseDayDevnet)
 	}
 }
@@ -160,9 +161,10 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Setup main quests tables
-	for _, questConfig := range questJson.MainQuests.Quests {
+	for idx, questConfig := range questJson.MainQuests.Quests {
 		_, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuests (name, description, reward, quest_type) VALUES ($1, $2, $3, $4)", questConfig.Name, questConfig.Description, questConfig.Reward, questConfig.ContractConfig.Type)
 		if err != nil {
+			fmt.Println(err, questConfig.Name, questConfig.Description, questConfig.Reward, questConfig.ContractConfig.Type)
 			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest")
 			return
 		}
@@ -172,13 +174,14 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 			paramStr := questConfig.ContractConfig.InitParams[storeParam]
 			param, err := strconv.Atoi(paramStr)
 			if err != nil {
-				routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid store param")
 				fmt.Println(paramIdx, paramStr, err, questConfig.Name)
+				routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid store param")
 				return
 			}
 
-			_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuestsInput (quest_id, input_key, input_value) VALUES ($1, $2, $3)", questConfig.Name, paramIdx, param)
+			_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuestsInput (quest_id, input_key, input_value) VALUES ($1, $2, $3)", idx, paramIdx, param)
 			if err != nil {
+				fmt.Println(err, questConfig.Name, paramIdx, param)
 				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest input")
 				return
 			}
@@ -201,7 +204,7 @@ func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMainQuests(w http.ResponseWriter, r *http.Request) {
-	quests, err := core.PostgresQueryJson[MainQuest]("SELECT key, name, description, reward FROM MainQuests ORDER BY key ASC")
+	quests, err := core.PostgresQueryJson[MainQuest]("SELECT key - 1 as quest_id, name, description, reward FROM MainQuests ORDER BY quest_id ASC")
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main quests")
 		return
@@ -217,7 +220,7 @@ func GetMainUserQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quests, err := core.PostgresQueryJson[MainUserQuest]("SELECT m.name, m.description, m.reward, m.key, COALESCE(u.completed, false) as completed FROM MainQuests m LEFT JOIN UserMainQuests u ON u.quest_id = m.key - 1 AND u.user_address = $1", userAddress)
+	quests, err := core.PostgresQueryJson[MainUserQuest]("SELECT m.name, m.description, m.reward, m.key - 1 as quest_id, COALESCE(u.completed, false) as completed FROM MainQuests m LEFT JOIN UserMainQuests u ON u.quest_id = m.key - 1 AND u.user_address = $1", userAddress)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests")
 		return
@@ -324,8 +327,7 @@ func GetMainQuestProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: key - 1 for all main quests?
-	questTypes, err := core.PostgresQuery[QuestTypes]("SELECT key as quest_id, quest_type FROM MainQuests")
+	questTypes, err := core.PostgresQuery[QuestTypes]("SELECT key - 1 as quest_id, quest_type FROM MainQuests")
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get quest status")
 		return
@@ -393,7 +395,7 @@ func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quests, err := core.PostgresQueryJson[MainQuest]("SELECT key, name, description, reward FROM MainQuests WHERE key = (SELECT quest_id FROM UserMainQuests WHERE user_address = $1 AND completed = TRUE)", userAddress)
+	quests, err := core.PostgresQueryJson[MainQuest]("SELECT key - 1 as quest_id, name, description, reward FROM MainQuests WHERE quest_id = (SELECT quest_id FROM UserMainQuests WHERE user_address = $1 AND completed = TRUE)", userAddress)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get completed main quests")
 		return
@@ -457,6 +459,37 @@ func ClaimTodayQuestDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Today quest claimed")
+}
+
+func ClaimMainQuestDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		return
+	}
+
+	questId, err := strconv.Atoi((*jsonBody)["questId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid quest id")
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.ClaimTodayQuestDevnet // TODO
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+
+	cmd := exec.Command(shellCmd, contract, "claim_main_quest", strconv.Itoa(questId), "0")
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to claim main quest on devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Main quest claimed")
 }
 
 func IncreaseDayDevnet(w http.ResponseWriter, r *http.Request) {

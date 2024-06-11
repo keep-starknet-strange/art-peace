@@ -175,16 +175,27 @@ const Quests = (props) => {
     return incomplete.concat(completed);
   };
 
-  const markCompleted = (questId) => {
+  const markCompleted = (questId, questType) => {
     let questReward = 0;
-    const newQuests = todaysQuestsInfo.map((quest) => {
-      if (quest.questId === questId) {
-        questReward = quest.reward;
-        return { ...quest, completed: true };
-      }
-      return quest;
-    });
-    setTodaysQuestsInfo(newQuests);
+    if (questType === 'daily') {
+      const newQuests = todaysQuestsInfo.map((quest) => {
+        if (quest.questId === questId) {
+          questReward = quest.reward;
+          return { ...quest, completed: true };
+        }
+        return quest;
+      });
+      setTodaysQuestsInfo(newQuests);
+    } else {
+      const newQuests = mainQuestsInfo.map((quest) => {
+        if (quest.questId === questId) {
+          questReward = quest.reward;
+          return { ...quest, completed: true };
+        }
+        return quest;
+      });
+      setMainQuestsInfo(newQuests);
+    }
     props.setExtraPixels(props.extraPixels + questReward);
   };
 
@@ -221,6 +232,7 @@ const Quests = (props) => {
             artPeaceContract={props.artPeaceContract}
             progress={quest.progress}
             needed={quest.needed}
+            type='daily'
           />
         ))}
 
@@ -239,6 +251,7 @@ const Quests = (props) => {
             artPeaceContract={props.artPeaceContract}
             progress={quest.progress}
             needed={quest.needed}
+            type='main'
           />
         ))}
       </div>
