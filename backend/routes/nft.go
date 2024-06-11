@@ -24,6 +24,9 @@ func InitNFTRoutes() {
 	}
 	// Create a static file server for the nft images
 	// TODO: Versioning here?
+}
+
+func InitNFTStaticRoutes() {
 	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts/images"))))
 	http.Handle("/nft-meta/", http.StripPrefix("/nft-meta/", http.FileServer(http.Dir("./nfts/meta"))))
 }

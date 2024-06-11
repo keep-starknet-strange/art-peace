@@ -93,7 +93,7 @@ echo "Contract class hash: $ART_PEACE_CONTRACT_CLASSHASH"
 
 # Deploying the contract
 CANVAS_CONFIG=$PROJECT_ROOT/configs/canvas.config.json
-QUESTS_CONFIG=$PROJECT_ROOT/configs/quests.config.json
+QUESTS_CONFIG=$PROJECT_ROOT/configs/production-quests.config.json
 
 ACCOUNT_ADDRESS=$(cat $STARKNET_ACCOUNT | jq -r '.deployment.address')
 WIDTH=$(jq -r '.canvas.width' $CANVAS_CONFIG)
