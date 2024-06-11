@@ -7,12 +7,14 @@ metadata:
     networking.gke.io/managed-certificates: managed-cert
     kubernetes.io/ingress.class: "gce"
 spec:
-  defaultBackend:
-    service:
-      name: backend
-      port:
-        number: 8080
   rules:
+  - path: /ws
+    pathType: Exact
+    backend:
+      service:
+        name: consumer
+        port:
+          number: 8081
   - http:
       paths:
       - path: /

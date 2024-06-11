@@ -171,7 +171,6 @@ const ExtraPixelsPanel = (props) => {
   const [factionPixelsExpanded, setFactionPixelsExpanded] =
     React.useState(false);
   const getFactionName = (index) => {
-    /* TODO: Black out spent pixels */
     /* TODO: Animate expanding */
     const id = props.userFactions.findIndex(
       (faction) =>
@@ -289,7 +288,10 @@ const ExtraPixelsPanel = (props) => {
                   onMouseOut={() => {
                     props.setIsExtraDeleteMode(false);
                   }}
-                  onClick={() => props.clearExtraPixel(index)}
+                  onClick={() => {
+                    props.clearExtraPixel(index);
+                    props.setIsExtraDeleteMode(false);
+                  }}
                 >
                   <p className='ExtraPixelsPanel__bubble__remove'>X</p>
                 </div>

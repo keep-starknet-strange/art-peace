@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: art-peace-static-ip
+    networking.gke.io/managed-certificates: managed-cert
+    kubernetes.io/ingress.class: "gce"
+spec:
+  rules:
+  - path: /ws
+    pathType: Exact
+    backend:
+      service:
+        name: {{ .Values.labels.consumer.name }}
+        port:
+          number: {{ .Values.ports.consumer }}
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.labels.backend.name }}
+            port:
+              number: {{ .Values.ports.backend }}

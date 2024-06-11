@@ -69,6 +69,7 @@ pub mod ArtPeace {
         nft_contract: ContractAddress,
         // Map: (day_index, user's address, color index) -> amount of pixels placed
         user_pixels_placed: LegacyMap::<(u32, ContractAddress, u8), u32>,
+        devmode: bool,
         #[substorage(v0)]
         templates: TemplateStoreComponent::Storage,
     }
@@ -86,6 +87,7 @@ pub mod ArtPeace {
         VoteColor: VoteColor,
         FactionCreated: FactionCreated,
         MemberReplaced: MemberReplaced,
+        VotableColorAdded: VotableColorAdded,
         // TODO: Integrate template event
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
@@ -166,6 +168,15 @@ pub mod ArtPeace {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct VotableColorAdded {
+        #[key]
+        day: u32,
+        #[key]
+        color_key: u8,
+        color: u32,
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct FactionCreated {
         #[key]
         faction_id: u32,
@@ -195,6 +206,7 @@ pub mod ArtPeace {
         pub daily_new_colors_count: u32,
         pub end_time: u64,
         pub daily_quests_count: u32,
+        pub devmode: bool,
     }
 
     const DAY_IN_SECONDS: u64 = consteval_int!(60 * 60 * 24);
@@ -221,7 +233,9 @@ pub mod ArtPeace {
         self.votable_colors_count.write(0, votable_colors_count);
         let mut i: u8 = 0;
         while i < votable_colors_count {
-            self.votable_colors.write((i + 1, 0), *init_params.votable_colors.at(i.into()));
+            let new_color = *init_params.votable_colors.at(i.into());
+            self.votable_colors.write((i + 1, 0), new_color);
+            self.emit(VotableColorAdded { day: 0, color_key: i + 1, color: new_color });
             i += 1;
         };
         self.daily_new_colors_count.write(init_params.daily_new_colors_count);
@@ -232,12 +246,13 @@ pub mod ArtPeace {
         self.day_index.write(0);
         self.emit(NewDay { day_index: 0, start_time: starknet::get_block_timestamp() });
 
-        // TODO: Dev only - remove
-        let test_address = starknet::contract_address_const::<
-            0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
-        >();
-        let zero_address = starknet::contract_address_const::<0>();
-        self.extra_pixels.write(test_address, 1000);
+        if init_params.devmode {
+            let test_address = starknet::contract_address_const::<
+                0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
+            >();
+            self.extra_pixels.write(test_address, 1000);
+        }
+        self.devmode.write(init_params.devmode);
 
         self.daily_quests_count.write(init_params.daily_quests_count);
     }
@@ -485,6 +500,10 @@ pub mod ArtPeace {
             self.factions_count.read()
         }
 
+        fn get_user_factions_count(self: @ContractState, user: ContractAddress) -> u32 {
+            self.user_memberships_count.read(user)
+        }
+
         fn get_faction(self: @ContractState, faction_id: u32) -> Faction {
             self.factions.read(faction_id)
         }
@@ -504,6 +523,7 @@ pub mod ArtPeace {
             //assert(
             //    starknet::get_caller_address() == self.host.read(), 'Factions are set by the host'
             //);
+            self.check_game_running();
             assert(members.len() <= pool, 'Invalid faction members count');
             let faction_id = self.factions_count.read();
             let faction = Faction { name, leader, pixel_pool: pool };
@@ -533,6 +553,7 @@ pub mod ArtPeace {
         fn replace_member(
             ref self: ContractState, faction_id: u32, member_id: u32, new_member: ContractAddress
         ) {
+            self.check_game_running();
             assert(
                 starknet::get_caller_address() == self.get_faction_leader(faction_id),
                 'Only leader can replace members'
@@ -572,6 +593,7 @@ pub mod ArtPeace {
         }
 
         //fn add_faction_member(ref self: ContractState, faction_id: u32, member: ContractAddress) {
+        //    self.check_game_running();
         //    assert(
         //        starknet::get_caller_address() == self.get_faction_owner(faction_id),
         //        'Only the faction owner can add members'
@@ -585,6 +607,7 @@ pub mod ArtPeace {
         //}
 
         //fn remove_faction_member(ref self: ContractState, faction_id: u32, member_id: u32) {
+        //    self.check_game_running();
         //    assert(
         //        starknet::get_caller_address() == self.get_faction_owner(faction_id),
         //        'Only the faction owner can remove members'
@@ -653,9 +676,8 @@ pub mod ArtPeace {
         }
 
         fn vote_color(ref self: ContractState, color: u8) {
-            let now = starknet::get_block_timestamp();
+            self.check_game_running();
             let day = self.day_index.read();
-            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
             assert(color != 0, 'Color 0 indicates no vote');
             assert(color <= self.votable_colors_count.read(day), 'Color out of bounds');
             let caller = starknet::get_caller_address();
@@ -708,10 +730,13 @@ pub mod ArtPeace {
 
         // TODO: Integrate call into backend
         fn increase_day_index(ref self: ContractState) {
+            self.check_game_running();
             let block_timestamp = starknet::get_block_timestamp();
             let start_day_time = self.start_day_time.read();
 
-            assert(block_timestamp >= start_day_time + DAY_IN_SECONDS, 'day has not passed');
+            if !self.devmode.read() {
+                assert(block_timestamp >= start_day_time + DAY_IN_SECONDS, 'day has not passed');
+            }
             finalize_color_votes(ref self);
 
             self.day_index.write(self.day_index.read() + 1);
@@ -775,6 +800,7 @@ pub mod ArtPeace {
         fn add_daily_quests(
             ref self: ContractState, day_index: u32, quests: Span<ContractAddress>
         ) {
+            self.check_game_running();
             assert(
                 starknet::get_caller_address() == self.host.read(), 'Quests are set by the host'
             );
@@ -792,6 +818,7 @@ pub mod ArtPeace {
         }
 
         fn add_main_quests(ref self: ContractState, quests: Span<ContractAddress>) {
+            self.check_game_running();
             assert(
                 starknet::get_caller_address() == self.host.read(), 'Quests are set by the host'
             );
@@ -804,30 +831,11 @@ pub mod ArtPeace {
             self.main_quests_count.write(end);
         }
 
-        fn claim_daily_quest(
-            ref self: ContractState, day_index: u32, quest_id: u32, calldata: Span<felt252>
-        ) {
-            let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
-            let quest = self.daily_quests.read((day_index, quest_id));
-            let user = starknet::get_caller_address();
-            let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
-            if reward > 0 {
-                self
-                    .extra_pixels
-                    .write(
-                        starknet::get_caller_address(),
-                        self.extra_pixels.read(starknet::get_caller_address()) + reward
-                    );
-            }
-            self.emit(DailyQuestClaimed { day_index, quest_id, user, reward, calldata });
-        }
-
         fn claim_today_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
-            let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
+            self.check_game_running();
             let day_index = self.day_index.read();
             let quest = self.daily_quests.read((day_index, quest_id));
+            assert(quest != starknet::contract_address_const::<0>(), 'This quest is unavailable');
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
             if reward > 0 {
@@ -842,8 +850,7 @@ pub mod ArtPeace {
         }
 
         fn claim_main_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
-            let now = starknet::get_block_timestamp();
-            assert(now <= self.end_time.read(), 'ArtPeace game has ended');
+            self.check_game_running();
             let quest = self.main_quests.read(quest_id);
             let user = starknet::get_caller_address();
             let reward = IQuestDispatcher { contract_address: quest }.claim(user, calldata);
@@ -916,6 +923,7 @@ pub mod ArtPeace {
     #[abi(embed_v0)]
     impl ArtPeaceNFTMinter of IArtPeaceNFTMinter<ContractState> {
         fn add_nft_contract(ref self: ContractState, nft_contract: ContractAddress) {
+            self.check_game_running();
             assert(
                 starknet::get_caller_address() == self.host.read(),
                 'NFT contract is set by the host'
@@ -928,6 +936,7 @@ pub mod ArtPeace {
         }
 
         fn mint_nft(ref self: ContractState, mint_params: NFTMintParams) {
+            self.check_game_running();
             let metadata = NFTMetadata {
                 position: mint_params.position,
                 width: mint_params.width,
@@ -961,6 +970,7 @@ pub mod ArtPeace {
         }
 
         fn complete_template(ref self: ContractState, template_id: u32, template_image: Span<u8>) {
+            self.check_game_running();
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
             let template_metadata: TemplateMetadata = self.get_template(template_id);
@@ -1008,6 +1018,7 @@ pub mod ArtPeace {
         fn complete_template_with_rewards(
             ref self: ContractState, template_id: u32, template_image: Span<u8>
         ) {
+            self.check_game_running();
             assert(template_id < self.get_templates_count(), 'Template ID out of bounds');
             assert(!self.is_template_complete(template_id), 'Template already completed');
             let template_metadata: TemplateMetadata = self.get_template(template_id);
@@ -1156,6 +1167,12 @@ pub mod ArtPeace {
                 color_index += 1;
             } else {
                 self.votable_colors.write((next_day_votable_index, next_day), color);
+                self
+                    .emit(
+                        VotableColorAdded {
+                            day: next_day, color_key: next_day_votable_index, color
+                        }
+                    );
                 next_day_votable_index += 1;
             }
             votable_index += 1;

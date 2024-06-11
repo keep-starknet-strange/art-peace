@@ -128,7 +128,12 @@ const Voting = (props) => {
         }}
       >
         <p className='Text__medium'>Vote closes</p>
-        <p className='Text__small Voting__timer'>{props.timeLeftInDay}</p>
+        <p
+          className={`Text__small Voting__timer ${props.newDayAvailable ? 'Voting__timer--active' : ''}`}
+          onClick={() => props.startNextDay()}
+        >
+          {props.timeLeftInDay}
+        </p>
       </div>
       <p className='Text__small Voting__description'>
         Vote for a new palette color

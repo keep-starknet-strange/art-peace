@@ -10,6 +10,9 @@ var QuestChecks = map[int]func(*Quest, string) (int, int){
 	RainbowQuestType:    CheckRainbowStatus,
 	TemplateQuestType:   CheckTemplateStatus,
 	UnruggableQuestType: CheckUnruggableStatus,
+	VoteQuestType:       CheckVoteStatus,
+	FactionQuestType:    CheckFactionStatus,
+	UsernameQuestType:   CheckUsernameStatus,
 }
 
 func (q *Quest) CheckStatus(user string) (progress int, needed int) {
@@ -70,6 +73,26 @@ func CheckPixelStatus(q *Quest, user string) (progress int, needed int) {
 	}
 }
 
+func CheckVoteStatus(q *Quest, user string) (progress int, needed int) {
+	voteQuestInputs := NewVoteQuestInputs(q.InputData)
+
+	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM ColorVotes WHERE user_address = $1 AND day_index = $2", user, voteQuestInputs.DayIndex)
+	if err != nil {
+		return 0, 1
+	}
+
+	return *count, 1
+}
+
+func CheckFactionStatus(q *Quest, user string) (progress int, needed int) {
+	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM FactionMembersInfo WHERE user_address = $1", user)
+	if err != nil {
+		return 0, 1
+	}
+
+	return *count, 1
+}
+
 func CheckRainbowStatus(q *Quest, user string) (progress int, needed int) {
 	// TODO: Implement this
 	return 0, 1
@@ -83,4 +106,15 @@ func CheckTemplateStatus(q *Quest, user string) (progress int, needed int) {
 func CheckUnruggableStatus(q *Quest, user string) (progress int, needed int) {
 	// TODO: Implement this
 	return 0, 1
+}
+
+func CheckUsernameStatus(q *Quest, user string) (progress int, needed int) {
+
+	count, err := core.PostgresQueryOne[int]("SELECT COUNT (*) FROM Users where address = $1", user)
+
+	if err != nil {
+		return 0, 1
+	} else {
+		return *count, 1
+	}
 }

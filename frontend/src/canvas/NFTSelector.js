@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import './NFTSelector.css';
 
 const NFTSelector = (props) => {
-  const [nftSelectionPositionX, setNftSelectionPositionX] = useState(-1);
-  const [nftSelectionPositionY, setNftSelectionPositionY] = useState(-1);
-  const [nftSelectionWidth, setNftSelectionWidth] = useState(0);
-  const [nftSelectionHeight, setNftSelectionHeight] = useState(0);
+  const [nftSelectionInitX, setNftSelectionInitX] = useState(0);
+  const [nftSelectionInitY, setNftSelectionInitY] = useState(0);
   const [nftSelectionStartX, setNftSelectionStartX] = useState(0);
   const [nftSelectionStartY, setNftSelectionStartY] = useState(0);
-  const [nftSelectionEndX, setNftSelectionEndX] = useState(0);
-  const [nftSelectionEndY, setNftSelectionEndY] = useState(0);
+  const [nftSelectionWidth, setNftSelectionWidth] = useState(0);
+  const [nftSelectionHeight, setNftSelectionHeight] = useState(0);
 
   useEffect(() => {
     const updateFromEvent = (event) => {
@@ -36,10 +34,6 @@ const NFTSelector = (props) => {
         }
         setNftSelectionStartX(x);
         setNftSelectionStartY(y);
-        setNftSelectionEndX(x + 1);
-        setNftSelectionEndY(y + 1);
-        setNftSelectionPositionX(x);
-        setNftSelectionPositionY(y);
         setNftSelectionWidth(1);
         setNftSelectionHeight(1);
         props.setNftPosition(x + y * props.width);
@@ -58,27 +52,36 @@ const NFTSelector = (props) => {
         if (x < 0 || x >= props.width || y < 0 || y >= props.height) {
           return;
         }
-        setNftSelectionEndX(x + 1);
-        setNftSelectionEndY(y + 1);
-        if (nftSelectionEndX <= nftSelectionStartX) {
-          setNftSelectionPositionX(nftSelectionEndX - 1);
-          setNftSelectionWidth(nftSelectionStartX - nftSelectionEndX + 1);
+
+        let initX = nftSelectionInitX;
+        let initY = nftSelectionInitY;
+        let startX = initX;
+        let startY = initY;
+        let endX = x + 1;
+        let endY = y + 1;
+        if (x < initX) {
+          startX = x;
+          endX = initX + 1;
         } else {
-          setNftSelectionPositionX(nftSelectionStartX);
-          setNftSelectionWidth(nftSelectionEndX - nftSelectionStartX);
+          startX = initX;
+          endX = x + 1;
         }
-        if (nftSelectionEndY <= nftSelectionStartY) {
-          setNftSelectionPositionY(nftSelectionEndY - 1);
-          setNftSelectionHeight(nftSelectionStartY - nftSelectionEndY + 1);
+        if (y < initY) {
+          startY = y;
+          endY = initY + 1;
         } else {
-          setNftSelectionPositionY(nftSelectionStartY);
-          setNftSelectionHeight(nftSelectionEndY - nftSelectionStartY);
+          startY = initY;
+          endY = y + 1;
         }
-        props.setNftPosition(
-          nftSelectionPositionX + nftSelectionPositionY * props.width
-        );
-        props.setNftWidth(nftSelectionWidth);
-        props.setNftHeight(nftSelectionHeight);
+        let width = endX - startX;
+        let height = endY - startY;
+        setNftSelectionStartX(startX);
+        setNftSelectionStartY(startY);
+        setNftSelectionWidth(width);
+        setNftSelectionHeight(height);
+        props.setNftPosition(startX + startY * props.width);
+        props.setNftWidth(width);
+        props.setNftHeight(height);
         return;
       }
     };
@@ -91,19 +94,11 @@ const NFTSelector = (props) => {
     };
   }, [
     props.nftSelectionStarted,
-    nftSelectionStartX,
-    nftSelectionStartY,
-    nftSelectionEndX,
-    nftSelectionEndY,
-    nftSelectionPositionX,
-    nftSelectionPositionY,
-    props.width,
-    props.height,
-    props.canvasScale,
+    nftSelectionInitX,
+    nftSelectionInitY,
     props.nftSelected
   ]);
 
-  // TODO: Fix one off issues with the selection
   useEffect(() => {
     const mouseUp = async (event) => {
       if (
@@ -133,14 +128,15 @@ const NFTSelector = (props) => {
           if (x < 0 || x >= props.width || y < 0 || y >= props.height) {
             return;
           }
+          setNftSelectionInitX(x);
+          setNftSelectionInitY(y);
           setNftSelectionStartX(x);
           setNftSelectionStartY(y);
-          setNftSelectionEndX(x + 1);
-          setNftSelectionEndY(y + 1);
-          setNftSelectionPositionX(x);
-          setNftSelectionPositionY(y);
           setNftSelectionWidth(1);
           setNftSelectionHeight(1);
+          props.setNftPosition(x + y * props.width);
+          props.setNftWidth(1);
+          props.setNftHeight(1);
           props.setNftSelectionStarted(true);
           return;
         } else {
@@ -157,30 +153,36 @@ const NFTSelector = (props) => {
           if (x < 0 || x >= props.width || y < 0 || y >= props.height) {
             return;
           }
-          setNftSelectionEndX(x + 1);
-          setNftSelectionEndY(y + 1);
-          if (nftSelectionEndX <= nftSelectionStartX) {
-            setNftSelectionPositionX(nftSelectionEndX - 1);
-            setNftSelectionWidth(nftSelectionStartX - nftSelectionEndX + 1);
+          let initX = nftSelectionInitX;
+          let initY = nftSelectionInitY;
+          let startX = initX;
+          let startY = initY;
+          let endX = x + 1;
+          let endY = y + 1;
+          if (x < initX) {
+            startX = x;
+            endX = initX + 1;
           } else {
-            setNftSelectionPositionX(nftSelectionStartX);
-            setNftSelectionWidth(nftSelectionEndX - nftSelectionStartX);
+            startX = initX;
+            endX = x + 1;
           }
-          if (nftSelectionEndY <= nftSelectionStartY) {
-            setNftSelectionPositionY(nftSelectionEndY - 1);
-            setNftSelectionHeight(nftSelectionStartY - nftSelectionEndY + 1);
+          if (y < initY) {
+            startY = y;
+            endY = initY + 1;
           } else {
-            setNftSelectionPositionY(nftSelectionStartY);
-            setNftSelectionHeight(nftSelectionEndY - nftSelectionStartY);
+            startY = initY;
+            endY = y + 1;
           }
+          let width = endX - startX;
+          let height = endY - startY;
 
-          // Pass the selection to the parent
-          props.setNftPosition(
-            nftSelectionPositionX + nftSelectionPositionY * props.width
-          );
-          props.setNftWidth(nftSelectionWidth);
-          props.setNftHeight(nftSelectionHeight);
-
+          setNftSelectionStartX(startX);
+          setNftSelectionStartY(startY);
+          setNftSelectionWidth(width);
+          setNftSelectionHeight(height);
+          props.setNftPosition(startX + startY * props.width);
+          props.setNftWidth(width);
+          props.setNftHeight(height);
           props.setNftSelected(true);
         }
       }
@@ -191,17 +193,10 @@ const NFTSelector = (props) => {
       window.removeEventListener('mouseup', mouseUp);
     };
   }, [
-    props.canvasRef,
     props.nftMintingMode,
-    props.width,
-    props.height,
     props.nftSelectionStarted,
-    nftSelectionStartX,
-    nftSelectionStartY,
-    nftSelectionEndX,
-    nftSelectionEndY,
-    nftSelectionPositionX,
-    nftSelectionPositionY
+    nftSelectionInitX,
+    nftSelectionInitY
   ]);
 
   const [nftMintingOutline, setNftMintingOutline] = useState('none');
@@ -226,8 +221,8 @@ const NFTSelector = (props) => {
     <div
       className='NFTSelector'
       style={{
-        left: nftSelectionPositionX * props.canvasScale,
-        top: nftSelectionPositionY * props.canvasScale,
+        left: nftSelectionStartX * props.canvasScale,
+        top: nftSelectionStartY * props.canvasScale,
         width: nftSelectionWidth * props.canvasScale,
         height: nftSelectionHeight * props.canvasScale,
         outline: nftMintingOutline,

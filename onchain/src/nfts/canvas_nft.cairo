@@ -1,12 +1,13 @@
 #[starknet::contract]
 mod CanvasNFT {
+    use art_peace::nfts::interfaces::ICanvasNFTStore;
     use openzeppelin::token::erc721::ERC721Component;
     use openzeppelin::token::erc721::interface::IERC721Metadata;
     use openzeppelin::introspection::src5::SRC5Component;
     use starknet::ContractAddress;
     use art_peace::nfts::component::CanvasNFTStoreComponent;
     use art_peace::nfts::component::CanvasNFTStoreComponent::CanvasNFTMinted;
-    use art_peace::nfts::{ICanvasNFTAdditional, NFTMetadata};
+    use art_peace::nfts::{ICanvasNFTAdditional, ICanvasNFTLikeAndUnlike, NFTMetadata};
 
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
@@ -47,7 +48,24 @@ mod CanvasNFT {
         SRC5Event: SRC5Component::Event,
         #[flat]
         NFTEvent: CanvasNFTStoreComponent::Event,
+        NFTLiked: NFTLiked,
+        NFTUnliked: NFTUnliked,
     }
+
+    #[derive(Drop, starknet::Event)]
+    struct NFTLiked {
+        #[key]
+        user_address: ContractAddress,
+        token_id: u256
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct NFTUnliked {
+        #[key]
+        user_address: ContractAddress,
+        token_id: u256
+    }
+
 
     #[constructor]
     fn constructor(ref self: ContractState, name: ByteArray, symbol: ByteArray) {
@@ -95,6 +113,26 @@ mod CanvasNFT {
             self.erc721._mint(receiver, token_id);
             self.nfts.nfts_count.write(token_id + 1);
             self.nfts.emit(CanvasNFTMinted { token_id, metadata });
+        }
+    }
+
+    #[abi(embed_v0)]
+    impl CanvasNFTLikeAndUnlike of ICanvasNFTLikeAndUnlike<ContractState> {
+        fn like_nft(ref self: ContractState, token_id: u256) {
+            assert(token_id < self.get_nfts_count(), 'NFT Does not Exist in the Store');
+
+            self
+                .emit(
+                    NFTLiked { user_address: starknet::get_caller_address(), token_id: token_id }
+                );
+        }
+
+        fn unlike_nft(ref self: ContractState, token_id: u256) {
+            assert(token_id < self.get_nfts_count(), 'NFT Does not Exist in the Store');
+            self
+                .emit(
+                    NFTUnliked { user_address: starknet::get_caller_address(), token_id: token_id }
+                );
         }
     }
 }

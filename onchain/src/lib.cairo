@@ -15,6 +15,7 @@ mod quests {
     pub mod unruggable_quest;
     pub mod nft_quest;
     pub mod hodl_quest;
+    pub mod faction_quest;
     pub mod vote_quest;
 
     use interfaces::{
@@ -42,8 +43,8 @@ mod nfts {
     use interfaces::{
         NFTMintParams, NFTMetadata, IArtPeaceNFTMinter, ICanvasNFTStoreDispatcher,
         ICanvasNFTStoreDispatcherTrait, IArtPeaceNFTMinterDispatcher,
-        IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTAdditional, ICanvasNFTAdditionalDispatcher,
-        ICanvasNFTAdditionalDispatcherTrait
+        IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTAdditional, ICanvasNFTLikeAndUnlike,
+        ICanvasNFTAdditionalDispatcher, ICanvasNFTAdditionalDispatcherTrait
     };
 }
 
@@ -70,6 +71,7 @@ mod tests {
     pub(crate) mod nft_quest;
     pub(crate) mod hodl_quest;
     pub(crate) mod pixel_quest;
+    pub(crate) mod faction_quest;
     pub(crate) mod rainbow_quest;
     pub(crate) mod template_quest;
     pub(crate) mod unruggable_quest;

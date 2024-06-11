@@ -68,7 +68,7 @@ const CanvasContainer = (props) => {
 
   // Zoom in/out ( into the cursor position )
   const zoom = (e) => {
-    // Get the cursor position within the canvas ( note the canvas can go outsid  e the viewport )
+    // Get the cursor position within the canvas ( note the canvas can go outside the viewport )
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
@@ -145,6 +145,14 @@ const CanvasContainer = (props) => {
     const position = y * width + x;
     // TODO: Cache pixel info & clear cache on update from websocket
     // TODO: Dont query if hover select ( until 1s after hover? )
+    if (
+      props.selectedColorId !== -1 ||
+      props.isEraserMode ||
+      props.isExtraDeleteMode
+    ) {
+      props.setPixelPlacedBy(null);
+      return;
+    }
     const getPixelInfoEndpoint = await fetchWrapper(
       `get-pixel-info?position=${position.toString()}`
     );
@@ -240,31 +248,32 @@ const CanvasContainer = (props) => {
     const timestamp = Math.floor(Date.now() / 1000);
 
     if (!devnetMode) {
+      props.setSelectedColorId(-1);
       placePixelCall(position, colorId, timestamp);
       props.clearPixelSelection();
-      props.setSelectedColorId(-1);
       props.setLastPlacedTime(timestamp * 1000);
       return;
     }
 
-    const response = await fetchWrapper(`place-pixel-devnet`, {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({
-        position: position.toString(),
-        color: colorId.toString(),
-        timestamp: timestamp.toString()
-      })
-    });
-    if (response.result) {
-      console.log(response.result);
+    if (props.selectedColorId !== -1) {
+      props.setSelectedColorId(-1);
+      const response = await fetchWrapper(`place-pixel-devnet`, {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          position: position.toString(),
+          color: colorId.toString(),
+          timestamp: timestamp.toString()
+        })
+      });
+      if (response.result) {
+        console.log(response.result);
+      }
+      props.clearPixelSelection();
+      props.setLastPlacedTime(timestamp * 1000);
     }
-    props.clearPixelSelection();
-    props.setSelectedColorId(-1);
-    props.setLastPlacedTime(timestamp * 1000);
     // TODO: Fix last placed time if error in placing pixel
   };
-  // TODO: Erasing extra pixels
 
   useEffect(() => {
     const hoverColor = (e) => {

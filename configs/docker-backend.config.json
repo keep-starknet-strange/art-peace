@@ -10,7 +10,8 @@
     "mint_nft_devnet": "/scripts/mint_nft.sh",
     "vote_color_devnet": "/scripts/vote_color.sh",
     "new_username_devnet": "/scripts/new_username.sh",
-    "change_username_devnet": "/scripts/change_username.sh"
+    "change_username_devnet": "/scripts/change_username.sh",
+    "increase_day_devnet": "/scripts/increase_day_index.sh"
   },
   "production": false,
   "websocket": {

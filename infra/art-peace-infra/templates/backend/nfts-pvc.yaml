@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.volumes.nfts.claim }}
+  labels:
+    app: nfts
+spec:
+  storageClassName: {{ .Values.volumes.nfts.class }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.volumes.nfts.storage }}

@@ -25,5 +25,10 @@ func AuthMiddleware(w http.ResponseWriter, r *http.Request) bool {
 
 func AdminMiddleware(w http.ResponseWriter, r *http.Request) bool {
 	// TODO: Implement admin authentication
-	return false
+	if core.ArtPeaceBackend.AdminMode {
+		return false
+	} else {
+		WriteErrorJson(w, http.StatusUnauthorized, "Admin is required")
+		return true
+	}
 }

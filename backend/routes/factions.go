@@ -17,6 +17,7 @@ func InitFactionRoutes() {
 	http.HandleFunc("/upload-faction-icon", uploadFactionIcon)
 	http.HandleFunc("/get-my-factions", getMyFactions)
 	http.HandleFunc("/get-factions", getFactions)
+	http.HandleFunc("/get-faction-members", getFactionMembers)
 	// Create a static file server for the nft images
 	http.Handle("/faction-images/", http.StripPrefix("/faction-images/", http.FileServer(http.Dir("./factions"))))
 }
@@ -69,10 +70,15 @@ type FactionsConfig struct {
 	Factions []FactionsConfigItem `json:"factions"`
 }
 
+type FactionMemberData struct {
+	Username        string `json:"username"`
+	UserAddress     string `json:"userAddress"`
+	TotalAllocation int    `json:"totalAllocation"`
+}
+
 func initFactions(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to initialize colors
 	if routeutils.AdminMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
@@ -98,7 +104,6 @@ func initFactions(w http.ResponseWriter, r *http.Request) {
 func uploadFactionIcon(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to initialize colors
 	if routeutils.AdminMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
@@ -201,4 +206,48 @@ func getFactions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	routeutils.WriteDataJson(w, string(factions))
+}
+
+func getFactionMembers(w http.ResponseWriter, r *http.Request) {
+	factionID, err := strconv.Atoi(r.URL.Query().Get("factionId"))
+	if err != nil || factionID < 0 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
+
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 10
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	query := `
+	SELECT 
+    FMI.user_address AS user_address, 
+    COALESCE(U.name, '') AS username, 
+    SUM(FMI.allocation) AS total_allocation
+	FROM FactionMembersInfo FMI
+	LEFT JOIN Users U ON FMI.user_address = U.address
+	WHERE FMI.faction_id = $1
+	GROUP BY FMI.user_address, U.name
+	ORDER BY total_allocation DESC
+	LIMIT $2 OFFSET $3;
+	`
+
+	members, err := core.PostgresQueryJson[FactionMemberData](query, factionID, pageLength, offset)
+
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve factions")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(members))
 }

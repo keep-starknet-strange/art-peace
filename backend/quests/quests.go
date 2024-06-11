@@ -11,6 +11,9 @@ const (
 	RainbowQuestType
 	TemplateQuestType
 	UnruggableQuestType
+	VoteQuestType
+	FactionQuestType
+	UsernameQuestType
 )
 
 var OnchainQuestTypes = map[string]int{
@@ -21,6 +24,9 @@ var OnchainQuestTypes = map[string]int{
 	"RainbowQuest":    RainbowQuestType,
 	"TemplateQuest":   TemplateQuestType,
 	"UnruggableQuest": UnruggableQuestType,
+	"VoteQuest":       VoteQuestType,
+	"FactionQuest":    FactionQuestType,
+	"UsernameQuest":   UsernameQuestType,
 }
 
 type Quest struct {

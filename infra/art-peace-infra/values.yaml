@@ -1,0 +1,73 @@
+labels:
+  redis:
+    name: redis
+  postgres:
+    name: postgres
+  backend:
+    name: backend
+  adminBackend:
+    name: admin-backend
+  consumer:
+    name: consumer
+  indexer:
+    name: indexer
+
+ports:
+  redis: 6379
+  postgres: 5432
+  backend: 8080
+  adminBackend: 8082
+  consumer: 8081
+
+volumes:
+  redis:
+    name: redis-data
+    class: standard-rwo
+    storage: 10Gi
+  postgres:
+    name: postgres-data
+    class: standard-rwo
+    storage: 10Gi
+  nfts:
+    name: nft-data
+    claim: nft-volume-claim
+    class: standard-rwo
+    storage: 10Gi
+
+deployments:
+  sha: aabbccdd
+  redis:
+    replicas: 1
+    image: redis
+    tag: 7.2.4-alpine
+  postgres:
+    replicas: 1
+    image: postgres
+    tag: 14.11-alpine
+  backend:
+    replicas: 1
+    image: brandonjroberts/art-peace-backend
+  adminBackend:
+    replicas: 1
+    image: brandonjroberts/art-peace-backend
+  consumer:
+    replicas: 1
+    image: brandonjroberts/art-peace-consumer
+  indexer:
+    replicas: 1
+    image: brandonjroberts/art-peace-indexer
+
+postgres:
+  db: art-peace-db
+  user: art-peace-user
+  password: ArtPeacePassword1234
+
+apibara:
+  streamUrl: https://sepolia.starknet.a5a.ch
+  indexerId: art-peace-indexer-id
+  authToken: dna_aabbcc
+
+contracts:
+  artPeace: 0x075ceac501d747749d289cd588f07601b3caad223f4fcfcc803a77311118b1cf
+  usernameStore: 0x073128a9f7b38d2bcdb6c1f9ef4fea357de4dfe2fab5832c1e7b51e9aae97c51
+  nft: 0x072f12a6056df3e4c683d3a7fba1e1a1a702c51e1b1928fb058e91294c738984
