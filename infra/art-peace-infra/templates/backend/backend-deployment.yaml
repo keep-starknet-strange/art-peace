@@ -22,10 +22,3 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.labels.backend.name }}-secret
-          volumeMounts:
-            - mountPath: /app/nfts
-              name: {{ .Values.volumes.nfts.name }}
-      volumes:
-        - name: {{ .Values.volumes.nfts.name }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.volumes.nfts.claim }}

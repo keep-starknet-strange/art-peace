@@ -50,7 +50,7 @@ helm-uninstall:
 helm-install:
 	$(eval COMMIT_SHA := $(shell git rev-parse --short HEAD))
 	@echo "Installing helm chart..."
-	helm install --set postgres.password=$(POSTGRES_PASSWORD) --set apibara.authToken=$(AUTH_TOKEN) art-peace-infra infra/art-peace-infra
+	helm install --set postgres.password=$(POSTGRES_PASSWORD) --set deployments.sha=$(COMMIT_SHA) --set apibara.authToken=$(AUTH_TOKEN) art-peace-infra infra/art-peace-infra
 
 helm-template:
 	$(eval COMMIT_SHA := $(shell git rev-parse --short HEAD))
@@ -64,9 +64,7 @@ helm-upgrade:
 
 init-infra-prod:
 	$(eval COLORS := $(shell cat configs/canvas.config.json | jq -r '.colors | map("\"\(.)\"") | join(",")'))
-	$(eval VOTABLE_COLORS := $(shell cat configs/canvas.config.json | jq -r '.votableColors | map("\"\(.)\"") | join(",")'))
 	@echo "Initializing infra..."
 	curl https://api.art-peace.net/init-canvas -X POST
 	curl https://api.art-peace.net/init-colors -X POST -d "[$(COLORS)]"
-	curl https://api.art-peace.net/init-votable-colors -X POST -d "[$(VOTABLE_COLORS)]"
-	curl https://api.art-peace.net/init-quests -X POST -d "@configs/quests.config.json"
+	curl https://api.art-peace.net/init-quests -X POST -d "@configs/production-quests.config.json"
