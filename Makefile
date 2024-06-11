@@ -64,7 +64,6 @@ helm-upgrade:
 
 init-infra-prod:
 	$(eval COLORS := $(shell cat configs/canvas.config.json | jq -r '.colors | map("\"\(.)\"") | join(",")'))
-	$(eval VOTABLE_COLORS := $(shell cat configs/canvas.config.json | jq -r '.votableColors | map("\"\(.)\"") | join(",")'))
 	@echo "Initializing infra..."
 	curl https://api.art-peace.net/init-canvas -X POST
 	curl https://api.art-peace.net/init-colors -X POST -d "[$(COLORS)]"
