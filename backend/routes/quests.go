@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -145,7 +144,6 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 				param, err := strconv.Atoi(paramStr)
 				if err != nil {
 					routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid store param")
-					fmt.Println(paramIdx, paramStr, err, questConfig.Name)
 					return
 				}
 
@@ -164,7 +162,6 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 	for idx, questConfig := range questJson.MainQuests.Quests {
 		_, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuests (name, description, reward, quest_type) VALUES ($1, $2, $3, $4)", questConfig.Name, questConfig.Description, questConfig.Reward, questConfig.ContractConfig.Type)
 		if err != nil {
-			fmt.Println(err, questConfig.Name, questConfig.Description, questConfig.Reward, questConfig.ContractConfig.Type)
 			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest")
 			return
 		}
@@ -174,14 +171,12 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 			paramStr := questConfig.ContractConfig.InitParams[storeParam]
 			param, err := strconv.Atoi(paramStr)
 			if err != nil {
-				fmt.Println(paramIdx, paramStr, err, questConfig.Name)
 				routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid store param")
 				return
 			}
 
 			_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuestsInput (quest_id, input_key, input_value) VALUES ($1, $2, $3)", idx, paramIdx, param)
 			if err != nil {
-				fmt.Println(err, questConfig.Name, paramIdx, param)
 				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest input")
 				return
 			}
