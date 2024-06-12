@@ -65,3 +65,25 @@ export const getNftsFn = async (query) => {
     `get-nfts?pageLength=${query.pageLength}&page=${query.page}`
   );
 };
+
+export const getFactions = async (query) => {
+  return await fetchWrapper(
+    `get-factions?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
+  );
+};
+
+/**
+ * Fetches top NFTs with pagination.
+ *
+ * @param {Object} params - The query parameters for fetching top NFTs.
+ * @param {string} params.address - The address to fetch top NFTs for.
+ * @param {number} params.pageLength - The number of top NFTs to fetch per page.
+ * @param {number} params.page - The page number to fetch.
+ * @returns {Promise<Object>} The response from the fetch call.
+ */
+export const getTopNftsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-top-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
+};

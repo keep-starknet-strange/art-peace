@@ -14,9 +14,11 @@ const SelectedPixelPanel = (props) => {
       <p className='Text__small SelectedPixelPanel__item'>
         Pos &nbsp; : ({props.selectedPositionX}, {props.selectedPositionY})
       </p>
-      <p className='Text__small SelectedPixelPanel__address SelectedPixelPanel__item'>
-        Owner : {props.pixelPlacedBy}
-      </p>
+      {props.pixelPlacedBy && (
+        <p className='Text__small SelectedPixelPanel__address SelectedPixelPanel__item'>
+          Owner : {props.pixelPlacedBy}
+        </p>
+      )}
     </div>
   );
 };

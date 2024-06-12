@@ -1,0 +1,37 @@
+.notification-panel {
+  position: absolute;
+  top: -100%;
+  padding: 1rem 0.5rem 0.5rem 0.5rem;
+  max-width: 30rem;
+
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 1)
+  );
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem 0.1rem rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(0, 0, 0, 0.4);
+
+  transition: top 0.5s ease-in-out;
+  z-index: 1000;
+}
+
+.notification-panel__text {
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 1rem 0.5rem 0rem;
+}
+
+.notification-panel.slide-in {
+  top: 1.5rem;
+}
+
+.notification-panel.slide-out {
+  top: -100%;
+}
+
+.NotificationPanel__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}

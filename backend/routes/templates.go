@@ -291,7 +291,6 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
 	if routeutils.NonProductionMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method only allowed in non-production mode")
 		return
 	}
 

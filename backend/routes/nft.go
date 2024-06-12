@@ -18,11 +18,17 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-nft-likes", getNftLikeCount)
 	http.HandleFunc("/like-nft", LikeNFT)
 	http.HandleFunc("/unlike-nft", UnLikeNFT)
+	http.HandleFunc("/get-top-nfts", getTopNFTs)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
 	}
 	// Create a static file server for the nft images
-	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts"))))
+	// TODO: Versioning here?
+}
+
+func InitNFTStaticRoutes() {
+	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts/images"))))
+	http.Handle("/nft-meta/", http.StripPrefix("/nft-meta/", http.FileServer(http.Dir("./nfts/meta"))))
 }
 
 type NFTData struct {
@@ -84,6 +90,7 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	}
 	routeutils.WriteDataJson(w, string(nfts))
 }
+
 func getNFT(w http.ResponseWriter, r *http.Request) {
 	tokenId := r.URL.Query().Get("tokenId")
 
@@ -143,7 +150,6 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
 	if routeutils.NonProductionMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method only allowed in non-production mode")
 		return
 	}
 
@@ -197,7 +203,7 @@ func LikeNFT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO:  ensure that the nft exists
+	// TODO: ensure that the nft exists
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "NFT already liked by user")
@@ -242,4 +248,49 @@ func getNftLikeCount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteDataJson(w, strconv.Itoa(*count))
+}
+
+func getTopNFTs(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	query := `
+        SELECT 
+            nfts.*, 
+            COALESCE(like_count, 0) AS likes,
+            COALESCE((SELECT true FROM nftlikes WHERE liker = $1), false) as liked
+        FROM 
+            nfts
+        LEFT JOIN (
+            SELECT 
+                nftKey, 
+                COUNT(*) AS like_count
+            FROM 
+                nftlikes
+            GROUP BY 
+                nftKey
+        ) nftlikes ON nfts.token_id = nftlikes.nftKey
+        ORDER BY 
+            likes DESC
+        LIMIT $2 OFFSET $3`
+	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
+		return
+	}
+	routeutils.WriteDataJson(w, string(nfts))
 }

@@ -23,6 +23,7 @@ func main() {
 	databaseConfigFilename := flag.String("database-config", config.DefaultDatabaseConfigPath, "Database config file")
 	backendConfigFilename := flag.String("backend-config", config.DefaultBackendConfigPath, "Backend config file")
 	production := flag.Bool("production", false, "Production mode")
+	admin := flag.Bool("admin", false, "Admin mode")
 
 	flag.Parse()
 
@@ -48,7 +49,7 @@ func main() {
 	databases := core.NewDatabases(databaseConfig)
 	defer databases.Close()
 
-	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig)
+	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig, *admin)
 
 	routes.InitRoutes()
 

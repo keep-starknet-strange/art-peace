@@ -13,7 +13,6 @@ import Account from './account/Account.js';
 import Templates from './templates/Templates.js';
 
 const TabPanel = (props) => {
-  // TODO: Speed up timer injection by using a context
   return (
     <div className='TabPanel'>
       <CSSTransition
@@ -86,6 +85,7 @@ const TabPanel = (props) => {
           nftPosition={props.nftPosition}
           nftWidth={props.nftWidth}
           nftHeight={props.nftHeight}
+          setNotificationMessage={props.setNotificationMessage}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>
@@ -99,12 +99,17 @@ const TabPanel = (props) => {
           <div>
             {props.activeTab === 'Quests' && (
               <div>
-                <TimerInjector>
-                  {({ timeLeftInDay }) => (
+                <TimerInjector
+                  address={props.address}
+                  artPeaceContract={props.artPeaceContract}
+                >
+                  {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Quests
                       address={props.address}
                       artPeaceContract={props.artPeaceContract}
                       timeLeftInDay={timeLeftInDay}
+                      newDayAvailable={newDayAvailable}
+                      startNextDay={startNextDay}
                       setActiveTab={props.setActiveTab}
                       queryAddress={props.queryAddress}
                       setExtraPixels={props.setExtraPixels}
@@ -118,16 +123,28 @@ const TabPanel = (props) => {
               <div>
                 <Factions
                   setActiveTab={props.setActiveTab}
+                  chainFaction={props.chainFaction}
+                  setChainFaction={props.setChainFaction}
                   userFactions={props.userFactions}
+                  factionPixels={props.factionPixels}
+                  factionPixelsData={props.factionPixelsData}
+                  setTemplateOverlayMode={props.setTemplateOverlayMode}
+                  setOverlayTemplate={props.setOverlayTemplate}
+                  isMobile={props.isMobile}
                 />
               </div>
             )}
             {props.activeTab === 'Vote' && (
               <div>
-                <TimerInjector>
-                  {({ timeLeftInDay }) => (
+                <TimerInjector
+                  address={props.address}
+                  artPeaceContract={props.artPeaceContract}
+                >
+                  {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Voting
                       timeLeftInDay={timeLeftInDay}
+                      newDayAvailable={newDayAvailable}
+                      startNextDay={startNextDay}
                       setActiveTab={props.setActiveTab}
                       queryAddress={props.queryAddress}
                       address={props.address}
@@ -156,6 +173,7 @@ const TabPanel = (props) => {
                   latestMintedTokenId={props.latestMintedTokenId}
                   setLatestMintedTokenId={props.setLatestMintedTokenId}
                   queryAddress={props.queryAddress}
+                  isMobile={props.isMobile}
                 />
               </div>
             )}
@@ -168,6 +186,8 @@ const TabPanel = (props) => {
                   setConnected={props.setConnected}
                   address={props.address}
                   chain={props.chain}
+                  connectWallet={props.connectWallet}
+                  connectors={props.connectors}
                 />
               </div>
             )}

@@ -65,7 +65,6 @@ CREATE INDEX dailyQuestsInput_day_index_index ON DailyQuestsInput (day_index);
 CREATE INDEX dailyQuestsInput_quest_id_index ON DailyQuestsInput (quest_id);
 CREATE INDEX dailyQuestsInput_input_key_index ON DailyQuestsInput (input_key);
 
--- TODO: Add calldata field
 -- Table for storing the daily quests that the user has completed
 CREATE TABLE UserDailyQuests (
   -- Postgres auto-incrementing primary key
@@ -121,8 +120,13 @@ CREATE TABLE Colors (
 CREATE TABLE VotableColors (
   -- Postgres auto-incrementing primary key
   key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  hex text NOT NULL
+  day_index integer NOT NULL,
+  color_key integer NOT NULL,
+  hex text NOT NULL,
+  UNIQUE (day_index, color_key)
 );
+CREATE INDEX votableColors_day_index_index ON VotableColors (day_index);
+CREATE INDEX votableColors_color_key_index ON VotableColors (color_key);
 
 CREATE TABLE ColorVotes (
   -- Postgres auto-incrementing primary key
@@ -154,7 +158,6 @@ CREATE TABLE Templates (
   reward_token char(64) NOT NULL
 );
 
--- TODO: Owner & change on transfer
 CREATE TABLE NFTs (
   token_id integer NOT NULL PRIMARY KEY,
   position integer NOT NULL,
@@ -178,27 +181,22 @@ CREATE TABLE Factions (
   -- Postgres auto-incrementing primary key
   key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   name text NOT NULL,
-  icon text,
   leader char(64) NOT NULL,
   pixel_pool integer NOT NULL
 );
 CREATE INDEX factions_leader_index ON Factions (leader);
 
 CREATE TABLE FactionLinks (
-  link_type text NOT NULL,
-  link_url text NOT NULL,
-  faction_id integer NOT NULL
+  faction_id integer NOT NULL,
+  icon text NOT NULL,
+  telegram text,
+  twitter text,
+  github text,
+  site text,
+  PRIMARY KEY (faction_id)
 );
 CREATE INDEX factionLinks_faction_id_index ON FactionLinks (faction_id);
 
-CREATE TABLE FactionChats (
-  sender char(64) NOT NULL,
-  faction_id integer NOT NULL,
-  message text NOT NULL,
-  time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- TODO: Should allocation be here or somewhere else?
 CREATE TABLE FactionMembersInfo (
   faction_id integer NOT NULL,
   member_id integer NOT NULL,

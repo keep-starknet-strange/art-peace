@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.labels.adminBackend.name }}
+spec:
+  replicas: {{ .Values.labels.adminBackend.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.labels.adminBackend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.labels.adminBackend.name }}
+    spec:
+      containers:
+        - name: {{ .Values.labels.adminBackend.name }}
+          image: {{ .Values.deployments.adminBackend.image }}:{{ .Chart.AppVersion }}-{{ .Values.deployments.sha }}
+          command: ["./main", "--admin"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.ports.backend }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.labels.backend.name }}-secret

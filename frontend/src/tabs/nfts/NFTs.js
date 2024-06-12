@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './NFTs.css';
 import ExpandableTab from '../ExpandableTab.js';
 import NFTItem from './NFTItem.js';
@@ -6,7 +6,8 @@ import { backendUrl } from '../../utils/Consts.js';
 import {
   fetchWrapper,
   getMyNftsFn,
-  getNftsFn
+  getNftsFn,
+  getTopNftsFn
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
 
@@ -53,20 +54,18 @@ const NFTsMainSection = (props) => {
 
 const NFTsExpandedSection = (props) => {
   const imageURL = backendUrl + '/nft-images/';
-  // TODO: Implement filters
-  const filters = ['hot', 'new', 'top'];
-  const [activeFilter, setActiveFilter] = React.useState(filters[0]);
+
   return (
     <div className='NFTs__all'>
       <div className='NFTs__header'>
         <h2 className='NFTs__heading'>Explore</h2>
         <div className='NFTs__filters'>
-          {filters.map((filter, index) => {
+          {props.filters.map((filter, index) => {
             return (
               <div
                 key={index}
-                className={`NFTs__button NFTs__filter ${activeFilter === filter ? 'NFTs__button--selected' : ''}`}
-                onClick={() => setActiveFilter(filter)}
+                className={`NFTs__button NFTs__filter ${props.activeFilter === filter ? 'NFTs__button--selected' : ''}`}
+                onClick={() => props.setActiveFilter(filter)}
               >
                 {filter}
               </div>
@@ -106,9 +105,8 @@ const NFTsExpandedSection = (props) => {
 };
 
 const NFTs = (props) => {
-  // TODO: Minted nfts view w/ non owned nfts
-  const [myNFTs, setMyNFTs] = React.useState([]);
-  const [allNFTs, setAllNFTs] = React.useState([]);
+  const [myNFTs, setMyNFTs] = useState([]);
+  const [allNFTs, setAllNFTs] = useState([]);
   const [myNftPagination, setMyNftPagination] = useState({
     pageLength: 6,
     page: 1
@@ -130,7 +128,7 @@ const NFTs = (props) => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       props.latestMintedTokenId !== null &&
       myNFTs.findIndex((nft) => nft.tokenId === props.latestMintedTokenId) ===
@@ -141,8 +139,7 @@ const NFTs = (props) => {
     }
   }, [props.latestMintedTokenId]);
 
-  React.useEffect(() => {
-    // TODO
+  useEffect(() => {
     async function getMyNfts() {
       try {
         const result = await getMyNftsFn({
@@ -159,41 +156,71 @@ const NFTs = (props) => {
           }
         }
       } catch (error) {
-        console.log('Error fetching Nfts', error);
+        console.log('Error fetching NFTs', error);
       }
     }
     getMyNfts();
   }, [props.queryAddress, myNftPagination.page, myNftPagination.pageLength]);
 
-  const [expanded, setExpanded] = React.useState(false);
-  React.useEffect(() => {
+  const [expanded, setExpanded] = useState(false);
+  const filters = ['hot', 'new', 'top'];
+  const [activeFilter, setActiveFilter] = useState(filters[0]);
+
+  useEffect(() => {
     if (!expanded) {
       return;
     }
     async function getNfts() {
       try {
-        const result = await getNftsFn({
-          page: allNftPagination.page,
-          pageLength: allNftPagination.pageLength
-        });
+        let result;
+        if (activeFilter === 'top') {
+          result = await getTopNftsFn({
+            page: allNftPagination.page,
+            pageLength: allNftPagination.pageLength
+          });
+        } else {
+          result = await getNftsFn({
+            page: allNftPagination.page,
+            pageLength: allNftPagination.pageLength
+          });
+        }
+
         if (result.data) {
           if (allNftPagination.page === 1) {
             setAllNFTs(result.data);
           } else {
-            setAllNFTs([...allNFTs, ...result.data]);
+            const newNfts = result.data.filter(
+              (nft) =>
+                !allNFTs.some(
+                  (existingNft) => existingNft.tokenId === nft.tokenId
+                )
+            );
+            setAllNFTs([...allNFTs, ...newNfts]);
           }
         }
       } catch (error) {
-        console.log('Error fetching Nfts', error);
+        console.log('Error fetching NFTs', error);
       }
     }
     getNfts();
   }, [
     props.queryAddress,
     expanded,
+    activeFilter,
     allNftPagination.page,
     allNftPagination.pageLength
   ]);
+
+  const resetPagination = () => {
+    setAllNftPagination((prev) => ({
+      ...prev,
+      page: 1
+    }));
+  };
+
+  useEffect(() => {
+    resetPagination();
+  }, [activeFilter]);
 
   return (
     <ExpandableTab
@@ -212,6 +239,11 @@ const NFTs = (props) => {
       expanded={expanded}
       setExpanded={setExpanded}
       queryAddress={props.queryAddress}
+      setAllNFTs={setAllNFTs}
+      activeFilter={activeFilter}
+      setActiveFilter={setActiveFilter}
+      filters={filters}
+      isMobile={props.isMobile}
     />
   );
 };

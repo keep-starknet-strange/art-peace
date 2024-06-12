@@ -1,22 +1,61 @@
 .Factions__main {
   position: relative;
+  max-height: 55vh;
   width: min(100%, 50rem);
+  overflow-y: scroll;
 
   transition: all 0.5s;
 }
 
-.Factions__container {
-  height: 55vh;
-  margin-top: 0.5rem;
+.Factions__header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 2rem;
+  margin-bottom: 0.5rem;
+}
 
+.Factions__header__buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.Factions__header__button {
+  margin-left: 1rem;
+}
+
+.Factions__header__button--selected {
+  background-color: rgba(30, 30, 70, 0.15);
+  transform: scale(1.02);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(30, 30, 70, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 0.7rem rgba(30, 30, 70, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 30, 70, 0);
+  }
+}
+
+.Factions__heading {
+  text-decoration: underline;
+}
+
+.Factions__container {
   padding: 0.5rem;
-  border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  overflow: hidden;
 }
 
 .Factions__container__factions {
+  padding: 0.5rem 0;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -30,14 +69,22 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 100%;
-  overflow: scroll;
+  max-height: 55vh;
   /* TODO: border-left: 4px solid rgba(0, 0, 0, 0.3); */
 }
 
+.Factions__all__container {
+  max-height: 47vh;
+  width: 100%;
+  padding: 0.5rem 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30rem, 1fr));
+  align-items: flex-start;
+  overflow: scroll;
+}
+
 .Factions__joiner {
-  margin: 0.5rem;
-  padding: 2rem 0.5rem;
+  padding: 1rem 0.5rem;
   width: calc(100% - 1rem); /* 1rem is the margin */
   display: flex;
   flex-direction: column;
@@ -46,6 +93,23 @@
   border-radius: 0.5rem;
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(0, 0, 0, 0.3);
+  height: 50vh;
+  overflow: scroll;
+}
+
+.Factions__joiner__heading {
+  margin: 0 0.5rem 1rem 0.5rem;
+  text-align: center;
+  flex: 1;
+}
+
+.Factions__joiner__header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 1rem;
 }
 
 .Factions__joiner__container {
@@ -56,29 +120,43 @@
   overflow: scroll;
 }
 
-.Factions__joiner__option {
-  padding: 0.5rem 1rem;
+.Factions__joiner__option__container {
   margin: 0.5rem;
-  border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  /* background-color: rgba(255, 255, 255, 0.8); */
+  background: url('../../resources/assets/pixel-gradient-diagonal.png');
+  /* stretch the background */
+  image-rendering: pixelated;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: 100% 0;
+  /* pixelate the background */
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  outline: 2px solid rgba(0, 0, 0, 0.3);
   cursor: pointer;
   flex-grow: 1;
+  transition: all 0.3s;
+  overflow: hidden;
+  height: 8rem;
+}
+
+.Factions__joiner__option__inner {
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.3s;
+  height: 100%;
 }
 
-.Factions__joiner__option:hover {
-  box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.5);
+.Factions__joiner__option__container:hover {
+  box-shadow: 0 0 1.2rem rgba(0, 0, 0, 0.5);
   transform: scale(1.02) translateY(-0.2rem);
 }
 
-.Factions__joiner__option:active {
-  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+.Factions__joiner__option__container:active {
+  box-shadow: 0 0 0.8rem rgba(0, 0, 0, 0.3);
   transform: scale(1) translateY(0);
 }
 
@@ -89,8 +167,10 @@
   /* Stretch the icon to fill the container */
   object-fit: cover;
   white-space: nowrap;
+  image-rendering: pixelated;
 }
 
 .Factions__joiner__option__text {
-  font-size: 1.5rem;
+  margin: 0;
+  padding-right: 0.5rem;
 }

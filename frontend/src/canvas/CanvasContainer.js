@@ -3,6 +3,7 @@ import { useContractWrite } from '@starknet-react/core';
 import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
+import TemplateOverlay from './TemplateOverlay.js';
 import NFTSelector from './NFTSelector.js';
 import canvasConfig from '../configs/canvas.config.json';
 import { fetchWrapper } from '../services/apiService.js';
@@ -19,7 +20,8 @@ const CanvasContainer = (props) => {
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
   const [canvasScale, setCanvasScale] = useState(3.85);
-
+  const [touchInitialDistance, setInitialTouchDistance] = useState(0);
+  const [touchScale, setTouchScale] = useState(0);
   const canvasContainerRef = useRef(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -47,6 +49,7 @@ const CanvasContainer = (props) => {
   };
 
   const handlePointerMove = (e) => {
+    if (props.nftMintingMode && !props.nftSelected) return;
     if (isDragging) {
       setCanvasX(canvasX + e.clientX - dragStartX);
       setCanvasY(canvasY + e.clientY - dragStartY);
@@ -67,7 +70,7 @@ const CanvasContainer = (props) => {
 
   // Zoom in/out ( into the cursor position )
   const zoom = (e) => {
-    // Get the cursor position within the canvas ( note the canvas can go outsid  e the viewport )
+    // Get the cursor position within the canvas ( note the canvas can go outside the viewport )
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
@@ -103,12 +106,84 @@ const CanvasContainer = (props) => {
     setCanvasY(newPosY);
   };
 
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const initialDistance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      setTouchScale(canvasScale);
+      setInitialTouchDistance(initialDistance);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2) {
+      const [touch1, touch2] = e.touches;
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      const rect = props.canvasRef.current.getBoundingClientRect();
+      const midX = (touch1.clientX + touch2.clientX) / 2;
+      const midY = (touch1.clientY + touch2.clientY) / 2;
+
+      let cursorX = midX - rect.left;
+      let cursorY = midY - rect.top;
+      if (cursorX < 0) {
+        cursorX = 0;
+      } else if (cursorX > rect.width) {
+        cursorX = rect.width;
+      }
+      if (cursorY < 0) {
+        cursorY = 0;
+      } else if (cursorY > rect.height) {
+        cursorY = rect.height;
+      }
+
+      let newScale = (distance / touchInitialDistance) * touchScale;
+      if (newScale < minScale) {
+        newScale = minScale;
+      } else if (newScale > maxScale) {
+        newScale = maxScale;
+      }
+      const newWidth = width * newScale;
+      const newHeight = height * newScale;
+
+      const oldCursorXRelative = cursorX / rect.width;
+      const oldCursorYRelative = cursorY / rect.height;
+
+      const newCursorX = oldCursorXRelative * newWidth;
+      const newCursorY = oldCursorYRelative * newHeight;
+
+      const newPosX = canvasX - (newCursorX - cursorX);
+      const newPosY = canvasY - (newCursorY - cursorY);
+
+      setCanvasScale(newScale);
+      setCanvasX(newPosX);
+      setCanvasY(newPosY);
+      // TODO: Make scroll acceleration based
+    }
+  };
+
   useEffect(() => {
     canvasContainerRef.current.addEventListener('wheel', zoom);
+    canvasContainerRef.current.addEventListener('touchstart', handleTouchStart);
+    canvasContainerRef.current.addEventListener('touchmove', handleTouchMove);
     return () => {
       canvasContainerRef.current.removeEventListener('wheel', zoom);
+      canvasContainerRef.current.removeEventListener(
+        'touchstart',
+        handleTouchStart
+      );
+      canvasContainerRef.current.removeEventListener(
+        'touchmove',
+        handleTouchMove
+      );
     };
-  }, [canvasScale, canvasX, canvasY]);
+  }, [canvasScale, canvasX, canvasY, touchInitialDistance]);
 
   // Init canvas transform to center of the viewport
   useEffect(() => {
@@ -144,6 +219,14 @@ const CanvasContainer = (props) => {
     const position = y * width + x;
     // TODO: Cache pixel info & clear cache on update from websocket
     // TODO: Dont query if hover select ( until 1s after hover? )
+    if (
+      props.selectedColorId !== -1 ||
+      props.isEraserMode ||
+      props.isExtraDeleteMode
+    ) {
+      props.setPixelPlacedBy(null);
+      return;
+    }
     const getPixelInfoEndpoint = await fetchWrapper(
       `get-pixel-info?position=${position.toString()}`
     );
@@ -239,31 +322,32 @@ const CanvasContainer = (props) => {
     const timestamp = Math.floor(Date.now() / 1000);
 
     if (!devnetMode) {
+      props.setSelectedColorId(-1);
       placePixelCall(position, colorId, timestamp);
       props.clearPixelSelection();
-      props.setSelectedColorId(-1);
       props.setLastPlacedTime(timestamp * 1000);
       return;
     }
 
-    const response = await fetchWrapper(`place-pixel-devnet`, {
-      mode: 'cors',
-      method: 'POST',
-      body: JSON.stringify({
-        position: position.toString(),
-        color: colorId.toString(),
-        timestamp: timestamp.toString()
-      })
-    });
-    if (response.result) {
-      console.log(response.result);
+    if (props.selectedColorId !== -1) {
+      props.setSelectedColorId(-1);
+      const response = await fetchWrapper(`place-pixel-devnet`, {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          position: position.toString(),
+          color: colorId.toString(),
+          timestamp: timestamp.toString()
+        })
+      });
+      if (response.result) {
+        console.log(response.result);
+      }
+      props.clearPixelSelection();
+      props.setLastPlacedTime(timestamp * 1000);
     }
-    props.clearPixelSelection();
-    props.setSelectedColorId(-1);
-    props.setLastPlacedTime(timestamp * 1000);
     // TODO: Fix last placed time if error in placing pixel
   };
-  // TODO: Erasing extra pixels
 
   useEffect(() => {
     const hoverColor = (e) => {
@@ -460,6 +544,18 @@ const CanvasContainer = (props) => {
             }}
             colors={props.colors}
             pixelClicked={pixelClicked}
+          />
+        )}
+        {props.templateOverlayMode && props.overlayTemplate && (
+          <TemplateOverlay
+            canvasRef={props.canvasRef}
+            width={width}
+            height={height}
+            canvasScale={canvasScale}
+            overlayTemplate={props.overlayTemplate}
+            setTemplateOverlayMode={props.setTemplateOverlayMode}
+            setOverlayTemplate={props.setOverlayTemplate}
+            colors={props.colors}
           />
         )}
         {props.nftMintingMode && (

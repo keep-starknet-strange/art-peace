@@ -1,23 +1,30 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { useAccount, useContract, useNetwork } from '@starknet-react/core';
+import {
+  useAccount,
+  useContract,
+  useNetwork,
+  useConnect
+} from '@starknet-react/core';
 import './App.css';
 import CanvasContainer from './canvas/CanvasContainer.js';
 import PixelSelector from './footer/PixelSelector.js';
 import TabsFooter from './footer/TabsFooter.js';
 import TabPanel from './tabs/TabPanel.js';
-import { usePreventZoom } from './utils/Window.js';
+import { usePreventZoom, useLockScroll } from './utils/Window.js';
 import { backendUrl, wsUrl, devnetMode } from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
+import NotificationPanel from './tabs/NotificationPanel.js';
 
 function App() {
   // Window management
   usePreventZoom();
+  useLockScroll();
 
   const isDesktopOrLaptop = useMediaQuery({
     query: '(min-width: 1224px)'
@@ -26,6 +33,7 @@ function App() {
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1224px)' });
   const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });
   const isRetina = useMediaQuery({ query: '(min-resolution: 2dppx)' });
+  const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
   // TODO: height checks ?
 
   const getDeviceTypeInfo = () => {
@@ -34,7 +42,8 @@ function App() {
       isBigScreen: isBigScreen,
       isTabletOrMobile: isTabletOrMobile,
       isPortrait: isPortrait,
-      isRetina: isRetina
+      isRetina: isRetina,
+      isMobile: isMobile
     };
   };
 
@@ -99,7 +108,6 @@ function App() {
         lastJsonMessage.messageType === 'nftMinted' &&
         activeTab === 'NFTs'
       ) {
-        // TODO: Compare to user's address
         if (lastJsonMessage.minter === queryAddress) {
           setLatestMintedTokenId(lastJsonMessage.token_id);
         }
@@ -110,6 +118,8 @@ function App() {
   // Colors
   const staticColors = canvasConfig.colors;
   const [colors, setColors] = useState([]);
+
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   useEffect(() => {
     const fetchColors = async () => {
@@ -315,7 +325,6 @@ function App() {
     context.clearRect(0, 0, width, height);
   }, [width, height]);
 
-  // TODO: thread safety?
   const clearExtraPixel = useCallback(
     (index) => {
       setAvailablePixelsUsed(availablePixelsUsed - 1);
@@ -352,6 +361,7 @@ function App() {
   );
 
   // Factions
+  const [chainFaction, setChainFaction] = useState(null);
   const [userFactions, setUserFactions] = useState([]);
   useEffect(() => {
     async function fetchUserFactions() {
@@ -366,6 +376,10 @@ function App() {
     fetchUserFactions();
   }, [queryAddress]);
 
+  // Templates
+  const [templateOverlayMode, setTemplateOverlayMode] = useState(false);
+  const [overlayTemplate, setOverlayTemplate] = useState(null);
+
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
   const [nftSelectionStarted, setNftSelectionStarted] = useState(false);
@@ -373,6 +387,32 @@ function App() {
   const [nftPosition, setNftPosition] = useState(null);
   const [nftWidth, setNftWidth] = useState(null);
   const [nftHeight, setNftHeight] = useState(null);
+
+  // Account
+  const { connect, connectors } = useConnect();
+  const connectWallet = async (connector) => {
+    if (devnetMode) {
+      setConnected(true);
+      return;
+    }
+    connect({ connector });
+  };
+  useEffect(() => {
+    if (devnetMode) return;
+    if (!connectors) return;
+    if (connectors.length === 0) return;
+
+    const connectIfReady = async () => {
+      for (let i = 0; i < connectors.length; i++) {
+        let ready = await connectors[i].ready();
+        if (ready) {
+          connectWallet(connectors[i]);
+          break;
+        }
+      }
+    };
+    connectIfReady();
+  }, [connectors]);
 
   // Tabs
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
@@ -417,6 +457,10 @@ function App() {
 
   return (
     <div className='App'>
+      <NotificationPanel
+        message={notificationMessage}
+        animationDuration={5000}
+      />
       <CanvasContainer
         address={address}
         artPeaceContract={artPeaceContract}
@@ -437,6 +481,10 @@ function App() {
         basePixelUp={basePixelUp}
         availablePixelsUsed={availablePixelsUsed}
         addExtraPixel={addExtraPixel}
+        templateOverlayMode={templateOverlayMode}
+        setTemplateOverlayMode={setTemplateOverlayMode}
+        overlayTemplate={overlayTemplate}
+        setOverlayTemplate={setOverlayTemplate}
         nftMintingMode={nftMintingMode}
         setNftMintingMode={setNftMintingMode}
         nftSelectionStarted={nftSelectionStarted}
@@ -468,10 +516,16 @@ function App() {
           setConnected={setConnected}
           artPeaceContract={artPeaceContract}
           usernameContract={usernameContract}
+          setNotificationMessage={setNotificationMessage}
           colors={colors}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           getDeviceTypeInfo={getDeviceTypeInfo}
+          isMobile={isMobile}
+          templateOverlayMode={templateOverlayMode}
+          setTemplateOverlayMode={setTemplateOverlayMode}
+          overlayTemplate={overlayTemplate}
+          setOverlayTemplate={setOverlayTemplate}
           nftMintingMode={nftMintingMode}
           setNftMintingMode={setNftMintingMode}
           nftSelectionStarted={nftSelectionStarted}
@@ -513,9 +567,13 @@ function App() {
           factionPixelsData={factionPixelsData}
           setFactionPixelsData={setFactionPixelsData}
           factionPixelTimers={factionPixelTimers}
+          chainFaction={chainFaction}
+          setChainFaction={setChainFaction}
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
           setLatestMintedTokenId={setLatestMintedTokenId}
+          connectWallet={connectWallet}
+          connectors={connectors}
         />
       </div>
       <div className='App__footer'>

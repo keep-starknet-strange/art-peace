@@ -52,7 +52,14 @@ const ExpandableTab = (props) => {
         {props.title}
       </h1>
       <div className='ExpandableTab__content'>
-        <MainSection {...rest} />
+        {(!props.expanded || (props.expanded && !props.isMobile)) && (
+          <MainSection {...rest} />
+        )}
+        {props.expanded &&
+          !props.isMobile &&
+          (props.canExpand === undefined || props.canExpand) && (
+            <div className='ExpandableTab__divider' />
+          )}
         {props.expanded && <ExpandedSection {...rest} />}
       </div>
       {(props.canExpand === undefined || props.canExpand) && (
