@@ -10,7 +10,6 @@ const NFTMintingPanel = (props) => {
     props.setNftMintingMode(false);
     props.setNftSelectionStarted(false);
     props.setNftSelected(false);
-    props.setNotificationMessage('Tab closed');
   };
 
   const [calls, setCalls] = useState([]);

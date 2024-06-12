@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './NotificationPanel.css';
 
-const NotificationPanel = ({ message, onClose, animationDuration = 3000 }) => {
+const NotificationPanel = ({ message, animationDuration = 3000 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -9,26 +9,23 @@ const NotificationPanel = ({ message, onClose, animationDuration = 3000 }) => {
       setIsVisible(true);
       const timer = setTimeout(() => {
         setIsVisible(false);
-        if (onClose) onClose();
       }, animationDuration);
       return () => clearTimeout(timer);
     }
-  }, [message, onClose, animationDuration]);
+  }, [message, animationDuration]);
 
   return (
     <div
       className={`notification-panel ${isVisible ? 'slide-in' : 'slide-out'}`}
     >
-      <div className='notification-content'>
-        <p>{message}</p>
-        <p
-          className='Button__close ExpandedTab__close'
-          // eslint-disable-next-line no-undef
-          onClick={() => props.setActiveTab('Canvas')}
-        >
-          X
-        </p>
-      </div>
+      <p className='Text__medium notification-panel__text'>{message}</p>
+      <p
+        className='Button__close ExpandedTab__close'
+        // eslint-disable-next-line no-undef
+        onClick={() => setIsVisible(false)}
+      >
+        X
+      </p>
     </div>
   );
 };

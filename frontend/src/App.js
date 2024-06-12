@@ -120,7 +120,6 @@ function App() {
 
   useEffect(() => {
     const fetchColors = async () => {
-      setNotificationMessage('This is Working');
       try {
         let getColorsEndpoint = backendUrl + '/get-colors';
         let response = await fetch(getColorsEndpoint);
@@ -455,7 +454,6 @@ function App() {
 
   return (
     <div className='App'>
-      {/* Notification Panel */}
       <NotificationPanel
         message={notificationMessage}
         animationDuration={5000}
@@ -515,6 +513,7 @@ function App() {
           setConnected={setConnected}
           artPeaceContract={artPeaceContract}
           usernameContract={usernameContract}
+          setNotificationMessage={setNotificationMessage}
           colors={colors}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -569,7 +568,6 @@ function App() {
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
           setLatestMintedTokenId={setLatestMintedTokenId}
-          setNotificationMessage={setNotificationMessage}
           connectWallet={connectWallet}
           connectors={connectors}
         />
