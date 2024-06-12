@@ -19,6 +19,7 @@ import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
+import NotificationPanel from './tabs/NotificationPanel.js';
 
 function App() {
   // Window management
@@ -114,6 +115,8 @@ function App() {
   // Colors
   const staticColors = canvasConfig.colors;
   const [colors, setColors] = useState([]);
+
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   useEffect(() => {
     const fetchColors = async () => {
@@ -451,6 +454,10 @@ function App() {
 
   return (
     <div className='App'>
+      <NotificationPanel
+        message={notificationMessage}
+        animationDuration={5000}
+      />
       <CanvasContainer
         address={address}
         artPeaceContract={artPeaceContract}
@@ -506,6 +513,7 @@ function App() {
           setConnected={setConnected}
           artPeaceContract={artPeaceContract}
           usernameContract={usernameContract}
+          setNotificationMessage={setNotificationMessage}
           colors={colors}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
