@@ -21,7 +21,6 @@ const NotificationPanel = ({ message, animationDuration = 3000 }) => {
       <p className='Text__medium notification-panel__text'>{message}</p>
       <p
         className='Button__close ExpandedTab__close'
-        // eslint-disable-next-line no-undef
         onClick={() => setIsVisible(false)}
       >
         X
