@@ -41,7 +41,7 @@ func InitColors(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllColors(w http.ResponseWriter, r *http.Request) {
-	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM colors ORDER BY key")
+	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM colors ORDER BY color_key")
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve colors")
 		return
@@ -57,7 +57,7 @@ func GetSingleColor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	color, err := core.PostgresQueryOne[ColorType]("SELECT hex FROM colors WHERE key = $1", colorKey)
+	color, err := core.PostgresQueryOne[ColorType]("SELECT hex FROM colors WHERE color_key = $1", colorKey)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusNotFound, "Color not found")
 		return

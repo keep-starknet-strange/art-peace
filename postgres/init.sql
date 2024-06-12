@@ -113,8 +113,10 @@ CREATE INDEX userMainQuests_quest_id_index ON UserMainQuests (quest_id);
 CREATE TABLE Colors (
   -- Postgres auto-incrementing primary key
   key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  color_key integer NOT NULL,
   hex text NOT NULL
 );
+CREATE INDEX colors_color_key_index ON Colors (color_key);
 
 -- TODO: Add day_index
 CREATE TABLE VotableColors (

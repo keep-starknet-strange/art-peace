@@ -41,14 +41,6 @@ func processPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
-	// TODO: Only validate onchain?
-	//validate color
-	colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
-	if int(color) < 0 || int(color) >= colorsLength {
-		PrintIndexerError("processPixelPlacedEvent", "Color value exceeds color palette", address, posHex, dayIdxHex, colorHex)
-		return
-	}
-
 	// Set pixel in redis
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth

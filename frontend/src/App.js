@@ -99,50 +99,57 @@ function App() {
     }
   }, [readyState]);
 
-  useEffect(() => {
-    if (lastJsonMessage) {
-      // Check the message type and handle accordingly
-      if (lastJsonMessage.messageType === 'colorPixel') {
-        colorPixel(lastJsonMessage.position, lastJsonMessage.color);
-      } else if (
-        lastJsonMessage.messageType === 'nftMinted' &&
-        activeTab === 'NFTs'
-      ) {
-        if (lastJsonMessage.minter === queryAddress) {
-          setLatestMintedTokenId(lastJsonMessage.token_id);
-        }
-      }
-    }
-  }, [lastJsonMessage]);
-
   // Colors
   const staticColors = canvasConfig.colors;
   const [colors, setColors] = useState([]);
 
   const [notificationMessage, setNotificationMessage] = useState('');
 
-  useEffect(() => {
-    const fetchColors = async () => {
-      try {
-        let getColorsEndpoint = backendUrl + '/get-colors';
-        let response = await fetch(getColorsEndpoint);
-        let colors = await response.json();
-        if (colors.error) {
-          setColors(staticColors);
-          console.error(colors.error);
-          return;
-        }
-        if (colors.data) {
-          setColors(colors.data);
-        }
-      } catch (error) {
+  const fetchColors = async () => {
+    try {
+      let getColorsEndpoint = backendUrl + '/get-colors';
+      let response = await fetch(getColorsEndpoint);
+      let colors = await response.json();
+      if (colors.error) {
         setColors(staticColors);
-        console.error(error);
+        console.error(colors.error);
+        return;
+      }
+      if (colors.data) {
+        setColors(colors.data);
+      }
+    } catch (error) {
+      setColors(staticColors);
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    fetchColors();
+  }, []);
+
+  useEffect(() => {
+    const processMessage = async (message) => {
+      if (message) {
+        // Check the message type and handle accordingly
+        if (message.messageType === 'colorPixel') {
+          if (message.color >= colors.length) {
+            // Get new colors from backend
+            await fetchColors();
+          }
+          colorPixel(message.position, message.color);
+        } else if (
+          message.messageType === 'nftMinted' &&
+          activeTab === 'NFTs'
+        ) {
+          if (message.minter === queryAddress) {
+            setLatestMintedTokenId(message.token_id);
+          }
+        }
       }
     };
 
-    fetchColors();
-  }, []);
+    processMessage(lastJsonMessage);
+  }, [lastJsonMessage]);
 
   // Canvas
   const width = canvasConfig.canvas.width;
