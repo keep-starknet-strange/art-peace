@@ -6,10 +6,6 @@
   transition: all 0.5s;
 }
 
-.NFTs__main_hidden_mobile {
-  display: none;
-}
-
 .NFTs__container {
   height: 55vh;
   display: grid;
