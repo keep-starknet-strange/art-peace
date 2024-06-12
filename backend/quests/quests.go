@@ -6,7 +6,7 @@ import "github.com/keep-starknet-strange/art-peace/backend/core"
 const (
 	AuthorityQuestType = iota
 	HodlQuestType
-	NftQuestType
+	NFTMintQuestType
 	PixelQuestType
 	RainbowQuestType
 	TemplateQuestType
@@ -19,7 +19,7 @@ const (
 var OnchainQuestTypes = map[string]int{
 	"AuthorityQuest":  AuthorityQuestType,
 	"HodlQuest":       HodlQuestType,
-	"NFTQuest":        NftQuestType,
+	"NFTMintQuest":    NFTMintQuestType,
 	"PixelQuest":      PixelQuestType,
 	"RainbowQuest":    RainbowQuestType,
 	"TemplateQuest":   TemplateQuestType,

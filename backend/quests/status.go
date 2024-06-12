@@ -5,7 +5,7 @@ import "github.com/keep-starknet-strange/art-peace/backend/core"
 var QuestChecks = map[int]func(*Quest, string) (int, int){
 	AuthorityQuestType:  CheckAuthorityStatus,
 	HodlQuestType:       CheckHodlStatus,
-	NftQuestType:        CheckNftStatus,
+	NFTMintQuestType:    CheckNftStatus,
 	PixelQuestType:      CheckPixelStatus,
 	RainbowQuestType:    CheckRainbowStatus,
 	TemplateQuestType:   CheckTemplateStatus,
@@ -34,8 +34,12 @@ func CheckHodlStatus(q *Quest, user string) (progress int, needed int) {
 }
 
 func CheckNftStatus(q *Quest, user string) (progress int, needed int) {
-	// TODO: Implement this
-	return 0, 1
+	nfts_minted_by_user, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM NFTs WHERE minter = $1", user)
+
+	if err != nil {
+		return 0, 1
+	}
+	return *nfts_minted_by_user, 1
 }
 
 func CheckPixelStatus(q *Quest, user string) (progress int, needed int) {
@@ -109,7 +113,6 @@ func CheckUnruggableStatus(q *Quest, user string) (progress int, needed int) {
 }
 
 func CheckUsernameStatus(q *Quest, user string) (progress int, needed int) {
-
 	count, err := core.PostgresQueryOne[int]("SELECT COUNT (*) FROM Users where address = $1", user)
 
 	if err != nil {

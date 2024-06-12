@@ -69,16 +69,19 @@ const NFTItem = (props) => {
       if (result.data === null || result.data === '') {
         if (props.minter.length > 12) {
           setMinterText(
-            minterText.substring(0, 4) +
+            props.minter.substring(0, 4) +
               '...' +
-              minterText.substring(minterText.length - 4, minterText.length)
+              props.minter.substring(
+                props.minter.length - 4,
+                props.minter.length
+              )
           );
         } else {
           setMinterText(props.minter);
         }
       } else {
-        if (result.data.length > 12) {
-          setMinterText(result.data.substring(0, 7) + '...');
+        if (result.data.length > 11) {
+          setMinterText(result.data.substring(0, 8) + '...');
         } else {
           setMinterText(result.data);
         }

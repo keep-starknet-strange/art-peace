@@ -14,6 +14,7 @@ import (
 func InitNFTRoutes() {
 	http.HandleFunc("/get-nft", getNFT)
 	http.HandleFunc("/get-nfts", getNFTs)
+	http.HandleFunc("/get-new-nfts", getNewNFTs)
 	http.HandleFunc("/get-my-nfts", getMyNFTs)
 	http.HandleFunc("/get-nft-likes", getNftLikeCount)
 	http.HandleFunc("/like-nft", LikeNFT)
@@ -25,6 +26,9 @@ func InitNFTRoutes() {
 	}
 	// Create a static file server for the nft images
 	// TODO: Versioning here?
+}
+
+func InitNFTStaticRoutes() {
 	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts/images"))))
 	http.Handle("/nft-meta/", http.StripPrefix("/nft-meta/", http.FileServer(http.Dir("./nfts/meta"))))
 }
@@ -145,10 +149,53 @@ func getNFTs(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, string(nfts))
 }
 
+func getNewNFTs(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	query := `
+        SELECT 
+            nfts.*, 
+            COALESCE(like_count, 0) AS likes,
+            COALESCE((SELECT true FROM nftlikes WHERE liker = $1), false) as liked
+        FROM 
+            nfts
+        LEFT JOIN (
+            SELECT 
+                nftKey, 
+                COUNT(*) AS like_count
+            FROM 
+                nftlikes
+            GROUP BY 
+                nftKey
+        ) nftlikes ON nfts.token_id = nftlikes.nftKey
+        ORDER BY nfts.token_id DESC
+        LIMIT $2 OFFSET $3`
+	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
+		return
+	}
+	routeutils.WriteDataJson(w, string(nfts))
+}
+
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
 	if routeutils.NonProductionMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method only allowed in non-production mode")
 		return
 	}
 

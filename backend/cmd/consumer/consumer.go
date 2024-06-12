@@ -49,11 +49,12 @@ func main() {
 	databases := core.NewDatabases(databaseConfig)
 	defer databases.Close()
 
-	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig)
+	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig, false)
 
 	routes.InitBaseRoutes()
 	indexer.InitIndexerRoutes()
 	routes.InitWebsocketRoutes()
+	routes.InitNFTStaticRoutes()
 	indexer.StartMessageProcessor()
 
 	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.ConsumerPort)

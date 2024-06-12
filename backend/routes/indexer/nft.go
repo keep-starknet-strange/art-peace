@@ -71,7 +71,12 @@ func processNFTMintedEvent(event IndexerEvent) {
 		return
 	}
 
-	colorPaletteHex := core.ArtPeaceBackend.CanvasConfig.Colors
+	colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY color_key")
+	if err != nil {
+		PrintIndexerError("processNFTMintedEvent", "Error getting color palette from postgres", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		return
+	}
+
 	colorPalette := make([]color.RGBA, len(colorPaletteHex))
 	for idx, colorHex := range colorPaletteHex {
 		r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
