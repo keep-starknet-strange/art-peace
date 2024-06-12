@@ -7,6 +7,7 @@ import {
   fetchWrapper,
   getMyNftsFn,
   getNftsFn,
+  getNewNftsFn,
   getTopNftsFn
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
@@ -173,7 +174,12 @@ const NFTs = (props) => {
     async function getNfts() {
       try {
         let result;
-        if (activeFilter === 'top') {
+        if (activeFilter === 'new') {
+          result = await getNewNftsFn({
+            page: allNftPagination.page,
+            pageLength: allNftPagination.pageLength
+          });
+        } else if (activeFilter === 'top') {
           result = await getTopNftsFn({
             page: allNftPagination.page,
             pageLength: allNftPagination.pageLength
@@ -203,13 +209,7 @@ const NFTs = (props) => {
       }
     }
     getNfts();
-  }, [
-    props.queryAddress,
-    expanded,
-    activeFilter,
-    allNftPagination.page,
-    allNftPagination.pageLength
-  ]);
+  }, [props.queryAddress, expanded, allNftPagination]);
 
   const resetPagination = () => {
     setAllNftPagination((prev) => ({

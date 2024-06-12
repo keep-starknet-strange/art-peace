@@ -182,8 +182,7 @@ func getNewNFTs(w http.ResponseWriter, r *http.Request) {
             GROUP BY 
                 nftKey
         ) nftlikes ON nfts.token_id = nftlikes.nftKey
-		 ORDER BY 
-            nfts.block_number DESC
+        ORDER BY nfts.token_id DESC
         LIMIT $2 OFFSET $3`
 	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset)
 	if err != nil {
