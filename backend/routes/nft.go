@@ -19,6 +19,7 @@ func InitNFTRoutes() {
 	http.HandleFunc("/like-nft", LikeNFT)
 	http.HandleFunc("/unlike-nft", UnLikeNFT)
 	http.HandleFunc("/get-top-nfts", getTopNFTs)
+	http.HandleFunc("/get-hot-nfts", getHotNFTs)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
 	}
@@ -289,6 +290,63 @@ func getTopNFTs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
+	}
+	routeutils.WriteDataJson(w, string(nfts))
+}
+
+func getHotNFTs(w http.ResponseWriter, r *http.Request) {
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+	 pageLength = 25
+	}
+	if pageLength > 50 {
+	 pageLength = 50
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+	 page = 1
+	}
+	offset := (page - 1) * pageLength
+   
+	query := `
+			SELECT 
+				ranked_nfts.token_id ,
+				ranked_nfts.position,
+				ranked_nfts.width,
+				ranked_nfts.height,
+				ranked_nfts.image_hash,
+				ranked_nfts.block_number ,
+				ranked_nfts.minter,
+				ranked_nfts.owner,
+				ranked_nfts.likes,
+				ranked_nfts.liked
+			FROM 
+				(
+				SELECT 
+					nfts.*, 
+					COALESCE(like_count, 0) AS likes,
+					ROW_NUMBER() OVER (ORDER BY COALESCE(like_count, 0) DESC) AS rank,
+					COALESCE((SELECT true FROM nftlikes WHERE liker = 'aaa'), false) as liked
+				FROM 
+					nfts
+				LEFT JOIN (
+					SELECT 
+						nftkey, 
+						COUNT(*) AS like_count
+				FROM 
+					nftlikes
+			GROUP BY 
+			nftkey
+		) nftlikes ON nfts.token_id = nftlikes.nftkey
+		ORDER BY 
+			rank
+		LIMIT 100
+		) AS ranked_nfts
+		LIMIT $1 OFFSET $2`
+	nfts, err := core.PostgresQueryJson[NFTData](query, pageLength, offset)
+	if err != nil {
+	 routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Hot NFTs")
+	 return
 	}
 	routeutils.WriteDataJson(w, string(nfts))
 }
