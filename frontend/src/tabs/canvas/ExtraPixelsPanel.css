@@ -40,25 +40,25 @@
 }
 
 .ExtraPixelsPanel__body {
+  position: relative;
   margin: 0;
   padding: 0 0.5rem;
   width: 100%;
-  height: 100%;
 
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  gap: 1rem;
+  display: flex;
+  flex-direction: row;
   overflow: hidden;
 }
 
-.ExtraPixelPanel__info {
+.ExtraPixelsPanel__info {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  /* TODO: Fix scrolling */
+  justify-content: flex-start;
+  height: 100%;
+  width: 100%;
+  padding: 0 0.5rem;
   overflow-y: scroll;
+  scrollbar-width: none;
 }
 
 /* TODO: Always scroll to bottom when adding new pixel */
@@ -72,9 +72,9 @@
   grid-auto-rows: 4.25rem;
   gap: 1rem;
 
-  /* TODO: Fix scrolling */
   overflow-y: scroll;
   border-left: 2px solid rgba(0, 0, 0, 0.4);
+  scrollbar-width: none;
 }
 
 .ExtraPixelsPanel__item {
@@ -187,6 +187,13 @@
   padding-top: 0.5rem;
   border-top: 0.1rem solid rgba(0, 0, 0, 0.4);
   margin-top: 0.5rem;
+}
+
+.ExtraPixelsPanel__faction__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-wrap: none;
 }
 
 .ExtraPixelsPanel__info__item__expand__item {

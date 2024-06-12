@@ -1,5 +1,5 @@
 .PixelSelector {
-  margin: 0;
+  margin: 1rem;
   padding: 0;
 }
 
@@ -21,7 +21,7 @@
 
 .PixelSelector__text {
   margin: 0;
-  padding: 0;
+  padding: 0.25rem;
 }
 
 .PixelSelector__extras {
@@ -38,6 +38,11 @@
   margin: 0 0.5rem;
   box-shadow: 0 0 0.7rem rgba(0, 0, 0, 0.4);
   border: 0.1rem solid rgba(0, 0, 0, 0.3);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 .PixelSelector__selector {

@@ -27,11 +27,15 @@
 }
 
 .App__panel--tablet {
-  width: max(28rem, 40%);
+  width: 40rem;
 }
 
 .App__panel--portrait {
-  width: max(30rem, 50%);
+  width: max(50rem, 60%);
+}
+
+.App__panel--mobile {
+  width: calc(100% - 1rem);
 }
 
 .App__footer {
@@ -56,4 +60,16 @@
   top: 1rem;
   width: min(8rem, 15%);
   image-rendering: pixelated;
+}
+
+.ExpandTabs__button {
+  margin: 0;
+  padding: 0;
+  width: 4.5rem;
+  height: 3.5rem;
+}
+
+.ExpandTabs__icon {
+  width: 3rem;
+  height: 3rem;
 }

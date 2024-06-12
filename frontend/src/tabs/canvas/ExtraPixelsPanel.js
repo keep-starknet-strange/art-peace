@@ -189,14 +189,16 @@ const ExtraPixelsPanel = (props) => {
       </p>
       <div className='ExtraPixelsPanel__header'>
         <p className='Text__medium Heading__sub'>Extra Pixels</p>
-        <div
-          className={`Button__primary ${props.isEraserMode ? 'Eraser__button--selected' : ''}`}
-          onClick={() => eraserMode()}
-        >
-          <img className='Eraser__icon' src={EraserIcon} alt='eraser' />
-        </div>
-        <div className='Button__primary' onClick={() => submit()}>
-          Submit
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <div
+            className={`Button__primary ${props.isEraserMode ? 'Eraser__button--selected' : ''}`}
+            onClick={() => eraserMode()}
+          >
+            <img className='Eraser__icon' src={EraserIcon} alt='eraser' />
+          </div>
+          <div className='Button__primary' onClick={() => submit()}>
+            Submit
+          </div>
         </div>
       </div>
       <div className='ExtraPixelsPanel__body'>
@@ -236,7 +238,7 @@ const ExtraPixelsPanel = (props) => {
                         key={index}
                       >
                         <p
-                          className='Text__xsmall'
+                          className='Text__xsmall ExtraPixelsPanel__faction__name'
                           style={{
                             margin: '0.5rem 0',
                             padding: '0 0.5rem',

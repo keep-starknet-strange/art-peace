@@ -188,6 +188,7 @@ const TabPanel = (props) => {
                   chain={props.chain}
                   connectWallet={props.connectWallet}
                   connectors={props.connectors}
+                  isMobile={props.isMobile}
                 />
               </div>
             )}

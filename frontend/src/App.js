@@ -20,6 +20,7 @@ import { fetchWrapper } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
 import NotificationPanel from './tabs/NotificationPanel.js';
+import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
   // Window management
@@ -34,7 +35,11 @@ function App() {
   const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });
   const isRetina = useMediaQuery({ query: '(min-resolution: 2dppx)' });
   const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
+  const isFooterSplit = useMediaQuery({ query: '(max-width: 52rem)' });
   // TODO: height checks ?
+  // TODO: Animate logo exit on mobile
+
+  const [footerExpanded, setFooterExpanded] = useState(false);
 
   const getDeviceTypeInfo = () => {
     return {
@@ -507,12 +512,15 @@ function App() {
         clearExtraPixel={clearExtraPixel}
         setLastPlacedTime={setLastPlacedTime}
       />
-      <img src={logo} alt='logo' className='App__logo--mobile' />
+      {(!isMobile || activeTab === tabs[0]) && (
+        <img src={logo} alt='logo' className='App__logo--mobile' />
+      )}
       <div
         className={
           'App__panel ' +
           (isTabletOrMobile ? 'App__panel--tablet ' : ' ') +
-          (isPortrait ? 'App__panel--portrait ' : ' ')
+          (isPortrait ? 'App__panel--portrait ' : ' ') +
+          (isMobile ? 'App__panel--mobile ' : ' ')
         }
       >
         <TabPanel
@@ -584,30 +592,68 @@ function App() {
         />
       </div>
       <div className='App__footer'>
-        <PixelSelector
-          colors={colors}
-          selectedColorId={selectedColorId}
-          setSelectedColorId={setSelectedColorId}
-          getDeviceTypeInfo={getDeviceTypeInfo}
-          extraPixels={extraPixels}
-          selectorMode={selectorMode}
-          setSelectorMode={setSelectorMode}
-          setIsEraserMode={setIsEraserMode}
-          availablePixels={availablePixels}
-          availablePixelsUsed={availablePixelsUsed}
-          basePixelUp={basePixelUp}
-          setBasePixelUp={setBasePixelUp}
-          lastPlacedTime={lastPlacedTime}
-          basePixelTimer={basePixelTimer}
-          queryAddress={queryAddress}
-          setActiveTab={setActiveTab}
-        />
-        <TabsFooter
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          getDeviceTypeInfo={getDeviceTypeInfo}
-        />
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: `${footerExpanded && isFooterSplit ? 'space-between' : 'center'}`,
+            alignItems: `${footerExpanded && isFooterSplit ? 'flex-end' : 'center'}`
+          }}
+        >
+          <PixelSelector
+            colors={colors}
+            selectedColorId={selectedColorId}
+            setSelectedColorId={setSelectedColorId}
+            getDeviceTypeInfo={getDeviceTypeInfo}
+            extraPixels={extraPixels}
+            selectorMode={selectorMode}
+            setSelectorMode={setSelectorMode}
+            setIsEraserMode={setIsEraserMode}
+            availablePixels={availablePixels}
+            availablePixelsUsed={availablePixelsUsed}
+            basePixelUp={basePixelUp}
+            setBasePixelUp={setBasePixelUp}
+            lastPlacedTime={lastPlacedTime}
+            basePixelTimer={basePixelTimer}
+            queryAddress={queryAddress}
+            setActiveTab={setActiveTab}
+            isEraserMode={isEraserMode}
+            setIsEraseMode={setIsEraserMode}
+            isPortrait={isPortrait}
+            isMobile={isMobile}
+          />
+          {isFooterSplit && !footerExpanded && (
+            <div
+              className='Button__primary ExpandTabs__button'
+              onClick={() => {
+                setActiveTab(tabs[0]);
+                setFooterExpanded(!footerExpanded);
+              }}
+            >
+              <img src={Hamburger} alt='Tabs' className='ExpandTabs__icon' />
+            </div>
+          )}
+          {isFooterSplit && footerExpanded && (
+            <TabsFooter
+              tabs={tabs}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              getDeviceTypeInfo={getDeviceTypeInfo}
+              isFooterSplit={isFooterSplit}
+              setFooterExpanded={setFooterExpanded}
+            />
+          )}
+        </div>
+        {!isFooterSplit && (
+          <TabsFooter
+            tabs={tabs}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            getDeviceTypeInfo={getDeviceTypeInfo}
+            isFooterSplit={isFooterSplit}
+            setFooterExpanded={setFooterExpanded}
+          />
+        )}
       </div>
     </div>
   );
