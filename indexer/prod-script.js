@@ -18,10 +18,12 @@ export const config = {
       {
         // Color Added Event
         fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
-        keys: ["0x0004a301e4d01f413a1d4d0460c4ba976e23392f49126d90f5bd45de7dd7dbeb"],
+        keys: [
+          "0x0004a301e4d01f413a1d4d0460c4ba976e23392f49126d90f5bd45de7dd7dbeb"
+        ],
         includeReverted: false,
         includeTransaction: false,
-        includeReceipt: false,
+        includeReceipt: false
       },
       {
         // Pixel Placed Event

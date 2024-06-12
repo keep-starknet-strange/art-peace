@@ -94,8 +94,6 @@ sleep 2 # Wait for indexer script to start; TODO: Check if indexer script is act
 echo "Initializing art-peace canvas ..."
 curl http://localhost:8080/init-canvas -X POST
 curl http://localhost:8080/set-contract-address -X POST -d "$ART_PEACE_CONTRACT_ADDRESS"
-COLORS=$(cat $CANVAS_CONFIG_FILE | jq -r '.colors | map("\"\(.)\"") | join(",")')
-curl http://localhost:8080/init-colors -X POST -d "[$COLORS]"
 
 # Start the art-peace frontend
 echo "Starting art-peace frontend ..."

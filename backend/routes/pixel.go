@@ -115,8 +115,12 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate color format (e.g., validate against allowed colors)
-	colorsLength := len(core.ArtPeaceBackend.CanvasConfig.Colors)
-	if color < 0 || color > colorsLength {
+	colorsLength, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM colors")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get colors count")
+		return
+	}
+	if color < 0 || color > *colorsLength {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Color out of range")
 		return
 	}
@@ -196,8 +200,13 @@ func placePixelRedis(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate color range (e.g., ensure color value fits within bit width)
-	colorsLength := uint(len(core.ArtPeaceBackend.CanvasConfig.Colors))
-	if color >= colorsLength {
+	colorsLength, err := core.PostgresQueryOne[uint]("SELECT COUNT(*) FROM colors")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get colors count")
+		return
+	}
+
+	if color >= *colorsLength {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Color out of range")
 		return
 	}

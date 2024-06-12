@@ -94,14 +94,12 @@ pub mod ArtPeace {
         TemplateEvent: TemplateStoreComponent::Event,
     }
 
-    // Add color
     #[derive(Drop, starknet::Event)]
     struct ColorAdded {
         #[key]
-        color_index: u8,
+        color_key: u8,
         color: u32,
     }
-
 
     #[derive(Drop, starknet::Event)]
     struct NewDay {
@@ -236,6 +234,7 @@ pub mod ArtPeace {
         let mut i: u8 = 0;
         while i < color_count {
             self.color_palette.write(i, *init_params.color_palette.at(i.into()));
+            self.emit(ColorAdded { color_key: i, color: *init_params.color_palette.at(i.into()) });
             i += 1;
         };
 
@@ -1174,7 +1173,7 @@ pub mod ArtPeace {
             let color = self.votable_colors.read((votable_index, day));
             if vote >= threshold {
                 self.color_palette.write(color_index, color);
-                self.emit(ColorAdded { color_index, color });
+                self.emit(ColorAdded { color_key: color_index, color });
                 color_index += 1;
             } else {
                 self.votable_colors.write((next_day_votable_index, next_day), color);

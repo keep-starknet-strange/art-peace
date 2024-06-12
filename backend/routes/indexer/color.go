@@ -8,31 +8,38 @@ import (
 )
 
 func processColorAddedEvent(event IndexerEvent) {
+	colorKeyHex := event.Event.Keys[1]
+	colorHex := event.Event.Data[0]
 
+	colorKey, err := strconv.ParseInt(colorKeyHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processcolorIdexHex", "Error converting color index hex to int", colorIdx, colorIdexHex)
+		PrintIndexerError("processColorAddedEvent", "Error converting color key hex to int", colorKeyHex, colorHex)
 		return
 	}
 
+	color := colorHex[len(colorHex)-6:]
+
 	// Set color in postgres
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Colors (hex) VALUES ($1))", colorHexHex)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Colors (color_key, hex) VALUES ($1, $2)", colorKey, color)
 	if err != nil {
-		PrintIndexerError("processColorAddedEvent", "Error inserting day into postgres", colorHexHex)
+		PrintIndexerError("processColorAddedEvent", "Error inserting color into postgres", colorKey, color)
 		return
 	}
 }
 
 func revertColorAddedEvent(event IndexerEvent) {
+	colorIdxHex := event.Event.Keys[1]
 
+	colorIdx, err := strconv.ParseInt(colorIdxHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("revertColorAddedEvent", "Error converting day index hex to int", colorIdxHex)
+		PrintIndexerError("revertColorAddedEvent", "Error converting color index hex to int", colorIdxHex)
 		return
 	}
 
 	// Delete color from postgres
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM colors WHERE color_index = $1", colorHexHex)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM colors WHERE color_key = $1", colorIdx)
 	if err != nil {
-		PrintIndexerError("revertColorAddedEvent", "Error deleting color from postgres", colorHexHex)
+		PrintIndexerError("revertColorAddedEvent", "Error deleting color from postgres", colorIdx)
 		return
 	}
 }

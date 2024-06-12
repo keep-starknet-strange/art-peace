@@ -95,7 +95,7 @@ var eventProcessors = map[string](func(IndexerEvent)){
 
 var eventReverters = map[string](func(IndexerEvent)){
 	newDayEvent:             revertNewDayEvent,
-	color:                   revertColorAddedEvent,
+	colorAddedEvent:         revertColorAddedEvent,
 	pixelPlacedEvent:        revertPixelPlacedEvent,
 	basicPixelPlacedEvent:   revertBasicPixelPlacedEvent,
 	memberPixelsPlacedEvent: revertMemberPixelsPlacedEvent,

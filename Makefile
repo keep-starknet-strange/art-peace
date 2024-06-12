@@ -63,8 +63,6 @@ helm-upgrade:
 	helm upgrade --set postgres.password=$(POSTGRES_PASSWORD) --set deployments.sha=$(COMMIT_SHA) --set apibara.authToken=$(AUTH_TOKEN) art-peace-infra infra/art-peace-infra
 
 init-infra-prod:
-	$(eval COLORS := $(shell cat configs/canvas.config.json | jq -r '.colors | map("\"\(.)\"") | join(",")'))
 	@echo "Initializing infra..."
 	curl https://api.art-peace.net/init-canvas -X POST
-	curl https://api.art-peace.net/init-colors -X POST -d "[$(COLORS)]"
 	curl https://api.art-peace.net/init-quests -X POST -d "@configs/production-quests.config.json"
