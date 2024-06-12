@@ -20,7 +20,8 @@ const CanvasContainer = (props) => {
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
   const [canvasScale, setCanvasScale] = useState(3.85);
-
+  const [touchInitialDistance, setInitialTouchDistance] = useState(0);
+  const [touchScale, setTouchScale] = useState(0);
   const canvasContainerRef = useRef(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -48,6 +49,7 @@ const CanvasContainer = (props) => {
   };
 
   const handlePointerMove = (e) => {
+    if (props.nftMintingMode && !props.nftSelected) return;
     if (isDragging) {
       setCanvasX(canvasX + e.clientX - dragStartX);
       setCanvasY(canvasY + e.clientY - dragStartY);
@@ -104,12 +106,84 @@ const CanvasContainer = (props) => {
     setCanvasY(newPosY);
   };
 
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const initialDistance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      setTouchScale(canvasScale);
+      setInitialTouchDistance(initialDistance);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2) {
+      const [touch1, touch2] = e.touches;
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      const rect = props.canvasRef.current.getBoundingClientRect();
+      const midX = (touch1.clientX + touch2.clientX) / 2;
+      const midY = (touch1.clientY + touch2.clientY) / 2;
+
+      let cursorX = midX - rect.left;
+      let cursorY = midY - rect.top;
+      if (cursorX < 0) {
+        cursorX = 0;
+      } else if (cursorX > rect.width) {
+        cursorX = rect.width;
+      }
+      if (cursorY < 0) {
+        cursorY = 0;
+      } else if (cursorY > rect.height) {
+        cursorY = rect.height;
+      }
+
+      let newScale = (distance / touchInitialDistance) * touchScale;
+      if (newScale < minScale) {
+        newScale = minScale;
+      } else if (newScale > maxScale) {
+        newScale = maxScale;
+      }
+      const newWidth = width * newScale;
+      const newHeight = height * newScale;
+
+      const oldCursorXRelative = cursorX / rect.width;
+      const oldCursorYRelative = cursorY / rect.height;
+
+      const newCursorX = oldCursorXRelative * newWidth;
+      const newCursorY = oldCursorYRelative * newHeight;
+
+      const newPosX = canvasX - (newCursorX - cursorX);
+      const newPosY = canvasY - (newCursorY - cursorY);
+
+      setCanvasScale(newScale);
+      setCanvasX(newPosX);
+      setCanvasY(newPosY);
+      // TODO: Make scroll acceleration based
+    }
+  };
+
   useEffect(() => {
     canvasContainerRef.current.addEventListener('wheel', zoom);
+    canvasContainerRef.current.addEventListener('touchstart', handleTouchStart);
+    canvasContainerRef.current.addEventListener('touchmove', handleTouchMove);
     return () => {
       canvasContainerRef.current.removeEventListener('wheel', zoom);
+      canvasContainerRef.current.removeEventListener(
+        'touchstart',
+        handleTouchStart
+      );
+      canvasContainerRef.current.removeEventListener(
+        'touchmove',
+        handleTouchMove
+      );
     };
-  }, [canvasScale, canvasX, canvasY]);
+  }, [canvasScale, canvasX, canvasY, touchInitialDistance]);
 
   // Init canvas transform to center of the viewport
   useEffect(() => {

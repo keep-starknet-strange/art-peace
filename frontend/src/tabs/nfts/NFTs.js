@@ -243,6 +243,7 @@ const NFTs = (props) => {
       activeFilter={activeFilter}
       setActiveFilter={setActiveFilter}
       filters={filters}
+      isMobile={props.isMobile}
     />
   );
 };

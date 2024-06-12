@@ -85,6 +85,7 @@ const TabPanel = (props) => {
           nftPosition={props.nftPosition}
           nftWidth={props.nftWidth}
           nftHeight={props.nftHeight}
+          setNotificationMessage={props.setNotificationMessage}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>
@@ -129,6 +130,7 @@ const TabPanel = (props) => {
                   factionPixelsData={props.factionPixelsData}
                   setTemplateOverlayMode={props.setTemplateOverlayMode}
                   setOverlayTemplate={props.setOverlayTemplate}
+                  isMobile={props.isMobile}
                 />
               </div>
             )}
@@ -171,6 +173,7 @@ const TabPanel = (props) => {
                   latestMintedTokenId={props.latestMintedTokenId}
                   setLatestMintedTokenId={props.setLatestMintedTokenId}
                   queryAddress={props.queryAddress}
+                  isMobile={props.isMobile}
                 />
               </div>
             )}
