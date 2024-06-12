@@ -5,7 +5,8 @@
 
   transition: all 0.5s;
 }
-.App__panel--tablet .NFTs__main_hidden_mobile {
+
+.NFTs__main_hidden_mobile {
   display: none;
 }
 

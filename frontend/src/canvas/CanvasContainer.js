@@ -126,34 +126,45 @@ const CanvasContainer = (props) => {
         Math.pow(touch2.clientX - touch1.clientX, 2) +
           Math.pow(touch2.clientY - touch1.clientY, 2)
       );
-      const scale = (distance / touchInitialDistance) * touchScale;
       const rect = props.canvasRef.current.getBoundingClientRect();
       const midX = (touch1.clientX + touch2.clientX) / 2;
       const midY = (touch1.clientY + touch2.clientY) / 2;
 
-      const cursorX = midX - rect.left;
-      const cursorY = midY - rect.top;
+      let cursorX = midX - rect.left;
+      let cursorY = midY - rect.top;
+      if (cursorX < 0) {
+        cursorX = 0;
+      } else if (cursorX > rect.width) {
+        cursorX = rect.width;
+      }
+      if (cursorY < 0) {
+        cursorY = 0;
+      } else if (cursorY > rect.height) {
+        cursorY = rect.height;
+      }
+
+      let newScale = (distance / touchInitialDistance) * touchScale;
+      if (newScale < minScale) {
+        newScale = minScale;
+      } else if (newScale > maxScale) {
+        newScale = maxScale;
+      }
+      const newWidth = width * newScale;
+      const newHeight = height * newScale;
 
       const oldCursorXRelative = cursorX / rect.width;
       const oldCursorYRelative = cursorY / rect.height;
 
-      const newWidth = width * scale;
-      const newHeight = height * scale;
       const newCursorX = oldCursorXRelative * newWidth;
       const newCursorY = oldCursorYRelative * newHeight;
 
       const newPosX = canvasX - (newCursorX - cursorX);
       const newPosY = canvasY - (newCursorY - cursorY);
 
-      if (scale < minScale) {
-        setCanvasScale(minScale);
-      } else if (scale > maxScale) {
-        setCanvasScale(maxScale);
-      } else {
-        setCanvasScale(scale);
-      }
+      setCanvasScale(newScale);
       setCanvasX(newPosX);
       setCanvasY(newPosY);
+      // TODO: Make scroll acceleration based
     }
   };
 

@@ -53,17 +53,15 @@ export function usePreventZoom(scrollCheck = true, keyboardCheck = true) {
   }, [scrollCheck, keyboardCheck]);
 }
 
-export const useLockScroll = (activeTab = '', lockedTab = 'Canvas') => {
-  const shouldLockScroll = activeTab === lockedTab || 'NFTs';
-
+export const useLockScroll = (scrollCheck = true) => {
   useEffect(() => {
     const handleScroll = (e) => {
-      if (shouldLockScroll) {
+      if (scrollCheck) {
         e.preventDefault();
       }
     };
 
-    if (shouldLockScroll) {
+    if (scrollCheck) {
       document.body.style.overflow = 'hidden';
       document.addEventListener('scroll', handleScroll, { passive: false });
     } else {
@@ -74,5 +72,5 @@ export const useLockScroll = (activeTab = '', lockedTab = 'Canvas') => {
     return () => {
       document.removeEventListener('scroll', handleScroll);
     };
-  }, [shouldLockScroll]);
+  }, [scrollCheck]);
 };
