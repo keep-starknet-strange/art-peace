@@ -98,7 +98,23 @@ func CheckFactionStatus(q *Quest, user string) (progress int, needed int) {
 }
 
 func CheckRainbowStatus(q *Quest, user string) (progress int, needed int) {
-	// TODO: Implement this
+	// Get the count of distinct colors the user has
+	userColorCount, err := core.PostgresQueryOne[int]("SELECT COUNT(DISTINCT p.color) FROM Pixels p WHERE p.address = $1", user)
+	if err != nil {
+		return 0, 1
+	}
+
+	// Get the total count of colors
+	totalColorCount, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM Colors")
+	if err != nil {
+		return 0, 1
+	}
+
+	// Check if the user has all colors
+	if *userColorCount == *totalColorCount {
+		return 1, 1
+	}
+
 	return 0, 1
 }
 
