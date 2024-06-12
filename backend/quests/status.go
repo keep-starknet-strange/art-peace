@@ -34,17 +34,12 @@ func CheckHodlStatus(q *Quest, user string) (progress int, needed int) {
 }
 
 func CheckNftStatus(q *Quest, user string) (progress int, needed int) {
-	// gets the count of NFTs minted by `user`
 	nfts_minted_by_user, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM NFTs WHERE minter = $1", user)
-	// if error is encountered, return 0, 1
+
 	if err != nil {
 		return 0, 1
 	}
-	// checks if count is greater than 0, if yes, returns 1, 1, else 0, 1
-	if *nfts_minted_by_user > 0 {
-		return 1, 1
-	}
-	return 0, 1
+	return *nfts_minted_by_user, 1
 }
 
 func CheckPixelStatus(q *Quest, user string) (progress int, needed int) {
@@ -118,7 +113,6 @@ func CheckUnruggableStatus(q *Quest, user string) (progress int, needed int) {
 }
 
 func CheckUsernameStatus(q *Quest, user string) (progress int, needed int) {
-
 	count, err := core.PostgresQueryOne[int]("SELECT COUNT (*) FROM Users where address = $1", user)
 
 	if err != nil {

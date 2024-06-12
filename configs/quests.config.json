@@ -36,18 +36,6 @@
               ],
               "storeParams": []
             }
-          },
-          {
-            "name": "Mint an NFT",
-            "description": "Mint NFT of any size from the canvas",
-            "reward": 5,
-            "questContract": {
-              "type": "NFTMintQuest",
-              "initParams": [
-                "$ART_PEACE_CONTRACT",
-                "$REWARD"
-              ]
-            }
           }
         ]
       },
