@@ -361,39 +361,44 @@ func getHotNFTs(w http.ResponseWriter, r *http.Request) {
    
 	query := `
 			SELECT 
-				ranked_nfts.token_id ,
-				ranked_nfts.position,
-				ranked_nfts.width,
-				ranked_nfts.height,
+    			ranked_nfts.token_id,
+    			ranked_nfts.position,
+    			ranked_nfts.width,
+    			ranked_nfts.height,
 				ranked_nfts.image_hash,
-				ranked_nfts.block_number ,
-				ranked_nfts.minter,
-				ranked_nfts.owner,
-				ranked_nfts.likes,
+    			ranked_nfts.block_number,
+    			ranked_nfts.minter,
+    			ranked_nfts.owner,
+    			ranked_nfts.likes,
 				ranked_nfts.liked
-			FROM 
-				(
-				SELECT 
-					nfts.*, 
-					COALESCE(like_count, 0) AS likes,
-					ROW_NUMBER() OVER (ORDER BY COALESCE(like_count, 0) DESC) AS rank,
-					COALESCE((SELECT true FROM nftlikes WHERE liker = $1 ), false) as liked
-				FROM 
-					nfts
-				LEFT JOIN (
-					SELECT 
-						nftkey, 
-						COUNT(*) AS like_count
-				FROM 
-					nftlikes
-			GROUP BY 
-			nftkey
-		) nftlikes ON nfts.token_id = nftlikes.nftkey
-		ORDER BY 
-			rank
-		LIMIT 100
-		) AS ranked_nfts
-		LIMIT $2 OFFSET $3`
+			FROM (
+    			SELECT 
+        			nfts.*, 
+        			COALESCE(like_count, 0) AS likes,
+        			ROW_NUMBER() OVER (ORDER BY COALESCE(like_count, 0) DESC) AS rank,
+        			COALESCE((SELECT true FROM nftlikes WHERE liker = $1 AND nftlikes.nftkey = nfts.token_id), false) as liked
+    			FROM 
+        			nfts
+    			LEFT JOIN (
+        			SELECT 
+            			nftkey, 
+            			COUNT(*) AS like_count
+        			FROM (
+            			SELECT 
+                			nftkey,
+                			ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn
+            			FROM 
+                			nftlikes
+				) sub
+        		WHERE 
+            		rn > (SELECT MAX(rn) - 4 FROM (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn FROM nftlikes) sub_rn)
+        		GROUP BY 
+            		nftkey
+    			) nftlikes ON nfts.token_id = nftlikes.nftkey
+			) AS ranked_nfts
+			ORDER BY 
+    			ranked_nfts.rank
+    		LIMIT $2 OFFSET $3;`
 	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset)
 	if err != nil {
 	 routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Hot NFTs")
