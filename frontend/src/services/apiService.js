@@ -97,8 +97,8 @@ export const getTopNftsFn = async (params) => {
  * @returns {Promise<Object>} The response from the fetch call.
  */
 export const getHotNftsFn = async (params) => {
-  const { page, pageLength } = params;
+  const { page, pageLength, queryAddress } = params;
   return await fetchWrapper(
-    `get-hot-nfts?page=${page}&pageLength=${pageLength}`
+    `get-hot-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
   );
 };

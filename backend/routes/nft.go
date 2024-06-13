@@ -295,6 +295,10 @@ func getTopNFTs(w http.ResponseWriter, r *http.Request) {
 }
 
 func getHotNFTs(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
 	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
 	if err != nil || pageLength <= 0 {
 	 pageLength = 25
@@ -326,7 +330,7 @@ func getHotNFTs(w http.ResponseWriter, r *http.Request) {
 					nfts.*, 
 					COALESCE(like_count, 0) AS likes,
 					ROW_NUMBER() OVER (ORDER BY COALESCE(like_count, 0) DESC) AS rank,
-					COALESCE((SELECT true FROM nftlikes WHERE liker = 'aaa'), false) as liked
+					COALESCE((SELECT true FROM nftlikes WHERE liker = $1 ), false) as liked
 				FROM 
 					nfts
 				LEFT JOIN (
@@ -342,8 +346,8 @@ func getHotNFTs(w http.ResponseWriter, r *http.Request) {
 			rank
 		LIMIT 100
 		) AS ranked_nfts
-		LIMIT $1 OFFSET $2`
-	nfts, err := core.PostgresQueryJson[NFTData](query, pageLength, offset)
+		LIMIT $2 OFFSET $3`
+	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset)
 	if err != nil {
 	 routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Hot NFTs")
 	 return
