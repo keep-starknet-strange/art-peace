@@ -76,18 +76,22 @@ const QuestItem = (props) => {
     );
   };
 
+  const claimMainQuest = () => {
+    if (devnetMode) return;
+    if (!props.address || !props.artPeaceContract) return;
+    setCalls(props.artPeaceContract.populateTransaction['claim_main_quest']());
+  };
+
   useEffect(() => {
     const claimQuest = async () => {
       if (devnetMode) return;
       if (calls.length === 0) return;
       await writeAsync();
-      console.log('Place Pixel successful:', data, isPending);
-      // TODO: Update the UI with the new state
     };
     claimQuest();
   }, [calls]);
 
-  const { writeAsync, data, isPending } = useContractWrite({
+  const { writeAsync } = useContractWrite({
     calls
   });
 
@@ -96,10 +100,25 @@ const QuestItem = (props) => {
       return;
     }
     if (!devnetMode) {
-      claimTodayQuestCall(props.questId, []);
+      if (props.type === 'daily') {
+        claimTodayQuestCall(props.questId, []);
+      } else if (props.type === 'main') {
+        claimMainQuest();
+      } else {
+        console.log('Quest type not recognized');
+      }
       return;
     }
-    const response = await fetchWrapper(`claim-today-quest-devnet`, {
+    let route = '';
+    if (props.type === 'daily') {
+      route = 'claim-today-quest-devnet';
+    } else if (props.type === 'main') {
+      route = 'claim-main-quest-devnet';
+    } else {
+      console.log('Quest type not recognized');
+      return;
+    }
+    const response = await fetchWrapper(route, {
       mode: 'cors',
       method: 'POST',
       body: JSON.stringify({
@@ -109,7 +128,7 @@ const QuestItem = (props) => {
     });
     if (response.result) {
       console.log(response.result);
-      props.markCompleted(props.questId);
+      props.markCompleted(props.questId, props.type);
     }
     // TODO: Expand if not claimable && has args
   };

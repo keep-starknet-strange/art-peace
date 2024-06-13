@@ -1,23 +1,31 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { useAccount, useContract, useNetwork } from '@starknet-react/core';
+import {
+  useAccount,
+  useContract,
+  useNetwork,
+  useConnect
+} from '@starknet-react/core';
 import './App.css';
 import CanvasContainer from './canvas/CanvasContainer.js';
 import PixelSelector from './footer/PixelSelector.js';
 import TabsFooter from './footer/TabsFooter.js';
 import TabPanel from './tabs/TabPanel.js';
-import { usePreventZoom } from './utils/Window.js';
+import { usePreventZoom, useLockScroll } from './utils/Window.js';
 import { backendUrl, wsUrl, devnetMode } from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
+import NotificationPanel from './tabs/NotificationPanel.js';
+import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
   // Window management
   usePreventZoom();
+  useLockScroll();
 
   const isDesktopOrLaptop = useMediaQuery({
     query: '(min-width: 1224px)'
@@ -26,7 +34,12 @@ function App() {
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1224px)' });
   const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });
   const isRetina = useMediaQuery({ query: '(min-resolution: 2dppx)' });
+  const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
+  const isFooterSplit = useMediaQuery({ query: '(max-width: 52rem)' });
   // TODO: height checks ?
+  // TODO: Animate logo exit on mobile
+
+  const [footerExpanded, setFooterExpanded] = useState(false);
 
   const getDeviceTypeInfo = () => {
     return {
@@ -34,7 +47,8 @@ function App() {
       isBigScreen: isBigScreen,
       isTabletOrMobile: isTabletOrMobile,
       isPortrait: isPortrait,
-      isRetina: isRetina
+      isRetina: isRetina,
+      isMobile: isMobile
     };
   };
 
@@ -90,49 +104,57 @@ function App() {
     }
   }, [readyState]);
 
-  useEffect(() => {
-    if (lastJsonMessage) {
-      // Check the message type and handle accordingly
-      if (lastJsonMessage.messageType === 'colorPixel') {
-        colorPixel(lastJsonMessage.position, lastJsonMessage.color);
-      } else if (
-        lastJsonMessage.messageType === 'nftMinted' &&
-        activeTab === 'NFTs'
-      ) {
-        // TODO: Compare to user's address
-        if (lastJsonMessage.minter === queryAddress) {
-          setLatestMintedTokenId(lastJsonMessage.token_id);
-        }
-      }
-    }
-  }, [lastJsonMessage]);
-
   // Colors
   const staticColors = canvasConfig.colors;
   const [colors, setColors] = useState([]);
 
-  useEffect(() => {
-    const fetchColors = async () => {
-      try {
-        let getColorsEndpoint = backendUrl + '/get-colors';
-        let response = await fetch(getColorsEndpoint);
-        let colors = await response.json();
-        if (colors.error) {
-          setColors(staticColors);
-          console.error(colors.error);
-          return;
-        }
-        if (colors.data) {
-          setColors(colors.data);
-        }
-      } catch (error) {
+  const [notificationMessage, setNotificationMessage] = useState('');
+
+  const fetchColors = async () => {
+    try {
+      let getColorsEndpoint = backendUrl + '/get-colors';
+      let response = await fetch(getColorsEndpoint);
+      let colors = await response.json();
+      if (colors.error) {
         setColors(staticColors);
-        console.error(error);
+        console.error(colors.error);
+        return;
+      }
+      if (colors.data) {
+        setColors(colors.data);
+      }
+    } catch (error) {
+      setColors(staticColors);
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    fetchColors();
+  }, []);
+
+  useEffect(() => {
+    const processMessage = async (message) => {
+      if (message) {
+        // Check the message type and handle accordingly
+        if (message.messageType === 'colorPixel') {
+          if (message.color >= colors.length) {
+            // Get new colors from backend
+            await fetchColors();
+          }
+          colorPixel(message.position, message.color);
+        } else if (
+          message.messageType === 'nftMinted' &&
+          activeTab === 'NFTs'
+        ) {
+          if (message.minter === queryAddress) {
+            setLatestMintedTokenId(message.token_id);
+          }
+        }
       }
     };
 
-    fetchColors();
-  }, []);
+    processMessage(lastJsonMessage);
+  }, [lastJsonMessage]);
 
   // Canvas
   const width = canvasConfig.canvas.width;
@@ -315,7 +337,6 @@ function App() {
     context.clearRect(0, 0, width, height);
   }, [width, height]);
 
-  // TODO: thread safety?
   const clearExtraPixel = useCallback(
     (index) => {
       setAvailablePixelsUsed(availablePixelsUsed - 1);
@@ -379,6 +400,32 @@ function App() {
   const [nftWidth, setNftWidth] = useState(null);
   const [nftHeight, setNftHeight] = useState(null);
 
+  // Account
+  const { connect, connectors } = useConnect();
+  const connectWallet = async (connector) => {
+    if (devnetMode) {
+      setConnected(true);
+      return;
+    }
+    connect({ connector });
+  };
+  useEffect(() => {
+    if (devnetMode) return;
+    if (!connectors) return;
+    if (connectors.length === 0) return;
+
+    const connectIfReady = async () => {
+      for (let i = 0; i < connectors.length; i++) {
+        let ready = await connectors[i].ready();
+        if (ready) {
+          connectWallet(connectors[i]);
+          break;
+        }
+      }
+    };
+    connectIfReady();
+  }, [connectors]);
+
   // Tabs
   const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -422,6 +469,10 @@ function App() {
 
   return (
     <div className='App'>
+      <NotificationPanel
+        message={notificationMessage}
+        animationDuration={5000}
+      />
       <CanvasContainer
         address={address}
         artPeaceContract={artPeaceContract}
@@ -461,12 +512,15 @@ function App() {
         clearExtraPixel={clearExtraPixel}
         setLastPlacedTime={setLastPlacedTime}
       />
-      <img src={logo} alt='logo' className='App__logo--mobile' />
+      {(!isMobile || activeTab === tabs[0]) && (
+        <img src={logo} alt='logo' className='App__logo--mobile' />
+      )}
       <div
         className={
           'App__panel ' +
           (isTabletOrMobile ? 'App__panel--tablet ' : ' ') +
-          (isPortrait ? 'App__panel--portrait ' : ' ')
+          (isPortrait ? 'App__panel--portrait ' : ' ') +
+          (isMobile ? 'App__panel--mobile ' : ' ')
         }
       >
         <TabPanel
@@ -477,10 +531,12 @@ function App() {
           setConnected={setConnected}
           artPeaceContract={artPeaceContract}
           usernameContract={usernameContract}
+          setNotificationMessage={setNotificationMessage}
           colors={colors}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           getDeviceTypeInfo={getDeviceTypeInfo}
+          isMobile={isMobile}
           templateOverlayMode={templateOverlayMode}
           setTemplateOverlayMode={setTemplateOverlayMode}
           overlayTemplate={overlayTemplate}
@@ -531,33 +587,73 @@ function App() {
           userFactions={userFactions}
           latestMintedTokenId={latestMintedTokenId}
           setLatestMintedTokenId={setLatestMintedTokenId}
+          connectWallet={connectWallet}
+          connectors={connectors}
         />
       </div>
       <div className='App__footer'>
-        <PixelSelector
-          colors={colors}
-          selectedColorId={selectedColorId}
-          setSelectedColorId={setSelectedColorId}
-          getDeviceTypeInfo={getDeviceTypeInfo}
-          extraPixels={extraPixels}
-          selectorMode={selectorMode}
-          setSelectorMode={setSelectorMode}
-          setIsEraserMode={setIsEraserMode}
-          availablePixels={availablePixels}
-          availablePixelsUsed={availablePixelsUsed}
-          basePixelUp={basePixelUp}
-          setBasePixelUp={setBasePixelUp}
-          lastPlacedTime={lastPlacedTime}
-          basePixelTimer={basePixelTimer}
-          queryAddress={queryAddress}
-          setActiveTab={setActiveTab}
-        />
-        <TabsFooter
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          getDeviceTypeInfo={getDeviceTypeInfo}
-        />
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: `${footerExpanded && isFooterSplit ? 'space-between' : 'center'}`,
+            alignItems: `${footerExpanded && isFooterSplit ? 'flex-end' : 'center'}`
+          }}
+        >
+          <PixelSelector
+            colors={colors}
+            selectedColorId={selectedColorId}
+            setSelectedColorId={setSelectedColorId}
+            getDeviceTypeInfo={getDeviceTypeInfo}
+            extraPixels={extraPixels}
+            selectorMode={selectorMode}
+            setSelectorMode={setSelectorMode}
+            setIsEraserMode={setIsEraserMode}
+            availablePixels={availablePixels}
+            availablePixelsUsed={availablePixelsUsed}
+            basePixelUp={basePixelUp}
+            setBasePixelUp={setBasePixelUp}
+            lastPlacedTime={lastPlacedTime}
+            basePixelTimer={basePixelTimer}
+            queryAddress={queryAddress}
+            setActiveTab={setActiveTab}
+            isEraserMode={isEraserMode}
+            setIsEraseMode={setIsEraserMode}
+            isPortrait={isPortrait}
+            isMobile={isMobile}
+          />
+          {isFooterSplit && !footerExpanded && (
+            <div
+              className='Button__primary ExpandTabs__button'
+              onClick={() => {
+                setActiveTab(tabs[0]);
+                setFooterExpanded(!footerExpanded);
+              }}
+            >
+              <img src={Hamburger} alt='Tabs' className='ExpandTabs__icon' />
+            </div>
+          )}
+          {isFooterSplit && footerExpanded && (
+            <TabsFooter
+              tabs={tabs}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              getDeviceTypeInfo={getDeviceTypeInfo}
+              isFooterSplit={isFooterSplit}
+              setFooterExpanded={setFooterExpanded}
+            />
+          )}
+        </div>
+        {!isFooterSplit && (
+          <TabsFooter
+            tabs={tabs}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            getDeviceTypeInfo={getDeviceTypeInfo}
+            isFooterSplit={isFooterSplit}
+            setFooterExpanded={setFooterExpanded}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 .TabsFooter {
   width: min(100vw, 100rem);
   height: max(3.4rem, 10%);
-  margin: min(1rem, 3%) 0;
+  margin: 0rem 1rem 1rem 1rem;
   padding: 0;
 
   display: flex;
@@ -11,9 +11,31 @@
   align-items: center;
 }
 
+.TabsFooter__split {
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
 .TabsFooter__tab--active {
   font-size: 1.8rem;
   font-weight: bold;
   text-shadow: 0 0.2rem 0.5rem rgba(255, 255, 255, 0.9);
   transform: scale(1.1);
+}
+
+.TabsFooter__close {
+  background-color: rgba(255, 255, 255, 0.9);
+  width: 3.5rem;
+  height: 3.5rem;
+  align-self: center;
+  margin: 0.5rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.3);
 }

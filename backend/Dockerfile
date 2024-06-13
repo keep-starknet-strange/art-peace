@@ -24,8 +24,8 @@ RUN go mod download
 COPY ./backend .
 
 # Build the app & run it
-RUN go build -o main .
+RUN go build -o main ./cmd/backend/backend.go
 
 EXPOSE 8080
 
-CMD ["./main"]
+CMD ["./main", "--admin"]

@@ -239,7 +239,11 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in database")
 		return
 	}
-	colorPaletteHex := core.ArtPeaceBackend.CanvasConfig.Colors
+	colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY color_key")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get color palette")
+		return
+	}
 	colorPalette := make([]color.RGBA, len(colorPaletteHex))
 	for idx, colorHex := range colorPaletteHex {
 		r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
@@ -291,7 +295,6 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {
 	// Disable this in production
 	if routeutils.NonProductionMiddleware(w, r) {
-		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method only allowed in non-production mode")
 		return
 	}
 

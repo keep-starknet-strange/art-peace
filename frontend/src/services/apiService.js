@@ -72,6 +72,13 @@ export const getFactions = async (query) => {
   );
 };
 
+export const getNewNftsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-new-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
+};
+
 /**
  * Fetches top NFTs with pagination.
  *

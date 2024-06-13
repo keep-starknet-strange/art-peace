@@ -65,7 +65,6 @@ CREATE INDEX dailyQuestsInput_day_index_index ON DailyQuestsInput (day_index);
 CREATE INDEX dailyQuestsInput_quest_id_index ON DailyQuestsInput (quest_id);
 CREATE INDEX dailyQuestsInput_input_key_index ON DailyQuestsInput (input_key);
 
--- TODO: Add calldata field
 -- Table for storing the daily quests that the user has completed
 CREATE TABLE UserDailyQuests (
   -- Postgres auto-incrementing primary key
@@ -114,8 +113,10 @@ CREATE INDEX userMainQuests_quest_id_index ON UserMainQuests (quest_id);
 CREATE TABLE Colors (
   -- Postgres auto-incrementing primary key
   key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  color_key integer NOT NULL,
   hex text NOT NULL
 );
+CREATE INDEX colors_color_key_index ON Colors (color_key);
 
 -- TODO: Add day_index
 CREATE TABLE VotableColors (
@@ -159,7 +160,6 @@ CREATE TABLE Templates (
   reward_token char(64) NOT NULL
 );
 
--- TODO: Owner & change on transfer
 CREATE TABLE NFTs (
   token_id integer NOT NULL PRIMARY KEY,
   position integer NOT NULL,
@@ -199,7 +199,6 @@ CREATE TABLE FactionLinks (
 );
 CREATE INDEX factionLinks_faction_id_index ON FactionLinks (faction_id);
 
--- TODO: Should allocation be here or somewhere else?
 CREATE TABLE FactionMembersInfo (
   faction_id integer NOT NULL,
   member_id integer NOT NULL,

@@ -4,13 +4,10 @@ import EventItem from './EventItem.js';
 import TemplateItem from './TemplateItem.js';
 import ExpandableTab from '../ExpandableTab.js';
 import { backendUrl } from '../../utils/Consts.js';
-import canvasConfig from '../../configs/canvas.config.json';
 import { fetchWrapper } from '../../services/apiService.js';
 
 const TemplatesMainSection = (props) => {
   // Each color represented as 'RRGGBB'
-  const colorsPalette = canvasConfig.colors;
-
   const imageURL = backendUrl + '/templates/';
 
   const imageToPalette = (image) => {
@@ -37,10 +34,10 @@ const TemplatesMainSection = (props) => {
         continue;
       }
       let minDistance = 1000000;
-      let minColor = colorsPalette[0];
+      let minColor = props.colors[0];
       let minColorIndex = 0;
-      for (let j = 0; j < colorsPalette.length; j++) {
-        const color = colorsPalette[j]
+      for (let j = 0; j < props.colors.length; j++) {
+        const color = props.colors[j]
           .match(/[A-Za-z0-9]{2}/g)
           .map((x) => parseInt(x, 16));
         const distance = Math.sqrt(

@@ -351,6 +351,7 @@ const Factions = (props) => {
       clearFactionSelection={clearFactionSelection}
       setTemplateOverlayMode={props.setTemplateOverlayMode}
       setOverlayTemplate={props.setOverlayTemplate}
+      isMobile={props.isMobile}
     />
   );
 };

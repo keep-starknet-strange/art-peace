@@ -15,6 +15,20 @@ spec:
         name: {{ .Values.labels.consumer.name }}
         port:
           number: {{ .Values.ports.consumer }}
+  - path: /nft-images
+    pathType: Prefix
+    backend:
+      service:
+        name: {{ .Values.labels.consumer.name }}
+        port:
+          number: {{ .Values.ports.consumer }}
+  - path: /nft-meta
+    pathType: Prefix
+    backend:
+      service:
+        name: {{ .Values.labels.consumer.name }}
+        port:
+          number: {{ .Values.ports.consumer }}
   - http:
       paths:
       - path: /

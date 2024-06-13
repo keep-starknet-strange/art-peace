@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.labels.adminBackend.name }}
+  labels:
+    app: {{ .Values.labels.adminBackend.name }}
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.ports.adminBackend }}
+      targetPort: {{ .Values.ports.backend }}
+  selector:
+    app: {{ .Values.labels.adminBackend.name }}

@@ -14,6 +14,7 @@ type BackendScriptsConfig struct {
 	VoteColorDevnet        string `json:"vote_color_devnet"`
 	NewUsernameDevnet      string `json:"new_username_devnet"`
 	ChangeUsernameDevnet   string `json:"change_username_devnet"`
+	IncreaseDayDevnet      string `json:"increase_day_devnet"`
 }
 
 type WebSocketConfig struct {
@@ -50,6 +51,7 @@ var DefaultBackendConfig = BackendConfig{
 		VoteColorDevnet:        "../scripts/vote_color.sh",
 		NewUsernameDevnet:      "../scripts/new_username.sh",
 		ChangeUsernameDevnet:   "../scripts/change_username.sh",
+		IncreaseDayDevnet:      "../scripts/increase_day_index.sh",
 	},
 	Production: false,
 	WebSocket: WebSocketConfig{

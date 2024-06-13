@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './PixelSelector.css';
 import '../utils/Styles.css';
+import EraserIcon from '../resources/icons/Eraser.png';
 
 const PixelSelector = (props) => {
   // Track when a placement is available
@@ -9,7 +10,7 @@ const PixelSelector = (props) => {
 
   useEffect(() => {
     if (props.queryAddress === '0') {
-      setPlacementTimer('Connect Wallet');
+      setPlacementTimer('Login to Play');
       return;
     }
     if (props.availablePixels > 0) {
@@ -60,6 +61,7 @@ const PixelSelector = (props) => {
   const cancelSelector = () => {
     props.setSelectedColorId(-1);
     props.setSelectorMode(false);
+    props.setIsEraserMode(false);
   };
 
   return (
@@ -126,6 +128,40 @@ const PixelSelector = (props) => {
                   backgroundColor: `#${props.colors[props.selectedColorId]}FF`
                 }}
               ></div>
+              <div
+                className='Button__close'
+                style={{ marginLeft: '1rem' }}
+                onClick={() => cancelSelector()}
+              >
+                x
+              </div>
+            </div>
+          )}
+          {props.isEraserMode && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: '0 0 0 0.5rem'
+              }}
+            >
+              <div
+                className='PixelSelector__color'
+                style={{
+                  backgroundColor: '#FFFFFF'
+                }}
+              >
+                <img
+                  src={EraserIcon}
+                  alt='Eraser'
+                  style={{
+                    width: '2rem',
+                    height: '2rem'
+                  }}
+                />
+              </div>
               <div
                 className='Button__close'
                 style={{ marginLeft: '1rem' }}
