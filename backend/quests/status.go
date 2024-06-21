@@ -29,13 +29,13 @@ func CheckAuthorityStatus(q *Quest, user string) (progress int, needed int) {
 }
 
 func CheckHodlStatus(q *Quest, user string) (progress int, needed int) {
-	needed = q.GetInputData()[0]
-	available_amount, err := core.PostgresQueryOne[int]("SELECT available FROM ExtraPixels WHERE address = $1", user)
+	hodlQuestInputs := NewHodlQuestInputs(q.InputData)
+	available, err := core.PostgresQueryOne[int]("SELECT available FROM ExtraPixels WHERE address = $1", user)
 
 	if err != nil {
-		return 0, needed
+		return 0, hodlQuestInputs.Amount
 	}
-	return *available_amount, needed
+	return *available, hodlQuestInputs.Amount
 }
 
 func CheckNftStatus(q *Quest, user string) (progress int, needed int) {

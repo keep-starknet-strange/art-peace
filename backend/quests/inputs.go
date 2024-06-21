@@ -12,6 +12,10 @@ type VoteQuestInputs struct {
 	DayIndex uint32
 }
 
+type HodlQuestInputs struct {
+	Amount int
+}
+
 func NewPixelQuestInputs(encodedInputs []int) *PixelQuestInputs {
 	return &PixelQuestInputs{
 		PixelsNeeded: uint32(encodedInputs[0]),
@@ -25,5 +29,11 @@ func NewPixelQuestInputs(encodedInputs []int) *PixelQuestInputs {
 func NewVoteQuestInputs(encodedInputs []int) *VoteQuestInputs {
 	return &VoteQuestInputs{
 		DayIndex: uint32(encodedInputs[0]),
+	}
+}
+
+func NewHodlQuestInputs(encodedInputs []int) *HodlQuestInputs {
+	return &HodlQuestInputs{
+		Amount: encodedInputs[0],
 	}
 }
