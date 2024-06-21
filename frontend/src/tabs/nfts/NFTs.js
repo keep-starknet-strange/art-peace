@@ -175,18 +175,18 @@ const NFTs = (props) => {
     async function getNfts() {
       try {
         let result;
-        if (activeFilter === 'new') {
+        if (activeFilter === 'hot') {
+          result = await getHotNftsFn({
+            page: allNftPagination.page,
+            pageLength: allNftPagination.pageLength
+          });
+        } else if (activeFilter === 'new') {
           result = await getNewNftsFn({
             page: allNftPagination.page,
             pageLength: allNftPagination.pageLength
           });
         } else if (activeFilter === 'top') {
           result = await getTopNftsFn({
-            page: allNftPagination.page,
-            pageLength: allNftPagination.pageLength
-          });
-        } else if (activeFilter === 'hot') {
-          result = await getHotNftsFn({
             page: allNftPagination.page,
             pageLength: allNftPagination.pageLength
           });

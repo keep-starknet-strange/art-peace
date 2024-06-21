@@ -95,14 +95,6 @@ export const getTopNftsFn = async (params) => {
   );
 };
 
-/**
- * Fetches hot NFTs with pagination.
- *
- * @param {Object} params - The query parameters for fetching hot NFTs.
- * @param {number} params.pageLength - The number of top NFTs to fetch per page.
- * @param {number} params.page - The page number to fetch.
- * @returns {Promise<Object>} The response from the fetch call.
- */
 export const getHotNftsFn = async (params) => {
   const { page, pageLength, queryAddress } = params;
   return await fetchWrapper(
