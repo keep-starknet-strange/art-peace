@@ -94,3 +94,10 @@ export const getTopNftsFn = async (params) => {
     `get-top-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
   );
 };
+
+export const getHotNftsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-hot-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
+};

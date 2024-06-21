@@ -172,9 +172,10 @@ CREATE TABLE NFTs (
 );
 
 CREATE TABLE NFTLikes (
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   nftKey integer NOT NULL,
   liker char(64) NOT NULL,
-  PRIMARY KEY (nftKey, liker)
+  UNIQUE (nftKey, liker)
 );
 CREATE INDEX nftLikes_nft_key_index ON NFTLikes (nftKey);
 CREATE INDEX nftLikes_liker_index ON NFTLikes (liker);
