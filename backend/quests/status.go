@@ -1,6 +1,8 @@
 package quests
 
-import "github.com/keep-starknet-strange/art-peace/backend/core"
+import (
+	"github.com/keep-starknet-strange/art-peace/backend/core"
+)
 
 var QuestChecks = map[int]func(*Quest, string) (int, int){
 	AuthorityQuestType:  CheckAuthorityStatus,
@@ -97,9 +99,18 @@ func CheckFactionStatus(q *Quest, user string) (progress int, needed int) {
 	return *count, 1
 }
 
+type RainbowStatus struct {
+	Used   int `json:"used"`
+	Colors int `json:"colors"`
+}
+
 func CheckRainbowStatus(q *Quest, user string) (progress int, needed int) {
-	// TODO: Implement this
-	return 0, 1
+	status, err := core.PostgresQueryOne[RainbowStatus]("SELECT COUNT(DISTINCT p.color) as used, (SELECT COUNT(*) FROM Colors) as colors FROM Pixels p WHERE p.address = $1", user)
+	if err != nil {
+		return 0, 1
+	}
+
+	return status.Used, status.Colors
 }
 
 func CheckTemplateStatus(q *Quest, user string) (progress int, needed int) {
