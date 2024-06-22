@@ -1,6 +1,8 @@
 package quests
 
-import "github.com/keep-starknet-strange/art-peace/backend/core"
+import (
+	"github.com/keep-starknet-strange/art-peace/backend/core"
+)
 
 var QuestChecks = map[int]func(*Quest, string) (int, int){
 	AuthorityQuestType:  CheckAuthorityStatus,
@@ -29,8 +31,13 @@ func CheckAuthorityStatus(q *Quest, user string) (progress int, needed int) {
 }
 
 func CheckHodlStatus(q *Quest, user string) (progress int, needed int) {
-	// TODO: Implement this
-	return 0, 1
+	hodlQuestInputs := NewHodlQuestInputs(q.InputData)
+	available, err := core.PostgresQueryOne[int]("SELECT available FROM ExtraPixels WHERE address = $1", user)
+
+	if err != nil {
+		return 0, hodlQuestInputs.Amount
+	}
+	return *available, hodlQuestInputs.Amount
 }
 
 func CheckNftStatus(q *Quest, user string) (progress int, needed int) {
@@ -97,9 +104,18 @@ func CheckFactionStatus(q *Quest, user string) (progress int, needed int) {
 	return *count, 1
 }
 
+type RainbowStatus struct {
+	Used   int `json:"used"`
+	Colors int `json:"colors"`
+}
+
 func CheckRainbowStatus(q *Quest, user string) (progress int, needed int) {
-	// TODO: Implement this
-	return 0, 1
+	status, err := core.PostgresQueryOne[RainbowStatus]("SELECT COUNT(DISTINCT p.color) as used, (SELECT COUNT(*) FROM Colors) as colors FROM Pixels p WHERE p.address = $1", user)
+	if err != nil {
+		return 0, 1
+	}
+
+	return status.Used, status.Colors
 }
 
 func CheckTemplateStatus(q *Quest, user string) (progress int, needed int) {
