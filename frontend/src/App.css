@@ -9,6 +9,15 @@
   background-color: #fefdfb;
 }
 
+.App--background {
+  height: 100vh;
+  width: 100vw;
+
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
 .App__panel {
   position: fixed;
   z-index: 100;

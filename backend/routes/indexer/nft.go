@@ -228,3 +228,84 @@ func revertNFTMintedEvent(event IndexerEvent) {
 
 	// TODO: Mark image as unused?
 }
+
+func processNFTLikedEvent(event IndexerEvent) {
+  tokenIdLowHex := event.Event.Keys[1][2:] // Remove 0x prefix
+  tokenIdHighHex := event.Event.Keys[2][2:] // Remove 0x prefix
+  liker := event.Event.Keys[3][2:] // Remove 0x prefix
+
+  tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
+  if err != nil {
+    PrintIndexerError("processNFTLikedEvent", "Error converting tokenId hex to int", tokenIdLowHex, liker)
+    return
+  }
+  tokenId := tokenIdU256.Uint64()
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2) ON CONFLICT DO NOTHING", tokenId, liker)
+  if err != nil {
+    PrintIndexerError("processNFTLikedEvent", "Error inserting NFT like into postgres", tokenIdLowHex, liker)
+    return
+  }
+
+  // TODO: WebSocket message?
+}
+
+func revertNFTLikedEvent(event IndexerEvent) {
+  tokenIdLowHex := event.Event.Keys[1][2:] // Remove 0x prefix
+  tokenIdHighHex := event.Event.Keys[2][2:] // Remove 0x prefix
+  liker := event.Event.Keys[3][2:] // Remove 0x prefix
+
+  tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
+  if err != nil {
+    PrintIndexerError("revertNFTLikedEvent", "Error converting tokenId hex to int", tokenIdLowHex, liker)
+    return
+  }
+  tokenId := tokenIdU256.Uint64()
+
+  // TODO: Check if like exists before event
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM NFTLikes WHERE nftKey = $1 AND liker = $2", tokenId, liker)
+  if err != nil {
+    PrintIndexerError("revertNFTLikedEvent", "Error deleting NFT like from postgres", tokenIdLowHex, liker)
+    return
+  }
+}
+
+func processNFTUnlikedEvent(event IndexerEvent) {
+  tokenIdLowHex := event.Event.Keys[1][2:] // Remove 0x prefix
+  tokenIdHighHex := event.Event.Keys[2][2:] // Remove 0x prefix
+  unliker := event.Event.Keys[2][2:] // Remove 0x prefix
+
+  tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
+  if err != nil {
+    PrintIndexerError("processNFTUnlikedEvent", "Error converting tokenId hex to int", tokenIdLowHex, unliker)
+    return
+  }
+  tokenId := tokenIdU256.Uint64()
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM NFTLikes WHERE nftKey = $1 AND liker = $2", tokenId, unliker)
+  if err != nil {
+    PrintIndexerError("processNFTUnlikedEvent", "Error deleting NFT like from postgres", tokenIdLowHex, unliker)
+    return
+  }
+
+  // TODO: WebSocket message?
+}
+
+func revertNFTUnlikedEvent(event IndexerEvent) {
+  tokenIdLowHex := event.Event.Keys[1][2:] // Remove 0x prefix
+  tokenIdHighHex := event.Event.Keys[2][2:] // Remove 0x prefix
+  unliker := event.Event.Keys[3][2:] // Remove 0x prefix
+
+  tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
+  if err != nil {
+    PrintIndexerError("revertNFTUnlikedEvent", "Error converting tokenId hex to int", tokenIdLowHex, unliker)
+    return
+  }
+  tokenId := tokenIdU256.Uint64()
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2) ON CONFLICT DO NOTHING", tokenId, unliker)
+  if err != nil {
+    PrintIndexerError("revertNFTUnlikedEvent", "Error inserting NFT like into postgres", tokenIdLowHex, unliker)
+    return
+  }
+}

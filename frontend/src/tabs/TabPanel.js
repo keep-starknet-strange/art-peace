@@ -16,7 +16,11 @@ const TabPanel = (props) => {
   return (
     <div className='TabPanel'>
       <CSSTransition
-        in={props.showSelectedPixelPanel}
+        in={
+          props.showSelectedPixelPanel &&
+          !(props.showExtraPixelsPanel || props.nftMintingMode) &&
+          props.activeTab === 'Canvas'
+        }
         timeout={300}
         classNames='list-transition'
         unmountOnExit
@@ -74,6 +78,7 @@ const TabPanel = (props) => {
         appear
       >
         <NFTMintingPanel
+          setActiveTab={props.setActiveTab}
           address={props.address}
           artPeaceContract={props.artPeaceContract}
           setNftMintingMode={props.setNftMintingMode}

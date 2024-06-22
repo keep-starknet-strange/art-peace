@@ -208,3 +208,48 @@
   align-items: center;
   justify-content: space-between;
 }
+
+.NFTMintingPanel__form {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.NFTMintingPanel__form__item {
+  margin: 0.5rem 0;
+  padding: 0;
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.NFTMintingPanel__form__input {
+  margin: 0.5rem 0.5rem 0.5rem 1rem;
+  padding: 0.5rem 1rem;
+  height: 2.4rem;
+  width: 100%;
+  flex: 1;
+}
+
+.NFTMintingPanel__form__buttons {
+  margin: 1rem 0 0 0;
+  padding: 0;
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.NFTMintingPanel__button {
+  margin: 0rem 1rem;
+}

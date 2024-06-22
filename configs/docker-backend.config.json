@@ -8,6 +8,8 @@
     "add_template_devnet": "/scripts/add_template.sh",
     "claim_today_quest_devnet": "/scripts/claim_today_quest.sh",
     "mint_nft_devnet": "/scripts/mint_nft.sh",
+    "like_nft_devnet": "/scripts/like_nft.sh",
+    "unlike_nft_devnet": "/scripts/unlike_nft.sh",
     "vote_color_devnet": "/scripts/vote_color.sh",
     "new_username_devnet": "/scripts/new_username.sh",
     "change_username_devnet": "/scripts/change_username.sh",

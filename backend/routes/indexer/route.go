@@ -65,8 +65,12 @@ const (
 	voteColorEvent          = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
 	votableColorAddedEvent  = "0x0115b3bc605487276e022f4bec68b316e7a6b3615fb01afee58241fd1d40e3e5"
 	factionCreatedEvent     = "0x00f3878d4c85ed94271bb611f83d47ea473bae501ffed34cd21b73206149f692"
-	memberReplacedEvent     = "0x01f8936599822d668e09401ffcef1989aca342fb1f003f9b3b1fd1cbf605ed6b"
+	factionJoinedEvent      = "0x01e3fbdf8156ad0dde21e886d61a16d85c9ef54451eb6e253f3f427de32a47ac"
+	factionLeftEvent        = "0x014ef8cc25c96157e2a00e9ceaa7c014a162d11d58a98871087ec488a67d7925"
+	chainFactionJoinedEvent = "0x02947960ff713d9b594a3b718b90a45360e46d1bbacef94b727bb0d461d04207"
 	nftMintedEvent          = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
+  nftLikedEvent           = "0x028d7ee09447088eecdd12a86c9467a5e9ad18f819a20f9adcf6e34e0bd51453"
+  nftUnlikedEvent         = "0x03b57514b19693484c35249c6e8b15bfe6e476205720680c2ff9f02faaf94941"
 	usernameClaimedEvent    = "0x019be6537c04b790ae4e3a06d6e777ec8b2e9950a01d76eed8a2a28941cc511c"
 	usernameChangedEvent    = "0x03c44b98666b0a27eadcdf5dc42449af5f907b19523858368c4ffbc7a2625dab"
 	templateAddedEvent      = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
@@ -85,8 +89,12 @@ var eventProcessors = map[string](func(IndexerEvent)){
 	voteColorEvent:          processVoteColorEvent,
 	votableColorAddedEvent:  processVotableColorAddedEvent,
 	factionCreatedEvent:     processFactionCreatedEvent,
-	memberReplacedEvent:     processMemberReplacedEvent,
+	factionJoinedEvent:      processFactionJoinedEvent,
+	factionLeftEvent:        processFactionLeftEvent,
+	chainFactionJoinedEvent: processChainFactionJoinedEvent,
 	nftMintedEvent:          processNFTMintedEvent,
+  nftLikedEvent:           processNFTLikedEvent,
+  nftUnlikedEvent:         processNFTUnlikedEvent,
 	usernameClaimedEvent:    processUsernameClaimedEvent,
 	usernameChangedEvent:    processUsernameChangedEvent,
 	templateAddedEvent:      processTemplateAddedEvent,
@@ -105,8 +113,12 @@ var eventReverters = map[string](func(IndexerEvent)){
 	voteColorEvent:          revertVoteColorEvent,
 	votableColorAddedEvent:  revertVotableColorAddedEvent,
 	factionCreatedEvent:     revertFactionCreatedEvent,
-	memberReplacedEvent:     revertMemberReplacedEvent,
+	factionJoinedEvent:      revertFactionJoinedEvent,
+	factionLeftEvent:        revertFactionLeftEvent,
+	chainFactionJoinedEvent: revertChainFactionJoinedEvent,
 	nftMintedEvent:          revertNFTMintedEvent,
+  nftLikedEvent:           revertNFTLikedEvent,
+  nftUnlikedEvent:         revertNFTUnlikedEvent,
 	usernameClaimedEvent:    revertUsernameClaimedEvent,
 	usernameChangedEvent:    revertUsernameChangedEvent,
 	templateAddedEvent:      revertTemplateAddedEvent,
@@ -124,9 +136,13 @@ var eventRequiresOrdering = map[string]bool{
 	mainQuestClaimedEvent:   false,
 	voteColorEvent:          true,
 	votableColorAddedEvent:  true,
-	factionCreatedEvent:     false,
-	memberReplacedEvent:     true,
+	factionCreatedEvent:     true,
+	factionJoinedEvent:      true,
+	factionLeftEvent:        true,
+	chainFactionJoinedEvent: true,
 	nftMintedEvent:          false,
+  nftLikedEvent:           true,
+  nftUnlikedEvent:         true,
 	usernameClaimedEvent:    false,
 	usernameChangedEvent:    true,
 	templateAddedEvent:      false,

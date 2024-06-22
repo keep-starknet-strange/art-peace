@@ -19,6 +19,7 @@ import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
+import canvas_nft_abi from './contracts/canvas_nft.abi.json';
 import NotificationPanel from './tabs/NotificationPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
 
@@ -84,6 +85,10 @@ function App() {
   const { contract: usernameContract } = useContract({
     address: process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
     abi: username_store_abi
+  });
+  const { contract: canvasNftContract } = useContract({
+    address: process.env.REACT_APP_CANVAS_NFT_CONTRACT_ADDRESS,
+    abi: canvas_nft_abi
   });
 
   // Websocket
@@ -469,74 +474,31 @@ function App() {
 
   return (
     <div className='App'>
-      <NotificationPanel
-        message={notificationMessage}
-        animationDuration={5000}
-      />
-      <CanvasContainer
-        address={address}
-        artPeaceContract={artPeaceContract}
-        colors={colors}
-        canvasRef={canvasRef}
-        extraPixelsCanvasRef={extraPixelsCanvasRef}
-        extraPixels={extraPixels}
-        extraPixelsData={extraPixelsData}
-        availablePixels={availablePixels}
-        selectedColorId={selectedColorId}
-        setSelectedColorId={setSelectedColorId}
-        pixelSelectedMode={pixelSelectedMode}
-        selectedPositionX={selectedPositionX}
-        selectedPositionY={selectedPositionY}
-        setPixelSelection={setPixelSelection}
-        clearPixelSelection={clearPixelSelection}
-        setPixelPlacedBy={setPixelPlacedBy}
-        basePixelUp={basePixelUp}
-        availablePixelsUsed={availablePixelsUsed}
-        addExtraPixel={addExtraPixel}
-        templateOverlayMode={templateOverlayMode}
-        setTemplateOverlayMode={setTemplateOverlayMode}
-        overlayTemplate={overlayTemplate}
-        setOverlayTemplate={setOverlayTemplate}
-        nftMintingMode={nftMintingMode}
-        setNftMintingMode={setNftMintingMode}
-        nftSelectionStarted={nftSelectionStarted}
-        setNftSelectionStarted={setNftSelectionStarted}
-        nftSelected={nftSelected}
-        setNftSelected={setNftSelected}
-        setNftPosition={setNftPosition}
-        setNftWidth={setNftWidth}
-        setNftHeight={setNftHeight}
-        isEraserMode={isEraserMode}
-        isExtraDeleteMode={isExtraDeleteMode}
-        setIsEraserMode={setIsEraserMode}
-        clearExtraPixel={clearExtraPixel}
-        setLastPlacedTime={setLastPlacedTime}
-      />
-      {(!isMobile || activeTab === tabs[0]) && (
-        <img src={logo} alt='logo' className='App__logo--mobile' />
-      )}
-      <div
-        className={
-          'App__panel ' +
-          (isTabletOrMobile ? 'App__panel--tablet ' : ' ') +
-          (isPortrait ? 'App__panel--portrait ' : ' ') +
-          (isMobile ? 'App__panel--mobile ' : ' ')
-        }
-      >
-        <TabPanel
+      <div className='App--background'>
+        <NotificationPanel
+          message={notificationMessage}
+          animationDuration={5000}
+        />
+        <CanvasContainer
           address={address}
-          queryAddress={queryAddress}
-          account={account}
-          chain={chain}
-          setConnected={setConnected}
           artPeaceContract={artPeaceContract}
-          usernameContract={usernameContract}
-          setNotificationMessage={setNotificationMessage}
           colors={colors}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          getDeviceTypeInfo={getDeviceTypeInfo}
-          isMobile={isMobile}
+          canvasRef={canvasRef}
+          extraPixelsCanvasRef={extraPixelsCanvasRef}
+          extraPixels={extraPixels}
+          extraPixelsData={extraPixelsData}
+          availablePixels={availablePixels}
+          selectedColorId={selectedColorId}
+          setSelectedColorId={setSelectedColorId}
+          pixelSelectedMode={pixelSelectedMode}
+          selectedPositionX={selectedPositionX}
+          selectedPositionY={selectedPositionY}
+          setPixelSelection={setPixelSelection}
+          clearPixelSelection={clearPixelSelection}
+          setPixelPlacedBy={setPixelPlacedBy}
+          basePixelUp={basePixelUp}
+          availablePixelsUsed={availablePixelsUsed}
+          addExtraPixel={addExtraPixel}
           templateOverlayMode={templateOverlayMode}
           setTemplateOverlayMode={setTemplateOverlayMode}
           overlayTemplate={overlayTemplate}
@@ -547,93 +509,149 @@ function App() {
           setNftSelectionStarted={setNftSelectionStarted}
           nftSelected={nftSelected}
           setNftSelected={setNftSelected}
-          nftPosition={nftPosition}
-          nftWidth={nftWidth}
-          nftHeight={nftHeight}
-          showSelectedPixelPanel={
-            !isPortrait
-              ? pixelSelectedMode || isEraserMode
-              : (pixelSelectedMode || isEraserMode) && activeTab === tabs[0]
-          }
-          selectedPositionX={selectedPositionX}
-          selectedPositionY={selectedPositionY}
-          setSelectedColorId={setSelectedColorId}
-          clearPixelSelection={clearPixelSelection}
-          pixelPlacedBy={pixelPlacedBy}
-          showExtraPixelsPanel={showExtraPixelsPanel}
-          extraPixelsData={extraPixelsData}
-          clearExtraPixels={clearExtraPixels}
-          clearExtraPixel={clearExtraPixel}
-          selectorMode={selectorMode}
-          setSelectorMode={setSelectorMode}
+          setNftPosition={setNftPosition}
+          setNftWidth={setNftWidth}
+          setNftHeight={setNftHeight}
           isEraserMode={isEraserMode}
+          isExtraDeleteMode={isExtraDeleteMode}
           setIsEraserMode={setIsEraserMode}
-          setIsExtraDeleteMode={setIsExtraDeleteMode}
-          basePixelUp={basePixelUp}
-          basePixelTimer={basePixelTimer}
-          factionPixels={factionPixels}
-          setFactionPixels={setFactionPixels}
-          setPixelSelection={setPixelSelection}
-          extraPixels={extraPixels}
-          setExtraPixels={setExtraPixels}
-          availablePixels={availablePixels}
-          availablePixelsUsed={availablePixelsUsed}
+          clearExtraPixel={clearExtraPixel}
           setLastPlacedTime={setLastPlacedTime}
-          factionPixelsData={factionPixelsData}
-          setFactionPixelsData={setFactionPixelsData}
-          factionPixelTimers={factionPixelTimers}
-          chainFaction={chainFaction}
-          setChainFaction={setChainFaction}
-          userFactions={userFactions}
-          latestMintedTokenId={latestMintedTokenId}
-          setLatestMintedTokenId={setLatestMintedTokenId}
-          connectWallet={connectWallet}
-          connectors={connectors}
         />
-      </div>
-      <div className='App__footer'>
+        {(!isMobile || activeTab === tabs[0]) && (
+          <img src={logo} alt='logo' className='App__logo--mobile' />
+        )}
         <div
-          style={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: `${footerExpanded && isFooterSplit ? 'space-between' : 'center'}`,
-            alignItems: `${footerExpanded && isFooterSplit ? 'flex-end' : 'center'}`
-          }}
+          className={
+            'App__panel ' +
+            (isTabletOrMobile ? 'App__panel--tablet ' : ' ') +
+            (isPortrait ? 'App__panel--portrait ' : ' ') +
+            (isMobile ? 'App__panel--mobile ' : ' ')
+          }
         >
-          <PixelSelector
+          <TabPanel
+            address={address}
+            queryAddress={queryAddress}
+            account={account}
+            chain={chain}
+            setConnected={setConnected}
+            artPeaceContract={artPeaceContract}
+            usernameContract={usernameContract}
+            canvasNftContract={canvasNftContract}
+            setNotificationMessage={setNotificationMessage}
             colors={colors}
-            selectedColorId={selectedColorId}
-            setSelectedColorId={setSelectedColorId}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
             getDeviceTypeInfo={getDeviceTypeInfo}
-            extraPixels={extraPixels}
+            isMobile={isMobile}
+            templateOverlayMode={templateOverlayMode}
+            setTemplateOverlayMode={setTemplateOverlayMode}
+            overlayTemplate={overlayTemplate}
+            setOverlayTemplate={setOverlayTemplate}
+            nftMintingMode={nftMintingMode}
+            setNftMintingMode={setNftMintingMode}
+            nftSelectionStarted={nftSelectionStarted}
+            setNftSelectionStarted={setNftSelectionStarted}
+            nftSelected={nftSelected}
+            setNftSelected={setNftSelected}
+            nftPosition={nftPosition}
+            nftWidth={nftWidth}
+            nftHeight={nftHeight}
+            showSelectedPixelPanel={
+              !isPortrait
+                ? pixelSelectedMode || isEraserMode
+                : (pixelSelectedMode || isEraserMode) && activeTab === tabs[0]
+            }
+            selectedPositionX={selectedPositionX}
+            selectedPositionY={selectedPositionY}
+            setSelectedColorId={setSelectedColorId}
+            clearPixelSelection={clearPixelSelection}
+            pixelPlacedBy={pixelPlacedBy}
+            showExtraPixelsPanel={showExtraPixelsPanel}
+            extraPixelsData={extraPixelsData}
+            clearExtraPixels={clearExtraPixels}
+            clearExtraPixel={clearExtraPixel}
             selectorMode={selectorMode}
             setSelectorMode={setSelectorMode}
+            isEraserMode={isEraserMode}
             setIsEraserMode={setIsEraserMode}
+            setIsExtraDeleteMode={setIsExtraDeleteMode}
+            basePixelUp={basePixelUp}
+            basePixelTimer={basePixelTimer}
+            factionPixels={factionPixels}
+            setFactionPixels={setFactionPixels}
+            setPixelSelection={setPixelSelection}
+            extraPixels={extraPixels}
+            setExtraPixels={setExtraPixels}
             availablePixels={availablePixels}
             availablePixelsUsed={availablePixelsUsed}
-            basePixelUp={basePixelUp}
-            setBasePixelUp={setBasePixelUp}
-            lastPlacedTime={lastPlacedTime}
-            basePixelTimer={basePixelTimer}
-            queryAddress={queryAddress}
-            setActiveTab={setActiveTab}
-            isEraserMode={isEraserMode}
-            setIsEraseMode={setIsEraserMode}
-            isPortrait={isPortrait}
-            isMobile={isMobile}
+            setLastPlacedTime={setLastPlacedTime}
+            factionPixelsData={factionPixelsData}
+            setFactionPixelsData={setFactionPixelsData}
+            factionPixelTimers={factionPixelTimers}
+            chainFaction={chainFaction}
+            setChainFaction={setChainFaction}
+            userFactions={userFactions}
+            latestMintedTokenId={latestMintedTokenId}
+            setLatestMintedTokenId={setLatestMintedTokenId}
+            connectWallet={connectWallet}
+            connectors={connectors}
           />
-          {isFooterSplit && !footerExpanded && (
-            <div
-              className='Button__primary ExpandTabs__button'
-              onClick={() => {
-                setActiveTab(tabs[0]);
-                setFooterExpanded(!footerExpanded);
-              }}
-            >
-              <img src={Hamburger} alt='Tabs' className='ExpandTabs__icon' />
-            </div>
-          )}
-          {isFooterSplit && footerExpanded && (
+        </div>
+        <div className='App__footer'>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: `${footerExpanded && isFooterSplit ? 'space-between' : 'center'}`,
+              alignItems: `${footerExpanded && isFooterSplit ? 'flex-end' : 'center'}`
+            }}
+          >
+            <PixelSelector
+              colors={colors}
+              selectedColorId={selectedColorId}
+              setSelectedColorId={setSelectedColorId}
+              getDeviceTypeInfo={getDeviceTypeInfo}
+              extraPixels={extraPixels}
+              selectorMode={selectorMode}
+              setSelectorMode={setSelectorMode}
+              setIsEraserMode={setIsEraserMode}
+              availablePixels={availablePixels}
+              availablePixelsUsed={availablePixelsUsed}
+              basePixelUp={basePixelUp}
+              setBasePixelUp={setBasePixelUp}
+              lastPlacedTime={lastPlacedTime}
+              basePixelTimer={basePixelTimer}
+              queryAddress={queryAddress}
+              setActiveTab={setActiveTab}
+              isEraserMode={isEraserMode}
+              setIsEraseMode={setIsEraserMode}
+              isPortrait={isPortrait}
+              isMobile={isMobile}
+            />
+            {isFooterSplit && !footerExpanded && (
+              <div
+                className='Button__primary ExpandTabs__button'
+                onClick={() => {
+                  setActiveTab(tabs[0]);
+                  setFooterExpanded(!footerExpanded);
+                }}
+              >
+                <img src={Hamburger} alt='Tabs' className='ExpandTabs__icon' />
+              </div>
+            )}
+            {isFooterSplit && footerExpanded && (
+              <TabsFooter
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                getDeviceTypeInfo={getDeviceTypeInfo}
+                isFooterSplit={isFooterSplit}
+                setFooterExpanded={setFooterExpanded}
+              />
+            )}
+          </div>
+          {!isFooterSplit && (
             <TabsFooter
               tabs={tabs}
               activeTab={activeTab}
@@ -644,16 +662,6 @@ function App() {
             />
           )}
         </div>
-        {!isFooterSplit && (
-          <TabsFooter
-            tabs={tabs}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            getDeviceTypeInfo={getDeviceTypeInfo}
-            isFooterSplit={isFooterSplit}
-            setFooterExpanded={setFooterExpanded}
-          />
-        )}
       </div>
     </div>
   );

@@ -42,9 +42,9 @@ pub mod FactionQuest {
                 contract_address: self.art_peace.read()
             };
 
-            let user_factions_count = art_peace_dispatcher.get_user_factions_count(user);
+            let user_faction = art_peace_dispatcher.get_user_faction(user);
 
-            if (user_factions_count == 0) {
+            if user_faction == 0 {
                 return false;
             }
 

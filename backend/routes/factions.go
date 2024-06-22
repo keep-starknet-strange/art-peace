@@ -24,10 +24,8 @@ func InitFactionRoutes() {
 
 type FactionUserData struct {
 	FactionId  int    `json:"factionId"`
-	MemberId   int    `json:"memberId"`
 	Allocation int    `json:"allocation"`
 	Name       string `json:"name"`
-	Pool       int    `json:"pool"`
 	Members    int    `json:"members"`
 	Icon       string `json:"icon"`
 	Telegram   string `json:"telegram"`
@@ -39,7 +37,6 @@ type FactionUserData struct {
 type FactionData struct {
 	FactionId int    `json:"factionId"`
 	Name      string `json:"name"`
-	Pool      int    `json:"pool"`
 	Members   int    `json:"members"`
 	IsMember  bool   `json:"isMember"`
 	Icon      string `json:"icon"`
@@ -156,9 +153,9 @@ func getMyFactions(w http.ResponseWriter, r *http.Request) {
 	// TODO: Paginate and accumulate the allocations for each faction
 
 	query := `
-    SELECT m.faction_id, m.member_id, m.allocation, f.name, f.pixel_pool as pool, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = m.faction_id), 0) as members, COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
+    SELECT m.faction_id, f.allocation, f.name, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = m.faction_id), 0) as members, COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
     FROM factionmembersinfo m
-    LEFT JOIN factions f ON m.faction_id = f.key - 1
+    LEFT JOIN factions f ON m.faction_id = f.faction_id
     LEFT JOIN FactionLinks l ON m.faction_id = l.faction_id
     WHERE m.user_address = $1
     ORDER BY m.faction_id
@@ -191,12 +188,12 @@ func getFactions(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * pageLength
 
 	query := `
-    SELECT key - 1 as faction_id, name, pixel_pool as pool, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = key - 1), 0) as members,
-    COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = key - 1 AND user_address = $1), 0) > 0 as is_member,
+    SELECT faction_id, name, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = key - 1), 0) as members,
+    COALESCE((SELECT COUNT(*) FROM factionmembersinfo fm WHERE f.faction_id = fm.faction_id AND user_address = $1), 0) > 0 as is_member,
     COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
-    FROM factions
-    LEFT JOIN FactionLinks ON key - 1 = faction_id
-    ORDER BY key
+    FROM factions f
+    LEFT JOIN FactionLinks ON f.faction_id = fm.faction_id
+    ORDER BY f.faction_id
     LIMIT $2 OFFSET $3
   `
 
@@ -233,10 +230,11 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 	SELECT 
     FMI.user_address AS user_address, 
     COALESCE(U.name, '') AS username, 
-    SUM(FMI.allocation) AS total_allocation
+    F.allocation AS total_allocation
 	FROM FactionMembersInfo FMI
 	LEFT JOIN Users U ON FMI.user_address = U.address
 	WHERE FMI.faction_id = $1
+  LEFT JOIN Factions F ON F.faction_id = FMI.faction_id
 	GROUP BY FMI.user_address, U.name
 	ORDER BY total_allocation DESC
 	LIMIT $2 OFFSET $3;

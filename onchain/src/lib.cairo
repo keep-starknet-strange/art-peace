@@ -2,7 +2,7 @@ pub mod art_peace;
 pub mod interfaces;
 use art_peace::ArtPeace;
 use interfaces::{
-    IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel, Faction, MemberMetadata
+    IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel, Faction, ChainFaction, MemberMetadata
 };
 
 mod quests {

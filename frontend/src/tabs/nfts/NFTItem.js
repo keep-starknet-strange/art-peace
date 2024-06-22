@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
+import { useContractWrite } from '@starknet-react/core';
 import './NFTItem.css';
 import { fetchWrapper } from '../../services/apiService';
 import canvasConfig from '../../configs/canvas.config.json';
@@ -7,49 +8,80 @@ import ShareIcon from '../../resources/icons/Share.png';
 import LikeIcon from '../../resources/icons/Like.png';
 import LikedIcon from '../../resources/icons/Liked.png';
 import Info from '../../resources/icons/Info.png';
+import { devnetMode } from '../../utils/Consts.js';
 
 const NFTItem = (props) => {
+  const [calls, setCalls] = useState([]);
+  const likeNftCall = (tokenId) => {
+    if (devnetMode) return;
+    if (!props.address || !props.canvasNftContract) return;
+    setCalls(props.usernameContract.populateTransaction['like_nft'](tokenId));
+  };
+  const unlikeNftCall = (tokenId) => {
+    if (devnetMode) return;
+    if (!props.address || !props.canvasNftContract) return;
+    setCalls(props.usernameContract.populateTransaction['unlike_nft'](tokenId));
+  };
+
+  useEffect(() => {
+    const likeCall = async () => {
+      if (devnetMode) return;
+      if (calls.length === 0) return;
+      await writeAsync();
+      console.log('Like call successful:', data, isPending);
+      // TODO: Update the UI
+    };
+    likeCall();
+  }, [calls]);
+
+  const { writeAsync, data, isPending } = useContractWrite({
+    calls
+  });
+
+  const handleLikePress = async (event) => {
+    event.preventDefault();
+    if (!devnetMode) {
+      if (liked) {
+        unlikeNftCall(props.tokenId);
+      } else {
+        likeNftCall(props.tokenId);
+      }
+      return;
+    }
+
+    if (!liked) {
+      let likeResponse = await fetchWrapper('like-nft-devnet', {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          tokenId: props.tokenId.toString()
+        })
+      });
+      if (likeResponse.result) {
+        setLikes(likes + 1);
+        setLiked(true);
+      }
+    } else {
+      let unlikeResponse = await fetchWrapper('unlike-nft-devnet', {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          tokenId: props.tokenId.toString()
+        })
+      });
+      if (unlikeResponse.result) {
+        setLikes(likes - 1);
+        setLiked(false);
+      }
+    }
+  };
+
   const [likes, setLikes] = useState(props.likes);
   const [liked, setLiked] = useState(props.liked);
   useEffect(() => {
     setLikes(props.likes);
     setLiked(props.liked);
   }, [props.likes, props.liked]);
-
-  const handleLike = async () => {
-    async function fetchLikeNFT() {
-      const response = await fetchWrapper('like-nft', {
-        method: 'POST',
-        body: JSON.stringify({
-          nftkey: props.tokenId,
-          useraddress: props.queryAddress
-        })
-      });
-      if (response.result) {
-        // TODO: Update likes on my nfts tab || explore tab if they are the same
-        setLikes(likes + 1);
-        setLiked(true);
-      }
-    }
-    fetchLikeNFT();
-  };
-
-  const handleUnlike = async () => {
-    async function fetchUnlikeNFT() {
-      const response = await fetchWrapper('unlike-nft', {
-        method: 'POST',
-        body: JSON.stringify({
-          nftkey: props.tokenId,
-          useraddress: props.queryAddress
-        })
-      });
-      if (response.result) {
-        setLikes(likes - 1);
-        setLiked(false);
-      }
-    }
-    fetchUnlikeNFT();
-  };
 
   const posx = props.position % canvasConfig.canvas.width;
   const posy = Math.floor(props.position / canvasConfig.canvas.width);
@@ -109,7 +141,7 @@ const NFTItem = (props) => {
               </div>
               <div
                 className={`NFTItem__button ${liked ? 'Like__button--liked' : ''}`}
-                onClick={liked ? handleUnlike : handleLike}
+                onClick={handleLikePress}
               >
                 <img
                   className='Like__icon'

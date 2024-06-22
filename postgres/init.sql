@@ -180,13 +180,19 @@ CREATE INDEX nftLikes_nft_key_index ON NFTLikes (nftKey);
 CREATE INDEX nftLikes_liker_index ON NFTLikes (liker);
 
 CREATE TABLE Factions (
-  -- Postgres auto-incrementing primary key
-  key integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  faction_id integer NOT NULL PRIMARY KEY,
   name text NOT NULL,
   leader char(64) NOT NULL,
-  pixel_pool integer NOT NULL
+  joinable boolean NOT NULL,
+  allocation integer NOT NULL
 );
 CREATE INDEX factions_leader_index ON Factions (leader);
+CREATE INDEX factions_joinable_index ON Factions (joinable);
+
+CREATE TABLE ChainFactions (
+  faction_id integer NOT NULL PRIMARY KEY,
+  name text NOT NULL
+);
 
 CREATE TABLE FactionLinks (
   faction_id integer NOT NULL,
@@ -201,15 +207,21 @@ CREATE INDEX factionLinks_faction_id_index ON FactionLinks (faction_id);
 
 CREATE TABLE FactionMembersInfo (
   faction_id integer NOT NULL,
-  member_id integer NOT NULL,
   user_address char(64) NOT NULL,
-  allocation integer NOT NULL,
   last_placed_time timestamp NOT NULL,
   member_pixels integer NOT NULL,
-  UNIQUE (faction_id, member_id)
+  UNIQUE (faction_id, user_address)
 );
 CREATE INDEX factionMembersInfo_faction_id_index ON FactionMembersInfo (faction_id);
 CREATE INDEX factionMembersInfo_user_address_index ON FactionMembersInfo (user_address);
+
+CREATE TABLE ChainFactionMembersInfo (
+  faction_id integer NOT NULL,
+  user_address char(64) NOT NULL,
+  last_placed_time timestamp NOT NULL,
+  member_pixels integer NOT NULL,
+  UNIQUE (faction_id, user_address)
+);
 
 CREATE TABLE FactionTemplates (
   template_key integer NOT NULL,

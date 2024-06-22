@@ -20,7 +20,10 @@ const NFTsMainSection = (props) => {
         <h2 className='NFTs__heading'>My Collection</h2>
         <div
           className={`NFTs__button ${props.nftMintingMode ? 'NFTs__button--selected' : ''}`}
-          onClick={() => props.setNftMintingMode(true)}
+          onClick={() => {
+            props.setNftMintingMode(true);
+            props.setActiveTab('Canvas');
+          }}
         >
           Mint
         </div>

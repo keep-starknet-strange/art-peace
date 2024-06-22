@@ -50,7 +50,6 @@ func setUsernameStoreAddress(w http.ResponseWriter, r *http.Request) {
 
 type MembershipPixelsData struct {
 	FactionId      int        `json:"factionId"`
-	MemberId       int        `json:"memberId"`
 	Allocation     int        `json:"allocation"`
 	LastPlacedTime *time.Time `json:"lastPlacedTime"`
 	MemberPixels   int        `json:"memberPixels"`
@@ -63,7 +62,7 @@ func getFactionPixels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	membershipPixels, err := core.PostgresQueryJson[MembershipPixelsData]("SELECT faction_id, member_id, allocation, last_placed_time, member_pixels FROM FactionMembersInfo WHERE user_address = $1", address)
+	membershipPixels, err := core.PostgresQueryJson[MembershipPixelsData]("SELECT faction_id, allocation, last_placed_time, member_pixels FROM FactionMembersInfo FMI LEFT JOIN Factions F ON F.faction_id = FMI.faction_id WHERE user_address = $1", address)
 	if err != nil {
 		routeutils.WriteDataJson(w, "[]")
 		return
