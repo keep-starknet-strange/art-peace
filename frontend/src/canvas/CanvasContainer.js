@@ -66,51 +66,54 @@ const CanvasContainer = (props) => {
     };
   }, [isDragging, canvasX, canvasY]);
 
-  // Zoom in/out ( into the cursor position )
   const zoom = (e) => {
-    // Get the cursor position within the canvas ( note the canvas can go outside the viewport )
     const rect = props.canvasRef.current.getBoundingClientRect();
-    let cursorX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    let cursorY = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+    let cursorX = e.clientX - rect.left;
+    let cursorY = e.clientY - rect.top;
+    cursorX = Math.max(0, Math.min(cursorX, rect.width));
+    cursorY = Math.max(0, Math.min(cursorY, rect.height));
 
-    const calculateNewScale = (deltaY) => {
-      let newScale = canvasScale * (1 + deltaY * -0.01);
-      newScale = Math.max(minScale, Math.min(newScale, maxScale));
-      const newWidth = width * newScale;
-      const newHeight = height * newScale;
-      const oldCursorXRelative = cursorX / rect.width;
-      const oldCursorYRelative = cursorY / rect.height;
+    // Calculate the new scale
+    let newScale = canvasScale * (1 + e.deltaY * 0.01);
+    newScale = Math.max(minScale, Math.min(newScale, maxScale));
+
+    const oldCursorXRelative = cursorX / rect.width;
+    const oldCursorYRelative = cursorY / rect.height;
+
+    const applyScale = (currentScale) => {
+      const newWidth = width * currentScale;
+      const newHeight = height * currentScale;
       const newCursorX = oldCursorXRelative * newWidth;
       const newCursorY = oldCursorYRelative * newHeight;
       const newPosX = canvasX - (newCursorX - cursorX);
       const newPosY = canvasY - (newCursorY - cursorY);
-      return { newScale, newPosX, newPosY };
-    };
 
-    const { newScale, newPosX, newPosY } = calculateNewScale(e.deltaY);
-
-    // inTerpolate zoom when using mouse
-    if (Math.abs(e.deltaY) >= 20) {
-      const duration = 300;
-      const startTime = performance.now();
-
-      const animate = () => {
-        const elapsed = performance.now() - startTime;
-        const t = Math.min(1, elapsed / duration);
-        const currentScale = canvasScale + t * (newScale - canvasScale);
-        const currentPosX = canvasX + t * (newPosX - canvasX);
-        const currentPosY = canvasY + t * (newPosY - canvasY);
-        setCanvasScale(currentScale);
-        setCanvasX(currentPosX);
-        setCanvasY(currentPosY);
-        if (t < 1) requestAnimationFrame(animate);
-      };
-
-      animate();
-    } else {
-      setCanvasScale(newScale);
+      setCanvasScale(currentScale);
       setCanvasX(newPosX);
       setCanvasY(newPosY);
+    };
+
+    // mouse zoom
+    if (Math.abs(e.deltaY) > 20) {
+      const interpolateScale = (startScale, endScale, duration) => {
+        const startTime = performance.now();
+        const step = (timestamp) => {
+          const progress = Math.min((timestamp - startTime) / duration, 1);
+          const currentScale = startScale + progress * (endScale - startScale);
+          applyScale(currentScale);
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        };
+        requestAnimationFrame(step);
+      };
+
+      // Start the interpolation with a duration of 300ms
+      interpolateScale(canvasScale, newScale, 300);
+    } else {
+      // trackpad zoom
+      applyScale(newScale);
     }
   };
 
