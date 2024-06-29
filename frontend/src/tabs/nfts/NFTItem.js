@@ -15,12 +15,14 @@ const NFTItem = (props) => {
   const likeNftCall = (tokenId) => {
     if (devnetMode) return;
     if (!props.address || !props.canvasNftContract) return;
-    setCalls(props.usernameContract.populateTransaction['like_nft'](tokenId));
+    setCalls(props.canvasNftContract.populateTransaction['like_nft'](tokenId));
   };
   const unlikeNftCall = (tokenId) => {
     if (devnetMode) return;
     if (!props.address || !props.canvasNftContract) return;
-    setCalls(props.usernameContract.populateTransaction['unlike_nft'](tokenId));
+    setCalls(
+      props.canvasNftContract.populateTransaction['unlike_nft'](tokenId)
+    );
   };
 
   useEffect(() => {

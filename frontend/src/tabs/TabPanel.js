@@ -195,6 +195,9 @@ const TabPanel = (props) => {
             {props.activeTab === 'NFTs' && (
               <div>
                 <NFTs
+                  address={props.address}
+                  artPeaceContract={props.artPeaceContract}
+                  canvasNftContract={props.canvasNftContract}
                   nftMintingMode={props.nftMintingMode}
                   setNftMintingMode={props.setNftMintingMode}
                   setActiveTab={props.setActiveTab}

@@ -317,7 +317,7 @@ const Factions = (props) => {
     if (!props.address || !props.artPeaceContract) return;
     if (chainId === 0) return;
     setCalls(
-      props.usernameContract.populateTransaction['join_chain_faction'](chainId)
+      props.artPeaceContract.populateTransaction['join_chain_faction'](chainId)
     );
   };
   const joinFactionCall = (factionId) => {
@@ -325,7 +325,7 @@ const Factions = (props) => {
     if (!props.address || !props.artPeaceContract) return;
     if (factionId === 0) return;
     setCalls(
-      props.usernameContract.populateTransaction['join_faction'](factionId)
+      props.artPeaceContract.populateTransaction['join_faction'](factionId)
     );
   };
 
