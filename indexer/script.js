@@ -47,10 +47,20 @@ export const config = {
         includeReceipt: false
       },
       {
-        // Member Pixels Placed Event
+        // Faction Pixels Placed Event
         fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
         keys: [
-          "0x0165248ea72ba05120b18ec02e729e1f03a465f728283e6bb805bb284086c859"
+          "0x02838056c6784086957f2252d4a36a24d554ea2db7e09d2806cc69751d81f0a2"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Chain Faction Pixels Placed Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: [
+          "0x02e4d1feaacd0627a6c7d5002564bdb4ca4877d47f00cad4714201194690a7a9"
         ],
         includeReverted: false,
         includeTransaction: false,
@@ -129,6 +139,15 @@ export const config = {
         // Faction Left Event
         keys: [
           "0x014ef8cc25c96157e2a00e9ceaa7c014a162d11d58a98871087ec488a67d7925"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Chain Faction Created Event
+        keys: [
+          "0x020c994ab49a8316bcc78b06d4ff9929d83b2995af33f480b93e972cedb0c926"
         ],
         includeReverted: false,
         includeTransaction: false,

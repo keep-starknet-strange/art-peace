@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './FactionItem.css';
 import { convertUrl } from '../../utils/Consts.js';
+import {
+  getChainFactionMembers,
+  getFactionMembers
+} from '../../services/apiService.js';
+import { PaginationView } from '../../ui/pagination.js';
 import TemplateItem from '../templates/TemplateItem.js';
 import Template from '../../resources/icons/Template.png';
 import Info from '../../resources/icons/Info.png';
@@ -9,10 +14,20 @@ const FactionItem = (props) => {
   // TODO: Faction owner tabs: allocations, ...
   const factionsSubTabs = ['templates', 'info'];
   const [activeTab, setActiveTab] = useState(factionsSubTabs[0]);
-  // TODO: Think what info to show for faction ( members, pixels, pool, ... )
   const [_leader, _setLeader] = useState('Brandon'); // TODO: Fetch leader & show in members info
-  const [pool, _setPool] = useState(10);
   const [members, setMembers] = useState([]);
+  const [membersPagination, setMembersPagination] = useState({
+    pageLength: 10,
+    page: 1
+  });
+  useEffect(() => {
+    let newPagination = {
+      pageLength: 10,
+      page: 1
+    };
+    setMembersPagination(newPagination);
+  }, [props.faction]);
+
   useEffect(() => {
     const createShorthand = (name) => {
       if (name.length > 12) {
@@ -24,50 +39,42 @@ const FactionItem = (props) => {
         return name;
       }
     };
-    // TODO: Fetch members
-    const memberData = [
-      {
-        name: 'Brandon',
-        allocation: 3
-      },
-      {
-        name: 'John',
-        allocation: 2
-      },
-      {
-        name: 'Mark',
-        allocation: 2
-      },
-      {
-        name: 'David',
-        allocation: 2
-      },
-      {
-        name: '0x12928349872394827349827349287234982374982734479234',
-        allocation: 1
-      },
-      {
-        name: 'Alex',
-        allocation: 0
-      },
-      {
-        name: '0x159234987239482734982734928723498237498273447923a4',
-        allocation: 0
-      },
-      {
-        name: 'Smith',
-        allocation: 0
+    async function getMembers() {
+      try {
+        let result = [];
+        if (props.isChain) {
+          result = await getChainFactionMembers({
+            factionId: props.faction.factionId,
+            page: membersPagination.page,
+            pageLength: membersPagination.pageLength
+          });
+        } else {
+          result = await getFactionMembers({
+            factionId: props.faction.factionId,
+            page: membersPagination.page,
+            pageLength: membersPagination.pageLength
+          });
+        }
+        if (!result.data || result.data.length === 0) {
+          setMembers([]);
+          return;
+        }
+        let shortenedMembers = [];
+        result.data.forEach((member) => {
+          let name =
+            member.username == '' ? '0x' + member.userAddress : member.username;
+          shortenedMembers.push({
+            name: createShorthand(name),
+            allocation: member.totalAllocation
+          });
+        });
+        setMembers(shortenedMembers);
+      } catch (error) {
+        console.log(error);
       }
-    ];
-    let shortenedMembers = [];
-    memberData.forEach((member) => {
-      shortenedMembers.push({
-        name: createShorthand(member.name),
-        allocation: member.allocation
-      });
-    });
-    setMembers(shortenedMembers);
-  }, [props.faction]);
+    }
+    getMembers();
+  }, [props.faction, membersPagination.page, membersPagination.pageLength]);
 
   const factionTemplates = [
     {
@@ -99,6 +106,27 @@ const FactionItem = (props) => {
       position: 0
     }
   ];
+
+  const [canJoin, setCanJoin] = useState(true);
+  useEffect(() => {
+    if (props.queryAddress === '0' || props.gameEnded) {
+      setCanJoin(false);
+      return;
+    }
+    if (props.faction.isMember || !props.faction.joinable) {
+      setCanJoin(false);
+      return;
+    }
+    if (props.isChain && props.userInChainFaction) {
+      setCanJoin(false);
+      return;
+    }
+    if (!props.isChain && props.userInFaction) {
+      setCanJoin(false);
+      return;
+    }
+    setCanJoin(true);
+  }, [props]);
 
   return (
     <div className='FactionItem'>
@@ -188,11 +216,17 @@ const FactionItem = (props) => {
                   </p>
                 </div>
               )}
-              {!props.faction.isMember && (
+              {canJoin && (
                 <div
                   className={`Text__xsmall Button__primary FactionItem__header__button`}
                   style={{ borderRadius: '2rem' }}
-                  onClick={() => props.joinFaction(props.faction.factionId)}
+                  onClick={() => {
+                    if (props.isChain) {
+                      props.joinChain(props.faction.factionId);
+                    } else {
+                      props.joinFaction(props.faction.factionId);
+                    }
+                  }}
                 >
                   <p style={{ padding: '0.5rem 0', margin: '0' }}>Join</p>
                 </div>
@@ -253,7 +287,7 @@ const FactionItem = (props) => {
           <div style={{ width: '100%' }}>
             <div className='FactionItem__info__header'>
               <h3 className='Text__medium FactionItem__info__text'>
-                Pool: {pool}px
+                Pool: {props.faction.members * props.factionAlloc}px
               </h3>
               <h3 className='Text__medium FactionItem__info__text'>Alloc</h3>
             </div>
@@ -270,6 +304,11 @@ const FactionItem = (props) => {
                   </div>
                 );
               })}
+              <PaginationView
+                data={members}
+                stateValue={membersPagination}
+                setState={setMembersPagination}
+              />
             </div>
           </div>
         )}

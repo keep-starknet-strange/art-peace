@@ -12,21 +12,23 @@ const (
 	TemplateQuestType
 	UnruggableQuestType
 	VoteQuestType
+  ChainFactionQuestType
 	FactionQuestType
 	UsernameQuestType
 )
 
 var OnchainQuestTypes = map[string]int{
-	"AuthorityQuest":  AuthorityQuestType,
-	"HodlQuest":       HodlQuestType,
-	"NFTMintQuest":    NFTMintQuestType,
-	"PixelQuest":      PixelQuestType,
-	"RainbowQuest":    RainbowQuestType,
-	"TemplateQuest":   TemplateQuestType,
-	"UnruggableQuest": UnruggableQuestType,
-	"VoteQuest":       VoteQuestType,
-	"FactionQuest":    FactionQuestType,
-	"UsernameQuest":   UsernameQuestType,
+	"AuthorityQuest":    AuthorityQuestType,
+	"HodlQuest":         HodlQuestType,
+	"NFTMintQuest":      NFTMintQuestType,
+	"PixelQuest":        PixelQuestType,
+	"RainbowQuest":      RainbowQuestType,
+	"TemplateQuest":     TemplateQuestType,
+	"UnruggableQuest":   UnruggableQuestType,
+	"VoteQuest":         VoteQuestType,
+  "ChainFactionQuest": ChainFactionQuestType,
+	"FactionQuest":      FactionQuestType,
+	"UsernameQuest":     UsernameQuestType,
 }
 
 type Quest struct {

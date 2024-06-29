@@ -17,6 +17,9 @@ type BackendScriptsConfig struct {
 	NewUsernameDevnet      string `json:"new_username_devnet"`
 	ChangeUsernameDevnet   string `json:"change_username_devnet"`
 	IncreaseDayDevnet      string `json:"increase_day_devnet"`
+  JoinChainFactionDevnet string `json:"join_chain_faction_devnet"`
+  JoinFactionDevnet      string `json:"join_faction_devnet"`
+  LeaveFactionDevnet     string `json:"leave_faction_devnet"`
 }
 
 type WebSocketConfig struct {
@@ -56,6 +59,9 @@ var DefaultBackendConfig = BackendConfig{
 		NewUsernameDevnet:      "../scripts/new_username.sh",
 		ChangeUsernameDevnet:   "../scripts/change_username.sh",
 		IncreaseDayDevnet:      "../scripts/increase_day_index.sh",
+    JoinChainFactionDevnet: "../scripts/join_chain_faction.sh",
+    JoinFactionDevnet:      "../scripts/join_faction.sh",
+    LeaveFactionDevnet:     "../scripts/leave_faction.sh",
 	},
 	Production: false,
 	WebSocket: WebSocketConfig{

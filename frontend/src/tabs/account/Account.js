@@ -5,6 +5,7 @@ import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl, devnetMode } from '../../utils/Consts.js';
 import { fetchWrapper } from '../../services/apiService.js';
+import { encodeToLink } from '../../utils/encodeToLink';
 import BeggarRankImg from '../../resources/ranks/Beggar.png';
 import OwlRankImg from '../../resources/ranks/Owl.png';
 import CrownRankImg from '../../resources/ranks/Crown.png';
@@ -342,16 +343,18 @@ const Account = (props) => {
               <p className='Text__small Account__item__label'>Username</p>
               <div className='Account__item__username'>
                 <p className='Text__small Account__item__label'>{username}</p>
-                <div
-                  className='Text__small Button__primary Account__item__button'
-                  onClick={editUsername}
-                >
-                  <img
-                    className='Account__item__icon'
-                    src={EditIcon}
-                    alt='edit'
-                  />
-                </div>
+                {!props.gameEnded && (
+                  <div
+                    className='Text__small Button__primary Account__item__button'
+                    onClick={editUsername}
+                  >
+                    <img
+                      className='Account__item__icon'
+                      src={EditIcon}
+                      alt='edit'
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -386,15 +389,20 @@ const Account = (props) => {
             </div>
           )}
 
-          <div className='Text__small Account__rank'>
-            <div className='Account__rank__outer' style={rankBackground}>
-              <div className='Account__rank__inner'>
-                <img
-                  className='Account__rank__img'
-                  src={accountRankImg}
-                  alt='rank'
-                />
-                <p className='Text__small Account__rank__text'>{accountRank}</p>
+          <div className='Account__item Account__item__separator'>
+            <p className='Text__medium Account__item__label'>Rank</p>
+            <div className='Text__small Account__rank'>
+              <div className='Account__rank__outer' style={rankBackground}>
+                <div className='Account__rank__inner'>
+                  <img
+                    className='Account__rank__img'
+                    src={accountRankImg}
+                    alt='rank'
+                  />
+                  <p className='Text__small Account__rank__text'>
+                    {accountRank}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -438,11 +446,21 @@ const Account = (props) => {
             </div>
           </div>
           <div className='Account__disconnect__button__separator'></div>
-          <div
-            className='Text__medium Button__primary Account__disconnect__button'
-            onClick={() => disconnectWallet()}
-          >
-            Logout
+          <div className='Account__footer'>
+            <div className='Account__kudos'>
+              <p
+                dangerouslySetInnerHTML={encodeToLink(
+                  'Special thanks to all [OnlyDust](https://app.onlydust.com/p/artpeace) contributors!'
+                )}
+                className='Text__small Account__kudos__label'
+              ></p>
+            </div>
+            <div
+              className='Text__medium Button__primary Account__disconnect__button'
+              onClick={() => disconnectWallet()}
+            >
+              Logout
+            </div>
           </div>
         </div>
       )}

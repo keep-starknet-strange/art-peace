@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -20,46 +21,70 @@ func processNFTMintedEvent(event IndexerEvent) {
 	positionHex := event.Event.Data[0]
 	widthHex := event.Event.Data[1]
 	heightHex := event.Event.Data[2]
-	imageHashHex := event.Event.Data[3]
-	blockNumberHex := event.Event.Data[4]
-	minter := event.Event.Data[5][2:] // Remove 0x prefix
+  nameHex := event.Event.Data[3][2:] // Remove 0x prefix
+	imageHashHex := event.Event.Data[4]
+	blockNumberHex := event.Event.Data[5]
+  dayIndexHex := event.Event.Data[6]
+	minter := event.Event.Data[7][2:] // Remove 0x prefix
 
 	// combine high and low token ids
 	tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error combining high and low tokenId hex", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error combining high and low tokenId hex", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 	tokenId := tokenIdU256.Uint64()
 
 	position, err := strconv.ParseInt(positionHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting position hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting position hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
 	width, err := strconv.ParseInt(widthHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting width hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting width hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
 	height, err := strconv.ParseInt(heightHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting height hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting height hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
+
+  decodedName, err := hex.DecodeString(nameHex)
+  if err != nil {
+    PrintIndexerError("processNFTMintedEvent", "Error decoding name hex", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
+    return
+  }
+  trimmedName := []byte{}
+  trimming := true
+  for _, b := range decodedName {
+    if b == 0 && trimming {
+      continue
+    }
+    trimming = false
+    trimmedName = append(trimmedName, b)
+  }
+  name := string(trimmedName)
 
 	blockNumber, err := strconv.ParseInt(blockNumberHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error converting block number hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error converting block number hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
+  dayIndex, err := strconv.ParseInt(dayIndexHex, 0, 64)
+  if err != nil {
+    PrintIndexerError("processNFTMintedEvent", "Error converting day index hex to int", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
+    return
+  }
+
 	// Set NFT in postgres
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (token_id, position, width, height, image_hash, block_number, minter, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", tokenId, position, width, height, imageHashHex, blockNumber, minter, minter)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTs (token_id, position, width, height, name, image_hash, block_number, day_index, minter, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", tokenId, position, width, height, name, imageHashHex, blockNumber, dayIndex, minter, minter)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error inserting NFT into postgres", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error inserting NFT into postgres", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
@@ -67,13 +92,13 @@ func processNFTMintedEvent(event IndexerEvent) {
 	ctx := context.Background()
 	canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error getting canvas from redis", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error getting canvas from redis", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
 	colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY color_key")
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error getting color palette from postgres", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error getting color palette from postgres", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
@@ -81,17 +106,17 @@ func processNFTMintedEvent(event IndexerEvent) {
 	for idx, colorHex := range colorPaletteHex {
 		r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error converting red hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error converting red hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 		g, err := strconv.ParseInt(colorHex[2:4], 16, 64)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error converting green hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error converting green hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 		b, err := strconv.ParseInt(colorHex[4:6], 16, 64)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error converting blue hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error converting blue hex to int when creating palette", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 		colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
@@ -121,7 +146,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 	if _, err := os.Stat("nfts"); os.IsNotExist(err) {
 		err = os.MkdirAll("nfts", os.ModePerm)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error creating nfts directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts directory", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 	}
@@ -129,7 +154,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 	if _, err := os.Stat("nfts/images"); os.IsNotExist(err) {
 		err = os.MkdirAll("nfts/images", os.ModePerm)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/images directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/images directory", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 	}
@@ -137,7 +162,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 	if _, err := os.Stat("nfts/meta"); os.IsNotExist(err) {
 		err = os.MkdirAll("nfts/meta", os.ModePerm)
 		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/meta directory", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/meta directory", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 			return
 		}
 	}
@@ -146,14 +171,14 @@ func processNFTMintedEvent(event IndexerEvent) {
 	filename := fmt.Sprintf("nfts/images/nft-%d.png", tokenId)
 	file, err := os.Create(filename)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error creating file", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error creating file", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 	defer file.Close()
 
 	err = png.Encode(file, generatedImage)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error encoding image", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error encoding image", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
@@ -163,7 +188,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 	y := position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	// TODO: Name from onchain mint event
 	metadata := map[string]interface{}{
-		"name":        fmt.Sprintf("art/peace #%d", tokenId),
+		"name":        name,
 		"description": "User minted art/peace NFT from the canvas.",
 		"image":       fmt.Sprintf("%s/nft-images/nft-%d.png", core.ArtPeaceBackend.GetBackendUrl(), tokenId),
 		"attributes": []map[string]interface{}{
@@ -176,26 +201,34 @@ func processNFTMintedEvent(event IndexerEvent) {
 				"value":      fmt.Sprintf("%d", height),
 			},
 			{
-				"trait_type": "position",
+				"trait_type": "Position",
 				"value":      fmt.Sprintf("(%d, %d)", x, y),
 			},
+      {
+        "trait_type": "Day Index",
+        "value":      fmt.Sprintf("%d", dayIndex),
+      },
 			{
 				"trait_type": "Minter",
 				"value":      minter,
 			},
+      {
+        "trait_type": "Token ID",
+        "value":      fmt.Sprintf("%d", tokenId),
+      },
 		},
 	}
 
 	metadataFile, err := json.MarshalIndent(metadata, "", "  ")
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error generating NFT metadata", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error generating NFT metadata", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
 	metadataFilename := fmt.Sprintf("nfts/meta/nft-%d.json", tokenId)
 	err = os.WriteFile(metadataFilename, metadataFile, 0644)
 	if err != nil {
-		PrintIndexerError("processNFTMintedEvent", "Error writing NFT metadata file", tokenIdLowHex, positionHex, widthHex, heightHex, imageHashHex, blockNumberHex, minter)
+		PrintIndexerError("processNFTMintedEvent", "Error writing NFT metadata file", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
 	}
 
@@ -273,7 +306,7 @@ func revertNFTLikedEvent(event IndexerEvent) {
 func processNFTUnlikedEvent(event IndexerEvent) {
   tokenIdLowHex := event.Event.Keys[1][2:] // Remove 0x prefix
   tokenIdHighHex := event.Event.Keys[2][2:] // Remove 0x prefix
-  unliker := event.Event.Keys[2][2:] // Remove 0x prefix
+  unliker := event.Event.Keys[3][2:] // Remove 0x prefix
 
   tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
   if err != nil {

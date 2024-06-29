@@ -39,6 +39,9 @@ const NFTItem = (props) => {
   });
 
   const handleLikePress = async (event) => {
+    if (props.queryAddress === '0') {
+      return;
+    }
     event.preventDefault();
     if (!devnetMode) {
       if (liked) {
@@ -58,8 +61,7 @@ const NFTItem = (props) => {
         })
       });
       if (likeResponse.result) {
-        setLikes(likes + 1);
-        setLiked(true);
+        props.updateLikes(props.tokenId, likes + 1, true);
       }
     } else {
       let unlikeResponse = await fetchWrapper('unlike-nft-devnet', {
@@ -70,8 +72,7 @@ const NFTItem = (props) => {
         })
       });
       if (unlikeResponse.result) {
-        setLikes(likes - 1);
-        setLiked(false);
+        props.updateLikes(props.tokenId, likes - 1, false);
       }
     }
   };
@@ -134,13 +135,14 @@ const NFTItem = (props) => {
             alt={`nft-image-${props.tokenId}`}
             className='NFTItem__image'
           />
+          <p className='Text__xsmall NFTItem__name'>{props.name}</p>
           <div className='NFTItem__overlay'>
             <div className='NFTItem__buttons'>
               <div onClick={handleShare} className='NFTItem__button'>
                 <img className='Share__icon' src={ShareIcon} alt='Share' />
               </div>
               <div
-                className={`NFTItem__button ${liked ? 'Like__button--liked' : ''}`}
+                className={`NFTItem__button ${liked ? 'Like__button--liked' : ''} ${props.queryAddress === '0' ? 'NFTItem__button--disabled' : ''}`}
                 onClick={handleLikePress}
               >
                 <img

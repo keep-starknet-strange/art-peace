@@ -401,24 +401,22 @@ pub mod ArtPeace {
                 }
             }
 
-            // Use member pixels if available
-            let last_member_placed_time = self.get_user_last_placed_time(caller);
-            if now - last_member_placed_time >= self.time_between_member_pixels.read() {
-                pixels_placed =
-                    place_user_faction_pixels_inner(ref self, positions, colors, pixels_placed, now);
-                if pixels_placed == pixel_count {
-                    return;
-                }
+            pixels_placed =
+                place_chain_faction_pixels_inner(
+                    ref self, positions, colors, pixels_placed, now
+                );
+            if pixels_placed == pixel_count {
+                return;
             }
 
-            let last_chain_member_placed_time = self.get_user_last_placed_time(caller);
-            if now - last_chain_member_placed_time >= self.time_between_member_pixels.read() {
-                pixels_placed =
-                    place_chain_faction_pixels_inner(ref self, positions, colors, pixels_placed, now);
-                if pixels_placed == pixel_count {
-                    return;
-                }
+            pixels_placed =
+                place_user_faction_pixels_inner(
+                    ref self, positions, colors, pixels_placed, now
+                );
+            if pixels_placed == pixel_count {
+                return;
             }
+
             // TODO: place_extra_pixels_inner
             // Use extra pixels
             let extra_pixels = self.extra_pixels.read(caller);
@@ -504,7 +502,11 @@ pub mod ArtPeace {
         fn join_faction(ref self: ContractState, faction_id: u32) {
             self.check_game_running();
             assert(faction_id != 0, 'Faction 0 is not joinable');
-            assert(faction_id < self.factions_count.read(), 'Faction does not exist');
+            assert(faction_id <= self.factions_count.read(), 'Faction does not exist');
+            assert(
+                self.users_faction.read(starknet::get_caller_address()) == 0,
+                'User already in a faction'
+            );
             let caller = starknet::get_caller_address();
             let faction = self.factions.read(faction_id);
             assert(faction.joinable, 'Faction is not joinable');
@@ -523,7 +525,11 @@ pub mod ArtPeace {
         fn join_chain_faction(ref self: ContractState, faction_id: u32) {
             self.check_game_running();
             assert(faction_id != 0, 'Faction 0 is not joinable');
-            assert(faction_id < self.chain_factions_count.read(), 'Faction does not exist');
+            assert(faction_id <= self.chain_factions_count.read(), 'Faction does not exist');
+            assert(
+                self.users_chain_faction.read(starknet::get_caller_address()) == 0,
+                'User already in a chain faction'
+            );
             let caller = starknet::get_caller_address();
             self.users_chain_faction.write(caller, faction_id);
             self.emit(ChainFactionJoined { faction_id, user: caller });
@@ -863,8 +869,10 @@ pub mod ArtPeace {
                 position: mint_params.position,
                 width: mint_params.width,
                 height: mint_params.height,
+                name: mint_params.name,
                 image_hash: 0, // TODO
                 block_number: starknet::get_block_number(),
+                day_index: self.day_index.read(),
                 minter: starknet::get_caller_address(),
             };
             ICanvasNFTAdditionalDispatcher { contract_address: self.nft_contract.read(), }
@@ -1119,9 +1127,7 @@ pub mod ArtPeace {
         let day = self.day_index.read();
         self
             .user_pixels_placed
-            .write(
-                (day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1
-            );
+            .write((day, caller, color), self.user_pixels_placed.read((day, caller, color)) + 1);
         // TODO: Optimize?
         self.emit(PixelPlaced { placed_by: caller, pos, day, color });
     }
@@ -1135,11 +1141,7 @@ pub mod ArtPeace {
     }
 
     fn place_user_faction_pixels_inner(
-        ref self: ContractState,
-        positions: Span<u128>,
-        colors: Span<u8>,
-        mut offset: u32,
-        now: u64
+        ref self: ContractState, positions: Span<u128>, colors: Span<u8>, mut offset: u32, now: u64
     ) -> u32 {
         let faction_pixels = self
             .get_user_faction_members_pixels(starknet::get_caller_address(), now);
@@ -1161,26 +1163,13 @@ pub mod ArtPeace {
         };
         let caller = starknet::get_caller_address();
         if faction_pixels_left == 0 {
-            let new_member_metadata = MemberMetadata {
-                member_placed_time: now, member_pixels: 0
-            };
+            let new_member_metadata = MemberMetadata { member_placed_time: now, member_pixels: 0 };
             self.users_faction_meta.write(caller, new_member_metadata);
-            self
-                .emit(
-                    FactionPixelsPlaced {
-                        user: caller,
-                        placed_time: now,
-                        member_pixels: 0
-                    }
-                );
+            self.emit(FactionPixelsPlaced { user: caller, placed_time: now, member_pixels: 0 });
         } else {
-            let last_placed_time = self
-                .users_faction_meta
-                .read(caller)
-                .member_placed_time;
+            let last_placed_time = self.users_faction_meta.read(caller).member_placed_time;
             let new_member_metadata = MemberMetadata {
-                member_placed_time: last_placed_time,
-                member_pixels: faction_pixels_left
+                member_placed_time: last_placed_time, member_pixels: faction_pixels_left
             };
             self.users_faction_meta.write(caller, new_member_metadata);
             self
@@ -1196,11 +1185,7 @@ pub mod ArtPeace {
     }
 
     fn place_chain_faction_pixels_inner(
-        ref self: ContractState,
-        positions: Span<u128>,
-        colors: Span<u8>,
-        mut offset: u32,
-        now: u64
+        ref self: ContractState, positions: Span<u128>, colors: Span<u8>, mut offset: u32, now: u64
     ) -> u32 {
         let pixel_count = positions.len();
         let caller = starknet::get_caller_address();
@@ -1226,9 +1211,7 @@ pub mod ArtPeace {
                 self
                     .emit(
                         ChainFactionPixelsPlaced {
-                            user: caller,
-                            placed_time: now,
-                            member_pixels: 0
+                            user: caller, placed_time: now, member_pixels: 0
                         }
                     );
             } else {
@@ -1237,8 +1220,7 @@ pub mod ArtPeace {
                     .read(caller)
                     .member_placed_time;
                 let new_member_metadata = MemberMetadata {
-                    member_placed_time: last_placed_time,
-                    member_pixels: member_pixels_left
+                    member_placed_time: last_placed_time, member_pixels: member_pixels_left
                 };
                 self.users_chain_faction_meta.write(caller, new_member_metadata);
                 self

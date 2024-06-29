@@ -33,6 +33,7 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=password
+      - ART_PEACE_END_TIME=3000000000
     volumes:
       - nfts:/app/nfts
   consumer:

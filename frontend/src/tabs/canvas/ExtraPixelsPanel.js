@@ -79,9 +79,74 @@ const ExtraPixelsPanel = (props) => {
         console.log(response.result);
       }
     }
+    for (let i = 0; i < props.extraPixelsData.length; i++) {
+      let position =
+        props.extraPixelsData[i].x +
+        props.extraPixelsData[i].y * canvasConfig.canvas.width;
+      props.colorPixel(position, props.extraPixelsData[i].colorId);
+    }
     if (basePixelUsed) {
       props.setLastPlacedTime(timestamp * 1000);
     }
+    if (chainFactionPixelsUsed > 0) {
+      let chainFactionIndex = 0;
+      let chainFactionUsedCounter = 0;
+      let newChainFactionPixels = [];
+      let newChainFactionPixelsData = [];
+      while (chainFactionIndex < props.chainFactionPixels.length) {
+        if (chainFactionUsedCounter >= chainFactionPixelsUsed) {
+          newChainFactionPixels.push(
+            props.chainFactionPixels[chainFactionIndex]
+          );
+          newChainFactionPixelsData.push(
+            props.chainFactionPixelsData[chainFactionIndex]
+          );
+          chainFactionIndex++;
+          continue;
+        }
+        let currChainFactionPixelsUsed = Math.min(
+          chainFactionPixelsUsed - chainFactionUsedCounter,
+          props.chainFactionPixels[chainFactionIndex]
+        );
+        if (currChainFactionPixelsUsed <= 0) {
+          newChainFactionPixels.push(
+            props.chainFactionPixels[chainFactionIndex]
+          );
+          newChainFactionPixelsData.push(
+            props.chainFactionPixelsData[chainFactionIndex]
+          );
+          chainFactionIndex++;
+          continue;
+        }
+        if (
+          currChainFactionPixelsUsed ===
+          props.chainFactionPixels[chainFactionIndex]
+        ) {
+          newChainFactionPixels.push(0);
+          let newChainFactionData =
+            props.chainFactionPixelsData[chainFactionIndex];
+          newChainFactionData.lastPlacedTime = timestamp * 1000;
+          newChainFactionData.memberPixels = 0;
+          newChainFactionPixelsData.push(newChainFactionData);
+        } else {
+          newChainFactionPixels.push(
+            props.chainFactionPixels[chainFactionIndex] -
+              currChainFactionPixelsUsed
+          );
+          let newChainFactionData =
+            props.chainFactionPixelsData[chainFactionIndex];
+          newChainFactionData.memberPixels =
+            props.chainFactionPixels[chainFactionIndex] -
+            currChainFactionPixelsUsed;
+          newChainFactionPixelsData.push(newChainFactionData);
+        }
+        chainFactionUsedCounter += currChainFactionPixelsUsed;
+        chainFactionIndex++;
+      }
+      props.setChainFactionPixels(newChainFactionPixels);
+      props.setChainFactionPixelsData(newChainFactionPixelsData);
+    }
+
     // TODO: Click faction pixels button to expand out info here
     if (factionPixelsUsed > 0) {
       // TODO: Will order always be the same?
@@ -138,7 +203,10 @@ const ExtraPixelsPanel = (props) => {
   };
 
   const [basePixelUsed, setBasePixelUsed] = React.useState(false);
+  const [totalChainFactionPixels, setTotalChainFactionPixels] =
+    React.useState(0);
   const [totalFactionPixels, setTotalFactionPixels] = React.useState(0);
+  const [chainFactionPixelsUsed, setChainFactionPixelsUsed] = React.useState(0);
   const [factionPixelsUsed, setFactionPixelsUsed] = React.useState(0);
   const [extraPixelsUsed, setExtraPixelsUsed] = React.useState(0);
   React.useEffect(() => {
@@ -151,11 +219,24 @@ const ExtraPixelsPanel = (props) => {
         setBasePixelUsed(false);
       }
     }
+    let allChainFactionPixels = 0;
+    for (let i = 0; i < props.chainFactionPixels.length; i++) {
+      allChainFactionPixels += props.chainFactionPixels[i];
+    }
+    setTotalChainFactionPixels(allChainFactionPixels);
     let allFactionPixels = 0;
     for (let i = 0; i < props.factionPixels.length; i++) {
       allFactionPixels += props.factionPixels[i];
     }
     setTotalFactionPixels(allFactionPixels);
+    if (allChainFactionPixels > 0) {
+      let chainFactionsPixelsUsed = Math.min(
+        pixelsUsed,
+        totalChainFactionPixels
+      );
+      setChainFactionPixelsUsed(chainFactionsPixelsUsed);
+      pixelsUsed -= chainFactionsPixelsUsed;
+    }
     if (allFactionPixels > 0) {
       let factionsPixelsUsed = Math.min(pixelsUsed, totalFactionPixels);
       setFactionPixelsUsed(factionsPixelsUsed);
@@ -170,6 +251,9 @@ const ExtraPixelsPanel = (props) => {
 
   const [factionPixelsExpanded, setFactionPixelsExpanded] =
     React.useState(false);
+  const getChainFactionName = (_index) => {
+    return props.chainFaction.name;
+  };
   const getFactionName = (index) => {
     /* TODO: Animate expanding */
     const id = props.userFactions.findIndex(
@@ -219,18 +303,51 @@ const ExtraPixelsPanel = (props) => {
               </p>
             )}
           </div>
-          {totalFactionPixels > 0 && (
+          {(props.chainFactionPixels.length > 0 ||
+            props.factionPixels.length > 0) && (
             <div
-              className={`ExtraPixelsPanel__info__item ${factionPixelsUsed === totalFactionPixels ? 'ExtraPixelsPanel__info__item--used' : ''} ExtraPixelsPanel__info__item--clickable`}
+              className={`ExtraPixelsPanel__info__item ${chainFactionPixelsUsed + factionPixelsUsed === totalChainFactionPixels + totalFactionPixels ? 'ExtraPixelsPanel__info__item--used' : ''} ExtraPixelsPanel__info__item--clickable`}
               onClick={() => setFactionPixelsExpanded(!factionPixelsExpanded)}
             >
               <p className='Text__small Heading__sub'>Faction</p>
               <p className='Text__small ExtraPixelsPanel__info__item__details'>
-                {totalFactionPixels - factionPixelsUsed} /&nbsp;
-                {totalFactionPixels}
+                {totalChainFactionPixels +
+                  totalFactionPixels -
+                  chainFactionPixelsUsed -
+                  factionPixelsUsed}
+                /&nbsp;
+                {totalChainFactionPixels + totalFactionPixels}
               </p>
               {factionPixelsExpanded && (
                 <div className='ExtraPixelsPanel__info__item__expand'>
+                  {props.chainFactionPixels.map((chainFactionPixel, index) => {
+                    return (
+                      <div
+                        className='ExtraPixelsPanel__info__item__expand__item'
+                        key={index}
+                      >
+                        <p
+                          className='Text__xsmall ExtraPixelsPanel__faction__name'
+                          style={{
+                            margin: '0.5rem 0',
+                            padding: '0 0.5rem',
+                            borderRight: '1px solid black',
+                            flex: 1
+                          }}
+                        >
+                          {getChainFactionName(index)}
+                        </p>
+                        <p
+                          className='Text__xsmall'
+                          style={{ margin: 0, padding: '0.5rem' }}
+                        >
+                          {chainFactionPixel === 0
+                            ? props.chainFactionPixelTimers[index]
+                            : chainFactionPixel + 'px'}
+                        </p>
+                      </div>
+                    );
+                  })}
                   {props.factionPixels.map((factionPixel, index) => {
                     return (
                       <div

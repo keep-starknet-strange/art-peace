@@ -14,7 +14,7 @@ use starknet::{ContractAddress, contract_address_const};
 
 const reward_amt: u32 = 18;
 
-fn deploy_nft_quest() -> ContractAddress {
+fn deploy_normal_nft_quest() -> ContractAddress {
     let contract = snf::declare("NFTMintQuest");
 
     let mut nft_quest_calldata = array![];
@@ -22,6 +22,22 @@ fn deploy_nft_quest() -> ContractAddress {
         canvas_nft: utils::NFT_CONTRACT(),
         art_peace: utils::ART_PEACE_CONTRACT(),
         reward: reward_amt,
+        is_daily: false,
+    }
+        .serialize(ref nft_quest_calldata);
+
+    contract.deploy(@nft_quest_calldata).unwrap()
+}
+
+fn deploy_daily_nft_quest() -> ContractAddress {
+    let contract = snf::declare("NFTMintQuest");
+
+    let mut nft_quest_calldata = array![];
+    NFTMintQuestInitParams {
+        canvas_nft: utils::NFT_CONTRACT(),
+        art_peace: utils::ART_PEACE_CONTRACT(),
+        reward: reward_amt,
+        is_daily: true,
     }
         .serialize(ref nft_quest_calldata);
 
@@ -29,8 +45,8 @@ fn deploy_nft_quest() -> ContractAddress {
 }
 
 #[test]
-fn deploy_nft_quest_test() {
-    let nft_quest = deploy_nft_quest();
+fn deploy_normal_nft_quest_test() {
+    let nft_quest = deploy_normal_nft_quest();
     let art_peace = IArtPeaceDispatcher {
         contract_address: deploy_with_quests_contract(array![].span(), array![nft_quest].span())
     };
@@ -48,8 +64,27 @@ fn deploy_nft_quest_test() {
 }
 
 #[test]
+fn deploy_daily_nft_quest_test() {
+    let nft_quest = deploy_daily_nft_quest();
+    let art_peace = IArtPeaceDispatcher {
+        contract_address: deploy_with_quests_contract(array![].span(), array![nft_quest].span())
+    };
+
+    let zero_address = contract_address_const::<0>();
+
+    assert!(
+        art_peace.get_days_quests(0) == array![nft_quest, zero_address, zero_address].span(),
+        "Daily quests were not set correctly"
+    );
+    assert!(
+        art_peace.get_main_quests() == array![].span(),
+        "Main quests were not set correctly"
+    );
+}
+
+#[test]
 fn nft_quest_test() {
-    let nft_mint_quest = deploy_nft_quest();
+    let nft_mint_quest = deploy_normal_nft_quest();
 
     let art_peace = IArtPeaceDispatcher {
         contract_address: deploy_with_quests_contract(

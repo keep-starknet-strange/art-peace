@@ -63,8 +63,10 @@ type NFTData struct {
 	Position    int    `json:"position"`
 	Width       int    `json:"width"`
 	Height      int    `json:"height"`
+  Name        string `json:"name"`
 	ImageHash   string `json:"imageHash"`
 	BlockNumber int    `json:"blockNumber"`
+  DayIndex    int    `json:"dayIndex"`
 	Minter      string `json:"minter"`
 	Owner       string `json:"owner"`
 	Likes       int    `json:"likes"`
@@ -251,10 +253,12 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+  name := (*jsonBody)["name"]
+
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.MintNFTDevnet
 	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
 
-	cmd := exec.Command(shellCmd, contract, "mint_nft", strconv.Itoa(position), strconv.Itoa(width), strconv.Itoa(height))
+	cmd := exec.Command(shellCmd, contract, "mint_nft", strconv.Itoa(position), strconv.Itoa(width), strconv.Itoa(height), name)
 	_, err = cmd.Output()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to mint NFT on devnet")
@@ -414,7 +418,7 @@ func unlikeNFTDevnet(w http.ResponseWriter, r *http.Request) {
   shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.UnlikeNFTDevnet
   contract := os.Getenv("CANVAS_NFT_CONTRACT_ADDRESS")
 
-  cmd := exec.Command(shellCmd, contract, "unlike_nft", tokenId)
+  cmd := exec.Command(shellCmd, contract, "unlike_nft", tokenId, "0")
   _, err = cmd.Output()
   if err != nil {
     routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unlike NFT on devnet")
@@ -451,7 +455,10 @@ func getHotNFTs(w http.ResponseWriter, r *http.Request) {
       SELECT
           nfts.*,
           COALESCE(like_count, 0) AS likes,
-          COALESCE((SELECT true FROM nftlikes WHERE liker = $1 AND nftlikes.nftkey = nfts.token_id), false) as liked
+          COALESCE((
+              SELECT true FROM nftlikes
+              WHERE liker = $1 AND nftlikes.nftkey = nfts.token_id),
+          false) as liked
       FROM
           nfts
       LEFT JOIN (
@@ -469,7 +476,7 @@ func getHotNFTs(w http.ResponseWriter, r *http.Request) {
           ) latestlikes
           GROUP BY nftkey
       ) rank ON nfts.token_id = rank.nftkey
-      ORDER BY rank DESC
+      ORDER BY COALESCE(rank, 0) DESC
       LIMIT $3 OFFSET $4;`
 	nfts, err := core.PostgresQueryJson[NFTData](query, address, hotLimit, pageLength, offset)
 	if err != nil {

@@ -75,8 +75,12 @@ pub trait IArtPeace<TContractState> {
     fn join_chain_faction(ref self: TContractState, faction_id: u32);
     fn get_user_faction(self: @TContractState, user: starknet::ContractAddress) -> u32;
     fn get_user_chain_faction(self: @TContractState, user: starknet::ContractAddress) -> u32;
-    fn get_user_faction_members_pixels(self: @TContractState, user: starknet::ContractAddress, now: u64) -> u32;
-    fn get_chain_faction_members_pixels(self: @TContractState, user: starknet::ContractAddress, now: u64) -> u32;
+    fn get_user_faction_members_pixels(
+        self: @TContractState, user: starknet::ContractAddress, now: u64
+    ) -> u32;
+    fn get_chain_faction_members_pixels(
+        self: @TContractState, user: starknet::ContractAddress, now: u64
+    ) -> u32;
 
     // Get color info
     fn get_color_count(self: @TContractState) -> u8;

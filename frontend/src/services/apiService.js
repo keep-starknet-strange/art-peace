@@ -72,6 +72,10 @@ export const getFactions = async (query) => {
   );
 };
 
+export const getChainFactions = async (query) => {
+  return await fetchWrapper(`get-chain-factions?address=${query.queryAddress}`);
+};
+
 export const getNewNftsFn = async (params) => {
   const { page, pageLength, queryAddress } = params;
   return await fetchWrapper(
@@ -99,5 +103,17 @@ export const getHotNftsFn = async (params) => {
   const { page, pageLength, queryAddress } = params;
   return await fetchWrapper(
     `get-hot-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
+};
+
+export const getChainFactionMembers = async (query) => {
+  return await fetchWrapper(
+    `get-chain-faction-members?factionId=${query.factionId}&page=${query.page}&pageLength=${query.pageLength}`
+  );
+};
+
+export const getFactionMembers = async (query) => {
+  return await fetchWrapper(
+    `get-faction-members?factionId=${query.factionId}&page=${query.page}&pageLength=${query.pageLength}`
   );
 };

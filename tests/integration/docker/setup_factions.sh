@@ -26,24 +26,28 @@ for entry in $(cat $FACTIONS_CONFIG_FILE | jq -r '.factions.[] | @base64'); do
   FACTION_ID=$(_jq '.id')
   FACTION_NAME=$(_jq '.name')
   FACTION_LEADER=$(_jq '.leader')
-  FACTION_POOL=$(_jq '.pool')
-  FACTION_PER_MEMBER=$(_jq '.per_member')
-  FACTION_MEMBERS=$(_jq '.members')
+  JOINABLE=$(_jq '.joinable')
+  ALLOCATION=$(_jq '.allocation')
 
   # Add faction onchain
   FACTION_NAME_HEX=0x$(echo -n $FACTION_NAME | xxd -p)
-  FACTION_MEMBERS_COUNT=$(echo $FACTION_MEMBERS | jq '. | length')
-  FACTION_MEMBERS_CALLDATA=$(echo $FACTION_MEMBERS | jq -r '[.[]] | join(" ")')
-
-  if [ $FACTION_PER_MEMBER == "true" ]; then
-    POOL=$(($FACTION_POOL * $FACTION_MEMBERS_COUNT))
-  else
-    POOL=$FACTION_POOL
+  FACTION_JOINABLE_HEX=1
+  if [ "$JOINABLE" = "false" ]; then
+    FACTION_JOINABLE_HEX=0
   fi
 
-  CALLDATA="$FACTION_NAME_HEX $FACTION_LEADER $POOL $FACTION_MEMBERS_COUNT $FACTION_MEMBERS_CALLDATA"
+  CALLDATA="$FACTION_NAME_HEX $FACTION_LEADER $FACTION_JOINABLE_HEX $ALLOCATION"
   echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function init_faction --calldata $CALLDATA"
   /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function init_faction --calldata $CALLDATA
+done
+
+for entry in $(cat $FACTIONS_CONFIG_FILE | jq -r '.chain_factions.[]'); do
+  FACTION_NAME=$entry
+  FACTION_NAME_HEX=0x$(echo -n $FACTION_NAME | xxd -p)
+
+  CALLDATA="$FACTION_NAME_HEX"
+  echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function init_chain_faction --calldata $CALLDATA"
+  /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json invoke --contract-address $ART_PEACE_CONTRACT_ADDRESS --function init_chain_faction --calldata $CALLDATA
 done
 
 # #TODO: rename script and make more generic

@@ -323,6 +323,7 @@ const CanvasContainer = (props) => {
 
     if (!devnetMode) {
       props.setSelectedColorId(-1);
+      props.colorPixel(position, colorId);
       placePixelCall(position, colorId, timestamp);
       props.clearPixelSelection();
       props.setLastPlacedTime(timestamp * 1000);
@@ -331,6 +332,7 @@ const CanvasContainer = (props) => {
 
     if (props.selectedColorId !== -1) {
       props.setSelectedColorId(-1);
+      props.colorPixel(position, colorId);
       const response = await fetchWrapper(`place-pixel-devnet`, {
         mode: 'cors',
         method: 'POST',

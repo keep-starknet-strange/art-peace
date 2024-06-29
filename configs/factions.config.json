@@ -1,13 +1,12 @@
 {
   "factions": [
     {
-      "id": 0,
+      "id": 1,
       "name": "Early Birds",
       "icon": "$BACKEND_URL/faction-images/early-bird.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 2,
-      "per_member": true,
       "joinable": false,
+      "allocation": 2,
       "links": {
         "telegram": "",
         "twitter": "",
@@ -26,13 +25,12 @@
       ]
     },
     {
-      "id": 1,
+      "id": 2,
       "name": "Keep Starknet Strange",
       "icon": "$BACKEND_URL/faction-images/keep-starknet-strange.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 4,
-      "per_member": true,
       "joinable": false,
+      "allocation": 5,
       "links": {
         "telegram": "",
         "twitter": "",
@@ -45,13 +43,12 @@
       ]
     },
     {
-      "id": 2,
+      "id": 3,
       "name": "Contributors",
       "icon": "$BACKEND_URL/faction-images/contributors.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 2,
-      "per_member": true,
       "joinable": false,
+      "allocation": 2,
       "links": {
         "telegram": "",
         "twitter": "",
@@ -67,13 +64,12 @@
       ]
     },
     {
-      "id": 3,
+      "id": 4,
       "name": "Ducks Everywhere",
       "icon": "$BACKEND_URL/faction-images/ducks-everywhere.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 100,
-      "per_member": false,
       "joinable": true,
+      "allocation": 1,
       "links": {
         "telegram": "https://t.me/duckseverywhere",
         "twitter": "https://twitter.com/DucksEverywher2",
@@ -81,18 +77,15 @@
         "site": "https://linktr.ee/duckseverywhere"
       },
       "members": [
-        "0x01bf5fad6815868d6fe067905548285596cf311641169544109a7a5394c2565f",
-        "0x0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0"
       ]
     },
     {
-      "id": 4,
+      "id": 5,
       "name": "PixeLaw",
       "icon": "$BACKEND_URL/faction-images/pixelaw.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 100,
-      "per_member": false,
       "joinable": true,
+      "allocation": 1,
       "links": {
         "telegram": "https://t.me/pixelaw",
         "twitter": "https://twitter.com/0xPixeLAW",
@@ -100,18 +93,15 @@
         "site": "https://www.pixelaw.xyz"
       },
       "members": [
-        "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-        "0x01bf5fad6815868d6fe067905548285596cf311641169544109a7a5394c2565f"
       ]
     },
     {
-      "id": 5,
+      "id": 6,
       "name": "WASD",
       "icon": "$BACKEND_URL/faction-images/wasd.png",
       "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
-      "pool": 100,
-      "per_member": false,
       "joinable": true,
+      "allocation": 1,
       "links": {
         "telegram": "https://t.me/wasd",
         "twitter": "https://twitter.com/WASD_0x",
@@ -119,10 +109,17 @@
         "site": "https://bento.me/wasd"
       },
       "members": [
-        "0x034be07b6e7eeb280eb15d000d9eb53a63e5614e9886b74284991098c30a614a",
-        "0x01bf5fad6815868d6fe067905548285596cf311641169544109a7a5394c2565f",
-        "0x0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0"
       ]
     }
+  ],
+  "chain_factions": [
+    "Starknet",
+    "Solana",
+    "Bitcoin",
+    "Base",
+    "ZkSync",
+    "Polygon",
+    "Optimism",
+    "Scroll"
   ]
 }

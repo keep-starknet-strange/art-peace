@@ -10,6 +10,11 @@
   padding: 0.5rem;
 }
 
+.Quests__nowallet {
+  padding: 0.5rem;
+  text-align: center;
+}
+
 .Quests__timer {
   margin: 1rem 0 0.5rem 1rem;
   padding: 0.5rem 1rem;

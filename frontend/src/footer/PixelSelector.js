@@ -26,6 +26,7 @@ const PixelSelector = (props) => {
         return;
       }
     } else {
+      // TODO: Use lowest timer out of base, chain, faction, ...
       setPlacementTimer(props.basePixelTimer);
     }
   }, [

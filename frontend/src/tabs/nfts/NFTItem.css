@@ -35,6 +35,7 @@
   display: flex;
   flex-direction: row;
   justify-content: right;
+  align-items: center;
   padding: 0;
   margin: 0;
 }
@@ -64,6 +65,22 @@
 .NFTItem__button:active {
   transform: scale(1) translateY(0);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.NFTItem__button--disabled {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.NFTItem__button--disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.NFTItem__button--disabled:active {
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .NFTItem__info {
@@ -140,6 +157,26 @@
   margin: 0.5rem 0;
 }
 
+.NFTItem__name {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0.5rem;
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.8)
+  );
+  border-radius: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 1rem;
+}
+
 .list-transition-enter,
 .list-transition-appear {
   transform: translateX(120%);
@@ -161,3 +198,4 @@
   transform: translateX(120%);
   transition: all 150ms;
 }
+

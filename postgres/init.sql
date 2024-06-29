@@ -65,6 +65,20 @@ CREATE INDEX dailyQuestsInput_day_index_index ON DailyQuestsInput (day_index);
 CREATE INDEX dailyQuestsInput_quest_id_index ON DailyQuestsInput (quest_id);
 CREATE INDEX dailyQuestsInput_input_key_index ON DailyQuestsInput (input_key);
 
+CREATE TABLE DailyQuestsClaimParams (
+  day_index integer NOT NULL,
+  quest_id integer NOT NULL,
+  claim_key integer NOT NULL,
+  claim_type text NOT NULL,
+  name text NOT NULL,
+  example text,
+  input boolean NOT NULL,
+  PRIMARY KEY (day_index, quest_id, claim_key)
+);
+CREATE INDEX dailyQuestsClaimParams_day_index_index ON DailyQuestsClaimParams (day_index);
+CREATE INDEX dailyQuestsClaimParams_quest_id_index ON DailyQuestsClaimParams (quest_id);
+CREATE INDEX dailyQuestsClaimParams_claim_key_index ON DailyQuestsClaimParams (claim_key);
+
 -- Table for storing the daily quests that the user has completed
 CREATE TABLE UserDailyQuests (
   -- Postgres auto-incrementing primary key
@@ -96,6 +110,18 @@ CREATE TABLE MainQuestsInput (
 );
 CREATE INDEX mainQuestsInput_quest_id_index ON MainQuestsInput (quest_id);
 CREATE INDEX mainQuestsInput_input_key_index ON MainQuestsInput (input_key);
+
+CREATE TABLE MainQuestsClaimParams (
+  quest_id integer NOT NULL,
+  claim_key integer NOT NULL,
+  claim_type text NOT NULL,
+  name text NOT NULL,
+  example text,
+  input boolean NOT NULL,
+  PRIMARY KEY (quest_id, claim_key)
+);
+CREATE INDEX mainQuestsClaimParams_quest_id_index ON MainQuestsClaimParams (quest_id);
+CREATE INDEX mainQuestsClaimParams_claim_key_index ON MainQuestsClaimParams (claim_key);
 
 -- Table for storing the main quests that the user has completed
 CREATE TABLE UserMainQuests (
@@ -165,8 +191,10 @@ CREATE TABLE NFTs (
   position integer NOT NULL,
   width integer NOT NULL,
   height integer NOT NULL,
+  name text NOT NULL,
   image_hash text NOT NULL,
   block_number integer NOT NULL,
+  day_index integer NOT NULL,
   minter char(64) NOT NULL,
   owner char(64) NOT NULL
 );
@@ -206,6 +234,17 @@ CREATE TABLE FactionLinks (
 );
 CREATE INDEX factionLinks_faction_id_index ON FactionLinks (faction_id);
 
+CREATE TABLE ChainFactionLinks (
+  faction_id integer NOT NULL,
+  icon text NOT NULL,
+  telegram text,
+  twitter text,
+  github text,
+  site text,
+  PRIMARY KEY (faction_id)
+);
+CREATE INDEX chainFactionLinks_faction_id_index ON ChainFactionLinks (faction_id);
+
 CREATE TABLE FactionMembersInfo (
   faction_id integer NOT NULL,
   user_address char(64) NOT NULL,
@@ -223,8 +262,19 @@ CREATE TABLE ChainFactionMembersInfo (
   member_pixels integer NOT NULL,
   UNIQUE (faction_id, user_address)
 );
+CREATE INDEX chainFactionMembersInfo_faction_id_index ON ChainFactionMembersInfo (faction_id);
+CREATE INDEX chainFactionMembersInfo_user_address_index ON ChainFactionMembersInfo (user_address);
 
 CREATE TABLE FactionTemplates (
   template_key integer NOT NULL,
   faction_id integer NOT NULL
 );
+CREATE INDEX factionTemplates_template_key_index ON FactionTemplates (template_key);
+CREATE INDEX factionTemplates_faction_id_index ON FactionTemplates (faction_id);
+
+CREATE TABLE ChainFactionTemplates (
+  template_key integer NOT NULL,
+  faction_id integer NOT NULL
+);
+CREATE INDEX chainFactionTemplates_template_key_index ON ChainFactionTemplates (template_key);
+CREATE INDEX chainFactionTemplates_faction_id_index ON ChainFactionTemplates (faction_id);

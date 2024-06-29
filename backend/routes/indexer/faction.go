@@ -38,11 +38,12 @@ func processFactionCreatedEvent(event IndexerEvent) {
 	}
 	name := string(trimmedName)
 
-	joinable, err := strconv.ParseBool(joinableHex)
+	joinableInt, err := strconv.ParseInt(joinableHex, 0, 64)
 	if err != nil {
 		PrintIndexerError("processFactionCreatedEvent", "Failed to parse joinable", factionIdHex, nameHex, leader, joinableHex, allocationHex)
 		return
 	}
+  joinable := joinableInt != 0
 
 	allocation, err := strconv.ParseInt(allocationHex, 0, 64)
 	if err != nil {
@@ -84,7 +85,7 @@ func processFactionJoinedEvent(event IndexerEvent) {
 		return
 	}
 
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO FactionMembersInfo (faction_id, user_address, last_placed_time, member_pixels) VALUES ($1, $2, $3, $4)", factionId, userAddress, 0, 0)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO FactionMembersInfo (faction_id, user_address, last_placed_time, member_pixels) VALUES ($1, $2, TO_TIMESTAMP($3), $4)", factionId, userAddress, 0, 0)
 	if err != nil {
 		PrintIndexerError("processFactionJoinedEvent", "Failed to insert faction member into postgres", factionIdHex, userAddress)
 		return
@@ -136,7 +137,7 @@ func revertFactionLeftEvent(event IndexerEvent) {
 	}
 
 	// TODO: Stash the last_placed_time and member_pixels in the event data
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO FactionMembersInfo (faction_id, user_address, last_placed_time, member_pixels) VALUES ($1, $2, $3, $4)", factionId, userAddress, 0, 0)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO FactionMembersInfo (faction_id, user_address, last_placed_time, member_pixels) VALUES ($1, $2, TO_TIMESTAMP($3), $4)", factionId, userAddress, 0, 0)
 	if err != nil {
 		PrintIndexerError("revertFactionLeftEvent", "Failed to insert faction member into postgres", factionIdHex, userAddress)
 		return
@@ -204,7 +205,7 @@ func processChainFactionJoinedEvent(event IndexerEvent) {
 		return
 	}
 
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO ChainFactionMembersInfo (faction_id, user_address, last_placed_time, members_pixels) VALUES ($1, $2, $3, $4)", factionId, userAddress, 0, 0)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO ChainFactionMembersInfo (faction_id, user_address, last_placed_time, member_pixels) VALUES ($1, $2, TO_TIMESTAMP($3), $4)", factionId, userAddress, 0, 0)
 	if err != nil {
 		PrintIndexerError("processChainFactionJoinedEvent", "Failed to insert faction member into postgres", factionIdHex, userAddress)
 		return
