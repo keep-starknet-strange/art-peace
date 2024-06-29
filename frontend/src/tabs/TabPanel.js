@@ -136,6 +136,8 @@ const TabPanel = (props) => {
             {props.activeTab === 'Factions' && (
               <div>
                 <Factions
+                  address={props.address}
+                  artPeaceContract={props.artPeaceContract}
                   queryAddress={props.queryAddress}
                   setActiveTab={props.setActiveTab}
                   chainFaction={props.chainFaction}
