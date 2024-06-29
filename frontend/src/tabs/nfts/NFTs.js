@@ -55,6 +55,9 @@ const NFTsMainSection = (props) => {
           return (
             <NFTItem
               key={index}
+              address={props.address}
+              artPeaceContract={props.artPeaceContract}
+              canvasNftContract={props.canvasNftContract}
               tokenId={nft.tokenId}
               position={nft.position}
               image={imageURL + 'nft-' + nft.tokenId + '.png'}
@@ -108,6 +111,9 @@ const NFTsExpandedSection = (props) => {
             return (
               <NFTItem
                 key={index}
+                address={props.address}
+                artPeaceContract={props.artPeaceContract}
+                canvasNftContract={props.canvasNftContract}
                 tokenId={nft.tokenId}
                 position={nft.position}
                 image={imageURL + 'nft-' + nft.tokenId + '.png'}
@@ -285,6 +291,9 @@ const NFTs = (props) => {
       mainSection={NFTsMainSection}
       expandedSection={NFTsExpandedSection}
       updateLikes={updateLikes}
+      address={props.address}
+      artPeaceContract={props.artPeaceContract}
+      canvasNftContract={props.canvasNftContract}
       nftMintingMode={props.nftMintingMode}
       setNftMintingMode={props.setNftMintingMode}
       nftsCollection={myNFTs}
