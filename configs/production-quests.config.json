@@ -38,11 +38,11 @@
             }
           },
           {
-            "name": "Join a faction",
-            "description": "Represent a community by joining their faction on the factions tab",
+            "name": "Represent your chain",
+            "description": "Join a faction to represent your favorite chain in the factions tab",
             "reward": 3,
             "questContract": {
-              "type": "FactionQuest",
+              "type": "ChainFactionQuest",
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD"
@@ -82,9 +82,18 @@
               "initParams": [
                 "$CANVAS_NFT_CONTRACT",
                 "$ART_PEACE_CONTRACT",
-                "$REWARD"
+                "$REWARD",
+                "0",
+                "0"
               ],
-              "storeParams": []
+              "storeParams": [3,4],
+              "claimParams": [
+                {
+                  "type": "int",
+                  "name": "Token ID",
+                  "input": false
+                }
+              ]
             }
           },
           {
@@ -170,9 +179,18 @@
               "initParams": [
                 "$CANVAS_NFT_CONTRACT",
                 "$ART_PEACE_CONTRACT",
-                "$REWARD"
+                "$REWARD",
+                "1",
+                "$DAY_IDX"
               ],
-              "storeParams": []
+              "storeParams": [3,4],
+              "claimParams": [
+                {
+                  "type": "int",
+                  "name": "Token ID",
+                  "input": false
+                }
+              ]
             }
           }
         ]
@@ -181,6 +199,32 @@
   },
   "main": {
     "mainQuests": [
+      {
+        "name": "The Rainbow",
+        "description": "Place at least 1 pixel of each color",
+        "reward": 10,
+        "questContract": {
+          "type": "RainbowQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD"
+          ],
+          "storeParams": []
+        }
+      },
+      {
+        "name": "Join a Faction",
+        "description": "Represent a community by joining their faction on the factions tab",
+        "reward": 3,
+        "questContract": {
+          "type": "FactionQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD"
+          ],
+          "storeParams": []
+        }
+      },
       {
         "name": "HODL",
         "description": "Accumulate 10 extra pixels in your account",
@@ -193,32 +237,6 @@
             "10"
           ],
           "storeParams": [2]
-        }
-      },
-      {
-        "name": "Represent your chain",
-        "description": "Join a faction to represent your favorite chain in the factions tab",
-        "reward": 5,
-        "questContract": {
-          "type": "ChainFactionQuest",
-          "initParams": [
-            "$ART_PEACE_CONTRACT",
-            "$REWARD"
-          ],
-          "storeParams": []
-        }
-      },
-      {
-        "name": "The Rainbow",
-        "description": "Place at least 1 pixel of each color",
-        "reward": 10,
-        "questContract": {
-          "type": "RainbowQuest",
-          "initParams": [
-            "$ART_PEACE_CONTRACT",
-            "$REWARD"
-          ],
-          "storeParams": []
         }
       },
       {
@@ -236,7 +254,8 @@
             {
               "type": "address",
               "name": "MemeCoin Address",
-              "example": "0x02D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23"
+              "example": "0x02D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23",
+              "input": true
             }
           ]
         }

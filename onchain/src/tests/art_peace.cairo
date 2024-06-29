@@ -354,7 +354,7 @@ fn nft_mint_test() {
     nft_minter.add_nft_contract(utils::NFT_CONTRACT());
     snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
 
-    let mint_params = NFTMintParams { position: 10, width: 16, height: 16, };
+    let mint_params = NFTMintParams { position: 10, width: 16, height: 16, name: 'test' };
     snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::PLAYER1());
     nft_minter.mint_nft(mint_params);
     snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
@@ -363,7 +363,9 @@ fn nft_mint_test() {
         position: 10,
         width: 16,
         height: 16,
+        name: 'test',
         image_hash: 0,
+        day_index: 0,
         block_number: 2000, // TODO
         minter: utils::PLAYER1(),
     };

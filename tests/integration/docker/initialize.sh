@@ -16,6 +16,10 @@ echo "Set the username store address"
 USERNAME_STORE_ADDRESS=$(cat /configs/configs.env | grep "^USERNAME_STORE_ADDRESS" | cut -d '=' -f2)
 curl http://backend:8080/set-username-store-address -X POST -d "$USERNAME_STORE_ADDRESS"
 
+echo "Set the canvas nft address"
+CANVAS_NFT_ADDRESS=$(cat /configs/configs.env | grep "^CANVAS_NFT_ADDRESS" | cut -d '=' -f2)
+curl http://backend:8080/set-canvas-nft-address -X POST -d "$CANVAS_NFT_ADDRESS"
+
 echo "Setup the quests from the quest config"
 QUESTS_CONFIG_FILE="/configs/quests.config.json"
 curl http://backend:8080/init-quests -X POST -d "@$QUESTS_CONFIG_FILE"

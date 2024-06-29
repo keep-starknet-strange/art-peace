@@ -40,8 +40,14 @@ func processDailyQuestClaimedEvent(event IndexerEvent) {
 	}
 
 	if calldataLen > 0 {
-		// TODO : Fix these
-		calldata = event.Event.Data[2:][2:] // Remove 0x prefix
+		for i := 2; i < len(event.Event.Data); i++ {
+			calldataInt, err := strconv.ParseInt(event.Event.Data[i], 0, 64)
+			if err != nil {
+				PrintIndexerError("processDailyQuestClaimedEvent", "Failed to parse calldata", dayIndexHex, questIdHex, user, rewardHex, calldataLenHex, calldata)
+				return
+			}
+			calldata = append(calldata, strconv.FormatInt(calldataInt, 10))
+		}
 	}
 
 	// TODO: Add calldata field & completed_at field

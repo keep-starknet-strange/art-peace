@@ -9,20 +9,9 @@ import { devnetMode } from '../../utils/Consts.js';
 const QuestItem = (props) => {
   // TODO: Flash red on quest if clicked and not completed w/ no args
   const [expanded, setExpanded] = useState(false);
-  const _expandQuest = () => {
-    if (props.status == 'completed') {
-      return;
-    }
-
-    if (props.args == null || props.args.length == 0) {
-      return;
-    }
-    setExpanded(!expanded);
-  };
-
   const [inputsValidated, setInputsValidated] = useState(false);
   const validateInputs = (event) => {
-    if (props.args == null || props.args.length == 0) {
+    if (props.claimParams == null || props.claimParams.length == 0) {
       return;
     }
 
@@ -34,24 +23,24 @@ const QuestItem = (props) => {
       if (input.value == '') {
         validated = false;
       }
-      // Switch based on props.args.type[inputIndex]
-      if (props.args[inputIndex].inputType == 'address') {
+      // Switch based on props.claimParams.claimType[inputIndex]
+      if (props.claimParams[inputIndex].claimType == 'address') {
         // Starts w/ 0x and is 65 || 66 hex characters long
         let hexPattern = /^0x[0-9a-fA-F]{63,64}$/;
         if (!hexPattern.test(input.value)) {
           validated = false;
         }
-      } else if (props.args[inputIndex].inputType == 'text') {
+      } else if (props.claimParams[inputIndex].claimType == 'text') {
         // Any string < 32 characters
         if (input.value.length >= 32) {
           validated = false;
         }
-      } else if (props.args[inputIndex].inputType == 'number') {
+      } else if (props.claimParams[inputIndex].claimType == 'number') {
         // Any number
         if (isNaN(input.value)) {
           validated = false;
         }
-      } else if (props.args[inputIndex].type == 'twitter') {
+      } else if (props.claimParams[inputIndex].claimType == 'twitter') {
         // Starts w/ @ and is < 16 characters
         if (!input.value.startsWith('@') || input.value.length >= 16) {
           validated = false;
@@ -76,10 +65,15 @@ const QuestItem = (props) => {
     );
   };
 
-  const claimMainQuest = () => {
+  const claimMainQuestCall = (quest_id, calldata) => {
     if (devnetMode) return;
     if (!props.address || !props.artPeaceContract) return;
-    setCalls(props.artPeaceContract.populateTransaction['claim_main_quest']());
+    setCalls(
+      props.artPeaceContract.populateTransaction['claim_main_quest'](
+        quest_id,
+        calldata
+      )
+    );
   };
 
   useEffect(() => {
@@ -95,15 +89,36 @@ const QuestItem = (props) => {
     calls
   });
 
+  const [canClaim, setCanClaim] = useState(false);
   const claimOrExpand = async () => {
+    if (!canClaim || props.gameEnded || props.queryAddress === '0') {
+      return;
+    }
     if (props.status == 'completed') {
       return;
     }
+    let questCalldata = [];
+    if (props.claimParams && props.claimParams.length > 0) {
+      if (inputsValidated) {
+        let component = event.target.closest('.QuestItem');
+        let inputs = component.querySelectorAll('.QuestItem__form__input');
+        inputs.forEach((input) => {
+          questCalldata.push(input.value);
+        });
+        setExpanded(!expanded);
+      } else if (props.claimParams[0].input) {
+        setExpanded(!expanded);
+        return;
+      }
+    }
+    if (props.calldata) {
+      questCalldata = props.calldata;
+    }
     if (!devnetMode) {
       if (props.type === 'daily') {
-        claimTodayQuestCall(props.questId, []);
+        claimTodayQuestCall(props.questId, questCalldata);
       } else if (props.type === 'main') {
-        claimMainQuest();
+        claimMainQuestCall(props.questId, questCalldata);
       } else {
         console.log('Quest type not recognized');
       }
@@ -122,15 +137,14 @@ const QuestItem = (props) => {
       mode: 'cors',
       method: 'POST',
       body: JSON.stringify({
-        // TODO
-        questId: props.questId.toString()
+        questId: props.questId.toString(),
+        calldata: questCalldata.length > 0 ? questCalldata[0].toString() : ''
       })
     });
     if (response.result) {
       console.log(response.result);
       props.markCompleted(props.questId, props.type);
     }
-    // TODO: Expand if not claimable && has args
   };
 
   const [percentCompletion, setPercentCompletion] = useState(0);
@@ -161,11 +175,37 @@ const QuestItem = (props) => {
     }
     if (props.status === 'completed') {
       setProgressionColor('rgba(32, 225, 32, 0.80)');
+    } else if (
+      props.claimParams &&
+      props.claimParams.length > 0 &&
+      props.claimParams[0].input
+    ) {
+      setProgressionColor(`hsla(${0.5 * 60}, 100%, 60%, 0.78)`);
     } else {
       setProgressionColor(`hsla(${(percent / 100) * 60}, 100%, 60%, 0.78)`);
     }
     setPercentCompletion(percent);
   }, [props.progress, props.needed, props.status]);
+
+  useEffect(() => {
+    if (props.gameEnded || props.queryAddress === '0') {
+      setCanClaim(false);
+      return;
+    }
+    if (props.status === 'completed') {
+      setCanClaim(false);
+      return;
+    }
+    if (props.claimParams && props.claimParams.length > 0) {
+      if (props.claimParams[0].input) {
+        setCanClaim(true);
+      } else {
+        setCanClaim(props.progress >= props.needed);
+      }
+      return;
+    }
+    setCanClaim(props.progress >= props.needed);
+  }, [props]);
 
   // TODO: Claimable if progress >= needed
   // TODO: 100% to the top of list
@@ -186,9 +226,7 @@ const QuestItem = (props) => {
         <div
           className={
             'QuestItem__button ' +
-            (props.status != 'completed'
-              ? 'QuestItem__button--claimable '
-              : '') +
+            (canClaim ? 'QuestItem__button--claimable ' : '') +
             (percentCompletion == 100 && props.status !== 'completed'
               ? 'QuestItem__button--pulsate '
               : '')
@@ -215,27 +253,27 @@ const QuestItem = (props) => {
         }
       >
         <div className='QuestItem__form__seperator'></div>
-        {props.args &&
-          props.args.map((arg, idx) => (
+        {props.claimParams &&
+          props.claimParams.map((arg, idx) => (
             <div className='QuestItem__form__item' key={idx}>
               <label className='Text__xsmall QuestItem__form__label'>
-                {arg.label}:&nbsp;
+                {arg.name}:&nbsp;
               </label>
               <input
                 type='text'
                 className='Text__small Input__primary QuestItem__form__input'
-                placeholder={arg.placeholder}
+                placeholder={arg.example}
                 onChange={validateInputs}
               ></input>
             </div>
           ))}
-        {props.args && (
+        {props.claimParams && (
           <button
             className={
               'Button__primary QuestItem__form__submit ' +
               (inputsValidated ? '' : 'Button__disabled')
             }
-            onClick={validateInputs}
+            onClick={claimOrExpand}
           >
             Submit
           </button>

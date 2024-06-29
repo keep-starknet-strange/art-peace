@@ -16,7 +16,11 @@ const TabPanel = (props) => {
   return (
     <div className='TabPanel'>
       <CSSTransition
-        in={props.showSelectedPixelPanel}
+        in={
+          props.showSelectedPixelPanel &&
+          !(props.showExtraPixelsPanel || props.nftMintingMode) &&
+          props.activeTab === 'Canvas'
+        }
         timeout={300}
         classNames='list-transition'
         unmountOnExit
@@ -37,6 +41,7 @@ const TabPanel = (props) => {
         appear
       >
         <ExtraPixelsPanel
+          colorPixel={props.colorPixel}
           address={props.address}
           artPeaceContract={props.artPeaceContract}
           extraPixelsData={props.extraPixelsData}
@@ -53,10 +58,16 @@ const TabPanel = (props) => {
           setLastPlacedTime={props.setLastPlacedTime}
           basePixelUp={props.basePixelUp}
           basePixelTimer={props.basePixelTimer}
+          chainFaction={props.chainFaction}
+          chainFactionPixels={props.chainFactionPixels}
           factionPixels={props.factionPixels}
+          setChainFactionPixels={props.setChainFactionPixels}
           setFactionPixels={props.setFactionPixels}
+          chainFactionPixelTimers={props.chainFactionPixelTimers}
           factionPixelTimers={props.factionPixelTimers}
+          chainFactionPixelsData={props.chainFactionPixelsData}
           factionPixelsData={props.factionPixelsData}
+          setChainFactionPixelsData={props.setChainFactionPixelsData}
           setFactionPixelsData={props.setFactionPixelsData}
           extraPixels={props.extraPixels}
           setPixelSelection={props.setPixelSelection}
@@ -74,6 +85,7 @@ const TabPanel = (props) => {
         appear
       >
         <NFTMintingPanel
+          setActiveTab={props.setActiveTab}
           address={props.address}
           artPeaceContract={props.artPeaceContract}
           setNftMintingMode={props.setNftMintingMode}
@@ -102,6 +114,7 @@ const TabPanel = (props) => {
                 <TimerInjector
                   address={props.address}
                   artPeaceContract={props.artPeaceContract}
+                  gameEnded={props.gameEnded}
                 >
                   {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Quests
@@ -114,6 +127,7 @@ const TabPanel = (props) => {
                       queryAddress={props.queryAddress}
                       setExtraPixels={props.setExtraPixels}
                       extraPixels={props.extraPixels}
+                      gameEnded={props.gameEnded}
                     />
                   )}
                 </TimerInjector>
@@ -122,15 +136,24 @@ const TabPanel = (props) => {
             {props.activeTab === 'Factions' && (
               <div>
                 <Factions
+                  queryAddress={props.queryAddress}
                   setActiveTab={props.setActiveTab}
                   chainFaction={props.chainFaction}
                   setChainFaction={props.setChainFaction}
                   userFactions={props.userFactions}
+                  setUserFactions={props.setUserFactions}
+                  setChainFactionPixels={props.setChainFactionPixels}
+                  setFactionPixels={props.setFactionPixels}
+                  chainFactionPixels={props.chainFactionPixels}
                   factionPixels={props.factionPixels}
+                  chainFactionPixelData={props.chainFactionPixelData}
+                  setChainFactionPixelsData={props.setChainFactionPixelsData}
                   factionPixelsData={props.factionPixelsData}
+                  setFactionPixelsData={props.setFactionPixelsData}
                   setTemplateOverlayMode={props.setTemplateOverlayMode}
                   setOverlayTemplate={props.setOverlayTemplate}
                   isMobile={props.isMobile}
+                  gameEnded={props.gameEnded}
                 />
               </div>
             )}
@@ -139,6 +162,7 @@ const TabPanel = (props) => {
                 <TimerInjector
                   address={props.address}
                   artPeaceContract={props.artPeaceContract}
+                  gameEnded={props.gameEnded}
                 >
                   {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Voting
@@ -149,6 +173,8 @@ const TabPanel = (props) => {
                       queryAddress={props.queryAddress}
                       address={props.address}
                       artPeaceContract={props.artPeaceContract}
+                      isLastDay={props.isLastDay}
+                      gameEnded={props.gameEnded}
                     />
                   )}
                 </TimerInjector>
@@ -174,6 +200,7 @@ const TabPanel = (props) => {
                   setLatestMintedTokenId={props.setLatestMintedTokenId}
                   queryAddress={props.queryAddress}
                   isMobile={props.isMobile}
+                  gameEnded={props.gameEnded}
                 />
               </div>
             )}
@@ -189,6 +216,7 @@ const TabPanel = (props) => {
                   connectWallet={props.connectWallet}
                   connectors={props.connectors}
                   isMobile={props.isMobile}
+                  gameEnded={props.gameEnded}
                 />
               </div>
             )}

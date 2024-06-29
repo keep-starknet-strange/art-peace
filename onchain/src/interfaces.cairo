@@ -10,12 +10,17 @@ pub struct Pixel {
 pub struct Faction {
     pub name: felt252,
     pub leader: starknet::ContractAddress,
-    pub pixel_pool: u32
+    pub joinable: bool,
+    pub allocation: u32
+}
+
+#[derive(Drop, Serde, starknet::Store)]
+pub struct ChainFaction {
+    pub name: felt252,
 }
 
 #[derive(Drop, Serde, starknet::Store)]
 pub struct MemberMetadata {
-    pub address: starknet::ContractAddress,
     pub member_placed_time: u64,
     pub member_pixels: u32
 }
@@ -39,17 +44,6 @@ pub trait IArtPeace<TContractState> {
     fn check_timing(self: @TContractState, now: u64);
 
     // Place pixels on the canvas
-    fn place_pixel_inner(ref self: TContractState, pos: u128, color: u8);
-    fn place_basic_pixel_inner(ref self: TContractState, pos: u128, color: u8, now: u64);
-    fn place_member_pixels_inner(
-        ref self: TContractState,
-        faction_id: u32,
-        member_id: u32,
-        positions: Span<u128>,
-        colors: Span<u8>,
-        offset: u32,
-        now: u64
-    ) -> u32;
     fn place_pixel(ref self: TContractState, pos: u128, color: u8, now: u64);
     fn place_pixel_xy(ref self: TContractState, x: u128, y: u128, color: u8, now: u64);
     fn place_pixel_blocktime(ref self: TContractState, pos: u128, color: u8);
@@ -66,28 +60,26 @@ pub trait IArtPeace<TContractState> {
 
     // Faction stuff
     fn get_factions_count(self: @TContractState) -> u32;
-    fn get_user_factions_count(self: @TContractState, user: starknet::ContractAddress) -> u32;
     fn get_faction(self: @TContractState, faction_id: u32) -> Faction;
     fn get_faction_leader(self: @TContractState, faction_id: u32) -> starknet::ContractAddress;
     fn init_faction(
         ref self: TContractState,
         name: felt252,
         leader: starknet::ContractAddress,
-        pool: u32,
-        members: Span<starknet::ContractAddress>
+        joinable: bool,
+        allocation: u32
     );
-    fn replace_member(
-        ref self: TContractState,
-        faction_id: u32,
-        member_id: u32,
-        new_member: starknet::ContractAddress
-    );
-    fn get_faction_members(
-        self: @TContractState, faction_id: u32
-    ) -> Span<starknet::ContractAddress>;
-    fn get_faction_member_count(self: @TContractState, faction_id: u32) -> u32;
-    fn get_faction_members_pixels(
-        self: @TContractState, faction_id: u32, member_id: u32, now: u64
+    fn init_chain_faction(ref self: TContractState, name: felt252);
+    fn join_faction(ref self: TContractState, faction_id: u32);
+    fn leave_faction(ref self: TContractState);
+    fn join_chain_faction(ref self: TContractState, faction_id: u32);
+    fn get_user_faction(self: @TContractState, user: starknet::ContractAddress) -> u32;
+    fn get_user_chain_faction(self: @TContractState, user: starknet::ContractAddress) -> u32;
+    fn get_user_faction_members_pixels(
+        self: @TContractState, user: starknet::ContractAddress, now: u64
+    ) -> u32;
+    fn get_chain_faction_members_pixels(
+        self: @TContractState, user: starknet::ContractAddress, now: u64
     ) -> u32;
 
     // Get color info

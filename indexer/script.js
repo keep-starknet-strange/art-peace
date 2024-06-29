@@ -47,10 +47,20 @@ export const config = {
         includeReceipt: false
       },
       {
-        // Member Pixels Placed Event
+        // Faction Pixels Placed Event
         fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
         keys: [
-          "0x0165248ea72ba05120b18ec02e729e1f03a465f728283e6bb805bb284086c859"
+          "0x02838056c6784086957f2252d4a36a24d554ea2db7e09d2806cc69751d81f0a2"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Chain Faction Pixels Placed Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: [
+          "0x02e4d1feaacd0627a6c7d5002564bdb4ca4877d47f00cad4714201194690a7a9"
         ],
         includeReverted: false,
         includeTransaction: false,
@@ -117,10 +127,36 @@ export const config = {
         includeReceipt: false
       },
       {
-        // Member Replaced Event
-        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        // Faction Joined Event
         keys: [
-          "0x01f8936599822d668e09401ffcef1989aca342fb1f003f9b3b1fd1cbf605ed6b"
+          "0x01e3fbdf8156ad0dde21e886d61a16d85c9ef54451eb6e253f3f427de32a47ac"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Faction Left Event
+        keys: [
+          "0x014ef8cc25c96157e2a00e9ceaa7c014a162d11d58a98871087ec488a67d7925"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Chain Faction Created Event
+        keys: [
+          "0x020c994ab49a8316bcc78b06d4ff9929d83b2995af33f480b93e972cedb0c926"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Chain Faction Joined Event
+        keys: [
+          "0x02947960ff713d9b594a3b718b90a45360e46d1bbacef94b727bb0d461d04207"
         ],
         includeReverted: false,
         includeTransaction: false,
@@ -131,6 +167,26 @@ export const config = {
         fromAddress: Deno.env.get("NFT_CONTRACT_ADDRESS"),
         keys: [
           "0x30826E0CD9A517F76E857E3F3100FE5B9098E9F8216D3DB283FB4C9A641232F"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // NFT Liked Event
+        fromAddress: Deno.env.get("NFT_CONTRACT_ADDRESS"),
+        keys: [
+          "0x028d7ee09447088eecdd12a86c9467a5e9ad18f819a20f9adcf6e34e0bd51453"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // NFT Unliked Event
+        fromAddress: Deno.env.get("NFT_CONTRACT_ADDRESS"),
+        keys: [
+          "0x03b57514b19693484c35249c6e8b15bfe6e476205720680c2ff9f02faaf94941"
         ],
         includeReverted: false,
         includeTransaction: false,

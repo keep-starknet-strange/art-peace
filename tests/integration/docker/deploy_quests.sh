@@ -71,7 +71,7 @@ for entry in $(echo $DAILY_QUESTS | jq -r '.[] | @base64'); do
     echo "      Contract type: $QUEST_TYPE"
     CALLDATA=$(echo -n $QUEST_INIT_PARAMS | jq -r '[.[]] | join(" ")')
     echo "      Contract calldata: $CALLDATA"
-    CLASS_HASH_IDX=$(echo ${DECLARED_CONTRACT_TYPES[@]} | tr ' ' '\n' | grep -n $QUEST_TYPE | cut -d: -f1)
+    CLASS_HASH_IDX=$(echo ${DECLARED_CONTRACT_TYPES[@]} | tr ' ' '\n' | grep -n ^$QUEST_TYPE$ | cut -d: -f1)
     echo "      Class hash index: $CLASS_HASH_IDX"
     CLASS_HASH=${DECLARED_CONTRACT_HASHES[$CLASS_HASH_IDX-1]}
     echo "      Using class hash $CLASS_HASH"
@@ -112,7 +112,7 @@ for entry in $(echo $MAIN_QUESTS | jq -r '.[] | @base64'); do
   echo "    Contract type: $QUEST_TYPE"
   CALLDATA=$(echo -n $QUEST_INIT_PARAMS | jq -r '[.[]] | join(" ")')
   echo "    Contract calldata: $CALLDATA"
-  CLASS_HASH_IDX=$(echo ${DECLARED_CONTRACT_TYPES[@]} | tr ' ' '\n' | grep -n $QUEST_TYPE | cut -d: -f1)
+  CLASS_HASH_IDX=$(echo ${DECLARED_CONTRACT_TYPES[@]} | tr ' ' '\n' | grep -n ^$QUEST_TYPE$ | cut -d: -f1)
   echo "    Class hash index: $CLASS_HASH_IDX"
   CLASS_HASH=${DECLARED_CONTRACT_HASHES[$CLASS_HASH_IDX-1]}
   echo "    Using class hash $CLASS_HASH"

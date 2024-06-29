@@ -66,3 +66,8 @@ init-infra-prod:
 	@echo "Initializing infra..."
 	curl https://api.art-peace.net/init-canvas -X POST
 	curl https://api.art-peace.net/init-quests -X POST -d "@configs/production-quests.config.json"
+
+update-frontend-contracts:
+	cat onchain/target/dev/art_peace_ArtPeace.contract_class.json| jq -r '.abi' > frontend/src/contracts/art_peace.abi.json
+	cat onchain/target/dev/art_peace_CanvasNFT.contract_class.json| jq -r '.abi' > frontend/src/contracts/canvas_nft.abi.json
+	cat onchain/target/dev/art_peace_UsernameStore.contract_class.json| jq -r '.abi' > frontend/src/contracts/username_store.abi.json

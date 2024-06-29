@@ -10,6 +10,11 @@
   padding: 0.5rem;
 }
 
+.Quests__nowallet {
+  padding: 0.5rem;
+  text-align: center;
+}
+
 .Quests__timer {
   margin: 1rem 0 0.5rem 1rem;
   padding: 0.5rem 1rem;
@@ -58,6 +63,6 @@
 }
 
 .Quests__timer--active:active {
-  transform: scale(1.0) translateY(0rem);
+  transform: scale(1) translateY(0rem);
   box-shadow: 0 0 0.3rem rgba(0, 0, 0, 0.3);
 }

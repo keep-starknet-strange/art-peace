@@ -2,7 +2,8 @@ pub mod art_peace;
 pub mod interfaces;
 use art_peace::ArtPeace;
 use interfaces::{
-    IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel, Faction, MemberMetadata
+    IArtPeace, IArtPeaceDispatcher, IArtPeaceDispatcherTrait, Pixel, Faction, ChainFaction,
+    MemberMetadata
 };
 
 mod quests {
@@ -16,6 +17,7 @@ mod quests {
     pub mod nft_quest;
     pub mod hodl_quest;
     pub mod faction_quest;
+    pub mod chain_faction_quest;
     pub mod vote_quest;
 
     use interfaces::{
@@ -72,6 +74,7 @@ mod tests {
     pub(crate) mod hodl_quest;
     pub(crate) mod pixel_quest;
     pub(crate) mod faction_quest;
+    pub(crate) mod chain_faction_quest;
     pub(crate) mod rainbow_quest;
     pub(crate) mod template_quest;
     pub(crate) mod unruggable_quest;

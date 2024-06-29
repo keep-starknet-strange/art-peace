@@ -3,6 +3,7 @@ pub struct NFTMintParams {
     pub position: u128,
     pub width: u128,
     pub height: u128,
+    pub name: felt252,
 }
 
 #[derive(Drop, Copy, Serde, PartialEq, starknet::Store)]
@@ -10,8 +11,10 @@ pub struct NFTMetadata {
     pub position: u128,
     pub width: u128,
     pub height: u128,
+    pub name: felt252,
     pub image_hash: felt252,
     pub block_number: u64,
+    pub day_index: u32,
     pub minter: starknet::ContractAddress,
 }
 
@@ -21,6 +24,7 @@ pub trait ICanvasNFTStore<TContractState> {
     fn get_nft_metadata(self: @TContractState, token_id: u256) -> NFTMetadata;
     fn get_nft_minter(self: @TContractState, token_id: u256) -> starknet::ContractAddress;
     fn get_nft_image_hash(self: @TContractState, token_id: u256) -> felt252;
+    fn get_nft_day_index(self: @TContractState, token_id: u256) -> u32;
 
     // Returns the number of NFTs stored in the contract state.
     fn get_nfts_count(self: @TContractState) -> u256;

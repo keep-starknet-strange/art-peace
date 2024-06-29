@@ -8,6 +8,10 @@ export const wsUrl = backendConfig.production
   ? 'wss://' + backendConfig.host + '/ws'
   : 'ws://' + backendConfig.host + ':' + backendConfig.consumer_port + '/ws';
 
+export const nftUrl = backendConfig.production
+  ? 'https://' + backendConfig.host
+  : 'http://' + backendConfig.host + ':' + backendConfig.consumer_port;
+
 export const devnetMode = backendConfig.production === false;
 
 export const convertUrl = (url) => {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
@@ -17,18 +18,25 @@ func InitFactionRoutes() {
 	http.HandleFunc("/upload-faction-icon", uploadFactionIcon)
 	http.HandleFunc("/get-my-factions", getMyFactions)
 	http.HandleFunc("/get-factions", getFactions)
+	http.HandleFunc("/get-my-chain-factions", getMyChainFactions)
+	http.HandleFunc("/get-chain-factions", getChainFactions)
+	http.HandleFunc("/get-chain-faction-members", getChainFactionMembers)
 	http.HandleFunc("/get-faction-members", getFactionMembers)
 	// Create a static file server for the nft images
 	http.Handle("/faction-images/", http.StripPrefix("/faction-images/", http.FileServer(http.Dir("./factions"))))
+	if !core.ArtPeaceBackend.BackendConfig.Production {
+		http.HandleFunc("/join-chain-faction-devnet", joinChainFactionDevnet)
+		http.HandleFunc("/join-faction-devnet", joinFactionDevnet)
+		http.HandleFunc("/leave-faction-devnet", leaveFactionDevnet)
+	}
 }
 
 type FactionUserData struct {
 	FactionId  int    `json:"factionId"`
-	MemberId   int    `json:"memberId"`
 	Allocation int    `json:"allocation"`
 	Name       string `json:"name"`
-	Pool       int    `json:"pool"`
 	Members    int    `json:"members"`
+	Joinable   bool   `json:"joinable"`
 	Icon       string `json:"icon"`
 	Telegram   string `json:"telegram"`
 	Twitter    string `json:"twitter"`
@@ -39,9 +47,9 @@ type FactionUserData struct {
 type FactionData struct {
 	FactionId int    `json:"factionId"`
 	Name      string `json:"name"`
-	Pool      int    `json:"pool"`
 	Members   int    `json:"members"`
 	IsMember  bool   `json:"isMember"`
+	Joinable  bool   `json:"joinable"`
 	Icon      string `json:"icon"`
 	Telegram  string `json:"telegram"`
 	Twitter   string `json:"twitter"`
@@ -67,7 +75,8 @@ type FactionsConfigItem struct {
 }
 
 type FactionsConfig struct {
-	Factions []FactionsConfigItem `json:"factions"`
+	Factions      []FactionsConfigItem `json:"factions"`
+	ChainFactions []string             `json:"chain_factions"`
 }
 
 type FactionMemberData struct {
@@ -156,9 +165,9 @@ func getMyFactions(w http.ResponseWriter, r *http.Request) {
 	// TODO: Paginate and accumulate the allocations for each faction
 
 	query := `
-    SELECT m.faction_id, m.member_id, m.allocation, f.name, f.pixel_pool as pool, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = m.faction_id), 0) as members, COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
+    SELECT m.faction_id, f.allocation, f.name, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = m.faction_id), 0) as members, f.joinable, COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
     FROM factionmembersinfo m
-    LEFT JOIN factions f ON m.faction_id = f.key - 1
+    LEFT JOIN factions f ON m.faction_id = f.faction_id
     LEFT JOIN FactionLinks l ON m.faction_id = l.faction_id
     WHERE m.user_address = $1
     ORDER BY m.faction_id
@@ -191,12 +200,12 @@ func getFactions(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * pageLength
 
 	query := `
-    SELECT key - 1 as faction_id, name, pixel_pool as pool, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = key - 1), 0) as members,
-    COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = key - 1 AND user_address = $1), 0) > 0 as is_member,
+    SELECT f.faction_id, name, COALESCE((SELECT COUNT(*) FROM factionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
+    COALESCE((SELECT COUNT(*) FROM factionmembersinfo fm WHERE f.faction_id = fm.faction_id AND user_address = $1), 0) > 0 as is_member, f.joinable,
     COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
-    FROM factions
-    LEFT JOIN FactionLinks ON key - 1 = faction_id
-    ORDER BY key
+    FROM factions f
+    LEFT JOIN FactionLinks fl ON f.faction_id = fl.faction_id
+    ORDER BY f.faction_id
     LIMIT $2 OFFSET $3
   `
 
@@ -206,6 +215,96 @@ func getFactions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	routeutils.WriteDataJson(w, string(factions))
+}
+
+func getMyChainFactions(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
+
+	query := `
+    SELECT f.faction_id, name, COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
+    COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id AND user_address = $1), 0) > 0 as is_member, true as joinable,
+    COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
+    FROM chainfactionmembersinfo m
+    LEFT JOIN ChainFactions f ON m.faction_id = f.faction_id
+    LEFT JOIN ChainFactionLinks l ON m.faction_id = l.faction_id
+    WHERE m.user_address = $1
+    ORDER BY m.faction_id
+  `
+
+	factions, err := core.PostgresQueryJson[FactionData](query, address)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve factions")
+		return
+	}
+	routeutils.WriteDataJson(w, string(factions))
+}
+
+func getChainFactions(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
+
+	query := `
+    SELECT f.faction_id, name, COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
+    COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id AND user_address = $1), 0) > 0 as is_member, true as joinable,
+    COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
+    FROM ChainFactions f
+    LEFT JOIN ChainFactionLinks fl ON f.faction_id = fl.faction_id
+    ORDER BY f.faction_id
+  `
+
+	factions, err := core.PostgresQueryJson[FactionData](query, address)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve factions")
+		return
+	}
+	routeutils.WriteDataJson(w, string(factions))
+}
+
+func getChainFactionMembers(w http.ResponseWriter, r *http.Request) {
+	factionID, err := strconv.Atoi(r.URL.Query().Get("factionId"))
+	if err != nil || factionID < 0 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
+
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 10
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	query := `
+    SELECT 
+    CFMI.user_address AS user_address, 
+    COALESCE(U.name, '') AS username, 
+    2 AS total_allocation
+    FROM ChainFactionMembersInfo CFMI
+    LEFT JOIN Users U ON CFMI.user_address = U.address
+    WHERE CFMI.faction_id = $1
+    LIMIT $2 OFFSET $3;
+  `
+
+	members, err := core.PostgresQueryJson[FactionMemberData](query, factionID, pageLength, offset)
+
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve factions")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(members))
 }
 
 func getFactionMembers(w http.ResponseWriter, r *http.Request) {
@@ -233,12 +332,11 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 	SELECT 
     FMI.user_address AS user_address, 
     COALESCE(U.name, '') AS username, 
-    SUM(FMI.allocation) AS total_allocation
+    F.allocation AS total_allocation
 	FROM FactionMembersInfo FMI
 	LEFT JOIN Users U ON FMI.user_address = U.address
+  LEFT JOIN Factions F ON F.faction_id = FMI.faction_id
 	WHERE FMI.faction_id = $1
-	GROUP BY FMI.user_address, U.name
-	ORDER BY total_allocation DESC
 	LIMIT $2 OFFSET $3;
 	`
 
@@ -250,4 +348,90 @@ func getFactionMembers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteDataJson(w, string(members))
+}
+
+func joinChainFactionDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		return
+	}
+
+	chainId := (*jsonBody)["chainId"]
+	if chainId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing chainId parameter")
+		return
+	}
+
+	if len(chainId) > 31 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "chainId too long (max 31 characters)")
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.JoinChainFactionDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+
+	cmd := exec.Command(shellCmd, contract, "join_chain_faction", chainId)
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to join chain faction on devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Joined chain faction successfully")
+}
+
+func joinFactionDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		return
+	}
+
+	factionId := (*jsonBody)["factionId"]
+	if factionId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing factionId parameter")
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.JoinFactionDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+
+	cmd := exec.Command(shellCmd, contract, "join_faction", factionId)
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to join faction on devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Joined faction successfully")
+}
+
+func leaveFactionDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.LeaveFactionDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+
+	cmd := exec.Command(shellCmd, contract, "leave_faction")
+	_, err := cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to leave faction on devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Left faction successfully")
 }

@@ -143,44 +143,61 @@ func revertBasicPixelPlacedEvent(event IndexerEvent) {
 	// TODO: check ordering of this and revertPixelPlacedEvent
 }
 
-func processMemberPixelsPlacedEvent(event IndexerEvent) {
-	factionIdHex := event.Event.Keys[1]
-	memberIdHex := event.Event.Keys[2]
+func processFactionPixelsPlacedEvent(event IndexerEvent) {
+	// TODO: Faction id
+	userAddress := event.Event.Keys[1][2:] // Remove 0x prefix
 	timestampHex := event.Event.Data[0]
 	memberPixelsHex := event.Event.Data[1]
 
-	factionId, err := strconv.ParseInt(factionIdHex, 0, 64)
-	if err != nil {
-		PrintIndexerError("processMemberPixelsPlacedEvent", "Error converting faction id hex to int", factionIdHex, memberIdHex, timestampHex, memberPixelsHex)
-		return
-	}
-
-	memberId, err := strconv.ParseInt(memberIdHex, 0, 64)
-	if err != nil {
-		PrintIndexerError("processMemberPixelsPlacedEvent", "Error converting member id hex to int", factionIdHex, memberIdHex, timestampHex, memberPixelsHex)
-		return
-	}
-
 	timestamp, err := strconv.ParseInt(timestampHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processMemberPixelsPlacedEvent", "Error converting timestamp hex to int", factionIdHex, memberIdHex, timestampHex, memberPixelsHex)
+		PrintIndexerError("processMemberPixelsPlacedEvent", "Error converting timestamp hex to int", userAddress, timestampHex, memberPixelsHex)
 		return
 	}
 
 	memberPixels, err := strconv.ParseInt(memberPixelsHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processMemberPixelsPlacedEvent", "Error converting member pixels hex to int", factionIdHex, memberIdHex, timestampHex, memberPixelsHex)
+		PrintIndexerError("processMemberPixelsPlacedEvent", "Error converting member pixels hex to int", userAddress, timestampHex, memberPixelsHex)
 		return
 	}
 
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE FactionMembersInfo SET last_placed_time = TO_TIMESTAMP($1), member_pixels = $2 WHERE faction_id = $3 AND member_id = $4", timestamp, memberPixels, factionId, memberId)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE FactionMembersInfo SET last_placed_time = TO_TIMESTAMP($1), member_pixels = $2 WHERE user_address = $3", timestamp, memberPixels, userAddress)
 	if err != nil {
-		PrintIndexerError("processMemberPixelsPlacedEvent", "Error updating faction member info in postgres", factionIdHex, memberIdHex, timestampHex, memberPixelsHex)
+		PrintIndexerError("processMemberPixelsPlacedEvent", "Error updating faction member info in postgres", userAddress, timestampHex, memberPixelsHex)
 		return
 	}
 }
 
-func revertMemberPixelsPlacedEvent(event IndexerEvent) {
+func revertFactionPixelsPlacedEvent(event IndexerEvent) {
+	// TODO
+}
+
+func processChainFactionPixelsPlacedEvent(event IndexerEvent) {
+	// TODO: Faction id
+	userAddress := event.Event.Keys[1][2:] // Remove 0x prefix
+	timestampHex := event.Event.Data[0]
+	memberPixelsHex := event.Event.Data[1]
+
+	timestamp, err := strconv.ParseInt(timestampHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processChainFactionMemberPixelsPlacedEvent", "Error converting timestamp hex to int", userAddress, timestampHex, memberPixelsHex)
+		return
+	}
+
+	memberPixels, err := strconv.ParseInt(memberPixelsHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processChainFactionMemberPixelsPlacedEvent", "Error converting member pixels hex to int", userAddress, timestampHex, memberPixelsHex)
+		return
+	}
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE ChainFactionMembersInfo SET last_placed_time = TO_TIMESTAMP($1), member_pixels = $2 WHERE user_address = $3", timestamp, memberPixels, userAddress)
+	if err != nil {
+		PrintIndexerError("processChainFactionMemberPixelsPlacedEvent", "Error updating chain faction member info in postgres", userAddress, timestampHex, memberPixelsHex)
+		return
+	}
+}
+
+func revertChainFactionPixelsPlacedEvent(event IndexerEvent) {
 	// TODO
 }
 

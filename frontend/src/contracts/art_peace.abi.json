@@ -39,6 +39,20 @@
     ]
   },
   {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
     "type": "struct",
     "name": "art_peace::interfaces::Faction",
     "members": [
@@ -51,7 +65,11 @@
         "type": "core::starknet::contract_address::ContractAddress"
       },
       {
-        "name": "pixel_pool",
+        "name": "joinable",
+        "type": "core::bool"
+      },
+      {
+        "name": "allocation",
         "type": "core::integer::u32"
       }
     ]
@@ -218,78 +236,6 @@
       },
       {
         "type": "function",
-        "name": "place_pixel_inner",
-        "inputs": [
-          {
-            "name": "pos",
-            "type": "core::integer::u128"
-          },
-          {
-            "name": "color",
-            "type": "core::integer::u8"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "place_basic_pixel_inner",
-        "inputs": [
-          {
-            "name": "pos",
-            "type": "core::integer::u128"
-          },
-          {
-            "name": "color",
-            "type": "core::integer::u8"
-          },
-          {
-            "name": "now",
-            "type": "core::integer::u64"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "place_member_pixels_inner",
-        "inputs": [
-          {
-            "name": "faction_id",
-            "type": "core::integer::u32"
-          },
-          {
-            "name": "member_id",
-            "type": "core::integer::u32"
-          },
-          {
-            "name": "positions",
-            "type": "core::array::Span::<core::integer::u128>"
-          },
-          {
-            "name": "colors",
-            "type": "core::array::Span::<core::integer::u8>"
-          },
-          {
-            "name": "offset",
-            "type": "core::integer::u32"
-          },
-          {
-            "name": "now",
-            "type": "core::integer::u64"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::integer::u32"
-          }
-        ],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
         "name": "place_pixel",
         "inputs": [
           {
@@ -446,22 +392,6 @@
       },
       {
         "type": "function",
-        "name": "get_user_factions_count",
-        "inputs": [
-          {
-            "name": "user",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::integer::u32"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
         "name": "get_faction",
         "inputs": [
           {
@@ -505,12 +435,12 @@
             "type": "core::starknet::contract_address::ContractAddress"
           },
           {
-            "name": "pool",
-            "type": "core::integer::u32"
+            "name": "joinable",
+            "type": "core::bool"
           },
           {
-            "name": "members",
-            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+            "name": "allocation",
+            "type": "core::integer::u32"
           }
         ],
         "outputs": [],
@@ -518,47 +448,70 @@
       },
       {
         "type": "function",
-        "name": "replace_member",
+        "name": "init_chain_faction",
+        "inputs": [
+          {
+            "name": "name",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "join_faction",
         "inputs": [
           {
             "name": "faction_id",
             "type": "core::integer::u32"
-          },
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "leave_faction",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "join_chain_faction",
+        "inputs": [
           {
-            "name": "member_id",
+            "name": "faction_id",
             "type": "core::integer::u32"
-          },
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_user_faction",
+        "inputs": [
           {
-            "name": "new_member",
+            "name": "user",
             "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "get_faction_members",
-        "inputs": [
-          {
-            "name": "faction_id",
-            "type": "core::integer::u32"
-          }
-        ],
         "outputs": [
           {
-            "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>"
+            "type": "core::integer::u32"
           }
         ],
         "state_mutability": "view"
       },
       {
         "type": "function",
-        "name": "get_faction_member_count",
+        "name": "get_user_chain_faction",
         "inputs": [
           {
-            "name": "faction_id",
-            "type": "core::integer::u32"
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
         "outputs": [
@@ -570,15 +523,31 @@
       },
       {
         "type": "function",
-        "name": "get_faction_members_pixels",
+        "name": "get_user_faction_members_pixels",
         "inputs": [
           {
-            "name": "faction_id",
-            "type": "core::integer::u32"
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
           },
           {
-            "name": "member_id",
+            "name": "now",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [
+          {
             "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_chain_faction_members_pixels",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
           },
           {
             "name": "now",
@@ -1132,20 +1101,6 @@
     ]
   },
   {
-    "type": "enum",
-    "name": "core::bool",
-    "variants": [
-      {
-        "name": "False",
-        "type": "()"
-      },
-      {
-        "name": "True",
-        "type": "()"
-      }
-    ]
-  },
-  {
     "type": "interface",
     "name": "art_peace::templates::interfaces::ITemplateStore",
     "items": [
@@ -1297,6 +1252,23 @@
   },
   {
     "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::ColorAdded",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "color_key",
+        "type": "core::integer::u8",
+        "kind": "key"
+      },
+      {
+        "name": "color",
+        "type": "core::integer::u32",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
     "name": "art_peace::art_peace::ArtPeace::PixelPlaced",
     "kind": "struct",
     "members": [
@@ -1341,17 +1313,34 @@
   },
   {
     "type": "event",
-    "name": "art_peace::art_peace::ArtPeace::MemberPixelsPlaced",
+    "name": "art_peace::art_peace::ArtPeace::FactionPixelsPlaced",
     "kind": "struct",
     "members": [
       {
-        "name": "faction_id",
-        "type": "core::integer::u32",
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
         "kind": "key"
       },
       {
-        "name": "member_id",
+        "name": "placed_time",
+        "type": "core::integer::u64",
+        "kind": "data"
+      },
+      {
+        "name": "member_pixels",
         "type": "core::integer::u32",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::ChainFactionPixelsPlaced",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
         "kind": "key"
       },
       {
@@ -1485,20 +1474,20 @@
         "kind": "data"
       },
       {
-        "name": "pool",
-        "type": "core::integer::u32",
+        "name": "joinable",
+        "type": "core::bool",
         "kind": "data"
       },
       {
-        "name": "members",
-        "type": "core::array::Span::<core::starknet::contract_address::ContractAddress>",
+        "name": "allocation",
+        "type": "core::integer::u32",
         "kind": "data"
       }
     ]
   },
   {
     "type": "event",
-    "name": "art_peace::art_peace::ArtPeace::MemberReplaced",
+    "name": "art_peace::art_peace::ArtPeace::ChainFactionCreated",
     "kind": "struct",
     "members": [
       {
@@ -1507,14 +1496,60 @@
         "kind": "key"
       },
       {
-        "name": "member_id",
+        "name": "name",
+        "type": "core::felt252",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::FactionJoined",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "faction_id",
         "type": "core::integer::u32",
         "kind": "key"
       },
       {
-        "name": "new_member",
+        "name": "user",
         "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::FactionLeft",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "faction_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::ChainFactionJoined",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "faction_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
       }
     ]
   },
@@ -1597,6 +1632,11 @@
         "kind": "nested"
       },
       {
+        "name": "ColorAdded",
+        "type": "art_peace::art_peace::ArtPeace::ColorAdded",
+        "kind": "nested"
+      },
+      {
         "name": "PixelPlaced",
         "type": "art_peace::art_peace::ArtPeace::PixelPlaced",
         "kind": "nested"
@@ -1607,8 +1647,13 @@
         "kind": "nested"
       },
       {
-        "name": "MemberPixelsPlaced",
-        "type": "art_peace::art_peace::ArtPeace::MemberPixelsPlaced",
+        "name": "FactionPixelsPlaced",
+        "type": "art_peace::art_peace::ArtPeace::FactionPixelsPlaced",
+        "kind": "nested"
+      },
+      {
+        "name": "ChainFactionPixelsPlaced",
+        "type": "art_peace::art_peace::ArtPeace::ChainFactionPixelsPlaced",
         "kind": "nested"
       },
       {
@@ -1637,8 +1682,23 @@
         "kind": "nested"
       },
       {
-        "name": "MemberReplaced",
-        "type": "art_peace::art_peace::ArtPeace::MemberReplaced",
+        "name": "ChainFactionCreated",
+        "type": "art_peace::art_peace::ArtPeace::ChainFactionCreated",
+        "kind": "nested"
+      },
+      {
+        "name": "FactionJoined",
+        "type": "art_peace::art_peace::ArtPeace::FactionJoined",
+        "kind": "nested"
+      },
+      {
+        "name": "FactionLeft",
+        "type": "art_peace::art_peace::ArtPeace::FactionLeft",
+        "kind": "nested"
+      },
+      {
+        "name": "ChainFactionJoined",
+        "type": "art_peace::art_peace::ArtPeace::ChainFactionJoined",
         "kind": "nested"
       },
       {

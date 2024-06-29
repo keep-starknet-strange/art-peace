@@ -42,7 +42,7 @@ CANVAS_CONFIG=$WORK_DIR/configs/canvas.config.json
 QUESTS_CONFIG=$WORK_DIR/configs/quests.config.json
 WIDTH=$(jq -r '.canvas.width' $CANVAS_CONFIG)
 HEIGHT=$(jq -r '.canvas.height' $CANVAS_CONFIG)
-PLACE_DELAY=0x00
+PLACE_DELAY=120
 COLOR_COUNT=$(jq -r '.colors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 COLORS=$(jq -r '.colors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 VOTABLE_COLOR_COUNT=$(jq -r '.votableColors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
@@ -106,8 +106,10 @@ echo "ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" > /configs/configs
 echo "REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> /configs/configs.env
 echo "NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /configs/configs.env
 echo "REACT_APP_NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /configs/configs.env
+echo "CANVAS_NFT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /configs/configs.env
+echo "REACT_APP_CANVAS_NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> /configs/configs.env
 echo "USERNAME_STORE_ADDRESS=$USERNAME_STORE_ADDRESS" >> /configs/configs.env
-echo "REACT_APP_USERNAME_STORE_ADDRESS=$USERNAME_STORE_ADDRESS" >> /configs/configs.env
+echo "REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS=$USERNAME_STORE_ADDRESS" >> /configs/configs.env
 
 # TODO
 # MULTICALL_TEMPLATE_DIR=$CONTRACT_DIR/tests/multicalls

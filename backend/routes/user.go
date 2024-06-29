@@ -17,6 +17,7 @@ func InitUserRoutes() {
 	http.HandleFunc("/get-username-store-address", getUsernameStoreAddress)
 	http.HandleFunc("/set-username-store-address", setUsernameStoreAddress)
 	http.HandleFunc("/get-last-placed-time", getLastPlacedTime)
+	http.HandleFunc("/get-chain-faction-pixels", getChainFactionPixels)
 	http.HandleFunc("/get-faction-pixels", getFactionPixels)
 	http.HandleFunc("/get-extra-pixels", getExtraPixels)
 	http.HandleFunc("/get-username", getUsername)
@@ -50,7 +51,6 @@ func setUsernameStoreAddress(w http.ResponseWriter, r *http.Request) {
 
 type MembershipPixelsData struct {
 	FactionId      int        `json:"factionId"`
-	MemberId       int        `json:"memberId"`
 	Allocation     int        `json:"allocation"`
 	LastPlacedTime *time.Time `json:"lastPlacedTime"`
 	MemberPixels   int        `json:"memberPixels"`
@@ -63,7 +63,23 @@ func getFactionPixels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	membershipPixels, err := core.PostgresQueryJson[MembershipPixelsData]("SELECT faction_id, member_id, allocation, last_placed_time, member_pixels FROM FactionMembersInfo WHERE user_address = $1", address)
+	membershipPixels, err := core.PostgresQueryJson[MembershipPixelsData]("SELECT F.faction_id, allocation, last_placed_time, member_pixels FROM FactionMembersInfo FMI LEFT JOIN Factions F ON F.faction_id = FMI.faction_id WHERE user_address = $1", address)
+	if err != nil {
+		routeutils.WriteDataJson(w, "[]")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(membershipPixels))
+}
+
+func getChainFactionPixels(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		return
+	}
+
+	membershipPixels, err := core.PostgresQueryJson[MembershipPixelsData]("SELECT F.faction_id, 2 as allocation, last_placed_time, member_pixels FROM ChainFactionMembersInfo FMI LEFT JOIN ChainFactions F ON F.faction_id = FMI.faction_id WHERE user_address = $1", address)
 	if err != nil {
 		routeutils.WriteDataJson(w, "[]")
 		return
@@ -167,7 +183,7 @@ func newUsernameDevnet(w http.ResponseWriter, r *http.Request) {
 	cmd := exec.Command(shellCmd, contract, "claim_username", username)
 	_, err = cmd.Output()
 	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to claim username on devnet")
 		return
 	}
 

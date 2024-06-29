@@ -1,6 +1,8 @@
 .Voting__description {
   padding: 0 0.5rem 0 1rem;
   margin: 0.7rem 0;
+  line-height: 1.6rem;
+  text-align: center;
 }
 
 .Voting__timer {
@@ -51,7 +53,7 @@
 }
 
 .Voting__timer--active:active {
-  transform: scale(1.0) translateY(0rem);
+  transform: scale(1) translateY(0rem);
   box-shadow: 0 0 0.3rem rgba(0, 0, 0, 0.3);
 }
 

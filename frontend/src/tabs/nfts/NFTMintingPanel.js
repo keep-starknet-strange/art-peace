@@ -6,14 +6,23 @@ import { fetchWrapper } from '../../services/apiService.js';
 import { devnetMode } from '../../utils/Consts.js';
 
 const NFTMintingPanel = (props) => {
+  // TODO: Arrows to control position and size
   const closePanel = () => {
     props.setNftMintingMode(false);
     props.setNftSelectionStarted(false);
     props.setNftSelected(false);
   };
 
+  const toHex = (str) => {
+    let hex = '0x';
+    for (let i = 0; i < str.length; i++) {
+      hex += '' + str.charCodeAt(i).toString(16);
+    }
+    return hex;
+  };
+
   const [calls, setCalls] = useState([]);
-  const mintNftCall = (position, width, height) => {
+  const mintNftCall = (position, width, height, name) => {
     if (devnetMode) return;
     if (!props.address || !props.artPeaceContract) return;
     // TODO: Validate the position, width, and height
@@ -21,7 +30,8 @@ const NFTMintingPanel = (props) => {
     let mintParams = {
       position: position,
       width: width,
-      height: height
+      height: height,
+      name: toHex(name)
     };
     setCalls(
       props.artPeaceContract.populateTransaction['mint_nft'](mintParams)
@@ -36,6 +46,7 @@ const NFTMintingPanel = (props) => {
       console.log('Mint nft successful:', data, isPending);
       // TODO: Update the UI with the new NFT
       closePanel();
+      props.setActiveTab('NFTs');
     };
     mintNft();
   }, [calls]);
@@ -44,9 +55,11 @@ const NFTMintingPanel = (props) => {
     calls
   });
 
+  const [nftName, setNftName] = useState('');
   const submit = async () => {
+    if (nftName.length === 0 || nftName.length > 31) return;
     if (!devnetMode) {
-      mintNftCall(props.nftPosition, props.nftWidth, props.nftHeight);
+      mintNftCall(props.nftPosition, props.nftWidth, props.nftHeight, nftName);
       return;
     }
     let mintNFTEndpoint = 'mint-nft-devnet';
@@ -56,13 +69,20 @@ const NFTMintingPanel = (props) => {
       body: JSON.stringify({
         position: props.nftPosition.toString(),
         width: props.nftWidth.toString(),
-        height: props.nftHeight.toString()
+        height: props.nftHeight.toString(),
+        name: toHex(nftName)
       })
     });
     if (response.result) {
       console.log(response.result);
       closePanel();
+      props.setActiveTab('NFTs');
     }
+  };
+
+  const cancel = () => {
+    props.setNftSelectionStarted(false);
+    props.setNftSelected(false);
   };
 
   // TODO: Add preview of the NFT && Add input fields for the NFT metadata
@@ -76,11 +96,6 @@ const NFTMintingPanel = (props) => {
       </p>
       <div className='NFTMintingPanel__header'>
         <p className='Text__medium Heading__sub'>art/peace NFT Mint</p>
-        {props.nftSelected && (
-          <div className='Button__primary' onClick={() => submit()}>
-            Submit
-          </div>
-        )}
       </div>
       <div className='NFTMintingPanel__notes'>
         {props.nftSelectionStarted === false && (
@@ -134,19 +149,41 @@ const NFTMintingPanel = (props) => {
             </p>
           </div>
           <div className='NFTMintingPanel__item'>
-            <p className='Text__small Heading__sub'>Width</p>
+            <p className='Text__small Heading__sub'>Size</p>
             <p className='Text__small NFTMintingPanel__item__text'>
-              {props.nftWidth}
-            </p>
-          </div>
-          <div className='NFTMintingPanel__item'>
-            <p className='Text__small Heading__sub'>Height</p>
-            <p className='Text__small NFTMintingPanel__item__text'>
-              {props.nftHeight}
+              {props.nftWidth} x {props.nftHeight}
             </p>
           </div>
         </div>
       </div>
+      {props.nftSelected && (
+        <div className='NFTMintingPanel__form'>
+          <div className='NFTMintingPanel__form__item'>
+            <p className='Text__small'>Name</p>
+            <input
+              className='Text__small Input__primary NFTMintingPanel__form__input'
+              type='text'
+              placeholder='NFT name...'
+              value={nftName}
+              onChange={(e) => setNftName(e.target.value)}
+            />
+          </div>
+          <div className='NFTMintingPanel__form__buttons'>
+            <div
+              className='Button__primary NFTMintingPanel__button'
+              onClick={() => cancel()}
+            >
+              Cancel
+            </div>
+            <div
+              className={`Button__primary NFTMintingPanel__button ${nftName.length === 0 || nftName.length > 31 ? 'Button__disabled' : ''}`}
+              onClick={() => submit()}
+            >
+              Submit
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,40 +1,32 @@
 #[starknet::contract]
-pub mod NFTMintQuest {
-    use art_peace::nfts::interfaces::{ICanvasNFTStoreDispatcher, ICanvasNFTStoreDispatcherTrait};
-    use art_peace::quests::IQuest;
+pub mod ChainFactionQuest {
+    use art_peace::{IArtPeaceDispatcher, IArtPeaceDispatcherTrait};
+    use art_peace::quests::{IQuest};
 
     use starknet::{ContractAddress, get_caller_address};
 
     #[storage]
     struct Storage {
-        canvas_nft: ContractAddress,
         art_peace: ContractAddress,
         reward: u32,
-        is_daily: bool,
-        day_index: u32,
         claimed: LegacyMap<ContractAddress, bool>,
     }
 
     #[derive(Drop, Serde)]
-    pub struct NFTMintQuestInitParams {
-        pub canvas_nft: ContractAddress,
+    pub struct ChainFactionQuestInitParams {
         pub art_peace: ContractAddress,
         pub reward: u32,
-        pub is_daily: bool,
-        pub day_index: u32,
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, init_params: NFTMintQuestInitParams) {
-        self.canvas_nft.write(init_params.canvas_nft);
+    fn constructor(ref self: ContractState, init_params: ChainFactionQuestInitParams) {
         self.art_peace.write(init_params.art_peace);
         self.reward.write(init_params.reward);
-        self.is_daily.write(init_params.is_daily);
-        self.day_index.write(init_params.day_index);
     }
 
+
     #[abi(embed_v0)]
-    impl NFTMintQuest of IQuest<ContractState> {
+    impl ChainFactionQuest of IQuest<ContractState> {
         fn get_reward(self: @ContractState) -> u32 {
             self.reward.read()
         }
@@ -46,25 +38,19 @@ pub mod NFTMintQuest {
                 return false;
             }
 
-            let token_id_felt = *calldata.at(0);
-            let token_id: u256 = token_id_felt.into();
+            let art_peace_dispatcher = IArtPeaceDispatcher {
+                contract_address: self.art_peace.read()
+            };
 
-            let nft_store = ICanvasNFTStoreDispatcher { contract_address: self.canvas_nft.read() };
-            let token_minter = nft_store.get_nft_minter(token_id);
+            let user_faction = art_peace_dispatcher.get_user_chain_faction(user);
 
-            if token_minter != user {
+            if user_faction == 0 {
                 return false;
-            }
-
-            if self.is_daily.read() {
-                let day_index = nft_store.get_nft_day_index(token_id);
-                if day_index != self.day_index.read() {
-                    return false;
-                }
             }
 
             return true;
         }
+
 
         fn claim(ref self: ContractState, user: ContractAddress, calldata: Span<felt252>) -> u32 {
             assert(get_caller_address() == self.art_peace.read(), 'Only ArtPeace can claim quests');
@@ -78,3 +64,4 @@ pub mod NFTMintQuest {
         }
     }
 }
+

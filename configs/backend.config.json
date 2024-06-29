@@ -7,8 +7,13 @@
     "place_extra_pixels_devnet": "../tests/integration/local/place_extra_pixels.sh",
     "add_template_devnet": "../tests/integration/local/add_template.sh",
     "mint_nft_devnet": "../tests/integration/local/mint_nft.sh",
+    "like_nft_devnet": "../tests/integration/local/like_nft.sh",
+    "unlike_nft_devnet": "../tests/integration/local/unlike_nft.sh",
     "vote_color_devnet": "../tests/integration/local/vote_color.sh",
-    "increase_day_devnet": "../tests/integration/local/increase_day_index.sh"
+    "increase_day_devnet": "../tests/integration/local/increase_day_index.sh",
+    "join_chain_faction_devnet": "../tests/integration/local/join_chain_faction.sh",
+    "join_faction_devnet": "../tests/integration/local/join_faction.sh",
+    "leave_faction_devnet": "../tests/integration/local/leave_faction.sh"
   },
   "production": false,
   "websocket": {

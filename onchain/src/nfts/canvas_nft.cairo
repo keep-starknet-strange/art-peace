@@ -55,15 +55,17 @@ mod CanvasNFT {
     #[derive(Drop, starknet::Event)]
     struct NFTLiked {
         #[key]
-        user_address: ContractAddress,
-        token_id: u256
+        token_id: u256,
+        #[key]
+        user_address: ContractAddress
     }
 
     #[derive(Drop, starknet::Event)]
     struct NFTUnliked {
         #[key]
-        user_address: ContractAddress,
-        token_id: u256
+        token_id: u256,
+        #[key]
+        user_address: ContractAddress
     }
 
 

@@ -31,8 +31,7 @@ const Quests = (props) => {
     setMainQuests(combineQuests(mainQuestsInfo, mainQuestsStatus));
   }, [todaysQuestsInfo, mainQuestsInfo, todaysQuestsStatus, mainQuestsStatus]);
 
-  // TODO: remove local quests
-  const createArgs = (labels, placeholders, types) => {
+  const _createArgs = (labels, placeholders, types) => {
     const args = [];
     for (let i = 0; i < labels.length; i++) {
       args.push({
@@ -44,67 +43,6 @@ const Quests = (props) => {
     return args;
   };
 
-  const localDailyQuests = [
-    {
-      name: 'Place 10 pixels',
-      description:
-        'Add 10 pixels on the canvas [art/peace theme](https://www.google.com/)',
-      reward: '3',
-      completed: false,
-      progress: 0,
-      needed: 10
-    },
-    {
-      name: 'Build a template',
-      description: 'Create a template for the community to use',
-      reward: '3',
-      completed: false,
-      progress: 1,
-      needed: 20
-    },
-    {
-      name: 'Deploy a Memecoin',
-      description: 'Create an Unruggable memecoin',
-      reward: '10',
-      completed: false,
-      args: createArgs(['MemeCoin Address'], ['0x1234'], ['address']),
-      progress: 1,
-      needed: 1
-    }
-  ];
-
-  const localMainQuests = [
-    {
-      name: 'Tweet #art/peace',
-      description: 'Tweet about art/peace using the hashtag & addr',
-      reward: '10',
-      completed: true,
-      args: createArgs(
-        ['Twitter Handle', 'Address', 'test'],
-        ['@test', '0x1234', 'asdioj'],
-        ['twitter', 'address', 'text']
-      ),
-      progress: 13,
-      needed: 13
-    },
-    {
-      name: 'Place 100 pixels',
-      description: 'Add 100 pixels on the canvas',
-      reward: '10',
-      completed: false,
-      progress: 98,
-      needed: 100
-    },
-    {
-      name: 'Mint art/peace NFT',
-      description: 'Mint an NFT using the art/peace theme',
-      reward: '5',
-      completed: false,
-      progress: 14,
-      needed: 13
-    }
-  ];
-
   useEffect(() => {
     const fetchQuests = async () => {
       try {
@@ -115,7 +53,7 @@ const Quests = (props) => {
         let dailyData = await dailyResponse.json();
         dailyData = dailyData.data;
         if (!dailyData) {
-          dailyData = localDailyQuests;
+          dailyData = [];
         }
         setTodaysQuestsInfo(sortByCompleted(dailyData));
 
@@ -126,8 +64,7 @@ const Quests = (props) => {
         let mainData = await mainResponse.json();
         mainData = mainData.data;
         if (!mainData) {
-          // TODO: remove this & use []
-          mainData = localMainQuests;
+          mainData = [];
         }
         setMainQuestsInfo(sortByCompleted(mainData));
       } catch (error) {
@@ -202,9 +139,14 @@ const Quests = (props) => {
   return (
     <BasicTab title='Quests' setActiveTab={props.setActiveTab}>
       <div className='Quests'>
+        {props.queryAddress === '0' && (
+          <p className='Text__medium Quests__nowallet'>
+            Please login with your wallet to view your quests.
+          </p>
+        )}
         <div
           style={{
-            display: 'flex',
+            display: `${todaysQuests.length === 0 ? 'none' : 'flex'}`,
             alignItems: 'center',
             justifyContent: 'space-between',
             paddingRight: '1rem'
@@ -221,6 +163,7 @@ const Quests = (props) => {
         {todaysQuests.map((quest, index) => (
           <QuestItem
             key={index}
+            queryAddress={props.queryAddress}
             questId={quest.questId}
             title={quest.name}
             description={quest.description}
@@ -232,7 +175,10 @@ const Quests = (props) => {
             artPeaceContract={props.artPeaceContract}
             progress={quest.progress}
             needed={quest.needed}
+            calldata={quest.calldata}
+            claimParams={quest.claimParams}
             type='daily'
+            gameEnded={props.gameEnded}
           />
         ))}
 
@@ -240,6 +186,7 @@ const Quests = (props) => {
         {mainQuests.map((quest, index) => (
           <QuestItem
             key={index}
+            queryAddress={props.queryAddress}
             questId={quest.questId}
             title={quest.name}
             description={quest.description}
@@ -251,7 +198,10 @@ const Quests = (props) => {
             artPeaceContract={props.artPeaceContract}
             progress={quest.progress}
             needed={quest.needed}
+            calldata={quest.calldata}
+            claimParams={quest.claimParams}
             type='main'
+            gameEnded={props.gameEnded}
           />
         ))}
       </div>

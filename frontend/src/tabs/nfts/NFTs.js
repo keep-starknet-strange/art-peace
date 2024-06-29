@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './NFTs.css';
 import ExpandableTab from '../ExpandableTab.js';
 import NFTItem from './NFTItem.js';
-import { backendUrl } from '../../utils/Consts.js';
+import { nftUrl } from '../../utils/Consts.js';
 import {
   fetchWrapper,
   getMyNftsFn,
@@ -14,19 +14,43 @@ import {
 import { PaginationView } from '../../ui/pagination.js';
 
 const NFTsMainSection = (props) => {
-  const imageURL = backendUrl + '/nft-images/';
+  const imageURL = nftUrl + '/nft-images/';
   return (
-    <div className='NFTs__main'>
+    <div
+      className={`${props.expanded ? 'NFTs__main__expanded' : 'NFTs__main'}`}
+    >
       <div className='NFTs__header'>
         <h2 className='NFTs__heading'>My Collection</h2>
-        <div
-          className={`NFTs__button ${props.nftMintingMode ? 'NFTs__button--selected' : ''}`}
-          onClick={() => props.setNftMintingMode(true)}
-        >
-          Mint
+        <div className='NFTs__buttons'>
+          {!props.gameEnded && props.queryAddress !== '0' && (
+            <div
+              className={`Button__primary Text__small ${props.nftMintingMode ? 'NFTs__button--selected' : ''}`}
+              onClick={() => {
+                props.setNftMintingMode(true);
+                props.setActiveTab('Canvas');
+              }}
+            >
+              Mint
+            </div>
+          )}
+          {!props.expanded && (
+            <div
+              className='Text__small Button__primary'
+              onClick={() => {
+                props.setExpanded(true);
+              }}
+            >
+              Explore
+            </div>
+          )}
         </div>
       </div>
       <div className='NFTs__container'>
+        {props.queryAddress === '0' && (
+          <p className='Text__medium NFTs__nowallet'>
+            Please login with your wallet to view your NFTs
+          </p>
+        )}
         {props.nftsCollection.map((nft, index) => {
           return (
             <NFTItem
@@ -36,11 +60,13 @@ const NFTsMainSection = (props) => {
               image={imageURL + 'nft-' + nft.tokenId + '.png'}
               width={nft.width}
               height={nft.height}
+              name={nft.name}
               blockNumber={nft.blockNumber}
               likes={nft.likes}
               liked={nft.liked}
               minter={nft.minter}
               queryAddress={props.queryAddress}
+              updateLikes={props.updateLikes}
             />
           );
         })}
@@ -55,7 +81,7 @@ const NFTsMainSection = (props) => {
 };
 
 const NFTsExpandedSection = (props) => {
-  const imageURL = backendUrl + '/nft-images/';
+  const imageURL = nftUrl + '/nft-images/';
 
   return (
     <div className='NFTs__all'>
@@ -87,11 +113,13 @@ const NFTsExpandedSection = (props) => {
                 image={imageURL + 'nft-' + nft.tokenId + '.png'}
                 width={nft.width}
                 height={nft.height}
+                name={nft.name}
                 blockNumber={nft.blockNumber}
                 likes={nft.likes}
                 liked={nft.liked}
                 minter={nft.minter}
                 queryAddress={props.queryAddress}
+                updateLikes={props.updateLikes}
               />
             );
           })}
@@ -128,6 +156,25 @@ const NFTs = (props) => {
     } catch (error) {
       console.error('Error fetching NFT data:', error);
     }
+  };
+
+  const updateLikes = (tokenId, likes, liked) => {
+    let newMyNFTs = myNFTs.map((nft) => {
+      if (nft.tokenId === tokenId) {
+        return { ...nft, likes: likes, liked: liked };
+      }
+      return nft;
+    });
+
+    let newAllNFTs = allNFTs.map((nft) => {
+      if (nft.tokenId === tokenId) {
+        return { ...nft, likes: likes, liked: liked };
+      }
+      return nft;
+    });
+
+    setMyNFTs(newMyNFTs);
+    setAllNFTs(newAllNFTs);
   };
 
   useEffect(() => {
@@ -178,22 +225,26 @@ const NFTs = (props) => {
         if (activeFilter === 'hot') {
           result = await getHotNftsFn({
             page: allNftPagination.page,
-            pageLength: allNftPagination.pageLength
+            pageLength: allNftPagination.pageLength,
+            queryAddress: props.queryAddress
           });
         } else if (activeFilter === 'new') {
           result = await getNewNftsFn({
             page: allNftPagination.page,
-            pageLength: allNftPagination.pageLength
+            pageLength: allNftPagination.pageLength,
+            queryAddress: props.queryAddress
           });
         } else if (activeFilter === 'top') {
           result = await getTopNftsFn({
             page: allNftPagination.page,
-            pageLength: allNftPagination.pageLength
+            pageLength: allNftPagination.pageLength,
+            queryAddress: props.queryAddress
           });
         } else {
           result = await getNftsFn({
             page: allNftPagination.page,
-            pageLength: allNftPagination.pageLength
+            pageLength: allNftPagination.pageLength,
+            queryAddress: props.queryAddress
           });
         }
 
@@ -233,6 +284,7 @@ const NFTs = (props) => {
       title='NFTs'
       mainSection={NFTsMainSection}
       expandedSection={NFTsExpandedSection}
+      updateLikes={updateLikes}
       nftMintingMode={props.nftMintingMode}
       setNftMintingMode={props.setNftMintingMode}
       nftsCollection={myNFTs}
@@ -250,6 +302,7 @@ const NFTs = (props) => {
       setActiveFilter={setActiveFilter}
       filters={filters}
       isMobile={props.isMobile}
+      gameEnded={props.gameEnded}
     />
   );
 };

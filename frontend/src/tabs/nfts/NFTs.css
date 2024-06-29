@@ -1,8 +1,15 @@
 .NFTs__main {
   position: relative;
-  width: min(100%, 40rem);
+  width: 100%;
   margin: 0 auto;
 
+  transition: all 0.5s;
+}
+
+.NFTs__main__expanded {
+  position: relative;
+  width: min(100%, 40rem);
+  margin: 0 auto;
   transition: all 0.5s;
 }
 
@@ -20,7 +27,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  align-items: space-between;
   padding: 0.5rem;
   margin: 0 0.5rem;
   width: calc(100% - 1rem);
@@ -28,11 +35,20 @@
 
 .NFTs__heading {
   font-size: 1.6rem;
-  text-align: center;
   padding: 0;
   padding-bottom: 0.5rem;
   margin: 0;
   text-decoration: underline;
+}
+
+.NFTS__nowallet {
+  text-align: center;
+}
+
+.NFTs__buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .NFTs__button {

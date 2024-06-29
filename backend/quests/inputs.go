@@ -16,6 +16,11 @@ type HodlQuestInputs struct {
 	Amount int
 }
 
+type NFTQuestInputs struct {
+	IsDaily  bool
+	ClaimDay uint32
+}
+
 func NewPixelQuestInputs(encodedInputs []int) *PixelQuestInputs {
 	return &PixelQuestInputs{
 		PixelsNeeded: uint32(encodedInputs[0]),
@@ -35,5 +40,12 @@ func NewVoteQuestInputs(encodedInputs []int) *VoteQuestInputs {
 func NewHodlQuestInputs(encodedInputs []int) *HodlQuestInputs {
 	return &HodlQuestInputs{
 		Amount: encodedInputs[0],
+	}
+}
+
+func NewNFTQuestInputs(encodedInputs []int) *NFTQuestInputs {
+	return &NFTQuestInputs{
+		IsDaily:  encodedInputs[0] == 1,
+		ClaimDay: uint32(encodedInputs[1]),
 	}
 }

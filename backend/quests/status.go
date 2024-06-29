@@ -5,16 +5,17 @@ import (
 )
 
 var QuestChecks = map[int]func(*Quest, string) (int, int){
-	AuthorityQuestType:  CheckAuthorityStatus,
-	HodlQuestType:       CheckHodlStatus,
-	NFTMintQuestType:    CheckNftStatus,
-	PixelQuestType:      CheckPixelStatus,
-	RainbowQuestType:    CheckRainbowStatus,
-	TemplateQuestType:   CheckTemplateStatus,
-	UnruggableQuestType: CheckUnruggableStatus,
-	VoteQuestType:       CheckVoteStatus,
-	FactionQuestType:    CheckFactionStatus,
-	UsernameQuestType:   CheckUsernameStatus,
+	AuthorityQuestType:    CheckAuthorityStatus,
+	HodlQuestType:         CheckHodlStatus,
+	NFTMintQuestType:      CheckNftStatus,
+	PixelQuestType:        CheckPixelStatus,
+	RainbowQuestType:      CheckRainbowStatus,
+	TemplateQuestType:     CheckTemplateStatus,
+	UnruggableQuestType:   CheckUnruggableStatus,
+	VoteQuestType:         CheckVoteStatus,
+	FactionQuestType:      CheckFactionStatus,
+	ChainFactionQuestType: CheckChainFactionStatus,
+	UsernameQuestType:     CheckUsernameStatus,
 }
 
 func (q *Quest) CheckStatus(user string) (progress int, needed int) {
@@ -41,12 +42,20 @@ func CheckHodlStatus(q *Quest, user string) (progress int, needed int) {
 }
 
 func CheckNftStatus(q *Quest, user string) (progress int, needed int) {
-	nfts_minted_by_user, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM NFTs WHERE minter = $1", user)
-
-	if err != nil {
-		return 0, 1
+	nftQuestInputs := NewNFTQuestInputs(q.InputData)
+	if nftQuestInputs.IsDaily {
+		nfts_minted_by_user, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM NFTs WHERE minter = $1 AND day_index = $2", user, nftQuestInputs.ClaimDay)
+		if err != nil {
+			return 0, 1
+		}
+		return *nfts_minted_by_user, 1
+	} else {
+		nfts_minted_by_user, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM NFTs WHERE minter = $1", user)
+		if err != nil {
+			return 0, 1
+		}
+		return *nfts_minted_by_user, 1
 	}
-	return *nfts_minted_by_user, 1
 }
 
 func CheckPixelStatus(q *Quest, user string) (progress int, needed int) {
@@ -88,6 +97,15 @@ func CheckVoteStatus(q *Quest, user string) (progress int, needed int) {
 	voteQuestInputs := NewVoteQuestInputs(q.InputData)
 
 	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM ColorVotes WHERE user_address = $1 AND day_index = $2", user, voteQuestInputs.DayIndex)
+	if err != nil {
+		return 0, 1
+	}
+
+	return *count, 1
+}
+
+func CheckChainFactionStatus(q *Quest, user string) (progress int, needed int) {
+	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM ChainFactionMembersInfo WHERE user_address = $1", user)
 	if err != nil {
 		return 0, 1
 	}

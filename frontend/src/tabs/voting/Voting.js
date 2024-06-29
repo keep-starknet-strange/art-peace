@@ -59,6 +59,9 @@ const Voting = (props) => {
   }, [props.queryAddress]);
 
   const castVote = async (index) => {
+    if (props.queryAddress === '0') {
+      return; // Prevent voting if not logged in
+    }
     if (userVote === index) {
       return; // Prevent re-voting for the same index
     }
@@ -91,6 +94,13 @@ const Voting = (props) => {
   };
 
   useEffect(() => {
+    if (props.isLastDay || props.gameEnded) {
+      setVotableColorApiState((prevState) => ({
+        ...prevState,
+        data: []
+      }));
+      return;
+    }
     const fetchVotableColors = async () => {
       try {
         setVotableColorApiState((prevState) => ({
@@ -115,48 +125,86 @@ const Voting = (props) => {
       }
     };
     fetchVotableColors();
-  }, []);
+  }, [props.isLastDay, props.gameEnded]);
 
   return (
     <BasicTab title='Voting' setActiveTab={props.setActiveTab}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          margin: '0rem 1rem'
-        }}
-      >
-        <p className='Text__medium'>Vote closes</p>
-        <p
-          className={`Text__small Voting__timer ${props.newDayAvailable ? 'Voting__timer--active' : ''}`}
-          onClick={() => props.startNextDay()}
-        >
-          {props.timeLeftInDay}
-        </p>
-      </div>
-      <p className='Text__small Voting__description'>
-        Vote for a new palette color
-      </p>
-
-      <div className='Voting__grid'>
-        {votableColorApiState.data && votableColorApiState.data.length ? (
-          votableColorApiState.data.map((color, index) => (
-            <VoteItem
-              key={index}
-              color={`#${color.hex}FF`}
-              votes={color.votes}
-              castVote={castVote}
-              index={color.key}
-              userVote={userVote}
-            />
-          ))
-        ) : (
-          <div style={{ padding: '1.4rem', textAlign: 'center' }}>
-            No Color Added Yet
+      {props.isLastDay && !props.gameEnded && (
+        <div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1.4rem'
+            }}
+          >
+            <p className='Text__medium'>Voting has ended</p>
+            <p
+              className={`Text__small Voting__timer ${props.newDayAvailable ? 'Voting__timer--active' : ''}`}
+              onClick={() => props.startNextDay()}
+            >
+              {props.timeLeftInDay}
+            </p>
           </div>
-        )}
-      </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '1.4rem 0.5rem'
+            }}
+          >
+            <p className='Text__small Voting__description'>
+              Check back tomorrow after the game ends to vote for the best NFTs.
+            </p>
+          </div>
+        </div>
+      )}
+      {!props.isLastDay && !props.gameEnded && (
+        <div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              margin: '0rem 1rem'
+            }}
+          >
+            <p className='Text__medium'>Time left to vote</p>
+            <p
+              className={`Text__small Voting__timer ${props.newDayAvailable ? 'Voting__timer--active' : ''}`}
+              onClick={() => props.startNextDay()}
+            >
+              {props.timeLeftInDay}
+            </p>
+          </div>
+          <p className='Text__small Voting__description'>
+            {props.queryAddress === '0'
+              ? 'Please login with your wallet to vote'
+              : 'Vote for a new palette color'}
+          </p>
+
+          <div className='Voting__grid'>
+            {votableColorApiState.data && votableColorApiState.data.length ? (
+              votableColorApiState.data.map((color, index) => (
+                <VoteItem
+                  key={index}
+                  queryAddress={props.queryAddress}
+                  color={`#${color.hex}FF`}
+                  votes={color.votes}
+                  castVote={castVote}
+                  index={color.key}
+                  userVote={userVote}
+                />
+              ))
+            ) : (
+              <div style={{ padding: '1.4rem', textAlign: 'center' }}>
+                No Color Added Yet
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </BasicTab>
   );
 };

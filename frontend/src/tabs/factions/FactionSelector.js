@@ -13,7 +13,7 @@ const FactionSelector = (props) => {
     if (e.target.classList.contains('FactionSelector__link__icon')) {
       return;
     }
-    props.selectFaction(props.factionId);
+    props.selectFaction(props, props.isChain);
   };
 
   return (

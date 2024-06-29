@@ -41,6 +41,11 @@ pub mod CanvasNFTStoreComponent {
             return metadata.minter;
         }
 
+        fn get_nft_day_index(self: @ComponentState<TContractState>, token_id: u256) -> u32 {
+            let metadata: NFTMetadata = self.nfts_data.read(token_id);
+            return metadata.day_index;
+        }
+
         fn get_nft_image_hash(self: @ComponentState<TContractState>, token_id: u256) -> felt252 {
             let metadata: NFTMetadata = self.nfts_data.read(token_id);
             return metadata.image_hash;
