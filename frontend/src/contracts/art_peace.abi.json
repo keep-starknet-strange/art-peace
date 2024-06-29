@@ -951,6 +951,10 @@
       {
         "name": "height",
         "type": "core::integer::u128"
+      },
+      {
+        "name": "name",
+        "type": "core::felt252"
       }
     ]
   },

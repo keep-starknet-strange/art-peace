@@ -102,6 +102,10 @@
         "type": "core::integer::u128"
       },
       {
+        "name": "name",
+        "type": "core::felt252"
+      },
+      {
         "name": "image_hash",
         "type": "core::felt252"
       },
