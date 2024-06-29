@@ -151,6 +151,7 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 		for idx, questConfig := range dailyQuestConfig.Quests {
 			_, err := core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO DailyQuests (name, description, reward, day_index, quest_id, quest_type) VALUES ($1, $2, $3, $4, $5, $6)", questConfig.Name, questConfig.Description, questConfig.Reward, dailyQuestConfig.Day-1, idx, questConfig.ContractConfig.Type)
 			if err != nil {
+        fmt.Println("Error inserting daily quest, ", idx, err)
 				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert daily quest")
 				return
 			}
