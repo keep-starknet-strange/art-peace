@@ -23,6 +23,7 @@ fn deploy_normal_nft_quest() -> ContractAddress {
         art_peace: utils::ART_PEACE_CONTRACT(),
         reward: reward_amt,
         is_daily: false,
+        day_index: 0,
     }
         .serialize(ref nft_quest_calldata);
 
@@ -38,6 +39,7 @@ fn deploy_daily_nft_quest() -> ContractAddress {
         art_peace: utils::ART_PEACE_CONTRACT(),
         reward: reward_amt,
         is_daily: true,
+        day_index: 0,
     }
         .serialize(ref nft_quest_calldata);
 
@@ -67,7 +69,7 @@ fn deploy_normal_nft_quest_test() {
 fn deploy_daily_nft_quest_test() {
     let nft_quest = deploy_daily_nft_quest();
     let art_peace = IArtPeaceDispatcher {
-        contract_address: deploy_with_quests_contract(array![].span(), array![nft_quest].span())
+        contract_address: deploy_with_quests_contract(array![nft_quest].span(), array![].span())
     };
 
     let zero_address = contract_address_const::<0>();
@@ -98,7 +100,7 @@ fn nft_quest_test() {
     let calldata: Array<felt252> = array![0];
 
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
-    let mint_params = NFTMintParams { height: 2, width: 2, position: 10 };
+    let mint_params = NFTMintParams { height: 2, width: 2, position: 10, name: 'test' };
     art_peace_nft_minter.mint_nft(mint_params);
     art_peace.claim_main_quest(0, calldata.span());
 
@@ -112,7 +114,7 @@ fn nft_quest_test() {
 #[test]
 #[should_panic(expected: ('Quest not claimable',))]
 fn nft_quest_claim_if_not_claimable_test() {
-    let nft_mint_quest = deploy_nft_quest();
+    let nft_mint_quest = deploy_normal_nft_quest();
     let art_peace = IArtPeaceDispatcher {
         contract_address: deploy_with_quests_contract(
             array![].span(), array![nft_mint_quest].span()
