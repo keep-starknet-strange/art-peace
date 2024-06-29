@@ -17,13 +17,13 @@ func processFactionCreatedEvent(event IndexerEvent) {
 
 	factionId, err := strconv.ParseInt(factionIdHex, 0, 64)
 	if err != nil {
-    PrintIndexerError("processFactionCreatedEvent", "Failed to parse factionId", factionIdHex, nameHex, leader, joinableHex, allocationHex)
+		PrintIndexerError("processFactionCreatedEvent", "Failed to parse factionId", factionIdHex, nameHex, leader, joinableHex, allocationHex)
 		return
 	}
 
 	decodedName, err := hex.DecodeString(nameHex)
 	if err != nil {
-    PrintIndexerError("processFactionCreatedEvent", "Failed to decode name", factionIdHex, nameHex, leader, joinableHex, allocationHex)
+		PrintIndexerError("processFactionCreatedEvent", "Failed to decode name", factionIdHex, nameHex, leader, joinableHex, allocationHex)
 		return
 	}
 	// Trim off 0s at the start
@@ -43,7 +43,7 @@ func processFactionCreatedEvent(event IndexerEvent) {
 		PrintIndexerError("processFactionCreatedEvent", "Failed to parse joinable", factionIdHex, nameHex, leader, joinableHex, allocationHex)
 		return
 	}
-  joinable := joinableInt != 0
+	joinable := joinableInt != 0
 
 	allocation, err := strconv.ParseInt(allocationHex, 0, 64)
 	if err != nil {

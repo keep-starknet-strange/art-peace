@@ -76,10 +76,7 @@ fn deploy_daily_nft_quest_test() {
         art_peace.get_days_quests(0) == array![nft_quest, zero_address, zero_address].span(),
         "Daily quests were not set correctly"
     );
-    assert!(
-        art_peace.get_main_quests() == array![].span(),
-        "Main quests were not set correctly"
-    );
+    assert!(art_peace.get_main_quests() == array![].span(), "Main quests were not set correctly");
 }
 
 #[test]

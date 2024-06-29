@@ -50,7 +50,6 @@ fn faction_quest_test() {
         )
     };
 
-
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::HOST());
     art_peace.init_faction('TestFaction', utils::HOST(), true, 1);
     snf::stop_prank(CheatTarget::One(art_peace.contract_address));

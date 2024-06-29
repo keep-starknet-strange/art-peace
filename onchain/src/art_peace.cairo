@@ -402,17 +402,13 @@ pub mod ArtPeace {
             }
 
             pixels_placed =
-                place_chain_faction_pixels_inner(
-                    ref self, positions, colors, pixels_placed, now
-                );
+                place_chain_faction_pixels_inner(ref self, positions, colors, pixels_placed, now);
             if pixels_placed == pixel_count {
                 return;
             }
 
             pixels_placed =
-                place_user_faction_pixels_inner(
-                    ref self, positions, colors, pixels_placed, now
-                );
+                place_user_faction_pixels_inner(ref self, positions, colors, pixels_placed, now);
             if pixels_placed == pixel_count {
                 return;
             }

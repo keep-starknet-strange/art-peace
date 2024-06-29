@@ -54,107 +54,107 @@ var FinalizedMessageQueue []IndexerMessage
 var FinalizedMessageLock = &sync.Mutex{}
 
 const (
-	newDayEvent              = "0x00df776faf675d0c64b0f2ec596411cf1509d3966baba3478c84771ddbac1784"
-	colorAddedEvent          = "0x0004a301e4d01f413a1d4d0460c4ba976e23392f49126d90f5bd45de7dd7dbeb"
-	pixelPlacedEvent         = "0x02d7b50ebf415606d77c7e7842546fc13f8acfbfd16f7bcf2bc2d08f54114c23"
-	basicPixelPlacedEvent    = "0x03089ae3085e1c52442bb171f26f92624095d32dc8a9c57c8fb09130d32daed8"
-  factionPixelsPlacedEvent = "0x02838056c6784086957f2252d4a36a24d554ea2db7e09d2806cc69751d81f0a2"
-  chainFactionPixelsPlacedEvent = "0x02e4d1feaacd0627a6c7d5002564bdb4ca4877d47f00cad4714201194690a7a9"
-	extraPixelsPlacedEvent   = "0x000e8f5c4e6f651bf4c7b093805f85c9b8ec2ec428210f90a4c9c135c347f48c"
-	dailyQuestClaimedEvent   = "0x02025eddbc0f68a923d76519fb336e0fe1e0d6b9053ab3a504251bbd44201b10"
-	mainQuestClaimedEvent    = "0x0121172d5bc3847c8c39069075125e53d3225741d190df6d52194cb5dd5d2049"
-	voteColorEvent           = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
-	votableColorAddedEvent   = "0x0115b3bc605487276e022f4bec68b316e7a6b3615fb01afee58241fd1d40e3e5"
-	factionCreatedEvent      = "0x00f3878d4c85ed94271bb611f83d47ea473bae501ffed34cd21b73206149f692"
-	factionJoinedEvent       = "0x01e3fbdf8156ad0dde21e886d61a16d85c9ef54451eb6e253f3f427de32a47ac"
-	factionLeftEvent         = "0x014ef8cc25c96157e2a00e9ceaa7c014a162d11d58a98871087ec488a67d7925"
-  chainFactionCreatedEvent = "0x020c994ab49a8316bcc78b06d4ff9929d83b2995af33f480b93e972cedb0c926"
-	chainFactionJoinedEvent  = "0x02947960ff713d9b594a3b718b90a45360e46d1bbacef94b727bb0d461d04207"
-	nftMintedEvent           = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
-  nftLikedEvent            = "0x028d7ee09447088eecdd12a86c9467a5e9ad18f819a20f9adcf6e34e0bd51453"
-  nftUnlikedEvent          = "0x03b57514b19693484c35249c6e8b15bfe6e476205720680c2ff9f02faaf94941"
-	usernameClaimedEvent     = "0x019be6537c04b790ae4e3a06d6e777ec8b2e9950a01d76eed8a2a28941cc511c"
-	usernameChangedEvent     = "0x03c44b98666b0a27eadcdf5dc42449af5f907b19523858368c4ffbc7a2625dab"
-	templateAddedEvent       = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
-	nftTransferEvent         = "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"
+	newDayEvent                   = "0x00df776faf675d0c64b0f2ec596411cf1509d3966baba3478c84771ddbac1784"
+	colorAddedEvent               = "0x0004a301e4d01f413a1d4d0460c4ba976e23392f49126d90f5bd45de7dd7dbeb"
+	pixelPlacedEvent              = "0x02d7b50ebf415606d77c7e7842546fc13f8acfbfd16f7bcf2bc2d08f54114c23"
+	basicPixelPlacedEvent         = "0x03089ae3085e1c52442bb171f26f92624095d32dc8a9c57c8fb09130d32daed8"
+	factionPixelsPlacedEvent      = "0x02838056c6784086957f2252d4a36a24d554ea2db7e09d2806cc69751d81f0a2"
+	chainFactionPixelsPlacedEvent = "0x02e4d1feaacd0627a6c7d5002564bdb4ca4877d47f00cad4714201194690a7a9"
+	extraPixelsPlacedEvent        = "0x000e8f5c4e6f651bf4c7b093805f85c9b8ec2ec428210f90a4c9c135c347f48c"
+	dailyQuestClaimedEvent        = "0x02025eddbc0f68a923d76519fb336e0fe1e0d6b9053ab3a504251bbd44201b10"
+	mainQuestClaimedEvent         = "0x0121172d5bc3847c8c39069075125e53d3225741d190df6d52194cb5dd5d2049"
+	voteColorEvent                = "0x02407c82b0efa2f6176a075ba5a939d33eefab39895fabcf3ac1c5e897974a40"
+	votableColorAddedEvent        = "0x0115b3bc605487276e022f4bec68b316e7a6b3615fb01afee58241fd1d40e3e5"
+	factionCreatedEvent           = "0x00f3878d4c85ed94271bb611f83d47ea473bae501ffed34cd21b73206149f692"
+	factionJoinedEvent            = "0x01e3fbdf8156ad0dde21e886d61a16d85c9ef54451eb6e253f3f427de32a47ac"
+	factionLeftEvent              = "0x014ef8cc25c96157e2a00e9ceaa7c014a162d11d58a98871087ec488a67d7925"
+	chainFactionCreatedEvent      = "0x020c994ab49a8316bcc78b06d4ff9929d83b2995af33f480b93e972cedb0c926"
+	chainFactionJoinedEvent       = "0x02947960ff713d9b594a3b718b90a45360e46d1bbacef94b727bb0d461d04207"
+	nftMintedEvent                = "0x030826e0cd9a517f76e857e3f3100fe5b9098e9f8216d3db283fb4c9a641232f"
+	nftLikedEvent                 = "0x028d7ee09447088eecdd12a86c9467a5e9ad18f819a20f9adcf6e34e0bd51453"
+	nftUnlikedEvent               = "0x03b57514b19693484c35249c6e8b15bfe6e476205720680c2ff9f02faaf94941"
+	usernameClaimedEvent          = "0x019be6537c04b790ae4e3a06d6e777ec8b2e9950a01d76eed8a2a28941cc511c"
+	usernameChangedEvent          = "0x03c44b98666b0a27eadcdf5dc42449af5f907b19523858368c4ffbc7a2625dab"
+	templateAddedEvent            = "0x03e18ec266fe76a2efce73f91228e6e04456b744fc6984c7a6374e417fb4bf59"
+	nftTransferEvent              = "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"
 )
 
 var eventProcessors = map[string](func(IndexerEvent)){
-	newDayEvent:              processNewDayEvent,
-	colorAddedEvent:          processColorAddedEvent,
-	pixelPlacedEvent:         processPixelPlacedEvent,
-	basicPixelPlacedEvent:    processBasicPixelPlacedEvent,
-  factionPixelsPlacedEvent: processFactionPixelsPlacedEvent,
-  chainFactionPixelsPlacedEvent: processChainFactionPixelsPlacedEvent,
-	extraPixelsPlacedEvent:   processExtraPixelsPlacedEvent,
-	dailyQuestClaimedEvent:   processDailyQuestClaimedEvent,
-	mainQuestClaimedEvent:    processMainQuestClaimedEvent,
-	voteColorEvent:           processVoteColorEvent,
-	votableColorAddedEvent:   processVotableColorAddedEvent,
-	factionCreatedEvent:      processFactionCreatedEvent,
-	factionJoinedEvent:       processFactionJoinedEvent,
-	factionLeftEvent:         processFactionLeftEvent,
-  chainFactionCreatedEvent: processChainFactionCreatedEvent,
-	chainFactionJoinedEvent:  processChainFactionJoinedEvent,
-	nftMintedEvent:           processNFTMintedEvent,
-  nftLikedEvent:            processNFTLikedEvent,
-  nftUnlikedEvent:          processNFTUnlikedEvent,
-	usernameClaimedEvent:     processUsernameClaimedEvent,
-	usernameChangedEvent:     processUsernameChangedEvent,
-	templateAddedEvent:       processTemplateAddedEvent,
-	nftTransferEvent:         processNFTTransferEvent,
+	newDayEvent:                   processNewDayEvent,
+	colorAddedEvent:               processColorAddedEvent,
+	pixelPlacedEvent:              processPixelPlacedEvent,
+	basicPixelPlacedEvent:         processBasicPixelPlacedEvent,
+	factionPixelsPlacedEvent:      processFactionPixelsPlacedEvent,
+	chainFactionPixelsPlacedEvent: processChainFactionPixelsPlacedEvent,
+	extraPixelsPlacedEvent:        processExtraPixelsPlacedEvent,
+	dailyQuestClaimedEvent:        processDailyQuestClaimedEvent,
+	mainQuestClaimedEvent:         processMainQuestClaimedEvent,
+	voteColorEvent:                processVoteColorEvent,
+	votableColorAddedEvent:        processVotableColorAddedEvent,
+	factionCreatedEvent:           processFactionCreatedEvent,
+	factionJoinedEvent:            processFactionJoinedEvent,
+	factionLeftEvent:              processFactionLeftEvent,
+	chainFactionCreatedEvent:      processChainFactionCreatedEvent,
+	chainFactionJoinedEvent:       processChainFactionJoinedEvent,
+	nftMintedEvent:                processNFTMintedEvent,
+	nftLikedEvent:                 processNFTLikedEvent,
+	nftUnlikedEvent:               processNFTUnlikedEvent,
+	usernameClaimedEvent:          processUsernameClaimedEvent,
+	usernameChangedEvent:          processUsernameChangedEvent,
+	templateAddedEvent:            processTemplateAddedEvent,
+	nftTransferEvent:              processNFTTransferEvent,
 }
 
 var eventReverters = map[string](func(IndexerEvent)){
-	newDayEvent:              revertNewDayEvent,
-	colorAddedEvent:          revertColorAddedEvent,
-	pixelPlacedEvent:         revertPixelPlacedEvent,
-	basicPixelPlacedEvent:    revertBasicPixelPlacedEvent,
-  factionPixelsPlacedEvent: revertFactionPixelsPlacedEvent,
-  chainFactionPixelsPlacedEvent: revertChainFactionPixelsPlacedEvent,
-	extraPixelsPlacedEvent:   revertExtraPixelsPlacedEvent,
-	dailyQuestClaimedEvent:   revertDailyQuestClaimedEvent,
-	mainQuestClaimedEvent:    revertMainQuestClaimedEvent,
-	voteColorEvent:           revertVoteColorEvent,
-	votableColorAddedEvent:   revertVotableColorAddedEvent,
-	factionCreatedEvent:      revertFactionCreatedEvent,
-	factionJoinedEvent:       revertFactionJoinedEvent,
-	factionLeftEvent:         revertFactionLeftEvent,
-  chainFactionCreatedEvent: revertChainFactionCreatedEvent,
-	chainFactionJoinedEvent:  revertChainFactionJoinedEvent,
-	nftMintedEvent:           revertNFTMintedEvent,
-  nftLikedEvent:            revertNFTLikedEvent,
-  nftUnlikedEvent:          revertNFTUnlikedEvent,
-	usernameClaimedEvent:     revertUsernameClaimedEvent,
-	usernameChangedEvent:     revertUsernameChangedEvent,
-	templateAddedEvent:       revertTemplateAddedEvent,
-	nftTransferEvent:         revertNFTTransferEvent,
+	newDayEvent:                   revertNewDayEvent,
+	colorAddedEvent:               revertColorAddedEvent,
+	pixelPlacedEvent:              revertPixelPlacedEvent,
+	basicPixelPlacedEvent:         revertBasicPixelPlacedEvent,
+	factionPixelsPlacedEvent:      revertFactionPixelsPlacedEvent,
+	chainFactionPixelsPlacedEvent: revertChainFactionPixelsPlacedEvent,
+	extraPixelsPlacedEvent:        revertExtraPixelsPlacedEvent,
+	dailyQuestClaimedEvent:        revertDailyQuestClaimedEvent,
+	mainQuestClaimedEvent:         revertMainQuestClaimedEvent,
+	voteColorEvent:                revertVoteColorEvent,
+	votableColorAddedEvent:        revertVotableColorAddedEvent,
+	factionCreatedEvent:           revertFactionCreatedEvent,
+	factionJoinedEvent:            revertFactionJoinedEvent,
+	factionLeftEvent:              revertFactionLeftEvent,
+	chainFactionCreatedEvent:      revertChainFactionCreatedEvent,
+	chainFactionJoinedEvent:       revertChainFactionJoinedEvent,
+	nftMintedEvent:                revertNFTMintedEvent,
+	nftLikedEvent:                 revertNFTLikedEvent,
+	nftUnlikedEvent:               revertNFTUnlikedEvent,
+	usernameClaimedEvent:          revertUsernameClaimedEvent,
+	usernameChangedEvent:          revertUsernameChangedEvent,
+	templateAddedEvent:            revertTemplateAddedEvent,
+	nftTransferEvent:              revertNFTTransferEvent,
 }
 
 var eventRequiresOrdering = map[string]bool{
-	newDayEvent:              false,
-	colorAddedEvent:          true,
-	pixelPlacedEvent:         true,
-	basicPixelPlacedEvent:    false,
-  factionPixelsPlacedEvent: false,
-  chainFactionPixelsPlacedEvent: false,
-	extraPixelsPlacedEvent:   false,
-	dailyQuestClaimedEvent:   false,
-	mainQuestClaimedEvent:    false,
-	voteColorEvent:           true,
-	votableColorAddedEvent:   true,
-	factionCreatedEvent:      true,
-	factionJoinedEvent:       true,
-	factionLeftEvent:         true,
-  chainFactionCreatedEvent: true,
-	chainFactionJoinedEvent:  true,
-	nftMintedEvent:           false,
-  nftLikedEvent:            true,
-  nftUnlikedEvent:          true,
-	usernameClaimedEvent:     false,
-	usernameChangedEvent:     true,
-	templateAddedEvent:       false,
-	nftTransferEvent:         true,
+	newDayEvent:                   false,
+	colorAddedEvent:               true,
+	pixelPlacedEvent:              true,
+	basicPixelPlacedEvent:         false,
+	factionPixelsPlacedEvent:      false,
+	chainFactionPixelsPlacedEvent: false,
+	extraPixelsPlacedEvent:        false,
+	dailyQuestClaimedEvent:        false,
+	mainQuestClaimedEvent:         false,
+	voteColorEvent:                true,
+	votableColorAddedEvent:        true,
+	factionCreatedEvent:           true,
+	factionJoinedEvent:            true,
+	factionLeftEvent:              true,
+	chainFactionCreatedEvent:      true,
+	chainFactionJoinedEvent:       true,
+	nftMintedEvent:                false,
+	nftLikedEvent:                 true,
+	nftUnlikedEvent:               true,
+	usernameClaimedEvent:          false,
+	usernameChangedEvent:          true,
+	templateAddedEvent:            false,
+	nftTransferEvent:              true,
 }
 
 const (

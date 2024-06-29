@@ -25,7 +25,9 @@ fn deploy_chain_faction_quest_main_test() {
     let chain_faction_quest = deploy_chain_faction_quest_main();
 
     let art_peace = IArtPeaceDispatcher {
-        contract_address: deploy_with_quests_contract(array![].span(), array![chain_faction_quest].span())
+        contract_address: deploy_with_quests_contract(
+            array![].span(), array![chain_faction_quest].span()
+        )
     };
 
     let zero_address = contract_address_const::<0>();
@@ -49,7 +51,6 @@ fn chain_faction_quest_test() {
             array![].span(), array![chain_faction_quest_contract_address].span()
         )
     };
-
 
     snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::HOST());
     art_peace.init_chain_faction('TestFaction');

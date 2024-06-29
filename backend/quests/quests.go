@@ -12,7 +12,7 @@ const (
 	TemplateQuestType
 	UnruggableQuestType
 	VoteQuestType
-  ChainFactionQuestType
+	ChainFactionQuestType
 	FactionQuestType
 	UsernameQuestType
 )
@@ -26,7 +26,7 @@ var OnchainQuestTypes = map[string]int{
 	"TemplateQuest":     TemplateQuestType,
 	"UnruggableQuest":   UnruggableQuestType,
 	"VoteQuest":         VoteQuestType,
-  "ChainFactionQuest": ChainFactionQuestType,
+	"ChainFactionQuest": ChainFactionQuestType,
 	"FactionQuest":      FactionQuestType,
 	"UsernameQuest":     UsernameQuestType,
 }

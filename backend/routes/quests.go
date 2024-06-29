@@ -16,61 +16,61 @@ import (
 )
 
 type DailyUserQuest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Reward      int    `json:"reward"`
-	DayIndex    int    `json:"dayIndex"`
-	QuestId     int    `json:"questId"`
-	Completed   bool   `json:"completed"`
-  ClaimParams []ClaimParams `json:"claimParams"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Reward      int           `json:"reward"`
+	DayIndex    int           `json:"dayIndex"`
+	QuestId     int           `json:"questId"`
+	Completed   bool          `json:"completed"`
+	ClaimParams []ClaimParams `json:"claimParams"`
 }
 
 type DailyQuest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Reward      int    `json:"reward"`
-	DayIndex    int    `json:"dayIndex"`
-	QuestId     int    `json:"questId"`
-  ClaimParams []ClaimParams `json:"claimParams"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Reward      int           `json:"reward"`
+	DayIndex    int           `json:"dayIndex"`
+	QuestId     int           `json:"questId"`
+	ClaimParams []ClaimParams `json:"claimParams"`
 }
 
 type MainUserQuest struct {
-	QuestId     int    `json:"questId"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Reward      int    `json:"reward"`
-	Completed   bool   `json:"completed"`
-  ClaimParams []ClaimParams `json:"claimParams"`
+	QuestId     int           `json:"questId"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Reward      int           `json:"reward"`
+	Completed   bool          `json:"completed"`
+	ClaimParams []ClaimParams `json:"claimParams"`
 }
 
 type MainQuest struct {
-	QuestId     int    `json:"questId"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Reward      int    `json:"reward"`
-  ClaimParams []ClaimParams `json:"claimParams"`
+	QuestId     int           `json:"questId"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Reward      int           `json:"reward"`
+	ClaimParams []ClaimParams `json:"claimParams"`
 }
 
 type QuestContractConfig struct {
 	Type        string             `json:"type"`
 	InitParams  []string           `json:"initParams"`
 	StoreParams []int              `json:"storeParams"`
-  ClaimParams []ClaimParamConfig `json:"claimParams"`
+	ClaimParams []ClaimParamConfig `json:"claimParams"`
 }
 
 type ClaimParams struct {
-  QuestId   int    `json:"questId"`
-  ClaimType string `json:"claimType"`
-  Name      string `json:"name"`
-  Example   string `json:"example"`
-  Input     bool   `json:"input"`
+	QuestId   int    `json:"questId"`
+	ClaimType string `json:"claimType"`
+	Name      string `json:"name"`
+	Example   string `json:"example"`
+	Input     bool   `json:"input"`
 }
 
 type ClaimParamConfig struct {
-  Type    string `json:"type"`
-  Name    string `json:"name"`
-  Example string `json:"example"`
-  Input   bool   `json:"input"`
+	Type    string `json:"type"`
+	Name    string `json:"name"`
+	Example string `json:"example"`
+	Input   bool   `json:"input"`
 }
 
 type QuestConfig struct {
@@ -109,7 +109,7 @@ type QuestProgress struct {
 	QuestId  int   `json:"questId"`
 	Progress int   `json:"progress"`
 	Needed   int   `json:"needed"`
-  Calldata []int `json:"calldata"`
+	Calldata []int `json:"calldata"`
 }
 
 func InitQuestsRoutes() {
@@ -178,16 +178,16 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 				paramIdx++
 			}
 
-      claimParamIdx := 0
-      for _, claimParam := range questConfig.ContractConfig.ClaimParams {
-        _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO DailyQuestsClaimParams (day_index, quest_id, claim_key, claim_type, name, example, input) VALUES ($1, $2, $3, $4, $5, $6, $7)", dailyQuestConfig.Day-1, idx, claimParamIdx, claimParam.Type, claimParam.Name, claimParam.Example, claimParam.Input)
-        if err != nil {
-          routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert daily quest claim param")
-          return
-        }
+			claimParamIdx := 0
+			for _, claimParam := range questConfig.ContractConfig.ClaimParams {
+				_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO DailyQuestsClaimParams (day_index, quest_id, claim_key, claim_type, name, example, input) VALUES ($1, $2, $3, $4, $5, $6, $7)", dailyQuestConfig.Day-1, idx, claimParamIdx, claimParam.Type, claimParam.Name, claimParam.Example, claimParam.Input)
+				if err != nil {
+					routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert daily quest claim param")
+					return
+				}
 
-        claimParamIdx++
-      }
+				claimParamIdx++
+			}
 		}
 	}
 
@@ -217,16 +217,16 @@ func InitQuests(w http.ResponseWriter, r *http.Request) {
 			paramIdx++
 		}
 
-    claimParamIdx := 0
-    for _, claimParam := range questConfig.ContractConfig.ClaimParams {
-      _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuestsClaimParams (quest_id, claim_key, claim_type, name, example, input) VALUES ($1, $2, $3, $4, $5, $6)", idx, claimParamIdx, claimParam.Type, claimParam.Name, claimParam.Example, claimParam.Input)
-      if err != nil {
-        routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest claim param")
-        return
-      }
+		claimParamIdx := 0
+		for _, claimParam := range questConfig.ContractConfig.ClaimParams {
+			_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO MainQuestsClaimParams (quest_id, claim_key, claim_type, name, example, input) VALUES ($1, $2, $3, $4, $5, $6)", idx, claimParamIdx, claimParam.Type, claimParam.Name, claimParam.Example, claimParam.Input)
+			if err != nil {
+				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert main quest claim param")
+				return
+			}
 
-      claimParamIdx++
-    }
+			claimParamIdx++
+		}
 	}
 
 	routeutils.WriteResultJson(w, "Initialized quests successfully")
@@ -239,26 +239,26 @@ func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  // Get claim params
-  questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM DailyQuestsClaimParams ORDER BY quest_id ASC, claim_key ASC")
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get daily quests claim params")
-    return
-  }
+	// Get claim params
+	questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM DailyQuestsClaimParams ORDER BY quest_id ASC, claim_key ASC")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get daily quests claim params")
+		return
+	}
 
-  // Add claim params to quests
-  for _, questClaimParam := range questClaimParams {
-    quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
-  }
+	// Add claim params to quests
+	for _, questClaimParam := range questClaimParams {
+		quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
+	}
 
-  // Json quest data
-  jsonQuests, err := json.Marshal(quests)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed daily quests")
-    return
-  }
+	// Json quest data
+	jsonQuests, err := json.Marshal(quests)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed daily quests")
+		return
+	}
 
-  routeutils.WriteDataJson(w, string(jsonQuests))
+	routeutils.WriteDataJson(w, string(jsonQuests))
 }
 
 // TODO: Here
@@ -269,26 +269,26 @@ func GetMainQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  // Get claim params
-  questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM MainQuestsClaimParams ORDER BY quest_id ASC, claim_key ASC")
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main quests claim params")
-    return
-  }
+	// Get claim params
+	questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM MainQuestsClaimParams ORDER BY quest_id ASC, claim_key ASC")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main quests claim params")
+		return
+	}
 
-  // Add claim params to quests
-  for _, questClaimParam := range questClaimParams {
-    quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
-  }
+	// Add claim params to quests
+	for _, questClaimParam := range questClaimParams {
+		quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
+	}
 
-  // Json quest data
-  jsonQuests, err := json.Marshal(quests)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed main quests")
-    return
-  }
+	// Json quest data
+	jsonQuests, err := json.Marshal(quests)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed main quests")
+		return
+	}
 
-  routeutils.WriteDataJson(w, string(jsonQuests))
+	routeutils.WriteDataJson(w, string(jsonQuests))
 }
 
 func GetMainUserQuests(w http.ResponseWriter, r *http.Request) {
@@ -304,26 +304,26 @@ func GetMainUserQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  // Get claim params
-  questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM MainQuestsClaimParams ORDER BY quest_id ASC, claim_key ASC")
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests claim params")
-    return
-  }
+	// Get claim params
+	questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM MainQuestsClaimParams ORDER BY quest_id ASC, claim_key ASC")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get main user quests claim params")
+		return
+	}
 
-  // Add claim params to quests
-  for _, questClaimParam := range questClaimParams {
-    quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
-  }
+	// Add claim params to quests
+	for _, questClaimParam := range questClaimParams {
+		quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
+	}
 
-  // Json quest data
-  jsonQuests, err := json.Marshal(quests)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed main quests")
-    return
-  }
+	// Json quest data
+	jsonQuests, err := json.Marshal(quests)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed main quests")
+		return
+	}
 
-  routeutils.WriteDataJson(w, string(jsonQuests))
+	routeutils.WriteDataJson(w, string(jsonQuests))
 }
 
 func GetDailyQuestProgress(w http.ResponseWriter, r *http.Request) {
@@ -362,15 +362,15 @@ func GetDailyQuestProgress(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		progress, needed := questItem.CheckStatus(userAddress)
-    var calldata []int
-    if progress >= needed {
-      calldata = questItem.GetQuestClaimData(userAddress)
-    }
+		var calldata []int
+		if progress >= needed {
+			calldata = questItem.GetQuestClaimData(userAddress)
+		}
 		result = append(result, QuestProgress{
 			QuestId:  quest.QuestId,
 			Progress: progress,
 			Needed:   needed,
-      Calldata: calldata,
+			Calldata: calldata,
 		})
 	}
 
@@ -406,15 +406,15 @@ func GetTodayQuestProgress(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		progress, needed := questItem.CheckStatus(userAddress)
-    var calldata []int
-    if progress >= needed {
-      calldata = questItem.GetQuestClaimData(userAddress)
-    }
+		var calldata []int
+		if progress >= needed {
+			calldata = questItem.GetQuestClaimData(userAddress)
+		}
 		result = append(result, QuestProgress{
 			QuestId:  quest.QuestId,
 			Progress: progress,
 			Needed:   needed,
-      Calldata: calldata,
+			Calldata: calldata,
 		})
 	}
 
@@ -448,15 +448,15 @@ func GetMainQuestProgress(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		progress, needed := questItem.CheckStatus(userAddress)
-    var calldata []int
-    if progress >= needed {
-      calldata = questItem.GetQuestClaimData(userAddress)
-    }
+		var calldata []int
+		if progress >= needed {
+			calldata = questItem.GetQuestClaimData(userAddress)
+		}
 		result = append(result, QuestProgress{
 			QuestId:  quest.QuestId,
 			Progress: progress,
 			Needed:   needed,
-      Calldata: calldata,
+			Calldata: calldata,
 		})
 	}
 
@@ -481,25 +481,25 @@ func getTodaysQuests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  // Get claim params
-  questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM DailyQuestsClaimParams WHERE day_index = (SELECT MAX(day_index) FROM Days) ORDER BY quest_id ASC, claim_key ASC")
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's quests claim params")
-    return
-  }
+	// Get claim params
+	questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM DailyQuestsClaimParams WHERE day_index = (SELECT MAX(day_index) FROM Days) ORDER BY quest_id ASC, claim_key ASC")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's quests claim params")
+		return
+	}
 
-  // Add claim params to quests
-  for _, questClaimParam := range questClaimParams {
-    quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
-  }
+	// Add claim params to quests
+	for _, questClaimParam := range questClaimParams {
+		quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
+	}
 
-  // Json quest data
-  jsonQuests, err := json.Marshal(quests)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed daily quests")
-    return
-  }
-  fmt.Println(string(jsonQuests))
+	// Json quest data
+	jsonQuests, err := json.Marshal(quests)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed daily quests")
+		return
+	}
+	fmt.Println(string(jsonQuests))
 
 	routeutils.WriteDataJson(w, string(jsonQuests))
 }
@@ -516,28 +516,27 @@ func getTodaysUserQuests(w http.ResponseWriter, r *http.Request) {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's user quests")
 		return
 	}
-  
-  // Get claim params
-  questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM DailyQuestsClaimParams WHERE day_index = (SELECT MAX(day_index) FROM Days) ORDER BY quest_id ASC, claim_key ASC")
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's user quests claim params")
-    return
-  }
 
-  // Add claim params to quests
-  for _, questClaimParam := range questClaimParams {
-    quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
-  }
+	// Get claim params
+	questClaimParams, err := core.PostgresQuery[ClaimParams]("SELECT quest_id, claim_type, name, example, input FROM DailyQuestsClaimParams WHERE day_index = (SELECT MAX(day_index) FROM Days) ORDER BY quest_id ASC, claim_key ASC")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get today's user quests claim params")
+		return
+	}
 
-  
-  // Json quest data
-  jsonQuests, err := json.Marshal(quests)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed daily quests")
-    return
-  }
+	// Add claim params to quests
+	for _, questClaimParam := range questClaimParams {
+		quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
+	}
 
-  routeutils.WriteDataJson(w, string(jsonQuests))
+	// Json quest data
+	jsonQuests, err := json.Marshal(quests)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to marshal completed daily quests")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(jsonQuests))
 }
 
 func GetCompletedMainQuests(w http.ResponseWriter, r *http.Request) {
@@ -600,14 +599,14 @@ func ClaimTodayQuestDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  calldataVal := (*jsonBody)["calldata"]
-  calldata := ""
-  // TODO: More generic
-  if calldataVal != "" {
-    calldata = "1 " + calldataVal
-  } else {
-    calldata = "0"
-  }
+	calldataVal := (*jsonBody)["calldata"]
+	calldata := ""
+	// TODO: More generic
+	if calldataVal != "" {
+		calldata = "1 " + calldataVal
+	} else {
+		calldata = "0"
+	}
 
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.ClaimTodayQuestDevnet
 	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
@@ -640,14 +639,14 @@ func ClaimMainQuestDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  calldataVal := (*jsonBody)["calldata"]
-  calldata := ""
-  // TODO: More generic
-  if calldataVal != "" {
-    calldata = "1 " + calldataVal
-  } else {
-    calldata = "0"
-  }
+	calldataVal := (*jsonBody)["calldata"]
+	calldata := ""
+	// TODO: More generic
+	if calldataVal != "" {
+		calldata = "1 " + calldataVal
+	} else {
+		calldata = "0"
+	}
 
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.ClaimTodayQuestDevnet // TODO
 	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")

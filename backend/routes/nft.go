@@ -12,8 +12,8 @@ import (
 )
 
 func InitNFTRoutes() {
-  http.HandleFunc("/get-canvas-nft-address", getCanvasNFTAddress)
-  http.HandleFunc("/set-canvas-nft-address", setCanvasNFTAddress)
+	http.HandleFunc("/get-canvas-nft-address", getCanvasNFTAddress)
+	http.HandleFunc("/set-canvas-nft-address", setCanvasNFTAddress)
 	http.HandleFunc("/get-nft", getNFT)
 	http.HandleFunc("/get-nfts", getNFTs)
 	http.HandleFunc("/get-new-nfts", getNewNFTs)
@@ -25,8 +25,8 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-hot-nfts", getHotNFTs)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
-    http.HandleFunc("/like-nft-devnet", likeNFTDevnet)
-    http.HandleFunc("/unlike-nft-devnet", unlikeNFTDevnet)
+		http.HandleFunc("/like-nft-devnet", likeNFTDevnet)
+		http.HandleFunc("/unlike-nft-devnet", unlikeNFTDevnet)
 	}
 	// Create a static file server for the nft images
 	// TODO: Versioning here?
@@ -38,24 +38,24 @@ func InitNFTStaticRoutes() {
 }
 
 func getCanvasNFTAddress(w http.ResponseWriter, r *http.Request) {
-  contractAddress := os.Getenv("CANVAS_NFT_CONTRACT_ADDRESS")
-  routeutils.WriteDataJson(w, "\""+contractAddress+"\"")
+	contractAddress := os.Getenv("CANVAS_NFT_CONTRACT_ADDRESS")
+	routeutils.WriteDataJson(w, "\""+contractAddress+"\"")
 }
 
 // TODO: Set env var on infra level in production
 func setCanvasNFTAddress(w http.ResponseWriter, r *http.Request) {
-  // Only allow admin to set contract address
-  if routeutils.AdminMiddleware(w, r) {
-    return
-  }
+	// Only allow admin to set contract address
+	if routeutils.AdminMiddleware(w, r) {
+		return
+	}
 
-  data, err := io.ReadAll(r.Body)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read reques  t body")
-    return
-  }
-  os.Setenv("CANVAS_NFT_CONTRACT_ADDRESS", string(data))
-  routeutils.WriteResultJson(w, "Contract address set")
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read reques  t body")
+		return
+	}
+	os.Setenv("CANVAS_NFT_CONTRACT_ADDRESS", string(data))
+	routeutils.WriteResultJson(w, "Contract address set")
 }
 
 type NFTData struct {
@@ -63,10 +63,10 @@ type NFTData struct {
 	Position    int    `json:"position"`
 	Width       int    `json:"width"`
 	Height      int    `json:"height"`
-  Name        string `json:"name"`
+	Name        string `json:"name"`
 	ImageHash   string `json:"imageHash"`
 	BlockNumber int    `json:"blockNumber"`
-  DayIndex    int    `json:"dayIndex"`
+	DayIndex    int    `json:"dayIndex"`
 	Minter      string `json:"minter"`
 	Owner       string `json:"owner"`
 	Likes       int    `json:"likes"`
@@ -253,7 +253,7 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  name := (*jsonBody)["name"]
+	name := (*jsonBody)["name"]
 
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.MintNFTDevnet
 	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
@@ -274,41 +274,41 @@ func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {
 // 		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
 // 		return
 // 	}
-// 
+//
 // 	nftlikeReq, err := routeutils.ReadJsonBody[NFTLikesRequest](r)
 // 	if err != nil {
 // 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 // 		return
 // 	}
-// 
+//
 // 	// TODO: ensure that the nft exists
 // 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO NFTLikes (nftKey, liker) VALUES ($1, $2)", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 // 	if err != nil {
 // 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "NFT already liked by user")
 // 		return
 // 	}
-// 
+//
 // 	routeutils.WriteResultJson(w, "NFT liked successfully")
 // }
-// 
+//
 // func UnLikeNFT(w http.ResponseWriter, r *http.Request) {
 // 	if r.Method != http.MethodPost {
 // 		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
 // 		return
 // 	}
-// 
+//
 // 	nftlikeReq, err := routeutils.ReadJsonBody[NFTLikesRequest](r)
 // 	if err != nil {
 // 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 // 		return
 // 	}
-// 
+//
 // 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM nftlikes WHERE nftKey = $1 AND liker = $2", nftlikeReq.NFTKey, nftlikeReq.UserAddress)
 // 	if err != nil {
 // 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unlike NFT")
 // 		return
 // 	}
-// 
+//
 // 	routeutils.WriteResultJson(w, "NFT unliked successfully")
 // }
 
@@ -374,10 +374,10 @@ func getTopNFTs(w http.ResponseWriter, r *http.Request) {
 }
 
 func likeNFTDevnet(w http.ResponseWriter, r *http.Request) {
-  // Disable this in production
-  if routeutils.NonProductionMiddleware(w, r) {
-    return
-  }
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
 
 	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
 	if err != nil {
@@ -385,47 +385,47 @@ func likeNFTDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  // TODO: Read tokenId into a big.Int
-  tokenId := (*jsonBody)["tokenId"]
+	// TODO: Read tokenId into a big.Int
+	tokenId := (*jsonBody)["tokenId"]
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.LikeNFTDevnet
-  contract := os.Getenv("CANVAS_NFT_CONTRACT_ADDRESS")
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.LikeNFTDevnet
+	contract := os.Getenv("CANVAS_NFT_CONTRACT_ADDRESS")
 
-  cmd := exec.Command(shellCmd, contract, "like_nft", tokenId, "0")
-  _, err = cmd.Output()
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to like NFT on devnet")
-    return
-  }
+	cmd := exec.Command(shellCmd, contract, "like_nft", tokenId, "0")
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to like NFT on devnet")
+		return
+	}
 
-  routeutils.WriteResultJson(w, "NFT liked on devnet")
+	routeutils.WriteResultJson(w, "NFT liked on devnet")
 }
 
 func unlikeNFTDevnet(w http.ResponseWriter, r *http.Request) {
-  // Disable this in production
-  if routeutils.NonProductionMiddleware(w, r) {
-    return
-  }
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
 
-  jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
-    return
-  }
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
 
-  tokenId := (*jsonBody)["tokenId"]
+	tokenId := (*jsonBody)["tokenId"]
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.UnlikeNFTDevnet
-  contract := os.Getenv("CANVAS_NFT_CONTRACT_ADDRESS")
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.UnlikeNFTDevnet
+	contract := os.Getenv("CANVAS_NFT_CONTRACT_ADDRESS")
 
-  cmd := exec.Command(shellCmd, contract, "unlike_nft", tokenId, "0")
-  _, err = cmd.Output()
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unlike NFT on devnet")
-    return
-  }
+	cmd := exec.Command(shellCmd, contract, "unlike_nft", tokenId, "0")
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unlike NFT on devnet")
+		return
+	}
 
-  routeutils.WriteResultJson(w, "NFT unliked on devnet")
+	routeutils.WriteResultJson(w, "NFT unliked on devnet")
 }
 
 func getHotNFTs(w http.ResponseWriter, r *http.Request) {
