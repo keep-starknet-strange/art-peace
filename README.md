@@ -80,7 +80,7 @@ Use the `make build-X` command for each corresponding component `X`. See the [Co
 - **Frontend:** [Reactjs application](./frontend/) for users to interact with.
 - **Indexer:** [Apibara indexer](./indexer/) for monitoring Starknet events and forwarding to the DBs.
 - **Postgres:** DB for storing general data used for analytics, frontend, and backend.
-- **Redis:** In memory DB used to store the compressed `Canvas` data for fast retrieval
+- **Redis:** In-memory DB used to store the compressed `Canvas` data for fast retrieval
 - **tests:** Integration tests for local, docker, ...
 
 ![art/peace diagram](./docs/diagrams/art-peace-diagram.png)
