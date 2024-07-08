@@ -37,16 +37,16 @@ func InitTemplateRoutes() {
 
 func hashTemplateImage(pixelData []byte) string {
 	/*
-	  TODO: Implement Poseidon hash
-		"github.com/NethermindEth/juno/core/crypto"
-		"github.com/NethermindEth/juno/core/felt"
+		  TODO: Implement Poseidon hash
+			"github.com/NethermindEth/juno/core/crypto"
+			"github.com/NethermindEth/juno/core/felt"
 
-		var data []*felt.Felt
-		for _, pixel := range pixelData {
-			f := new(felt.Felt).SetUint64(uint64(pixel))
-			data = append(data, f)
-		}
-		hash := crypto.PoseidonArray(data...)
+			var data []*felt.Felt
+			for _, pixel := range pixelData {
+				f := new(felt.Felt).SetUint64(uint64(pixel))
+				data = append(data, f)
+			}
+			hash := crypto.PoseidonArray(data...)
 	*/
 	h := sha256.New()
 	h.Write(pixelData)
