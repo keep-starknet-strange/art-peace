@@ -154,10 +154,16 @@ const NFTs = (props) => {
 
   const retrieveMyNFTById = async (tokenId) => {
     try {
-      let getNFTBtTokenId = `get-nft?tokenId=${tokenId}`;
-      const response = await fetchWrapper(getNFTBtTokenId, { mode: 'cors' });
+      let getNFTByTokenId = `get-nft?tokenId=${tokenId}`;
+      const response = await fetchWrapper(getNFTByTokenId, { mode: 'cors' });
       if (response.data) {
-        setMyNFTs((prev) => [response.data, ...prev]);
+        let newNFTs = [response.data, ...myNFTs];
+        // Remove duplicate tokenIds
+        let uniqueNFTs = newNFTs.filter(
+          (nft, index, self) =>
+            index === self.findIndex((t) => t.tokenId === nft.tokenId)
+        );
+        setMyNFTs(uniqueNFTs);
       }
     } catch (error) {
       console.error('Error fetching NFT data:', error);

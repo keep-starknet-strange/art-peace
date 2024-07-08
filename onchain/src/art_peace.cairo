@@ -11,7 +11,9 @@ pub mod ArtPeace {
         ICanvasNFTAdditionalDispatcherTrait
     };
     use art_peace::templates::component::TemplateStoreComponent;
-    use art_peace::templates::interfaces::{ITemplateVerifier, ITemplateStore, TemplateMetadata};
+    use art_peace::templates::interfaces::{
+        ITemplateVerifier, ITemplateStore, FactionTemplateMetadata, TemplateMetadata
+    };
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
@@ -23,7 +25,7 @@ pub mod ArtPeace {
     #[storage]
     struct Storage {
         host: ContractAddress,
-        canvas: LegacyMap::<u128, Pixel>,
+        // TODO: Add back canvas: LegacyMap::<u128, Pixel>,
         canvas_width: u128,
         canvas_height: u128,
         total_pixels: u128,
@@ -74,6 +76,12 @@ pub mod ArtPeace {
         // Map: (day_index, user's address, color index) -> amount of pixels placed
         user_pixels_placed: LegacyMap::<(u32, ContractAddress, u8), u32>,
         devmode: bool,
+        faction_templates_count: u32,
+        // Map: template id -> template metadata
+        faction_templates: LegacyMap::<u32, FactionTemplateMetadata>,
+        chain_faction_templates_count: u32,
+        // Map: template id -> template metadata
+        chain_faction_templates: LegacyMap::<u32, FactionTemplateMetadata>,
         #[substorage(v0)]
         templates: TemplateStoreComponent::Storage,
     }
@@ -82,6 +90,7 @@ pub mod ArtPeace {
     #[derive(Drop, starknet::Event)]
     enum Event {
         NewDay: NewDay,
+        CanvasScaled: CanvasScaled,
         ColorAdded: ColorAdded,
         PixelPlaced: PixelPlaced,
         BasicPixelPlaced: BasicPixelPlaced,
@@ -92,11 +101,16 @@ pub mod ArtPeace {
         MainQuestClaimed: MainQuestClaimed,
         VoteColor: VoteColor,
         FactionCreated: FactionCreated,
+        FactionLeaderChanged: FactionLeaderChanged,
         ChainFactionCreated: ChainFactionCreated,
         FactionJoined: FactionJoined,
         FactionLeft: FactionLeft,
         ChainFactionJoined: ChainFactionJoined,
         VotableColorAdded: VotableColorAdded,
+        FactionTemplateAdded: FactionTemplateAdded,
+        FactionTemplateRemoved: FactionTemplateRemoved,
+        ChainFactionTemplateAdded: ChainFactionTemplateAdded,
+        ChainFactionTemplateRemoved: ChainFactionTemplateRemoved,
         // TODO: Integrate template event
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
@@ -114,6 +128,14 @@ pub mod ArtPeace {
         #[key]
         day_index: u32,
         start_time: u64,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct CanvasScaled {
+        old_width: u128,
+        new_width: u128,
+        old_height: u128,
+        new_height: u128
     }
 
     #[derive(Drop, starknet::Event)]
@@ -209,6 +231,13 @@ pub mod ArtPeace {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct FactionLeaderChanged {
+        #[key]
+        faction_id: u32,
+        new_leader: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct ChainFactionCreated {
         #[key]
         faction_id: u32,
@@ -239,6 +268,32 @@ pub mod ArtPeace {
         user: ContractAddress,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct FactionTemplateAdded {
+        #[key]
+        template_id: u32,
+        template_metadata: FactionTemplateMetadata,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct FactionTemplateRemoved {
+        #[key]
+        template_id: u32,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ChainFactionTemplateAdded {
+        #[key]
+        template_id: u32,
+        template_metadata: FactionTemplateMetadata,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ChainFactionTemplateRemoved {
+        #[key]
+        template_id: u32,
+    }
+
     #[derive(Drop, Serde)]
     pub struct InitParams {
         pub host: ContractAddress,
@@ -248,6 +303,7 @@ pub mod ArtPeace {
         pub color_palette: Array<u32>,
         pub votable_colors: Array<u32>,
         pub daily_new_colors_count: u32,
+        pub start_time: u64,
         pub end_time: u64,
         pub daily_quests_count: u32,
         pub devmode: bool,
@@ -287,10 +343,13 @@ pub mod ArtPeace {
         self.daily_new_colors_count.write(init_params.daily_new_colors_count);
 
         self.creation_time.write(starknet::get_block_timestamp());
-        self.start_day_time.write(starknet::get_block_timestamp());
+        let mut start_time = init_params.start_time;
+        if start_time == 0 {
+            start_time = starknet::get_block_timestamp();
+        }
         self.end_time.write(init_params.end_time);
         self.day_index.write(0);
-        self.emit(NewDay { day_index: 0, start_time: starknet::get_block_timestamp() });
+        self.emit(NewDay { day_index: 0, start_time: start_time });
 
         if init_params.devmode {
             let test_address = starknet::contract_address_const::<
@@ -305,23 +364,23 @@ pub mod ArtPeace {
 
     #[abi(embed_v0)]
     impl ArtPeaceImpl of IArtPeace<ContractState> {
-        fn get_pixel(self: @ContractState, pos: u128) -> Pixel {
-            self.canvas.read(pos)
-        }
+        // fn get_pixel(self: @ContractState, pos: u128) -> Pixel {
+        //     self.canvas.read(pos)
+        // }
 
-        fn get_pixel_color(self: @ContractState, pos: u128) -> u8 {
-            self.canvas.read(pos).color
-        }
+        // fn get_pixel_color(self: @ContractState, pos: u128) -> u8 {
+        //     self.canvas.read(pos).color
+        // }
 
-        fn get_pixel_owner(self: @ContractState, pos: u128) -> ContractAddress {
-            self.canvas.read(pos).owner
-        }
+        // fn get_pixel_owner(self: @ContractState, pos: u128) -> ContractAddress {
+        //     self.canvas.read(pos).owner
+        // }
 
-        fn get_pixel_xy(self: @ContractState, x: u128, y: u128) -> Pixel {
-            let pos = x + y * self.canvas_width.read();
+        // fn get_pixel_xy(self: @ContractState, x: u128, y: u128) -> Pixel {
+        //     let pos = x + y * self.canvas_width.read();
 
-            self.canvas.read(pos)
-        }
+        //     self.canvas.read(pos)
+        // }
 
         fn get_width(self: @ContractState) -> u128 {
             self.canvas_width.read()
@@ -350,10 +409,8 @@ pub mod ArtPeace {
             // TODO: To config?
             let leanience_margin = 20; // 20 seconds
             let expected_block_time = 6 * 60; // 6 minutes
-            assert(now >= block_timestamp - leanience_margin, 'Block timestamp is too old');
-            assert(
-                now <= block_timestamp + 2 * expected_block_time, 'Passed timestamp too far ahead'
-            );
+            assert(now >= block_timestamp - leanience_margin, 'Timestamp too far behind');
+            assert(now <= block_timestamp + 2 * expected_block_time, 'Timestamp too far ahead');
         }
 
         fn place_pixel(ref self: ContractState, pos: u128, color: u8, now: u64) {
@@ -483,6 +540,23 @@ pub mod ArtPeace {
             self.emit(FactionCreated { faction_id, name, leader, joinable, allocation });
         }
 
+        fn change_faction_leader(
+            ref self: ContractState, faction_id: u32, new_leader: ContractAddress
+        ) {
+            self.check_game_running();
+            assert(faction_id != 0, 'Faction 0 is not changeable');
+            assert(faction_id <= self.factions_count.read(), 'Faction does not exist');
+            assert(
+                starknet::get_caller_address() == self.host.read()
+                    || starknet::get_caller_address() == self.factions.read(faction_id).leader,
+                'Host or leader changes leader'
+            );
+            let mut faction = self.factions.read(faction_id);
+            faction.leader = new_leader;
+            self.factions.write(faction_id, faction);
+            self.emit(FactionLeaderChanged { faction_id, new_leader });
+        }
+
         fn init_chain_faction(ref self: ContractState, name: felt252) {
             assert(
                 starknet::get_caller_address() == self.host.read(), 'Factions are set by the host'
@@ -510,13 +584,14 @@ pub mod ArtPeace {
             self.emit(FactionJoined { faction_id, user: caller });
         }
 
-        fn leave_faction(ref self: ContractState) {
-            self.check_game_running();
-            let caller = starknet::get_caller_address();
-            let faction_id = self.users_faction.read(caller);
-            self.users_faction.write(caller, 0);
-            self.emit(FactionLeft { faction_id, user: caller });
-        }
+        // TODO
+        // fn leave_faction(ref self: ContractState) {
+        //     self.check_game_running();
+        //     let caller = starknet::get_caller_address();
+        //     let faction_id = self.users_faction.read(caller);
+        //     self.users_faction.write(caller, 0);
+        //     self.emit(FactionLeft { faction_id, user: caller });
+        // }
 
         fn join_chain_faction(ref self: ContractState, faction_id: u32) {
             self.check_game_running();
@@ -793,6 +868,96 @@ pub mod ArtPeace {
             self.nft_contract.read()
         }
 
+        fn add_faction_template(
+            ref self: ContractState, template_metadata: FactionTemplateMetadata
+        ) {
+            self.check_game_running();
+            assert(
+                starknet::get_caller_address() == self.host.read()
+                    || starknet::get_caller_address() == self
+                        .factions
+                        .read(template_metadata.faction_id)
+                        .leader,
+                'Host or leader sets templates'
+            );
+            assert(
+                template_metadata.position < self.canvas_width.read() * self.canvas_height.read(),
+                'Template position out of bounds'
+            );
+            let MAX_TEMPLATE_SIZE: u128 = 64;
+            let MIN_TEMPLATE_SIZE: u128 = 5;
+            assert(
+                template_metadata.width >= MIN_TEMPLATE_SIZE
+                    && template_metadata.width <= MAX_TEMPLATE_SIZE,
+                'Template width out of bounds'
+            );
+            assert(
+                template_metadata.height >= MIN_TEMPLATE_SIZE
+                    && template_metadata.height <= MAX_TEMPLATE_SIZE,
+                'Template height out of bounds'
+            );
+            assert(
+                template_metadata.faction_id <= self.factions_count.read(), 'Faction does not exist'
+            );
+            let template_id = self.faction_templates_count.read();
+            self.faction_templates.write(template_id, template_metadata);
+            self.faction_templates_count.write(template_id + 1);
+            self.emit(FactionTemplateAdded { template_id, template_metadata });
+        }
+
+        fn remove_faction_template(ref self: ContractState, template_id: u32) {
+            self.check_game_running();
+            let template_metadata = self.faction_templates.read(template_id);
+            assert(
+                starknet::get_caller_address() == self.host.read()
+                    || starknet::get_caller_address() == self
+                        .factions
+                        .read(template_metadata.faction_id)
+                        .leader,
+                'Host or leader sets templates'
+            );
+            // Don't need to actually remove the template, just mark it as removed
+            self.emit(FactionTemplateRemoved { template_id });
+        }
+
+        fn add_chain_faction_template(
+            ref self: ContractState, template_metadata: FactionTemplateMetadata
+        ) {
+            self.check_game_running();
+            assert(starknet::get_caller_address() == self.host.read(), 'Host sets chain templates');
+            assert(
+                template_metadata.position < self.canvas_width.read() * self.canvas_height.read(),
+                'Template position out of bounds'
+            );
+            let MAX_TEMPLATE_SIZE: u128 = 64;
+            let MIN_TEMPLATE_SIZE: u128 = 5;
+            assert(
+                template_metadata.width >= MIN_TEMPLATE_SIZE
+                    && template_metadata.width <= MAX_TEMPLATE_SIZE,
+                'Template width out of bounds'
+            );
+            assert(
+                template_metadata.height >= MIN_TEMPLATE_SIZE
+                    && template_metadata.height <= MAX_TEMPLATE_SIZE,
+                'Template height out of bounds'
+            );
+            assert(
+                template_metadata.faction_id <= self.chain_factions_count.read(),
+                'Faction does not exist'
+            );
+            let template_id = self.chain_faction_templates_count.read();
+            self.chain_faction_templates.write(template_id, template_metadata);
+            self.chain_faction_templates_count.write(template_id + 1);
+            self.emit(ChainFactionTemplateAdded { template_id, template_metadata });
+        }
+
+        fn remove_chain_faction_template(ref self: ContractState, template_id: u32) {
+            self.check_game_running();
+            assert(starknet::get_caller_address() == self.host.read(), 'Host sets chain templates');
+            // Don't need to actually remove the template, just mark it as removed
+            self.emit(ChainFactionTemplateRemoved { template_id });
+        }
+
         fn get_user_pixels_placed(self: @ContractState, user: ContractAddress) -> u32 {
             let mut i = 0;
             let mut total = 0;
@@ -861,6 +1026,21 @@ pub mod ArtPeace {
 
         fn mint_nft(ref self: ContractState, mint_params: NFTMintParams) {
             self.check_game_running();
+            // TODO: To config?
+            let MIN_NFT_SIZE: u128 = 1;
+            let MAX_NFT_SIZE: u128 = 64;
+            assert(
+                mint_params.width >= MIN_NFT_SIZE && mint_params.width <= MAX_NFT_SIZE,
+                'NFT width out of bounds'
+            );
+            assert(
+                mint_params.height >= MIN_NFT_SIZE && mint_params.height <= MAX_NFT_SIZE,
+                'NFT height out of bounds'
+            );
+            assert(
+                mint_params.position < self.canvas_width.read() * self.canvas_height.read(),
+                'NFT position out of bounds'
+            );
             let metadata = NFTMetadata {
                 position: mint_params.position,
                 width: mint_params.width,
@@ -873,6 +1053,16 @@ pub mod ArtPeace {
             };
             ICanvasNFTAdditionalDispatcher { contract_address: self.nft_contract.read(), }
                 .mint(metadata, starknet::get_caller_address());
+        }
+
+        fn set_nft_base_uri(ref self: ContractState, base_uri: ByteArray) {
+            // Use incase of changes in the backed routing
+            assert(
+                starknet::get_caller_address() == self.host.read(),
+                'NFT base URI is set by the host'
+            );
+            ICanvasNFTAdditionalDispatcher { contract_address: self.nft_contract.read() }
+                .set_base_uri(base_uri);
         }
     }
 
@@ -921,11 +1111,13 @@ pub mod ArtPeace {
                     x = 0;
                     while x < template_metadata
                         .width {
-                            let pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
-                            let color = *template_image
+                            let _pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
+                            let _color = *template_image
                                 .at((x + y * template_metadata.width).try_into().unwrap());
                             // TODO: Check if the color is transparent
-                            if color == self.canvas.read(pos).color {
+                            // TODO: Add back
+                            // if color == self.canvas.read(pos).color {
+                            if false {
                                 matches += 1;
                             }
                             x += 1;
@@ -973,14 +1165,18 @@ pub mod ArtPeace {
                     x = 0;
                     while x < template_metadata
                         .width {
-                            let pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
-                            let color = *template_image
+                            let _pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
+                            let _color = *template_image
                                 .at((x + y * template_metadata.width).try_into().unwrap());
                             // TODO: Check if the color is transparent
-                            if color == self.canvas.read(pos).color {
+                            // TODO: Add back
+                            // if color == self.canvas.read(pos).color {
+                            if false {
                                 matches += 1;
 
-                                let mut pixel_owner = self.canvas.read(pos).owner;
+                                let mut pixel_owner = starknet::contract_address_const::<
+                                    0
+                                >(); // TODO: self.canvas.read(pos).owner;
                                 let user_index = pixel_contributors_indexes.get(pixel_owner.into());
 
                                 if user_index == 0 {
@@ -1118,8 +1314,8 @@ pub mod ArtPeace {
         self.check_valid_pixel(pos, color);
 
         let caller = starknet::get_caller_address();
-        let pixel = Pixel { color, owner: caller };
-        self.canvas.write(pos, pixel);
+        // TODO: let pixel = Pixel { color, owner: caller };
+        // TODO: self.canvas.write(pos, pixel);
         let day = self.day_index.read();
         self
             .user_pixels_placed

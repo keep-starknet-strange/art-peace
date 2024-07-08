@@ -3,8 +3,10 @@ import { CSSTransition } from 'react-transition-group';
 import './TemplateItem.css';
 import canvasConfig from '../../configs/canvas.config.json';
 import Info from '../../resources/icons/Info.png';
+import { templateUrl } from '../../utils/Consts.js';
 
 const TemplateItem = (props) => {
+  const imageUrl = templateUrl + '/templates/';
   // TODO: Reward
   // TODO: alt text for image
   const posx = props.template.position % canvasConfig.canvas.width;
@@ -18,8 +20,10 @@ const TemplateItem = (props) => {
     ) {
       return;
     }
+    let template = props.template;
+    template.image = imageUrl + 'template-' + props.template.hash + '.png';
     props.setTemplateOverlayMode(true);
-    props.setOverlayTemplate(props.template);
+    props.setOverlayTemplate(template);
     props.setActiveTab('Canvas');
   };
 
@@ -29,15 +33,12 @@ const TemplateItem = (props) => {
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <div className='TemplateItem__imagecontainer'>
           <img
-            src={props.template.image}
+            src={imageUrl + 'template-' + props.template.hash + '.png'}
             alt={`template-image-${props.template.id}`}
             className='TemplateItem__image'
           />
           <div className='TemplateItem__overlay'>
             <div className='TemplateItem__footer'>
-              <p className='Text__xsmall TemplateItem__name'>
-                {props.template.name}
-              </p>
               <div
                 onClick={() => setShowInfo(!showInfo)}
                 className='TemplateItem__button'

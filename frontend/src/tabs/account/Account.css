@@ -31,6 +31,16 @@
   padding: 0 1rem 0 0;
 }
 
+.Account__item__un {
+  margin: 0rem;
+  padding: 0 0.5rem 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 21rem;
+  text-align: right;
+}
+
 .Account__item__username {
   margin: 0rem;
   padding: 0;
@@ -182,6 +192,10 @@
 .Account__walletlogin__button {
   margin: 1rem;
   padding: 0.7rem 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 .Account__login__button {
@@ -205,4 +219,17 @@
   align-items: center;
   justify-content: space-between;
   margin: 0 1rem;
+}
+
+.Account__wallet__icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 1rem 0 0;
+  padding: 0;
+}
+
+.Account__form__error {
+  color: rgba(225, 20, 20, 0.8);
+  padding: 0;
+  margin: 0.5rem 0.5rem 0 0.5rem;
 }

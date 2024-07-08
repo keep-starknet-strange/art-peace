@@ -1,0 +1,125 @@
+{
+  "factions": [
+    {
+      "id": 1,
+      "name": "Early Birds",
+      "icon": "$BACKEND_URL/faction-images/early-bird.png",
+      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "joinable": false,
+      "allocation": 2,
+      "links": {
+        "telegram": "",
+        "twitter": "",
+        "github": "",
+        "site": ""
+      },
+      "members": [
+        "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+        "0x034be07b6e7eeb280eb15d000d9eb53a63e5614e9886b74284991098c30a614a",
+        "0x013d851b4a0a69c86309d6e1f89a728c7e23d4dac3499531ec894a8f002a07dc",
+        "0x0583e9857d5547330859698f711a7bd354d88970cb8987ea4c6b084ce3567319",
+        "0x01bf5fad6815868d6fe067905548285596cf311641169544109a7a5394c2565f",
+        "0x02d053fa69add382b43095102488d89c5d49ca70df16fc39513a61da4352fd48",
+        "0x01c14041373cd03109c8a05c52fb45e3aff992b988a7237aab5196a5614fe326",
+        "0x0764b02d58af0bd15f6aa9555cb89402a62ca3f655f5ff5b2e2fe8041beb593d"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Keep Starknet Strange",
+      "icon": "$BACKEND_URL/faction-images/keep-starknet-strange.png",
+      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "joinable": false,
+      "allocation": 5,
+      "links": {
+        "telegram": "",
+        "twitter": "",
+        "github": "https://github.com/keep-starknet-strange",
+        "site": ""
+      },
+      "members": [
+        "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+        "0x0583e9857d5547330859698f711a7bd354d88970cb8987ea4c6b084ce3567319"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Contributors",
+      "icon": "$BACKEND_URL/faction-images/contributors.png",
+      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "joinable": false,
+      "allocation": 2,
+      "links": {
+        "telegram": "",
+        "twitter": "",
+        "github": "https://github.com/keep-starknet-strange/art-peace",
+        "site": ""
+      },
+      "members": [
+        "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+        "0x034be07b6e7eeb280eb15d000d9eb53a63e5614e9886b74284991098c30a614a",
+        "0x013d851b4a0a69c86309d6e1f89a728c7e23d4dac3499531ec894a8f002a07dc",
+        "0x0583e9857d5547330859698f711a7bd354d88970cb8987ea4c6b084ce3567319",
+        "0x01bf5fad6815868d6fe067905548285596cf311641169544109a7a5394c2565f"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Ducks Everywhere",
+      "icon": "$BACKEND_URL/faction-images/ducks-everywhere.png",
+      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "joinable": true,
+      "allocation": 1,
+      "links": {
+        "telegram": "https://t.me/duckseverywhere",
+        "twitter": "https://twitter.com/DucksEverywher2",
+        "github": "",
+        "site": "https://linktr.ee/duckseverywhere"
+      },
+      "members": [
+      ]
+    },
+    {
+      "id": 5,
+      "name": "PixeLaw",
+      "icon": "$BACKEND_URL/faction-images/pixelaw.png",
+      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "joinable": true,
+      "allocation": 1,
+      "links": {
+        "telegram": "https://t.me/pixelaw",
+        "twitter": "https://twitter.com/0xPixeLAW",
+        "github": "https://github.com/pixelaw",
+        "site": "https://www.pixelaw.xyz"
+      },
+      "members": [
+      ]
+    },
+    {
+      "id": 6,
+      "name": "WASD",
+      "icon": "$BACKEND_URL/faction-images/wasd.png",
+      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "joinable": true,
+      "allocation": 1,
+      "links": {
+        "telegram": "https://t.me/wasd",
+        "twitter": "https://twitter.com/WASD_0x",
+        "github": "",
+        "site": "https://bento.me/wasd"
+      },
+      "members": [
+      ]
+    }
+  ],
+  "chain_factions": [
+    "Starknet",
+    "Solana",
+    "Bitcoin",
+    "Base",
+    "ZkSync",
+    "Polygon",
+    "Optimism",
+    "Scroll"
+  ]
+}

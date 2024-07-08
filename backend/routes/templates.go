@@ -2,7 +2,7 @@ package routes
 
 import (
 	"bytes"
-	"context"
+	"crypto/sha256"
 	"fmt"
 	"image"
 	"image/color"
@@ -15,33 +15,45 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/NethermindEth/juno/core/crypto"
-	"github.com/NethermindEth/juno/core/felt"
-
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func InitTemplateRoutes() {
 	http.HandleFunc("/get-templates", getTemplates)
+	http.HandleFunc("/get-faction-templates", getFactionTemplates)
+	http.HandleFunc("/get-chain-faction-templates", getChainFactionTemplates)
 	http.HandleFunc("/add-template-img", addTemplateImg)
 	http.HandleFunc("/add-template-data", addTemplateData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
-		http.HandleFunc("/add-template-devnet", addTemplateDevnet)
+		// http.HandleFunc("/add-template-devnet", addTemplateDevnet)
+		http.HandleFunc("/add-faction-template-devnet", addFactionTemplateDevnet)
+		http.HandleFunc("/remove-faction-template-devnet", removeFactionTemplateDevnet)
+		http.HandleFunc("/add-chain-faction-template-devnet", addChainFactionTemplateDevnet)
+		http.HandleFunc("/remove-chain-faction-template-devnet", removeChainFactionTemplateDevnet)
 	}
-	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("."))))
+	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("./templates/"))))
 }
 
-// TODO: Add specific location for template images
-
 func hashTemplateImage(pixelData []byte) string {
-	var data []*felt.Felt
-	for _, pixel := range pixelData {
-		f := new(felt.Felt).SetUint64(uint64(pixel))
-		data = append(data, f)
-	}
-	hash := crypto.PoseidonArray(data...)
-	return hash.String()
+	/*
+	  TODO: Implement Poseidon hash
+		"github.com/NethermindEth/juno/core/crypto"
+		"github.com/NethermindEth/juno/core/felt"
+
+		var data []*felt.Felt
+		for _, pixel := range pixelData {
+			f := new(felt.Felt).SetUint64(uint64(pixel))
+			data = append(data, f)
+		}
+		hash := crypto.PoseidonArray(data...)
+	*/
+	h := sha256.New()
+	h.Write(pixelData)
+	hash := h.Sum(nil)
+	hashStr := fmt.Sprintf("%x", hash)
+	// Replace 1st byte with 00
+	return "00" + hashStr[2:]
 }
 
 func bytesToRGBA(colorBytes []byte) color.RGBA {
@@ -126,6 +138,47 @@ func getTemplates(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, string(templates))
 }
 
+type FactionTemplateData struct {
+	TemplateId int    `json:"templateId"`
+	Hash       string `json:"hash"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	Position   int    `json:"position"`
+}
+
+// TODO: Pagination
+func getFactionTemplates(w http.ResponseWriter, r *http.Request) {
+	factionId, err := strconv.Atoi(r.URL.Query().Get("factionId"))
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
+
+	factionTemplates, err := core.PostgresQueryJson[FactionTemplateData]("SELECT template_id, hash, width, height, position FROM FactionTemplates WHERE faction_id = $1 AND stale = false", factionId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get faction templates")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(factionTemplates))
+}
+
+func getChainFactionTemplates(w http.ResponseWriter, r *http.Request) {
+	factionId, err := strconv.Atoi(r.URL.Query().Get("factionId"))
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
+
+	factionTemplates, err := core.PostgresQueryJson[FactionTemplateData]("SELECT template_id, hash, width, height, position FROM ChainFactionTemplates WHERE faction_id = $1 AND stale = false", factionId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get chain faction templates")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(factionTemplates))
+}
+
 func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("image")
 	if err != nil {
@@ -142,7 +195,7 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 	}
 	bounds := img.Bounds()
 	width, height := bounds.Max.X-bounds.Min.X, bounds.Max.Y-bounds.Min.Y
-	if width < 5 || width > 50 || height < 5 || height > 50 {
+	if width < 5 || width > 64 || height < 5 || height > 64 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
@@ -164,14 +217,16 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	hash := hashTemplateImage(imageData)
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2)", hash, imageData)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in postgres")
-		return
+
+	if _, err := os.Stat("templates"); os.IsNotExist(err) {
+		err = os.Mkdir("templates", os.ModePerm)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create templates directory")
+			return
+		}
 	}
 
-	// TODO: Path to store generated image
-	filename := fmt.Sprintf("template-%s.png", hash)
+	filename := fmt.Sprintf("templates/template-%s.png", hash)
 	newimg, err := os.Create(filename)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
@@ -209,7 +264,7 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if width < 5 || width > 50 || height < 5 || height > 50 {
+	if width < 5 || width > 64 || height < 5 || height > 64 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
@@ -234,11 +289,6 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hash := hashTemplateImage(imageBytes)
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO TemplateData (hash, data) VALUES ($1, $2)", hash, imageBytes)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert template data in database")
-		return
-	}
 	colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY color_key")
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get color palette")
@@ -274,8 +324,15 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// TODO: Path to store generated image
-	filename := fmt.Sprintf("template-%s.png", hash)
+	if _, err := os.Stat("templates"); os.IsNotExist(err) {
+		err = os.Mkdir("templates", os.ModePerm)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create templates directory")
+			return
+		}
+	}
+
+	filename := fmt.Sprintf("templates/template-%s.png", hash)
 	file, err := os.Create(filename)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
@@ -347,4 +404,164 @@ func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Template added to devnet")
+}
+
+func addFactionTemplateDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
+
+	factionId, err := strconv.Atoi((*jsonBody)["factionId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
+
+	hash := (*jsonBody)["hash"]
+
+	position, err := strconv.Atoi((*jsonBody)["position"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid position")
+		return
+	}
+
+	width, err := strconv.Atoi((*jsonBody)["width"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid width")
+		return
+	}
+
+	height, err := strconv.Atoi((*jsonBody)["height"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid height")
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.AddFactionTemplateDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+	cmd := exec.Command(shellCmd, contract, "add_faction_template", strconv.Itoa(factionId), hash, strconv.Itoa(position), strconv.Itoa(width), strconv.Itoa(height))
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to add faction template to devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Faction template added to devnet")
+}
+
+func removeFactionTemplateDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
+
+	templateId, err := strconv.Atoi((*jsonBody)["templateId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid template ID")
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.RemoveFactionTemplateDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+	cmd := exec.Command(shellCmd, contract, "remove_faction_template", strconv.Itoa(templateId))
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to remove faction template from devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Faction template removed from devnet")
+}
+
+func addChainFactionTemplateDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
+
+	factionId, err := strconv.Atoi((*jsonBody)["factionId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
+
+	hash := (*jsonBody)["hash"]
+
+	position, err := strconv.Atoi((*jsonBody)["position"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid position")
+		return
+	}
+
+	width, err := strconv.Atoi((*jsonBody)["width"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid width")
+		return
+	}
+
+	height, err := strconv.Atoi((*jsonBody)["height"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid height")
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.AddFactionTemplateDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+	cmd := exec.Command(shellCmd, contract, "add_chain_faction_template", strconv.Itoa(factionId), hash, strconv.Itoa(position), strconv.Itoa(width), strconv.Itoa(height))
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to add chain faction template to devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Chain faction template added to devnet")
+}
+
+func removeChainFactionTemplateDevnet(w http.ResponseWriter, r *http.Request) {
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
+
+	templateId, err := strconv.Atoi((*jsonBody)["templateId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid template ID")
+		return
+	}
+
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.RemoveFactionTemplateDevnet
+	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
+	cmd := exec.Command(shellCmd, contract, "remove_chain_faction_template", strconv.Itoa(templateId))
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to remove chain faction template from devnet")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Chain faction template removed from devnet")
 }

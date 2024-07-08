@@ -12,6 +12,10 @@ export const nftUrl = backendConfig.production
   ? 'https://' + backendConfig.host
   : 'http://' + backendConfig.host + ':' + backendConfig.consumer_port;
 
+export const templateUrl = backendConfig.production
+  ? 'https://' + backendConfig.host
+  : 'http://' + backendConfig.host + ':' + backendConfig.port;
+
 export const devnetMode = backendConfig.production === false;
 
 export const convertUrl = (url) => {

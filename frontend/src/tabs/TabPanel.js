@@ -4,6 +4,7 @@ import './TabPanel.css';
 import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
 import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
 import NFTMintingPanel from './nfts/NFTMintingPanel.js';
+import FactionTemplateBuilderPanel from './templates/FactionTemplateBuilderPanel.js';
 import Factions from './factions/Factions.js';
 import { TimerInjector } from '../utils/TimerInjector.js';
 import Quests from './quests/Quests.js';
@@ -100,6 +101,30 @@ const TabPanel = (props) => {
           setNotificationMessage={props.setNotificationMessage}
         />
       </CSSTransition>
+      <CSSTransition
+        in={props.templateCreationMode}
+        timeout={300}
+        classNames='list-transition'
+        unmountOnExit
+        appear
+      >
+        <FactionTemplateBuilderPanel
+          setActiveTab={props.setActiveTab}
+          address={props.address}
+          artPeaceContract={props.artPeaceContract}
+          setTemplateCreationMode={props.setTemplateCreationMode}
+          templateCreationSelected={props.templateCreationSelected}
+          setTemplateCreationSelected={props.setTemplateCreationSelected}
+          queryAddress={props.queryAddress}
+          templatePosition={props.templatePosition}
+          templateImage={props.templateImage}
+          templateColorIds={props.templateColorIds}
+          templateFaction={props.templateFaction}
+          setTemplateImage={props.setTemplateImage}
+          setTemplateColorIds={props.setTemplateColorIds}
+          setTemplateFaction={props.setTemplateFaction}
+        />
+      </CSSTransition>
       <SwitchTransition mode='out-in'>
         <CSSTransition
           key={props.activeTab}
@@ -138,6 +163,8 @@ const TabPanel = (props) => {
                 <Factions
                   address={props.address}
                   artPeaceContract={props.artPeaceContract}
+                  colors={props.colors}
+                  setModal={props.setModal}
                   queryAddress={props.queryAddress}
                   setActiveTab={props.setActiveTab}
                   chainFaction={props.chainFaction}
@@ -154,8 +181,16 @@ const TabPanel = (props) => {
                   setFactionPixelsData={props.setFactionPixelsData}
                   setTemplateOverlayMode={props.setTemplateOverlayMode}
                   setOverlayTemplate={props.setOverlayTemplate}
+                  setTemplateFaction={props.setTemplateFaction}
+                  setTemplateCreationMode={props.setTemplateCreationMode}
+                  setTemplateCreationSelected={
+                    props.setTemplateCreationSelected
+                  }
+                  setTemplateImage={props.setTemplateImage}
+                  setTemplateColorIds={props.setTemplateColorIds}
                   isMobile={props.isMobile}
                   gameEnded={props.gameEnded}
+                  host={props.host}
                 />
               </div>
             )}

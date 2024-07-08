@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './FactionItem.css';
 import { convertUrl } from '../../utils/Consts.js';
+import { useContractWrite } from '@starknet-react/core';
 import {
   getChainFactionMembers,
-  getFactionMembers
+  getFactionMembers,
+  addFactionTemplateDevnet,
+  fetchWrapper
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
 import TemplateItem from '../templates/TemplateItem.js';
 import Template from '../../resources/icons/Template.png';
 import Info from '../../resources/icons/Info.png';
+import { devnetMode } from '../../utils/Consts.js';
 
 const FactionItem = (props) => {
   // TODO: Faction owner tabs: allocations, ...
   const factionsSubTabs = ['templates', 'info'];
-  const [activeTab, setActiveTab] = useState(factionsSubTabs[0]);
-  const [_leader, _setLeader] = useState('Brandon'); // TODO: Fetch leader & show in members info
+  const [innerActiveTab, setInnerActiveTab] = useState(factionsSubTabs[0]);
   const [members, setMembers] = useState([]);
   const [membersPagination, setMembersPagination] = useState({
     pageLength: 10,
@@ -76,36 +79,24 @@ const FactionItem = (props) => {
     getMembers();
   }, [props.faction, membersPagination.page, membersPagination.pageLength]);
 
-  const factionTemplates = [
-    {
-      name: 'My Template 1',
-      image: convertUrl(props.faction.icon),
-      width: 32,
-      height: 32,
-      position: 25
-    },
-    {
-      name: 'My Template With long name 2',
-      image: 'https://www.w3schools.com/w3images/mountains.jpg',
-      width: 25,
-      height: 20,
-      position: 47
-    },
-    {
-      name: 'My Template 3',
-      image: 'https://www.w3schools.com/w3images/mountains.jpg',
-      width: 25,
-      height: 20,
-      position: 47
-    },
-    {
-      name: 'My Template 3',
-      image: 'https://www.w3schools.com/w3images/mountains.jpg',
-      width: 20,
-      height: 20,
-      position: 0
+  const [factionTemplates, setFactionTemplates] = useState([]);
+  useEffect(() => {
+    async function getTemplates() {
+      let getFactionTemplatesUrl = '';
+      if (props.isChain) {
+        getFactionTemplatesUrl = `get-chain-faction-templates?factionId=${props.faction.factionId}`;
+      } else {
+        getFactionTemplatesUrl = `get-faction-templates?factionId=${props.faction.factionId}`;
+      }
+      let templates = await fetchWrapper(getFactionTemplatesUrl);
+      if (!templates.data) {
+        setFactionTemplates([]);
+        return;
+      }
+      setFactionTemplates(templates.data);
     }
-  ];
+    getTemplates();
+  }, [props.faction]);
 
   const [canJoin, setCanJoin] = useState(true);
   useEffect(() => {
@@ -127,6 +118,183 @@ const FactionItem = (props) => {
     }
     setCanJoin(true);
   }, [props]);
+
+  let [owner, setOwner] = useState(false);
+  useEffect(() => {
+    if (props.faction.leader === props.queryAddress) {
+      setOwner(true);
+    } else if (props.host === props.queryAddress) {
+      setOwner(true);
+    } else {
+      setOwner(false);
+    }
+  }, [props.faction, props.queryAddress]);
+
+  // TODO:  metadata
+  const [calls, setCalls] = useState([]);
+  const addStencilCall = (metadata) => {
+    if (devnetMode) return;
+    if (!props.address || !props.artPeaceContract) return;
+    if (!metadata) return;
+    setCalls(
+      props.artPeaceContract.populateTransaction['add_faction_template'](
+        metadata
+      )
+    );
+  };
+
+  useEffect(() => {
+    const addTemplate = async () => {
+      if (devnetMode) return;
+      if (calls.length === 0) return;
+      await writeAsync();
+      console.log('Stencil added successful:', data, isPending);
+    };
+    addTemplate();
+  }, [calls]);
+
+  const { writeAsync, data, isPending } = useContractWrite({
+    calls
+  });
+
+  const imageToPalette = (image) => {
+    // Convert image pixels to be within the color palette
+
+    // Get image data
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    ctx.drawImage(image, 0, 0);
+    const imageData = ctx.getImageData(0, 0, image.width, image.height);
+    const data = imageData.data;
+
+    let imagePalleteIds = [];
+    // Convert image data to color palette
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 128) {
+        data[i] = 255;
+        data[i + 1] = 255;
+        data[i + 2] = 255;
+        data[i + 3] = 0;
+        imagePalleteIds.push(255);
+        continue;
+      }
+      let minDistance = 1000000;
+      let minColor = props.colors[0];
+      let minColorIndex = 0;
+      for (let j = 0; j < props.colors.length; j++) {
+        const color = props.colors[j]
+          .match(/[A-Za-z0-9]{2}/g)
+          .map((x) => parseInt(x, 16));
+        const distance = Math.sqrt(
+          Math.pow(data[i] - color[0], 2) +
+            Math.pow(data[i + 1] - color[1], 2) +
+            Math.pow(data[i + 2] - color[2], 2)
+        );
+        if (distance < minDistance) {
+          minDistance = distance;
+          minColor = color;
+          minColorIndex = j;
+        }
+      }
+      data[i] = minColor[0];
+      data[i + 1] = minColor[1];
+      data[i + 2] = minColor[2];
+      imagePalleteIds.push(minColorIndex);
+    }
+
+    // Set image data back to canvas
+    ctx.putImageData(imageData, 0, 0);
+    return [canvas.toDataURL(), imagePalleteIds];
+  };
+
+  const inputFile = useRef();
+  const uploadTemplate = () => {
+    // Open file upload dialog
+    inputFile.current.click();
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file === undefined) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function (e) {
+      var image = new Image();
+      image.src = e.target.result;
+
+      image.onload = function () {
+        var height = this.height;
+        var width = this.width;
+        if (height < 5 || width < 5) {
+          alert(
+            'Image is too small, minimum size is 5x5. Given size is ' +
+              width +
+              'x' +
+              height
+          );
+          return;
+        }
+        if (height > 64 || width > 64) {
+          alert(
+            'Image is too large, maximum size is 64x64. Given size is ' +
+              width +
+              'x' +
+              height
+          );
+          return;
+        }
+        const [paletteImage, colorIds] = imageToPalette(image);
+        // TODO: Upload to backend and get template hash back
+        props.setTemplateFaction(props.faction);
+        let templateImage = {
+          image: paletteImage,
+          width: width,
+          height: height
+        };
+        props.setTemplateImage(templateImage);
+        props.setTemplateColorIds(colorIds);
+        props.setTemplateCreationMode(true);
+        props.setTemplateCreationSelected(false);
+        props.setActiveTab('Canvas');
+      };
+    };
+  };
+
+  const _addStencil = async () => {
+    if (props.queryAddress === '0') {
+      return;
+    }
+    let metadata = {
+      factionId: props.faction.factionId.toString(),
+      hash: '0',
+      position: '0',
+      width: '32',
+      height: '32'
+    };
+    if (!devnetMode) {
+      // TODO: Add stencil to the faction
+      addStencilCall(metadata);
+      return;
+    }
+    try {
+      console.log('Adding stencil...', metadata);
+      // TODO: chain vs non-chain
+      const result = await addFactionTemplateDevnet(metadata);
+      if (result.result) {
+        console.log('Stencil added successful:', result);
+        // TODO: Add stencil to the faction
+      } else {
+        console.log('Error adding stencil to devnet:', result);
+      }
+    } catch (error) {
+      console.log('Error adding stencil:', error);
+    }
+  };
 
   return (
     <div className='FactionItem'>
@@ -222,9 +390,25 @@ const FactionItem = (props) => {
                   style={{ borderRadius: '2rem' }}
                   onClick={() => {
                     if (props.isChain) {
-                      props.joinChain(props.faction.factionId);
+                      props.setModal({
+                        title: 'Join Chain Faction',
+                        text: `You can only join one Chain Faction. Are you sure you want   to join the ${props.faction.name} Faction`,
+                        confirm: 'Join',
+                        action: () => {
+                          props.joinChain(props.faction.factionId);
+                        }
+                      });
+                      return;
                     } else {
-                      props.joinFaction(props.faction.factionId);
+                      props.setModal({
+                        title: 'Join Faction',
+                        text: `You can only join one Faction. Are you sure you want to jo  in the ${props.faction.name} Faction`,
+                        confirm: 'Join',
+                        action: () => {
+                          props.joinFaction(props.faction.factionId);
+                        }
+                      });
+                      return;
                     }
                   }}
                 >
@@ -233,8 +417,8 @@ const FactionItem = (props) => {
               )}
               <div
                 className={`Text__xsmall Button__primary FactionItem__header__template__button 
-                  ${activeTab === 'templates' ? 'FactionItem__header__button--selected' : ''}`}
-                onClick={() => setActiveTab('templates')}
+                  ${innerActiveTab === 'templates' ? 'FactionItem__header__button--selected' : ''}`}
+                onClick={() => setInnerActiveTab('templates')}
               >
                 <img
                   src={Template}
@@ -249,9 +433,9 @@ const FactionItem = (props) => {
                 <p style={{ padding: '0', margin: '0' }}>stencils</p>
               </div>
               <div
-                className={`FactionItem__link ${activeTab === 'info' ? 'FactionItem__header__button--selected' : ''}`}
+                className={`FactionItem__link ${innerActiveTab === 'info' ? 'FactionItem__header__button--selected' : ''}`}
                 style={{ border: '1px solid rgba(0, 0, 0, 0.5)' }}
-                onClick={() => setActiveTab('info')}
+                onClick={() => setInnerActiveTab('info')}
               >
                 <img
                   src={Info}
@@ -271,19 +455,46 @@ const FactionItem = (props) => {
         </div>
       </div>
       <div className='FactionItem__info'>
-        {activeTab === 'templates' &&
-          factionTemplates.map((template, index) => {
-            return (
-              <TemplateItem
-                key={index}
-                template={template}
-                setTemplateOverlayMode={props.setTemplateOverlayMode}
-                setOverlayTemplate={props.setOverlayTemplate}
-                setActiveTab={props.setActiveTab}
-              />
-            );
-          })}
-        {activeTab === 'info' && (
+        {innerActiveTab === 'templates' && (
+          <div>
+            {factionTemplates.length === 0 && (
+              <p className='Text__medium FactionItem__stencil__text'>
+                No stencils available...
+              </p>
+            )}
+            {factionTemplates.map((template, index) => {
+              return (
+                <TemplateItem
+                  key={index}
+                  template={template}
+                  setTemplateOverlayMode={props.setTemplateOverlayMode}
+                  setOverlayTemplate={props.setOverlayTemplate}
+                  setInnerActiveTab={props.setInnerActiveTab}
+                  setActiveTab={props.setActiveTab}
+                />
+              );
+            })}
+            {owner && (
+              <div>
+                <div
+                  className='Button__primary FactionItem__stencil__button'
+                  onClick={uploadTemplate}
+                >
+                  Add stencil
+                </div>
+                <input
+                  type='file'
+                  id='file'
+                  accept='.png'
+                  ref={inputFile}
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+              </div>
+            )}
+          </div>
+        )}
+        {innerActiveTab === 'info' && (
           <div style={{ width: '100%' }}>
             <div className='FactionItem__info__header'>
               <h3 className='Text__medium FactionItem__info__text'>

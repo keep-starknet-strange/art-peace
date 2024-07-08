@@ -35,6 +35,7 @@ type FactionUserData struct {
 	FactionId  int    `json:"factionId"`
 	Allocation int    `json:"allocation"`
 	Name       string `json:"name"`
+	Leader     string `json:"leader"`
 	Members    int    `json:"members"`
 	Joinable   bool   `json:"joinable"`
 	Icon       string `json:"icon"`
@@ -47,6 +48,7 @@ type FactionUserData struct {
 type FactionData struct {
 	FactionId int    `json:"factionId"`
 	Name      string `json:"name"`
+	Leader    string `json:"leader"`
 	Members   int    `json:"members"`
 	IsMember  bool   `json:"isMember"`
 	Joinable  bool   `json:"joinable"`
@@ -165,7 +167,7 @@ func getMyFactions(w http.ResponseWriter, r *http.Request) {
 	// TODO: Paginate and accumulate the allocations for each faction
 
 	query := `
-    SELECT m.faction_id, f.allocation, f.name, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = m.faction_id), 0) as members, f.joinable, COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
+    SELECT m.faction_id, f.allocation, f.name, f.leader, COALESCE((SELECT COUNT(*) FROM factionmembersinfo WHERE faction_id = m.faction_id), 0) as members, f.joinable, COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
     FROM factionmembersinfo m
     LEFT JOIN factions f ON m.faction_id = f.faction_id
     LEFT JOIN FactionLinks l ON m.faction_id = l.faction_id
@@ -200,7 +202,7 @@ func getFactions(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * pageLength
 
 	query := `
-    SELECT f.faction_id, name, COALESCE((SELECT COUNT(*) FROM factionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
+    SELECT f.faction_id, name, leader, COALESCE((SELECT COUNT(*) FROM factionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
     COALESCE((SELECT COUNT(*) FROM factionmembersinfo fm WHERE f.faction_id = fm.faction_id AND user_address = $1), 0) > 0 as is_member, f.joinable,
     COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
     FROM factions f
@@ -224,7 +226,7 @@ func getMyChainFactions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := `
-    SELECT f.faction_id, name, COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
+    SELECT f.faction_id, name, 'N/A' as leader, COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
     COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id AND user_address = $1), 0) > 0 as is_member, true as joinable,
     COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
     FROM chainfactionmembersinfo m
@@ -249,7 +251,7 @@ func getChainFactions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := `
-    SELECT f.faction_id, name, COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
+    SELECT f.faction_id, name, 'N/A' as leader, COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id), 0) as members,
     COALESCE((SELECT COUNT(*) FROM chainfactionmembersinfo fm WHERE f.faction_id = fm.faction_id AND user_address = $1), 0) > 0 as is_member, true as joinable,
     COALESCE(icon, '') as icon, COALESCE(telegram, '') as telegram, COALESCE(twitter, '') as twitter, COALESCE(github, '') as github, COALESCE(site, '') as site
     FROM ChainFactions f
@@ -368,6 +370,7 @@ func joinChainFactionDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO : 64 characters is the max length for a chainId
 	if len(chainId) > 31 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "chainId too long (max 31 characters)")
 		return

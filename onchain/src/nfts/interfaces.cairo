@@ -36,6 +36,8 @@ pub trait ICanvasNFTAdditional<TContractState> {
     fn set_canvas_contract(ref self: TContractState, canvas_contract: starknet::ContractAddress);
     // Mint a new NFT called by the ArtPeaceNFTMinter contract.
     fn mint(ref self: TContractState, metadata: NFTMetadata, receiver: starknet::ContractAddress);
+    // Change the base uri of the NFTs.
+    fn set_base_uri(ref self: TContractState, base_uri: ByteArray);
 }
 
 #[starknet::interface]
@@ -44,6 +46,8 @@ pub trait IArtPeaceNFTMinter<TContractState> {
     fn add_nft_contract(ref self: TContractState, nft_contract: starknet::ContractAddress);
     // Mints a new NFT from the canvas using init params, and returns the token ID.
     fn mint_nft(ref self: TContractState, mint_params: NFTMintParams);
+    // Change the base uri of the NFTs.
+    fn set_nft_base_uri(ref self: TContractState, base_uri: ByteArray);
 }
 
 #[starknet::interface]

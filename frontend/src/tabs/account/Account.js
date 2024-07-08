@@ -12,6 +12,8 @@ import CrownRankImg from '../../resources/ranks/Crown.png';
 import WolfRankImg from '../../resources/ranks/Wolf.png';
 import EditIcon from '../../resources/icons/Edit.png';
 import SearchIcon from '../../resources/icons/Search.png';
+import ArgentIcon from '../../resources/icons/Argent.png';
+import BraavosIcon from '../../resources/icons/Braavos.png';
 
 const Account = (props) => {
   const [username, setUsername] = useState('');
@@ -28,12 +30,60 @@ const Account = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [usernameBeforeEdit, setUsernameBeforeEdit] = useState('');
 
+  const [isValidUsername, setIsValidUsername] = useState(false);
+  let [usernameTaken, setUsernameTaken] = useState(false);
+  useEffect(() => {
+    setUsernameTaken(false);
+    if (username === '') {
+      setIsValidUsername(false);
+      return;
+    }
+    if (username.length > 30 || username.length < 3) {
+      setIsValidUsername(false);
+      return;
+    }
+    // Allow: a-z, A-Z, 0-9, -, _, .
+    if (!/^[a-zA-Z0-9-_.]*$/.test(username)) {
+      setIsValidUsername(false);
+      return;
+    }
+    setIsValidUsername(true);
+  }, [username]);
+
   const toHex = (str) => {
     let hex = '0x';
     for (let i = 0; i < str.length; i++) {
       hex += '' + str.charCodeAt(i).toString(16);
     }
     return hex;
+  };
+
+  const connectorLogo = (name) => {
+    switch (name) {
+      case 'Argent':
+      case 'ArgentX':
+      case 'argentX':
+        return ArgentIcon;
+      case 'Braavos':
+      case 'braavos':
+        return BraavosIcon;
+      default:
+        return null;
+    }
+  };
+
+  const connectorName = (name) => {
+    switch (name) {
+      case 'Argent':
+      case 'ArgentX':
+      case 'argentX':
+        return 'Argent X';
+      case 'Braavos':
+      case 'braavos':
+        return 'Braavos';
+      default:
+        return null;
+    }
   };
 
   // TODO: Connect wallet page if no connectors
@@ -117,6 +167,18 @@ const Account = (props) => {
   // TODO: Pending & ... options for edit
   const handleSubmit = async (event) => {
     event.preventDefault();
+    // Check if username is unique
+    if (!isValidUsername) return;
+    if (usernameTaken) return;
+    let uniqueRequestUrl = `check-username-unique?username=${username}`;
+    const uniqueResponse = await fetchWrapper(uniqueRequestUrl);
+    if (uniqueResponse.data === null) {
+      console.error('Failed to check if username is unique:', uniqueResponse);
+      return;
+    } else if (uniqueResponse.data !== 0) {
+      setUsernameTaken(true);
+      return;
+    }
     if (!devnetMode) {
       setUsername(username.trim());
       if (usernameBeforeEdit === '') {
@@ -291,13 +353,18 @@ const Account = (props) => {
             <div className='Account__walletmode__connect'>
               {availableConnectors.map((connector) => {
                 return (
-                  <button
+                  <div
                     className='Text__medium Button__primary Account__walletlogin__button'
                     key={connector.id}
                     onClick={() => props.connectWallet(connector)}
                   >
-                    {connector.name}
-                  </button>
+                    <img
+                      className='Account__wallet__icon'
+                      src={connectorLogo(connector.name)}
+                      alt='wallet'
+                    />
+                    <p>{connectorName(connector.name)}</p>
+                  </div>
                 );
               })}
               {availableConnectors.length === 0 && (
@@ -342,7 +409,7 @@ const Account = (props) => {
             <div className='Account__item__user'>
               <p className='Text__small Account__item__label'>Username</p>
               <div className='Account__item__username'>
-                <p className='Text__small Account__item__label'>{username}</p>
+                <p className='Text__small Account__item__un'>{username}</p>
                 {!props.gameEnded && (
                   <div
                     className='Text__small Button__primary Account__item__button'
@@ -372,7 +439,11 @@ const Account = (props) => {
                   onChange={(e) => setUsername(e.target.value)}
                 />
                 <div className='Account__item__pair'>
-                  <button className='Text__small Button__primary' type='submit'>
+                  <button
+                    className={`Text__small Button__primary ${isValidUsername && !usernameTaken ? '' : 'Button__disabled'}`}
+                    type='submit'
+                    disabled={!isValidUsername || usernameTaken}
+                  >
                     submit
                   </button>
                   {isEditing && (
@@ -386,6 +457,16 @@ const Account = (props) => {
                   )}
                 </div>
               </form>
+              {!isValidUsername && username.length > 3 && (
+                <p className='Text__xsmall Account__form__error'>
+                  Invalid username: 3 - 30 characters, a-z, A-Z, 0-9, -, _, .
+                </p>
+              )}
+              {usernameTaken && (
+                <p className='Text__xsmall Account__form__error'>
+                  Username is already taken
+                </p>
+              )}
             </div>
           )}
 
@@ -433,16 +514,18 @@ const Account = (props) => {
             <p className='Text__small Account__item__label'>Pixels placed</p>
             <div className='Account__item__pair'>
               <p className='Text__small Account__item__label'>{pixelCount}</p>
-              <div
-                className='Button__primary Account__item__button'
-                onClick={showPixelHistory}
-              >
-                <img
-                  className='Account__item__icon'
-                  src={SearchIcon}
-                  alt='show'
-                />
-              </div>
+              {false && (
+                <div
+                  className='Button__primary Account__item__button'
+                  onClick={showPixelHistory}
+                >
+                  <img
+                    className='Account__item__icon'
+                    src={SearchIcon}
+                    alt='show'
+                  />
+                </div>
+              )}
             </div>
           </div>
           <div className='Account__disconnect__button__separator'></div>

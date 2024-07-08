@@ -31,6 +31,27 @@ spec:
           number: {{ .Values.ports.consumer }}
   - http:
       paths:
+      - path: /nft-images
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.labels.consumer.name }}
+            port:
+              number: {{ .Values.ports.consumer }}
+      - path: /nft-meta
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.labels.consumer.name }}
+            port:
+              number: {{ .Values.ports.consumer }}
+      - path: /ws
+        pathType: Exact
+        backend:
+          service:
+            name: {{ .Values.labels.consumer.name }}
+            port:
+              number: {{ .Values.ports.consumer }}
       - path: /
         pathType: Prefix
         backend:

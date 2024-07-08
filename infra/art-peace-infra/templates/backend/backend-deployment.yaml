@@ -22,3 +22,15 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.labels.backend.name }}-secret
+          volumeMounts:
+            - mountPath: /app/factions
+              name: {{ .Values.volumes.factions.name }}
+            - mountPath: /app/templates
+              name: {{ .Values.volumes.templates.name }}
+      volumes:
+        - name: {{ .Values.volumes.factions.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.factions.claim }}
+        - name: {{ .Values.volumes.templates.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.templates.claim }}

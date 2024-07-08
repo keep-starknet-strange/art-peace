@@ -22,6 +22,7 @@ func InitUserRoutes() {
 	http.HandleFunc("/get-extra-pixels", getExtraPixels)
 	http.HandleFunc("/get-username", getUsername)
 	http.HandleFunc("/get-pixel-count", getPixelCount)
+	http.HandleFunc("/check-username-unique", checkUsernameUnique)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/new-username-devnet", newUsernameDevnet)
 		http.HandleFunc("/change-username-devnet", changeUsernameDevnet)
@@ -172,7 +173,7 @@ func newUsernameDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(username) > 31 {
+	if len(username) > 64 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Username too long (max 31 characters)")
 		return
 	}
@@ -209,7 +210,7 @@ func changeUsernameDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(username) > 31 {
+	if len(username) > 64 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Username too long (max 31 characters)")
 		return
 	}
@@ -242,4 +243,20 @@ func getUserColorVote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteDataJson(w, strconv.Itoa(*vote))
+}
+
+func checkUsernameUnique(w http.ResponseWriter, r *http.Request) {
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing username parameter")
+		return
+	}
+
+	count, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM Users WHERE name = $1", username)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to check username uniqueness")
+		return
+	}
+
+	routeutils.WriteDataJson(w, strconv.Itoa(*count))
 }

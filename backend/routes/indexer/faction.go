@@ -75,6 +75,27 @@ func revertFactionCreatedEvent(event IndexerEvent) {
 	}
 }
 
+func processFactionLeaderChangedEvent(event IndexerEvent) {
+	factionIdHex := event.Event.Keys[1]
+	newLeader := event.Event.Data[0][2:] // Remove 0x prefix
+
+	factionId, err := strconv.ParseInt(factionIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processFactionLeaderChangedEvent", "Failed to parse factionId", factionIdHex, newLeader)
+		return
+	}
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Factions SET leader = $1 WHERE faction_id = $2", newLeader, factionId)
+	if err != nil {
+		PrintIndexerError("processFactionLeaderChangedEvent", "Failed to update faction leader in postgres", factionIdHex, newLeader)
+		return
+	}
+}
+
+func revertFactionLeaderChangedEvent(event IndexerEvent) {
+	// TODO: Implement
+}
+
 func processFactionJoinedEvent(event IndexerEvent) {
 	factionIdHex := event.Event.Keys[1]
 	userAddress := event.Event.Keys[2][2:] // Remove 0x prefix

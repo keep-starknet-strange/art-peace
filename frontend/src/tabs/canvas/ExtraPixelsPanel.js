@@ -278,10 +278,8 @@ const ExtraPixelsPanel = (props) => {
             className={`Button__primary ${props.isEraserMode ? 'Eraser__button--selected' : ''}`}
             onClick={() => eraserMode()}
           >
+            <p className='Text__small Eraser__text'>Eraser</p>
             <img className='Eraser__icon' src={EraserIcon} alt='eraser' />
-          </div>
-          <div className='Button__primary' onClick={() => submit()}>
-            Submit
           </div>
         </div>
       </div>
@@ -424,6 +422,12 @@ const ExtraPixelsPanel = (props) => {
             );
           })}
         </div>
+      </div>
+      <div
+        className={`Text__medium Button__primary ExtraPixelPanel__submit__button ${props.availablePixelsUsed === props.availablePixels ? 'ExtraPixelsPanel__submit__button--all' : 'ExtraPixelsPanel__submit__button--some'}`}
+        onClick={() => submit()}
+      >
+        Submit
       </div>
     </div>
   );

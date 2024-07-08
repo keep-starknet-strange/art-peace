@@ -21,6 +21,7 @@ import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
 import canvas_nft_abi from './contracts/canvas_nft.abi.json';
 import NotificationPanel from './tabs/NotificationPanel.js';
+import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
   // TODO: Animate logo exit on mobile
 
   const [footerExpanded, setFooterExpanded] = useState(false);
+  const [modal, setModal] = useState(null);
 
   const getDeviceTypeInfo = () => {
     return {
@@ -94,6 +96,7 @@ function App() {
   const [currentDay, setCurrentDay] = useState(0);
   const [isLastDay, setIsLastDay] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
+  const [host, setHost] = useState('');
   useEffect(() => {
     const fetchGameData = async () => {
       let response = await fetchWrapper('get-game-data');
@@ -119,6 +122,7 @@ function App() {
           setIsLastDay(true);
         }
       }
+      setHost(response.data.host);
     };
     fetchGameData();
   }, []);
@@ -126,7 +130,9 @@ function App() {
   // Websocket
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(wsUrl, {
     share: false,
-    shouldReconnect: () => true
+    shouldReconnect: () => true,
+    reconnectAttempts: 10,
+    reconnectInterval: (attempt) => Math.min(10000, Math.pow(2, attempt) * 1000)
   });
   const [latestMintedTokenId, setLatestMintedTokenId] = useState(null);
 
@@ -502,6 +508,14 @@ function App() {
   const [templateOverlayMode, setTemplateOverlayMode] = useState(false);
   const [overlayTemplate, setOverlayTemplate] = useState(null);
 
+  const [templateFaction, setTemplateFaction] = useState(null);
+  const [templateImage, setTemplateImage] = useState(null);
+  const [templateColorIds, setTemplateColorIds] = useState([]);
+  const [templateCreationMode, setTemplateCreationMode] = useState(false);
+  const [templateCreationSelected, setTemplateCreationSelected] =
+    useState(false);
+  const [templatePosition, setTemplatePosition] = useState(0);
+
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
   const [nftSelectionStarted, setNftSelectionStarted] = useState(false);
@@ -584,6 +598,7 @@ function App() {
           message={notificationMessage}
           animationDuration={5000}
         />
+        {modal && <ModalPanel modal={modal} setModal={setModal} />}
         <CanvasContainer
           colorPixel={colorPixel}
           address={address}
@@ -609,6 +624,14 @@ function App() {
           setTemplateOverlayMode={setTemplateOverlayMode}
           overlayTemplate={overlayTemplate}
           setOverlayTemplate={setOverlayTemplate}
+          templateImage={templateImage}
+          templateColorIds={templateColorIds}
+          templateCreationMode={templateCreationMode}
+          setTemplateCreationSelected={setTemplateCreationSelected}
+          templateCreationSelected={templateCreationSelected}
+          setTemplateCreationMode={setTemplateCreationMode}
+          templatePosition={templatePosition}
+          setTemplatePosition={setTemplatePosition}
           nftMintingMode={nftMintingMode}
           setNftMintingMode={setNftMintingMode}
           nftSelectionStarted={nftSelectionStarted}
@@ -649,12 +672,24 @@ function App() {
             colors={colors}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
+            setModal={setModal}
             getDeviceTypeInfo={getDeviceTypeInfo}
             isMobile={isMobile}
             templateOverlayMode={templateOverlayMode}
             setTemplateOverlayMode={setTemplateOverlayMode}
             overlayTemplate={overlayTemplate}
             setOverlayTemplate={setOverlayTemplate}
+            templateFaction={templateFaction}
+            setTemplateFaction={setTemplateFaction}
+            templateImage={templateImage}
+            templatePosition={templatePosition}
+            setTemplateImage={setTemplateImage}
+            templateColorIds={templateColorIds}
+            setTemplateColorIds={setTemplateColorIds}
+            templateCreationMode={templateCreationMode}
+            setTemplateCreationMode={setTemplateCreationMode}
+            templateCreationSelected={templateCreationSelected}
+            setTemplateCreationSelected={setTemplateCreationSelected}
             nftMintingMode={nftMintingMode}
             setNftMintingMode={setNftMintingMode}
             nftSelectionStarted={nftSelectionStarted}
@@ -712,6 +747,7 @@ function App() {
             currentDay={currentDay}
             gameEnded={gameEnded}
             isLastDay={isLastDay}
+            host={host}
           />
         </div>
         <div className='App__footer'>

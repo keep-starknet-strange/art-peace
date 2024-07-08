@@ -16,7 +16,9 @@
     "increase_day_devnet": "/scripts/increase_day_index.sh",
     "join_chain_faction_devnet": "/scripts/join_chain_faction.sh",
     "join_faction_devnet": "/scripts/join_faction.sh",
-    "leave_faction_devnet": "/scripts/leave_faction.sh"
+    "leave_faction_devnet": "/scripts/leave_faction.sh",
+    "add_faction_template_devnet": "/scripts/add_faction_template.sh",
+    "remove_faction_template_devnet": "/scripts/remove_faction_template.sh"
   },
   "production": false,
   "websocket": {
