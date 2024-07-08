@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.volumes.factions.claim }}
+  labels:
+    app: factions
+spec:
+  storageClassName: {{ .Values.volumes.factions.class }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.volumes.factions.storage }}

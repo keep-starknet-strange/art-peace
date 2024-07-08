@@ -82,7 +82,7 @@ const Account = (props) => {
       case 'braavos':
         return 'Braavos';
       default:
-        return null;
+        return name;
     }
   };
 
@@ -358,11 +358,13 @@ const Account = (props) => {
                     key={connector.id}
                     onClick={() => props.connectWallet(connector)}
                   >
-                    <img
-                      className='Account__wallet__icon'
-                      src={connectorLogo(connector.name)}
-                      alt='wallet'
-                    />
+                    {connectorLogo(connector.name) && (
+                      <img
+                        className='Account__wallet__icon'
+                        src={connectorLogo(connector.name)}
+                        alt='wallet'
+                      />
+                    )}
                     <p>{connectorName(connector.name)}</p>
                   </div>
                 );
