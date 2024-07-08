@@ -20,9 +20,9 @@ elif [ -z "$STARKNET_ACCOUNT" ]; then
   exit 1
 fi
 
-ART_PEACE_CONTRACT_ADDRESS=0x075381b84dd86e87836c257615e59cc46bb78bfae45e56d35595e4253e555e80
-CANVAS_NFT_CONTRACT=0x026774a47ab295f393201403ac8d2a5a7c9befc25c63dc91305a944373a5323a
-USERNAME_STORE_CONTRACT=0x073128a9f7b38d2bcdb6c1f9ef4fea357de4dfe2fab5832c1e7b51e9aae97c51
+ART_PEACE_CONTRACT_ADDRESS=0x0384e5fa826e1151715dbc3df0bd1b3aaec234dfc344394d02c39b670e354c48
+CANVAS_NFT_CONTRACT=0x009835b97a6756aca76edfd603aacb386d81fc5c34148912a306e9c22a61b748
+USERNAME_STORE_CONTRACT=0x03d9ac2a08d83dcbcf7a05358dd77e05d2b094d3c13232611fe86ee957c34d02
 
 CONTRACT_DIR=$WORK_DIR/onchain
 
@@ -36,8 +36,8 @@ DECLARED_CONTRACT_HASHES=( )
 for CONTRACT_TYPE in $CONTRACT_TYPES; do
   echo "  Declaring $CONTRACT_TYPE contract..."
   QUEST_SIERRA_FILE=$CONTRACT_DIR/target/dev/art_peace_$CONTRACT_TYPE.contract_class.json
-  echo "starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $QUEST_SIERRA_FILE"
-  QUEST_DECLARE_OUTPUT=$(starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $QUEST_SIERRA_FILE 2>&1)
+  echo "starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $QUEST_SIERRA_FILE --compiler-version 2.6.2"
+  QUEST_DECLARE_OUTPUT=$(starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $QUEST_SIERRA_FILE --compiler-version 2.6.2 2>&1)
   CLASS_HASH=$(echo $QUEST_DECLARE_OUTPUT | tail -n 1 | awk '{print $NF}')
   echo "    Declared class \"$CONTRACT_TYPE\" with hash $CLASS_HASH"
   if [[ ! -z $CLASS_HASH && $CLASS_HASH != "null" ]]; then

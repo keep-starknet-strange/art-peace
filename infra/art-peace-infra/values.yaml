@@ -27,12 +27,12 @@ volumes:
   postgres:
     name: postgres-data
     class: standard-rwo
-    storage: 10Gi
+    storage: 50Gi
   nfts:
     name: nft-data
     claim: nft-volume-claim
     class: standard-rwo
-    storage: 10Gi
+    storage: 50Gi
   factions:
     name: faction-data
     claim: faction-volume-claim
@@ -42,7 +42,7 @@ volumes:
     name: template-data
     claim: template-volume-claim
     class: standard-rwo
-    storage: 10Gi
+    storage: 50Gi
 
 deployments:
   sha: aabbccdd
@@ -73,13 +73,14 @@ postgres:
   password: ArtPeacePassword1234
 
 apibara:
-  streamUrl: https://sepolia.starknet.a5a.ch
+  streamUrl: https://mainnet.starknet.a5a.ch
+  #  streamUrl: https://sepolia.starknet.a5a.ch
   indexerId: art-peace-indexer-id
   authToken: dna_aabbcc
 
 contracts:
-  artPeace: 0x04d88b27976e74363163d97d6eb4505007c102b7c7cdb8b7bac5ea75fec6e998
-  usernameStore: 0x073128a9f7b38d2bcdb6c1f9ef4fea357de4dfe2fab5832c1e7b51e9aae97c51
-  nft: 0x040d7f7a6ec27d8ffc9e993ac9b307007356c3b3c6d5b12717953659ccd3df51
-  host: "07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124"
-  end: "1721399517"
+  artPeace: 0x0384e5fa826e1151715dbc3df0bd1b3aaec234dfc344394d02c39b670e354c48
+  usernameStore: 0x03d9ac2a08d83dcbcf7a05358dd77e05d2b094d3c13232611fe86ee957c34d02
+  nft: 0x009835b97a6756aca76edfd603aacb386d81fc5c34148912a306e9c22a61b748
+  host: "05bd7adfe8afaa58300adc72bf5584b191e236987fe16a217b1a3e067869a0aa"
+  end: "1720776600"

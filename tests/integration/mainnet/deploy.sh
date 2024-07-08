@@ -86,8 +86,8 @@ cd $ONCHAIN_DIR && scarb build
 
 # Declaring the contract
 echo "Declaring the contract..."
-echo "starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $ART_PEACE_SIERRA_FILE"
-ART_PEACE_DECLARE_OUTPUT=$(starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $ART_PEACE_SIERRA_FILE 2>&1)
+echo "starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $ART_PEACE_SIERRA_FILE --compiler-version 2.6.2"
+ART_PEACE_DECLARE_OUTPUT=$(starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $ART_PEACE_SIERRA_FILE --compiler-version 2.6.2 2>&1)
 ART_PEACE_CONTRACT_CLASSHASH=$(echo $ART_PEACE_DECLARE_OUTPUT | tail -n 1 | awk '{print $NF}')
 echo "Contract class hash: $ART_PEACE_CONTRACT_CLASSHASH"
 
@@ -104,8 +104,8 @@ COLORS=$(jq -r '.colors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 VOTABLE_COLOR_COUNT=$(jq -r '.votableColors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 VOTABLE_COLORS=$(jq -r '.votableColors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 DAILY_NEW_COLORS_COUNT=3
-START_TIME=1620276200
-END_TIME=1720276200
+START_TIME=1720430751
+END_TIME=1720776600
 DEVNET_MODE=0
 
 DAILY_QUESTS_COUNT=$(jq -r '.daily.dailyQuestsCount' $QUESTS_CONFIG)

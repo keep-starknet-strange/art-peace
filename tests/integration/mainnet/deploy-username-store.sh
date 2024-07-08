@@ -72,8 +72,8 @@ cd $ONCHAIN_DIR && scarb build
 
 # Declaring the contract
 echo "Declaring the contract..."
-echo "starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $USERNAME_STORE_SIERRA_FILE"
-USERNAME_STORE_DECLARE_OUTPUT=$(starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $USERNAME_STORE_SIERRA_FILE 2>&1)
+echo "starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $USERNAME_STORE_SIERRA_FILE --compiler-version 2.6.2"
+USERNAME_STORE_DECLARE_OUTPUT=$(starkli declare --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $USERNAME_STORE_SIERRA_FILE --compiler-version 2.6.2 2>&1)
 USERNAME_STORE_CONTRACT_CLASSHASH=$(echo $USERNAME_STORE_DECLARE_OUTPUT | tail -n 1 | awk '{print $NF}')
 echo "Contract class hash: $USERNAME_STORE_CONTRACT_CLASSHASH"
 
