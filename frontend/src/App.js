@@ -27,6 +27,8 @@ import Hamburger from './resources/icons/Hamburger.png';
 function App() {
   // Window management
   usePreventZoom();
+  const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
+  const [activeTab, setActiveTab] = useState(tabs[0]);
   useLockScroll(activeTab === 'Canvas');
 
   const isDesktopOrLaptop = useMediaQuery({
@@ -551,8 +553,6 @@ function App() {
   }, [connectors]);
 
   // Tabs
-  const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
-  const [activeTab, setActiveTab] = useState(tabs[0]);
   const [showExtraPixelsPanel, setShowExtraPixelsPanel] = useState(false);
 
   useEffect(() => {

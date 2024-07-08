@@ -20,7 +20,7 @@ const CanvasContainer = (props) => {
 
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(3.85);
+  const [canvasScale, setCanvasScale] = useState(2);
   const [touchInitialDistance, setInitialTouchDistance] = useState(0);
   const [touchScale, setTouchScale] = useState(0);
   const canvasContainerRef = useRef(null);
