@@ -118,9 +118,12 @@ function App() {
         const result = await getTodaysStartTime();
         let dayEnd = new Date(result.data);
         dayEnd.setHours(dayEnd.getHours() + 24);
-        if (now.getTime() >= response.data.endTime) {
+        // Now in seconds
+        let nowInSeconds = Math.floor(now.getTime() / 1000);
+        let dayEndInSeconds = Math.floor(dayEnd.getTime() / 1000);
+        if (nowInSeconds >= response.data.endTime) {
           setGameEnded(true);
-        } else if (dayEnd.getTime() >= response.data.endTime) {
+        } else if (dayEndInSeconds >= response.data.endTime) {
           setIsLastDay(true);
         }
       }

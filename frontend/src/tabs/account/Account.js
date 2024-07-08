@@ -63,6 +63,7 @@ const Account = (props) => {
       case 'Argent':
       case 'ArgentX':
       case 'argentX':
+      case 'Argent X':
         return ArgentIcon;
       case 'Braavos':
       case 'braavos':
@@ -77,6 +78,7 @@ const Account = (props) => {
       case 'Argent':
       case 'ArgentX':
       case 'argentX':
+      case 'Argent X':
         return 'Argent X';
       case 'Braavos':
       case 'braavos':

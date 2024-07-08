@@ -70,9 +70,9 @@ const FactionTemplateBuilderPanel = (props) => {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          width: props.templateImage.width,
-          height: props.templateImage.height,
-          image: props.templateColorIds
+          width: props.templateImage.width.toString(),
+          height: props.templateImage.height.toString(),
+          image: props.templateColorIds.toString()
         })
       });
       if (addResponse.result) {
