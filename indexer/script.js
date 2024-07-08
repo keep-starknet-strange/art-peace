@@ -137,6 +137,7 @@ export const config = {
       },
       {
         // Faction Joined Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
         keys: [
           "0x01e3fbdf8156ad0dde21e886d61a16d85c9ef54451eb6e253f3f427de32a47ac"
         ],
@@ -146,6 +147,7 @@ export const config = {
       },
       {
         // Faction Left Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
         keys: [
           "0x014ef8cc25c96157e2a00e9ceaa7c014a162d11d58a98871087ec488a67d7925"
         ],
@@ -155,6 +157,7 @@ export const config = {
       },
       {
         // Chain Faction Created Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
         keys: [
           "0x020c994ab49a8316bcc78b06d4ff9929d83b2995af33f480b93e972cedb0c926"
         ],
@@ -164,6 +167,7 @@ export const config = {
       },
       {
         // Chain Faction Joined Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
         keys: [
           "0x02947960ff713d9b594a3b718b90a45360e46d1bbacef94b727bb0d461d04207"
         ],

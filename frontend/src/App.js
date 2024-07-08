@@ -27,7 +27,7 @@ import Hamburger from './resources/icons/Hamburger.png';
 function App() {
   // Window management
   usePreventZoom();
-  useLockScroll();
+  useLockScroll(activeTab === 'Canvas');
 
   const isDesktopOrLaptop = useMediaQuery({
     query: '(min-width: 1224px)'
