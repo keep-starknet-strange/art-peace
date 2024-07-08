@@ -122,6 +122,7 @@ const QuestItem = (props) => {
       } else {
         console.log('Quest type not recognized');
       }
+      props.markCompleted(props.questId, props.type);
       return;
     }
     let route = '';

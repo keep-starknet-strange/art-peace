@@ -66,8 +66,18 @@ const Voting = (props) => {
       return; // Prevent re-voting for the same index
     }
     if (!devnetMode) {
-      setUserVote(index);
       voteCall(index);
+      const oldColorIdx = votableColorApiState.data.findIndex(
+        (idx) => idx.key === userVote
+      );
+      const colorIdx = votableColorApiState.data.findIndex(
+        (idx) => idx.key === index
+      );
+      if (oldColorIdx !== -1) {
+        votableColorApiState.data[oldColorIdx].votes--;
+      }
+      votableColorApiState.data[colorIdx].votes++;
+      setUserVote(index);
       return;
     }
     try {

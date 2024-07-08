@@ -135,7 +135,7 @@ function App() {
   // Websocket
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(wsUrl, {
     share: false,
-    shouldReconnect: () => true,
+    shouldReconnect: (_e) => true,
     reconnectAttempts: 10,
     reconnectInterval: (attempt) => Math.min(10000, Math.pow(2, attempt) * 1000)
   });

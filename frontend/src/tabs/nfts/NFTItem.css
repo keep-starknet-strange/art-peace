@@ -147,8 +147,9 @@
 }
 
 .Like__button--liked {
-  background-color: rgba(255, 64, 61, 0.2);
-  border: 1px solid rgba(255, 64, 61, 0.5);
+  background-color: rgba(255, 64, 61, 0.5);
+  border: 1px solid rgba(255, 64, 61, 0.8);
+  color: rgba(205, 255, 255, 1);
 }
 
 .NFTItem__overlay {

@@ -71,7 +71,11 @@ func SendWebSocketMessage(message map[string]interface{}) {
 			fmt.Println(err)
 			// Remove problematic connection
 			conn.Close()
-			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
+			if idx < len(core.ArtPeaceBackend.WSConnections) {
+				core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
+			} else {
+				core.ArtPeaceBackend.WSConnections = core.ArtPeaceBackend.WSConnections[:idx]
+			}
 		}
 	}
 	core.ArtPeaceBackend.WSConnectionsLock.Unlock()

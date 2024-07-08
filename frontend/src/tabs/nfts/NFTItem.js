@@ -48,8 +48,10 @@ const NFTItem = (props) => {
     if (!devnetMode) {
       if (liked) {
         unlikeNftCall(props.tokenId);
+        props.updateLikes(props.tokenId, likes - 1, false);
       } else {
         likeNftCall(props.tokenId);
+        props.updateLikes(props.tokenId, likes + 1, true);
       }
       return;
     }

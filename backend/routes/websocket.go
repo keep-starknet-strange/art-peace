@@ -39,6 +39,8 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	core.ArtPeaceBackend.WSConnectionsLock.Lock()
 	core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections, ws)
+	core.ArtPeaceBackend.WSConnectionsLock.Unlock()
 	wsReader(ws)
 }
