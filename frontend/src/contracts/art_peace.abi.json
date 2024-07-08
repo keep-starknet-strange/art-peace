@@ -6,20 +6,6 @@
   },
   {
     "type": "struct",
-    "name": "art_peace::interfaces::Pixel",
-    "members": [
-      {
-        "name": "color",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "owner",
-        "type": "core::starknet::contract_address::ContractAddress"
-      }
-    ]
-  },
-  {
-    "type": "struct",
     "name": "core::array::Span::<core::integer::u128>",
     "members": [
       {
@@ -95,77 +81,35 @@
     ]
   },
   {
+    "type": "struct",
+    "name": "art_peace::templates::interfaces::FactionTemplateMetadata",
+    "members": [
+      {
+        "name": "faction_id",
+        "type": "core::integer::u32"
+      },
+      {
+        "name": "hash",
+        "type": "core::felt252"
+      },
+      {
+        "name": "position",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "width",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "height",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
     "type": "interface",
     "name": "art_peace::interfaces::IArtPeace",
     "items": [
-      {
-        "type": "function",
-        "name": "get_pixel",
-        "inputs": [
-          {
-            "name": "pos",
-            "type": "core::integer::u128"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "art_peace::interfaces::Pixel"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "get_pixel_color",
-        "inputs": [
-          {
-            "name": "pos",
-            "type": "core::integer::u128"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::integer::u8"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "get_pixel_owner",
-        "inputs": [
-          {
-            "name": "pos",
-            "type": "core::integer::u128"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "get_pixel_xy",
-        "inputs": [
-          {
-            "name": "x",
-            "type": "core::integer::u128"
-          },
-          {
-            "name": "y",
-            "type": "core::integer::u128"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "art_peace::interfaces::Pixel"
-          }
-        ],
-        "state_mutability": "view"
-      },
       {
         "type": "function",
         "name": "get_width",
@@ -448,6 +392,22 @@
       },
       {
         "type": "function",
+        "name": "change_faction_leader",
+        "inputs": [
+          {
+            "name": "faction_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "new_leader",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
         "name": "init_chain_faction",
         "inputs": [
           {
@@ -467,13 +427,6 @@
             "type": "core::integer::u32"
           }
         ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "leave_faction",
-        "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
@@ -851,6 +804,54 @@
       },
       {
         "type": "function",
+        "name": "add_faction_template",
+        "inputs": [
+          {
+            "name": "template_metadata",
+            "type": "art_peace::templates::interfaces::FactionTemplateMetadata"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "remove_faction_template",
+        "inputs": [
+          {
+            "name": "template_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "add_chain_faction_template",
+        "inputs": [
+          {
+            "name": "template_metadata",
+            "type": "art_peace::templates::interfaces::FactionTemplateMetadata"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "remove_chain_faction_template",
+        "inputs": [
+          {
+            "name": "template_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
         "name": "get_user_pixels_placed",
         "inputs": [
           {
@@ -959,6 +960,24 @@
     ]
   },
   {
+    "type": "struct",
+    "name": "core::byte_array::ByteArray",
+    "members": [
+      {
+        "name": "data",
+        "type": "core::array::Array::<core::bytes_31::bytes31>"
+      },
+      {
+        "name": "pending_word",
+        "type": "core::felt252"
+      },
+      {
+        "name": "pending_word_len",
+        "type": "core::integer::u32"
+      }
+    ]
+  },
+  {
     "type": "interface",
     "name": "art_peace::nfts::interfaces::IArtPeaceNFTMinter",
     "items": [
@@ -981,6 +1000,18 @@
           {
             "name": "mint_params",
             "type": "art_peace::nfts::interfaces::NFTMintParams"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "set_nft_base_uri",
+        "inputs": [
+          {
+            "name": "base_uri",
+            "type": "core::byte_array::ByteArray"
           }
         ],
         "outputs": [],
@@ -1214,6 +1245,10 @@
         "type": "core::integer::u32"
       },
       {
+        "name": "start_time",
+        "type": "core::integer::u64"
+      },
+      {
         "name": "end_time",
         "type": "core::integer::u64"
       },
@@ -1250,6 +1285,33 @@
       {
         "name": "start_time",
         "type": "core::integer::u64",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::CanvasScaled",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "old_width",
+        "type": "core::integer::u128",
+        "kind": "data"
+      },
+      {
+        "name": "new_width",
+        "type": "core::integer::u128",
+        "kind": "data"
+      },
+      {
+        "name": "old_height",
+        "type": "core::integer::u128",
+        "kind": "data"
+      },
+      {
+        "name": "new_height",
+        "type": "core::integer::u128",
         "kind": "data"
       }
     ]
@@ -1491,6 +1553,23 @@
   },
   {
     "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::FactionLeaderChanged",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "faction_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "new_leader",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
     "name": "art_peace::art_peace::ArtPeace::ChainFactionCreated",
     "kind": "struct",
     "members": [
@@ -1581,6 +1660,64 @@
   },
   {
     "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::FactionTemplateAdded",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "template_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "template_metadata",
+        "type": "art_peace::templates::interfaces::FactionTemplateMetadata",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::FactionTemplateRemoved",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "template_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::ChainFactionTemplateAdded",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "template_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "template_metadata",
+        "type": "art_peace::templates::interfaces::FactionTemplateMetadata",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::ChainFactionTemplateRemoved",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "template_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
     "name": "art_peace::templates::component::TemplateStoreComponent::TemplateAdded",
     "kind": "struct",
     "members": [
@@ -1636,6 +1773,11 @@
         "kind": "nested"
       },
       {
+        "name": "CanvasScaled",
+        "type": "art_peace::art_peace::ArtPeace::CanvasScaled",
+        "kind": "nested"
+      },
+      {
         "name": "ColorAdded",
         "type": "art_peace::art_peace::ArtPeace::ColorAdded",
         "kind": "nested"
@@ -1686,6 +1828,11 @@
         "kind": "nested"
       },
       {
+        "name": "FactionLeaderChanged",
+        "type": "art_peace::art_peace::ArtPeace::FactionLeaderChanged",
+        "kind": "nested"
+      },
+      {
         "name": "ChainFactionCreated",
         "type": "art_peace::art_peace::ArtPeace::ChainFactionCreated",
         "kind": "nested"
@@ -1708,6 +1855,26 @@
       {
         "name": "VotableColorAdded",
         "type": "art_peace::art_peace::ArtPeace::VotableColorAdded",
+        "kind": "nested"
+      },
+      {
+        "name": "FactionTemplateAdded",
+        "type": "art_peace::art_peace::ArtPeace::FactionTemplateAdded",
+        "kind": "nested"
+      },
+      {
+        "name": "FactionTemplateRemoved",
+        "type": "art_peace::art_peace::ArtPeace::FactionTemplateRemoved",
+        "kind": "nested"
+      },
+      {
+        "name": "ChainFactionTemplateAdded",
+        "type": "art_peace::art_peace::ArtPeace::ChainFactionTemplateAdded",
+        "kind": "nested"
+      },
+      {
+        "name": "ChainFactionTemplateRemoved",
+        "type": "art_peace::art_peace::ArtPeace::ChainFactionTemplateRemoved",
         "kind": "nested"
       },
       {

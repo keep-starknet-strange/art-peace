@@ -154,6 +154,18 @@
         ],
         "outputs": [],
         "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "set_base_uri",
+        "inputs": [
+          {
+            "name": "base_uri",
+            "type": "core::byte_array::ByteArray"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
       }
     ]
   },
