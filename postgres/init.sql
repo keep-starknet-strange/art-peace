@@ -266,15 +266,27 @@ CREATE INDEX chainFactionMembersInfo_faction_id_index ON ChainFactionMembersInfo
 CREATE INDEX chainFactionMembersInfo_user_address_index ON ChainFactionMembersInfo (user_address);
 
 CREATE TABLE FactionTemplates (
-  template_key integer NOT NULL,
-  faction_id integer NOT NULL
+  template_id integer NOT NULL,
+  faction_id integer NOT NULL,
+  hash text NOT NULL,
+  position integer NOT NULL,
+  width integer NOT NULL,
+  height integer NOT NULL,
+  stale boolean NOT NULL
 );
-CREATE INDEX factionTemplates_template_key_index ON FactionTemplates (template_key);
+CREATE INDEX factionTemplates_template_id_index ON FactionTemplates (template_id);
 CREATE INDEX factionTemplates_faction_id_index ON FactionTemplates (faction_id);
+CREATE INDEX factionTemplates_stale_index ON FactionTemplates (stale);
 
 CREATE TABLE ChainFactionTemplates (
-  template_key integer NOT NULL,
-  faction_id integer NOT NULL
+  template_id integer NOT NULL,
+  faction_id integer NOT NULL,
+  hash text NOT NULL,
+  position integer NOT NULL,
+  width integer NOT NULL,
+  height integer NOT NULL,
+  stale boolean NOT NULL
 );
-CREATE INDEX chainFactionTemplates_template_key_index ON ChainFactionTemplates (template_key);
+CREATE INDEX chainFactionTemplates_template_id_index ON ChainFactionTemplates (template_id);
 CREATE INDEX chainFactionTemplates_faction_id_index ON ChainFactionTemplates (faction_id);
+CREATE INDEX chainFactionTemplates_stale_index ON ChainFactionTemplates (stale);

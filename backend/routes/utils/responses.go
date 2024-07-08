@@ -65,6 +65,7 @@ func SendWebSocketMessage(message map[string]interface{}) {
 		fmt.Println("Failed to marshal websocket message")
 		return
 	}
+	core.ArtPeaceBackend.WSConnectionsLock.Lock()
 	for idx, conn := range core.ArtPeaceBackend.WSConnections {
 		if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
 			fmt.Println(err)
@@ -73,4 +74,5 @@ func SendWebSocketMessage(message map[string]interface{}) {
 			core.ArtPeaceBackend.WSConnections = append(core.ArtPeaceBackend.WSConnections[:idx], core.ArtPeaceBackend.WSConnections[idx+1:]...)
 		}
 	}
+	core.ArtPeaceBackend.WSConnectionsLock.Unlock()
 }

@@ -1,0 +1,40 @@
+.TemplateCreationOverlay {
+  position: absolute;
+  z-index: 5;
+
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.TemplateCreationOverlay__image {
+  /* stretch image to fill overlay */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  opacity: 0.4;
+}
+
+.TemplateCreationOverlay__close {
+  position: absolute;
+  top: -2rem;
+  right: -2rem;
+  z-index: 5;
+  padding: 0.5rem;
+  pointer-events: auto;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+}
+
+.TemplateCreationOverlay__close:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.5);
+  transform: scale(1.05) translateY(-0.1rem);
+}
+
+.TemplateCreationOverlay__close:active {
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  transform: scale(1) translateY(0);
+}

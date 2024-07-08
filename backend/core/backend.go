@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/websocket"
 
@@ -12,7 +13,8 @@ import (
 type Backend struct {
 	Databases *Databases
 	// TODO: Is this thread safe?
-	WSConnections []*websocket.Conn
+	WSConnections     []*websocket.Conn
+	WSConnectionsLock sync.Mutex
 
 	CanvasConfig  *config.CanvasConfig
 	BackendConfig *config.BackendConfig

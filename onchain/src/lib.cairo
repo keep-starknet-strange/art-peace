@@ -32,7 +32,7 @@ mod templates {
     pub mod component;
 
     use interfaces::{
-        TemplateMetadata, ITemplateVerifier, ITemplateStoreDispatcher,
+        FactionTemplateMetadata, TemplateMetadata, ITemplateVerifier, ITemplateStoreDispatcher,
         ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher, ITemplateVerifierDispatcherTrait
     };
 }

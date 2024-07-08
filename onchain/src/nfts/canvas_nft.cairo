@@ -116,6 +116,14 @@ mod CanvasNFT {
             self.nfts.nfts_count.write(token_id + 1);
             self.nfts.emit(CanvasNFTMinted { token_id, metadata });
         }
+
+        fn set_base_uri(ref self: ContractState, base_uri: ByteArray) {
+            assert(
+                self.art_peace.read() == starknet::get_caller_address(),
+                'Only ArtPeace can set base uri'
+            );
+            self.erc721._set_base_uri(base_uri);
+        }
     }
 
     #[abi(embed_v0)]

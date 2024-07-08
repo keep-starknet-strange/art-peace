@@ -30,10 +30,10 @@ pub struct MemberMetadata {
 #[starknet::interface]
 pub trait IArtPeace<TContractState> {
     // Get canvas info
-    fn get_pixel(self: @TContractState, pos: u128) -> Pixel;
-    fn get_pixel_color(self: @TContractState, pos: u128) -> u8;
-    fn get_pixel_owner(self: @TContractState, pos: u128) -> starknet::ContractAddress;
-    fn get_pixel_xy(self: @TContractState, x: u128, y: u128) -> Pixel;
+    // fn get_pixel(self: @TContractState, pos: u128) -> Pixel;
+    // fn get_pixel_color(self: @TContractState, pos: u128) -> u8;
+    // fn get_pixel_owner(self: @TContractState, pos: u128) -> starknet::ContractAddress;
+    // fn get_pixel_xy(self: @TContractState, x: u128, y: u128) -> Pixel;
     fn get_width(self: @TContractState) -> u128;
     fn get_height(self: @TContractState) -> u128;
     fn get_total_pixels(self: @TContractState) -> u128;
@@ -69,9 +69,12 @@ pub trait IArtPeace<TContractState> {
         joinable: bool,
         allocation: u32
     );
+    fn change_faction_leader(
+        ref self: TContractState, faction_id: u32, new_leader: starknet::ContractAddress
+    );
     fn init_chain_faction(ref self: TContractState, name: felt252);
     fn join_faction(ref self: TContractState, faction_id: u32);
-    fn leave_faction(ref self: TContractState);
+    // TODO: fn leave_faction(ref self: TContractState);
     fn join_chain_faction(ref self: TContractState, faction_id: u32);
     fn get_user_faction(self: @TContractState, user: starknet::ContractAddress) -> u32;
     fn get_user_chain_faction(self: @TContractState, user: starknet::ContractAddress) -> u32;
@@ -122,6 +125,18 @@ pub trait IArtPeace<TContractState> {
 
     // NFT info
     fn get_nft_contract(self: @TContractState) -> starknet::ContractAddress;
+
+    // Templates
+    fn add_faction_template(
+        ref self: TContractState,
+        template_metadata: art_peace::templates::interfaces::FactionTemplateMetadata
+    );
+    fn remove_faction_template(ref self: TContractState, template_id: u32);
+    fn add_chain_faction_template(
+        ref self: TContractState,
+        template_metadata: art_peace::templates::interfaces::FactionTemplateMetadata
+    );
+    fn remove_chain_faction_template(ref self: TContractState, template_id: u32);
 
     // Stats
     fn get_user_pixels_placed(self: @TContractState, user: starknet::ContractAddress) -> u32;

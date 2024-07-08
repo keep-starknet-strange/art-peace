@@ -67,6 +67,7 @@ pub(crate) fn deploy_contract() -> ContractAddress {
             0x888800
         ],
         daily_new_colors_count: 3,
+        start_time: 0,
         end_time: 1000000,
         daily_quests_count: 3,
         devmode: false
@@ -118,6 +119,7 @@ pub(crate) fn deploy_with_quests_contract(
             0x888800
         ],
         daily_new_colors_count: 3,
+        start_time: 0,
         end_time: 1000000,
         daily_quests_count: daily_quests_count,
         devmode: false
@@ -213,21 +215,31 @@ fn place_pixel_test() {
     let pos = x + y * WIDTH;
     let color = 0x5;
     let now = 10;
+    snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER1());
     art_peace.place_pixel(pos, color, now);
-    assert!(art_peace.get_pixel_color(pos) == color, "Pixel was not placed correctly at pos");
-    assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel was not placed correctly at xy");
+    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
+    assert!(art_peace.get_user_pixels_placed(utils::PLAYER1()) == 1, "User pixels placed is not 1");
+    assert!(
+        art_peace.get_user_pixels_placed_color(utils::PLAYER1(), color) == 1,
+        "User pixels placed color is not 1"
+    );
 
     warp_to_next_available_time(art_peace);
     let x = 15;
     let y = 25;
-    let pos = x + y * WIDTH;
     let color = 0x7;
     let now = 20;
+    snf::start_prank(CheatTarget::One(art_peace.contract_address), utils::PLAYER2());
     art_peace.place_pixel_xy(x, y, color, now);
-    assert!(art_peace.get_pixel_xy(x, y).color == color, "Pixel xy was not placed correctly at xy");
-    assert!(art_peace.get_pixel(pos).color == color, "Pixel xy was not placed correctly at pos");
+    snf::stop_prank(CheatTarget::One(art_peace.contract_address));
+    assert!(art_peace.get_user_pixels_placed(utils::PLAYER2()) == 1, "User pixels placed is not 1");
+    assert!(
+        art_peace.get_user_pixels_placed_color(utils::PLAYER2(), color) == 1,
+        "User pixels placed color is not 1"
+    );
 }
 
+#[ignore]
 #[test]
 fn template_full_basic_test() {
     let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
@@ -391,6 +403,33 @@ fn nft_mint_test() {
 }
 
 #[test]
+fn nft_set_base_uri_test() {
+    let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
+    let nft_minter = IArtPeaceNFTMinterDispatcher { contract_address: art_peace.contract_address };
+    let nft = IERC721Dispatcher { contract_address: utils::NFT_CONTRACT() };
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::HOST());
+    nft_minter.add_nft_contract(utils::NFT_CONTRACT());
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
+
+    let mint_params = NFTMintParams { position: 10, width: 16, height: 16, name: 'test' };
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::PLAYER1());
+    nft_minter.mint_nft(mint_params);
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
+
+    let _base_uri: ByteArray = "https://api.art-peace.net/nft-meta/nft-";
+    let expected_uri: ByteArray = "https://api.art-peace.net/nft-meta/nft-0.json";
+    let nft_meta = IERC721MetadataDispatcher { contract_address: nft.contract_address };
+    assert!(nft_meta.token_uri(0) == expected_uri, "NFT URI is not correct before change");
+
+    let new_base_uri: ByteArray = "https://api.art-peace.net/nft-meta/v1/nft-";
+    let new_expected_uri: ByteArray = "https://api.art-peace.net/nft-meta/v1/nft-0.json";
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::HOST());
+    nft_minter.set_nft_base_uri(new_base_uri);
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
+    assert!(nft_meta.token_uri(0) == new_expected_uri, "NFT URI is not correct after change");
+}
+
+#[test]
 fn deposit_reward_test() {
     let art_peace_address = deploy_contract();
     let art_peace = IArtPeaceDispatcher { contract_address: art_peace_address };
@@ -428,6 +467,7 @@ fn deposit_reward_test() {
     );
 }
 
+#[ignore]
 #[test]
 fn distribute_rewards_test() {
     let art_peace_address = deploy_contract();

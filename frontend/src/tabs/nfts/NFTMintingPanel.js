@@ -56,8 +56,10 @@ const NFTMintingPanel = (props) => {
   });
 
   const [nftName, setNftName] = useState('');
+  const [isValidName, setIsValidName] = useState(false);
   const submit = async () => {
     if (nftName.length === 0 || nftName.length > 31) return;
+    if (!isValidName) return;
     if (!devnetMode) {
       mintNftCall(props.nftPosition, props.nftWidth, props.nftHeight, nftName);
       return;
@@ -84,6 +86,14 @@ const NFTMintingPanel = (props) => {
     props.setNftSelectionStarted(false);
     props.setNftSelected(false);
   };
+
+  useEffect(() => {
+    if (nftName.length === 0 || nftName.length > 31) {
+      setIsValidName(false);
+    } else {
+      setIsValidName(true);
+    }
+  }, [nftName]);
 
   // TODO: Add preview of the NFT && Add input fields for the NFT metadata
   return (
@@ -176,7 +186,7 @@ const NFTMintingPanel = (props) => {
               Cancel
             </div>
             <div
-              className={`Button__primary NFTMintingPanel__button ${nftName.length === 0 || nftName.length > 31 ? 'Button__disabled' : ''}`}
+              className={`Button__primary NFTMintingPanel__button ${!isValidName ? 'Button__disabled' : ''}`}
               onClick={() => submit()}
             >
               Submit

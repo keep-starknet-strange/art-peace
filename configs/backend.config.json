@@ -13,7 +13,9 @@
     "increase_day_devnet": "../tests/integration/local/increase_day_index.sh",
     "join_chain_faction_devnet": "../tests/integration/local/join_chain_faction.sh",
     "join_faction_devnet": "../tests/integration/local/join_faction.sh",
-    "leave_faction_devnet": "../tests/integration/local/leave_faction.sh"
+    "leave_faction_devnet": "../tests/integration/local/leave_faction.sh",
+    "add_faction_template_devnet": "../tests/integration/local/add_faction_template.sh",
+    "remove_faction_template_devnet": "../tests/integration/local/remove_faction_template.sh"
   },
   "production": false,
   "websocket": {

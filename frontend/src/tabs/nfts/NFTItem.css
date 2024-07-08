@@ -18,7 +18,7 @@
   padding: 0;
   margin: 0;
   width: 100%;
-  height: 20rem;
+  height: 100%;
 }
 
 .NFTItem__image {
@@ -49,12 +49,13 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.7);
   border-radius: 2rem;
   border: 1px solid rgba(0, 0, 0, 0.3);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   font-size: 1rem;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .NFTItem__button:hover {
@@ -68,7 +69,7 @@
 }
 
 .NFTItem__button--disabled {
-  background-color: rgba(255, 255, 255, 0.3) !important;
+  background-color: rgba(200, 200, 200, 0.7) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   box-shadow: none !important;
 }
@@ -146,7 +147,7 @@
 }
 
 .Like__button--liked {
-  background-color: rgba(255, 64, 61, 0.05);
+  background-color: rgba(255, 64, 61, 0.2);
   border: 1px solid rgba(255, 64, 61, 0.5);
 }
 

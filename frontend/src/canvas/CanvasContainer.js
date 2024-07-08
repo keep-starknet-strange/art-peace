@@ -4,6 +4,7 @@ import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
 import TemplateOverlay from './TemplateOverlay.js';
+import TemplateCreationOverlay from './TemplateCreationOverlay.js';
 import NFTSelector from './NFTSelector.js';
 import canvasConfig from '../configs/canvas.config.json';
 import { fetchWrapper } from '../services/apiService.js';
@@ -50,6 +51,7 @@ const CanvasContainer = (props) => {
 
   const handlePointerMove = (e) => {
     if (props.nftMintingMode && !props.nftSelected) return;
+    if (props.templateCreationMode && !props.templateCreationSelected) return;
     if (isDragging) {
       setCanvasX(canvasX + e.clientX - dragStartX);
       setCanvasY(canvasY + e.clientY - dragStartY);
@@ -86,7 +88,9 @@ const CanvasContainer = (props) => {
     }
 
     // Calculate new left and top position to keep cursor over the same rect pos  ition
-    let newScale = canvasScale * (1 + e.deltaY * -0.01);
+    let direction = e.deltaY > 0 ? 1 : -1;
+    let scaler = Math.log2(1 + Math.abs(e.deltaY) * 2) * direction;
+    let newScale = canvasScale * (1 + scaler * -0.01);
     if (newScale < minScale) {
       newScale = minScale;
     } else if (newScale > maxScale) {
@@ -267,7 +271,7 @@ const CanvasContainer = (props) => {
   });
 
   const pixelClicked = async (e) => {
-    if (props.nftMintingMode) {
+    if (props.nftMintingMode || props.templateCreationMode) {
       return;
     }
 
@@ -356,7 +360,7 @@ const CanvasContainer = (props) => {
       if (props.selectedColorId === -1 && !props.isEraserMode) {
         return;
       }
-      if (props.nftMintingMode) {
+      if (props.nftMintingMode || props.templateCreationMode) {
         return;
       }
       if (
@@ -388,7 +392,12 @@ const CanvasContainer = (props) => {
     return () => {
       window.removeEventListener('mousemove', hoverColor);
     };
-  }, [props.selectedColorId, props.nftMintingMode, props.isEraserMode]);
+  }, [
+    props.selectedColorId,
+    props.nftMintingMode,
+    props.isEraserMode,
+    props.templateCreationMode
+  ]);
 
   const getSelectedColorInverse = () => {
     if (props.selectedPositionX === null || props.selectedPositionY === null) {
@@ -558,6 +567,22 @@ const CanvasContainer = (props) => {
             setTemplateOverlayMode={props.setTemplateOverlayMode}
             setOverlayTemplate={props.setOverlayTemplate}
             colors={props.colors}
+          />
+        )}
+        {props.templateCreationMode && (
+          <TemplateCreationOverlay
+            canvasRef={props.canvasRef}
+            canvasScale={canvasScale}
+            templateImage={props.templateImage}
+            templateColorIds={props.templateColorIds}
+            templateCreationMode={props.templateCreationMode}
+            setTemplateCreationMode={props.setTemplateCreationMode}
+            templateCreationSelected={props.templateCreationSelected}
+            setTemplateCreationSelected={props.setTemplateCreationSelected}
+            width={width}
+            height={height}
+            templatePosition={props.templatePosition}
+            setTemplatePosition={props.setTemplatePosition}
           />
         )}
         {props.nftMintingMode && (

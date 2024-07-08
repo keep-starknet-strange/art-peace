@@ -33,6 +33,16 @@ volumes:
     claim: nft-volume-claim
     class: standard-rwo
     storage: 10Gi
+  factions:
+    name: faction-data
+    claim: faction-volume-claim
+    class: standard-rwo
+    storage: 10Gi
+  templates:
+    name: template-data
+    claim: template-volume-claim
+    class: standard-rwo
+    storage: 10Gi
 
 deployments:
   sha: aabbccdd

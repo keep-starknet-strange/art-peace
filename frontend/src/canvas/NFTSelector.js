@@ -75,6 +75,20 @@ const NFTSelector = (props) => {
         }
         let width = endX - startX;
         let height = endY - startY;
+        // Max NFT sizes
+        if (width > 64) {
+          width = 64;
+          if (x < initX) {
+            startX = endX - width;
+          }
+        }
+        if (height > 64) {
+          height = 64;
+          if (y < initY) {
+            startY = endY - height;
+          }
+        }
+
         setNftSelectionStartX(startX);
         setNftSelectionStartY(startY);
         setNftSelectionWidth(width);
@@ -175,6 +189,19 @@ const NFTSelector = (props) => {
           }
           let width = endX - startX;
           let height = endY - startY;
+          // Max NFT sizes
+          if (width > 64) {
+            width = 64;
+            if (x < initX) {
+              startX = endX - width;
+            }
+          }
+          if (height > 64) {
+            height = 64;
+            if (y < initY) {
+              startY = endY - height;
+            }
+          }
 
           setNftSelectionStartX(startX);
           setNftSelectionStartY(startY);

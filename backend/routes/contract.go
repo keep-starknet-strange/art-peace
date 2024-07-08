@@ -39,8 +39,9 @@ func setContractAddress(w http.ResponseWriter, r *http.Request) {
 }
 
 type GameData struct {
-	Day     int `json:"day"`
-	EndTime int `json:"endTime"`
+	Day     int    `json:"day"`
+	EndTime int    `json:"endTime"`
+	Host    string `json:"host"`
 }
 
 func getGameData(w http.ResponseWriter, r *http.Request) {
@@ -61,9 +62,16 @@ func getGameData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	host := os.Getenv("ART_PEACE_HOST")
+	if host == "" {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get host")
+		return
+	}
+
 	gameData := GameData{
 		Day:     *day,
 		EndTime: endTimeInt,
+		Host:    host,
 	}
 	jsonGameData, err := json.Marshal(gameData)
 	if err != nil {

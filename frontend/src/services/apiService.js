@@ -36,6 +36,13 @@ export const voteColorDevnet = async (colorIdx) => {
   });
 };
 
+export const addFactionTemplateDevnet = async (metadata) => {
+  return await fetchWrapper('add-faction-template-devnet', {
+    method: 'POST',
+    body: JSON.stringify(metadata)
+  });
+};
+
 //NFTS API
 /**
  * Fetches NFTs for a given address with pagination.

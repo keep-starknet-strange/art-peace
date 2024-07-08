@@ -15,7 +15,6 @@ export const config = {
         includeTransaction: false,
         includeReceipt: false
       },
-      
       {
         // Color Added Event
         fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
@@ -127,6 +126,16 @@ export const config = {
         includeReceipt: false
       },
       {
+        // Faction Leader Changed Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: [
+          "0x00aa4bacdfcf2717835a46fbd64f7d39bfdf2b4404bc5af8e5660415d1dc2848"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
         // Faction Joined Event
         keys: [
           "0x01e3fbdf8156ad0dde21e886d61a16d85c9ef54451eb6e253f3f427de32a47ac"
@@ -213,20 +222,50 @@ export const config = {
         includeReceipt: false
       },
       {
-        // Template Added Event
-        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        // NFT Transfer Event
+        fromAddress: Deno.env.get("NFT_CONTRACT_ADDRESS"),
         keys: [
-          "0x3E18EC266FE76A2EFCE73F91228E6E04456B744FC6984C7A6374E417FB4BF59"
+          "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"
         ],
         includeReverted: false,
         includeTransaction: false,
         includeReceipt: false
       },
       {
-        // NFT Transfer Event
-        fromAddress: Deno.env.get("NFT_CONTRACT_ADDRESS"),
+        // Faction Template Added Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
         keys: [
-          "0x0099cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"
+          "0x026ab80224b4bc3543bf20cd8b66304b3591c05eac775d823e1970514881757f"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Faction Template Removed Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: [
+          "0x029a976c0074fc910f3a6a58f1351c48dab7b1c539f54ed930616292c806283f"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Chain Faction Template Added Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: [
+          "0x00476f35ea27024c89c1fc05dfad873e9e93419e452ee781e8207e435289a39b"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Chain Faction Template Removed Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: [
+          "0x0126718de7cb8b83dfa258eb095bc0ec7a3ef5a2258ebd1ed349551764856c6b"
         ],
         includeReverted: false,
         includeTransaction: false,

@@ -12,6 +12,8 @@ import Bitcoin from '../../resources/chains/Bitcoin.png';
 import Polygon from '../../resources/chains/Polygon.png';
 import Solana from '../../resources/chains/Solana.png';
 import ZkSync from '../../resources/chains/ZkSync.png';
+import Arbitrum from '../../resources/chains/Arbitrum.png';
+import Dogecoin from '../../resources/chains/Dogecoin.png';
 import { PaginationView } from '../../ui/pagination.js';
 import { getFactions, getChainFactions } from '../../services/apiService.js';
 import { devnetMode, convertUrl } from '../../utils/Consts.js';
@@ -56,6 +58,7 @@ const FactionsMainSection = (props) => {
                   props.chainFaction ? props.chainFaction.factionId : -1
                 }
                 name={props.chainFaction ? props.chainFaction.name : 'Chain'}
+                leader={null}
                 joinable={
                   props.chainFaction ? props.chainFaction.joinable : true
                 }
@@ -71,6 +74,10 @@ const FactionsMainSection = (props) => {
                 github={props.chainFaction ? props.chainFaction.github : ''}
                 site={props.chainFaction ? props.chainFaction.site : ''}
                 isChain={true}
+                userInChainFaction={props.chainFaction !== null}
+                userInFaction={props.userFactions.length > 0}
+                queryAddress={props.queryAddress}
+                setModal={props.setModal}
               />
             )}
             {props.userFactions.map((faction, idx) => (
@@ -79,6 +86,7 @@ const FactionsMainSection = (props) => {
                 id={idx}
                 factionId={faction.factionId}
                 name={faction.name}
+                leader={faction.leader}
                 joinable={faction.joinable}
                 icon={convertUrl(faction.icon)}
                 selectFaction={props.selectFaction}
@@ -91,6 +99,10 @@ const FactionsMainSection = (props) => {
                 github={faction.github}
                 site={faction.site}
                 isChain={false}
+                userInChainFaction={props.chainFaction !== null}
+                userInFaction={props.userFactions.length > 0}
+                queryAddress={props.queryAddress}
+                setModal={props.setModal}
               />
             ))}
             <p
@@ -105,18 +117,33 @@ const FactionsMainSection = (props) => {
             >
               {props.queryAddress === '0'
                 ? 'Login with your wallet to see your factions'
-                : 'Join a faction to represent your community'}
+                : 'Join a faction to represent your community and receive extra pixels'}
             </p>
+            {props.userFactions.length === 0 && props.chainFaction !== null && (
+              <div
+                className='Text__medium Button__primary Factions__msg__button'
+                onClick={() => props.setExpanded(true)}
+              >
+                Join a community faction
+              </div>
+            )}
           </div>
         )}
         {props.selectedFaction !== null && (
           <FactionItem
+            address={props.address}
             queryAddress={props.queryAddress}
+            colors={props.colors}
             setActiveTab={props.setActiveTab}
             faction={props.selectedFaction}
             clearFactionSelection={props.clearFactionSelection}
             setTemplateOverlayMode={props.setTemplateOverlayMode}
             setOverlayTemplate={props.setOverlayTemplate}
+            setTemplateFaction={props.setTemplateFaction}
+            setTemplateCreationMode={props.setTemplateCreationMode}
+            setTemplateCreationSelected={props.setTemplateCreationSelected}
+            setTemplateImage={props.setTemplateImage}
+            setTemplateColorIds={props.setTemplateColorIds}
             joinFaction={props.joinFaction}
             joinChain={props.joinChain}
             userInFaction={props.userFactions.length > 0}
@@ -124,6 +151,8 @@ const FactionsMainSection = (props) => {
             factionAlloc={props.selectedFactionType === 'chain' ? 2 : 1}
             isChain={props.selectedFactionType === 'chain'}
             gameEnded={props.gameEnded}
+            host={props.host}
+            setModal={props.setModal}
           />
         )}
       </div>
@@ -146,9 +175,19 @@ const FactionsExpandedSection = (props) => {
         });
         if (result.data) {
           if (props.allFactionsPagination.page === 1) {
-            props.setAllFactions(result.data);
+            let factions = result.data;
+            // Remove non-joinable factions
+            factions = factions.filter((faction) => faction.joinable);
+            // Randomize factions order
+            factions.sort(() => Math.random() - 0.5);
+            props.setAllFactions(factions);
           } else {
-            props.setAllFactions([...props.allFactions, ...result.data]);
+            let factions = [...props.allFactions, ...result.data];
+            // Remove non-joinable factions
+            factions = factions.filter((faction) => faction.joinable);
+            // Randomize factions order
+            factions.sort(() => Math.random() - 0.5);
+            props.setAllFactions(factions);
           }
         }
       } catch (error) {
@@ -161,7 +200,10 @@ const FactionsExpandedSection = (props) => {
           queryAddress: props.queryAddress
         });
         if (result.data) {
-          props.setChainFactions(result.data);
+          let chainFactions = result.data;
+          // Randomize chain factions order
+          chainFactions.sort(() => Math.random() - 0.5);
+          props.setChainFactions(chainFactions);
         }
       } catch (error) {
         console.log('Error fetching Nfts', error);
@@ -176,7 +218,7 @@ const FactionsExpandedSection = (props) => {
     props.allFactionsPagination.pageLength
   ]);
 
-  const exploreOptions = ['Factions', 'Events'];
+  const exploreOptions = ['Factions']; //, 'Events'];
   const [selectedExplore, setSelectedExplore] = useState(exploreOptions[0]);
 
   return (
@@ -187,10 +229,10 @@ const FactionsExpandedSection = (props) => {
         <div className='Factions__joiner'>
           <div className='Factions__joiner__header'>
             <h3 className='Text__medium Heading__sub Factions__joiner__heading'>
-              Pick a faction to represent your favorite chain
+              Join a chain faction and earn extra pixels
             </h3>
             <div
-              className='Text__small Button__primary'
+              className='Text__medium Button__primary'
               onClick={() => props.setExploreMode(true)}
             >
               Explore
@@ -201,7 +243,14 @@ const FactionsExpandedSection = (props) => {
               <div
                 key={idx}
                 className='Factions__joiner__option__container'
-                onClick={() => props.joinChain(idx + 1)}
+                onClick={() => {
+                  props.setModal({
+                    title: 'Join Chain Faction',
+                    text: `You can only join one Chain Faction. Are you sure you want to join the ${chain.name} Faction?`,
+                    confirm: 'Join',
+                    action: () => props.joinChain(chain.factionId)
+                  });
+                }}
               >
                 <div className='Factions__joiner__option__inner'>
                   <img
@@ -226,23 +275,30 @@ const FactionsExpandedSection = (props) => {
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
           <div className='Factions__header'>
             <h2 className='Text__large Factions__heading'>Explore</h2>
-            <div className='Factions__header__buttons'>
-              {exploreOptions.map((option, idx) => (
-                <div
-                  key={idx}
-                  className={`Text__medium Button__primary Factions__header__button ${
-                    selectedExplore === option
-                      ? 'Factions__header__button--selected'
-                      : ''
-                  }`}
-                  onClick={() => setSelectedExplore(option)}
-                >
-                  {option}
-                </div>
-              ))}
-            </div>
+            {false && (
+              <div className='Factions__header__buttons'>
+                {exploreOptions.map((option, idx) => (
+                  <div
+                    key={idx}
+                    className={`Text__medium Button__primary Factions__header__button ${
+                      selectedExplore === option
+                        ? 'Factions__header__button--selected'
+                        : ''
+                    }`}
+                    onClick={() => setSelectedExplore(option)}
+                  >
+                    {option}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className='Factions__all__container'>
+            {props.userFactions.length === 0 && (
+              <p className='Text__medium Factions__all__msg'>
+                Join a community faction and gain extra pixels
+              </p>
+            )}
             <div className='Factions__all__grid'>
               {props.allFactions.map((faction, idx) => (
                 <FactionSelector
@@ -250,6 +306,7 @@ const FactionsExpandedSection = (props) => {
                   id={idx}
                   factionId={faction.factionId}
                   name={faction.name}
+                  leader={faction.leader}
                   joinable={faction.joinable}
                   icon={convertUrl(faction.icon)}
                   selectFaction={props.selectFaction}
@@ -261,6 +318,12 @@ const FactionsExpandedSection = (props) => {
                   github={faction.github}
                   site={faction.site}
                   isChain={false}
+                  userInChainFaction={props.chainFaction !== null}
+                  userInFaction={props.userFactions.length > 0}
+                  joinFaction={props.joinFaction}
+                  joinChain={props.joinChain}
+                  queryAddress={props.queryAddress}
+                  setModal={props.setModal}
                 />
               ))}
             </div>
@@ -272,6 +335,7 @@ const FactionsExpandedSection = (props) => {
                   id={idx}
                   factionId={chain.factionId}
                   name={chain.name}
+                  leader={null}
                   joinable={chain.joinable}
                   icon={chainIcons[chain.name]}
                   selectFaction={props.selectFaction}
@@ -283,6 +347,12 @@ const FactionsExpandedSection = (props) => {
                   github={chain.github}
                   site={chain.site}
                   isChain={true}
+                  userInChainFaction={props.chainFaction !== null}
+                  userInFaction={props.userFactions.length > 0}
+                  joinFaction={props.joinFaction}
+                  joinChain={props.joinChain}
+                  queryAddress={props.queryAddress}
+                  setModal={props.setModal}
                 />
               ))}
             </div>
@@ -301,7 +371,9 @@ const chainIcons = {
   ZkSync: ZkSync,
   Polygon: Polygon,
   Optimism: Optimism,
-  Scroll: Scroll
+  Scroll: Scroll,
+  Arbitrum: Arbitrum,
+  Dogecoin: Dogecoin
 };
 
 const Factions = (props) => {
@@ -487,6 +559,8 @@ const Factions = (props) => {
       title='Factions'
       mainSection={FactionsMainSection}
       expandedSection={FactionsExpandedSection}
+      address={props.address}
+      artPeaceContract={props.artPeaceContract}
       setActiveTab={props.setActiveTab}
       userFactions={props.userFactions}
       setUserFactions={props.setUserFactions}
@@ -524,6 +598,14 @@ const Factions = (props) => {
       setOverlayTemplate={props.setOverlayTemplate}
       isMobile={props.isMobile}
       gameEnded={props.gameEnded}
+      host={props.host}
+      colors={props.colors}
+      setTemplateFaction={props.setTemplateFaction}
+      setTemplateCreationMode={props.setTemplateCreationMode}
+      setTemplateCreationSelected={props.setTemplateCreationSelected}
+      setTemplateImage={props.setTemplateImage}
+      setTemplateColorIds={props.setTemplateColorIds}
+      setModal={props.setModal}
     />
   );
 };

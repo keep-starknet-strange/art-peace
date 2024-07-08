@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './FactionSelector.css';
 import _Info from '../../resources/icons/Info.png';
 import _Template from '../../resources/icons/Template.png';
@@ -16,6 +16,27 @@ const FactionSelector = (props) => {
     props.selectFaction(props, props.isChain);
   };
 
+  const [canJoin, setCanJoin] = useState(true);
+  useEffect(() => {
+    if (props.queryAddress === '0' || props.gameEnded) {
+      setCanJoin(false);
+      return;
+    }
+    if (props.isMember || !props.joinable) {
+      setCanJoin(false);
+      return;
+    }
+    if (props.isChain && props.userInChainFaction) {
+      setCanJoin(false);
+      return;
+    }
+    if (!props.isChain && props.userInFaction) {
+      setCanJoin(false);
+      return;
+    }
+    setCanJoin(true);
+  }, [props]);
+
   return (
     <div className='FactionSelector__container' onClick={selectFaction}>
       <div className='FactionSelector__main'>
@@ -32,6 +53,38 @@ const FactionSelector = (props) => {
               {props.members} members
             </p>
             <div className='FactionSelector__info__links'>
+              {canJoin && (
+                <div
+                  className={`Text__xsmall Button__primary FactionItem__header__button`}
+                  style={{ borderRadius: '2rem' }}
+                  onClick={() => {
+                    // Make the user confirm they can only join one faction
+                    if (props.isChain) {
+                      props.setModal({
+                        title: 'Join Chain Faction',
+                        text: `You can only join one Chain Faction. Are you sure you want to join the ${props.name} Faction`,
+                        confirm: 'Join',
+                        action: () => {
+                          props.joinChain(props.factionId);
+                        }
+                      });
+                      return;
+                    } else {
+                      props.setModal({
+                        title: 'Join Faction',
+                        text: `You can only join one Faction. Are you sure you want to join the ${props.name} Faction`,
+                        confirm: 'Join',
+                        action: () => {
+                          props.joinFaction(props.factionId);
+                        }
+                      });
+                      return;
+                    }
+                  }}
+                >
+                  <p style={{ padding: '0.5rem 0', margin: '0' }}>Join</p>
+                </div>
+              )}
               {props.telegram && (
                 <a
                   className='FactionSelector__link'
