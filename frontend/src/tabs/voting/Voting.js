@@ -157,17 +157,6 @@ const Voting = (props) => {
               {props.timeLeftInDay}
             </p>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              padding: '1.4rem 0.5rem'
-            }}
-          >
-            <p className='Text__small Voting__description'>
-              Check back tomorrow after the game ends to vote for the best NFTs.
-            </p>
-          </div>
         </div>
       )}
       {!props.isLastDay && !props.gameEnded && (
