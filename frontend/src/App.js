@@ -99,6 +99,7 @@ function App() {
   const [isLastDay, setIsLastDay] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
   const [host, setHost] = useState('');
+  const [endTimestamp, setEndTimestamp] = useState(0);
   useEffect(() => {
     const fetchGameData = async () => {
       let response = await fetchWrapper('get-game-data');
@@ -128,6 +129,7 @@ function App() {
         }
       }
       setHost(response.data.host);
+      setEndTimestamp(response.data.endTime);
     };
     fetchGameData();
   }, []);
@@ -750,6 +752,7 @@ function App() {
             currentDay={currentDay}
             gameEnded={gameEnded}
             isLastDay={isLastDay}
+            endTimestamp={endTimestamp}
             host={host}
           />
         </div>

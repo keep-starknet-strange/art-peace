@@ -111,6 +111,7 @@ const QuestItem = (props) => {
         return;
       }
     }
+    // TODO: Bug when token_id is 0
     if (props.calldata) {
       questCalldata = props.calldata;
     }

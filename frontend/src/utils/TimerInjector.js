@@ -4,7 +4,8 @@ import { fetchWrapper } from '../services/apiService';
 import { getTodaysStartTime } from '../services/apiService.js';
 import { devnetMode } from '../utils/Consts.js';
 
-export const TimerInjector = ({ children, props }) => {
+// TODO: CHange props
+export const TimerInjector = ({ children, props, isLastDay, endTimestamp }) => {
   // Timing
   const [startTimeApiState, setStartTimeApiState] = useState({
     loading: null,
@@ -86,8 +87,14 @@ export const TimerInjector = ({ children, props }) => {
         return;
       }
       const now = new Date();
-      const thisDayEnd = new Date(startTimeApiState.data);
-      thisDayEnd.setHours(thisDayEnd.getHours() + 24);
+      let thisDayEnd = now;
+      console.log(props);
+      if (isLastDay) {
+        thisDayEnd = new Date(endTimestamp * 1000);
+      } else {
+        thisDayEnd = new Date(startTimeApiState.data);
+        thisDayEnd.setHours(thisDayEnd.getHours() + 24);
+      }
 
       const difference = thisDayEnd - now;
       if (difference < 0 || devnetMode) {

@@ -140,6 +140,8 @@ const TabPanel = (props) => {
                   address={props.address}
                   artPeaceContract={props.artPeaceContract}
                   gameEnded={props.gameEnded}
+                  isLastDay={props.isLastDay}
+                  endTimestamp={props.endTimestamp}
                 >
                   {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Quests
@@ -200,6 +202,8 @@ const TabPanel = (props) => {
                   address={props.address}
                   artPeaceContract={props.artPeaceContract}
                   gameEnded={props.gameEnded}
+                  isLastDay={props.isLastDay}
+                  endTimestamp={props.endTimestamp}
                 >
                   {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Voting
