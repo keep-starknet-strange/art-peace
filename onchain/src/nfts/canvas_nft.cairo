@@ -71,7 +71,6 @@ mod CanvasNFT {
 
     #[constructor]
     fn constructor(ref self: ContractState, name: ByteArray, symbol: ByteArray) {
-        // TODO: allow changing base_uri
         let base_uri = "https://api.art-peace.net/nft-meta/nft-";
         self.erc721.initializer(name, symbol, base_uri);
     }

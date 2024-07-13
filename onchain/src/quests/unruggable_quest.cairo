@@ -51,10 +51,6 @@ pub mod UnruggableQuest {
                 contract_address: coin_address_as_felt252.try_into().unwrap()
             };
 
-            if coin.owner() != user {
-                return false;
-            }
-
             if coin.is_launched() != true {
                 return false;
             }

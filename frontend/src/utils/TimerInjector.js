@@ -88,7 +88,7 @@ export const TimerInjector = ({ children, props, isLastDay, endTimestamp }) => {
       }
       const now = new Date();
       let thisDayEnd = now;
-      console.log(props);
+      // TODO: isLastDay || game ended
       if (isLastDay) {
         thisDayEnd = new Date(endTimestamp * 1000);
       } else {

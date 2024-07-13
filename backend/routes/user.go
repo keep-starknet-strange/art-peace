@@ -34,7 +34,6 @@ func getUsernameStoreAddress(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, "\""+contractAddress+"\"")
 }
 
-// TODO: Set env var on infra level in production
 func setUsernameStoreAddress(w http.ResponseWriter, r *http.Request) {
 	// Only allow admin to set contract address
 	if routeutils.AdminMiddleware(w, r) {

@@ -1,0 +1,83 @@
+setup .env w/ STARKNET_KEYSTORE=$HOME/.starkli-sepolia/starkli-keystore.json
+              STARKNET_ACCOUNT=$HOME/.starkli-sepolia/starkli-account.json
+
+source .env
+
+build contracts : scarb build
+deploy username store to sepolia
+    ./tests/integration/sepolia/deploy-username-store.sh
+    save address
+deploy art peace to sepolia
+    vim ./tests/integration/sepolia/deploy.sh
+    change start & end time
+    ./tests/integration/sepolia/deploy.sh
+    save address
+deploy canvas nft to sepolia
+    ./tests/integration/sepolia/deploy-canvas-nft.sh
+    save address
+    and set in art_peace contract
+deploy quests
+    vim ./tests/integration/sepolia/deploy_quests.sh
+    change art peace address, canvas contract address, username store, ...
+    ./tests/integration/sepolia/deploy_quests.sh
+
+setup nft contract
+setup factions
+    vim ./tests/integration/sepolia/setup_factions.sh
+    change art-peace contract
+    ./tests/integration/sepolia/setup_factions.sh
+
+copy abis to frontend
+    make update-frontend-contracts
+
+build prod docker images w/ new version & push to docker hub
+   Update docker version in infra/art-peace-infra/Chart.yaml if needed
+   Update contracts in values.yaml
+   commit and merge changes
+   make docker-build
+   make docker-push
+
+apply changes to cloud
+   cloud console
+   clone / pull latest main
+     git clone https://github.com/keep-starknet-strange/art-peace.git
+     git pull origin main
+   cd art-peace
+   If full reset
+     make helm-uninstall
+     POSTGRES_PASSWORD=test AUTH_TOKEN=dna_abc make helm-install
+     make init-infra-prod
+  else
+     POSTGRES_PASSWORD=test AUTH_TOKEN=dna_abc make helm-upgrade
+
+change frontend contract addresses in vercel
+    https://vercel.com/keep-starknet-strange/art-peace/settings
+    REACT_APP_STARKNET_CONTRACT_ADDRESS=
+    REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS=
+    REACT_APP_CANVAS_NFT_CONTRACT_ADDRESS=
+    ART_PEACE_END_TIME=
+    ART_PEACE_HOST=
+
+
+    kubectl cp ../postgres/init.sql pod:/home
+      kubectl exec -it pod/pod-name bash
+      psql -U art-peace-user -d art-peace-db -f /home/init.sql
+    reset :
+      kubectl delete pvc nft-volume-claim redis-volume-claim
+      kubectl delete deployment.apps/backend deployment.apps/admin-backend deployment.apps/consumer deployment.apps/indexer deployment.apps/redis
+
+    setup canvas, quests, and faction backend
+
+
+
+
+video:
+  redis-server
+  redis-cli del canvas
+  backend/video/video.go - set color palette
+  backend/routes/indexer/route.go - add video.GenerateImageFromCanvas(message.Data.Cursor.OrderKey) after LastFinalizedCursor = message.Data.Cursor.OrderKey
+  go run cmd/video-gen/video.go
+  curl http://localhost:8081/init-canvas
+  setup indexer.env for art peace contract
+  AUTH_TOKEN=dna_abc apibara run indexer/video-script.js --allow-env backend/video/indexer.env
+  render video from frames in blender

@@ -11,8 +11,7 @@ import (
 )
 
 type Backend struct {
-	Databases *Databases
-	// TODO: Is this thread safe?
+	Databases         *Databases
 	WSConnections     []*websocket.Conn
 	WSConnectionsLock sync.Mutex
 
@@ -41,7 +40,6 @@ func (b *Backend) Start(port int) {
 
 func (b *Backend) GetBackendUrl() string {
 	if b.BackendConfig.Production {
-		// TODO: To config
 		return "https://api.art-peace.net"
 	} else {
 		return fmt.Sprintf("http://%s:%d", b.BackendConfig.Host, b.BackendConfig.Port)

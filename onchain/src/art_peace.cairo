@@ -824,6 +824,7 @@ pub mod ArtPeace {
             let mut i = self.main_quests_count.read();
             let end = i + quests.len();
             while i < end {
+                // TODO: This should be i - self.main_quests_count.read()
                 self.main_quests.write(i, *quests.at(i));
                 i += 1;
             };

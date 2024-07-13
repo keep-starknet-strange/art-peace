@@ -186,7 +186,6 @@ func processNFTMintedEvent(event IndexerEvent) {
 
 	x := position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	y := position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
-	// TODO: Name from onchain mint event
 	metadata := map[string]interface{}{
 		"name":        name,
 		"description": "User minted art/peace NFT from the canvas.",

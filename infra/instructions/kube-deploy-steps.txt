@@ -1,0 +1,91 @@
+setup .env w/ STARKNET_KEYSTORE=$HOME/.starkli-sepolia/starkli-keystore.json
+              STARKNET_ACCOUNT=$HOME/.starkli-sepolia/starkli-account.json
+              DOCKER_VERSION=new version
+source .env
+
+deploy username store to sepolia
+    ./tests/integration/sepolia/deploy-username-store.sh
+    save address
+deploy art peace to sepolia
+    vim ./tests/integration/sepolia/deploy.sh
+    change end time
+    ./tests/integration/sepolia/deploy.sh
+    save address
+deploy canvas nft to sepolia
+    ./tests/integration/sepolia/deploy-canvas-nft.sh
+    save address
+    and set in art_peace contract
+deploy quests
+    vim ./tests/integration/sepolia/deploy-daily-quests.sh
+    change art peace address
+    ./tests/integration/sepolia/deploy-daily-quests.sh
+    save address(es)
+    add quests to art peace
+
+copy abis to frontend
+    jq -r '.abi' onchain/target/dev/art_peace_UsernameStore.contract_class.json > frontend/src/contracts/username_store.abi.json
+    jq -r '.abi' onchain/target/dev/art_peace_ArtPeace.contract_class.json > frontend/src/contracts/art_peace.abi.json
+
+build prod docker images w/ new version & push to docker hub
+   docker build . -f backend/Dockerfile.prod -t "brandonjroberts/art-peace-backend:$DOCKER_VERSION"
+   docker build . -f backend/Dockerfile.consumer.prod -t "brandonjroberts/art-peace-consumer:$DOCKER_VERSION"
+   docker build . -f indexer/Dockerfile.prod -t "brandonjroberts/art-peace-indexer:$DOCKER_VERSION"
+   docker push "brandonjroberts/art-peace-backend:$DOCKER_VERSION"
+   docker push "brandonjroberts/art-peace-consumer:$DOCKER_VERSION"
+   docker push "brandonjroberts/art-peace-indexer:$DOCKER_VERSION"
+
+clean old infra / volumes if needed
+   cloud console 
+
+   kubectl delete deployment.apps/backend deployment.apps/consumer deployment.apps/indexer deployment.apps/postgres deployment.apps/redis
+   kubectl delete pvc postgres-volume-claim redis-volume-claim nft-volume-claim
+   kubectl get pv
+   kubectl delete pv's above --grace-period=0 --force
+
+apply kubectl changes
+    clone / pull latest main / branch art-peace
+      git clone https://github.com/keep-starknet-strange/art-peace.git
+    cd art-peace & checkout
+    cd infra
+    change configmap values
+       vim backend/backend-configmap.yaml
+       vim consumer/consumer-configmap.yaml
+       vim indexer/indexer-configmap.yaml
+       vim postgres/postgres-configmap.yaml
+    change image tags in deployments
+      vim backend/backend-deployment.yaml
+      vim consumer/consumer-deployment.yaml
+      vim indexer/indexer-deployment.yaml
+    apply all
+      kubectl apply -f backend/backend-configmap.yaml
+      kubectl apply -f consumer/consumer-configmap.yaml
+      kubectl apply -f indexer/indexer-configmap.yaml
+      kubectl apply -f postgres/postgres-configmap.yaml
+      kubectl apply -f redis/redis-configmap.yaml
+      kubectl apply -f postgres/psql-pvc.yaml
+      kubectl apply -f redis/redis-pvc.yaml
+      kubectl apply -f backend/nfts-pvc.yaml
+      kubectl apply -f postgres/psql-deployment.yaml
+
+      kubectl cp ../postgres/init.sql pod:/home
+      kubectl exec -it pod/pod-name bash
+      psql -U art-peace-user -d art-peace-db -f /home/init.sql
+
+      kubectl apply -f redis/redis-deployment.yaml
+      kubectl apply -f backend/backend-deployment.yaml
+      kubectl apply -f consumer/consumer-deployment.yaml
+      kubectl apply -f indexer/indexer-deployment.yaml
+
+init backend w/ commands if needed
+    curl https://api.art-peace.net/init-canvas -X POST
+    export COLORS=$(cat ../configs/canvas.config.json | jq -r '.colors | map("\"\(.)\"") | join(",")')
+    curl https://api.art-peace.net/init-colors -X POST -d "[$COLORS]"
+    export VOTABLE_COLORS=$(cat ../configs/canvas.config.json | jq -r '.votableColors | map("\"\(.)\"") | join(",")')
+    curl https://api.art-peace.net/init-votable-colors -X POST -d "[$VOTABLE_COLORS]"
+    export QUESTS_CONFIG_FILE="../configs/quests.config.json"
+    curl https://api.art-peace.net/init-quests -X POST -d "@$QUESTS_CONFIG_FILE"
+
+change frontend contract addresses in vercel
+    https://vercel.com/keep-starknet-strange/art-peace/settings
+    REACT_APP_STARKNET_CONTRACT_ADDRESS=
+    REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS=

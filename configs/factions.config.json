@@ -4,7 +4,7 @@
       "id": 1,
       "name": "Ducks Everywhere",
       "icon": "$BACKEND_URL/faction-images/ducks-everywhere.png",
-      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
       "joinable": true,
       "allocation": 1,
       "links": {
@@ -20,7 +20,7 @@
       "id": 2,
       "name": "WASD",
       "icon": "$BACKEND_URL/faction-images/wasd.png",
-      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
       "joinable": true,
       "allocation": 1,
       "links": {
@@ -36,7 +36,7 @@
       "id": 3,
       "name": "Influence",
       "icon": "$BACKEND_URL/faction-images/influence.png",
-      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
       "joinable": true,
       "allocation": 1,
       "links": {
@@ -52,7 +52,7 @@
       "id": 4,
       "name": "Ark Project",
       "icon": "$BACKEND_URL/faction-images/ark-project.png",
-      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
       "joinable": true,
       "allocation": 1,
       "links": {
@@ -68,7 +68,7 @@
       "id": 5,
       "name": "Everai",
       "icon": "$BACKEND_URL/faction-images/everai.png",
-      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
       "joinable": true,
       "allocation": 1,
       "links": {
@@ -84,7 +84,7 @@
       "id": 6,
       "name": "2077 Collective",
       "icon": "$BACKEND_URL/faction-images/2077.png",
-      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
       "joinable": true,
       "allocation": 1,
       "links": {
@@ -100,7 +100,7 @@
       "id": 7,
       "name": "Argent",
       "icon": "$BACKEND_URL/faction-images/argent.png",
-      "leader": "0x07c313ea8b45044c2272b77ec7332b65bdfef089c4de0fffab3de3fd6b85d124",
+      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
       "joinable": true,
       "allocation": 1,
       "links": {

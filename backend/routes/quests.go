@@ -262,7 +262,6 @@ func GetDailyQuests(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, string(jsonQuests))
 }
 
-// TODO: Here
 func GetMainQuests(w http.ResponseWriter, r *http.Request) {
 	quests, err := core.PostgresQuery[MainQuest]("SELECT key - 1 as quest_id, name, description, reward FROM MainQuests ORDER BY quest_id ASC")
 	if err != nil {
@@ -314,6 +313,7 @@ func GetMainUserQuests(w http.ResponseWriter, r *http.Request) {
 
 	// Add claim params to quests
 	for _, questClaimParam := range questClaimParams {
+		// TODO: Assumes no gaps in quest ids
 		quests[questClaimParam.QuestId].ClaimParams = append(quests[questClaimParam.QuestId].ClaimParams, questClaimParam)
 	}
 

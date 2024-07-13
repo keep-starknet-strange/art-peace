@@ -93,7 +93,7 @@ func initFactions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: check if quests already exist
+	// TODO: check if factions already exist
 	factionJson, err := routeutils.ReadJsonBody[FactionsConfig](r)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to parse request body")
