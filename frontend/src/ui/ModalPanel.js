@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { encodeToLink } from '../utils/encodeToLink';
 import './ModalPanel.css';
 
 const ModalPanel = (props) => {
@@ -15,6 +16,9 @@ const ModalPanel = (props) => {
   const clearModal = () => {
     setIsVisible(false);
     props.setModal(null);
+    if (props.modal.closeAction) {
+      props.modal.closeAction();
+    }
   };
 
   const confirmModal = () => {
@@ -29,7 +33,16 @@ const ModalPanel = (props) => {
           <h2 className='Text__medium modal-panel__title'>
             {props.modal.title}
           </h2>
-          <p className='Text__small modal-panel__text'>{props.modal.text}</p>
+          {props.modal.text &&
+            props.modal.text.split('\n').map((item, key) => {
+              return (
+                <p
+                  key={key}
+                  className='Text__small modal-panel__text'
+                  dangerouslySetInnerHTML={encodeToLink(item)}
+                ></p>
+              );
+            })}
           <div className='modal-panel__buttons'>
             <div className='Text__small Button__primary' onClick={clearModal}>
               Cancel

@@ -261,6 +261,7 @@ const TabPanel = (props) => {
                   connectors={props.connectors}
                   isMobile={props.isMobile}
                   gameEnded={props.gameEnded}
+                  setModal={props.setModal}
                 />
               </div>
             )}

@@ -102,6 +102,56 @@ const Account = (props) => {
     );
   }, [props.address]);
 
+  const [userAwards, setUserAwards] = useState([]);
+  const [claimText, setClaimText] = useState('');
+  useEffect(() => {
+    const fetchAwards = async () => {
+      const getAwardsUrl = `${backendUrl}/get-user-rewards?address=${props.queryAddress}`;
+      const response = await fetch(getAwardsUrl);
+      if (response.ok) {
+        const result = await response.json();
+        setUserAwards(result.data);
+        let claimTextStr = 'You qualify for the following awards: \n';
+        if (!result.data || result.data.length === 0) {
+          claimTextStr += 'No awards\n';
+          setClaimText(claimTextStr);
+          return;
+        }
+        for (let i = 0; i < result.data.length; i++) {
+          let claimObject = result.data[i];
+          claimTextStr +=
+            claimObject.type + ' : ' + claimObject.amount + 'STRK\n';
+        }
+        claimTextStr += '\nTo claim your award:\n';
+        // TODO: Hardcoded issue link
+        claimTextStr +=
+          '1. Create a [github account](https://github.com) if you dont have one. \n2. Sign up for [OnlyDust](https://app.onlydust.com) and link your Starknet account used in the art/peace competition. \n3. Comment on [this Github issue](https://github.com/keep-starknet-strange/art-peace/issues/251) with a photo of your account page and what awards you qualify for. \nThank you!';
+        setClaimText(claimTextStr);
+      } else {
+        console.error('Failed to fetch awards:', await response.text());
+      }
+    };
+
+    fetchAwards();
+  }, [props.queryAddress]);
+
+  const [showClaimInfo, setShowClaimInfo] = useState(false);
+  useEffect(() => {
+    if (showClaimInfo) {
+      props.setModal({
+        title: 'How to claim',
+        text: claimText,
+        confirm: 'Done',
+        action: () => {
+          setShowClaimInfo(false);
+        },
+        closeAction: () => {
+          setShowClaimInfo(false);
+        }
+      });
+    }
+  }, [showClaimInfo, userAwards]);
+
   const [calls, setCalls] = useState([]);
   const claimCall = (username) => {
     if (devnetMode) return;
@@ -530,6 +580,24 @@ const Account = (props) => {
                   />
                 </div>
               )}
+            </div>
+          </div>
+          <div className='Account__item'>
+            <p className='Text__small Account__item__label'>Awards</p>
+            <div className='Account__item__pair'>
+              <p className='Text__small Account__item__label'>
+                {userAwards ? `${userAwards.length} awards` : 'No awards'}
+              </p>
+              <div
+                className='Button__primary Account__item__button'
+                onClick={() => setShowClaimInfo(!showClaimInfo)}
+                style={{
+                  display:
+                    userAwards && userAwards.length > 0 ? 'block' : 'none'
+                }}
+              >
+                Claim
+              </div>
             </div>
           </div>
           <div className='Account__disconnect__button__separator'></div>

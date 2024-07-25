@@ -62,7 +62,7 @@ const FactionSelector = (props) => {
                     if (props.isChain) {
                       props.setModal({
                         title: 'Join Chain Faction',
-                        text: `You can only join one Chain Faction. Are you sure you want to join the ${props.name} Faction`,
+                        text: `You can only join one Chain Faction.\nAre you sure you want to join the ${props.name} Faction`,
                         confirm: 'Join',
                         action: () => {
                           props.joinChain(props.factionId);
@@ -72,7 +72,7 @@ const FactionSelector = (props) => {
                     } else {
                       props.setModal({
                         title: 'Join Faction',
-                        text: `You can only join one Faction. Are you sure you want to join the ${props.name} Faction`,
+                        text: `You can only join one Faction.\nAre you sure you want to join the ${props.name} Faction`,
                         confirm: 'Join',
                         action: () => {
                           props.joinFaction(props.factionId);

@@ -23,6 +23,7 @@ func InitUserRoutes() {
 	http.HandleFunc("/get-username", getUsername)
 	http.HandleFunc("/get-pixel-count", getPixelCount)
 	http.HandleFunc("/check-username-unique", checkUsernameUnique)
+	http.HandleFunc("/get-user-rewards", getUserRewards)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/new-username-devnet", newUsernameDevnet)
 		http.HandleFunc("/change-username-devnet", changeUsernameDevnet)
@@ -258,4 +259,26 @@ func checkUsernameUnique(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteDataJson(w, strconv.Itoa(*count))
+}
+
+type UserRewardsData struct {
+	Address string `json:"address"`
+	Amount  int    `json:"amount"`
+	Type    string `json:"type"`
+}
+
+func getUserRewards(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address parameter")
+		return
+	}
+
+	rewards, err := core.PostgresQueryJson[UserRewardsData]("SELECT address, amount, type FROM AwardWinners WHERE address = $1", address)
+	if err != nil {
+		routeutils.WriteDataJson(w, "[]")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(rewards))
 }

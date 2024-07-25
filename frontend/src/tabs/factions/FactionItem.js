@@ -392,7 +392,7 @@ const FactionItem = (props) => {
                     if (props.isChain) {
                       props.setModal({
                         title: 'Join Chain Faction',
-                        text: `You can only join one Chain Faction. Are you sure you want   to join the ${props.faction.name} Faction`,
+                        text: `You can only join one Chain Faction.\nAre you sure you want to join the ${props.faction.name} Faction`,
                         confirm: 'Join',
                         action: () => {
                           props.joinChain(props.faction.factionId);
@@ -402,7 +402,7 @@ const FactionItem = (props) => {
                     } else {
                       props.setModal({
                         title: 'Join Faction',
-                        text: `You can only join one Faction. Are you sure you want to jo  in the ${props.faction.name} Faction`,
+                        text: `You can only join one Faction.\nAre you sure you want to join the ${props.faction.name} Faction`,
                         confirm: 'Join',
                         action: () => {
                           props.joinFaction(props.faction.factionId);

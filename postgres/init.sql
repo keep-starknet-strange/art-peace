@@ -290,3 +290,12 @@ CREATE TABLE ChainFactionTemplates (
 CREATE INDEX chainFactionTemplates_template_id_index ON ChainFactionTemplates (template_id);
 CREATE INDEX chainFactionTemplates_faction_id_index ON ChainFactionTemplates (faction_id);
 CREATE INDEX chainFactionTemplates_stale_index ON ChainFactionTemplates (stale);
+
+-- TODO: allow marking claimed
+CREATE TABLE AwardWinners (
+  address char(64) NOT NULL,
+  amount int NOT NULL,
+  type text NOT NULL
+);
+CREATE INDEX address ON AwardWinners (address);
+CREATE INDEX type ON AwardWinners (type);
