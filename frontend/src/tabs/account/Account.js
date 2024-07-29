@@ -125,7 +125,7 @@ const Account = (props) => {
         claimTextStr += '\nTo claim your award:\n';
         // TODO: Hardcoded issue link
         claimTextStr +=
-          '1. Create a [github account](https://github.com) if you dont have one. \n2. Sign up for [OnlyDust](https://app.onlydust.com) and link your Starknet account used in the art/peace competition. \n3. Comment on [this Github issue](https://github.com/keep-starknet-strange/art-peace/issues/251) with a photo of your account page and what awards you qualify for. \nThank you!';
+          '1. Create a [github account](https://github.com) if you dont have one. \n2. Sign up for [OnlyDust](https://app.onlydust.com) and create a Billing Profile with your Starknet account used in the art/peace competition. \n3. Comment on [this Github issue](https://github.com/keep-starknet-strange/art-peace/issues/251) with a photo of your account page and what awards you qualify for. \nFollow us on [twitter](https://x.com/art_peace_sn) or join [telegram](https://t.me/art_peace_starknet/1) if you have questions! \nThank you!';
         setClaimText(claimTextStr);
       } else {
         console.error('Failed to fetch awards:', await response.text());
