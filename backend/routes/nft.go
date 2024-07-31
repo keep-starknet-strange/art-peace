@@ -50,7 +50,7 @@ func setCanvasNFTAddress(w http.ResponseWriter, r *http.Request) {
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read reques  t body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 	os.Setenv("CANVAS_NFT_CONTRACT_ADDRESS", string(data))
