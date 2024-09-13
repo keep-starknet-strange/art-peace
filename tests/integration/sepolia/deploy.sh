@@ -98,14 +98,14 @@ QUESTS_CONFIG=$PROJECT_ROOT/configs/production-quests.config.json
 ACCOUNT_ADDRESS=$(cat $STARKNET_ACCOUNT | jq -r '.deployment.address')
 WIDTH=$(jq -r '.canvas.width' $CANVAS_CONFIG)
 HEIGHT=$(jq -r '.canvas.height' $CANVAS_CONFIG)
-PLACE_DELAY=0x78
+PLACE_DELAY=0x1E
 COLOR_COUNT=$(jq -r '.colors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 COLORS=$(jq -r '.colors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 VOTABLE_COLOR_COUNT=$(jq -r '.votableColors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 VOTABLE_COLORS=$(jq -r '.votableColors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 DAILY_NEW_COLORS_COUNT=3
-START_TIME=1720399517
-END_TIME=1721399517
+START_TIME=1726192577
+END_TIME=1727483400
 DEVNET_MODE=0
 
 DAILY_QUESTS_COUNT=$(jq -r '.daily.dailyQuestsCount' $QUESTS_CONFIG)

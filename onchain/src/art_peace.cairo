@@ -408,7 +408,7 @@ pub mod ArtPeace {
             let block_timestamp = starknet::get_block_timestamp();
             // TODO: To config?
             let leanience_margin = 20; // 20 seconds
-            let expected_block_time = 6 * 60; // 6 minutes
+            let expected_block_time = 30; // 30 seconds
             assert(now >= block_timestamp - leanience_margin, 'Timestamp too far behind');
             assert(now <= block_timestamp + 2 * expected_block_time, 'Timestamp too far ahead');
         }

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Start a new block every 6 minutes
+# Start a new block every 30 seconds
 echo "Starting the block producer"
 
-INTERVAL=360
+INTERVAL=30
 
 while true
 do
