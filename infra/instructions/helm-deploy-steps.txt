@@ -22,6 +22,7 @@ deploy quests
     ./tests/integration/sepolia/deploy_quests.sh
 
 setup nft contract
+setup indexer starting block
 setup factions
     vim ./tests/integration/sepolia/setup_factions.sh
     change art-peace contract
