@@ -610,7 +610,7 @@ const Account = (props) => {
             <div className='Account__kudos'>
               {!props.usingSessionKeys && props.isSessionable ? (
                 <p className='Text__small Account__kudos__label'>
-                  Tired of approving each pixel? Create a session!
+                  Tired of approving each pixel? Sessions coming soon!
                 </p>
               ) : (
                 <p className='Text__small Account__kudos__label'>
@@ -621,11 +621,11 @@ const Account = (props) => {
             <div>
               {!props.usingSessionKeys && props.isSessionable && (
                 <div
-                  className='Text__small Button__primary Account__disconnect__button'
-                  style={{ marginBottom: '0.3rem' }}
+                  className='Text__small Button__primary Button__disabled'
+                  style={{ marginBottom: '0.3rem', backgroundColor: '#f00' }}
                   onClick={() => props.startSession()}
                 >
-                  New Session
+                  Start session
                 </div>
               )}
               <div
