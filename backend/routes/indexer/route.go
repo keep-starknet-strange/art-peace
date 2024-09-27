@@ -81,6 +81,7 @@ const (
 	factionTemplateRemovedEvent      = "0x029a976c0074fc910f3a6a58f1351c48dab7b1c539f54ed930616292c806283f"
 	chainFactionTemplateAddedEvent   = "0x00476f35ea27024c89c1fc05dfad873e9e93419e452ee781e8207e435289a39b"
 	chainFactionTemplateRemovedEvent = "0x0126718de7cb8b83dfa258eb095bc0ec7a3ef5a2258ebd1ed349551764856c6b"
+	hostAwardedPixelsEvent           = "0x03cab98018a5e38e0cf717d8bed481983eb400f6a1d9ccd34f87050c0f36a32a"
 )
 
 var eventProcessors = map[string](func(IndexerEvent)){
@@ -111,6 +112,7 @@ var eventProcessors = map[string](func(IndexerEvent)){
 	factionTemplateRemovedEvent:      processFactionTemplateRemovedEvent,
 	chainFactionTemplateAddedEvent:   processChainFactionTemplateAddedEvent,
 	chainFactionTemplateRemovedEvent: processChainFactionTemplateRemovedEvent,
+	hostAwardedPixelsEvent:           processHostAwardedPixelsEvent,
 }
 
 var eventReverters = map[string](func(IndexerEvent)){
@@ -141,6 +143,7 @@ var eventReverters = map[string](func(IndexerEvent)){
 	factionTemplateRemovedEvent:      revertFactionTemplateRemovedEvent,
 	chainFactionTemplateAddedEvent:   revertChainFactionTemplateAddedEvent,
 	chainFactionTemplateRemovedEvent: revertChainFactionTemplateRemovedEvent,
+	hostAwardedPixelsEvent:           revertHostAwardedPixelsEvent,
 }
 
 var eventRequiresOrdering = map[string]bool{
@@ -171,6 +174,7 @@ var eventRequiresOrdering = map[string]bool{
 	factionTemplateRemovedEvent:      true,
 	chainFactionTemplateAddedEvent:   true,
 	chainFactionTemplateRemovedEvent: true,
+	hostAwardedPixelsEvent:           false,
 }
 
 const (

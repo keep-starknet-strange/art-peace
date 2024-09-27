@@ -37,6 +37,7 @@ pub trait IArtPeace<TContractState> {
     fn get_width(self: @TContractState) -> u128;
     fn get_height(self: @TContractState) -> u128;
     fn get_total_pixels(self: @TContractState) -> u128;
+    fn get_host(self: @TContractState) -> starknet::ContractAddress;
 
     // Assertion helpers
     fn check_game_running(self: @TContractState);
@@ -149,4 +150,9 @@ pub trait IArtPeace<TContractState> {
     fn get_user_pixels_placed_day_color(
         self: @TContractState, user: starknet::ContractAddress, day: u32, color: u8
     ) -> u32;
+
+    // Host functions
+    fn host_set_timer(ref self: TContractState, time: u64);
+    fn host_award_user(ref self: TContractState, user: starknet::ContractAddress, amount: u32);
+    fn host_change_end_time(ref self: TContractState, new_end_time: u64);
 }

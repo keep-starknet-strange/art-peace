@@ -23,6 +23,7 @@ func InitTemplateRoutes() {
 	http.HandleFunc("/get-templates", getTemplates)
 	http.HandleFunc("/get-faction-templates", getFactionTemplates)
 	http.HandleFunc("/get-chain-faction-templates", getChainFactionTemplates)
+	http.HandleFunc("/build-template-img", buildTemplateImg)
 	http.HandleFunc("/add-template-img", addTemplateImg)
 	http.HandleFunc("/add-template-data", addTemplateData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
@@ -56,33 +57,44 @@ func hashTemplateImage(pixelData []byte) string {
 	return "00" + hashStr[2:]
 }
 
-func bytesToRGBA(colorBytes []byte) color.RGBA {
-	r := colorBytes[0]
-	g := colorBytes[1]
-	b := colorBytes[2]
-	return color.RGBA{r, g, b, 0xFF}
+func hexToRGBA(colorBytes string) color.RGBA {
+	// Hex like "rrggbb"
+	r, err := strconv.ParseUint(colorBytes[0:2], 16, 8)
+	if err != nil {
+		return color.RGBA{}
+	}
+	g, err := strconv.ParseUint(colorBytes[2:4], 16, 8)
+	if err != nil {
+		return color.RGBA{}
+	}
+	b, err := strconv.ParseUint(colorBytes[4:6], 16, 8)
+	if err != nil {
+		return color.RGBA{}
+	}
+	return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 }
 
-func imageToPixelData(imageData []byte) ([]byte, error) {
+func imageToPixelData(imageData []byte) ([]int, error) {
 	img, _, err := image.Decode(bytes.NewReader(imageData))
 	if err != nil {
 		return nil, err
 	}
 
-	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM colors ORDER BY key")
+	colors, err := core.PostgresQuery[ColorType]("SELECT hex FROM colors ORDER BY key")
 	if err != nil {
 		return nil, err
 	}
 
-	colorCount := len(colors) / 3
+	colorCount := len(colors)
 	palette := make([]color.Color, colorCount)
 	for i := 0; i < colorCount; i++ {
-		palette[i] = bytesToRGBA(colors[i*3 : i*3+3])
+		colorHex := colors[i]
+		palette[i] = hexToRGBA(colorHex)
 	}
 
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
-	pixelData := make([]byte, width*height)
+	pixelData := make([]int, width*height)
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
@@ -91,7 +103,7 @@ func imageToPixelData(imageData []byte) ([]byte, error) {
 				pixelData[y*width+x] = 0xFF
 			} else {
 				closestIndex := findClosestColor(rgba, palette)
-				pixelData[y*width+x] = byte(closestIndex)
+				pixelData[y*width+x] = closestIndex
 			}
 		}
 	}
@@ -114,7 +126,10 @@ func findClosestColor(target color.RGBA, palette []color.Color) int {
 }
 
 func colorDistance(c1, c2 color.RGBA) float64 {
-	return math.Sqrt(float64((c1.R-c2.R)*(c1.R-c2.R) + (c1.G-c2.G)*(c1.G-c2.G) + (c1.B-c2.B)*(c1.B-c2.B)))
+	r_diff := float64(int(c1.R) - int(c2.R))
+	g_diff := float64(int(c1.G) - int(c2.G))
+	b_diff := float64(int(c1.B) - int(c2.B))
+	return math.Sqrt(r_diff*r_diff + g_diff*g_diff + b_diff*b_diff)
 }
 
 type TemplateData struct {
@@ -179,6 +194,92 @@ func getChainFactionTemplates(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteDataJson(w, string(factionTemplates))
 }
 
+// curl -F "image=@<path to image>" http://localhost:8080/build-template-img?start=0
+func buildTemplateImg(w http.ResponseWriter, r *http.Request) {
+	file, _, err := r.FormFile("image")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read image")
+		return
+	}
+	defer file.Close()
+
+	startStr := r.URL.Query().Get("start")
+	start, err := strconv.Atoi(startStr)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid start position")
+		return
+	}
+
+	// Decode the image to check dimensions
+	img, _, err := image.Decode(file)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to decode image")
+		return
+	}
+	bounds := img.Bounds()
+	width, _ := bounds.Max.X-bounds.Min.X, bounds.Max.Y-bounds.Min.Y
+	file.Seek(0, 0)
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to read image data")
+
+		return
+	}
+
+	imageData, err := imageToPixelData(fileBytes)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
+		return
+	}
+
+	imageDataBytes := make([]byte, len(imageData))
+	for idx, val := range imageData {
+		imageDataBytes[idx] = byte(val)
+	}
+	hash := hashTemplateImage(imageDataBytes)
+
+	// Make file to store template data
+	if _, err := os.Stat("templates-build"); os.IsNotExist(err) {
+		err = os.Mkdir("templates-build", os.ModePerm)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create templates directory")
+			return
+		}
+	}
+
+	filename := fmt.Sprintf("templates-build/template-%s.txt", hash)
+	newtemp, err := os.Create(filename)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
+		return
+	}
+	defer file.Close()
+
+	// TODO: Hardcoded width
+	x := start % 512
+	y := start / 512
+	start_x := x
+	end_x := x + width
+	// Write image data to file
+	for _, pixel := range imageData {
+		pos := y*512 + x
+		// Convert byte to integer representation
+		if pixel != 0xFF {
+			_, err := newtemp.WriteString(fmt.Sprintf("%d %d\n", pos, int(pixel)))
+			if err != nil {
+				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to write image data")
+				return
+			}
+		}
+		x++
+		if x >= end_x {
+			x = start_x
+			y++
+		}
+	}
+}
+
 func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("image")
 	if err != nil {
@@ -216,7 +317,12 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
 	}
-	hash := hashTemplateImage(imageData)
+
+	imageDataBytes := make([]byte, len(imageData))
+	for idx, val := range imageData {
+		imageDataBytes[idx] = byte(val)
+	}
+	hash := hashTemplateImage(imageDataBytes)
 
 	if _, err := os.Stat("templates"); os.IsNotExist(err) {
 		err = os.Mkdir("templates", os.ModePerm)

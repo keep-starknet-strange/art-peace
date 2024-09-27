@@ -1,5 +1,8 @@
 # Sys files
 **/.DS_Store
+.env
+.env.main
+.env.sep
 
 # Scarb and Starknet Foundry
 **/target

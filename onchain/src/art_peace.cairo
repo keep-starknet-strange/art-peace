@@ -111,6 +111,7 @@ pub mod ArtPeace {
         FactionTemplateRemoved: FactionTemplateRemoved,
         ChainFactionTemplateAdded: ChainFactionTemplateAdded,
         ChainFactionTemplateRemoved: ChainFactionTemplateRemoved,
+        HostAwardedUser: HostAwardedUser,
         // TODO: Integrate template event
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
@@ -294,6 +295,13 @@ pub mod ArtPeace {
         template_id: u32,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct HostAwardedUser {
+        #[key]
+        user: ContractAddress,
+        amount: u32,
+    }
+
     #[derive(Drop, Serde)]
     pub struct InitParams {
         pub host: ContractAddress,
@@ -392,6 +400,10 @@ pub mod ArtPeace {
 
         fn get_total_pixels(self: @ContractState) -> u128 {
             self.total_pixels.read()
+        }
+
+        fn get_host(self: @ContractState) -> ContractAddress {
+            self.host.read()
         }
 
         fn check_game_running(self: @ContractState) {
@@ -821,11 +833,11 @@ pub mod ArtPeace {
             assert(
                 starknet::get_caller_address() == self.host.read(), 'Quests are set by the host'
             );
-            let mut i = self.main_quests_count.read();
+            let quest_count = self.main_quests_count.read();
+            let mut i = quest_count;
             let end = i + quests.len();
             while i < end {
-                // TODO: This should be i - self.main_quests_count.read()
-                self.main_quests.write(i, *quests.at(i));
+                self.main_quests.write(i, *quests.at(i - quest_count));
                 i += 1;
             };
             self.main_quests_count.write(end);
@@ -1007,6 +1019,23 @@ pub mod ArtPeace {
             self: @ContractState, user: ContractAddress, day: u32, color: u8
         ) -> u32 {
             self.user_pixels_placed.read((day, user, color))
+        }
+
+        fn host_set_timer(ref self: ContractState, time: u64) {
+            assert(starknet::get_caller_address() == self.host.read(), 'Host sets timer');
+            self.time_between_pixels.write(time);
+            self.time_between_member_pixels.write(time);
+        }
+
+        fn host_award_user(ref self: ContractState, user: starknet::ContractAddress, amount: u32) {
+            assert(starknet::get_caller_address() == self.host.read(), 'Host awards user');
+            self.extra_pixels.write(user, self.extra_pixels.read(user) + amount);
+            self.emit(HostAwardedUser { user, amount });
+        }
+
+        fn host_change_end_time(ref self: ContractState, new_end_time: u64) {
+            assert(starknet::get_caller_address() == self.host.read(), 'Host changes end time');
+            self.end_time.write(new_end_time);
         }
     }
 

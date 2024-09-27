@@ -4,7 +4,7 @@ import { useContractWrite } from '@starknet-react/core';
 import './NFTItem.css';
 import { fetchWrapper } from '../../services/apiService';
 import canvasConfig from '../../configs/canvas.config.json';
-import ShareIcon from '../../resources/icons/Share.png';
+// TODO: import ShareIcon from '../../resources/icons/Share.png';
 import LikeIcon from '../../resources/icons/Like.png';
 import LikedIcon from '../../resources/icons/Liked.png';
 import Info from '../../resources/icons/Info.png';
@@ -142,7 +142,7 @@ const NFTItem = (props) => {
           <p className='Text__xsmall NFTItem__name'>{props.name}</p>
           <div className='NFTItem__overlay'>
             <div className='NFTItem__buttons'>
-              <div onClick={handleShare} className='NFTItem__button'>
+              <div onClick={handleShare} className='NFTItem__button' style={{ display: 'none' }}>
                 <img className='Share__icon' src={ShareIcon} alt='Share' />
               </div>
               <div

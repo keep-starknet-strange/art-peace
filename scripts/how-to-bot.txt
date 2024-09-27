@@ -1,0 +1,11 @@
+curl -F "image=@/Users/brandonroberts/workspace/keep-starknet-strange/art-peace/templates/me.png" http://localhost:8080/build-template-img\?start\=2565
+#TODO: Diff from canvas
+
+rm -rf <bots-dir>
+mkdir <bots-dir>
+./scripts/generate-accounts.sh <#> <bots-dir> <fund-account.json> <fund-test.key>
+./scripts/setup-bots.sh <bots-dir>
+
+./scripts/bot-builder.sh <bots-dir> <template-file>
+
+#TODO: Fund the bots script

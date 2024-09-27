@@ -56,13 +56,23 @@ change frontend contract addresses in vercel
     REACT_APP_STARKNET_CONTRACT_ADDRESS=
     REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS=
     REACT_APP_CANVAS_NFT_CONTRACT_ADDRESS=
-    ART_PEACE_END_TIME=
-    ART_PEACE_HOST=
+    REACT_APP_ART_PEACE_END_TIME=
+    REACT_APP_ART_PEACE_HOST=
+    REACT_APP_BASE_PIXEL_TIMER=
 
 
     kubectl cp ../postgres/init.sql pod:/home
       kubectl exec -it pod/pod-name bash
       psql -U art-peace-user -d art-peace-db -f /home/init.sql
+      kubectl delete pvc redis-volume-claim
+      kubectl delete deployment.apps/redis
+      kubectl delete deployment.apps/indexer
+      POSTGRES_PASSWORD=test AUTH_TOKEN=dna_abc make helm-upgrade
+      kubectl exec -it pod/admin-backend-xxx bash
+      curl http://localhost:8080/init-canvas -X POST
+      curl http://localhost:8080/init-quests -X POST -d "@configs/production-quests.config.json"
+      curl http://localhost:8080/init-factions -X POST -d "@configs/factions.config.json"
+      kubectl cp resources/factions/ backend-6774986b76-n2mnm:/app/
     reset :
       kubectl delete pvc nft-volume-claim redis-volume-claim
       kubectl delete deployment.apps/backend deployment.apps/admin-backend deployment.apps/consumer deployment.apps/indexer deployment.apps/redis
