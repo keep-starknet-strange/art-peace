@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useDisconnect, useContractWrite } from '@starknet-react/core';
+import { constants } from 'starknet';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
 import { backendUrl, devnetMode } from '../../utils/Consts.js';
 import { fetchWrapper } from '../../services/apiService.js';
-import { encodeToLink } from '../../utils/encodeToLink';
 import BeggarRankImg from '../../resources/ranks/Beggar.png';
 import OwlRankImg from '../../resources/ranks/Owl.png';
 import CrownRankImg from '../../resources/ranks/Crown.png';
@@ -90,7 +89,6 @@ const Account = (props) => {
 
   // TODO: Connect wallet page if no connectors
   let [availableConnectors, setAvailableConnectors] = useState([]);
-  const { disconnect } = useDisconnect();
 
   const [addressShort, setAddressShort] = useState('');
   useEffect(() => {
@@ -152,29 +150,57 @@ const Account = (props) => {
     }
   }, [showClaimInfo, userAwards]);
 
-  const [calls, setCalls] = useState([]);
-  const claimCall = (username) => {
+  const claimCall = async (username) => {
     if (devnetMode) return;
-    if (!props.address || !props.usernameContract) return;
+    if (!props.address || !props.usernameContract || !props.account) return;
     if (username === '') return;
-    setCalls(
-      props.usernameContract.populateTransaction['claim_username'](
-        toHex(username)
-      )
+    const usernameCallData = props.usernameContract.populate('claim_username', {
+      key: toHex(username)
+    });
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.usernameContract.address,
+      entrypoint: 'claim_username',
+      calldata: usernameCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.usernameContract.claim_username(
+      usernameCallData.calldata,
+      {
+        maxFee
+      }
     );
+    console.log(result);
   };
-  const changeCall = (username) => {
+
+  const changeCall = async (username) => {
     if (devnetMode) return;
-    if (!props.address || !props.usernameContract) return;
+    if (!props.address || !props.usernameContract || !props.account) return;
     if (username === '') return;
-    setCalls(
-      props.usernameContract.populateTransaction['change_username'](
-        toHex(username)
-      )
+    const usernameCallData = props.usernameContract.populate(
+      'change_username',
+      {
+        new_username: toHex(username)
+      }
     );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.usernameContract.address,
+      entrypoint: 'change_username',
+      calldata: usernameCallData.calldata
+    });
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.usernameContract.change_username(
+      usernameCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    // TODO: Success message
+    console.log(result);
   };
 
   useEffect(() => {
+    if (!props.connectors) return;
     if (devnetMode) {
       setAvailableConnectors(props.connectors);
       return;
@@ -192,29 +218,6 @@ const Account = (props) => {
     };
     checkIfAvailable();
   }, [props.connectors]);
-
-  const disconnectWallet = () => {
-    if (devnetMode) {
-      props.setConnected(false);
-      return;
-    }
-    disconnect();
-  };
-
-  useEffect(() => {
-    const usernameCall = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      console.log('Username call successful:', data, isPending);
-      // TODO: Update the UI with the new vote count
-    };
-    usernameCall();
-  }, [calls]);
-
-  const { writeAsync, data, isPending } = useContractWrite({
-    calls
-  });
 
   // TODO: Pending & ... options for edit
   const handleSubmit = async (event) => {
@@ -234,9 +237,9 @@ const Account = (props) => {
     if (!devnetMode) {
       setUsername(username.trim());
       if (usernameBeforeEdit === '') {
-        claimCall(username.trim());
+        await claimCall(username.trim());
       } else {
-        changeCall(username.trim());
+        await changeCall(username.trim());
       }
       setUsernameSaved(true);
       setIsEditing(false);
@@ -362,7 +365,7 @@ const Account = (props) => {
   }, [pixelCount]);
 
   const [starknetWalletMode, setStarknetWalletMode] = useState(false);
-  const connectStarknetWallet = async () => {
+  const _connectStarknetWallet = async () => {
     setStarknetWalletMode(true);
   };
 
@@ -390,9 +393,9 @@ const Account = (props) => {
           <div className='Account__login'>
             <div
               className='Text__medium Button__primary Account__login__button'
-              onClick={connectStarknetWallet}
+              onClick={props.connectWallet}
             >
-              StarkNet Login
+              Starknet Login
             </div>
           </div>
           <div
@@ -557,7 +560,9 @@ const Account = (props) => {
           <div className='Account__item'>
             <p className='Text__small Account__item__label'>Network</p>
             <p className='Text__small Account__item__text'>
-              {props.chain.network.toUpperCase()}
+              {process.env.REACT_APP_CHAIN_ID === constants.NetworkName.SN_MAIN
+                ? 'Mainnet'
+                : 'Sepolia'}
             </p>
           </div>
 
@@ -603,18 +608,32 @@ const Account = (props) => {
           <div className='Account__disconnect__button__separator'></div>
           <div className='Account__footer'>
             <div className='Account__kudos'>
-              <p
-                dangerouslySetInnerHTML={encodeToLink(
-                  'Special thanks to all [OnlyDust](https://app.onlydust.com/p/artpeace) contributors!'
-                )}
-                className='Text__small Account__kudos__label'
-              ></p>
+              {!props.usingSessionKeys && props.isSessionable ? (
+                <p className='Text__small Account__kudos__label'>
+                  Tired of approving each pixel? Create a session!
+                </p>
+              ) : (
+                <p className='Text__small Account__kudos__label'>
+                  Session active
+                </p>
+              )}
             </div>
-            <div
-              className='Text__medium Button__primary Account__disconnect__button'
-              onClick={() => disconnectWallet()}
-            >
-              Logout
+            <div>
+              {!props.usingSessionKeys && props.isSessionable && (
+                <div
+                  className='Text__small Button__primary Account__disconnect__button'
+                  style={{ marginBottom: '0.3rem' }}
+                  onClick={() => props.startSession()}
+                >
+                  New Session
+                </div>
+              )}
+              <div
+                className='Text__small Button__primary Account__disconnect__button'
+                onClick={() => props.disconnectWallet()}
+              >
+                Logout
+              </div>
             </div>
           </div>
         </div>

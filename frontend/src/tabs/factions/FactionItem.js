@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './FactionItem.css';
 import { convertUrl } from '../../utils/Consts.js';
-import { useContractWrite } from '@starknet-react/core';
 import {
   getChainFactionMembers,
   getFactionMembers,
@@ -131,31 +130,31 @@ const FactionItem = (props) => {
   }, [props.faction, props.queryAddress]);
 
   // TODO:  metadata
-  const [calls, setCalls] = useState([]);
-  const addStencilCall = (metadata) => {
+  const addStencilCall = async (metadata) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     if (!metadata) return;
-    setCalls(
-      props.artPeaceContract.populateTransaction['add_faction_template'](
-        metadata
-      )
+    const addStencilCallData = props.artPeaceContract.populate(
+      'add_faction_template',
+      {
+        template_metadata: metadata
+      }
     );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'add_faction_template',
+      calldata: addStencilCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.add_faction_template(
+      addStencilCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
   };
-
-  useEffect(() => {
-    const addTemplate = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      console.log('Stencil added successful:', data, isPending);
-    };
-    addTemplate();
-  }, [calls]);
-
-  const { writeAsync, data, isPending } = useContractWrite({
-    calls
-  });
 
   const imageToPalette = (image) => {
     // Convert image pixels to be within the color palette
@@ -278,7 +277,7 @@ const FactionItem = (props) => {
     };
     if (!devnetMode) {
       // TODO: Add stencil to the faction
-      addStencilCall(metadata);
+      await addStencilCall(metadata);
       return;
     }
     try {

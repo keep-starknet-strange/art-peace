@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useContractWrite } from '@starknet-react/core';
 import { fetchWrapper } from '../services/apiService';
 import { getTodaysStartTime } from '../services/apiService.js';
 import { devnetMode } from '../utils/Consts.js';
@@ -38,29 +37,29 @@ export const TimerInjector = ({ children, props, isLastDay, endTimestamp }) => {
     fetchStartTime();
   }, []);
 
-  const [calls, setCalls] = useState([]);
-  const increaseDayIndexCall = () => {
+  const increaseDayIndexCall = async () => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     // TODO: Check valid inputs & expand calldata
-    setCalls(
-      props.artPeaceContract.populateTransaction['increase_day_index']()
+    const increaseDayIndexCallData = props.artPeaceContract.populate(
+      'increase_day_index',
+      {}
     );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'increase_day_index',
+      calldata: increaseDayIndexCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.increase_day_index(
+      increaseDayIndexCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
   };
-
-  useEffect(() => {
-    const increaseDayIndex = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      // TODO: Update the UI with the new state
-    };
-    increaseDayIndex();
-  }, [calls]);
-
-  const { writeAsync } = useContractWrite({
-    calls
-  });
 
   const [timeLeftInDay, setTimeLeftInDay] = useState('');
   const [newDayAvailable, setNewDayAvailable] = useState(false);
@@ -69,7 +68,7 @@ export const TimerInjector = ({ children, props, isLastDay, endTimestamp }) => {
       return;
     }
     if (!devnetMode) {
-      increaseDayIndexCall(props.questId, []);
+      await increaseDayIndexCall(props.questId, []);
       return;
     }
     const response = await fetchWrapper(`increase-day-devnet`, {

@@ -71,6 +71,19 @@
   image-rendering: pixelated;
 }
 
+.App__logo--rotating {
+  animation: rotation 1s infinite linear;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
 .ExpandTabs__button {
   margin: 0;
   padding: 0;

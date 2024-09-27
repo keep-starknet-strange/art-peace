@@ -44,6 +44,8 @@ const TabPanel = (props) => {
         <ExtraPixelsPanel
           colorPixel={props.colorPixel}
           address={props.address}
+          account={props.account}
+          estimateInvokeFee={props.estimateInvokeFee}
           artPeaceContract={props.artPeaceContract}
           extraPixelsData={props.extraPixelsData}
           colors={props.colors}
@@ -88,6 +90,8 @@ const TabPanel = (props) => {
         <NFTMintingPanel
           setActiveTab={props.setActiveTab}
           address={props.address}
+          account={props.account}
+          estimateInvokeFee={props.estimateInvokeFee}
           artPeaceContract={props.artPeaceContract}
           setNftMintingMode={props.setNftMintingMode}
           nftSelectionStarted={props.nftSelectionStarted}
@@ -111,6 +115,8 @@ const TabPanel = (props) => {
         <FactionTemplateBuilderPanel
           setActiveTab={props.setActiveTab}
           address={props.address}
+          account={props.account}
+          estimateInvokeFee={props.estimateInvokeFee}
           artPeaceContract={props.artPeaceContract}
           setTemplateCreationMode={props.setTemplateCreationMode}
           templateCreationSelected={props.templateCreationSelected}
@@ -138,6 +144,8 @@ const TabPanel = (props) => {
               <div>
                 <TimerInjector
                   address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
                   artPeaceContract={props.artPeaceContract}
                   gameEnded={props.gameEnded}
                   isLastDay={props.isLastDay}
@@ -146,6 +154,8 @@ const TabPanel = (props) => {
                   {({ timeLeftInDay, newDayAvailable, startNextDay }) => (
                     <Quests
                       address={props.address}
+                      account={props.account}
+                      estimateInvokeFee={props.estimateInvokeFee}
                       artPeaceContract={props.artPeaceContract}
                       timeLeftInDay={timeLeftInDay}
                       newDayAvailable={newDayAvailable}
@@ -164,6 +174,8 @@ const TabPanel = (props) => {
               <div>
                 <Factions
                   address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
                   artPeaceContract={props.artPeaceContract}
                   colors={props.colors}
                   setModal={props.setModal}
@@ -200,6 +212,8 @@ const TabPanel = (props) => {
               <div>
                 <TimerInjector
                   address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
                   artPeaceContract={props.artPeaceContract}
                   gameEnded={props.gameEnded}
                   isLastDay={props.isLastDay}
@@ -213,6 +227,8 @@ const TabPanel = (props) => {
                       setActiveTab={props.setActiveTab}
                       queryAddress={props.queryAddress}
                       address={props.address}
+                      account={props.account}
+                      estimateInvokeFee={props.estimateInvokeFee}
                       artPeaceContract={props.artPeaceContract}
                       isLastDay={props.isLastDay}
                       gameEnded={props.gameEnded}
@@ -235,6 +251,8 @@ const TabPanel = (props) => {
               <div>
                 <NFTs
                   address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
                   artPeaceContract={props.artPeaceContract}
                   canvasNftContract={props.canvasNftContract}
                   nftMintingMode={props.nftMintingMode}
@@ -251,15 +269,20 @@ const TabPanel = (props) => {
             {props.activeTab === 'Account' && (
               <div>
                 <Account
+                  address={props.address}
+                  account={props.account}
+                  usingSessionKeys={props.usingSessionKeys}
+                  estimateInvokeFee={props.estimateInvokeFee}
                   usernameContract={props.usernameContract}
                   setActiveTab={props.setActiveTab}
                   queryAddress={props.queryAddress}
                   setConnected={props.setConnected}
-                  address={props.address}
                   chain={props.chain}
                   connectWallet={props.connectWallet}
-                  connectors={props.connectors}
+                  disconnectWallet={props.disconnectWallet}
+                  startSession={props.startSession}
                   isMobile={props.isMobile}
+                  isSessionable={props.isSessionable}
                   gameEnded={props.gameEnded}
                   setModal={props.setModal}
                 />

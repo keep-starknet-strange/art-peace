@@ -1,19 +1,30 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { stark, Contract } from 'starknet';
+import { connect } from 'starknetkit-next';
 import {
-  useAccount,
-  useContract,
-  useNetwork,
-  useConnect
-} from '@starknet-react/core';
+  openSession,
+  createSessionRequest,
+  buildSessionAccount
+} from '@argent/x-sessions';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 import './App.css';
 import CanvasContainer from './canvas/CanvasContainer.js';
 import PixelSelector from './footer/PixelSelector.js';
 import TabsFooter from './footer/TabsFooter.js';
 import TabPanel from './tabs/TabPanel.js';
 import { usePreventZoom, useLockScroll } from './utils/Window.js';
-import { backendUrl, wsUrl, devnetMode } from './utils/Consts.js';
+import {
+  backendUrl,
+  wsUrl,
+  devnetMode,
+  provider,
+  allowedMethods,
+  expiry,
+  metaData,
+  dappKey,
+  CHAIN_ID
+} from './utils/Consts.js';
 import logo from './resources/logo.png';
 import canvasConfig from './configs/canvas.config.json';
 import { fetchWrapper, getTodaysStartTime } from './services/apiService.js';
@@ -58,8 +69,15 @@ function App() {
   };
 
   // Starknet wallet
-  const { account, address } = useAccount();
-  const { chain } = useNetwork();
+  const [wallet, setWallet] = useState(null);
+  const [address, setAddress] = useState(null);
+  const [connectorData, setConnectorData] = useState(null);
+  const [_connector, setConnector] = useState(null);
+  const [account, setAccount] = useState(null);
+  const [_sessionRequest, setSessionRequest] = useState(null);
+  const [_accountSessionSignature, setAccountSessionSignature] = useState(null);
+  const [isSessionable, setIsSessionable] = useState(false);
+  const [usingSessionKeys, setUsingSessionKeys] = useState(false);
   const [queryAddress, setQueryAddress] = useState('0');
   const [connected, setConnected] = useState(false); // TODO: change to only devnet
   useEffect(() => {
@@ -72,28 +90,45 @@ function App() {
         setQueryAddress('0');
       }
     } else {
-      if (!address) {
+      if (!connectorData) {
         setQueryAddress('0');
       } else {
-        setQueryAddress(address.slice(2).toLowerCase().padStart(64, '0'));
+        setQueryAddress(
+          connectorData.account.slice(2).toLowerCase().padStart(64, '0')
+        );
+        setAddress(connectorData.account);
       }
     }
-  }, [address, connected]);
+  }, [connectorData, connected]);
 
   // Contracts
   // TODO: Pull addrs from api?
-  const { contract: artPeaceContract } = useContract({
-    address: process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
-    abi: art_peace_abi
-  });
-  const { contract: usernameContract } = useContract({
-    address: process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
-    abi: username_store_abi
-  });
-  const { contract: canvasNftContract } = useContract({
-    address: process.env.REACT_APP_CANVAS_NFT_CONTRACT_ADDRESS,
-    abi: canvas_nft_abi
-  });
+  const [artPeaceContract, setArtPeaceContract] = useState(null);
+  const [usernameContract, setUsernameContract] = useState(null);
+  const [canvasNftContract, setCanvasNftContract] = useState(null);
+
+  useEffect(() => {
+    if (!connected) return;
+    if (!account) return;
+    const artPeaceContract = new Contract(
+      art_peace_abi,
+      process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
+      account
+    );
+    const usernameContract = new Contract(
+      username_store_abi,
+      process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
+      account
+    );
+    const canvasNftContract = new Contract(
+      canvas_nft_abi,
+      process.env.REACT_APP_CANVAS_NFT_CONTRACT_ADDRESS,
+      account
+    );
+    setArtPeaceContract(artPeaceContract);
+    setUsernameContract(usernameContract);
+    setCanvasNftContract(canvasNftContract);
+  }, [connected, account]);
 
   const [currentDay, setCurrentDay] = useState(0);
   const [isLastDay, setIsLastDay] = useState(false);
@@ -531,15 +566,135 @@ function App() {
   const [nftWidth, setNftWidth] = useState(null);
   const [nftHeight, setNftHeight] = useState(null);
 
+  const [loadingRequest, _setLoadingRequest] = useState(false);
+  const estimateInvokeFee = async ({
+    contractAddress,
+    entrypoint,
+    calldata
+  }) => {
+    try {
+      const { suggestedMaxFee } = await account.estimateInvokeFee({
+        contractAddress: contractAddress,
+        entrypoint: entrypoint,
+        calldata: calldata
+      });
+      return { suggestedMaxFee };
+    } catch (error) {
+      console.error(error);
+      /* global BigInt */
+      return { suggestedMaxFee: BigInt(1000000000000000) };
+    }
+  };
+
+  const canSession = (wallet) => {
+    let sessionableIds = [
+      'argentX',
+      'ArgentX',
+      'argent',
+      'Argent',
+      'argentMobile',
+      'ArgentMobile',
+      'argentWebWallet',
+      'ArgentWebWallet'
+    ];
+    if (sessionableIds.includes(wallet.id)) {
+      return true;
+    }
+    return false;
+  };
+
   // Account
-  const { connect, connectors } = useConnect();
-  const connectWallet = async (connector) => {
+  const connectWallet = async () => {
     if (devnetMode) {
       setConnected(true);
       return;
     }
-    connect({ connector });
+    const { wallet, connectorData, connector } = await connect({
+      modalMode: 'alwaysAsk',
+      webWalletUrl: process.env.REACT_APP_ARGENT_WEBWALLET_URL,
+      argentMobileOptions: {
+        dappName: 'art/peace',
+        url: window.location.hostname,
+        chainId: CHAIN_ID,
+        icons: []
+      }
+    });
+    if (wallet && connectorData && connector) {
+      setWallet(wallet);
+      setConnectorData(connectorData);
+      setConnector(connector);
+      setConnected(true);
+      let new_account = await connector.account(provider);
+      setAccount(new_account);
+      setIsSessionable(canSession(wallet));
+      console.log('Wallet:', wallet);
+    }
   };
+
+  const disconnectWallet = async () => {
+    if (devnetMode) {
+      setConnected(false);
+      return;
+    }
+    setWallet(null);
+    setConnectorData(null);
+    setConnected(false);
+    setAccount(null);
+    setSessionRequest(null);
+    setAccountSessionSignature(null);
+    setUsingSessionKeys(false);
+    setIsSessionable(false);
+  };
+
+  const startSession = async () => {
+    const sessionParams = {
+      allowedMethods: allowedMethods,
+      expiry: expiry,
+      metaData: metaData(false),
+      publicDappKey: dappKey.publicKey
+    };
+    let chainId = await provider.getChainId();
+    const accountSessionSignature = await openSession({
+      wallet: wallet,
+      sessionParams: sessionParams,
+      chainId: chainId
+    });
+    const sessionRequest = createSessionRequest(
+      allowedMethods,
+      expiry,
+      metaData(false),
+      dappKey.publicKey
+    );
+    if (!accountSessionSignature || !sessionRequest) {
+      console.error('Session request failed');
+      return;
+    }
+    setSessionRequest(sessionRequest);
+    setAccountSessionSignature(accountSessionSignature);
+    if (!address || !connectorData) {
+      console.error('No address or connector data');
+      return;
+    }
+    const sessionAccount = await buildSessionAccount({
+      accountSessionSignature: stark.formatSignature(accountSessionSignature),
+      sessionRequest: sessionRequest,
+      provider: provider,
+      chainId: chainId,
+      address: address,
+      dappKey: dappKey,
+      argentSessionServiceBaseUrl:
+        process.env.REACT_APP_ARGENT_SESSION_SERVICE_BASE_URL
+    });
+    if (!sessionAccount) {
+      console.error('Session account failed');
+      return;
+    }
+    setAccount(sessionAccount);
+    setUsingSessionKeys(true);
+  };
+
+  /*
+   * TODO
   useEffect(() => {
     if (devnetMode) return;
     if (!connectors) return;
@@ -556,6 +711,7 @@ function App() {
     };
     connectIfReady();
   }, [connectors]);
+  */
 
   // Tabs
   const [showExtraPixelsPanel, setShowExtraPixelsPanel] = useState(false);
@@ -607,6 +763,8 @@ function App() {
         <CanvasContainer
           colorPixel={colorPixel}
           address={address}
+          account={account}
+          estimateInvokeFee={estimateInvokeFee}
           artPeaceContract={artPeaceContract}
           colors={colors}
           canvasRef={canvasRef}
@@ -653,7 +811,11 @@ function App() {
           setLastPlacedTime={setLastPlacedTime}
         />
         {(!isMobile || activeTab === tabs[0]) && (
-          <img src={logo} alt='logo' className='App__logo--mobile' />
+          <img
+            src={logo}
+            alt='logo'
+            className={`App__logo--mobile ${loadingRequest ? 'App__logo--rotating' : ''}`}
+          />
         )}
         <div
           className={
@@ -668,7 +830,8 @@ function App() {
             address={address}
             queryAddress={queryAddress}
             account={account}
-            chain={chain}
+            usingSessionKeys={usingSessionKeys}
+            // chain={chain}
             setConnected={setConnected}
             artPeaceContract={artPeaceContract}
             usernameContract={usernameContract}
@@ -748,7 +911,10 @@ function App() {
             latestMintedTokenId={latestMintedTokenId}
             setLatestMintedTokenId={setLatestMintedTokenId}
             connectWallet={connectWallet}
-            connectors={connectors}
+            disconnectWallet={disconnectWallet}
+            startSession={startSession}
+            isSessionable={isSessionable}
+            estimateInvokeFee={estimateInvokeFee}
             currentDay={currentDay}
             gameEnded={gameEnded}
             isLastDay={isLastDay}

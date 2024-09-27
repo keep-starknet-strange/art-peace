@@ -172,6 +172,8 @@ const Quests = (props) => {
             args={quest.args}
             markCompleted={markCompleted}
             address={props.address}
+            account={props.account}
+            estimateInvokeFee={props.estimateInvokeFee}
             artPeaceContract={props.artPeaceContract}
             progress={quest.progress}
             needed={quest.needed}
@@ -195,6 +197,8 @@ const Quests = (props) => {
             args={quest.args}
             markCompleted={markCompleted}
             address={props.address}
+            account={props.account}
+            estimateInvokeFee={props.estimateInvokeFee}
             artPeaceContract={props.artPeaceContract}
             progress={quest.progress}
             needed={quest.needed}

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useContractWrite } from '@starknet-react/core';
 import './NFTMintingPanel.css';
 import canvasConfig from '../../configs/canvas.config.json';
 import { fetchWrapper } from '../../services/apiService.js';
@@ -21,10 +20,9 @@ const NFTMintingPanel = (props) => {
     return hex;
   };
 
-  const [calls, setCalls] = useState([]);
-  const mintNftCall = (position, width, height, name) => {
+  const mintNftCall = async (position, width, height, name) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     // TODO: Validate the position, width, and height
     console.log('Minting NFT:', position, width, height);
     let mintParams = {
@@ -33,27 +31,27 @@ const NFTMintingPanel = (props) => {
       height: height,
       name: toHex(name)
     };
-    setCalls(
-      props.artPeaceContract.populateTransaction['mint_nft'](mintParams)
+    const mintNFTCallData = props.artPeaceContract.populate('mint_nft', {
+      mint_params: mintParams
+    });
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'mint_nft',
+      calldata: mintNFTCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.mint_nft(
+      mintNFTCallData.calldata,
+      {
+        maxFee
+      }
     );
+    console.log(result);
+    // TODO: Update the UI with the new NFT
+    closePanel();
+    props.setActiveTab('NFTs');
   };
-
-  useEffect(() => {
-    const mintNft = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      console.log('Mint nft successful:', data, isPending);
-      // TODO: Update the UI with the new NFT
-      closePanel();
-      props.setActiveTab('NFTs');
-    };
-    mintNft();
-  }, [calls]);
-
-  const { writeAsync, data, isPending } = useContractWrite({
-    calls
-  });
 
   const [nftName, setNftName] = useState('');
   const [isValidName, setIsValidName] = useState(false);
@@ -61,7 +59,12 @@ const NFTMintingPanel = (props) => {
     if (nftName.length === 0 || nftName.length > 31) return;
     if (!isValidName) return;
     if (!devnetMode) {
-      mintNftCall(props.nftPosition, props.nftWidth, props.nftHeight, nftName);
+      await mintNftCall(
+        props.nftPosition,
+        props.nftWidth,
+        props.nftHeight,
+        nftName
+      );
       return;
     }
     let mintNFTEndpoint = 'mint-nft-devnet';

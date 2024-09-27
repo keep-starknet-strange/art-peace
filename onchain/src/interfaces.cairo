@@ -37,6 +37,7 @@ pub trait IArtPeace<TContractState> {
     fn get_width(self: @TContractState) -> u128;
     fn get_height(self: @TContractState) -> u128;
     fn get_total_pixels(self: @TContractState) -> u128;
+    fn get_host(self: @TContractState) -> starknet::ContractAddress;
 
     // Assertion helpers
     fn check_game_running(self: @TContractState);

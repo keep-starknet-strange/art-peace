@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useContractWrite } from '@starknet-react/core';
+import React from 'react';
 import './FactionTemplateBuilderPanel.css';
 import canvasConfig from '../../configs/canvas.config.json';
 import { fetchWrapper } from '../../services/apiService.js';
@@ -16,10 +15,15 @@ const FactionTemplateBuilderPanel = (props) => {
     props.setTemplateFaction(null);
   };
 
-  const [calls, setCalls] = useState([]);
-  const addFactionTemplateCall = (factionId, hash, position, width, height) => {
+  const addFactionTemplateCall = async (
+    factionId,
+    hash,
+    position,
+    width,
+    height
+  ) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     // TODO: Validate the position, width, and height
     console.log('Adding Faction Template:', position, width, height);
     let addTemplateParams = {
@@ -29,13 +33,49 @@ const FactionTemplateBuilderPanel = (props) => {
       width: width,
       height: height
     };
-    setCalls(
-      props.artPeaceContract.populateTransaction['add_faction_template'](
-        addTemplateParams
-      )
+    const addFactionTemplateCallData = props.artPeaceContract.populate(
+      'add_faction_template',
+      {
+        template_metadata: addTemplateParams
+      }
     );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'add_faction_template',
+      calldata: addFactionTemplateCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.add_faction_template(
+      addFactionTemplateCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
+    // TODO: Check if the transaction is successful
+    let addTemplateImageEndpoint = 'add-template-data';
+    const addResponse = await fetchWrapper(addTemplateImageEndpoint, {
+      mode: 'cors',
+      method: 'POST',
+      body: JSON.stringify({
+        width: props.templateImage.width.toString(),
+        height: props.templateImage.height.toString(),
+        image: props.templateColorIds.toString()
+      })
+    });
+    if (addResponse.result) {
+      // TODO: after tx done, add template to backend
+      // TODO: Double check hash match
+      // TODO: Update UI optimistically & go to specific faction in factions tab
+      console.log('Template added to backend with hash: ', addResponse.result);
+      closePanel();
+      props.setActiveTab('Factions');
+      return;
+    }
   };
-  const addChainFactionTemplateCall = (
+
+  const addChainFactionTemplateCall = async (
     factionId,
     hash,
     position,
@@ -43,7 +83,7 @@ const FactionTemplateBuilderPanel = (props) => {
     height
   ) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     console.log('Adding Chain Faction Template:', position, width, height);
     let addTemplateParams = {
       faction_id: factionId,
@@ -52,48 +92,42 @@ const FactionTemplateBuilderPanel = (props) => {
       width: width,
       height: height
     };
-    setCalls(
-      props.artPeaceContract.populateTransaction['add_chain_faction_template'](
-        addTemplateParams
-      )
-    );
-  };
-
-  useEffect(() => {
-    const addFactionTemplate = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      console.log('Faction template added successfully', data, isPending);
-      let addTemplateImageEndpoint = 'add-template-data';
-      const addResponse = await fetchWrapper(addTemplateImageEndpoint, {
-        mode: 'cors',
-        method: 'POST',
-        body: JSON.stringify({
-          width: props.templateImage.width.toString(),
-          height: props.templateImage.height.toString(),
-          image: props.templateColorIds.toString()
-        })
-      });
-      if (addResponse.result) {
-        // TODO: after tx done, add template to backend
-        // TODO: Double check hash match
-        // TODO: Update UI optimistically & go to specific faction in factions tab
-        console.log(
-          'Template added to backend with hash: ',
-          addResponse.result
-        );
-        closePanel();
-        props.setActiveTab('Factions');
-        return;
+    const addChainFactionTemplateCallData = props.artPeaceContract.populate(
+      'add_chain_faction_template',
+      {
+        template_metadata: addTemplateParams
       }
-    };
-    addFactionTemplate();
-  }, [calls]);
-
-  const { writeAsync, data, isPending } = useContractWrite({
-    calls
-  });
+    );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'add_chain_faction_template',
+      calldata: addChainFactionTemplateCallData.calldata
+    });
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.add_chain_faction_template(
+      addChainFactionTemplateCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
+    let addTemplateImageEndpoint = 'add-template-data';
+    const addResponse = await fetchWrapper(addTemplateImageEndpoint, {
+      mode: 'cors',
+      method: 'POST',
+      body: JSON.stringify({
+        width: props.templateImage.width.toString(),
+        height: props.templateImage.height.toString(),
+        image: props.templateColorIds.toString()
+      })
+    });
+    if (addResponse.result) {
+      console.log('Template added to backend with hash: ', addResponse.result);
+      closePanel();
+      props.setActiveTab('Factions');
+      return;
+    }
+  };
 
   const hashStencilImage = () => {
     // TODO: Change hash to Poseidon
@@ -105,7 +139,7 @@ const FactionTemplateBuilderPanel = (props) => {
     let hash = hashStencilImage();
     if (!devnetMode) {
       if (props.templateFaction.isChain) {
-        addChainFactionTemplateCall(
+        await addChainFactionTemplateCall(
           props.templateFaction.factionId,
           hash,
           props.templatePosition,
@@ -113,7 +147,7 @@ const FactionTemplateBuilderPanel = (props) => {
           props.templateImage.height
         );
       } else {
-        addFactionTemplateCall(
+        await addFactionTemplateCall(
           props.templateFaction.factionId,
           hash,
           props.templatePosition,

@@ -1,5 +1,8 @@
 # Sys files
 **/.DS_Store
+.env
+.env.main
+.env.sep
 
 # Scarb and Starknet Foundry
 **/target
@@ -13,6 +16,7 @@
 /package.json
 /yarn.lock
 node_modules/
+pnpm-lock.yaml
 
 # Redis
 **/dump.rdb

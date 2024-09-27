@@ -394,6 +394,10 @@ pub mod ArtPeace {
             self.total_pixels.read()
         }
 
+        fn get_host(self: @ContractState) -> ContractAddress {
+            self.host.read()
+        }
+
         fn check_game_running(self: @ContractState) {
             let block_timestamp = starknet::get_block_timestamp();
             assert(block_timestamp <= self.end_time.read(), 'ArtPeace game has ended');
