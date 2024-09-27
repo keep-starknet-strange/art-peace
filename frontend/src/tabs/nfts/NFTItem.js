@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
-import { useContractWrite } from '@starknet-react/core';
 import './NFTItem.css';
 import { fetchWrapper } from '../../services/apiService';
 import canvasConfig from '../../configs/canvas.config.json';
@@ -11,34 +10,48 @@ import Info from '../../resources/icons/Info.png';
 import { devnetMode } from '../../utils/Consts.js';
 
 const NFTItem = (props) => {
-  const [calls, setCalls] = useState([]);
-  const likeNftCall = (tokenId) => {
+  const likeNftCall = async (tokenId) => {
     if (devnetMode) return;
-    if (!props.address || !props.canvasNftContract) return;
-    setCalls(props.canvasNftContract.populateTransaction['like_nft'](tokenId));
-  };
-  const unlikeNftCall = (tokenId) => {
-    if (devnetMode) return;
-    if (!props.address || !props.canvasNftContract) return;
-    setCalls(
-      props.canvasNftContract.populateTransaction['unlike_nft'](tokenId)
+    if (!props.address || !props.canvasNftContract || !props.account) return;
+    const likeCallData = props.canvasNftContract.populate('like_nft', {
+      token_id: tokenId
+    });
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.canvasNftContract.address,
+      entrypoint: 'like_nft',
+      calldata: likeCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.canvasNftContract.like_nft(
+      likeCallData.calldata,
+      {
+        maxFee
+      }
     );
+    console.log(result);
   };
 
-  useEffect(() => {
-    const likeCall = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      console.log('Like call successful:', data, isPending);
-      // TODO: Update the UI
-    };
-    likeCall();
-  }, [calls]);
-
-  const { writeAsync, data, isPending } = useContractWrite({
-    calls
-  });
+  const unlikeNftCall = async (tokenId) => {
+    if (devnetMode) return;
+    if (!props.address || !props.canvasNftContract || !props.account) return;
+    const unlikeCallData = props.canvasNftContract.populate('unlike_nft', {
+      token_id: tokenId
+    });
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.canvasNftContract.address,
+      entrypoint: 'unlike_nft',
+      calldata: unlikeCallData.calldata
+    });
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.canvasNftContract.unlike_nft(
+      unlikeCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
+  };
 
   const handleLikePress = async (event) => {
     if (props.queryAddress === '0') {
@@ -47,10 +60,10 @@ const NFTItem = (props) => {
     event.preventDefault();
     if (!devnetMode) {
       if (liked) {
-        unlikeNftCall(props.tokenId);
+        await unlikeNftCall(props.tokenId);
         props.updateLikes(props.tokenId, likes - 1, false);
       } else {
-        likeNftCall(props.tokenId);
+        await likeNftCall(props.tokenId);
         props.updateLikes(props.tokenId, likes + 1, true);
       }
       return;

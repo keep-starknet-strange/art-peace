@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useContractWrite } from '@starknet-react/core';
 import './Factions.css';
 import FactionSelector from './FactionSelector.js';
 import FactionItem from './FactionItem.js';
@@ -382,42 +381,58 @@ const Factions = (props) => {
   const [chainFactions, setChainFactions] = useState([]);
   const [allFactions, setAllFactions] = useState([]);
 
-  const [calls, setCalls] = useState([]);
-  const joinChainCall = (chainId) => {
+  const joinChainCall = async (chainId) => {
     if (props.gameEnded) return;
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     if (chainId === 0) return;
-    setCalls(
-      props.artPeaceContract.populateTransaction['join_chain_faction'](chainId)
+    const joinChainFactionCall = props.artPeaceContract.populate(
+      'join_chain_faction',
+      {
+        faction_id: chainId
+      }
     );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'join_chain_faction',
+      calldata: joinChainFactionCall.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.join_chain_faction(
+      joinChainFactionCall.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
   };
-  const joinFactionCall = (factionId) => {
+
+  const joinFactionCall = async (factionId) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     if (factionId === 0) return;
-    setCalls(
-      props.artPeaceContract.populateTransaction['join_faction'](factionId)
+    const joinFactionCall = props.artPeaceContract.populate('join_faction', {
+      faction_id: factionId
+    });
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'join_faction',
+      calldata: joinFactionCall.calldata
+    });
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.join_faction(
+      joinFactionCall.calldata,
+      {
+        maxFee
+      }
     );
+    console.log(result);
   };
-
-  useEffect(() => {
-    const factionCall = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      console.log('Faction call successful:', data, isPending);
-    };
-    factionCall();
-  }, [calls]);
-
-  const { writeAsync, data, isPending } = useContractWrite({
-    calls
-  });
 
   const joinChain = async (chainId) => {
     if (!devnetMode) {
-      joinChainCall(chainId);
+      await joinChainCall(chainId);
       setExpanded(false);
       let newChainFactions = chainFactions.map((chain) => {
         if (chain.factionId === chainId) {
@@ -473,7 +488,7 @@ const Factions = (props) => {
 
   const joinFaction = async (factionId) => {
     if (!devnetMode) {
-      joinFactionCall(factionId);
+      await joinFactionCall(factionId);
       let newAllFactions = allFactions.map((faction) => {
         if (faction.factionId === factionId) {
           faction.isMember = true;

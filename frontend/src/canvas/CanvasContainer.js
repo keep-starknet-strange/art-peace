@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useContractWrite } from '@starknet-react/core';
 import './CanvasContainer.css';
 import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
@@ -241,34 +240,27 @@ const CanvasContainer = (props) => {
     props.setPixelPlacedBy(getPixelInfoEndpoint.data);
   };
 
-  const [calls, setCalls] = useState([]);
-  const placePixelCall = (position, color, now) => {
+  const placePixelCall = async (position, color, now) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     // TODO: Check valid inputs
-    setCalls(
-      props.artPeaceContract.populateTransaction['place_pixel'](
-        position,
-        color,
-        now
-      )
-    );
+    const callData = props.artPeaceContract.populate('place_pixel', {
+      pos: position,
+      color: color,
+      now: now
+    });
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'place_pixel',
+      calldata: callData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.place_pixel(callData.calldata, {
+      maxFee
+    });
+    console.log(result);
   };
-
-  useEffect(() => {
-    const placePixel = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      console.log('Place Pixel successful:', data, isPending);
-      // TODO: Update the UI with the new state
-    };
-    placePixel();
-  }, [calls]);
-
-  const { writeAsync, data, isPending } = useContractWrite({
-    calls
-  });
 
   const pixelClicked = async (e) => {
     if (props.nftMintingMode || props.templateCreationMode) {
@@ -328,7 +320,7 @@ const CanvasContainer = (props) => {
     if (!devnetMode) {
       props.setSelectedColorId(-1);
       props.colorPixel(position, colorId);
-      placePixelCall(position, colorId, timestamp);
+      await placePixelCall(position, colorId, timestamp);
       props.clearPixelSelection();
       props.setLastPlacedTime(timestamp * 1000);
       return;

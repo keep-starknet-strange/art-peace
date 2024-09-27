@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useContractWrite } from '@starknet-react/core';
+import React from 'react';
 import './ExtraPixelsPanel.css';
 import canvasConfig from '../../configs/canvas.config.json';
 import { fetchWrapper } from '../../services/apiService.js';
@@ -22,40 +21,39 @@ const ExtraPixelsPanel = (props) => {
     props.setSelectedColorId(-1);
   };
 
-  const [calls, setCalls] = useState([]);
-  const extraPixelPlaceCall = (positions, colors, now) => {
+  const extraPixelPlaceCall = async (positions, colors, now) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     // TODO: Validate inputs
-    setCalls(
-      props.artPeaceContract.populateTransaction['place_extra_pixels'](
-        positions,
-        colors,
-        now
-      )
+    const placeExtraPixelsCallData = props.artPeaceContract.populate(
+      'place_extra_pixels',
+      {
+        positions: positions,
+        colors: colors,
+        now: now
+      }
     );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'place_extra_pixels',
+      calldata: placeExtraPixelsCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.place_extra_pixels(
+      placeExtraPixelsCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
   };
-
-  useEffect(() => {
-    const extraPixelsPlaced = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-      console.log('Extra pixels placed successful:', data, isPending);
-      // TODO: Update the UI with the new vote count
-    };
-    extraPixelsPlaced();
-  }, [calls]);
-
-  const { writeAsync, data, isPending } = useContractWrite({
-    calls
-  });
 
   // TODO: Is rounding down the time always okay?
   const submit = async () => {
     let timestamp = Math.floor(Date.now() / 1000);
     if (!devnetMode) {
-      extraPixelPlaceCall(
+      await extraPixelPlaceCall(
         props.extraPixelsData.map(
           (pixel) => pixel.x + pixel.y * canvasConfig.canvas.width
         ),
@@ -423,12 +421,18 @@ const ExtraPixelsPanel = (props) => {
           })}
         </div>
       </div>
-      <div
-        className={`Text__medium Button__primary ExtraPixelPanel__submit__button ${props.availablePixelsUsed === props.availablePixels ? 'ExtraPixelsPanel__submit__button--all' : 'ExtraPixelsPanel__submit__button--some'}`}
-        onClick={() => submit()}
-      >
-        Submit
-      </div>
+      {props.availablePixelsUsed > 0 ? (
+        <div
+          className={`Text__medium Button__primary ExtraPixelPanel__submit__button ${props.availablePixelsUsed === props.availablePixels ? 'ExtraPixelsPanel__submit__button--all' : 'ExtraPixelsPanel__submit__button--some'}`}
+          onClick={() => submit()}
+        >
+          Submit {props.availablePixelsUsed}/{props.availablePixels} pxs
+        </div>
+      ) : (
+        <div className='Text__small' style={{ margin: '1rem' }}>
+          Place pixels on the canvas
+        </div>
+      )}
     </div>
   );
 };

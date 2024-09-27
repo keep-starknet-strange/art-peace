@@ -56,6 +56,8 @@ const NFTsMainSection = (props) => {
             <NFTItem
               key={index}
               address={props.address}
+              account={props.account}
+              estimateInvokeFee={props.estimateInvokeFee}
               artPeaceContract={props.artPeaceContract}
               canvasNftContract={props.canvasNftContract}
               tokenId={nft.tokenId}
@@ -112,6 +114,8 @@ const NFTsExpandedSection = (props) => {
               <NFTItem
                 key={index}
                 address={props.address}
+                account={props.account}
+                estimateInvokeFee={props.estimateInvokeFee}
                 artPeaceContract={props.artPeaceContract}
                 canvasNftContract={props.canvasNftContract}
                 tokenId={nft.tokenId}
@@ -298,6 +302,8 @@ const NFTs = (props) => {
       expandedSection={NFTsExpandedSection}
       updateLikes={updateLikes}
       address={props.address}
+      account={props.account}
+      estimateInvokeFee={props.estimateInvokeFee}
       artPeaceContract={props.artPeaceContract}
       canvasNftContract={props.canvasNftContract}
       nftMintingMode={props.nftMintingMode}

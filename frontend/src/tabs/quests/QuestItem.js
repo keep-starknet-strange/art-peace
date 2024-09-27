@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useContractWrite } from '@starknet-react/core';
 import { encodeToLink } from '../../utils/encodeToLink';
 import './QuestItem.css';
 import '../../utils/Styles.css';
@@ -52,42 +51,57 @@ const QuestItem = (props) => {
     setInputsValidated(validated);
   };
 
-  const [calls, setCalls] = useState([]);
-  const claimTodayQuestCall = (quest_id, calldata) => {
+  const claimTodayQuestCall = async (quest_id, calldata) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
+    if (!props.address || !props.artPeaceContract || !props.account) return;
     // TODO: Check valid inputs & expand calldata
-    setCalls(
-      props.artPeaceContract.populateTransaction['claim_today_quest'](
-        quest_id,
-        calldata
-      )
+    const claimQuestCallData = props.artPeaceContract.populate(
+      'claim_today_quest',
+      {
+        quest_id: quest_id,
+        calldata: calldata
+      }
     );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'claim_today_quest',
+      calldata: claimQuestCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.claim_today_quest(
+      claimQuestCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
   };
 
-  const claimMainQuestCall = (quest_id, calldata) => {
+  const claimMainQuestCall = async (quest_id, calldata) => {
     if (devnetMode) return;
-    if (!props.address || !props.artPeaceContract) return;
-    setCalls(
-      props.artPeaceContract.populateTransaction['claim_main_quest'](
-        quest_id,
-        calldata
-      )
+    if (!props.address || !props.artPeaceContract || !props.account) return;
+    const claimQuestCallData = props.artPeaceContract.populate(
+      'claim_main_quest',
+      {
+        quest_id: quest_id,
+        calldata: calldata
+      }
     );
+    const { suggestedMaxFee } = await props.estimateInvokeFee({
+      contractAddress: props.artPeaceContract.address,
+      entrypoint: 'claim_main_quest',
+      calldata: claimQuestCallData.calldata
+    });
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await props.artPeaceContract.claim_main_quest(
+      claimQuestCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
   };
-
-  useEffect(() => {
-    const claimQuest = async () => {
-      if (devnetMode) return;
-      if (calls.length === 0) return;
-      await writeAsync();
-    };
-    claimQuest();
-  }, [calls]);
-
-  const { writeAsync } = useContractWrite({
-    calls
-  });
 
   const [canClaim, setCanClaim] = useState(false);
   const claimOrExpand = async () => {
@@ -117,9 +131,9 @@ const QuestItem = (props) => {
     }
     if (!devnetMode) {
       if (props.type === 'daily') {
-        claimTodayQuestCall(props.questId, questCalldata);
+        await claimTodayQuestCall(props.questId, questCalldata);
       } else if (props.type === 'main') {
-        claimMainQuestCall(props.questId, questCalldata);
+        await claimMainQuestCall(props.questId, questCalldata);
       } else {
         console.log('Quest type not recognized');
       }
