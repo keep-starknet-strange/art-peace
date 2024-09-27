@@ -145,6 +145,17 @@
       },
       {
         "type": "function",
+        "name": "get_host",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
         "name": "check_game_running",
         "inputs": [],
         "outputs": [],
@@ -929,6 +940,46 @@
           }
         ],
         "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "host_set_timer",
+        "inputs": [
+          {
+            "name": "time",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "host_award_user",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "amount",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "host_change_end_time",
+        "inputs": [
+          {
+            "name": "new_end_time",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
       }
     ]
   },
@@ -1718,6 +1769,23 @@
   },
   {
     "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::HostAwardedUser",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "amount",
+        "type": "core::integer::u32",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
     "name": "art_peace::templates::component::TemplateStoreComponent::TemplateAdded",
     "kind": "struct",
     "members": [
@@ -1875,6 +1943,11 @@
       {
         "name": "ChainFactionTemplateRemoved",
         "type": "art_peace::art_peace::ArtPeace::ChainFactionTemplateRemoved",
+        "kind": "nested"
+      },
+      {
+        "name": "HostAwardedUser",
+        "type": "art_peace::art_peace::ArtPeace::HostAwardedUser",
         "kind": "nested"
       },
       {
