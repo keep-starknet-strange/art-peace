@@ -6,15 +6,15 @@
         "day": 1,
         "quests": [
           {
-            "name": "Place 5 pixels",
-            "description": "Add 5 pixels on the canvas",
-            "reward": 3,
+            "name": "Place 10 pixels",
+            "description": "Place 10 pixels on the canvas today",
+            "reward": 10,
             "questContract": {
               "type": "PixelQuest",
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD",
-                "5",
+                "10",
                 "1",
                 "$DAY_IDX",
                 "0",
@@ -26,7 +26,7 @@
           {
             "name": "Create a username",
             "description": "Claim a username in the accounts tab",
-            "reward": 3,
+            "reward": 7,
             "questContract": {
               "type": "UsernameQuest",
               "initParams": [
@@ -38,16 +38,17 @@
             }
           },
           {
-            "name": "Represent your chain",
-            "description": "Join a faction to represent your favorite chain in the factions tab",
-            "reward": 3,
+            "name": "Cast your vote",
+            "description": "Vote to add a color to the palette in the vote tab",
+            "reward": 7,
             "questContract": {
-              "type": "ChainFactionQuest",
+              "type": "VoteQuest",
               "initParams": [
                 "$ART_PEACE_CONTRACT",
-                "$REWARD"
+                "$REWARD",
+                "$DAY_IDX"
               ],
-              "storeParams": []
+              "storeParams": [2]
             }
           }
         ]
@@ -57,14 +58,14 @@
         "quests": [
           {
             "name": "The Void",
-            "description": "Place 10 black pixels and spread the void",
-            "reward": 5,
+            "description": "Place 15 black pixels and spread the void",
+            "reward": 10,
             "questContract": {
               "type": "PixelQuest",
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD",
-                "10",
+                "15",
                 "1",
                 "$DAY_IDX",
                 "1",
@@ -76,7 +77,7 @@
           {
             "name": "Mint art/peace NFT",
             "description": "Mint your artwork from the canvas under the NFT tab",
-            "reward": 5,
+            "reward": 10,
             "questContract": {
               "type": "NFTMintQuest",
               "initParams": [
@@ -99,7 +100,7 @@
           {
             "name": "Cast your vote",
             "description": "Vote to add a color to the palette in the vote tab",
-            "reward": 3,
+            "reward": 7,
             "questContract": {
               "type": "VoteQuest",
               "initParams": [
@@ -116,15 +117,15 @@
         "day": 3,
         "quests": [
           {
-            "name": "Place 5 pixels",
-            "description": "Add 5 pixels on the canvas",
-            "reward": 3,
+            "name": "Place 15 pixels",
+            "description": "Place 15 pixels on the canvas",
+            "reward": 13,
             "questContract": {
               "type": "PixelQuest",
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD",
-                "5",
+                "15",
                 "1",
                 "$DAY_IDX",
                 "0",
@@ -135,8 +136,8 @@
           },
           {
             "name": "Last color vote",
-            "description": "Cast your vote in the last color vote in the vote tab",
-            "reward": 3,
+            "description": "Vote for the last color to addd to the palette in the vote tab",
+            "reward": 10,
             "questContract": {
               "type": "VoteQuest",
               "initParams": [
@@ -146,6 +147,24 @@
               ],
               "storeParams": [2]
             }
+          },
+          {
+            "name": "Become a Pixel Wizard",
+            "description": "Add 50 total pixels onto the canvas",
+            "reward": 15,
+            "questContract": {
+              "type": "PixelQuest",
+              "initParams": [
+                "$ART_PEACE_CONTRACT",
+                "$REWARD",
+                "50",
+                "0",
+                "0",
+                "0",
+                "0"
+              ],
+              "storeParams": [2,3,4,5,6]
+            }
           }
         ]
       },
@@ -154,14 +173,14 @@
         "quests": [
           {
             "name": "Endgame Pixels",
-            "description": "Place 5 pixels on the canvas to try and appear on the final snapshot",
-            "reward": 3,
+            "description": "Place 10 pixels on the canvas to try and appear on the final snapshot",
+            "reward": 10,
             "questContract": {
               "type": "PixelQuest",
               "initParams": [
                 "$ART_PEACE_CONTRACT",
                 "$REWARD",
-                "5",
+                "10",
                 "1",
                 "$DAY_IDX",
                 "0",
@@ -173,7 +192,7 @@
           {
             "name": "Finalize your art piece",
             "description": "Mint an NFT of your artwork to keep it forever",
-            "reward": 5,
+            "reward": 10,
             "questContract": {
               "type": "NFTMintQuest",
               "initParams": [
@@ -202,7 +221,7 @@
       {
         "name": "The Rainbow",
         "description": "Place at least 1 pixel of each color",
-        "reward": 10,
+        "reward": 13,
         "questContract": {
           "type": "RainbowQuest",
           "initParams": [
@@ -213,9 +232,22 @@
         }
       },
       {
+        "name": "Represent your chain",
+        "description": "Join a faction to represent your favorite chain in the factions tab",
+        "reward": 7,
+        "questContract": {
+          "type": "ChainFactionQuest",
+          "initParams": [
+            "$ART_PEACE_CONTRACT",
+            "$REWARD"
+          ],
+          "storeParams": []
+        }
+      },
+      {
         "name": "Join a Faction",
         "description": "Represent a community by joining their faction on the factions tab",
-        "reward": 3,
+        "reward": 7,
         "questContract": {
           "type": "FactionQuest",
           "initParams": [
@@ -228,7 +260,7 @@
       {
         "name": "HODL",
         "description": "Accumulate 10 extra pixels in your account",
-        "reward": 5,
+        "reward": 10,
         "questContract": {
           "type": "HodlQuest",
           "initParams": [
@@ -240,36 +272,15 @@
         }
       },
       {
-        "name": "Deploy a Memecoin",
-        "description": "Create your own [Unruggable memecoin](https://www.unruggable.meme/)",
-        "reward": 15,
-        "questContract": {
-          "type": "UnruggableQuest",
-          "initParams": [
-            "$ART_PEACE_CONTRACT",
-            "$REWARD"
-          ],
-          "storeParams": [],
-          "claimParams": [
-            {
-              "type": "address",
-              "name": "MemeCoin Address",
-              "example": "0x02D7B50EBF415606D77C7E7842546FC13F8ACFBFD16F7BCF2BC2D08F54114C23",
-              "input": true
-            }
-          ]
-        }
-      },
-      {
-        "name": "Place 100 pixels",
-        "description": "Add 100 pixels on the canvas",
-        "reward": 15,
+        "name": "Become Alpha Wolf",
+        "description": "Add 500 pixels on the canvas",
+        "reward": 50,
         "questContract": {
           "type": "PixelQuest",
           "initParams": [
             "$ART_PEACE_CONTRACT",
             "$REWARD",
-            "100",
+            "500",
             "0",
             "0",
             "0",

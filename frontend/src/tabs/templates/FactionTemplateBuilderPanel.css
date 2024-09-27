@@ -127,7 +127,8 @@
   text-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.7);
 }
 
-.FactionTemplateBuilderPanel__bubble:hover .FactionTemplateBuilderPanel__bubble__remove {
+.FactionTemplateBuilderPanel__bubble:hover
+  .FactionTemplateBuilderPanel__bubble__remove {
   display: block;
   color: red;
 }

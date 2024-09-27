@@ -104,8 +104,8 @@ COLORS=$(jq -r '.colors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 VOTABLE_COLOR_COUNT=$(jq -r '.votableColors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
 VOTABLE_COLORS=$(jq -r '.votableColors[]' $CANVAS_CONFIG | sed 's/^/0x/')
 DAILY_NEW_COLORS_COUNT=3
-START_TIME=1720430751
-END_TIME=1720776600
+START_TIME=1727424000
+END_TIME=1727769600
 DEVNET_MODE=0
 
 DAILY_QUESTS_COUNT=$(jq -r '.daily.dailyQuestsCount' $QUESTS_CONFIG)

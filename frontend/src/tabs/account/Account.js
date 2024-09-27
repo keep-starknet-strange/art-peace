@@ -337,17 +337,17 @@ const Account = (props) => {
   }, [animatedRankColor, pixelCount]);
 
   useEffect(() => {
-    if (pixelCount >= 50) {
+    if (pixelCount >= 500) {
       setAccountRank('Alpha Wolf');
       setAccountRankImg(WolfRankImg);
-    } else if (pixelCount >= 30) {
+    } else if (pixelCount >= 250) {
       setAccountRank('Degen Artist');
       setRankBackground({
         background:
           'linear-gradient(45deg, rgba(255, 215, 0, 0.9), rgba(255, 215, 0, 0.6))'
       });
       setAccountRankImg(CrownRankImg);
-    } else if (pixelCount >= 10) {
+    } else if (pixelCount >= 50) {
       setAccountRank('Pixel Wizard');
       setRankBackground({
         background:

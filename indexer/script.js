@@ -274,6 +274,16 @@ export const config = {
         includeReverted: false,
         includeTransaction: false,
         includeReceipt: false
+      },
+      {
+        // Host Awarded Pixels Event
+        fromAddress: Deno.env.get("ART_PEACE_CONTRACT_ADDRESS"),
+        keys: [
+          "0x03cab98018a5e38e0cf717d8bed481983eb400f6a1d9ccd34f87050c0f36a32a"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
       }
     ]
   },

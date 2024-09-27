@@ -4,7 +4,7 @@
       "id": 1,
       "name": "Ducks Everywhere",
       "icon": "$BACKEND_URL/faction-images/ducks-everywhere.png",
-      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
+      "leader": "0x5cf1e201ace78e436ec07748ddd7312db07a9d588e8b177ded3eb612daad80e",
       "joinable": true,
       "allocation": 1,
       "links": {
@@ -18,22 +18,70 @@
     },
     {
       "id": 2,
-      "name": "WASD",
-      "icon": "$BACKEND_URL/faction-images/wasd.png",
+      "name": "Realms",
+      "icon": "$BACKEND_URL/faction-images/realms.png",
       "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
       "joinable": true,
       "allocation": 1,
       "links": {
-        "telegram": "https://t.me/art_peace_game/3",
-        "twitter": "https://twitter.com/WASD_0x",
-        "github": "",
-        "site": "https://bento.me/wasd"
+        "telegram": "https://t.me/art_peace_game/25",
+        "twitter": "https://x.com/LootRealms",
+        "github": "https://github.com/bibliothecaDAO",
+        "site": "https://realms.world"
       },
       "members": [
       ]
     },
     {
       "id": 3,
+      "name": "Wolf Pack League",
+      "icon": "$BACKEND_URL/faction-images/wpl.png",
+      "leader": "0x0179caf1b35202a0a544109cc04caf07a813755d1a15927e025ad874108b0543",
+      "joinable": true,
+      "allocation": 1,
+      "links": {
+        "telegram": "https://t.me/art_peace_game/26",
+        "twitter": "https://x.com/WPLSTARK",
+        "github": "",
+        "site": "https://www.thewpl.xyz"
+      },
+      "members": [
+      ]
+    },
+    {
+      "id": 4,
+      "name": "zkCampus",
+      "icon": "$BACKEND_URL/faction-images/zk-campus.png",
+      "leader": "0x00Cca69dDF0833Bd6De5d0074949dC45820113fd6F4124a1C380304EDC4d79E9",
+      "joinable": true,
+      "allocation": 1,
+      "links": {
+        "telegram": "https://t.me/art_peace_game/27",
+        "twitter": "https://x.com/ZkCampus",
+        "github": "",
+        "site": "https://medium.com/@ZkCampus"
+      },
+      "members": [
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Starknet Africa",
+      "icon": "$BACKEND_URL/faction-images/sn_africa.png",
+      "leader": "0x0091549c2fe52f07266a21228406131df81b39a7f4793cf23c8cb30d4c667850",
+      "joinable": true,
+      "allocation": 1,
+      "links": {
+        "telegram": "https://t.me/art_peace_game/12",
+        "twitter": "https://x.com/StarkNetAfrica",
+        "github": "",
+        "site": "https://www.starknet.africa"
+      },
+      "members": [
+      ]
+    },
+    {
+      "id": 6,
       "name": "Influence",
       "icon": "$BACKEND_URL/faction-images/influence.png",
       "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
@@ -49,58 +97,10 @@
       ]
     },
     {
-      "id": 4,
-      "name": "Ark Project",
-      "icon": "$BACKEND_URL/faction-images/ark-project.png",
-      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
-      "joinable": true,
-      "allocation": 1,
-      "links": {
-        "telegram": "https://t.me/art_peace_game/5",
-        "twitter": "https://x.com/arkprojectnfts",
-        "github": "",
-        "site": "https://www.arkproject.dev/"
-      },
-      "members": [
-      ]
-    },
-    {
-      "id": 5,
-      "name": "Everai",
-      "icon": "$BACKEND_URL/faction-images/everai.png",
-      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
-      "joinable": true,
-      "allocation": 1,
-      "links": {
-        "telegram": "https://t.me/art_peace_game/6",
-        "twitter": "https://x.com/everai",
-        "github": "",
-        "site": "https://www.everai.xyz/"
-      },
-      "members": [
-      ]
-    },
-    {
-      "id": 6,
-      "name": "2077 Collective",
-      "icon": "$BACKEND_URL/faction-images/2077.png",
-      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
-      "joinable": true,
-      "allocation": 1,
-      "links": {
-        "telegram": "https://t.me/art_peace_game/7",
-        "twitter": "https://x.com/2077Collective",
-        "github": "",
-        "site": "https://2077.xyz/"
-      },
-      "members": [
-      ]
-    },
-    {
       "id": 7,
       "name": "Argent",
       "icon": "$BACKEND_URL/faction-images/argent.png",
-      "leader": "0x05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa",
+      "leader": "0x02775831D81d35d30Cd842511331b482E4275Cd1c8a34AE832aDb0D282307AFd",
       "joinable": true,
       "allocation": 1,
       "links": {
