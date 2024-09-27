@@ -4,7 +4,7 @@ import { useContractWrite } from '@starknet-react/core';
 import './NFTItem.css';
 import { fetchWrapper } from '../../services/apiService';
 import canvasConfig from '../../configs/canvas.config.json';
-// TODO: import ShareIcon from '../../resources/icons/Share.png';
+import ShareIcon from '../../resources/icons/Share.png';
 import LikeIcon from '../../resources/icons/Like.png';
 import LikedIcon from '../../resources/icons/Liked.png';
 import Info from '../../resources/icons/Info.png';
