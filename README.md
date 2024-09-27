@@ -10,6 +10,10 @@
 
 </div>
 
+> Art Peace Round 2 is live!
+> Check live stats on this cool [Dune Dashboard](https://dune.com/hessish/artpeace)
+> And go place some pixels and draw cool shit you mfer! ==> https://www.art-peace.net/
+
 ## Overview
 
 `art/peace` is a collaborative art game where users can place pixels on a large shared canvas and receive rewards for collaborating to build art. The game will run over X days, and end with a final snapshot of the board. The goal is to give users the feeling of collectively building on a highly responsive art canvas, which they can explore, interact with, and compete on.
