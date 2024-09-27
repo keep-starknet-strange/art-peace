@@ -263,7 +263,7 @@ function App() {
 
   const updateInterval = 1000; // 1 second
   // TODO: make this a config
-  const timeBetweenPlacements = 30000; // 30 seconds
+  const timeBetweenPlacements = process.env.REACT_APP_BASE_PIXEL_TIMER; // Example: 30 * 1000; // 30 seconds
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
   useEffect(() => {
     const updateBasePixelTimer = () => {

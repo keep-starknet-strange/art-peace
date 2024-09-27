@@ -234,3 +234,37 @@ func revertExtraPixelsPlacedEvent(event IndexerEvent) {
 		return
 	}
 }
+
+func processHostAwardedPixelsEvent(event IndexerEvent) {
+	user := event.Event.Keys[1][2:] // Remove 0x prefix
+	awardHex := event.Event.Data[0]
+
+	award, err := strconv.ParseInt(awardHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processHostAwardedPixelsEvent", "Error converting award hex to int", user, awardHex)
+		return
+	}
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO ExtraPixels (address, available, used) VALUES ($1, $2, 0) ON CONFLICT (address) DO UPDATE SET available = ExtraPixels.available + $2", user, award)
+	if err != nil {
+		PrintIndexerError("processHostAwardedPixelsEvent", "Error updating extra pixels in postgres", user, awardHex)
+		return
+	}
+}
+
+func revertHostAwardedPixelsEvent(event IndexerEvent) {
+	user := event.Event.Keys[1][2:] // Remove 0x prefix
+	awardHex := event.Event.Data[0]
+
+	award, err := strconv.ParseInt(awardHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertHostAwardedPixelsEvent", "Error converting award hex to int", user, awardHex)
+		return
+	}
+
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE ExtraPixels SET available = ExtraPixels.available - $1 WHERE address = $2", award, user)
+	if err != nil {
+		PrintIndexerError("revertHostAwardedPixelsEvent", "Error updating extra pixels in postgres", user, awardHex)
+		return
+	}
+}
