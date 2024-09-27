@@ -326,7 +326,7 @@ const Account = (props) => {
   const [animatedRankColor, setAnimatedRankColor] = React.useState(0);
   const btrColorOffset = 1000;
   useEffect(() => {
-    if (pixelCount < 50) return;
+    if (pixelCount < 500) return;
     const interval = setInterval(() => {
       setAnimatedRankColor((animatedRankColor + 3) % 360);
       setRankBackground({
