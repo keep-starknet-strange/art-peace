@@ -13,8 +13,7 @@
         "github": "",
         "site": "https://linktr.ee/duckseverywhere"
       },
-      "members": [
-      ]
+      "members": []
     },
     {
       "id": 2,
@@ -29,8 +28,7 @@
         "github": "https://github.com/bibliothecaDAO",
         "site": "https://realms.world"
       },
-      "members": [
-      ]
+      "members": []
     },
     {
       "id": 3,
@@ -45,8 +43,7 @@
         "github": "",
         "site": "https://www.thewpl.xyz"
       },
-      "members": [
-      ]
+      "members": []
     },
     {
       "id": 4,
@@ -61,8 +58,7 @@
         "github": "",
         "site": "https://medium.com/@ZkCampus"
       },
-      "members": [
-      ]
+      "members": []
     },
     {
       "id": 5,
@@ -77,8 +73,7 @@
         "github": "",
         "site": "https://www.starknet.africa"
       },
-      "members": [
-      ]
+      "members": []
     },
     {
       "id": 6,
@@ -93,8 +88,7 @@
         "github": "",
         "site": "https://www.influenceth.io/"
       },
-      "members": [
-      ]
+      "members": []
     },
     {
       "id": 7,
@@ -109,8 +103,21 @@
         "github": "",
         "site": "https://www.argent.xyz/"
       },
-      "members": [
-      ]
+      "members": []
+    },
+    {
+      "id": 8,
+      "name": "CarmineOptions",
+      "icon": "$BACKEND_URL/faction-images/carmine-options.png",
+      "leader": "0x03d1525605db970fa1724693404f5f64cba8af82ec4aab514e6ebd3dec4838ad",
+      "joinable": true,
+      "allocation": 1,
+      "links": {
+        "twitter": "https://x.com/CarmineOptions",
+        "github": "https://github.com/CarmineOptions",
+        "site": "https://www.carmine.finance/"
+      },
+      "members": []
     }
   ],
   "chain_factions": [
