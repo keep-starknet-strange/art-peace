@@ -16,7 +16,6 @@
 /package.json
 /yarn.lock
 node_modules/
-pnpm-lock.yaml
 
 # Redis
 **/dump.rdb
