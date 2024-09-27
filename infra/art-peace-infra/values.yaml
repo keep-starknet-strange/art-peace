@@ -73,14 +73,14 @@ postgres:
   password: ArtPeacePassword1234
 
 apibara:
-  #streamUrl: https://mainnet.starknet.a5a.ch
-  streamUrl: https://sepolia.starknet.a5a.ch
+  streamUrl: https://mainnet.starknet.a5a.ch
+  #streamUrl: https://sepolia.starknet.a5a.ch
   indexerId: art-peace-indexer-id
   authToken: dna_aabbcc
 
 contracts:
-  artPeace: 0x078f4e772300472a68a19f2b1aedbcb7cf2acd6f67a2236372310a528c7eaa67
-  usernameStore: 0x051cf8214d781f5ee503cb668505e58f0374bfd602145560ba1b897eb98f2e1a
-  nft: 0x03f169f36006f9007b94a7046944d0c351a7a301aae692c995fec41bb38693e8
-  host: "07C313Ea8b45044c2272B77eC7332B65bdFef089c4De0FFfaB3De3FD6b85d124"
-  end: "1727483400"
+  artPeace: 0x067883deb1c1cb60756eb6e60d500081352441a040d5039d0e4ce9fed35d68c1
+  usernameStore: 0x03d9ac2a08d83dcbcf7a05358dd77e05d2b094d3c13232611fe86ee957c34d02
+  nft: 0x042dbc0bbdb0faaad99d0b116d0105f9e213ac0d2faf75c878f49d69b544befb
+  host: "05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa"
+  end: "1727769600"
