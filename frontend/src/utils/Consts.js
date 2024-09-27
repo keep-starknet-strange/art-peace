@@ -41,7 +41,11 @@ export const STARKNET_CHAIN_ID =
     ? constants.StarknetChainId.SN_MAIN
     : constants.StarknetChainId.SN_SEPOLIA;
 
-export const provider = new RpcProvider([NODE_URL], STARKNET_CHAIN_ID);
+//export const provider = new RpcProvider([NODE_URL], STARKNET_CHAIN_ID);
+export const provider = new RpcProvider({
+  nodeUrl: NODE_URL,
+  chainId: STARKNET_CHAIN_ID
+});
 
 export const allowedMethods = [
   {
@@ -103,10 +107,6 @@ export const allowedMethods = [
   {
     'Contract Address': process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
     selector: 'place_pixel'
-  },
-  {
-    'Contract Address': process.env.REACT_APP_STARKNET_CONTRACT_ADDRESS,
-    selector: 'entrypoint'
   }
 ];
 
