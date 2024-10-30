@@ -7,6 +7,7 @@ const PixelSelector = (props) => {
   // Track when a placement is available
 
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
+  const [ended, setEnded] = useState(false);
 
   useEffect(() => {
     if (props.queryAddress === '0') {
@@ -28,6 +29,15 @@ const PixelSelector = (props) => {
     } else {
       // TODO: Use lowest timer out of base, chain, faction, ...
       setPlacementTimer(props.basePixelTimer);
+    }
+    if (
+      placementTimer === '0:00' &&
+      placementTimer !== 'Out of Pixels' &&
+      placementTimer !== 'Login to Play'
+    ) {
+      setEnded(true);
+    } else {
+      setEnded(false);
     }
   }, [
     props.availablePixels,
@@ -63,11 +73,12 @@ const PixelSelector = (props) => {
     props.setSelectedColorId(-1);
     props.setSelectorMode(false);
     props.setIsEraserMode(false);
+    setEnded(false);
   };
 
   return (
     <div className='PixelSelector'>
-      {props.selectorMode && (
+      {(props.selectorMode || ended) && (
         <div className='PixelSelector__selector'>
           <div className='PixelSelector__selector__colors'>
             {props.colors.map((color, idx) => {
