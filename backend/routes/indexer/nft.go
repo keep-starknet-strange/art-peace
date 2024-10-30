@@ -27,7 +27,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 	dayIndexHex := event.Event.Data[6]
 	minter := event.Event.Data[7][2:] // Remove 0x prefix
 
-	// Combine high and low token ids
+	// combine high and low token ids
 	tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error combining high and low tokenId hex", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
@@ -121,18 +121,20 @@ func processNFTMintedEvent(event IndexerEvent) {
 		}
 		colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
 	}
+
+	// Scale factors
+	scaleFactor := 10
+	scaledWidth := width * int64(scaleFactor)
+	scaledHeight := height * int64(scaleFactor)
+
+	// Create a new image with scaled dimensions
+	generatedImage := image.NewRGBA(image.Rect(0, 0, int(scaledWidth), int(scaledHeight)))
+
 	bitWidth := int64(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth)
 	startX := int64(position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width))
 	startY := int64(position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width))
 	oneByteBitOffset := int64(8 - bitWidth)
 	twoByteBitOffset := int64(16 - bitWidth)
-
-	// Scale the width and height by 10
-	scaledWidth := width * 10
-	scaledHeight := height * 10
-
-	// Create a new image with scaled dimensions
-	generatedImage := image.NewRGBA(image.Rect(0, 0, int(scaledWidth), int(scaledHeight)))
 
 	for y := startY; y < startY+height; y++ {
 		for x := startX; x < startX+width; x++ {
@@ -141,18 +143,19 @@ func processNFTMintedEvent(event IndexerEvent) {
 			bytePos := bitPos / 8
 			bitOffset := bitPos % 8
 
-			// Determine the color index based on the bit offset
-			var colorIdx int
-			if bitOffset <= oneByteBitOffset {
-				colorIdx = (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
-			} else {
-				colorIdx = (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
-			}
+			// Calculate the scaled position
+			for dy := 0; dy < scaleFactor; dy++ {
+				for dx := 0; dx < scaleFactor; dx++ {
+					scaledX := int(x-startX)*scaleFactor + dx
+					scaledY := int(y-startY)*scaleFactor + dy
 
-			// Set the scaled pixel in the generated image
-			for dy := 0; dy < 10; dy++ {
-				for dx := 0; dx < 10; dx++ {
-					generatedImage.Set(int(x*10+dx-startX*10), int(y*10+dy-startY*10), colorPalette[colorIdx])
+					if bitOffset <= oneByteBitOffset {
+						colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
+						generatedImage.Set(scaledX, scaledY, colorPalette[colorIdx])
+					} else {
+						colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
+						generatedImage.Set(scaledX, scaledY, colorPalette[colorIdx])
+					}
 				}
 			}
 		}
@@ -208,11 +211,11 @@ func processNFTMintedEvent(event IndexerEvent) {
 		"attributes": []map[string]interface{}{
 			{
 				"trait_type": "Width",
-				"value":      fmt.Sprintf("%d", width),
+				"value":      fmt.Sprintf("%d", scaledWidth),
 			},
 			{
 				"trait_type": "Height",
-				"value":      fmt.Sprintf("%d", height),
+				"value":      fmt.Sprintf("%d", scaledHeight),
 			},
 			{
 				"trait_type": "Position",
