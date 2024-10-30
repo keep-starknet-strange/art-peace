@@ -27,7 +27,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 	dayIndexHex := event.Event.Data[6]
 	minter := event.Event.Data[7][2:] // Remove 0x prefix
 
-	// combine high and low token ids
+	// Combine high and low token ids
 	tokenIdU256, err := combineLowHigh(tokenIdLowHex, tokenIdHighHex)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error combining high and low tokenId hex", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
@@ -126,22 +126,38 @@ func processNFTMintedEvent(event IndexerEvent) {
 	startY := int64(position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width))
 	oneByteBitOffset := int64(8 - bitWidth)
 	twoByteBitOffset := int64(16 - bitWidth)
-	generatedImage := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
+
+	// Scale the width and height by 10
+	scaledWidth := width * 10
+	scaledHeight := height * 10
+
+	// Create a new image with scaled dimensions
+	generatedImage := image.NewRGBA(image.Rect(0, 0, int(scaledWidth), int(scaledHeight)))
+
 	for y := startY; y < startY+height; y++ {
 		for x := startX; x < startX+width; x++ {
 			pos := y*int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width) + x
 			bitPos := pos * bitWidth
 			bytePos := bitPos / 8
 			bitOffset := bitPos % 8
+
+			// Determine the color index based on the bit offset
+			var colorIdx int
 			if bitOffset <= oneByteBitOffset {
-				colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
-				generatedImage.Set(int(x-startX), int(y-startY), colorPalette[colorIdx])
+				colorIdx = (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
 			} else {
-				colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
-				generatedImage.Set(int(x-startX), int(y-startY), colorPalette[colorIdx])
+				colorIdx = (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
+			}
+
+			// Set the scaled pixel in the generated image
+			for dy := 0; dy < 10; dy++ {
+				for dx := 0; dx < 10; dx++ {
+					generatedImage.Set(int(x*10+dx-startX*10), int(y*10+dy-startY*10), colorPalette[colorIdx])
+				}
 			}
 		}
 	}
+
 	// TODO: Check if file exists
 	if _, err := os.Stat("nfts"); os.IsNotExist(err) {
 		err = os.MkdirAll("nfts", os.ModePerm)
@@ -183,7 +199,6 @@ func processNFTMintedEvent(event IndexerEvent) {
 	}
 
 	// Create a NFT JSON metadata file
-
 	x := position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	y := position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	metadata := map[string]interface{}{
