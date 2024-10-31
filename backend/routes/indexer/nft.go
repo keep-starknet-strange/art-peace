@@ -121,27 +121,46 @@ func processNFTMintedEvent(event IndexerEvent) {
 		}
 		colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
 	}
+
+	// Scale factors
+	scaleFactor := 10
+	scaledWidth := width * int64(scaleFactor)
+	scaledHeight := height * int64(scaleFactor)
+
+	// Create a new image with scaled dimensions
+	generatedImage := image.NewRGBA(image.Rect(0, 0, int(scaledWidth), int(scaledHeight)))
+
 	bitWidth := int64(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth)
 	startX := int64(position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width))
 	startY := int64(position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width))
 	oneByteBitOffset := int64(8 - bitWidth)
 	twoByteBitOffset := int64(16 - bitWidth)
-	generatedImage := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
+
 	for y := startY; y < startY+height; y++ {
 		for x := startX; x < startX+width; x++ {
 			pos := y*int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width) + x
 			bitPos := pos * bitWidth
 			bytePos := bitPos / 8
 			bitOffset := bitPos % 8
-			if bitOffset <= oneByteBitOffset {
-				colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
-				generatedImage.Set(int(x-startX), int(y-startY), colorPalette[colorIdx])
-			} else {
-				colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
-				generatedImage.Set(int(x-startX), int(y-startY), colorPalette[colorIdx])
+
+			// Calculate the scaled position
+			for dy := 0; dy < scaleFactor; dy++ {
+				for dx := 0; dx < scaleFactor; dx++ {
+					scaledX := int(x-startX)*scaleFactor + dx
+					scaledY := int(y-startY)*scaleFactor + dy
+
+					if bitOffset <= oneByteBitOffset {
+						colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
+						generatedImage.Set(scaledX, scaledY, colorPalette[colorIdx])
+					} else {
+						colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
+						generatedImage.Set(scaledX, scaledY, colorPalette[colorIdx])
+					}
+				}
 			}
 		}
 	}
+
 	// TODO: Check if file exists
 	if _, err := os.Stat("nfts"); os.IsNotExist(err) {
 		err = os.MkdirAll("nfts", os.ModePerm)
@@ -183,7 +202,6 @@ func processNFTMintedEvent(event IndexerEvent) {
 	}
 
 	// Create a NFT JSON metadata file
-
 	x := position % int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	y := position / int64(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
 	metadata := map[string]interface{}{
@@ -193,11 +211,11 @@ func processNFTMintedEvent(event IndexerEvent) {
 		"attributes": []map[string]interface{}{
 			{
 				"trait_type": "Width",
-				"value":      fmt.Sprintf("%d", width),
+				"value":      fmt.Sprintf("%d", scaledWidth),
 			},
 			{
 				"trait_type": "Height",
-				"value":      fmt.Sprintf("%d", height),
+				"value":      fmt.Sprintf("%d", scaledHeight),
 			},
 			{
 				"trait_type": "Position",
