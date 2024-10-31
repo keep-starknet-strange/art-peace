@@ -7,6 +7,7 @@ const PixelSelector = (props) => {
   // Track when a placement is available
 
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
+  const [placementMode, setPlacementMode] = useState(false);
   const [ended, setEnded] = useState(false);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ const PixelSelector = (props) => {
     }
     if (
       placementTimer === '0:00' &&
+      placementMode &&
       placementTimer !== 'Out of Pixels' &&
       placementTimer !== 'Login to Play'
     ) {
@@ -43,7 +45,9 @@ const PixelSelector = (props) => {
     props.availablePixels,
     props.availablePixelsUsed,
     props.basePixelTimer,
-    props.queryAddress
+    props.queryAddress,
+    placementTimer,
+    placementMode
   ]);
 
   const toSelectorMode = (event) => {
@@ -61,6 +65,7 @@ const PixelSelector = (props) => {
     if (props.availablePixels > props.availablePixelsUsed) {
       props.setSelectorMode(true);
       props.setIsEraserMode(false);
+      setPlacementMode(true);
     }
   };
 
@@ -72,6 +77,7 @@ const PixelSelector = (props) => {
   const cancelSelector = () => {
     props.setSelectedColorId(-1);
     props.setSelectorMode(false);
+    setPlacementMode(false);
     props.setIsEraserMode(false);
     setEnded(false);
   };
@@ -97,7 +103,7 @@ const PixelSelector = (props) => {
           </div>
         </div>
       )}
-      {!props.selectorMode && (
+      {!props.selectorMode && !ended && (
         <div
           className={
             'Button__primary Text__large ' +
