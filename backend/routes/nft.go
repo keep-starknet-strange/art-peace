@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"context"
+	"fmt"
+	"strings"
 	"io"
 	"net/http"
 	"os"
@@ -33,8 +36,43 @@ func InitNFTRoutes() {
 }
 
 func InitNFTStaticRoutes() {
-	http.Handle("/nft-images/", http.StripPrefix("/nft-images/", http.FileServer(http.Dir("./nfts/images"))))
-	http.Handle("/nft-meta/", http.StripPrefix("/nft-meta/", http.FileServer(http.Dir("./nfts/meta"))))
+	http.HandleFunc("/nft-images/", func(w http.ResponseWriter, r *http.Request) {
+		tokenID := strings.TrimPrefix(r.URL.Path, "/nft-images/nft-")
+		tokenID = strings.TrimSuffix(tokenID, ".png")
+		
+		// Query postgres to get the day_index for this token
+		var dayIndex int
+		err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), 
+			"SELECT day_index FROM NFTs WHERE token_id = $1", tokenID).Scan(&dayIndex)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		
+		roundNum := dayIndex/7 + 1
+		actualPath := fmt.Sprintf("./nfts/round-%d/images/nft-%s.png", roundNum, tokenID)
+		
+		http.ServeFile(w, r, actualPath)
+	})
+
+	// Serve round-specific NFT metadata
+	http.HandleFunc("/nft-meta/", func(w http.ResponseWriter, r *http.Request) {
+		tokenID := strings.TrimPrefix(r.URL.Path, "/nft-meta/nft-")
+		tokenID = strings.TrimSuffix(tokenID, ".json")
+		
+		var dayIndex int
+		err := core.ArtPeaceBackend.Databases.Postgres.QueryRow(context.Background(), 
+			"SELECT day_index FROM NFTs WHERE token_id = $1", tokenID).Scan(&dayIndex)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		
+		roundNum := dayIndex/7 + 1
+		actualPath := fmt.Sprintf("./nfts/round-%d/meta/nft-%s.json", roundNum, tokenID)
+		
+		http.ServeFile(w, r, actualPath)
+	})
 }
 
 func getCanvasNFTAddress(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +88,7 @@ func setCanvasNFTAddress(w http.ResponseWriter, r *http.Request) {
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read reques  t body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
 		return
 	}
 	os.Setenv("CANVAS_NFT_CONTRACT_ADDRESS", string(data))
