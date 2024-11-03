@@ -5,12 +5,18 @@ ENVIRONMENT="sepolia"
 NETWORK="sepolia"
 ART_PEACE_CONTRACT="0x078f4e772300472a68a19f2b1aedbcb7cf2acd6f67a2236372310a528c7eaa67"
 
-# Use Sepolia keystore/account paths
-STARKNET_KEYSTORE="$HOME/.starkli-wallets/deployer/keystore.json"
-STARKNET_ACCOUNT="$HOME/.starkli-wallets/deployer/account.json"
-
 # Set RPC URL for Sepolia
-export STARKNET_RPC="https://starknet-sepolia.public.blastapi.io"
+STARKNET_RPC="https://starknet-sepolia.public.blastapi.io"
+
+# Define the JSON file paths from command line argument
+JSON_FILE_PATH="$1"
+STARKNET_KEYSTORE="$2"
+STARKNET_ACCOUNT="$3"
+
+if [ -z "$JSON_FILE_PATH" ] || [ -z "$STARKNET_KEYSTORE" ] || [ -z "$STARKNET_ACCOUNT" ]; then
+    echo "Error: Please provide valid paths for the JSON rewards file, keystore, and account."
+    exit 1
+fi
 
 # Verify contract exists before proceeding
 echo "Verifying contract at $ART_PEACE_CONTRACT..."
@@ -29,10 +35,13 @@ if [ -z "$STARKNET_KEYSTORE_PASSWORD" ]; then
     export STARKNET_KEYSTORE_PASSWORD
 fi
 
-# Define the user address and amount to award
-USER_ADDRESS="0x05e01dB693CBF7461a016343042786DaC5A6000104813cF134a1E8B1D0a6810b"
-AMOUNT=100  # Amount to award
+# Iterate through each user address and amount in the JSON file
+jq -c '.[]' "$JSON_FILE_PATH" | while read -r entry; do
+    USER_ADDRESS=$(echo "$entry" | jq -r '.address')
+    AMOUNT=$(echo "$entry" | jq -r '.amount')
 
-# Call the host_award_user function using starkli
-starkli invoke --network $NETWORK --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT \
-  --watch $ART_PEACE_CONTRACT host_award_user $USER_ADDRESS $AMOUNT
+    # Invoke the host_award_user function using starkli
+    starkli invoke --network $NETWORK --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT \
+    --watch $ART_PEACE_CONTRACT host_award_user $USER_ADDRESS $AMOUNT --keystore-password "$STARKNET_KEYSTORE_PASSWORD"
+
+done
