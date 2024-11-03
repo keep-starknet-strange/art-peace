@@ -1,18 +1,21 @@
 #!/bin/bash
 
+# Load environment variables from `.env` file
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
 # Set environment and network details
 ENVIRONMENT="local"
 NETWORK_URL="http://localhost:5050"  # Use the URL from your console output
 ART_PEACE_CONTRACT="0x6fe75e8821863019aa3e7b824cceaa8a42265bbf1374e3c92eebc698036d438"  # Updated contract address
 CANVAS_NFT_CONTRACT="0x370eae686c423fcb7ef6e131223180406d5cfbf34504e43b0e391f38408032c"  # New contract address
 
-# Define the JSON file paths from command line argument
+# Define the JSON file path from command line argument
 JSON_FILE_PATH="$1"
-STARKNET_KEYSTORE="$2"
-STARKNET_ACCOUNT="$3"
 
 if [ -z "$JSON_FILE_PATH" ] || [ -z "$STARKNET_KEYSTORE" ] || [ -z "$STARKNET_ACCOUNT" ]; then
-    echo "Error: Please provide valid paths for the JSON rewards file, keystore, and account."
+    echo "Error: Please provide a valid JSON rewards file and ensure STARKNET_KEYSTORE and STARKNET_ACCOUNT are set in the .env file."
     exit 1
 fi
 
