@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Load environment variables from `.env` file
+if [ -f ../.env ]; then
+    export $(grep -v '^#' ../.env | xargs)
+fi
+
 # Set environment and network details
 ENVIRONMENT="mainnet"
 NETWORK="mainnet"
@@ -8,13 +13,11 @@ ART_PEACE_CONTRACT="0x067883deb1c1cb60756eb6e60d500081352441a040d5039d0e4ce9fed3
 # Set RPC URL for Mainnet
 STARKNET_RPC="https://starknet-mainnet.public.blastapi.io"
 
-# Define the JSON file paths from command line argument
+# Define the JSON file path from command line argument
 JSON_FILE_PATH="$1"
-STARKNET_KEYSTORE="$2"
-STARKNET_ACCOUNT="$3"
 
 if [ -z "$JSON_FILE_PATH" ] || [ -z "$STARKNET_KEYSTORE" ] || [ -z "$STARKNET_ACCOUNT" ]; then
-    echo "Error: Please provide valid paths for the JSON rewards file, keystore, and account."
+    echo "Error: Please provide a valid JSON rewards file and ensure STARKNET_KEYSTORE and STARKNET_ACCOUNT are set in the .env file."
     exit 1
 fi
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Load environment variables from `.env` file
-if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
+if [ -f ../.env ]; then
+    export $(grep -v '^#' ../.env | xargs)
 fi
 
 # Set environment and network details
