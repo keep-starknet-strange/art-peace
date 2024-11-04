@@ -162,19 +162,26 @@ func processNFTMintedEvent(event IndexerEvent) {
 	}
 
 	// TODO: Check if file exists
-	if _, err := os.Stat("nfts"); os.IsNotExist(err) {
-		err = os.MkdirAll("nfts", os.ModePerm)
-		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error creating nfts directory", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
-			return
-		}
+	roundNumber := os.Getenv("ROUND_NUMBER")
+	if roundNumber == "" {
+		roundNumber = "3" // Default to round 3 if not set
+	}
+	roundDir := fmt.Sprintf("round-%s", roundNumber)
+
+	// Create base directories if they don't exist
+	dirs := []string{
+		"nfts",
+		fmt.Sprintf("nfts/%s", roundDir),
+		fmt.Sprintf("nfts/%s/images", roundDir),
 	}
 
-	if _, err := os.Stat("nfts/images"); os.IsNotExist(err) {
-		err = os.MkdirAll("nfts/images", os.ModePerm)
-		if err != nil {
-			PrintIndexerError("processNFTMintedEvent", "Error creating nfts/images directory", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
-			return
+	for _, dir := range dirs {
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			err = os.MkdirAll(dir, os.ModePerm)
+			if err != nil {
+				PrintIndexerError("processNFTMintedEvent", fmt.Sprintf("Error creating %s directory", dir), tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
+				return
+			}
 		}
 	}
 
@@ -187,7 +194,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 	}
 
 	// Save image to disk
-	filename := fmt.Sprintf("nfts/images/nft-%d.png", tokenId)
+	filename := fmt.Sprintf("nfts/%s/images/nft-%d.png", roundDir, tokenId)
 	file, err := os.Create(filename)
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error creating file", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)

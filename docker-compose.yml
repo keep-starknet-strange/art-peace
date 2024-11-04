@@ -138,6 +138,7 @@ services:
       - devnet
     environment:
       - REACT_APP_BASE_PIXEL_TIMER=30000
+      - ROUND_NUMBER=3
     volumes:
       - ./frontend/package.json:/app/package.json
       - ./frontend/package-lock.json:/app/package-lock.json

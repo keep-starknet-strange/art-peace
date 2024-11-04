@@ -14,7 +14,8 @@ import {
 import { PaginationView } from '../../ui/pagination.js';
 
 const NFTsMainSection = (props) => {
-  const imageURL = nftUrl + '/nft-images/';
+  const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '3';
+  const imageURL = `${nftUrl}/round-${roundNumber}/images/`;
   return (
     <div
       className={`${props.expanded ? 'NFTs__main__expanded' : 'NFTs__main'}`}
