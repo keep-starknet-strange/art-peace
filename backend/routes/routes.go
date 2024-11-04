@@ -17,7 +17,7 @@ func InitBaseRoutes() {
 
     roundNumber := os.Getenv("ROUND_NUMBER")
     if roundNumber == "" {
-        roundNumber = "1"
+        roundNumber = "3"
     }
 
 		http.HandleFunc(fmt.Sprintf("/round-%s/images/", roundNumber), func(w http.ResponseWriter, r *http.Request) {
