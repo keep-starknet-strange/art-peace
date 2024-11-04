@@ -15,12 +15,17 @@ func InitBaseRoutes() {
 		w.WriteHeader(http.StatusOK)
 	})
 
-		http.HandleFunc("/round-3/images/", func(w http.ResponseWriter, r *http.Request) {
+    roundNumber := os.Getenv("ROUND_NUMBER")
+    if roundNumber == "" {
+        roundNumber = "1"
+    }
+
+		http.HandleFunc(fmt.Sprintf("/round-%s/images/", roundNumber), func(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("Received request for: %s\n", r.URL.Path)
 			routeutils.SetupHeaders(w)
 			
 			// Get just the filename from the path
-			filename := strings.TrimPrefix(r.URL.Path, "/round-3/images/")
+			filename := strings.TrimPrefix(r.URL.Path, fmt.Sprintf("/round-%s/images/", roundNumber))
 			fmt.Printf("Filename: %s\n", filename)
 			
 			// Get working directory
@@ -33,7 +38,7 @@ func InitBaseRoutes() {
 			fmt.Printf("Working directory: %s\n", workDir)
 			
 			// Construct absolute file path
-			filepath := fmt.Sprintf("%s/nfts/round-3/images/%s", workDir, filename)
+            filepath := fmt.Sprintf("%s/nfts/round-%s/images/%s", workDir, roundNumber, filename)
 			fmt.Printf("Looking for file at: %s\n", filepath)
 			
 			// Check if file exists

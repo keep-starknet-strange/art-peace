@@ -35,6 +35,7 @@ services:
       - POSTGRES_PASSWORD=password
       - ART_PEACE_END_TIME=3000000000
       - ART_PEACE_HOST=0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
+      - ROUND_NUMBER=3
   consumer:
     build:
       dockerfile: backend/Dockerfile.consumer
@@ -47,6 +48,7 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=password
+      - ROUND_NUMBER=3
     volumes:
       - nfts:/app/nfts
   devnet:
@@ -121,6 +123,7 @@ services:
       - CONSUMER_TARGET_URL=http://art-peace-consumer-1:8081/consume-indexer-msg
       - PERSIST_TO_REDIS=redis://art-peace-redis-1:6379
       - INDEXER_ID=art-peace-indexer-id
+      - ROUND_NUMBER=3
     volumes:
       - configs:/configs
     restart: on-failure
