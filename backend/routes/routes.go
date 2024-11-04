@@ -14,42 +14,6 @@ func InitBaseRoutes() {
 		routeutils.SetupHeaders(w)
 		w.WriteHeader(http.StatusOK)
 	})
-		http.HandleFunc("/round-", func(w http.ResponseWriter, r *http.Request) {
-			routeutils.SetupHeaders(w)
-			
-			// Extract round number and filename from path
-			path := strings.TrimPrefix(r.URL.Path, "/round-")
-			parts := strings.Split(path, "/")
-			if len(parts) < 3 { 
-				http.Error(w, "Invalid path", http.StatusBadRequest)
-				return
-			}
-			
-			round := parts[0]
-			filename := parts[2]
-			
-			// Get working directory
-			workDir, err := os.Getwd()
-			if err != nil {
-				http.Error(w, "Server error", http.StatusInternalServerError)
-				return
-			}
-			
-			// Construct absolute file path
-			filepath := fmt.Sprintf("%s/nfts/round-%s/images/%s", workDir, round, filename)
-			
-			// Check if file exists
-			if _, err := os.Stat(filepath); os.IsNotExist(err) {
-				http.Error(w, fmt.Sprintf("Image not found at %s", filepath), http.StatusNotFound)
-				return
-			}
-			
-			// Set content type for images
-			w.Header().Set("Content-Type", "image/png")
-			
-			// Serve the file
-			http.ServeFile(w, r, filepath)
-		})
 
 		http.HandleFunc("/round-3/images/", func(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("Received request for: %s\n", r.URL.Path)
