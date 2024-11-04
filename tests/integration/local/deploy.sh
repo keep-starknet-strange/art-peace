@@ -69,7 +69,8 @@ echo "Deployed contract \"$ART_PEACE_CLASS_NAME\" with address $ART_PEACE_CONTRA
 
 NFT_NAME="0 318195848183955342120051 10"
 NFT_SYMBOL="0 4271952 3"
-CALLDATA=$(echo -n $NFT_NAME $NFT_SYMBOL)
+ROUND_NUMBER=3
+CALLDATA=$(echo -n $NFT_NAME $NFT_SYMBOL $ROUND_NUMBER)
 
 echo "Deploying contract \"$NFT_CLASS_NAME\"..."
 echo "sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $NFT_CLASS_HASH --constructor-calldata $CALLDATA"

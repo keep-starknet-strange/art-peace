@@ -55,6 +55,36 @@ func InitBaseRoutes() {
 			// Serve the file
 			http.ServeFile(w, r, filepath)
 		})
+
+        http.HandleFunc(fmt.Sprintf("/round-%s/metadata/", roundNumber), func(w http.ResponseWriter, r *http.Request) {
+            fmt.Printf("Received request for: %s\n", r.URL.Path)
+            routeutils.SetupHeaders(w)
+            
+            filename := strings.TrimPrefix(r.URL.Path, fmt.Sprintf("/round-%s/metadata/", roundNumber))
+            fmt.Printf("Filename: %s\n", filename)
+            
+            workDir, err := os.Getwd()
+            if err != nil {
+                fmt.Printf("Error getting working directory: %v\n", err)
+                http.Error(w, "Server error", http.StatusInternalServerError)
+                return
+            }
+            fmt.Printf("Working directory: %s\n", workDir)
+            
+            filepath := fmt.Sprintf("%s/nfts/round-%s/metadata/%s", workDir, roundNumber, filename)
+            fmt.Printf("Looking for file at: %s\n", filepath)
+            
+            if _, err := os.Stat(filepath); os.IsNotExist(err) {
+                fmt.Printf("File not found: %s\n", filepath)
+                http.Error(w, fmt.Sprintf("Metadata not found at %s", filepath), http.StatusNotFound)
+                return
+            }
+            
+            w.Header().Set("Content-Type", "application/json")
+            
+            fmt.Printf("Serving file: %s\n", filepath)
+            http.ServeFile(w, r, filepath)
+        })
 }
 
 func InitRoutes() {

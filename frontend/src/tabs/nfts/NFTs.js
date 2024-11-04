@@ -16,6 +16,7 @@ import { PaginationView } from '../../ui/pagination.js';
 const NFTsMainSection = (props) => {
   const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '3';
   const imageURL = `${nftUrl}/round-${roundNumber}/images/`;
+  const metadataURL = `${nftUrl}/round-${roundNumber}/metadata/`;
   return (
     <div
       className={`${props.expanded ? 'NFTs__main__expanded' : 'NFTs__main'}`}
@@ -64,6 +65,7 @@ const NFTsMainSection = (props) => {
               tokenId={nft.tokenId}
               position={nft.position}
               image={imageURL + 'nft-' + nft.tokenId + '.png'}
+              metadata={metadataURL + 'nft-' + nft.tokenId + '.json'}
               width={nft.width}
               height={nft.height}
               name={nft.name}
@@ -87,7 +89,9 @@ const NFTsMainSection = (props) => {
 };
 
 const NFTsExpandedSection = (props) => {
-  const imageURL = nftUrl + '/nft-images/';
+  const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '3';
+  const imageURL = `${nftUrl}/round-${roundNumber}/images/`;
+  const metadataURL = `${nftUrl}/round-${roundNumber}/metadata/`;
 
   return (
     <div className='NFTs__all'>
@@ -122,6 +126,7 @@ const NFTsExpandedSection = (props) => {
                 tokenId={nft.tokenId}
                 position={nft.position}
                 image={imageURL + 'nft-' + nft.tokenId + '.png'}
+                metadata={metadataURL + 'nft-' + nft.tokenId + '.json'}
                 width={nft.width}
                 height={nft.height}
                 name={nft.name}
