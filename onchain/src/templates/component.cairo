@@ -32,7 +32,7 @@ pub mod TemplateStoreComponent {
     struct TemplateCompleted {
         #[key]
         id: u32,
-    // TODO: Users rewarded, ...
+        // TODO: Users rewarded, ...
     }
 
     #[embeddable_as(TemplateStoreImpl)]

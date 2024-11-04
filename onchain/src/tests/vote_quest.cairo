@@ -97,7 +97,7 @@ fn vote_quest_double_claim_test() {
     art_peace_dispatcher.claim_main_quest(0, utils::EMPTY_CALLDATA());
 }
 
-// When the `votable_colors` storage variable is not set for a particular day index, trying to 
+// When the `votable_colors` storage variable is not set for a particular day index, trying to
 // vote for a color at that day panics with 'Color out of bounds' error
 #[test]
 #[should_panic(expected: 'Color out of bounds')]
