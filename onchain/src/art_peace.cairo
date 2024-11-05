@@ -822,10 +822,11 @@ pub mod ArtPeace {
                 self.daily_quests.read((day_index, 0)) == zero_address, 'Daily quests already set'
             );
             let mut i = 0;
-            while i < quests.len() {
-                self.daily_quests.write((day_index, i), *quests.at(i));
-                i += 1;
-            };
+            while i < quests
+                .len() {
+                    self.daily_quests.write((day_index, i), *quests.at(i));
+                    i += 1;
+                };
         }
 
         fn add_main_quests(ref self: ContractState, quests: Span<ContractAddress>) {
@@ -1136,27 +1137,29 @@ pub mod ArtPeace {
             let canvas_width = self.canvas_width.read();
             let (mut x, mut y) = (0, 0);
             let mut matches = 0;
-            while y < template_metadata.height {
-                x = 0;
-                while x < template_metadata.width {
-                    let _pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
-                    let _color = *template_image
-                        .at((x + y * template_metadata.width).try_into().unwrap());
-                    // TODO: Check if the color is transparent
-                    // TODO: Add back
-                    // if color == self.canvas.read(pos).color {
-                    if false {
-                        matches += 1;
-                    }
-                    x += 1;
+            while y < template_metadata
+                .height {
+                    x = 0;
+                    while x < template_metadata
+                        .width {
+                            let _pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
+                            let _color = *template_image
+                                .at((x + y * template_metadata.width).try_into().unwrap());
+                            // TODO: Check if the color is transparent
+                            // TODO: Add back
+                            // if color == self.canvas.read(pos).color {
+                            if false {
+                                matches += 1;
+                            }
+                            x += 1;
+                        };
+                    y += 1;
                 };
-                y += 1;
-            };
 
             // TODO: Allow some threshold?
             if matches == template_metadata.width * template_metadata.height {
                 self.templates.completed_templates.write(template_id, true);
-                // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
+            // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
         }
 
@@ -1188,69 +1191,73 @@ pub mod ArtPeace {
             let canvas_width = self.canvas_width.read();
             let (mut x, mut y) = (0, 0);
             let mut matches = 0;
-            while y < template_metadata.height {
-                x = 0;
-                while x < template_metadata.width {
-                    let _pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
-                    let _color = *template_image
-                        .at((x + y * template_metadata.width).try_into().unwrap());
-                    // TODO: Check if the color is transparent
-                    // TODO: Add back
-                    // if color == self.canvas.read(pos).color {
-                    if false {
-                        matches += 1;
+            while y < template_metadata
+                .height {
+                    x = 0;
+                    while x < template_metadata
+                        .width {
+                            let _pos = template_pos_x + x + (template_pos_y + y) * canvas_width;
+                            let _color = *template_image
+                                .at((x + y * template_metadata.width).try_into().unwrap());
+                            // TODO: Check if the color is transparent
+                            // TODO: Add back
+                            // if color == self.canvas.read(pos).color {
+                            if false {
+                                matches += 1;
 
-                        let mut pixel_owner = starknet::contract_address_const::<
-                            0
-                        >(); // TODO: self.canvas.read(pos).owner;
-                        let user_index = pixel_contributors_indexes.get(pixel_owner.into());
+                                let mut pixel_owner = starknet::contract_address_const::<
+                                    0
+                                >(); // TODO: self.canvas.read(pos).owner;
+                                let user_index = pixel_contributors_indexes.get(pixel_owner.into());
 
-                        if user_index == 0 {
-                            let new_index = pixel_contributors.len() + 1;
+                                if user_index == 0 {
+                                    let new_index = pixel_contributors.len() + 1;
 
-                            pixel_contributors.append(pixel_owner);
-                            pixel_contributors_indexes.insert(pixel_owner.into(), new_index);
-                            total_pixels_by_user.insert(new_index.into(), 1);
-                        } else {
-                            let count = total_pixels_by_user.get(user_index.into());
-                            total_pixels_by_user.insert(user_index.into(), count + 1);
-                        }
-                    }
-                    x += 1;
+                                    pixel_contributors.append(pixel_owner);
+                                    pixel_contributors_indexes
+                                        .insert(pixel_owner.into(), new_index);
+                                    total_pixels_by_user.insert(new_index.into(), 1);
+                                } else {
+                                    let count = total_pixels_by_user.get(user_index.into());
+                                    total_pixels_by_user.insert(user_index.into(), count + 1);
+                                }
+                            }
+                            x += 1;
+                        };
+                    y += 1;
                 };
-                y += 1;
-            };
 
             // TODO: Allow some threshold?
             if matches == template_metadata.width * template_metadata.height {
                 self.templates.completed_templates.write(template_id, true);
                 // Distribute rewards
                 let mut i = 0;
-                while i < pixel_contributors.len() {
-                    let reward_token = template_metadata.reward_token;
-                    let reward_amount = template_metadata.reward;
-                    let total_pixels_in_template = template_metadata.width
-                        * template_metadata.height;
+                while i < pixel_contributors
+                    .len() {
+                        let reward_token = template_metadata.reward_token;
+                        let reward_amount = template_metadata.reward;
+                        let total_pixels_in_template = template_metadata.width
+                            * template_metadata.height;
 
-                    let mut user = *pixel_contributors.at(i).into();
-                    let user_index = (i + 1);
-                    let user_total_pixels = total_pixels_by_user.get(user_index.into());
+                        let mut user = *pixel_contributors.at(i).into();
+                        let user_index = (i + 1);
+                        let user_total_pixels = total_pixels_by_user.get(user_index.into());
 
-                    // TODO: Handle remainder of funds
-                    let user_reward = (reward_amount * user_total_pixels.into())
-                        / total_pixels_in_template.into();
+                        // TODO: Handle remainder of funds
+                        let user_reward = (reward_amount * user_total_pixels.into())
+                            / total_pixels_in_template.into();
 
-                    assert(
-                        IERC20Dispatcher { contract_address: reward_token }
-                            .balance_of(contract) >= user_reward,
-                        'insufficient funds'
-                    );
-                    let success = IERC20Dispatcher { contract_address: reward_token }
-                        .transfer(user, user_reward);
-                    assert(success, 'ERC20 transfer fail!');
-                    i += 1;
-                };
-                // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
+                        assert(
+                            IERC20Dispatcher { contract_address: reward_token }
+                                .balance_of(contract) >= user_reward,
+                            'insufficient funds'
+                        );
+                        let success = IERC20Dispatcher { contract_address: reward_token }
+                            .transfer(user, user_reward);
+                        assert(success, 'ERC20 transfer fail!');
+                        i += 1;
+                    };
+            // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
         }
     }
@@ -1290,10 +1297,11 @@ pub mod ArtPeace {
         // find threshold
         let mut threshold: u32 = 0;
         let mut min_index = daily_new_colors_count;
-        while threshold == 0 && min_index > 0 {
-            min_index -= 1;
-            threshold = max_scores.get(min_index.into());
-        };
+        while threshold == 0
+            && min_index > 0 {
+                min_index -= 1;
+                threshold = max_scores.get(min_index.into());
+            };
         if threshold == 0 {
             // No votes
             threshold = 1;

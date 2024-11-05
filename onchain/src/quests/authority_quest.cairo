@@ -37,10 +37,11 @@ pub mod AuthorityQuest {
         fn mark_claimable(ref self: ContractState, calldata: Span<felt252>) {
             assert(get_caller_address() == self.authority.read(), 'Only authority address allowed');
             let mut i = 0;
-            while i < calldata.len() {
-                self.claimable.write((*calldata[i]).try_into().unwrap(), true);
-                i += 1;
-            }
+            while i < calldata
+                .len() {
+                    self.claimable.write((*calldata[i]).try_into().unwrap(), true);
+                    i += 1;
+                }
         }
     }
 

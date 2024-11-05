@@ -48,14 +48,15 @@ pub mod RainbowQuest {
 
             let mut result = true;
             let mut i = 0;
-            while i < art_piece.get_color_count() {
-                if (art_piece.get_user_pixels_placed_color(user, i) == 0) {
-                    result = false;
-                    break;
-                }
+            while i < art_piece
+                .get_color_count() {
+                    if (art_piece.get_user_pixels_placed_color(user, i) == 0) {
+                        result = false;
+                        break;
+                    }
 
-                i += 1;
-            };
+                    i += 1;
+                };
 
             result
         }

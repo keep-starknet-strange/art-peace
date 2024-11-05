@@ -133,15 +133,16 @@ pub(crate) fn deploy_with_quests_contract(
     let mut i = 0;
     let mut dayId = 0;
     let mut days_quests: Array<ContractAddress> = array![];
-    while i < daily_quests.len() {
-        days_quests.append(*daily_quests.at(i));
-        i += 1;
-        if i % daily_quests_count == 0 {
-            art_peace.add_daily_quests(dayId, days_quests.span());
-            dayId += 1;
-            days_quests = array![];
-        }
-    };
+    while i < daily_quests
+        .len() {
+            days_quests.append(*daily_quests.at(i));
+            i += 1;
+            if i % daily_quests_count == 0 {
+                art_peace.add_daily_quests(dayId, days_quests.span());
+                dayId += 1;
+                days_quests = array![];
+            }
+        };
     if days_quests.len() > 0 {
         art_peace.add_daily_quests(dayId, days_quests.span());
     }
