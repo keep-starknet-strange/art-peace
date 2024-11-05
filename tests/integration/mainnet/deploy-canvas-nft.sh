@@ -77,8 +77,10 @@ CANVAS_NFT_DECLARE_OUTPUT=$(starkli declare --network mainnet --keystore $STARKN
 CANVAS_NFT_CONTRACT_CLASSHASH=$(echo $CANVAS_NFT_DECLARE_OUTPUT | tail -n 1 | awk '{print $NF}')
 echo "Contract class hash: $CANVAS_NFT_CONTRACT_CLASSHASH"
 
+ROUND_NUMBER=3
+
 # Deploying the contract
-CALLDATA=$(echo 0 81458137135092567582733106 11 0 4271952 3)
+CALLDATA=$(echo 0 81458137135092567582733106 11 0 4271952 $ROUND_NUMBER)
 echo "Deploying the contract..."
 echo "starkli deploy --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $CANVAS_NFT_CONTRACT_CLASSHASH $CALLDATA"
 starkli deploy --network mainnet --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $CANVAS_NFT_CONTRACT_CLASSHASH $CALLDATA

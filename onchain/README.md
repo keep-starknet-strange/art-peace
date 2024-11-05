@@ -4,12 +4,12 @@ This directory contains the onchain Starknet contract components for `art/peace`
 
 ## Build
 
-```
+```bash
 scarb build
 ```
 
 ## Test
 
-```
+```bash
 scarb test
 ```

@@ -11,10 +11,8 @@
 </div>
 
 > Art Peace Round 2 is live!
-
 > Check live stats on this cool [Dune Dashboard](https://dune.com/hessish/artpeace)
-
-> And go place some pixels and draw cool shit you mfer! ==> https://www.art-peace.net/
+> And go place some pixels and draw cool shit you mfer! ==> [art-peace.net](https://www.art-peace.net)
 
 ## Overview
 

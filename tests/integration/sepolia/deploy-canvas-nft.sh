@@ -77,8 +77,10 @@ CANVAS_NFT_DECLARE_OUTPUT=$(starkli declare --network sepolia --keystore $STARKN
 CANVAS_NFT_CONTRACT_CLASSHASH=$(echo $CANVAS_NFT_DECLARE_OUTPUT | tail -n 1 | awk '{print $NF}')
 echo "Contract class hash: $CANVAS_NFT_CONTRACT_CLASSHASH"
 
+ROUND_NUMBER=3
+
 # Deploying the contract
-CALLDATA=$(echo 0 318195848183955342120051 10 0 4271952 3)
+CALLDATA=$(echo 0 318195848183955342120051 10 0 4271952 $ROUND_NUMBER)
 echo "Deploying the contract..."
 echo "starkli deploy --network sepolia --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $CANVAS_NFT_CONTRACT_CLASSHASH $CALLDATA"
 starkli deploy --network sepolia --keystore $STARKNET_KEYSTORE --account $STARKNET_ACCOUNT --watch $CANVAS_NFT_CONTRACT_CLASSHASH $CALLDATA

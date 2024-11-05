@@ -636,7 +636,8 @@ pub mod ArtPeace {
             }
             let member_metadata = self.users_faction_meta.read(user);
             if member_metadata.member_pixels > 0 {
-                // TODO: If member_pixels > 0 && < allocation && enough time has passed, return allocation instead of member_pixels
+                // TODO: If member_pixels > 0 && < allocation && enough time has passed, return
+                // allocation instead of member_pixels
                 return member_metadata.member_pixels;
             } else {
                 let time_since_last_pixel = now - member_metadata.member_placed_time;
