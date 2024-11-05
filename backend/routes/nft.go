@@ -33,7 +33,7 @@ func InitNFTRoutes() {
 }
 
 func InitNFTStaticRoutes() {
-  http.Handle("/nft/", http.StripPrefix("/nft/", http.FileServer(http.Dir("./nfts"))))
+	http.Handle("/nft/", http.StripPrefix("/nft/", http.FileServer(http.Dir("./nfts"))))
 }
 
 func getCanvasNFTAddress(w http.ResponseWriter, r *http.Request) {
