@@ -31,7 +31,7 @@ These labels are used as prefixes as follows for `issue`, `branch name`, `pr tit
 If your PR includes a `TODO` comment please open an issue and comment the relevant
 code with `TODO(#ISSUE_NUM):`.
 
-### Submit PR
+## Submit PR
 
 Ensure your code is well formatted, well tested and well documented. A core contributor
 will review your work. Address changes, ensure ci passes,
@@ -49,7 +49,7 @@ Scarb linter:
 scarb fmt
 ```
 
-### Additional Resources
+## Additional Resources
 
 - [Cairo Book](https://book.cairo-lang.org/)
 - [Starknet Book](https://book.starknet.io/)
@@ -57,7 +57,5 @@ scarb fmt
 - [Starknet By Example](https://starknet-by-example.voyager.online/)
 - [Starkli Book](https://book.starkli.rs/)
 - [Syncing a Fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork)
-
-##
 
 Thank you for your contribution!

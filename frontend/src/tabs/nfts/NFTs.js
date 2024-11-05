@@ -14,9 +14,9 @@ import {
 import { PaginationView } from '../../ui/pagination.js';
 
 const NFTsMainSection = (props) => {
-  const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '3';
-  const imageURL = `${nftUrl}/round-${roundNumber}/images/`;
-  const metadataURL = `${nftUrl}/round-${roundNumber}/metadata/`;
+  const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '0';
+  const imageURL = `${nftUrl}/nft/round-${roundNumber}/images/`;
+  const metadataURL = `${nftUrl}/nft/round-${roundNumber}/metadata/`;
   return (
     <div
       className={`${props.expanded ? 'NFTs__main__expanded' : 'NFTs__main'}`}
@@ -89,9 +89,9 @@ const NFTsMainSection = (props) => {
 };
 
 const NFTsExpandedSection = (props) => {
-  const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '3';
-  const imageURL = `${nftUrl}/round-${roundNumber}/images/`;
-  const metadataURL = `${nftUrl}/round-${roundNumber}/metadata/`;
+  const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '0';
+  const imageURL = `${nftUrl}/nft/round-${roundNumber}/images/`;
+  const metadataURL = `${nftUrl}/nft/round-${roundNumber}/metadata/`;
 
   return (
     <div className='NFTs__all'>

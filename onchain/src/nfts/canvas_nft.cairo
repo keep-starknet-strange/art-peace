@@ -73,7 +73,7 @@ mod CanvasNFT {
     fn constructor(
         ref self: ContractState, name: ByteArray, symbol: ByteArray, round_number: felt252
     ) {
-        let base_uri = format!("https://api.art-peace.net/round-{}/metadata/", round_number);
+        let base_uri = format!("https://api.art-peace.net/nft/round-{}/metadata/nft-", round_number);
         self.erc721.initializer(name, symbol, base_uri);
     }
 

@@ -164,7 +164,8 @@ func processNFTMintedEvent(event IndexerEvent) {
 	// TODO: Check if file exists
 	roundNumber := os.Getenv("ROUND_NUMBER")
 	if roundNumber == "" {
-		roundNumber = "3" // Default to round 3 if not set
+    PrintIndexerError("processNFTMintedEvent", "Error getting round number from environment", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
+    return
 	}
 	roundDir := fmt.Sprintf("round-%s", roundNumber)
 
@@ -207,15 +208,15 @@ func processNFTMintedEvent(event IndexerEvent) {
 	metadata := map[string]interface{}{
 		"name":        name,
 		"description": "User minted art/peace NFT from the canvas.",
-		"image":       fmt.Sprintf("%s/nft-images/nft-%d.png", core.ArtPeaceBackend.GetBackendUrl(), tokenId),
+		"image":       fmt.Sprintf("%s/nft/%s/image/nft-%d.png", core.ArtPeaceBackend.GetBackendUrl(), roundDir, tokenId),
 		"attributes": []map[string]interface{}{
 			{
 				"trait_type": "Width",
-				"value":      fmt.Sprintf("%d", scaledWidth),
+				"value":      fmt.Sprintf("%d", width),
 			},
 			{
 				"trait_type": "Height",
-				"value":      fmt.Sprintf("%d", scaledHeight),
+				"value":      fmt.Sprintf("%d", height),
 			},
 			{
 				"trait_type": "Position",

@@ -12,7 +12,7 @@
 
 > Art Peace Round 2 is live!
 > Check live stats on this cool [Dune Dashboard](https://dune.com/hessish/artpeace)
-> And go place some pixels and draw cool shit you mfer! ==> <https://www.art-peace.net/>
+> And go place some pixels and draw cool shit you mfer! ==> [art-peace.net](https://www.art-peace.net)
 
 ## Overview
 
@@ -57,7 +57,7 @@ To stop the run use `Ctrl-C`.
 
 ### Component Run
 
-Each component can also be run individually, check the [Components](#components) section below for more details.
+Each component can also be run individually, check the [Components](#Components) section below for more details.
 
 ## Build
 
@@ -75,7 +75,7 @@ make build
 
 ### Component Build
 
-Use the `make build-X` command for each corresponding component `X`. See the [Components](#components) section below for more details.
+Use the `make build-X` command for each corresponding component `X`. See the [Components](#Components) section below for more details.
 
 ## Components
 
