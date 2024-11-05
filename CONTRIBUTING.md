@@ -1,4 +1,4 @@
-# 🛠️ Contributing to art/peace 🛠️
+## 🛠️ Contributing to art/peace 🛠️
 
 Welcome, contributing to `art/peace` is easy!
 
@@ -8,7 +8,7 @@ Welcome, contributing to `art/peace` is easy!
 1. Submit your PR against `main`
 1. Address PR Review
 
-## Issue
+### Issue
 
 Project tracking is done via GitHub [issues](https://github.com/keep-starknet-strange/art-peace/issues).
 First look at open issues to see if your request is already submitted.
@@ -26,7 +26,7 @@ These labels are used as prefixes as follows for `issue`, `branch name`, `pr tit
 - `[bug]` -> `bug/{issue #}-{issue name}` -> `bug:`
 - `[dev]` -> `dev/{issue #}-{issue name}` -> `dev:`
 
-## TODO
+#### TODO
 
 If your PR includes a `TODO` comment please open an issue and comment the relevant
 code with `TODO(#ISSUE_NUM):`.
@@ -49,7 +49,7 @@ Scarb linter:
 scarb fmt
 ```
 
-## Additional Resources
+### Additional Resources
 
 - [Cairo Book](https://book.cairo-lang.org/)
 - [Starknet Book](https://book.starknet.io/)
