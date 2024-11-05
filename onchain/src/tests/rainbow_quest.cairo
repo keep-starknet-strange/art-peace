@@ -56,12 +56,13 @@ fn rainbow_quest_test() {
     );
 
     let mut i: u8 = 0;
-    while i < art_peace.get_color_count() {
+    while i < art_peace
+    .get_color_count() {
         art_peace.place_pixel_blocktime(i.into(), i);
         warp_to_next_available_time(art_peace);
 
-        i += 1;
-    };
+            i += 1;
+        };
 
     let calldata = array![].span();
     art_peace.claim_main_quest(0, calldata);
@@ -87,12 +88,13 @@ fn rainbow_quest_color_missing_test() {
     );
 
     let mut i: u8 = 0;
-    while i < art_peace.get_color_count() - 1 {
-        art_peace.place_pixel_blocktime(i.into(), i);
-        warp_to_next_available_time(art_peace);
+    while i < art_peace.get_color_count() 
+        - 1 {
+            art_peace.place_pixel_blocktime(i.into(), i);
+            warp_to_next_available_time(art_peace);
 
-        i += 1;
-    };
+            i += 1;
+        };
 
     let calldata = array![].span();
     art_peace.claim_main_quest(0, calldata);
