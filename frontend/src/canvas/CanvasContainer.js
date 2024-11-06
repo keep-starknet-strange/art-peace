@@ -14,12 +14,12 @@ const CanvasContainer = (props) => {
   const width = canvasConfig.canvas.width;
   const height = canvasConfig.canvas.height;
 
-  const minScale = 1;
+  const minScale = 0.6;
   const maxScale = 40;
 
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(2);
+  const [canvasScale, setCanvasScale] = useState(1.16);
   const [touchInitialDistance, setInitialTouchDistance] = useState(0);
   const [touchScale, setTouchScale] = useState(0);
   const canvasContainerRef = useRef(null);

@@ -107,7 +107,7 @@ const NFTItem = (props) => {
   const [minterText, setMinterText] = React.useState('');
 
   function handleShare() {
-    const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent('Check out my #ArtPeace @art_peace_sn')}&url=${encodeURIComponent(props.image)}`;
+    const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent('Check out my art/peace! @art_peace_sn')}&url=${encodeURIComponent(props.image)}`;
     window.open(twitterShareUrl, '_blank');
   }
 

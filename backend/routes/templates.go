@@ -257,13 +257,13 @@ func buildTemplateImg(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// TODO: Hardcoded width
-	x := start % 512
-	y := start / 512
+	x := start % 1024
+	y := start / 1024
 	start_x := x
 	end_x := x + width
 	// Write image data to file
 	for _, pixel := range imageData {
-		pos := y*512 + x
+		pos := y*1024 + x
 		// Convert byte to integer representation
 		if pixel != 0xFF {
 			_, err := newtemp.WriteString(fmt.Sprintf("%d %d\n", pos, int(pixel)))
