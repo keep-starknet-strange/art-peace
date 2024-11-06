@@ -1265,7 +1265,7 @@ pub mod ArtPeace {
     #[abi(embed_v0)]
     impl CanvasNFTLikeAndUnlike of ICanvasNFTLikeAndUnlike<ContractState>{
         fn like_nft(ref self: ContractState, token_id: u256){
-            let nft_address = self.nft_address.read();
+            let nft_address = self.nft_contract.read();
         ICanvasNFTLikeAndUnlikeDispatcher { contract_address: nft_address }
                 .like_nft(token_id);
             let nft_owner = IERC721Dispatcher{contract_address: nft_address }.owner_of(token_id);
