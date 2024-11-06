@@ -8,12 +8,12 @@ deploy username store to sepolia
     save address
 deploy art peace to sepolia
     vim ./tests/integration/sepolia/deploy.sh
-    change end time
+    change end time & round number
     ./tests/integration/sepolia/deploy.sh
     save address
 deploy canvas nft to sepolia
     ./tests/integration/sepolia/deploy-canvas-nft.sh
-    save address
+    save address & round number
     and set in art_peace contract
 deploy quests
     vim ./tests/integration/sepolia/deploy-daily-quests.sh

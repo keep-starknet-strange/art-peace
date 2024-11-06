@@ -70,7 +70,7 @@ pub(crate) fn deploy_contract() -> ContractAddress {
         start_time: 0,
         end_time: 1000000,
         daily_quests_count: 3,
-        devmode: false
+        devmode: false,
     }
         .serialize(ref calldata);
     let contract_addr = contract.deploy_at(@calldata, utils::ART_PEACE_CONTRACT()).unwrap();
@@ -162,6 +162,8 @@ fn deploy_nft_contract() -> ContractAddress {
     let symbol: ByteArray = "A/P";
     name.serialize(ref calldata);
     symbol.serialize(ref calldata);
+    let round_number: u32 = 1;
+    round_number.serialize(ref calldata);
     contract.deploy_at(@calldata, utils::NFT_CONTRACT()).unwrap()
 }
 
@@ -398,7 +400,7 @@ fn nft_mint_test() {
     assert!(nft.balance_of(utils::PLAYER2()) == 1, "NFT balance is not correct after transfer");
 
     let nft_meta = IERC721MetadataDispatcher { contract_address: nft.contract_address };
-    let expected_uri = "https://api.art-peace.net/nft-meta/nft-0.json";
+    let expected_uri = "https://api.art-peace.net/nft/round-1/metadata/nft-0.json";
     assert!(nft_meta.token_uri(0) == expected_uri, "NFT URI is not correct");
 }
 
@@ -416,8 +418,8 @@ fn nft_set_base_uri_test() {
     nft_minter.mint_nft(mint_params);
     snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
 
-    let _base_uri: ByteArray = "https://api.art-peace.net/nft-meta/nft-";
-    let expected_uri: ByteArray = "https://api.art-peace.net/nft-meta/nft-0.json";
+    let _base_uri: ByteArray = "https://api.art-peace.net/nft/round-1/metadata/nft-";
+    let expected_uri: ByteArray = "https://api.art-peace.net/nft/round-1/metadata/nft-0.json";
     let nft_meta = IERC721MetadataDispatcher { contract_address: nft.contract_address };
     assert!(nft_meta.token_uri(0) == expected_uri, "NFT URI is not correct before change");
 
