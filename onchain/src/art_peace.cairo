@@ -8,14 +8,14 @@ pub mod ArtPeace {
     use art_peace::quests::interfaces::{IQuestDispatcher, IQuestDispatcherTrait};
     use art_peace::nfts::interfaces::{
         IArtPeaceNFTMinter, NFTMetadata, NFTMintParams, ICanvasNFTAdditionalDispatcher,
-        ICanvasNFTAdditionalDispatcherTrait
+        ICanvasNFTAdditionalDispatcherTrait, ICanvasNFTLikeAndUnlike, ICanvasNFTLikeAndUnlikeDispatcher, ICanvasNFTLikeAndUnlikeDispatcherTrait
     };
     use art_peace::templates::component::TemplateStoreComponent;
     use art_peace::templates::interfaces::{
         ITemplateVerifier, ITemplateStore, FactionTemplateMetadata, TemplateMetadata
     };
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
-
+    use openzeppelin::token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait}
     component!(path: TemplateStoreComponent, storage: templates, event: TemplateEvent);
 
     #[abi(embed_v0)]
@@ -1259,6 +1259,23 @@ pub mod ArtPeace {
                     };
             // self.emit(Event::TemplateEvent::TemplateCompleted { template_id });
             }
+        }
+    }
+
+    #[abi(embed_v0)]
+    impl CanvasNFTLikeAndUnlike of ICanvasNFTLikeAndUnlike<ContractState>{
+        fn like_nft(ref self: ContractState, token_id: u256){
+            let nft_address = self.nft_address.read();
+        ICanvasNFTLikeAndUnlikeDispatcher { contract_address: nft_address }
+                .like_nft(token_id);
+            let nft_owner = IERC721Dispatcher{contract_address: nft_address }.owner_of(token_id);
+    
+            // award the minter of the nft 1 extra pixel each time someone likes the nft
+            self.extra_pixels.write(nft_owner, self.extra_pixels.read(nft_owner) + 1);
+        }
+        fn unlike_nft(ref self: ContractState, token_id: u256){
+            ICanvasNFTLikeAndUnlikeDispatcher { contract_address: self.nft_contract.read() }
+            .unlike_nft(token_id);
         }
     }
 
