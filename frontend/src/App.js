@@ -752,86 +752,33 @@ function App() {
     basePixelUp
   ]);
 
-  const [facts, setFacts] = useState([]);
-  const [imgs, setImgs] = useState();
-
-  async function createImage(src, width, height) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = src;
-      img.width = width;
-      img.height = height;
-    });
-  }
+  const [templatePixels, setTemplatePixels] = useState([]);
 
   useEffect(() => {
-    const fetchFactionItems = async () => {
-      try {
-        // let getTemplatesEndpoint = backendUrl + '/get-templates';
-        let response = await fetchWrapper(
-          'get-chain-faction-templates?factionId=1',
-          {
-            mode: 'cors'
-          }
+    const getTemplatePixelData = async (hash) => {
+      console.log(hash);
+      if (hash !== null) {
+        const response = await fetchWrapper(
+          `get-template-pixel-data?hash=${hash}`
         );
-        if (response.data.length === 0) {
-          setFacts([]);
-          console.log('error fetching templates');
-          return;
-        }
-        if (response.data) {
-          setImgs(
-            await createImage(
-              'http://localhost:8080/templates/template-0025e05b8be7d393830ebf6b2961e3c7bf70456418f10f15b801ac14c234175a.png',
-              48,
-              48
-            )
-          );
-          setFacts(response.data);
-        }
-      } catch (error) {
-        console.error(error);
+        return response.data;
       }
+      return [];
     };
-    // const fetchTemplates = async () => {
-    //   try {
-    //     // First get template metadata
-    //     let response = await fetchWrapper('get-templates', {
-    //       mode: 'cors'
-    //     });
 
-    //     if (!response.data) {
-    //       console.error('No templates found');
-    //       setTemps([]);
-    //       return;
-    //     }
+    // Only call getTemplatePixelData if overlayTemplate exists and has a hash
+    if (overlayTemplate && overlayTemplate.hash) {
+      // Need to handle the Promise properly
+      getTemplatePixelData(overlayTemplate.hash)
+        .then((data) => setTemplatePixels(data))
+        .catch((error) => {
+          console.error('Error fetching template pixels:', error);
+          setTemplatePixels([]);
+        });
+    }
+  }, [overlayTemplate]);
 
-    //     // Then fetch image data for each template
-    //     const templatesWithImages = await Promise.all(
-    //       response.data.map(async (template) => {
-    //         const imageData = await fetchTemplateImage(template.hash);
-    //         return {
-    //           ...template,
-    //           imageData
-    //         };
-    //       })
-    //     );
-
-    //     console.log('Templates with images:', templatesWithImages);
-    //     setTemps(templatesWithImages);
-    //   } catch (error) {
-    //     console.error('Error fetching templates:', error);
-    //     setTemps([]);
-    //   }
-    // };
-    fetchFactionItems();
-  }, []);
-
-  console.log('temps: ', facts);
-  console.log('images: ', imgs);
-  // console.log('process image: ', imageToPalette(imgs));
+  console.log(templatePixels);
 
   return (
     <div className='App'>
