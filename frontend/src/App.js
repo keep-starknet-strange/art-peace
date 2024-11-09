@@ -497,12 +497,31 @@ function App() {
   );
 
   const addExtraPixel = useCallback(
-    (pixels) => {
-      // Convert single pixel to array if necessary
-      const pixelsArray = Array.isArray(pixels)
-        ? pixels
-        : [{ x: pixels, y: pixels }];
+    (data, y, colorId) => {
+      // If all parameters are provided, it's a single pixel click
+      if (y !== undefined) {
+        const x = data; // In this case, first parameter is x
+        const existingPixelIndex = extraPixelsData.findIndex(
+          (pixel) => pixel.x === x && pixel.y === y
+        );
 
+        if (existingPixelIndex !== -1) {
+          let newExtraPixelsData = [...extraPixelsData];
+          newExtraPixelsData[existingPixelIndex].colorId =
+            colorId || selectedColorId;
+          setExtraPixelsData(newExtraPixelsData);
+        } else {
+          setAvailablePixelsUsed(availablePixelsUsed + 1);
+          setExtraPixelsData([
+            ...extraPixelsData,
+            { x, y, colorId: colorId || selectedColorId }
+          ]);
+        }
+        return;
+      }
+
+      // If only one parameter is provided, treat it as an array of pixels
+      const pixelsArray = Array.isArray(data) ? data : [data];
       let newExtraPixelsData = [...extraPixelsData];
       let newPixelsAdded = 0;
 
@@ -512,11 +531,9 @@ function App() {
         );
 
         if (existingPixelIndex !== -1) {
-          // Update existing pixel
           newExtraPixelsData[existingPixelIndex].colorId =
             pixel.colorId || selectedColorId;
         } else {
-          // Add new pixel
           newExtraPixelsData.push({
             x: pixel.x,
             y: pixel.y,
@@ -529,7 +546,7 @@ function App() {
       setExtraPixelsData(newExtraPixelsData);
       setAvailablePixelsUsed((prevUsed) => prevUsed + newPixelsAdded);
     },
-    [extraPixelsData, selectedColorId]
+    [extraPixelsData, availablePixelsUsed, selectedColorId]
   );
 
   // Factions
@@ -792,8 +809,6 @@ function App() {
         });
     }
   }, [overlayTemplate]);
-
-  console.log(templatePixels);
 
   const defendTemplate = useCallback(() => {
     if (!overlayTemplate || !templatePixels || !templatePixels.pixelData)
