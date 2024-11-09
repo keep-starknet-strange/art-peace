@@ -810,60 +810,6 @@ function App() {
     }
   }, [overlayTemplate]);
 
-  const defendTemplate = useCallback(() => {
-    if (!overlayTemplate || !templatePixels || !templatePixels.pixelData)
-      return;
-
-    const availableCount = availablePixels - availablePixelsUsed;
-    if (availableCount <= 0) return;
-
-    const templateX = overlayTemplate.position % width;
-    const templateY = Math.floor(overlayTemplate.position / width);
-
-    // Get current canvas state
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    const pixelsToPlace = [];
-    for (let i = 0; i < templatePixels.pixelData.length; i++) {
-      const colorId = templatePixels.pixelData[i];
-      if (colorId === 0xff) continue; // Skip transparent pixels
-
-      const pixelX = i % templatePixels.width;
-      const pixelY = Math.floor(i / templatePixels.width);
-      const canvasX = templateX + pixelX;
-      const canvasY = templateY + pixelY;
-
-      // Get current pixel color
-      const imageData = context.getImageData(canvasX, canvasY, 1, 1).data;
-      const currentColor = `${imageData[0].toString(16).padStart(2, '0')}${imageData[1].toString(16).padStart(2, '0')}${imageData[2].toString(16).padStart(2, '0')}`;
-
-      // Only add if different from template
-      if (currentColor.toLowerCase() !== colors[colorId].toLowerCase()) {
-        pixelsToPlace.push({
-          x: canvasX,
-          y: canvasY,
-          colorId: colorId
-        });
-      }
-    }
-
-    // Randomly select pixels up to available amount
-    const shuffledPixels = pixelsToPlace.sort(() => Math.random() - 0.5);
-    const selectedPixels = shuffledPixels.slice(0, availableCount);
-
-    // Add all selected pixels at once
-    addExtraPixel(selectedPixels);
-  }, [
-    overlayTemplate,
-    templatePixels,
-    availablePixels,
-    availablePixelsUsed,
-    width,
-    colors,
-    addExtraPixel
-  ]);
-
   return (
     <div className='App'>
       <div className='App--background'>
@@ -1066,17 +1012,12 @@ function App() {
                 isPortrait={isPortrait}
                 isMobile={isMobile}
                 overlayTemplate={overlayTemplate}
+                templatePixels={templatePixels}
+                width={canvasConfig.canvas.width}
+                canvasRef={canvasRef}
+                addExtraPixel={addExtraPixel}
+                setLastPlacedTime={setLastPlacedTime}
               />
-            )}
-            {overlayTemplate && (
-              <button
-                className='Button__primary Text__large'
-                style={{ marginLeft: '1rem' }}
-                onClick={defendTemplate}
-                disabled={availablePixels <= availablePixelsUsed}
-              >
-                Defend
-              </button>
             )}
             {isFooterSplit && !footerExpanded && (
               <div
