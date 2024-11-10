@@ -90,7 +90,8 @@ const PixelSelector = (props) => {
     )
       return;
 
-    const availableCount = props.templatePixels.pixelData.length;
+    // const availableCount = props.templatePixels.pixelData.length;
+    const availableCount = props.availablePixels - props.availablePixelsUsed;
     if (availableCount <= 0) return;
 
     const templateX = props.overlayTemplate.position % props.width;

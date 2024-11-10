@@ -78,6 +78,8 @@ const TabPanel = (props) => {
           availablePixels={props.availablePixels}
           availablePixelsUsed={props.availablePixelsUsed}
           userFactions={props.userFactions}
+          setOverlayTemplate={props.setOverlayTemplate}
+          setTemplateOverlayMode={props.setTemplateOverlayMode}
         />
       </CSSTransition>
       <CSSTransition

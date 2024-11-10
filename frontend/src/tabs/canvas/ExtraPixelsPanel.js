@@ -194,6 +194,9 @@ const ExtraPixelsPanel = (props) => {
       let newExtraPixels = props.extraPixels - extraPixelsUsed;
       props.setExtraPixels(newExtraPixels);
     }
+
+    props.setOverlayTemplate(null);
+    props.setTemplateOverlayMode(false);
     clearAll();
     props.setIsEraserMode(false);
     props.setSelectorMode(false);
