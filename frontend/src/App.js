@@ -300,30 +300,41 @@ function App() {
   // TODO: make this a config
   const timeBetweenPlacements = process.env.REACT_APP_BASE_PIXEL_TIMER; // Example: 30 * 1000; // 30 seconds
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
+
   useEffect(() => {
     const updateBasePixelTimer = () => {
+      if (!lastPlacedTime) {
+        setBasePixelUp(true);
+        setBasePixelTimer('Place Pixel');
+        return;
+      }
+
       let timeSinceLastPlacement = Date.now() - lastPlacedTime;
       let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
+
       if (basePixelAvailable) {
         setBasePixelUp(true);
-        setBasePixelTimer('00:00');
+        setBasePixelTimer('Place Pixel');
         clearInterval(interval);
       } else {
         let secondsTillPlacement = Math.floor(
           (timeBetweenPlacements - timeSinceLastPlacement) / 1000
         );
-        setBasePixelTimer(
-          `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
-        );
+        let minutes = Math.floor(secondsTillPlacement / 60);
+        let seconds = secondsTillPlacement % 60;
+        setBasePixelTimer(`${minutes}:${seconds.toString().padStart(2, '0')}`);
         setBasePixelUp(false);
       }
     };
+
     const interval = setInterval(() => {
       updateBasePixelTimer();
     }, updateInterval);
-    updateBasePixelTimer();
+
+    updateBasePixelTimer(); // Call immediately
+
     return () => clearInterval(interval);
-  }, [lastPlacedTime]);
+  }, [lastPlacedTime, timeBetweenPlacements]);
 
   const [chainFactionPixelTimers, setChainFactionPixelTimers] = useState([]);
   useEffect(() => {
