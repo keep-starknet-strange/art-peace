@@ -115,7 +115,6 @@ pub mod ArtPeace {
         // TODO: Integrate template event
         #[flat]
         TemplateEvent: TemplateStoreComponent::Event,
-
         #[flat]
         ExtraPixelsAwardedEvent: ExtraPixelsAwarded
     }
@@ -184,7 +183,7 @@ pub mod ArtPeace {
     }
 
     #[derive(Drop, starknet::Event)]
-    enum ExtraPixelsAwarded{
+    enum ExtraPixelsAwarded {
         DailyQuest: DailyQuestClaimed,
         MainQuest: MainQuestClaimed,
         HostAwardedUser: HostAwardedUser,
@@ -213,7 +212,7 @@ pub mod ArtPeace {
         pub reward: u32,
         pub calldata: Span<felt252>,
     }
-    
+
     #[derive(Drop, starknet::Event)]
     struct HostAwardedUser {
         #[key]
@@ -878,7 +877,12 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
-            self.emit(ExtraPixelsAwarded::DailyQuest(DailyQuestClaimed { day_index, quest_id, user, reward, calldata }));
+            self
+                .emit(
+                    ExtraPixelsAwarded::DailyQuest(
+                        DailyQuestClaimed { day_index, quest_id, user, reward, calldata }
+                    )
+                );
         }
 
         fn claim_main_quest(ref self: ContractState, quest_id: u32, calldata: Span<felt252>) {
@@ -894,7 +898,12 @@ pub mod ArtPeace {
                         self.extra_pixels.read(starknet::get_caller_address()) + reward
                     );
             }
-            self.emit(ExtraPixelsAwarded::MainQuest(MainQuestClaimed { quest_id, user, reward, calldata }));
+            self
+                .emit(
+                    ExtraPixelsAwarded::MainQuest(
+                        MainQuestClaimed { quest_id, user, reward, calldata }
+                    )
+                );
         }
 
         fn get_nft_contract(self: @ContractState) -> ContractAddress {
@@ -1057,8 +1066,8 @@ pub mod ArtPeace {
             assert(starknet::get_caller_address() == self.host.read(), 'Host changes end time');
             self.end_time.write(new_end_time);
         }
-        
-        fn already_liked_nft(self: @ContractState, user: ContractAddress, nft_id: u256) -> bool{ 
+
+        fn already_liked_nft(self: @ContractState, user: ContractAddress, nft_id: u256) -> bool {
             self.liked_nfts.read((user, nft_id))
         }
     }
@@ -1289,14 +1298,14 @@ pub mod ArtPeace {
     impl ArtPeaceCanvasNFTLikeAndUnlike of ICanvasNFTLikeAndUnlike<ContractState> {
         fn like_nft(ref self: ContractState, token_id: u256) {
             let caller = starknet::get_caller_address();
-            assert(self.already_liked_nft(caller, token_id), 'already liked this nft');
+            assert(!self.already_liked_nft(caller, token_id), 'already liked this nft');
             let nft_address = self.nft_contract.read();
             ICanvasNFTLikeAndUnlikeDispatcher { contract_address: nft_address }.like_nft(token_id);
             let nft_owner = IERC721Dispatcher { contract_address: nft_address }.owner_of(token_id);
-            
+
             // award the minter of the nft 1 extra pixel each time someone likes the nft
             self.extra_pixels.write(nft_owner, self.extra_pixels.read(nft_owner) + 1);
-            self.emit(ExtraPixelsAwarded::LikeNft(LikeNftAwarded{user: nft_owner, amount: 1}));
+            self.emit(ExtraPixelsAwarded::LikeNft(LikeNftAwarded { user: nft_owner, amount: 1 }));
             self.liked_nfts.write((caller, token_id), true);
         }
         fn unlike_nft(ref self: ContractState, token_id: u256) {

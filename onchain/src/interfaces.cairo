@@ -126,7 +126,9 @@ pub trait IArtPeace<TContractState> {
 
     // NFT-related info
     fn get_nft_contract(self: @TContractState) -> starknet::ContractAddress;
-    fn already_liked_nft(self: @TContractState, user: starknet::ContractAddress, nft_id: u256) -> bool;
+    fn already_liked_nft(
+        self: @TContractState, user: starknet::ContractAddress, nft_id: u256
+    ) -> bool;
 
     // Templates
     fn add_faction_template(
