@@ -33,12 +33,17 @@ const PixelSelector = (props) => {
     } else {
       setPlacementTimer(props.basePixelTimer);
     }
+
+    if (placementTimer === '00:00') {
+      setEnded(true);
+    }
   }, [
     props.availablePixels,
     props.availablePixelsUsed,
     props.basePixelTimer,
     props.queryAddress,
-    props.lastPlacedTime
+    props.lastPlacedTime,
+    placementTimer
   ]);
 
   const toSelectorMode = (event) => {
@@ -137,6 +142,24 @@ const PixelSelector = (props) => {
     props.addExtraPixel,
     props.setLastPlacedTime,
     props.canvasRef
+  ]);
+
+  useEffect(() => {
+    if (
+      props.overlayTemplate &&
+      props.isDefending &&
+      props.availablePixels - props.availablePixelsUsed > 0 &&
+      ended
+    ) {
+      defendTemplate();
+    }
+  }, [
+    props.overlayTemplate,
+    props.isDefending,
+    props.availablePixels,
+    props.availablePixelsUsed,
+    ended,
+    defendTemplate
   ]);
 
   return (
@@ -260,10 +283,12 @@ const PixelSelector = (props) => {
       {props.overlayTemplate && (
         <div
           className='Button__primary Text__large'
-          onClick={defendTemplate}
+          onClick={() => props.setIsDefending(!props.isDefending)}
           disabled={props.availablePixels <= props.availablePixelsUsed}
         >
-          <p className='PixelSelector__text'>Defend</p>
+          <p className='PixelSelector__text'>
+            {props.isDefending ? 'Defender On' : 'Defender Off'}
+          </p>
         </div>
       )}
     </div>

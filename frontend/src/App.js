@@ -276,6 +276,7 @@ function App() {
   const [availablePixels, setAvailablePixels] = useState(0);
   const [availablePixelsUsed, setAvailablePixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
+  const [isDefending, setIsDefending] = useState(false);
 
   const [selectorMode, setSelectorMode] = useState(false);
 
@@ -989,6 +990,7 @@ function App() {
             isLastDay={isLastDay}
             endTimestamp={endTimestamp}
             host={host}
+            isDefending={isDefending}
           />
         </div>
         <div className='App__footer'>
@@ -1028,6 +1030,8 @@ function App() {
                 canvasRef={canvasRef}
                 addExtraPixel={addExtraPixel}
                 setLastPlacedTime={setLastPlacedTime}
+                isDefending={isDefending}
+                setIsDefending={setIsDefending}
               />
             )}
             {isFooterSplit && !footerExpanded && (

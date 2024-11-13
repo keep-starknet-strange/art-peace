@@ -80,6 +80,7 @@ const TabPanel = (props) => {
           userFactions={props.userFactions}
           setOverlayTemplate={props.setOverlayTemplate}
           setTemplateOverlayMode={props.setTemplateOverlayMode}
+          isDefending={props.isDefending}
         />
       </CSSTransition>
       <CSSTransition
