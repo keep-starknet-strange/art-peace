@@ -124,8 +124,11 @@ pub trait IArtPeace<TContractState> {
     fn claim_today_quest(ref self: TContractState, quest_id: u32, calldata: Span<felt252>);
     fn claim_main_quest(ref self: TContractState, quest_id: u32, calldata: Span<felt252>);
 
-    // NFT info
+    // NFT-related info
     fn get_nft_contract(self: @TContractState) -> starknet::ContractAddress;
+    fn already_liked_nft(
+        self: @TContractState, user: starknet::ContractAddress, nft_id: u256
+    ) -> bool;
 
     // Templates
     fn add_faction_template(

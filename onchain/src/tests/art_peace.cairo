@@ -3,7 +3,8 @@ use art_peace::ArtPeace::InitParams;
 use art_peace::tests::utils;
 use art_peace::nfts::interfaces::{
     IArtPeaceNFTMinterDispatcher, IArtPeaceNFTMinterDispatcherTrait, ICanvasNFTStoreDispatcher,
-    ICanvasNFTStoreDispatcherTrait, NFTMintParams, NFTMetadata
+    ICanvasNFTStoreDispatcherTrait, NFTMintParams, NFTMetadata, ICanvasNFTLikeAndUnlikeDispatcher,
+    ICanvasNFTLikeAndUnlikeDispatcherTrait
 };
 use art_peace::templates::interfaces::{
     ITemplateStoreDispatcher, ITemplateStoreDispatcherTrait, ITemplateVerifierDispatcher,
@@ -429,6 +430,33 @@ fn nft_set_base_uri_test() {
     nft_minter.set_nft_base_uri(new_base_uri);
     snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
     assert!(nft_meta.token_uri(0) == new_expected_uri, "NFT URI is not correct after change");
+}
+
+#[test]
+fn nft_like_nft_test() {
+    let art_peace = IArtPeaceDispatcher { contract_address: deploy_contract() };
+    let nft_minter = IArtPeaceNFTMinterDispatcher { contract_address: art_peace.contract_address };
+    let nft_like = ICanvasNFTLikeAndUnlikeDispatcher {
+        contract_address: art_peace.contract_address
+    };
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::HOST());
+    nft_minter.add_nft_contract(utils::NFT_CONTRACT());
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
+
+    let mint_params = NFTMintParams { position: 10, width: 16, height: 16, name: 'test' };
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::PLAYER1());
+    nft_minter.mint_nft(mint_params);
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
+
+    let extra_pixels_count = art_peace.get_user_extra_pixels_count(utils::PLAYER1());
+    assert_eq!(extra_pixels_count, 0, "should not have any extra pixel");
+
+    snf::start_prank(CheatTarget::One(nft_minter.contract_address), utils::PLAYER1());
+    nft_like.like_nft(0);
+    snf::stop_prank(CheatTarget::One(nft_minter.contract_address));
+
+    let extra_pixels_count = art_peace.get_user_extra_pixels_count(utils::PLAYER1());
+    assert_eq!(extra_pixels_count, 1, "should increase by one");
 }
 
 #[test]
