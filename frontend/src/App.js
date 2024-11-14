@@ -557,6 +557,7 @@ function App() {
   const [templateCreationSelected, setTemplateCreationSelected] =
     useState(false);
   const [templatePosition, setTemplatePosition] = useState(0);
+  const [isDefending, setIsDefending] = useState(false);
 
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
@@ -953,6 +954,9 @@ function App() {
                 setIsEraseMode={setIsEraserMode}
                 isPortrait={isPortrait}
                 isMobile={isMobile}
+                overlayTemplate={overlayTemplate}
+                isDefending={isDefending}
+                setIsDefending={setIsDefending}
               />
             )}
             {isFooterSplit && !footerExpanded && (
