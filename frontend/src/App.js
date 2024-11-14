@@ -300,30 +300,6 @@ function App() {
   // TODO: make this a config
   const timeBetweenPlacements = process.env.REACT_APP_BASE_PIXEL_TIMER; // Example: 30 * 1000; // 30 seconds
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
-  useEffect(() => {
-    const updateBasePixelTimer = () => {
-      let timeSinceLastPlacement = Date.now() - lastPlacedTime;
-      let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
-      if (basePixelAvailable) {
-        setBasePixelUp(true);
-        setBasePixelTimer('00:00');
-        clearInterval(interval);
-      } else {
-        let secondsTillPlacement = Math.floor(
-          (timeBetweenPlacements - timeSinceLastPlacement) / 1000
-        );
-        setBasePixelTimer(
-          `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
-        );
-        setBasePixelUp(false);
-      }
-    };
-    const interval = setInterval(() => {
-      updateBasePixelTimer();
-    }, updateInterval);
-    updateBasePixelTimer();
-    return () => clearInterval(interval);
-  }, [lastPlacedTime]);
 
   const [chainFactionPixelTimers, setChainFactionPixelTimers] = useState([]);
   useEffect(() => {
@@ -752,6 +728,47 @@ function App() {
     availablePixelsUsed,
     basePixelUp
   ]);
+
+  function defendTemplate() {
+    console.log('defended!');
+  }
+
+  useEffect(() => {
+    const updateBasePixelTimer = () => {
+      let timeSinceLastPlacement = Date.now() - lastPlacedTime;
+      let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
+
+      if (basePixelAvailable) {
+        const wasPixelPreviouslyUnavailable = !basePixelUp;
+        setBasePixelUp(true);
+        setBasePixelTimer('00:00');
+        if (
+          wasPixelPreviouslyUnavailable &&
+          isDefending &&
+          overlayTemplate &&
+          lastPlacedTime !== 0
+        ) {
+          defendTemplate();
+        }
+        clearInterval(interval);
+      } else {
+        let secondsTillPlacement = Math.floor(
+          (timeBetweenPlacements - timeSinceLastPlacement) / 1000
+        );
+        setBasePixelTimer(
+          `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
+        );
+        setBasePixelUp(false);
+      }
+    };
+
+    const interval = setInterval(() => {
+      updateBasePixelTimer();
+    }, updateInterval);
+
+    updateBasePixelTimer();
+    return () => clearInterval(interval);
+  }, [lastPlacedTime, isDefending, overlayTemplate, defendTemplate]);
 
   return (
     <div className='App'>
