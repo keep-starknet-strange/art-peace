@@ -168,6 +168,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://soetandev.netlify.app/"><img src="https://avatars.githubusercontent.com/u/17912134?v=4?s=100" width="100px;" alt="Emmanuel Soetan"/><br /><sub><b>Emmanuel Soetan</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Shoetan" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/EmmanuelAR"><img src="https://avatars.githubusercontent.com/u/54730752?v=4?s=100" width="100px;" alt="Emmanuel Agüero "/><br /><sub><b>Emmanuel Agüero </b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=EmmanuelAR" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/muheebyusufbaba1"><img src="https://avatars.githubusercontent.com/u/134698940?v=4?s=100" width="100px;" alt="Babs"/><br /><sub><b>Babs</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=muheebyusufbaba1" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
