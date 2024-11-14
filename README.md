@@ -161,6 +161,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/supreme2580"><img src="https://avatars.githubusercontent.com/u/100731397?v=4?s=100" width="100px;" alt="Supreme Labs"/><br /><sub><b>Supreme Labs</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=supreme2580" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/AbdelStark"><img src="https://avatars.githubusercontent.com/u/45264458?v=4?s=100" width="100px;" alt="A₿del ∞/21M"/><br /><sub><b>A₿del ∞/21M</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=AbdelStark" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jjjike2021"><img src="https://avatars.githubusercontent.com/u/171845810?v=4?s=100" width="100px;" alt="jike"/><br /><sub><b>jike</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=jjjike2021" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/bloomingpeach"><img src="https://avatars.githubusercontent.com/u/177087057?v=4?s=100" width="100px;" alt="Rumia"/><br /><sub><b>Rumia</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=bloomingpeach" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
