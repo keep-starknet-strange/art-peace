@@ -7,7 +7,6 @@ const PixelSelector = (props) => {
   // Track when a placement is available
 
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
-  const [ended, setEnded] = useState(false);
 
   useEffect(() => {
     if (props.queryAddress === '0') {
@@ -35,7 +34,7 @@ const PixelSelector = (props) => {
     }
 
     if (placementTimer === '00:00') {
-      setEnded(true);
+      props.setEnded(true);
     }
   }, [
     props.availablePixels,
@@ -76,7 +75,7 @@ const PixelSelector = (props) => {
     props.setSelectedColorId(-1);
     props.setSelectorMode(false);
     props.setIsEraserMode(false);
-    setEnded(false);
+    props.setEnded(false);
   };
 
   const defendTemplate = useCallback(() => {
@@ -127,10 +126,7 @@ const PixelSelector = (props) => {
     const selectedPixels = shuffledPixels.slice(0, availableCount);
 
     if (selectedPixels.length > 0) {
-      // Add all selected pixels at once
       props.addExtraPixel(selectedPixels);
-      // Update last placed time
-      props.setLastPlacedTime(Date.now());
     }
   }, [
     props.overlayTemplate,
@@ -140,7 +136,6 @@ const PixelSelector = (props) => {
     props.width,
     props.colors,
     props.addExtraPixel,
-    props.setLastPlacedTime,
     props.canvasRef
   ]);
 
@@ -149,16 +144,18 @@ const PixelSelector = (props) => {
       props.overlayTemplate &&
       props.isDefending &&
       props.availablePixels - props.availablePixelsUsed > 0 &&
-      ended
+      props.basePixelTimer === '0:00' &&
+      !props.ended
     ) {
       defendTemplate();
+      props.setEnded(true);
     }
   }, [
     props.overlayTemplate,
     props.isDefending,
     props.availablePixels,
     props.availablePixelsUsed,
-    ended,
+    props.basePixelTimer,
     defendTemplate
   ]);
 
@@ -172,7 +169,7 @@ const PixelSelector = (props) => {
       }}
     >
       <div className='PixelSelector'>
-        {(props.selectorMode || ended) && (
+        {(props.selectorMode || props.ended) && (
           <div className='PixelSelector__selector'>
             <div className='PixelSelector__selector__colors'>
               {props.colors.map((color, idx) => {
@@ -191,7 +188,7 @@ const PixelSelector = (props) => {
             </div>
           </div>
         )}
-        {!props.selectorMode && !ended && (
+        {!props.selectorMode && !props.ended && (
           <div
             className={
               'Button__primary Text__large ' +

@@ -301,6 +301,7 @@ function App() {
   // TODO: make this a config
   const timeBetweenPlacements = process.env.REACT_APP_BASE_PIXEL_TIMER; // Example: 30 * 1000; // 30 seconds
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
+  const [ended, setEnded] = useState(false);
 
   useEffect(() => {
     const updateBasePixelTimer = () => {
@@ -1032,6 +1033,8 @@ function App() {
                 setLastPlacedTime={setLastPlacedTime}
                 isDefending={isDefending}
                 setIsDefending={setIsDefending}
+                ended={ended}
+                setEnded={setEnded}
               />
             )}
             {isFooterSplit && !footerExpanded && (
