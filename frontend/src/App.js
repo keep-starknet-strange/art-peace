@@ -729,9 +729,88 @@ function App() {
     basePixelUp
   ]);
 
-  function defendTemplate() {
-    console.log('defended!');
-  }
+  const [templatePixels, setTemplatePixels] = useState([]);
+
+  useEffect(() => {
+    const getTemplatePixelData = async (hash) => {
+      console.log(hash);
+      if (hash !== null) {
+        const response = await fetchWrapper(
+          `get-template-pixel-data?hash=${hash}`
+        );
+        return response.data;
+      }
+      return [];
+    };
+
+    // Only call getTemplatePixelData if overlayTemplate exists and has a hash
+    if (overlayTemplate && overlayTemplate.hash) {
+      // Need to handle the Promise properly
+      getTemplatePixelData(overlayTemplate.hash)
+        .then((data) => setTemplatePixels(data))
+        .catch((error) => {
+          console.error('Error fetching template pixels:', error);
+          setTemplatePixels([]);
+        });
+    }
+  }, [overlayTemplate]);
+
+  const defendTemplate = useCallback(() => {
+    if (!overlayTemplate || !templatePixels || !templatePixels.pixelData)
+      return;
+
+    // const availableCount = props.templatePixels.pixelData.length;
+    const availableCount = availablePixels - availablePixelsUsed;
+    if (availableCount <= 0) return;
+
+    const templateX = overlayTemplate.position % width;
+    const templateY = Math.floor(overlayTemplate.position / width);
+
+    // Get current canvas state
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    const pixelsToPlace = [];
+    for (let i = 0; i < templatePixels.pixelData.length; i++) {
+      const colorId = templatePixels.pixelData[i];
+      if (colorId === 0xff) continue; // Skip transparent pixels
+
+      const pixelX = i % templatePixels.width;
+      const pixelY = Math.floor(i / templatePixels.width);
+      const canvasX = templateX + pixelX;
+      const canvasY = templateY + pixelY;
+
+      // Get current pixel color
+      const imageData = context.getImageData(canvasX, canvasY, 1, 1).data;
+      const currentColor = `${imageData[0].toString(16).padStart(2, '0')}${imageData[1].toString(16).padStart(2, '0')}${imageData[2].toString(16).padStart(2, '0')}`;
+
+      // Only add if different from template
+      if (currentColor.toLowerCase() !== colors[colorId].toLowerCase()) {
+        pixelsToPlace.push({
+          x: canvasX,
+          y: canvasY,
+          colorId: colorId
+        });
+      }
+    }
+
+    // Randomly select pixels up to available amount
+    const shuffledPixels = pixelsToPlace.sort(() => Math.random() - 0.5);
+    const selectedPixels = shuffledPixels.slice(0, availableCount);
+
+    if (selectedPixels.length > 0) {
+      addExtraPixel(selectedPixels);
+    }
+  }, [
+    overlayTemplate,
+    templatePixels,
+    availablePixels,
+    availablePixelsUsed,
+    width,
+    colors,
+    addExtraPixel,
+    canvasRef
+  ]);
 
   useEffect(() => {
     const updateBasePixelTimer = () => {
