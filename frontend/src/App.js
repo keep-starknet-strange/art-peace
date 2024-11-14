@@ -276,6 +276,7 @@ function App() {
   const [availablePixels, setAvailablePixels] = useState(0);
   const [availablePixelsUsed, setAvailablePixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
+  const [isDefending, setIsDefending] = useState(false);
 
   const [selectorMode, setSelectorMode] = useState(false);
 
@@ -300,6 +301,41 @@ function App() {
   // TODO: make this a config
   const timeBetweenPlacements = process.env.REACT_APP_BASE_PIXEL_TIMER; // Example: 30 * 1000; // 30 seconds
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
+
+  useEffect(() => {
+    const updateBasePixelTimer = () => {
+      if (!lastPlacedTime) {
+        setBasePixelUp(true);
+        setBasePixelTimer('Place Pixel');
+        return;
+      }
+
+      let timeSinceLastPlacement = Date.now() - lastPlacedTime;
+      let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
+
+      if (basePixelAvailable) {
+        setBasePixelUp(true);
+        setBasePixelTimer('Place Pixel');
+        clearInterval(interval);
+      } else {
+        let secondsTillPlacement = Math.floor(
+          (timeBetweenPlacements - timeSinceLastPlacement) / 1000
+        );
+        let minutes = Math.floor(secondsTillPlacement / 60);
+        let seconds = secondsTillPlacement % 60;
+        setBasePixelTimer(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+        setBasePixelUp(false);
+      }
+    };
+
+    const interval = setInterval(() => {
+      updateBasePixelTimer();
+    }, updateInterval);
+
+    updateBasePixelTimer(); // Call immediately
+
+    return () => clearInterval(interval);
+  }, [lastPlacedTime, timeBetweenPlacements]);
 
   const [chainFactionPixelTimers, setChainFactionPixelTimers] = useState([]);
   useEffect(() => {
@@ -473,22 +509,54 @@ function App() {
   );
 
   const addExtraPixel = useCallback(
-    (x, y) => {
-      // Overwrite pixel if already placed
-      const existingPixelIndex = extraPixelsData.findIndex(
-        (pixel) => pixel.x === x && pixel.y === y
-      );
-      if (existingPixelIndex !== -1) {
-        let newExtraPixelsData = [...extraPixelsData];
-        newExtraPixelsData[existingPixelIndex].colorId = selectedColorId;
-        setExtraPixelsData(newExtraPixelsData);
-      } else {
-        setAvailablePixelsUsed(availablePixelsUsed + 1);
-        setExtraPixelsData([
-          ...extraPixelsData,
-          { x: x, y: y, colorId: selectedColorId }
-        ]);
+    (data, y, colorId) => {
+      // If all parameters are provided, it's a single pixel click
+      if (y !== undefined) {
+        const x = data; // In this case, first parameter is x
+        const existingPixelIndex = extraPixelsData.findIndex(
+          (pixel) => pixel.x === x && pixel.y === y
+        );
+
+        if (existingPixelIndex !== -1) {
+          let newExtraPixelsData = [...extraPixelsData];
+          newExtraPixelsData[existingPixelIndex].colorId =
+            colorId || selectedColorId;
+          setExtraPixelsData(newExtraPixelsData);
+        } else {
+          setAvailablePixelsUsed(availablePixelsUsed + 1);
+          setExtraPixelsData([
+            ...extraPixelsData,
+            { x, y, colorId: colorId || selectedColorId }
+          ]);
+        }
+        return;
       }
+
+      // If only one parameter is provided, treat it as an array of pixels
+      const pixelsArray = Array.isArray(data) ? data : [data];
+      let newExtraPixelsData = [...extraPixelsData];
+      let newPixelsAdded = 0;
+
+      pixelsArray.forEach((pixel) => {
+        const existingPixelIndex = newExtraPixelsData.findIndex(
+          (p) => p.x === pixel.x && p.y === pixel.y
+        );
+
+        if (existingPixelIndex !== -1) {
+          newExtraPixelsData[existingPixelIndex].colorId =
+            pixel.colorId || selectedColorId;
+        } else {
+          newExtraPixelsData.push({
+            x: pixel.x,
+            y: pixel.y,
+            colorId: pixel.colorId || selectedColorId
+          });
+          newPixelsAdded++;
+        }
+      });
+
+      setExtraPixelsData(newExtraPixelsData);
+      setAvailablePixelsUsed((prevUsed) => prevUsed + newPixelsAdded);
     },
     [extraPixelsData, availablePixelsUsed, selectedColorId]
   );
@@ -533,7 +601,6 @@ function App() {
   const [templateCreationSelected, setTemplateCreationSelected] =
     useState(false);
   const [templatePosition, setTemplatePosition] = useState(0);
-  const [isDefending, setIsDefending] = useState(false);
 
   // NFTs
   const [nftMintingMode, setNftMintingMode] = useState(false);
@@ -755,100 +822,6 @@ function App() {
     }
   }, [overlayTemplate]);
 
-  const defendTemplate = useCallback(() => {
-    if (!overlayTemplate || !templatePixels || !templatePixels.pixelData)
-      return;
-
-    // const availableCount = props.templatePixels.pixelData.length;
-    const availableCount = availablePixels - availablePixelsUsed;
-    if (availableCount <= 0) return;
-
-    const templateX = overlayTemplate.position % width;
-    const templateY = Math.floor(overlayTemplate.position / width);
-
-    // Get current canvas state
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    const pixelsToPlace = [];
-    for (let i = 0; i < templatePixels.pixelData.length; i++) {
-      const colorId = templatePixels.pixelData[i];
-      if (colorId === 0xff) continue; // Skip transparent pixels
-
-      const pixelX = i % templatePixels.width;
-      const pixelY = Math.floor(i / templatePixels.width);
-      const canvasX = templateX + pixelX;
-      const canvasY = templateY + pixelY;
-
-      // Get current pixel color
-      const imageData = context.getImageData(canvasX, canvasY, 1, 1).data;
-      const currentColor = `${imageData[0].toString(16).padStart(2, '0')}${imageData[1].toString(16).padStart(2, '0')}${imageData[2].toString(16).padStart(2, '0')}`;
-
-      // Only add if different from template
-      if (currentColor.toLowerCase() !== colors[colorId].toLowerCase()) {
-        pixelsToPlace.push({
-          x: canvasX,
-          y: canvasY,
-          colorId: colorId
-        });
-      }
-    }
-
-    // Randomly select pixels up to available amount
-    const shuffledPixels = pixelsToPlace.sort(() => Math.random() - 0.5);
-    const selectedPixels = shuffledPixels.slice(0, availableCount);
-
-    if (selectedPixels.length > 0) {
-      addExtraPixel(selectedPixels);
-    }
-  }, [
-    overlayTemplate,
-    templatePixels,
-    availablePixels,
-    availablePixelsUsed,
-    width,
-    colors,
-    addExtraPixel,
-    canvasRef
-  ]);
-
-  useEffect(() => {
-    const updateBasePixelTimer = () => {
-      let timeSinceLastPlacement = Date.now() - lastPlacedTime;
-      let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
-
-      if (basePixelAvailable) {
-        const wasPixelPreviouslyUnavailable = !basePixelUp;
-        setBasePixelUp(true);
-        setBasePixelTimer('00:00');
-        if (
-          wasPixelPreviouslyUnavailable &&
-          isDefending &&
-          overlayTemplate &&
-          lastPlacedTime !== 0
-        ) {
-          defendTemplate();
-        }
-        clearInterval(interval);
-      } else {
-        let secondsTillPlacement = Math.floor(
-          (timeBetweenPlacements - timeSinceLastPlacement) / 1000
-        );
-        setBasePixelTimer(
-          `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
-        );
-        setBasePixelUp(false);
-      }
-    };
-
-    const interval = setInterval(() => {
-      updateBasePixelTimer();
-    }, updateInterval);
-
-    updateBasePixelTimer();
-    return () => clearInterval(interval);
-  }, [lastPlacedTime, isDefending, overlayTemplate, defendTemplate]);
-
   return (
     <div className='App'>
       <div className='App--background'>
@@ -1017,6 +990,7 @@ function App() {
             isLastDay={isLastDay}
             endTimestamp={endTimestamp}
             host={host}
+            isDefending={isDefending}
           />
         </div>
         <div className='App__footer'>
@@ -1051,8 +1025,16 @@ function App() {
                 isPortrait={isPortrait}
                 isMobile={isMobile}
                 overlayTemplate={overlayTemplate}
+                templatePixels={templatePixels}
+                width={canvasConfig.canvas.width}
+                canvasRef={canvasRef}
+                addExtraPixel={addExtraPixel}
+                setLastPlacedTime={setLastPlacedTime}
                 isDefending={isDefending}
                 setIsDefending={setIsDefending}
+                basePixelAvailable={
+                  Date.now() - lastPlacedTime > timeBetweenPlacements
+                }
               />
             )}
             {isFooterSplit && !footerExpanded && (

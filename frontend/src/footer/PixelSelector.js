@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import './PixelSelector.css';
 import '../utils/Styles.css';
 import EraserIcon from '../resources/icons/Eraser.png';
@@ -7,47 +7,38 @@ const PixelSelector = (props) => {
   // Track when a placement is available
 
   const [placementTimer, setPlacementTimer] = useState('XX:XX');
-  const [placementMode, setPlacementMode] = useState(false);
-  const [ended, setEnded] = useState(false);
 
   useEffect(() => {
     if (props.queryAddress === '0') {
       setPlacementTimer('Login to Play');
       return;
     }
+
+    // Show countdown if last placed time exists and timer is active
+    if (props.lastPlacedTime && props.basePixelTimer !== 'Place Pixel') {
+      setPlacementTimer(props.basePixelTimer);
+      return;
+    }
+
     if (props.availablePixels > 0) {
       let amountAvailable = props.availablePixels - props.availablePixelsUsed;
       if (amountAvailable > 1) {
         setPlacementTimer('Place Pixels');
-        return;
       } else if (amountAvailable === 1) {
         setPlacementTimer('Place Pixel');
-        return;
       } else {
         setPlacementTimer('Out of Pixels');
-        return;
       }
     } else {
-      // TODO: Use lowest timer out of base, chain, faction, ...
       setPlacementTimer(props.basePixelTimer);
-    }
-    if (
-      placementTimer === '0:00' &&
-      placementMode &&
-      placementTimer !== 'Out of Pixels' &&
-      placementTimer !== 'Login to Play'
-    ) {
-      setEnded(true);
-    } else {
-      setEnded(false);
     }
   }, [
     props.availablePixels,
     props.availablePixelsUsed,
     props.basePixelTimer,
     props.queryAddress,
-    placementTimer,
-    placementMode
+    props.lastPlacedTime,
+    placementTimer
   ]);
 
   const toSelectorMode = (event) => {
@@ -62,10 +53,12 @@ const PixelSelector = (props) => {
       return;
     }
 
-    if (props.availablePixels > props.availablePixelsUsed) {
+    if (
+      props.availablePixels > props.availablePixelsUsed &&
+      props.basePixelTimer === 'Place Pixel'
+    ) {
       props.setSelectorMode(true);
       props.setIsEraserMode(false);
-      setPlacementMode(true);
     }
   };
 
@@ -77,10 +70,88 @@ const PixelSelector = (props) => {
   const cancelSelector = () => {
     props.setSelectedColorId(-1);
     props.setSelectorMode(false);
-    setPlacementMode(false);
     props.setIsEraserMode(false);
-    setEnded(false);
   };
+
+  const defendTemplate = useCallback(() => {
+    if (
+      !props.overlayTemplate ||
+      !props.templatePixels ||
+      !props.templatePixels.pixelData
+    )
+      return;
+
+    // const availableCount = props.templatePixels.pixelData.length;
+    const availableCount = props.availablePixels - props.availablePixelsUsed;
+    if (availableCount <= 0) return;
+
+    const templateX = props.overlayTemplate.position % props.width;
+    const templateY = Math.floor(props.overlayTemplate.position / props.width);
+
+    // Get current canvas state
+    const canvas = props.canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    const pixelsToPlace = [];
+    for (let i = 0; i < props.templatePixels.pixelData.length; i++) {
+      const colorId = props.templatePixels.pixelData[i];
+      if (colorId === 0xff) continue; // Skip transparent pixels
+
+      const pixelX = i % props.templatePixels.width;
+      const pixelY = Math.floor(i / props.templatePixels.width);
+      const canvasX = templateX + pixelX;
+      const canvasY = templateY + pixelY;
+
+      // Get current pixel color
+      const imageData = context.getImageData(canvasX, canvasY, 1, 1).data;
+      const currentColor = `${imageData[0].toString(16).padStart(2, '0')}${imageData[1].toString(16).padStart(2, '0')}${imageData[2].toString(16).padStart(2, '0')}`;
+
+      // Only add if different from template
+      if (currentColor.toLowerCase() !== props.colors[colorId].toLowerCase()) {
+        pixelsToPlace.push({
+          x: canvasX,
+          y: canvasY,
+          colorId: colorId
+        });
+      }
+    }
+
+    // Randomly select pixels up to available amount
+    const shuffledPixels = pixelsToPlace.sort(() => Math.random() - 0.5);
+    const selectedPixels = shuffledPixels.slice(0, availableCount);
+
+    if (selectedPixels.length > 0) {
+      props.addExtraPixel(selectedPixels);
+    }
+  }, [
+    props.overlayTemplate,
+    props.templatePixels,
+    props.availablePixels,
+    props.availablePixelsUsed,
+    props.width,
+    props.colors,
+    props.addExtraPixel,
+    props.canvasRef
+  ]);
+
+  useEffect(() => {
+    if (
+      props.overlayTemplate &&
+      props.isDefending &&
+      props.basePixelAvailable
+    ) {
+      defendTemplate();
+    }
+  }, [
+    props.overlayTemplate,
+    props.isDefending,
+    props.availablePixels,
+    props.availablePixelsUsed,
+    props.basePixelTimer,
+    defendTemplate
+  ]);
+
+  console.log('base pixel available: ', props.basePixelAvailable);
 
   return (
     <div
@@ -92,7 +163,7 @@ const PixelSelector = (props) => {
       }}
     >
       <div className='PixelSelector'>
-        {(props.selectorMode || ended) && (
+        {props.selectorMode && (
           <div className='PixelSelector__selector'>
             <div className='PixelSelector__selector__colors'>
               {props.colors.map((color, idx) => {
@@ -111,7 +182,7 @@ const PixelSelector = (props) => {
             </div>
           </div>
         )}
-        {!props.selectorMode && !ended && (
+        {!props.selectorMode && (
           <div
             className={
               'Button__primary Text__large ' +
