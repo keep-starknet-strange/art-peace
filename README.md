@@ -154,6 +154,7 @@ Thanks goes to these wonderful people. Follow the [contributors guide](https://g
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Jemiiah"><img src="https://avatars.githubusercontent.com/u/160767568?v=4?s=100" width="100px;" alt="Jemiiah"/><br /><sub><b>Jemiiah</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=Jemiiah" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/UmarSalihu"><img src="https://avatars.githubusercontent.com/u/56638850?v=4?s=100" width="100px;" alt="Umar I Salihu"/><br /><sub><b>Umar I Salihu</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=UmarSalihu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/lfgtwo"><img src="https://avatars.githubusercontent.com/u/171595475?v=4?s=100" width="100px;" alt="lfg2"/><br /><sub><b>lfg2</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=lfgtwo" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/zintarh"><img src="https://avatars.githubusercontent.com/u/35270183?v=4?s=100" width="100px;" alt="Zintarh"/><br /><sub><b>Zintarh</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/art-peace/commits?author=zintarh" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
