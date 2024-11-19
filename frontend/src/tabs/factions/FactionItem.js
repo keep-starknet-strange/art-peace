@@ -416,7 +416,11 @@ const FactionItem = (props) => {
               )}
               <div
                 className={`Text__xsmall Button__primary FactionItem__header__template__button 
-                  ${innerActiveTab === 'templates' ? 'FactionItem__header__button--selected' : ''}`}
+                  ${
+                    innerActiveTab === 'templates'
+                      ? 'FactionItem__header__button--selected'
+                      : ''
+                  }`}
                 onClick={() => setInnerActiveTab('templates')}
               >
                 <img
@@ -432,7 +436,11 @@ const FactionItem = (props) => {
                 <p style={{ padding: '0', margin: '0' }}>stencils</p>
               </div>
               <div
-                className={`FactionItem__link ${innerActiveTab === 'info' ? 'FactionItem__header__button--selected' : ''}`}
+                className={`FactionItem__link ${
+                  innerActiveTab === 'info'
+                    ? 'FactionItem__header__button--selected'
+                    : ''
+                }`}
                 style={{ border: '1px solid rgba(0, 0, 0, 0.5)' }}
                 onClick={() => setInnerActiveTab('info')}
               >

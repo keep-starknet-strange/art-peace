@@ -3,6 +3,7 @@ package routes
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -26,6 +27,7 @@ func InitTemplateRoutes() {
 	http.HandleFunc("/build-template-img", buildTemplateImg)
 	http.HandleFunc("/add-template-img", addTemplateImg)
 	http.HandleFunc("/add-template-data", addTemplateData)
+	http.HandleFunc("/get-template-pixel-data", getTemplatePixelData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		// http.HandleFunc("/add-template-devnet", addTemplateDevnet)
 		http.HandleFunc("/add-faction-template-devnet", addFactionTemplateDevnet)
@@ -453,6 +455,58 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, hash)
+}
+
+func getTemplatePixelData(w http.ResponseWriter, r *http.Request) {
+	hash := r.URL.Query().Get("hash")
+	if hash == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Hash parameter is required")
+		return
+	}
+
+	// Read the template image file
+	filename := fmt.Sprintf("templates/template-%s.png", hash)
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusNotFound, "Template not found")
+		return
+	}
+
+	// Convert image to pixel data using existing function
+	pixelData, err := imageToPixelData(fileBytes)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
+		return
+	}
+
+	// Get image dimensions
+	img, _, err := image.Decode(bytes.NewReader(fileBytes))
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to decode image")
+		return
+	}
+	bounds := img.Bounds()
+	width, height := bounds.Max.X, bounds.Max.Y
+
+	// Create response structure
+	response := struct {
+		Width     int   `json:"width"`
+		Height    int   `json:"height"`
+		PixelData []int `json:"pixelData"`
+	}{
+		Width:     width,
+		Height:    height,
+		PixelData: pixelData,
+	}
+
+	// Convert to JSON and send response
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create response")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(jsonResponse))
 }
 
 func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {

@@ -30,6 +30,7 @@ const PixelSelector = (props) => {
     } else {
       // TODO: Use lowest timer out of base, chain, faction, ...
       setPlacementTimer(props.basePixelTimer);
+      props.clearAll();
     }
     if (
       placementTimer === '0:00' &&
@@ -49,6 +50,93 @@ const PixelSelector = (props) => {
     placementTimer,
     placementMode
   ]);
+
+  const defendTemplate = async () => {
+    if (!props.templatePixels || !props.templatePixels.pixelData) return;
+    const availableCount = props.availablePixels - props.availablePixelsUsed;
+    if (props.availablePixels == 0) return;
+
+    const templateX = props.overlayTemplate.position % props.width;
+    const templateY = Math.floor(props.overlayTemplate.position / props.width);
+
+    const canvas = props.canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    const pixelsToPlace = [];
+    for (let i = 0; i < props.templatePixels.pixelData.length; i++) {
+      const colorId = props.templatePixels.pixelData[i];
+      if (colorId === 0xff) continue; // Skip transparent pixels
+
+      const pixelX = i % props.templatePixels.width;
+      const pixelY = Math.floor(i / props.templatePixels.width);
+      const canvasX = templateX + pixelX;
+      const canvasY = templateY + pixelY;
+
+      // Get current pixel color
+      const imageData = context.getImageData(canvasX, canvasY, 1, 1).data;
+      const currentColor = `${imageData[0]
+        .toString(16)
+        .padStart(2, '0')}${imageData[1]
+        .toString(16)
+        .padStart(2, '0')}${imageData[2].toString(16).padStart(2, '0')}`;
+
+      // Only add if different from template
+      if (currentColor.toLowerCase() !== props.colors[colorId].toLowerCase()) {
+        pixelsToPlace.push({
+          x: canvasX,
+          y: canvasY,
+          colorId: colorId
+        });
+      }
+    }
+
+    while (pixelsToPlace.length < availableCount) {
+      // Place random pixel in template
+      let idx = Math.floor(
+        Math.random() * props.templatePixels.pixelData.length
+      );
+      const randomX = idx % props.templatePixels.width;
+      const randomY = Math.floor(idx / props.templatePixels.width);
+      const colorId = props.templatePixels.pixelData[idx];
+      if (colorId === 0xff) continue; // Skip transparent pixels
+      const canvasX = templateX + randomX;
+      const canvasY = templateY + randomY;
+      pixelsToPlace.push({
+        x: canvasX,
+        y: canvasY,
+        colorId: colorId
+      });
+    }
+
+    // Randomly select pixels up to available amount
+    const shuffledPixels = pixelsToPlace.sort(() => Math.random() - 0.5);
+    const selectedPixels = shuffledPixels.slice(0, availableCount);
+
+    await props.addExtraPixels(selectedPixels);
+  };
+
+  useEffect(() => {
+    if (
+      props.isDefending &&
+      (placementTimer === 'Place Pixels' || placementTimer === 'Place Pixel')
+    ) {
+      defendTemplate();
+    }
+  }, [placementTimer, props.isDefending]);
+
+  useEffect(() => {
+    const submit = async () => {
+      if (
+        props.templatePixels &&
+        props.isDefending &&
+        props.availablePixels > 0 &&
+        props.totalPixelsUsed === props.availablePixels
+      ) {
+        await props.submit();
+      }
+    };
+    submit();
+  }, [props.totalPixelsUsed]);
 
   const toSelectorMode = (event) => {
     event.preventDefault();
@@ -191,6 +279,20 @@ const PixelSelector = (props) => {
           )}
         </div>
       )}
+      {props.queryAddress !== '0' &&
+        props.templatePixels.pixelData &&
+        props.templatePixels.pixelData.length > 0 && (
+          <div style={{ marginLeft: '1rem' }}>
+            <div
+              className='PixelSelector__defend Text__large Button__primary'
+              onClick={() => props.setIsDefending(!props.isDefending)}
+            >
+              <p className='PixelSelector__text'>
+                {props.isDefending ? 'Stop' : 'Defend'}
+              </p>
+            </div>
+          </div>
+        )}
     </div>
   );
 };

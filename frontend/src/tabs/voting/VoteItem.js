@@ -5,7 +5,9 @@ const VoteItem = (props) => {
   return (
     <div className='VoteItem'>
       <div
-        className={`Button__primary VoteItem__vote ${props.queryAddress === '0' ? 'Button__disabled' : ''}`}
+        className={`Button__primary VoteItem__vote ${
+          props.queryAddress === '0' ? 'Button__disabled' : ''
+        }`}
         onClick={() => props.castVote(props.index)}
       >
         {props.userVote === props.index && (

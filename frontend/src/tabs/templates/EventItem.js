@@ -42,7 +42,9 @@ const EventItem = (props) => {
     <div
       className='EventItem'
       style={{
-        background: `linear-gradient(to bottom right, hsla(${color}, 100%, 50%, 30%), hsla(${(color + btrColorOffset) % 360}, 100%, 50%, 30%)`
+        background: `linear-gradient(to bottom right, hsla(${color}, 100%, 50%, 30%), hsla(${
+          (color + btrColorOffset) % 360
+        }, 100%, 50%, 30%)`
       }}
     >
       <div style={{ position: 'relative' }}>

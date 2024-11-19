@@ -11,7 +11,9 @@ const SelectedPixelPanel = (props) => {
     } else {
       if (props.pixelPlacedBy.length >= 64) {
         setShortPixelPlacedBy(
-          `${props.pixelPlacedBy.slice(0, 6)}...${props.pixelPlacedBy.slice(-4)}`
+          `${props.pixelPlacedBy.slice(0, 6)}...${props.pixelPlacedBy.slice(
+            -4
+          )}`
         );
       } else {
         setShortPixelPlacedBy(props.pixelPlacedBy);
