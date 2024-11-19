@@ -253,7 +253,11 @@ const QuestItem = (props) => {
             <div
               className='QuestItem__button__progression'
               style={{
-                width: `${percentCompletion === 0 || props.status === 'completed' ? 100 : percentCompletion}%`,
+                width: `${
+                  percentCompletion === 0 || props.status === 'completed'
+                    ? 100
+                    : percentCompletion
+                }%`,
                 backgroundColor: progressionColor
               }}
             ></div>

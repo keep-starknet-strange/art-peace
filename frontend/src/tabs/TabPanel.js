@@ -42,6 +42,8 @@ const TabPanel = (props) => {
         appear
       >
         <ExtraPixelsPanel
+          clearAll={props.clearAll}
+          submit={props.submit}
           colorPixel={props.colorPixel}
           address={props.address}
           account={props.account}

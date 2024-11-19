@@ -189,7 +189,9 @@ const NFTMintingPanel = (props) => {
               Cancel
             </div>
             <div
-              className={`Button__primary NFTMintingPanel__button ${!isValidName ? 'Button__disabled' : ''}`}
+              className={`Button__primary NFTMintingPanel__button ${
+                !isValidName ? 'Button__disabled' : ''
+              }`}
               onClick={() => submit()}
             >
               Submit

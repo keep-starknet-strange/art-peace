@@ -26,7 +26,9 @@ const NFTsMainSection = (props) => {
         <div className='NFTs__buttons'>
           {!props.gameEnded && props.queryAddress !== '0' && (
             <div
-              className={`Button__primary Text__small ${props.nftMintingMode ? 'NFTs__button--selected' : ''}`}
+              className={`Button__primary Text__small ${
+                props.nftMintingMode ? 'NFTs__button--selected' : ''
+              }`}
               onClick={() => {
                 props.setNftMintingMode(true);
                 props.setActiveTab('Canvas');
@@ -102,7 +104,9 @@ const NFTsExpandedSection = (props) => {
             return (
               <div
                 key={index}
-                className={`NFTs__button NFTs__filter ${props.activeFilter === filter ? 'NFTs__button--selected' : ''}`}
+                className={`NFTs__button NFTs__filter ${
+                  props.activeFilter === filter ? 'NFTs__button--selected' : ''
+                }`}
                 onClick={() => props.setActiveFilter(filter)}
               >
                 {filter}

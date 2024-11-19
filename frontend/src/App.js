@@ -304,18 +304,12 @@ function App() {
 
   useEffect(() => {
     const updateBasePixelTimer = () => {
-      if (!lastPlacedTime) {
-        setBasePixelUp(true);
-        setBasePixelTimer('Place Pixel');
-        return;
-      }
-
       let timeSinceLastPlacement = Date.now() - lastPlacedTime;
       let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
 
       if (basePixelAvailable) {
         setBasePixelUp(true);
-        setBasePixelTimer('Place Pixel');
+        setBasePixelTimer('00:00');
         clearInterval(interval);
       } else {
         let secondsTillPlacement = Math.floor(
@@ -335,7 +329,7 @@ function App() {
     updateBasePixelTimer(); // Call immediately
 
     return () => clearInterval(interval);
-  }, [lastPlacedTime, timeBetweenPlacements]);
+  }, [lastPlacedTime]);
 
   const [chainFactionPixelTimers, setChainFactionPixelTimers] = useState([]);
   useEffect(() => {
@@ -361,7 +355,9 @@ function App() {
             (timeBetweenPlacements - timeSinceLastPlacement) / 1000
           );
           newChainFactionPixelTimers.push(
-            `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
+            `${Math.floor(secondsTillPlacement / 60)}:${
+              secondsTillPlacement % 60 < 10 ? '0' : ''
+            }${secondsTillPlacement % 60}`
           );
           newChainFactionPixels.push(0);
         }
@@ -400,7 +396,9 @@ function App() {
             (timeBetweenPlacements - timeSinceLastPlacement) / 1000
           );
           newFactionPixelTimers.push(
-            `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
+            `${Math.floor(secondsTillPlacement / 60)}:${
+              secondsTillPlacement % 60 < 10 ? '0' : ''
+            }${secondsTillPlacement % 60}`
           );
           newFactionPixels.push(0);
         }
@@ -487,9 +485,11 @@ function App() {
 
   const clearExtraPixels = useCallback(() => {
     setAvailablePixelsUsed(0);
+    setTotalPixelsUsed(0);
     setExtraPixelsData([]);
 
     const canvas = extraPixelsCanvasRef.current;
+    if (!canvas) return;
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, width, height);
   }, [width, height]);
@@ -509,57 +509,258 @@ function App() {
   );
 
   const addExtraPixel = useCallback(
-    (data, y, colorId) => {
-      // If all parameters are provided, it's a single pixel click
-      if (y !== undefined) {
-        const x = data; // In this case, first parameter is x
-        const existingPixelIndex = extraPixelsData.findIndex(
-          (pixel) => pixel.x === x && pixel.y === y
-        );
-
-        if (existingPixelIndex !== -1) {
-          let newExtraPixelsData = [...extraPixelsData];
-          newExtraPixelsData[existingPixelIndex].colorId =
-            colorId || selectedColorId;
-          setExtraPixelsData(newExtraPixelsData);
-        } else {
-          setAvailablePixelsUsed(availablePixelsUsed + 1);
-          setExtraPixelsData([
-            ...extraPixelsData,
-            { x, y, colorId: colorId || selectedColorId }
-          ]);
-        }
-        return;
+    (x, y) => {
+      // Overwrite pixel if already placed
+      const existingPixelIndex = extraPixelsData.findIndex(
+        (pixel) => pixel.x === x && pixel.y === y
+      );
+      if (existingPixelIndex !== -1) {
+        let newExtraPixelsData = [...extraPixelsData];
+        newExtraPixelsData[existingPixelIndex].colorId = selectedColorId;
+        setExtraPixelsData(newExtraPixelsData);
+      } else {
+        setAvailablePixelsUsed(availablePixelsUsed + 1);
+        setExtraPixelsData([
+          ...extraPixelsData,
+          { x: x, y: y, colorId: selectedColorId }
+        ]);
       }
-
-      // If only one parameter is provided, treat it as an array of pixels
-      const pixelsArray = Array.isArray(data) ? data : [data];
-      let newExtraPixelsData = [...extraPixelsData];
-      let newPixelsAdded = 0;
-
-      pixelsArray.forEach((pixel) => {
-        const existingPixelIndex = newExtraPixelsData.findIndex(
-          (p) => p.x === pixel.x && p.y === pixel.y
-        );
-
-        if (existingPixelIndex !== -1) {
-          newExtraPixelsData[existingPixelIndex].colorId =
-            pixel.colorId || selectedColorId;
-        } else {
-          newExtraPixelsData.push({
-            x: pixel.x,
-            y: pixel.y,
-            colorId: pixel.colorId || selectedColorId
-          });
-          newPixelsAdded++;
-        }
-      });
-
-      setExtraPixelsData(newExtraPixelsData);
-      setAvailablePixelsUsed((prevUsed) => prevUsed + newPixelsAdded);
     },
     [extraPixelsData, availablePixelsUsed, selectedColorId]
   );
+
+  const addExtraPixels = async (pixels) => {
+    const available = availablePixels - availablePixelsUsed;
+    if (available < pixels.length) {
+      setNotificationMessage('Not enough available pixels');
+      return;
+    }
+    setAvailablePixelsUsed(availablePixelsUsed + pixels.length);
+    setExtraPixelsData([...extraPixelsData, ...pixels]);
+  };
+
+  const extraPixelPlaceCall = async (positions, colors, now) => {
+    if (devnetMode) return;
+    if (!address || !artPeaceContract || !account) return;
+    // TODO: Validate inputs
+    const placeExtraPixelsCallData = artPeaceContract.populate(
+      'place_extra_pixels',
+      {
+        positions: positions,
+        colors: colors,
+        now: now
+      }
+    );
+    const { suggestedMaxFee } = await estimateInvokeFee({
+      contractAddress: artPeaceContract.address,
+      entrypoint: 'place_extra_pixels',
+      calldata: placeExtraPixelsCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await artPeaceContract.place_extra_pixels(
+      placeExtraPixelsCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
+  };
+
+  const [basePixelUsed, setBasePixelUsed] = React.useState(false);
+  const [totalChainFactionPixels, setTotalChainFactionPixels] =
+    React.useState(0);
+  const [totalFactionPixels, setTotalFactionPixels] = React.useState(0);
+  const [chainFactionPixelsUsed, setChainFactionPixelsUsed] = React.useState(0);
+  const [factionPixelsUsed, setFactionPixelsUsed] = React.useState(0);
+  const [extraPixelsUsed, setExtraPixelsUsed] = React.useState(0);
+  const [totalPixelsUsed, setTotalPixelsUsed] = React.useState(0);
+  React.useEffect(() => {
+    let pixelsUsed = availablePixelsUsed;
+    if (basePixelUp) {
+      if (pixelsUsed > 0) {
+        setBasePixelUsed(true);
+        pixelsUsed--;
+      } else {
+        setBasePixelUsed(false);
+      }
+    }
+    let allChainFactionPixels = 0;
+    for (let i = 0; i < chainFactionPixels.length; i++) {
+      allChainFactionPixels += chainFactionPixels[i];
+    }
+    setTotalChainFactionPixels(allChainFactionPixels);
+    let allFactionPixels = 0;
+    for (let i = 0; i < factionPixels.length; i++) {
+      allFactionPixels += factionPixels[i];
+    }
+    setTotalFactionPixels(allFactionPixels);
+    if (allChainFactionPixels > 0) {
+      let chainFactionsPixelsUsed = Math.min(
+        pixelsUsed,
+        totalChainFactionPixels
+      );
+      setChainFactionPixelsUsed(chainFactionsPixelsUsed);
+      pixelsUsed -= chainFactionsPixelsUsed;
+    }
+    if (allFactionPixels > 0) {
+      let factionsPixelsUsed = Math.min(pixelsUsed, totalFactionPixels);
+      setFactionPixelsUsed(factionsPixelsUsed);
+      pixelsUsed -= factionsPixelsUsed;
+    }
+    if (extraPixels > 0) {
+      let extraPixelsUsed = Math.min(pixelsUsed, extraPixels);
+      setExtraPixelsUsed(extraPixelsUsed);
+      pixelsUsed -= extraPixelsUsed;
+    }
+    setTotalPixelsUsed(availablePixelsUsed - pixelsUsed);
+  }, [availablePixels, availablePixelsUsed]);
+
+  const clearAll = () => {
+    clearExtraPixels();
+    setSelectedColorId(-1);
+  };
+
+  // TODO: Is rounding down the time always okay?
+  const submit = async () => {
+    let timestamp = Math.floor(Date.now() / 1000);
+    if (!devnetMode) {
+      await extraPixelPlaceCall(
+        extraPixelsData.map(
+          (pixel) => pixel.x + pixel.y * canvasConfig.canvas.width
+        ),
+        extraPixelsData.map((pixel) => pixel.colorId),
+        timestamp
+      );
+    } else {
+      let placeExtraPixelsEndpoint = 'place-extra-pixels-devnet';
+      const response = await fetchWrapper(placeExtraPixelsEndpoint, {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          extraPixels: extraPixelsData.map((pixel) => ({
+            position: pixel.x + pixel.y * canvasConfig.canvas.width,
+            colorId: pixel.colorId
+          })),
+          timestamp: timestamp
+        })
+      });
+      if (response.result) {
+        console.log(response.result);
+      }
+    }
+    for (let i = 0; i < extraPixelsData.length; i++) {
+      let position =
+        extraPixelsData[i].x + extraPixelsData[i].y * canvasConfig.canvas.width;
+      colorPixel(position, extraPixelsData[i].colorId);
+    }
+    if (basePixelUsed) {
+      setLastPlacedTime(timestamp * 1000);
+    }
+    if (chainFactionPixelsUsed > 0) {
+      let chainFactionIndex = 0;
+      let chainFactionUsedCounter = 0;
+      let newChainFactionPixels = [];
+      let newChainFactionPixelsData = [];
+      while (chainFactionIndex < chainFactionPixels.length) {
+        if (chainFactionUsedCounter >= chainFactionPixelsUsed) {
+          newChainFactionPixels.push(chainFactionPixels[chainFactionIndex]);
+          newChainFactionPixelsData.push(
+            chainFactionPixelsData[chainFactionIndex]
+          );
+          chainFactionIndex++;
+          continue;
+        }
+        let currChainFactionPixelsUsed = Math.min(
+          chainFactionPixelsUsed - chainFactionUsedCounter,
+          chainFactionPixels[chainFactionIndex]
+        );
+        if (currChainFactionPixelsUsed <= 0) {
+          newChainFactionPixels.push(chainFactionPixels[chainFactionIndex]);
+          newChainFactionPixelsData.push(
+            chainFactionPixelsData[chainFactionIndex]
+          );
+          chainFactionIndex++;
+          continue;
+        }
+        if (
+          currChainFactionPixelsUsed === chainFactionPixels[chainFactionIndex]
+        ) {
+          newChainFactionPixels.push(0);
+          let newChainFactionData = chainFactionPixelsData[chainFactionIndex];
+          newChainFactionData.lastPlacedTime = timestamp * 1000;
+          newChainFactionData.memberPixels = 0;
+          newChainFactionPixelsData.push(newChainFactionData);
+        } else {
+          newChainFactionPixels.push(
+            chainFactionPixels[chainFactionIndex] - currChainFactionPixelsUsed
+          );
+          let newChainFactionData = chainFactionPixelsData[chainFactionIndex];
+          newChainFactionData.memberPixels =
+            chainFactionPixels[chainFactionIndex] - currChainFactionPixelsUsed;
+          newChainFactionPixelsData.push(newChainFactionData);
+        }
+        chainFactionUsedCounter += currChainFactionPixelsUsed;
+        chainFactionIndex++;
+      }
+      setChainFactionPixels(newChainFactionPixels);
+      setChainFactionPixelsData(newChainFactionPixelsData);
+    }
+
+    // TODO: Click faction pixels button to expand out info here
+    if (factionPixelsUsed > 0) {
+      // TODO: Will order always be the same?
+      let factionIndex = 0;
+      let factionUsedCounter = 0;
+      let newFactionPixels = [];
+      let newFactionPixelsData = [];
+      while (factionIndex < factionPixels.length) {
+        if (factionUsedCounter >= factionPixelsUsed) {
+          newFactionPixels.push(factionPixels[factionIndex]);
+          newFactionPixelsData.push(factionPixelsData[factionIndex]);
+          factionIndex++;
+          continue;
+        }
+        let currFactionPixelsUsed = Math.min(
+          factionPixelsUsed - factionUsedCounter,
+          factionPixels[factionIndex]
+        );
+        if (currFactionPixelsUsed <= 0) {
+          newFactionPixels.push(factionPixels[factionIndex]);
+          newFactionPixelsData.push(factionPixelsData[factionIndex]);
+          factionIndex++;
+          continue;
+        }
+        if (currFactionPixelsUsed === factionPixels[factionIndex]) {
+          newFactionPixels.push(0);
+          let newFactionData = factionPixelsData[factionIndex];
+          newFactionData.lastPlacedTime = timestamp * 1000;
+          newFactionData.memberPixels = 0;
+          newFactionPixelsData.push(newFactionData);
+        } else {
+          newFactionPixels.push(
+            factionPixels[factionIndex] - currFactionPixelsUsed
+          );
+          let newFactionData = factionPixelsData[factionIndex];
+          newFactionData.memberPixels =
+            factionPixels[factionIndex] - currFactionPixelsUsed;
+          newFactionPixelsData.push(newFactionData);
+        }
+        factionUsedCounter += currFactionPixelsUsed;
+        factionIndex++;
+      }
+      setFactionPixels(newFactionPixels);
+      setFactionPixelsData(newFactionPixelsData);
+    }
+    if (extraPixelsUsed > 0) {
+      let newExtraPixels = extraPixels - extraPixelsUsed;
+      setExtraPixels(newExtraPixels);
+    }
+    clearAll();
+    setIsEraserMode(false);
+    setSelectorMode(false);
+    clearPixelSelection();
+  };
 
   // Factions
   const [chainFaction, setChainFaction] = useState(null);
@@ -625,7 +826,6 @@ function App() {
       return { suggestedMaxFee };
     } catch (error) {
       console.error(error);
-      /* global BigInt */
       return { suggestedMaxFee: BigInt(1000000000000000) };
     }
   };
@@ -800,7 +1000,6 @@ function App() {
 
   useEffect(() => {
     const getTemplatePixelData = async (hash) => {
-      console.log(hash);
       if (hash !== null) {
         const response = await fetchWrapper(
           `get-template-pixel-data?hash=${hash}`
@@ -819,6 +1018,8 @@ function App() {
           console.error('Error fetching template pixels:', error);
           setTemplatePixels([]);
         });
+    } else {
+      setTemplatePixels([]);
     }
   }, [overlayTemplate]);
 
@@ -884,7 +1085,9 @@ function App() {
           <img
             src={logo}
             alt='logo'
-            className={`App__logo--mobile ${loadingRequest ? 'App__logo--rotating' : ''}`}
+            className={`App__logo--mobile ${
+              loadingRequest ? 'App__logo--rotating' : ''
+            }`}
           />
         )}
         <div
@@ -901,6 +1104,8 @@ function App() {
             queryAddress={queryAddress}
             account={account}
             usingSessionKeys={usingSessionKeys}
+            submit={submit}
+            clearAll={clearAll}
             // chain={chain}
             setConnected={setConnected}
             artPeaceContract={artPeaceContract}
@@ -998,13 +1203,21 @@ function App() {
             style={{
               width: '100%',
               display: 'flex',
-              justifyContent: `${footerExpanded && isFooterSplit ? 'space-between' : 'center'}`,
-              alignItems: `${footerExpanded && isFooterSplit ? 'flex-end' : 'center'}`
+              justifyContent: `${
+                footerExpanded && isFooterSplit ? 'space-between' : 'center'
+              }`,
+              alignItems: `${
+                footerExpanded && isFooterSplit ? 'flex-end' : 'center'
+              }`
             }}
           >
             {!gameEnded && (
               <PixelSelector
                 colors={colors}
+                submit={submit}
+                clearAll={clearAll}
+                totalPixelsUsed={totalPixelsUsed}
+                setTotalPixelsUsed={setTotalPixelsUsed}
                 selectedColorId={selectedColorId}
                 setSelectedColorId={setSelectedColorId}
                 getDeviceTypeInfo={getDeviceTypeInfo}
@@ -1029,12 +1242,10 @@ function App() {
                 width={canvasConfig.canvas.width}
                 canvasRef={canvasRef}
                 addExtraPixel={addExtraPixel}
+                addExtraPixels={addExtraPixels}
                 setLastPlacedTime={setLastPlacedTime}
                 isDefending={isDefending}
                 setIsDefending={setIsDefending}
-                basePixelAvailable={
-                  Date.now() - lastPlacedTime > timeBetweenPlacements
-                }
               />
             )}
             {isFooterSplit && !footerExpanded && (

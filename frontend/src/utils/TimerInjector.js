@@ -106,7 +106,11 @@ export const TimerInjector = ({ children, props, isLastDay, endTimestamp }) => {
       const minutesFinal = Math.floor((difference / 1000 / 60) % 60);
       const secondsFinal = Math.floor((difference / 1000) % 60);
 
-      const formattedTimeLeft = `${hoursFinal.toString().padStart(2, '0')}:${minutesFinal.toString().padStart(2, '0')}:${secondsFinal.toString().padStart(2, '0')}`;
+      const formattedTimeLeft = `${hoursFinal
+        .toString()
+        .padStart(2, '0')}:${minutesFinal
+        .toString()
+        .padStart(2, '0')}:${secondsFinal.toString().padStart(2, '0')}`;
       setTimeLeftInDay(formattedTimeLeft);
     };
     calculateTimeLeft();

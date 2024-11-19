@@ -1,6 +1,10 @@
 .PixelSelector {
   margin: 1rem;
   padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 .PixelSelector__button--valid:active {
