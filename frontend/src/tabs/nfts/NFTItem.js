@@ -145,6 +145,27 @@ const NFTItem = (props) => {
   }, [props.minter]);
 
   const [showInfo, setShowInfo] = React.useState(false);
+  const handleNftClick = (e) => {
+    if (
+      e.target.classList.contains('NFTItem__button') ||
+      e.target.classList.contains('Like__icon') ||
+      e.target.classList.contains('Share__icon')
+    ) {
+      return;
+    }
+    // Format NFT data to match template structure
+    const nftTemplate = {
+      position: props.position,
+      width: props.width,
+      height: props.height,
+      image: props.image,
+      isNft: true, // Add flag to identify as NFT
+      tokenId: props.tokenId
+    };
+    props.setTemplateOverlayMode(true);
+    props.setOverlayTemplate(nftTemplate);
+    props.setActiveTab('Canvas');
+  };
   return (
     <div className='NFTItem'>
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -153,6 +174,7 @@ const NFTItem = (props) => {
             src={props.image}
             alt={`nft-image-${props.tokenId}`}
             className='NFTItem__image'
+            onClick={handleNftClick}
           />
           <p className='Text__xsmall NFTItem__name'>{props.name}</p>
           <div className='NFTItem__overlay'>

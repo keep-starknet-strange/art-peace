@@ -77,6 +77,9 @@ const NFTsMainSection = (props) => {
               minter={nft.minter}
               queryAddress={props.queryAddress}
               updateLikes={props.updateLikes}
+              setTemplateOverlayMode={props.setTemplateOverlayMode}
+              setOverlayTemplate={props.setOverlayTemplate}
+              setActiveTab={props.setActiveTab}
             />
           );
         })}
@@ -140,6 +143,9 @@ const NFTsExpandedSection = (props) => {
                 minter={nft.minter}
                 queryAddress={props.queryAddress}
                 updateLikes={props.updateLikes}
+                setTemplateOverlayMode={props.setTemplateOverlayMode}
+                setOverlayTemplate={props.setOverlayTemplate}
+                setActiveTab={props.setActiveTab}
               />
             );
           })}
@@ -334,6 +340,8 @@ const NFTs = (props) => {
       filters={filters}
       isMobile={props.isMobile}
       gameEnded={props.gameEnded}
+      setTemplateOverlayMode={props.setTemplateOverlayMode}
+      setOverlayTemplate={props.setOverlayTemplate}
     />
   );
 };

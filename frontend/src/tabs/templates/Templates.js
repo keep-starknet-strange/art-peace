@@ -460,6 +460,8 @@ const Templates = (props) => {
       setTemplateColorIds={props.setTemplateColorIds}
       availableTemplates={availableTemplates}
       setActiveTab={props.setActiveTab}
+      setTemplateOverlayMode={props.setTemplateOverlayMode}
+      setOverlayTemplate={props.setOverlayTemplate}
     />
   );
 };

@@ -246,6 +246,8 @@ const TabPanel = (props) => {
                   setTemplateImage={props.setTemplateImage}
                   setTemplateColorIds={props.setTemplateColorIds}
                   setActiveTab={props.setActiveTab}
+                  setTemplateOverlayMode={props.setTemplateOverlayMode}
+                  setOverlayTemplate={props.setOverlayTemplate}
                 />
               </div>
             )}
@@ -265,6 +267,8 @@ const TabPanel = (props) => {
                   queryAddress={props.queryAddress}
                   isMobile={props.isMobile}
                   gameEnded={props.gameEnded}
+                  setTemplateOverlayMode={props.setTemplateOverlayMode}
+                  setOverlayTemplate={props.setOverlayTemplate}
                 />
               </div>
             )}
