@@ -91,9 +91,9 @@ const TemplatesMainSection = (props) => {
           );
           return;
         }
-        if (height > 64 || width > 64) {
+        if (height > 256 || width > 256) {
           alert(
-            'Image is too large, maximum size is 64x64. Given size is ' +
+            'Image is too large, maximum size is 256x256. Given size is ' +
               width +
               'x' +
               height
