@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -19,6 +22,7 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-new-nfts", getNewNFTs)
 	http.HandleFunc("/get-my-nfts", getMyNFTs)
 	http.HandleFunc("/get-nft-likes", getNftLikeCount)
+	http.HandleFunc("/get-nft-pixel-data", getNftPixelData)
 	// http.HandleFunc("/like-nft", LikeNFT)
 	// http.HandleFunc("/unlike-nft", UnLikeNFT)
 	http.HandleFunc("/get-top-nfts", getTopNFTs)
@@ -218,6 +222,123 @@ func getNewNFTs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	routeutils.WriteDataJson(w, string(nfts))
+}
+
+func getNftPixelData(w http.ResponseWriter, r *http.Request) {
+	tokenId := r.URL.Query().Get("tokenId")
+	if tokenId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "TokenId parameter is required")
+		return
+	}
+
+	// First get the NFT data to access the imageHash
+	nft, err := core.PostgresQueryOneJson[NFTData]("SELECT * FROM nfts WHERE token_id = $1", tokenId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusNotFound, "NFT not found")
+		return
+	}
+
+	var nftData NFTData
+	if err := json.Unmarshal([]byte(nft), &nftData); err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to parse NFT data")
+		return
+	}
+
+	// Get round number from environment
+	roundNumber := os.Getenv("ROUND_NUMBER")
+	if roundNumber == "" {
+		roundNumber = "1" // Default to round 1 if not set
+	}
+
+	// Try to read from file first
+	filename := fmt.Sprintf("./nfts/round-%s/images/nft-%s.png", roundNumber, tokenId)
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		filename = fmt.Sprintf("nfts/round-%s/images/nft-%s.png", roundNumber, tokenId)
+		fileBytes, err = os.ReadFile(filename)
+		if err != nil {
+			// If file not found, try to get pixel data from canvas using imageHash
+			ctx := context.Background()
+			canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
+			if err != nil {
+				routeutils.WriteErrorJson(w, http.StatusNotFound, "NFT image not found and canvas data unavailable")
+				return
+			}
+
+			// Create response using NFT dimensions from database
+			response := struct {
+				Width     int   `json:"width"`
+				Height    int   `json:"height"`
+				PixelData []int `json:"pixelData"`
+			}{
+				Width:     nftData.Width,
+				Height:    nftData.Height,
+				PixelData: make([]int, nftData.Width*nftData.Height),
+			}
+
+			// Extract pixel data from canvas using position and dimensions
+			bitWidth := core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+			canvasWidth := int(core.ArtPeaceBackend.CanvasConfig.Canvas.Width)
+
+			for y := 0; y < nftData.Height; y++ {
+				for x := 0; x < nftData.Width; x++ {
+					pos := nftData.Position + x + (y * canvasWidth)
+					bitPos := uint(pos) * bitWidth
+					bytePos := int(bitPos / 8)    // Convert to int here
+					bitOffset := uint(bitPos % 8) // Keep as uint for bit operations
+
+					if bytePos >= len(canvas) {
+						continue
+					}
+
+					var colorIdx int
+					if bitOffset <= 3 { // Single byte case
+						colorIdx = int((canvas[bytePos] >> (8 - bitWidth - bitOffset)) & ((1 << bitWidth) - 1))
+					} else { // Two byte case
+						if bytePos+1 >= len(canvas) {
+							continue
+						}
+						colorIdx = int(((uint16(canvas[bytePos])<<8)|uint16(canvas[bytePos+1]))>>(16-bitWidth-bitOffset)) & ((1 << bitWidth) - 1)
+					}
+					response.PixelData[x+y*nftData.Width] = colorIdx
+				}
+			}
+
+			jsonResponse, err := json.Marshal(response)
+			if err != nil {
+				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create response")
+				return
+			}
+
+			routeutils.WriteDataJson(w, string(jsonResponse))
+			return
+		}
+	}
+
+	// If we have the file, process it normally
+	pixelData, err := imageToPixelData(fileBytes)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
+		return
+	}
+
+	response := struct {
+		Width     int   `json:"width"`
+		Height    int   `json:"height"`
+		PixelData []int `json:"pixelData"`
+	}{
+		Width:     nftData.Width,
+		Height:    nftData.Height,
+		PixelData: pixelData,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create response")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(jsonResponse))
 }
 
 func mintNFTDevnet(w http.ResponseWriter, r *http.Request) {

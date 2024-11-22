@@ -170,6 +170,8 @@ const PixelSelector = (props) => {
     setEnded(false);
   };
 
+  console.log(props.templatePixels.pixelData);
+
   return (
     <div className='PixelSelector'>
       {(props.selectorMode || ended) && (

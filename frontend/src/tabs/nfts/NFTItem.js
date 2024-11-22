@@ -159,7 +159,7 @@ const NFTItem = (props) => {
       width: props.width,
       height: props.height,
       image: props.image,
-      isNft: true, // Add flag to identify as NFT
+      isNft: true,
       tokenId: props.tokenId
     };
     props.setTemplateOverlayMode(true);
