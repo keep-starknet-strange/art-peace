@@ -13,6 +13,18 @@ export const nftUrl = backendConfig.production
   ? 'https://' + backendConfig.host
   : 'http://' + backendConfig.host + ':' + backendConfig.consumer_port;
 
+export const worldImgUrl = backendConfig.production
+  ? 'https://' + backendConfig.host + '/worlds/images/'
+  : 'http://' +
+    backendConfig.host +
+    ':' +
+    backendConfig.consumer_port +
+    '/worlds/images/';
+
+export const worldUrl = backendConfig.production
+  ? 'https://' + backendConfig.host
+  : 'http://' + backendConfig.host + ':' + backendConfig.port;
+
 export const templateUrl = backendConfig.production
   ? 'https://' + backendConfig.host
   : 'http://' + backendConfig.host + ':' + backendConfig.port;

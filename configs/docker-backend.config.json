@@ -18,7 +18,10 @@
     "join_faction_devnet": "/scripts/join_faction.sh",
     "leave_faction_devnet": "/scripts/leave_faction.sh",
     "add_faction_template_devnet": "/scripts/add_faction_template.sh",
-    "remove_faction_template_devnet": "/scripts/remove_faction_template.sh"
+    "remove_faction_template_devnet": "/scripts/remove_faction_template.sh",
+    "create_canvas_devnet": "/scripts/create_canvas.sh",
+    "favorite_world_devnet": "../tests/integration/local/favorite_world.sh",
+    "unfavorite_world_devnet": "../tests/integration/local/unfavorite_world.sh"
   },
   "production": false,
   "websocket": {

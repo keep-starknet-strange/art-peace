@@ -25,4 +25,5 @@ func InitRoutes() {
 	InitQuestsRoutes()
 	InitColorsRoutes()
 	InitVotableColorsRoutes()
+	InitWorldsRoutes()
 }

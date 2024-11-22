@@ -38,7 +38,15 @@ import Hamburger from './resources/icons/Hamburger.png';
 function App() {
   // Window management
   usePreventZoom();
-  const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
+  const tabs = [
+    'Canvas',
+    'Factions',
+    'NFTs',
+    'Quests',
+    'Vote',
+    'Worlds',
+    'Account'
+  ];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   useLockScroll(activeTab === 'Canvas');
 
@@ -566,6 +574,9 @@ function App() {
   const [nftWidth, setNftWidth] = useState(null);
   const [nftHeight, setNftHeight] = useState(null);
 
+  // Worlds
+  const [worldsCreationMode, setWorldsCreationMode] = useState(false);
+
   const [loadingRequest, _setLoadingRequest] = useState(false);
   const estimateInvokeFee = async ({
     contractAddress,
@@ -845,6 +856,8 @@ function App() {
             isMobile={isMobile}
             templateOverlayMode={templateOverlayMode}
             setTemplateOverlayMode={setTemplateOverlayMode}
+            worldsCreationMode={worldsCreationMode}
+            setWorldsCreationMode={setWorldsCreationMode}
             overlayTemplate={overlayTemplate}
             setOverlayTemplate={setOverlayTemplate}
             templateFaction={templateFaction}

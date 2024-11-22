@@ -82,6 +82,14 @@ const (
 	chainFactionTemplateAddedEvent   = "0x00476f35ea27024c89c1fc05dfad873e9e93419e452ee781e8207e435289a39b"
 	chainFactionTemplateRemovedEvent = "0x0126718de7cb8b83dfa258eb095bc0ec7a3ef5a2258ebd1ed349551764856c6b"
 	hostAwardedPixelsEvent           = "0x03cab98018a5e38e0cf717d8bed481983eb400f6a1d9ccd34f87050c0f36a32a"
+	canvasCreatedEvent               = "0x0003fddf2e955d6c8fbd5ec6e98da32f7e9ebe7731b86b4ef7de342b165222e0"
+	canvasHostChangedEvent           = "0x00569981649f1a25a7a012ccf216e9c0f807068f8ba4689ee58c2d55df22cc45"
+	canvasTimerChangedEvent          = "0x02e1eccce24e49cc4ab3df0795f173bbe667dd4fddbc52c8af731b4e2ad78cf5"
+	canvasColorAddedEvent            = "0x03e856f8abfe58c8841f552ce76651ebff20c1550d167b3a18b049b7552fe8a2"
+	canvasPixelPlacedEvent           = "0x02adf9f56e1f4e16a3e116f34424bd26cb5fc45363498015b4c007835318f7bb"
+	canvasBasicPixelPlacedEvent      = "0x03066baa9c37a42082799e6bc6426ff7d4dc8a635ed9dfc444d0d3c51e605a6b"
+	canvasExtraPixelsPlacedEvent     = "0x01e42e4d6ca5843bfd4e86e344db6c418b295c23bed38831a7ec9b4a83148830"
+	canvasHostAwardedUserEvent       = "0x01bf6ede8c6c232cee1830a5227fd638383f5af669701289d113492b1d41fda5"
 )
 
 var eventProcessors = map[string](func(IndexerEvent)){
@@ -113,6 +121,14 @@ var eventProcessors = map[string](func(IndexerEvent)){
 	chainFactionTemplateAddedEvent:   processChainFactionTemplateAddedEvent,
 	chainFactionTemplateRemovedEvent: processChainFactionTemplateRemovedEvent,
 	hostAwardedPixelsEvent:           processHostAwardedPixelsEvent,
+	canvasCreatedEvent:               processCanvasCreatedEvent,
+	canvasHostChangedEvent:           processCanvasHostChangedEvent,
+	canvasTimerChangedEvent:          processCanvasTimerChangedEvent,
+	canvasColorAddedEvent:            processCanvasColorAddedEvent,
+	canvasPixelPlacedEvent:           processCanvasPixelPlacedEvent,
+	canvasBasicPixelPlacedEvent:      processCanvasBasicPixelPlacedEvent,
+	canvasExtraPixelsPlacedEvent:     processCanvasExtraPixelsPlacedEvent,
+	canvasHostAwardedUserEvent:       processCanvasHostAwardedUserEvent,
 }
 
 var eventReverters = map[string](func(IndexerEvent)){
@@ -144,18 +160,27 @@ var eventReverters = map[string](func(IndexerEvent)){
 	chainFactionTemplateAddedEvent:   revertChainFactionTemplateAddedEvent,
 	chainFactionTemplateRemovedEvent: revertChainFactionTemplateRemovedEvent,
 	hostAwardedPixelsEvent:           revertHostAwardedPixelsEvent,
+	canvasCreatedEvent:               revertCanvasCreatedEvent,
+	canvasHostChangedEvent:           revertCanvasHostChangedEvent,
+	canvasTimerChangedEvent:          revertCanvasTimerChangedEvent,
+	canvasColorAddedEvent:            revertCanvasColorAddedEvent,
+	canvasPixelPlacedEvent:           revertCanvasPixelPlacedEvent,
+	canvasBasicPixelPlacedEvent:      revertCanvasBasicPixelPlacedEvent,
+	canvasExtraPixelsPlacedEvent:     revertCanvasExtraPixelsPlacedEvent,
+	canvasHostAwardedUserEvent:       revertCanvasHostAwardedUserEvent,
 }
 
+// TODO: Rethink this ( & look at values before multicanvas PR )
 var eventRequiresOrdering = map[string]bool{
-	newDayEvent:                      false,
+	newDayEvent:                      true,
 	colorAddedEvent:                  true,
 	pixelPlacedEvent:                 true,
-	basicPixelPlacedEvent:            false,
-	factionPixelsPlacedEvent:         false,
-	chainFactionPixelsPlacedEvent:    false,
-	extraPixelsPlacedEvent:           false,
-	dailyQuestClaimedEvent:           false,
-	mainQuestClaimedEvent:            false,
+	basicPixelPlacedEvent:            true,
+	factionPixelsPlacedEvent:         true,
+	chainFactionPixelsPlacedEvent:    true,
+	extraPixelsPlacedEvent:           true,
+	dailyQuestClaimedEvent:           true,
+	mainQuestClaimedEvent:            true,
 	voteColorEvent:                   true,
 	votableColorAddedEvent:           true,
 	factionCreatedEvent:              true,
@@ -164,17 +189,25 @@ var eventRequiresOrdering = map[string]bool{
 	factionLeftEvent:                 true,
 	chainFactionCreatedEvent:         true,
 	chainFactionJoinedEvent:          true,
-	nftMintedEvent:                   false,
+	nftMintedEvent:                   true,
 	nftLikedEvent:                    true,
 	nftUnlikedEvent:                  true,
-	usernameClaimedEvent:             false,
+	usernameClaimedEvent:             true,
 	usernameChangedEvent:             true,
 	nftTransferEvent:                 true,
 	factionTemplateAddedEvent:        true,
 	factionTemplateRemovedEvent:      true,
 	chainFactionTemplateAddedEvent:   true,
 	chainFactionTemplateRemovedEvent: true,
-	hostAwardedPixelsEvent:           false,
+	hostAwardedPixelsEvent:           true,
+	canvasCreatedEvent:               true,
+	canvasHostChangedEvent:           true,
+	canvasTimerChangedEvent:          true,
+	canvasColorAddedEvent:            true,
+	canvasPixelPlacedEvent:           true,
+	canvasBasicPixelPlacedEvent:      true,
+	canvasExtraPixelsPlacedEvent:     true,
+	canvasHostAwardedUserEvent:       true,
 }
 
 const (

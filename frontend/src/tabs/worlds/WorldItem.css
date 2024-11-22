@@ -1,0 +1,326 @@
+.WorldItem {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+  margin: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
+  position: relative;
+  height: 22rem;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.7);
+
+  transition: all 0.2s;
+}
+
+.WorldItem:hover {
+  transform: scale(1.02) translateY(-0.1rem);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+}
+
+.WorldItem:active {
+  transform: scale(1) translateY(0);
+  box-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.5);
+}
+
+/* Pulsing animation */
+@keyframes pulse {
+  0% {
+    transform: scale(.99);
+  }
+  25% {
+    transform: scale(1.01);
+  }
+  100% {
+    transform: scale(.99);
+  }
+}
+
+@keyframes shadow-color {
+  0% {
+    box-shadow: 0 0 10px rgba(200, 0, 0, 0.6);
+  }
+  17% {
+    box-shadow: 0 0 9px rgba(200, 200, 0, 0.6);
+  }
+  34% {
+    box-shadow: 0 0 8px rgba(0, 200, 0, 0.6);
+  }
+  51% {
+    box-shadow: 0 0 8px rgba(0, 200, 200, 0.6);
+  }
+  68% {
+    box-shadow: 0 0 9px rgba(0, 0, 200, 0.6);
+  }
+  85% {
+    box-shadow: 0 0 10px rgba(200, 0, 200, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 9px rgba(200, 0, 0, 0.6);
+  }
+}
+
+.WorldItem--active {
+  animation: pulse 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1), shadow-color 3s infinite;
+}
+
+.WorldItem__imagecontainer {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.WorldItem__image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
+  image-rendering: pixelated;
+}
+
+.WorldItem__buttons {
+  display: flex;
+  margin: 0 0.5rem;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+}
+
+.WorldItem__buttons2 {
+  display: flex;
+  margin: 0rem;
+  flex-direction: row;
+  justify-content: right;
+  align-items: center;
+  padding: 0;
+}
+
+.WorldItem__button {
+  position: relative;
+  padding: 0.5rem;
+  text-align: center;
+  margin: 0 0.5rem 0 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.WorldItem__buttonlike {
+  position: relative;
+  padding: 0.5rem;
+  text-align: center;
+  margin: 0 0.5rem 0 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+}
+
+/* Pinging animation */
+@keyframes ping {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  20% {
+    transform: scale(1.03) translateY(-0.1rem);
+  }
+  35% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.03) translateY(-0.1rem);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.WorldItem__buttonlike--endingsoon {
+  /* pinging animation */
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Live animation */
+@keyframes live {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  60% {
+    transform: scale(1.25);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0.0;
+  }
+}
+
+.WorldItem__live {
+  animation: live 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.WorldItem__button:hover {
+  transform: scale(1.05) translateY(-0.1rem);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.WorldItem__button:active {
+  transform: scale(1) translateY(0);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.WorldItem__button--disabled {
+  background-color: rgba(200, 200, 200, 0.7) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.WorldItem__button--disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.WorldItem__button--disabled:active {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.WorldItem__info {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0;
+  margin: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.WorldItem__info__item {
+  flex-grow: 1;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0 0.5rem;
+  margin: 0;
+  overflow: hidden;
+}
+
+.WorldItem__info__item:first-child {
+  border: none;
+}
+
+/* Style children of .WorldItem__info__item */
+.WorldItem__info__item > * {
+  margin: 0;
+  padding: 0.5rem;
+}
+
+/* Underline the first child of .WorldItem__info__item */
+.WorldItem__info__item > p:first-child {
+  text-decoration: underline;
+}
+
+.Share__icon {
+  padding: 0;
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+}
+
+.Favorite__icon {
+  padding: 0;
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+}
+
+.Favorite__count {
+  font-size: 1rem;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  width: 3.5rem;
+}
+
+.Favorite__button--liked {
+  background-color: rgba(255, 64, 61, 0.5);
+  border: 1px solid rgba(255, 64, 61, 0.8);
+  color: rgba(205, 255, 255, 1);
+}
+
+.WorldItem__overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 0.5rem 0;
+  width: 100%;
+}
+
+.WorldItem__name {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0.5rem;
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.8)
+  );
+  border-radius: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 1rem;
+}
+
+.list-transition-enter,
+.list-transition-appear {
+  transform: translateX(120%);
+}
+
+/* This is where we can add the transition*/
+.list-transition-enter-active,
+.list-transition-appear-active {
+  transform: translateX(0);
+  transition: all 150ms;
+}
+
+/* This fires as soon as the this.state.showList is false */
+.list-transition-exit {
+}
+
+/* fires as element leaves the DOM*/
+.list-transition-exit-active {
+  transform: translateX(120%);
+  transition: all 150ms;
+}
+

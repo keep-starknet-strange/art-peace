@@ -1,4 +1,4 @@
-.NFTs__main {
+.Worlds__main {
   position: relative;
   width: 100%;
   margin: 0 auto;
@@ -6,14 +6,14 @@
   transition: all 0.5s;
 }
 
-.NFTs__main__expanded {
+.Worlds__main__expanded {
   position: relative;
   width: min(100%, 40rem);
   margin: 0 auto;
   transition: all 0.5s;
 }
 
-.NFTs__container {
+.Worlds__container {
   height: 55vh;
   display: grid;
   grid-template-columns: minmax(25rem, 1fr);
@@ -23,7 +23,7 @@
   overflow: scroll;
 }
 
-.NFTs__header {
+.Worlds__header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -33,7 +33,7 @@
   width: calc(100% - 1rem);
 }
 
-.NFTs__heading {
+.Worlds__heading {
   font-size: 1.6rem;
   padding: 0;
   padding-bottom: 0.5rem;
@@ -41,17 +41,17 @@
   text-decoration: underline;
 }
 
-.NFTs__nowallet {
+.Worlds__nowallet {
   text-align: center;
 }
 
-.NFTs__buttons {
+.Worlds__buttons {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.NFTs__button {
+.Worlds__button {
   padding: 1rem;
   font-size: 1.2rem;
   text-align: center;
@@ -62,17 +62,17 @@
   cursor: pointer;
 }
 
-.NFTs__button:hover {
+.Worlds__button:hover {
   transform: scale(1.1) translateY(-2px);
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
 }
 
-.NFTs__button:active {
+.Worlds__button:active {
   transform: scale(1) translateY(2px);
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
 }
 
-.NFTs__button--selected {
+.Worlds__button--selected {
   background-color: rgba(30, 30, 70, 0.15);
   transform: scale(1.02);
   animation: pulse 1s infinite;
@@ -90,27 +90,28 @@
   }
 }
 
-.NFTs__all {
+.Worlds__all {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
 }
 
-.NFTs__all__container {
+.Worlds__all__container {
   margin-top: 0.5rem;
+  padding: 0.5rem;
   height: 55vh;
   width: 100%;
   overflow: scroll;
 }
 
-.NFTs__all__grid {
+.Worlds__all__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
   grid-template-rows: min-content;
 }
 
-.NFTs__all__item {
+.Worlds__all__item {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -122,7 +123,7 @@
   height: 13rem;
 }
 
-.NFTs__filters {
+.Worlds__filters {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -131,6 +132,6 @@
   margin: 0 0.5rem;
 }
 
-.NFTs__filter {
+.Worlds__filter {
   margin: 0 0.5rem;
 }

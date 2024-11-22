@@ -90,15 +90,6 @@ export const getNewNftsFn = async (params) => {
   );
 };
 
-/**
- * Fetches top NFTs with pagination.
- *
- * @param {Object} params - The query parameters for fetching top NFTs.
- * @param {string} params.address - The address to fetch top NFTs for.
- * @param {number} params.pageLength - The number of top NFTs to fetch per page.
- * @param {number} params.page - The page number to fetch.
- * @returns {Promise<Object>} The response from the fetch call.
- */
 export const getTopNftsFn = async (params) => {
   const { page, pageLength, queryAddress } = params;
   return await fetchWrapper(
@@ -122,5 +113,38 @@ export const getChainFactionMembers = async (query) => {
 export const getFactionMembers = async (query) => {
   return await fetchWrapper(
     `get-faction-members?factionId=${query.factionId}&page=${query.page}&pageLength=${query.pageLength}`
+  );
+};
+
+export const getWorldsFn = async (query) => {
+  return await fetchWrapper(
+    `get-worlds?pageLength=${query.pageLength}&page=${query.page}`
+  );
+};
+
+export const getNewWorldsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-new-worlds?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
+};
+
+export const getTopWorldsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-top-worlds?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
+};
+
+export const getHotWorldsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-hot-worlds?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
+};
+
+export const getFavoriteWorldsFn = async (query) => {
+  return await fetchWrapper(
+    `get-favorite-worlds?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
   );
 };

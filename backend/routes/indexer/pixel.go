@@ -81,7 +81,7 @@ func revertPixelPlacedEvent(event IndexerEvent) {
 	}
 
 	// Delete pixel from postgres ( last one )
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Pixels WHERE address = $1 AND position = $2 ORDER BY time limit 1", address, position)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM Pixels WHERE address = $1 AND position = $2 ORDER BY time DESC limit 1", address, position)
 	if err != nil {
 		PrintIndexerError("revertPixelPlacedEvent", "Error deleting pixel from postgres", address, posHex)
 		return

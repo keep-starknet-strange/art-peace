@@ -5,11 +5,13 @@ import SelectedPixelPanel from './canvas/SelectedPixelPanel.js';
 import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
 import NFTMintingPanel from './nfts/NFTMintingPanel.js';
 import FactionTemplateBuilderPanel from './templates/FactionTemplateBuilderPanel.js';
+import WorldsCreationPanel from './worlds/WorldsCreationPanel.js';
 import Factions from './factions/Factions.js';
 import { TimerInjector } from '../utils/TimerInjector.js';
 import Quests from './quests/Quests.js';
 import Voting from './voting/Voting.js';
 import NFTs from './nfts/NFTs.js';
+import Worlds from './worlds/Worlds.js';
 import Account from './account/Account.js';
 import Templates from './templates/Templates.js';
 
@@ -129,6 +131,24 @@ const TabPanel = (props) => {
           setTemplateImage={props.setTemplateImage}
           setTemplateColorIds={props.setTemplateColorIds}
           setTemplateFaction={props.setTemplateFaction}
+        />
+      </CSSTransition>
+      <CSSTransition
+        in={props.worldsCreationMode}
+        timeout={300}
+        classNames='list-transition'
+        unmountOnExit
+        appear
+      >
+        <WorldsCreationPanel
+          setActiveTab={props.setActiveTab}
+          address={props.address}
+          account={props.account}
+          estimateInvokeFee={props.estimateInvokeFee}
+          canvasFactoryContract={props.canvasFactoryContract}
+          setWorldsCreationMode={props.setWorldsCreationMode}
+          queryAddress={props.queryAddress}
+          setNotificationMessage={props.setNotificationMessage}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>
@@ -263,6 +283,20 @@ const TabPanel = (props) => {
                   queryAddress={props.queryAddress}
                   isMobile={props.isMobile}
                   gameEnded={props.gameEnded}
+                />
+              </div>
+            )}
+            {props.activeTab === 'Worlds' && (
+              <div>
+                <Worlds
+                  address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
+                  setActiveTab={props.setActiveTab}
+                  queryAddress={props.queryAddress}
+                  isMobile={props.isMobile}
+                  worldsCreationMode={props.worldsCreationMode}
+                  setWorldsCreationMode={props.setWorldsCreationMode}
                 />
               </div>
             )}

@@ -299,3 +299,68 @@ CREATE TABLE AwardWinners (
 );
 CREATE INDEX address ON AwardWinners (address);
 CREATE INDEX type ON AwardWinners (type);
+
+CREATE TABLE Worlds (
+  world_id integer NOT NULL PRIMARY KEY,
+  host char(64) NOT NULL,
+  name text NOT NULL,
+  width integer NOT NULL,
+  height integer NOT NULL,
+  time_between_pixels integer NOT NULL,
+  start_time timestamp NOT NULL,
+  end_time timestamp NOT NULL
+);
+CREATE INDEX worlds_host_index ON Worlds (host);
+CREATE INDEX worlds_end_time_index ON Worlds (end_time);
+
+CREATE TABLE WorldFavorites (
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  world_id integer NOT NULL,
+  user_address char(64) NOT NULL,
+  UNIQUE (world_id, user_address)
+);
+CREATE INDEX worldFavorites_world_id_index ON WorldFavorites (world_id);
+CREATE INDEX worldFavorites_user_index ON WorldFavorites (user_address);
+
+CREATE TABLE WorldsPixels (
+  world_id integer NOT NULL,
+  address char(64) NOT NULL,
+  position integer NOT NULL,
+  color integer NOT NULL,
+  time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX worldspixels_world_id_index ON WorldsPixels (world_id);
+CREATE INDEX worldspixels_address_index ON WorldsPixels (address);
+CREATE INDEX worldspixels_position_index ON WorldsPixels (position);
+CREATE INDEX worldspixels_color_index ON WorldsPixels (color);
+CREATE INDEX worldspixels_time_index ON WorldsPixels (time);
+
+CREATE TABLE WorldsLastPlacedTime (
+  world_id integer NOT NULL,
+  address char(64) NOT NULL,
+  time timestamp NOT NULL,
+  UNIQUE (world_id, address)
+);
+CREATE INDEX worldlastPlacedTime_world_id_index ON WorldsLastPlacedTime (world_id);
+CREATE INDEX worldlastPlacedTime_address_index ON WorldsLastPlacedTime (address);
+CREATE INDEX worldlastPlacedTime_time_index ON WorldsLastPlacedTime (time);
+
+CREATE TABLE WorldsExtraPixels (
+  world_id integer NOT NULL,
+  address char(64) NOT NULL,
+  available integer NOT NULL,
+  used integer NOT NULL,
+  UNIQUE (world_id, address)
+);
+CREATE INDEX worldextraPixels_world_id_index ON WorldsExtraPixels (world_id);
+CREATE INDEX worldextraPixels_address_index ON WorldsExtraPixels (address);
+
+CREATE TABLE WorldsColors (
+  -- Postgres auto-incrementing primary key
+  world_id integer NOT NULL,
+  color_key integer NOT NULL,
+  hex text NOT NULL,
+  UNIQUE (world_id, color_key)
+);
+CREATE INDEX worldcolors_world_id_index ON WorldsColors (world_id);
+CREATE INDEX worldcolors_color_key_index ON WorldsColors (color_key);

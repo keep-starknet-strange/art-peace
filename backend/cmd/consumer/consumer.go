@@ -55,6 +55,7 @@ func main() {
 	indexer.InitIndexerRoutes()
 	routes.InitWebsocketRoutes()
 	routes.InitNFTStaticRoutes()
+  routes.InitWorldsStaticRoutes()
 	indexer.StartMessageProcessor()
 
 	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.ConsumerPort)

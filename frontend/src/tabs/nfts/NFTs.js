@@ -50,7 +50,7 @@ const NFTsMainSection = (props) => {
       <div className='NFTs__container'>
         {props.queryAddress === '0' && (
           <p className='Text__medium NFTs__nowallet'>
-            Please login with your wallet to view your NFTs
+            Please login to view your NFTs
           </p>
         )}
         {props.nftsCollection.map((nft, index) => {
