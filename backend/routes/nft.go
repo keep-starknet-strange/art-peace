@@ -244,27 +244,26 @@ func getNftPixelData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get round number from environment
+	// Get colors from postgres for consistent palette
+	colors, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY key")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get color palette")
+		return
+	}
+
+	// Try to read from file first
 	roundNumber := os.Getenv("ROUND_NUMBER")
 	if roundNumber == "" {
 		roundNumber = "1" // Default to round 1 if not set
 	}
 
-	// Try to read from file first
 	filename := fmt.Sprintf("./nfts/round-%s/images/nft-%s.png", roundNumber, tokenId)
 	fileBytes, err := os.ReadFile(filename)
 	if err != nil {
 		filename = fmt.Sprintf("nfts/round-%s/images/nft-%s.png", roundNumber, tokenId)
 		fileBytes, err = os.ReadFile(filename)
 		if err != nil {
-			// If file not found, get colors from postgres for canvas fallback
-			colors, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY key")
-			if err != nil {
-				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get color palette")
-				return
-			}
-
-			// Get canvas data
+			// If file not found, fallback to canvas data
 			ctx := context.Background()
 			canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
 			if err != nil {
@@ -294,6 +293,7 @@ func getNftPixelData(w http.ResponseWriter, r *http.Request) {
 					bytePos := int(bitPos / 8)
 					bitOffset := uint(bitPos % 8)
 
+					// Handle out of bounds as transparent (0xFF)
 					if bytePos >= len(canvas) {
 						response.PixelData[x+y*nftData.Width] = 0xFF
 						continue
@@ -310,6 +310,7 @@ func getNftPixelData(w http.ResponseWriter, r *http.Request) {
 						colorIdx = int(((uint16(canvas[bytePos])<<8)|uint16(canvas[bytePos+1]))>>(16-bitWidth-bitOffset)) & ((1 << bitWidth) - 1)
 					}
 
+					// Validate color index
 					if colorIdx >= len(colors) {
 						response.PixelData[x+y*nftData.Width] = 0xFF
 					} else {
@@ -329,7 +330,7 @@ func getNftPixelData(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// If we have the file, process it using the template's imageToPixelData function
+	// If we have the file, process it using imageToPixelData
 	pixelData, err := imageToPixelData(fileBytes)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
