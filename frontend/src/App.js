@@ -1054,8 +1054,6 @@ function App() {
     fetchPixelData();
   }, [overlayTemplate]);
 
-  console.log('overlay template pixels: ', templatePixels);
-
   return (
     <div className='App'>
       <div className='App--background'>
