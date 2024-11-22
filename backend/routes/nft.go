@@ -284,18 +284,20 @@ func getNftPixelData(w http.ResponseWriter, r *http.Request) {
 				for x := 0; x < nftData.Width; x++ {
 					pos := nftData.Position + x + (y * canvasWidth)
 					bitPos := uint(pos) * bitWidth
-					bytePos := int(bitPos / 8)    // Convert to int here
-					bitOffset := uint(bitPos % 8) // Keep as uint for bit operations
+					bytePos := int(bitPos / 8)
+					bitOffset := uint(bitPos % 8)
 
 					if bytePos >= len(canvas) {
+						response.PixelData[x+y*nftData.Width] = 0xFF
 						continue
 					}
 
 					var colorIdx int
-					if bitOffset <= 3 { // Single byte case
+					if bitOffset <= 3 {
 						colorIdx = int((canvas[bytePos] >> (8 - bitWidth - bitOffset)) & ((1 << bitWidth) - 1))
-					} else { // Two byte case
+					} else {
 						if bytePos+1 >= len(canvas) {
+							response.PixelData[x+y*nftData.Width] = 0xFF
 							continue
 						}
 						colorIdx = int(((uint16(canvas[bytePos])<<8)|uint16(canvas[bytePos+1]))>>(16-bitWidth-bitOffset)) & ((1 << bitWidth) - 1)
