@@ -18,7 +18,8 @@
     "remove_faction_template_devnet": "../tests/integration/local/remove_faction_template.sh",
     "create_canvas_devnet": "../tests/integration/local/create_canvas.sh",
     "favorite_world_devnet": "../tests/integration/local/favorite_world.sh",
-    "unfavorite_world_devnet": "../tests/integration/local/unfavorite_world.sh"
+    "unfavorite_world_devnet": "../tests/integration/local/unfavorite_world.sh",
+    "place_world_pixel_devnet": "../tests/integration/local/place_world_pixel.sh"
   },
   "production": false,
   "websocket": {

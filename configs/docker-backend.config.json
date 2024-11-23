@@ -20,8 +20,9 @@
     "add_faction_template_devnet": "/scripts/add_faction_template.sh",
     "remove_faction_template_devnet": "/scripts/remove_faction_template.sh",
     "create_canvas_devnet": "/scripts/create_canvas.sh",
-    "favorite_world_devnet": "../tests/integration/local/favorite_world.sh",
-    "unfavorite_world_devnet": "../tests/integration/local/unfavorite_world.sh"
+    "favorite_world_devnet": "/scripts/favorite_world.sh",
+    "unfavorite_world_devnet": "/scripts/unfavorite_world.sh",
+    "place_world_pixel_devnet": "/scripts/place_world_pixel.sh"
   },
   "production": false,
   "websocket": {
