@@ -159,7 +159,9 @@ const WorldItem = (props) => {
           return;
         } else {
           setEndingSoon(true);
-          setTimerText(`${hours}:${minutes}:${seconds}`);
+          setTimerText(
+            `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
+          );
         }
       } else {
         setEndingSoon(false);

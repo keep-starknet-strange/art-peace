@@ -369,7 +369,7 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldsPixels (world_id, address, position, color) VALUES ($1, $2, $3, $4)", canvasId, placedBy, position, colorVal)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldsPixels (world_id, address, position, color) VALUES ($1, $2, $3, $4)", canvasId, placedBy, pos, colorVal)
 	if err != nil {
 		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to insert into WorldsPixels", canvasIdHex, placedBy, posHex, colorHex, err)
 		return
@@ -382,17 +382,17 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
     return
   }
 
-  lastPixelPlacedTime, err := core.PostgresQueryOne[int]("SELECT time FROM WorldsPixels WHERE world_id = $1 ORDER BY time DESC LIMIT 1", canvasId)
+  lastPixelPlacedTime, err := core.PostgresQueryOne[*time.Time]("SELECT time FROM WorldsPixels WHERE world_id = $1 ORDER BY time DESC LIMIT 1", canvasId)
   if err != nil {
     PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query lastPixelPlacedTime", canvasIdHex, placedBy, posHex, colorHex, err)
     return
   }
-  timeSinceLastPixelPlaced := time.Now().Unix() - int64(*lastPixelPlacedTime)
-  threeHoursInSeconds := int64(3 * 60 * 60)
+  timeSinceLastPixelPlaced := time.Now().Unix() - (*lastPixelPlacedTime).Unix()
+  threeHours := int64(3 * 60 * 60)
 
   // TODO: Improve this & collect snapshots for a timelapse
   // Snapshot canvas image every 100 pixels placed || if last pixel placed was more than 3 hours ago
-  if uint(*totalPixelsPlaced) % 100 == 0 || timeSinceLastPixelPlaced > threeHoursInSeconds {
+  if uint(*totalPixelsPlaced) % 100 == 0 || timeSinceLastPixelPlaced > threeHours {
     worldWidth, err := core.PostgresQueryOne[int]("SELECT width FROM Worlds WHERE world_id = $1", canvasId)
     if err != nil {
       PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldWidth", canvasIdHex, placedBy, posHex, colorHex, err)
@@ -446,8 +446,8 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 
     for y := 0; y < *worldHeight; y++ {
       for x := 0; x < *worldWidth; x++ {
-        position := uint(y*(*worldWidth) + x)
-        bitPos := position * bitWidth
+        innerPos := uint(y*(*worldWidth) + x)
+        bitPos := innerPos * bitWidth
         bytePos := bitPos / 8
         bitOffset := bitPos % 8
 
@@ -480,7 +480,7 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 
 	var message = map[string]interface{}{
 		"worldId":     canvasId,
-		"position":    position,
+		"position":    pos,
 		"color":       colorVal,
 		"messageType": "colorWorldPixel",
 	}
@@ -546,7 +546,7 @@ func processCanvasBasicPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldsLastPlacedTime (world_id, address, time) VALUES ($1, TO_TIMESTAMP($2), $3) ON CONFLICT (world_id, address) DO UPDATE SET time = TO_TIMESTAMP($2)", canvasId, placedBy, timestamp)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldsLastPlacedTime (world_id, address, time) VALUES ($1, $2, TO_TIMESTAMP($3)) ON CONFLICT (world_id, address) DO UPDATE SET time = TO_TIMESTAMP($3)", canvasId, placedBy, timestamp)
 	if err != nil {
 		PrintIndexerError("processCanvasBasicPixelPlacedEvent", "Failed to insert into WorldsLastPlacedTime", canvasIdHex, placedBy, timestampHex, err)
 		return

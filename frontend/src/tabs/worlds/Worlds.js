@@ -3,7 +3,7 @@ import './Worlds.css';
 import ExpandableTab from '../ExpandableTab.js';
 import WorldItem from './WorldItem.js';
 import { fetchWrapper } from '../../services/apiService.js';
-import { worldImgUrl, worldUrl } from '../../utils/Consts.js';
+import { worldImgUrl } from '../../utils/Consts.js';
 
 import {
   getWorldsFn,
@@ -299,17 +299,20 @@ const Worlds = (props) => {
   const [activeWorld, setActiveWorld] = useState(null);
   useEffect(() => {
     const getWorld = async () => {
-      if (activeWorldId !== null) {
-        const getWorldPath = `get-world?worldId=${activeWorldId}`;
-        console.log('activeWorldId', activeWorldId, 'worldUrl', worldUrl);
-        const response = await fetchWrapper(getWorldPath);
-        if (!response.data) {
-          return;
-        }
-        setActiveWorld(response.data);
+      const getWorldPath = `get-world?worldId=${activeWorldId}`;
+      const response = await fetchWrapper(getWorldPath);
+      if (!response.data) {
+        return;
       }
+      setActiveWorld(response.data);
     };
+    if (activeWorldId === null) {
+      return;
+    }
     getWorld();
+    // Route path to "/worlds/:worldId" when activeWorldId changes
+    let path = `/worlds/${activeWorldId}`;
+    window.history.pushState({}, '', path);
   }, [activeWorldId]);
 
   return (

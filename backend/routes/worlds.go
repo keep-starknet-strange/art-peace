@@ -33,6 +33,7 @@ func InitWorldsRoutes() {
 		http.HandleFunc("/create-canvas-devnet", createCanvasDevnet)
 		http.HandleFunc("/favorite-world-devnet", favoriteWorldDevnet)
 		http.HandleFunc("/unfavorite-world-devnet", unfavoriteWorldDevnet)
+    http.HandleFunc("/place-world-pixel-devnet", placeWorldPixelDevnet)
 	}
 }
 
@@ -292,7 +293,7 @@ func getWorldsColors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM WorldsColors ORDER BY color_key WHERE world_id = $1", worldId)
+	colors, err := core.PostgresQueryJson[ColorType]("SELECT hex FROM WorldsColors WHERE world_id = $1 ORDER BY color_key", worldId)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve colors")
 		return
@@ -573,4 +574,66 @@ func unfavoriteWorldDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "World unfavorited on devnet")
+}
+
+func placeWorldPixelDevnet(w http.ResponseWriter, r *http.Request) {
+  // Disable this in production
+  if routeutils.NonProductionMiddleware(w, r) {
+    return
+  }
+
+  jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+  if err != nil {
+    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+    return
+  }
+
+  worldId, err := strconv.Atoi((*jsonBody)["worldId"])
+  if err != nil {
+    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+    return
+  }
+
+  position, err := strconv.Atoi((*jsonBody)["position"])
+  if err != nil {
+    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid position")
+    return
+  }
+
+  color, err := strconv.Atoi((*jsonBody)["color"])
+  if err != nil {
+    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid color")
+    return
+  }
+
+  timestamp, err := strconv.Atoi((*jsonBody)["timestamp"])
+  if err != nil {
+    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid time")
+    return
+  }
+
+  //TODO: Validate position range
+
+  // Validate color format (e.g., validate against allowed colors)
+  colorsLength, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsColors")
+  if err != nil {
+    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get colors count")
+    return
+  }
+  if color < 0 || color > *colorsLength {
+    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Color out of range")
+    return
+  }
+
+  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.PlaceWorldPixelDevnet
+  contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
+
+  cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(worldId), strconv.Itoa(position), strconv.Itoa(color), strconv.Itoa(timestamp))
+  _, err = cmd.Output()
+  if err != nil {
+    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
+    return
+  }
+
+  routeutils.WriteResultJson(w, "Pixel placed world")
 }
