@@ -1,6 +1,7 @@
 {
   "host": "api.art-peace.net",
   "port": 8080,
+  "consumer_port": 8081,
   "scripts": {
     "place_pixel_devnet": "../tests/integration/local/place_pixel.sh",
     "place_extra_pixels_devnet": "../tests/integration/local/place_extra_pixels.sh",

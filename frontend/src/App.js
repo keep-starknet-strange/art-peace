@@ -1009,18 +1009,49 @@ function App() {
       return [];
     };
 
-    // Only call getTemplatePixelData if overlayTemplate exists and has a hash
-    if (overlayTemplate && overlayTemplate.hash) {
-      // Need to handle the Promise properly
-      getTemplatePixelData(overlayTemplate.hash)
-        .then((data) => setTemplatePixels(data))
-        .catch((error) => {
-          console.error('Error fetching template pixels:', error);
+    const getNftPixelData = async (tokenId) => {
+      if (tokenId !== null) {
+        const response = await fetchWrapper(
+          `get-nft-pixel-data?tokenId=${tokenId}`
+        );
+        if (!response.data) {
+          console.error('NFT pixel data not found');
+          return [];
+        }
+        return response.data;
+      }
+      return [];
+    };
+
+    const fetchPixelData = async () => {
+      try {
+        if (!overlayTemplate) {
           setTemplatePixels([]);
-        });
-    } else {
-      setTemplatePixels([]);
-    }
+          return;
+        }
+
+        // Handle NFT overlay case
+        if (overlayTemplate.isNft && overlayTemplate.tokenId !== undefined) {
+          const data = await getNftPixelData(overlayTemplate.tokenId);
+          setTemplatePixels(data);
+          return;
+        }
+
+        // Handle template overlay case
+        if (overlayTemplate.hash) {
+          const data = await getTemplatePixelData(overlayTemplate.hash);
+          setTemplatePixels(data);
+          return;
+        }
+
+        setTemplatePixels([]);
+      } catch (error) {
+        console.error('Error fetching pixel data:', error);
+        setTemplatePixels([]);
+      }
+    };
+
+    fetchPixelData();
   }, [overlayTemplate]);
 
   return (

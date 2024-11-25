@@ -381,7 +381,7 @@ pub mod ArtPeace {
             let test_address = starknet::contract_address_const::<
                 0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
             >();
-            self.extra_pixels.write(test_address, 1000);
+            self.extra_pixels.write(test_address, 100000);
         }
         self.devmode.write(init_params.devmode);
 
@@ -926,7 +926,7 @@ pub mod ArtPeace {
                 template_metadata.position < self.canvas_width.read() * self.canvas_height.read(),
                 'Template position out of bounds'
             );
-            let MAX_TEMPLATE_SIZE: u128 = 64;
+            let MAX_TEMPLATE_SIZE: u128 = 256;
             let MIN_TEMPLATE_SIZE: u128 = 5;
             assert(
                 template_metadata.width >= MIN_TEMPLATE_SIZE
@@ -971,7 +971,7 @@ pub mod ArtPeace {
                 template_metadata.position < self.canvas_width.read() * self.canvas_height.read(),
                 'Template position out of bounds'
             );
-            let MAX_TEMPLATE_SIZE: u128 = 64;
+            let MAX_TEMPLATE_SIZE: u128 = 256;
             let MIN_TEMPLATE_SIZE: u128 = 5;
             assert(
                 template_metadata.width >= MIN_TEMPLATE_SIZE
@@ -1091,7 +1091,7 @@ pub mod ArtPeace {
             self.check_game_running();
             // TODO: To config?
             let MIN_NFT_SIZE: u128 = 1;
-            let MAX_NFT_SIZE: u128 = 64;
+            let MAX_NFT_SIZE: u128 = 256;
             assert(
                 mint_params.width >= MIN_NFT_SIZE && mint_params.width <= MAX_NFT_SIZE,
                 'NFT width out of bounds'

@@ -76,14 +76,14 @@ const NFTSelector = (props) => {
         let width = endX - startX;
         let height = endY - startY;
         // Max NFT sizes
-        if (width > 64) {
-          width = 64;
+        if (width > 256) {
+          width = 256;
           if (x < initX) {
             startX = endX - width;
           }
         }
-        if (height > 64) {
-          height = 64;
+        if (height > 256) {
+          height = 256;
           if (y < initY) {
             startY = endY - height;
           }
@@ -190,14 +190,14 @@ const NFTSelector = (props) => {
           let width = endX - startX;
           let height = endY - startY;
           // Max NFT sizes
-          if (width > 64) {
-            width = 64;
+          if (width > 256) {
+            width = 256;
             if (x < initX) {
               startX = endX - width;
             }
           }
-          if (height > 64) {
-            height = 64;
+          if (height > 256) {
+            height = 256;
             if (y < initY) {
               startY = endY - height;
             }

@@ -29,6 +29,32 @@
   margin: 0;
   padding: 0;
   image-rendering: pixelated;
+  cursor: pointer;
+
+  transition: all 0.2s;
+}
+
+/* pulse animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.NFTItem__image:hover {
+  animation: pulse 1s infinite;
+  transform: scale(1.03);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.NFTItem__image:active {
+  transform: scale(1);
 }
 
 .NFTItem__buttons {

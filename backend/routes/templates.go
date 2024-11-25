@@ -76,7 +76,7 @@ func hexToRGBA(colorBytes string) color.RGBA {
 	return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 }
 
-func imageToPixelData(imageData []byte) ([]int, error) {
+func imageToPixelData(imageData []byte, scaleFactor int) ([]int, error) {
 	img, _, err := image.Decode(bytes.NewReader(imageData))
 	if err != nil {
 		return nil, err
@@ -96,16 +96,20 @@ func imageToPixelData(imageData []byte) ([]int, error) {
 
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
-	pixelData := make([]int, width*height)
+	scaledWidth := width / scaleFactor
+	scaledHeight := height / scaleFactor
+	pixelData := make([]int, scaledWidth*scaledHeight)
 
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
+	for y := 0; y < height; y += scaleFactor {
+		for x := 0; x < width; x += scaleFactor {
+			newX := x / scaleFactor
+			newY := y / scaleFactor
 			rgba := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
 			if rgba.A < 128 { // Consider pixels with less than 50% opacity as transparent
-				pixelData[y*width+x] = 0xFF
+				pixelData[newY*scaledWidth+newX] = 0xFF
 			} else {
 				closestIndex := findClosestColor(rgba, palette)
-				pixelData[y*width+x] = closestIndex
+				pixelData[newY*scaledWidth+newX] = closestIndex
 			}
 		}
 	}
@@ -229,7 +233,7 @@ func buildTemplateImg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imageData, err := imageToPixelData(fileBytes)
+	imageData, err := imageToPixelData(fileBytes, 1)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
@@ -298,7 +302,7 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 	}
 	bounds := img.Bounds()
 	width, height := bounds.Max.X-bounds.Min.X, bounds.Max.Y-bounds.Min.Y
-	if width < 5 || width > 64 || height < 5 || height > 64 {
+	if width < 5 || width > 256 || height < 5 || height > 256 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
@@ -314,7 +318,7 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	imageData, err := imageToPixelData(fileBytes)
+	imageData, err := imageToPixelData(fileBytes, 1)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
@@ -372,7 +376,7 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if width < 5 || width > 64 || height < 5 || height > 64 {
+	if width < 5 || width > 256 || height < 5 || height > 256 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
@@ -473,7 +477,7 @@ func getTemplatePixelData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert image to pixel data using existing function
-	pixelData, err := imageToPixelData(fileBytes)
+	pixelData, err := imageToPixelData(fileBytes, 1)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
 		return
