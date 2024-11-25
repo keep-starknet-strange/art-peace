@@ -38,21 +38,21 @@ const WorldItem = (props) => {
   }, [props.host]);
   const favoriteWorldCall = async (worldId) => {
     if (devnetMode) return;
-    if (!props.address || !props.worldCanvasContract || !props.account) return;
-    const favoriteCallData = props.worldCanvasContract.populate(
+    if (!props.address || !props.canvasFactoryContract || !props.account) return;
+    const favoriteCallData = props.canvasFactoryContract.populate(
       'favorite_canvas',
       {
         world_id: worldId
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
-      contractAddress: props.worldCanvasContract.address,
+      contractAddress: props.canvasFactoryContract.address,
       entrypoint: 'favorite_canvas',
       calldata: favoriteCallData.calldata
     });
     /* global BigInt */
     const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
-    const result = await props.worldCanvasContract.favorite_canvas(
+    const result = await props.canvasFactoryContract.favorite_canvas(
       favoriteCallData.calldata,
       {
         maxFee
@@ -63,20 +63,20 @@ const WorldItem = (props) => {
 
   const unfavoriteWorldCall = async (worldId) => {
     if (devnetMode) return;
-    if (!props.address || !props.worldCanvasContract || !props.account) return;
-    const unfavoriteCallData = props.worldCanvasContract.populate(
+    if (!props.address || !props.canvasFactoryContract || !props.account) return;
+    const unfavoriteCallData = props.canvasFactoryContract.populate(
       'unfavorite_canvas',
       {
         world_id: worldId
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
-      contractAddress: props.worldCanvasContract.address,
+      contractAddress: props.canvasFactoryContract.address,
       entrypoint: 'unfavorite_canvas',
       calldata: unfavoriteCallData.calldata
     });
     const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
-    const result = await props.worldCanvasContract.unfavorite_canvas(
+    const result = await props.canvasFactoryContract.unfavorite_canvas(
       unfavoriteCallData.calldata,
       {
         maxFee

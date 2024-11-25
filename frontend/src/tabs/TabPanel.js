@@ -145,7 +145,7 @@ const TabPanel = (props) => {
           address={props.address}
           account={props.account}
           estimateInvokeFee={props.estimateInvokeFee}
-          canvasFactoryContract={props.canvasFactoryContract}
+          canvasFactoryContract={props.multiCanvasContract}
           setWorldsCreationMode={props.setWorldsCreationMode}
           queryAddress={props.queryAddress}
           setNotificationMessage={props.setNotificationMessage}
@@ -298,6 +298,7 @@ const TabPanel = (props) => {
                   worldsCreationMode={props.worldsCreationMode}
                   setWorldsCreationMode={props.setWorldsCreationMode}
                   openedWorldId={props.openedWorldId}
+                  canvasFactoryContract={props.multiCanvasContract}
                 />
               </div>
             )}

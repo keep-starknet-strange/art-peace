@@ -31,6 +31,7 @@ import { fetchWrapper, getTodaysStartTime } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
 import canvas_nft_abi from './contracts/canvas_nft.abi.json';
+import multi_canvas_abi from './contracts/multi_canvas.abi.json';
 import NotificationPanel from './tabs/NotificationPanel.js';
 import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
@@ -126,6 +127,7 @@ function App() {
   const [artPeaceContract, setArtPeaceContract] = useState(null);
   const [usernameContract, setUsernameContract] = useState(null);
   const [canvasNftContract, setCanvasNftContract] = useState(null);
+  const [multiCanvasContract, setMultiCanvasContract] = useState(null);
 
   useEffect(() => {
     if (!connected) return;
@@ -145,9 +147,15 @@ function App() {
       process.env.REACT_APP_CANVAS_NFT_CONTRACT_ADDRESS,
       account
     );
+    const multiCanvasContract = new Contract(
+      multi_canvas_abi,
+      process.env.REACT_APP_CANVAS_FACTORY_CONTRACT_ADDRESS,
+      account
+    );
     setArtPeaceContract(artPeaceContract);
     setUsernameContract(usernameContract);
     setCanvasNftContract(canvasNftContract);
+    setMultiCanvasContract(multiCanvasContract);
   }, [connected, account]);
 
   const [timeBetweenPlacements, setTimeBetweenPlacements] = useState(30 * 1000);
@@ -919,6 +927,7 @@ function App() {
             artPeaceContract={artPeaceContract}
             usernameContract={usernameContract}
             canvasNftContract={canvasNftContract}
+            multiCanvasContract={multiCanvasContract}
             setNotificationMessage={setNotificationMessage}
             colors={colors}
             activeTab={activeTab}

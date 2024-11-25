@@ -61,6 +61,7 @@ const WorldsMainSection = (props) => {
             image={worldImgUrl + '/world-' + props.activeWorld.worldId + '.png'}
             queryAddress={props.queryAddress}
             updateFavorites={props.updateFavorites}
+            canvasFactoryContract={props.canvasFactoryContract}
           />
         )}
         {props.favoriteWorlds.map((world, index) => {
@@ -85,6 +86,7 @@ const WorldsMainSection = (props) => {
               image={worldImgUrl + '/world-' + world.worldId + '.png'}
               queryAddress={props.queryAddress}
               updateFavorites={props.updateFavorites}
+              canvasFactoryContract={props.canvasFactoryContract}
             />
           );
         })}
@@ -161,6 +163,7 @@ const WorldsExpandedSection = (props) => {
                 image={worldImgUrl + '/world-' + world.worldId + '.png'}
                 queryAddress={props.queryAddress}
                 updateFavorites={props.updateFavorites}
+                canvasFactoryContract={props.canvasFactoryContract}
               />
             );
           })}
@@ -364,6 +367,7 @@ const Worlds = (props) => {
       filters={filters}
       isMobile={props.isMobile}
       gameEnded={props.gameEnded}
+      canvasFactoryContract={props.canvasFactoryContract}
     />
   );
 };
