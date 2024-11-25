@@ -297,6 +297,7 @@ const TabPanel = (props) => {
                   isMobile={props.isMobile}
                   worldsCreationMode={props.worldsCreationMode}
                   setWorldsCreationMode={props.setWorldsCreationMode}
+                  openedWorldId={props.openedWorldId}
                 />
               </div>
             )}
@@ -319,6 +320,7 @@ const TabPanel = (props) => {
                   isSessionable={props.isSessionable}
                   gameEnded={props.gameEnded}
                   setModal={props.setModal}
+                  openedWorldId={props.openedWorldId}
                 />
               </div>
             )}

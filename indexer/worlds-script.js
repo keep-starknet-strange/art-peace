@@ -84,7 +84,27 @@ export const config = {
         includeReverted: false,
         includeTransaction: false,
         includeReceipt: false
-      }
+      },
+      {
+        // Canvas Favorited Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x032105bd4f21a32bc92e45a49b30eab9355f7f89619d87e9801628e3acc5b502"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Canvas Unfavorited Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x014ee6480f95acb4b7286d3a7f95b6033299e66e502cfb4b207ccf088b5f601d"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
     ]
   },
   sinkType: "webhook",

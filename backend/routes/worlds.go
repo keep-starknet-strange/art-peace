@@ -539,7 +539,7 @@ func favoriteWorldDevnet(w http.ResponseWriter, r *http.Request) {
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.FavoriteWorldDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 
-	cmd := exec.Command(shellCmd, contract, "favorite_world", worldId)
+	cmd := exec.Command(shellCmd, contract, "favorite_canvas", worldId)
 	_, err = cmd.Output()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to favorite World on devnet")
@@ -566,7 +566,7 @@ func unfavoriteWorldDevnet(w http.ResponseWriter, r *http.Request) {
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.UnfavoriteWorldDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 
-	cmd := exec.Command(shellCmd, contract, "unfavorite_world", worldId)
+	cmd := exec.Command(shellCmd, contract, "unfavorite_canvas", worldId)
 	_, err = cmd.Output()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unfavorite World on devnet")

@@ -10,6 +10,8 @@ pub trait ICanvasFactory<TContractState> {
     fn get_canvas_count(self: @TContractState) -> u64;
     fn create_canvas(ref self: TContractState, init_params: Canvas::InitParams) -> (ContractAddress, u64);
     fn get_canvas(self: @TContractState, canvas_id: u64) -> ContractAddress;
+    fn favorite_canvas(ref self: TContractState, canvas_id: u64);
+    fn unfavorite_canvas(ref self: TContractState, canvas_id: u64);
 }
 
 #[starknet::contract]
@@ -24,6 +26,8 @@ pub mod CanvasFactory {
         canvas_class_hash: ClassHash,
         canvases: LegacyMap::<u64, ContractAddress>,
         canvas_count: u64,
+        // Maps: (canvas_id, user addr) -> if favorited
+        canvas_favorites: LegacyMap::<(u64, ContractAddress), bool>
     }
 
     #[event]
@@ -31,6 +35,8 @@ pub mod CanvasFactory {
     enum Event {
         HostChanged: HostChanged,
         CanvasCreated: CanvasCreated,
+        CanvasFavorited: CanvasFavorited,
+        CanvasUnfavorited: CanvasUnfavorited,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -45,6 +51,22 @@ pub mod CanvasFactory {
         pub canvas_id: u64,
         pub canvas_address: ContractAddress,
         pub init_params: Canvas::InitParams,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct CanvasFavorited {
+        #[key]
+        pub canvas_id: u64,
+        #[key]
+        pub user: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct CanvasUnfavorited {
+        #[key]
+        pub canvas_id: u64,
+        #[key]
+        pub user: ContractAddress,
     }
 
     #[derive(Drop, Serde)]
@@ -111,6 +133,30 @@ pub mod CanvasFactory {
 
         fn get_canvas(self: @ContractState, canvas_id: u64) -> ContractAddress {
             self.canvases.read(canvas_id)
+        }
+
+        fn favorite_canvas(ref self: ContractState, canvas_id: u64) {
+            let caller = get_caller_address();
+            if self.canvas_favorites.read((canvas_id, caller)) {
+                return;
+            }
+            self.canvas_favorites.write((canvas_id, caller), true);
+            self.emit(Event::CanvasFavorited(CanvasFavorited {
+                canvas_id,
+                user: caller,
+            }));
+        }
+
+        fn unfavorite_canvas(ref self: ContractState, canvas_id: u64) {
+            let caller = get_caller_address();
+            if !self.canvas_favorites.read((canvas_id, caller)) {
+                return;
+            }
+            self.canvas_favorites.write((canvas_id, caller), false);
+            self.emit(Event::CanvasUnfavorited(CanvasUnfavorited {
+                canvas_id,
+                user: caller,
+            }));
         }
     }
 }

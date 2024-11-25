@@ -652,3 +652,71 @@ func revertCanvasHostAwardedUserEvent(event IndexerEvent) {
 		return
 	}
 }
+
+func processCanvasFavoritedEvent(event IndexerEvent) {
+  canvasIdHex := event.Event.Keys[1]
+  user := event.Event.Keys[2][2:] // Remove 0x prefix
+
+  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+  if err != nil {
+    PrintIndexerError("processCanvasFavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
+    return
+  }
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldFavorites (world_id, user_address) VALUES ($1, $2)", canvasId, user)
+  if err != nil {
+    PrintIndexerError("processCanvasFavoritedEvent", "Failed to insert into WorldFavorites", canvasIdHex, user, err)
+    return
+  }
+}
+
+func revertCanvasFavoritedEvent(event IndexerEvent) {
+  canvasIdHex := event.Event.Keys[1]
+  user := event.Event.Keys[2][2:] // Remove 0x prefix
+
+  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+  if err != nil {
+    PrintIndexerError("revertCanvasFavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
+    return
+  }
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM WorldFavorites WHERE world_id = $1 AND user_address = $2", canvasId, user)
+  if err != nil {
+    PrintIndexerError("revertCanvasFavoritedEvent", "Failed to delete from WorldFavorites", canvasIdHex, user, err)
+    return
+  }
+}
+
+func processCanvasUnfavoritedEvent(event IndexerEvent) {
+  canvasIdHex := event.Event.Keys[1]
+  user := event.Event.Keys[2][2:] // Remove 0x prefix
+
+  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+  if err != nil {
+    PrintIndexerError("processCanvasUnfavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
+    return
+  }
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM WorldFavorites WHERE world_id = $1 AND user_address = $2", canvasId, user)
+  if err != nil {
+    PrintIndexerError("processCanvasUnfavoritedEvent", "Failed to delete from WorldFavorites", canvasIdHex, user, err)
+    return
+  }
+}
+
+func revertCanvasUnfavoritedEvent(event IndexerEvent) {
+  canvasIdHex := event.Event.Keys[1]
+  user := event.Event.Keys[2][2:] // Remove 0x prefix
+
+  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+  if err != nil {
+    PrintIndexerError("revertCanvasUnfavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
+    return
+  }
+
+  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldFavorites (world_id, user_address) VALUES ($1, $2)", canvasId, user)
+  if err != nil {
+    PrintIndexerError("revertCanvasUnfavoritedEvent", "Failed to insert into WorldFavorites", canvasIdHex, user, err)
+    return
+  }
+}

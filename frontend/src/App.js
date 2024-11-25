@@ -908,6 +908,7 @@ function App() {
           }
         >
           <TabPanel
+            openedWorldId={openedWorldId}
             colorPixel={colorPixel}
             address={address}
             queryAddress={queryAddress}

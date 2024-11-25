@@ -40,19 +40,19 @@ const WorldItem = (props) => {
     if (devnetMode) return;
     if (!props.address || !props.worldCanvasContract || !props.account) return;
     const favoriteCallData = props.worldCanvasContract.populate(
-      'favorite_world',
+      'favorite_canvas',
       {
         world_id: worldId
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
       contractAddress: props.worldCanvasContract.address,
-      entrypoint: 'favorite_world',
+      entrypoint: 'favorite_canvas',
       calldata: favoriteCallData.calldata
     });
     /* global BigInt */
     const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
-    const result = await props.worldCanvasContract.favorite_world(
+    const result = await props.worldCanvasContract.favorite_canvas(
       favoriteCallData.calldata,
       {
         maxFee
@@ -65,18 +65,18 @@ const WorldItem = (props) => {
     if (devnetMode) return;
     if (!props.address || !props.worldCanvasContract || !props.account) return;
     const unfavoriteCallData = props.worldCanvasContract.populate(
-      'unfavorite_world',
+      'unfavorite_canvas',
       {
         world_id: worldId
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
       contractAddress: props.worldCanvasContract.address,
-      entrypoint: 'unfavorite_world',
+      entrypoint: 'unfavorite_canvas',
       calldata: unfavoriteCallData.calldata
     });
     const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
-    const result = await props.worldCanvasContract.unfavorite_world(
+    const result = await props.worldCanvasContract.unfavorite_canvas(
       unfavoriteCallData.calldata,
       {
         maxFee
@@ -102,7 +102,7 @@ const WorldItem = (props) => {
     }
 
     if (!favorited) {
-      let favoriteResponse = await fetchWrapper('favorite-nft-devnet', {
+      let favoriteResponse = await fetchWrapper('favorite-world-devnet', {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
@@ -113,7 +113,7 @@ const WorldItem = (props) => {
         props.updateFavorites(props.worldId, favorites + 1, true);
       }
     } else {
-      let unfavoriteResponse = await fetchWrapper('unfavorite-nft-devnet', {
+      let unfavoriteResponse = await fetchWrapper('unfavorite-world-devnet', {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({

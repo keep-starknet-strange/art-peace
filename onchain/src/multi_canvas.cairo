@@ -27,6 +27,8 @@ pub trait IMultiCanvas<TContractState> {
     fn check_timing(self: @TContractState, now: u64);
     fn place_pixel(ref self: TContractState, canvas_id: u32, pos: u128, color: u8, now: u64);
     fn place_pixel_xy(ref self: TContractState, canvas_id: u32, x: u128, y: u128, color: u8, now: u64);
+    fn favorite_canvas(ref self: TContractState, canvas_id: u32);
+    fn unfavorite_canvas(ref self: TContractState, canvas_id: u32);
 }
 
 // TODO: Move to factory contract
@@ -79,6 +81,8 @@ pub mod MultiCanvas {
         color_counts: LegacyMap::<u32, u8>,
         // Map: (canvas_id, color_id) -> color value in RGBA
         color_palettes: LegacyMap::<(u32, u8), u32>,
+        // Maps: (canvas_id, user addr) -> if favorited
+        canvas_favorites: LegacyMap::<(u32, ContractAddress), bool>
     }
 
     #[event]
@@ -93,6 +97,8 @@ pub mod MultiCanvas {
         // TODO: Extra pixels place do
         CanvasExtraPixelsPlaced: CanvasExtraPixelsPlaced,
         CanvasHostAwardedUser: CanvasHostAwardedUser,
+        CanvasFavorited: CanvasFavorited,
+        CanvasUnfavorited: CanvasUnfavorited,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -163,6 +169,22 @@ pub mod MultiCanvas {
         #[key]
         user: ContractAddress,
         amount: u32,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct CanvasFavorited {
+        #[key]
+        pub canvas_id: u32,
+        #[key]
+        pub user: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct CanvasUnfavorited {
+        #[key]
+        pub canvas_id: u32,
+        #[key]
+        pub user: ContractAddress,
     }
 
     #[constructor]
@@ -326,6 +348,30 @@ pub mod MultiCanvas {
         fn place_pixel_xy(ref self: ContractState, canvas_id: u32, x: u128, y: u128, color: u8, now: u64) {
             let pos = x + y * self.canvases.read(canvas_id).width;
             self.place_pixel(canvas_id, pos, color, now);
+        }
+
+        fn favorite_canvas(ref self: ContractState, canvas_id: u32) {
+            let caller = get_caller_address();
+            if self.canvas_favorites.read((canvas_id, caller)) {
+                return;
+            }
+            self.canvas_favorites.write((canvas_id, caller), true);
+            self.emit(Event::CanvasFavorited(CanvasFavorited {
+                canvas_id,
+                user: caller,
+            }));
+        }
+
+        fn unfavorite_canvas(ref self: ContractState, canvas_id: u32) {
+            let caller = get_caller_address();
+            if !self.canvas_favorites.read((canvas_id, caller)) {
+                return;
+            }
+            self.canvas_favorites.write((canvas_id, caller), false);
+            self.emit(Event::CanvasUnfavorited(CanvasUnfavorited {
+                canvas_id,
+                user: caller,
+            }));
         }
     }
 

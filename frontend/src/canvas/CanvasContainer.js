@@ -226,9 +226,11 @@ const CanvasContainer = (props) => {
       props.setPixelPlacedBy(null);
       return;
     }
-    const getPixelInfoEndpoint = await fetchWrapper(
-      `get-pixel-info?position=${position.toString()}`
-    );
+    const pixelInfoUrl =
+      props.openedWorldId == null
+        ? `get-pixel-info?position=${position.toString()}`
+        : `get-worlds-pixel-info?position=${position.toString()}&worldId=${props.openedWorldId}`;
+    const getPixelInfoEndpoint = await fetchWrapper(pixelInfoUrl);
 
     if (!getPixelInfoEndpoint.data) {
       return;

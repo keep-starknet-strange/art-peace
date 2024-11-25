@@ -40,7 +40,7 @@ const WorldsMainSection = (props) => {
             Please login to view your Worlds
           </p>
         )}
-        {props.activeWorld && (
+        {props.activeWorld && !props.activeWorld.favorited && (
           <WorldItem
             key={props.activeWorld.worldId}
             activeWorldId={props.activeWorldId}
@@ -60,7 +60,7 @@ const WorldsMainSection = (props) => {
             endtime={props.activeWorld.endTime}
             image={worldImgUrl + '/world-' + props.activeWorld.worldId + '.png'}
             queryAddress={props.queryAddress}
-            updateLikes={props.updateLikes}
+            updateFavorites={props.updateFavorites}
           />
         )}
         {props.favoriteWorlds.map((world, index) => {
@@ -84,7 +84,7 @@ const WorldsMainSection = (props) => {
               endtime={world.endTime}
               image={worldImgUrl + '/world-' + world.worldId + '.png'}
               queryAddress={props.queryAddress}
-              updateLikes={props.updateLikes}
+              updateFavorites={props.updateFavorites}
             />
           );
         })}
@@ -160,7 +160,7 @@ const WorldsExpandedSection = (props) => {
                 endtime={world.endTime}
                 image={worldImgUrl + '/world-' + world.worldId + '.png'}
                 queryAddress={props.queryAddress}
-                updateLikes={props.updateLikes}
+                updateFavorites={props.updateFavorites}
               />
             );
           })}
@@ -295,7 +295,7 @@ const Worlds = (props) => {
     resetPagination();
   }, [activeFilter]);
 
-  const [activeWorldId, setActiveWorldId] = useState(null);
+  const [activeWorldId, setActiveWorldId] = useState(props.openedWorldId);
   const [activeWorld, setActiveWorld] = useState(null);
   useEffect(() => {
     const getWorld = async () => {
@@ -314,6 +314,25 @@ const Worlds = (props) => {
     let path = `/worlds/${activeWorldId}`;
     window.history.pushState({}, '', path);
   }, [activeWorldId]);
+
+  const updateFavorites = (worldId, favorites, favorited) => {
+    let newFavoriteWorlds = favoriteWorlds.map((world) => {
+      if (world.worldId === worldId) {
+        return { ...world, favorites: favorites, favorited: favorited };
+      }
+      return world;
+    });
+
+    let newAllWorldss = allWorlds.map((world) => {
+      if (world.worldId === worldId) {
+        return { ...world, favorites: favorites, favorited: favorited };
+      }
+      return world;
+    });
+
+    setFavoriteWorlds(newFavoriteWorlds);
+    setAllWorlds(newAllWorldss);
+  };
 
   return (
     <ExpandableTab
@@ -334,6 +353,7 @@ const Worlds = (props) => {
       allWorldsPagination={allWorldsPagination}
       favoriteWorlds={favoriteWorlds}
       setFavoriteWorlds={setFavoriteWorlds}
+      updateFavorites={updateFavorites}
       setActiveTab={props.setActiveTab}
       expanded={expanded}
       setExpanded={setExpanded}
