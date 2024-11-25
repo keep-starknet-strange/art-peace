@@ -381,7 +381,7 @@ pub mod ArtPeace {
             let test_address = starknet::contract_address_const::<
                 0x328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
             >();
-            self.extra_pixels.write(test_address, 1000);
+            self.extra_pixels.write(test_address, 100000);
         }
         self.devmode.write(init_params.devmode);
 
