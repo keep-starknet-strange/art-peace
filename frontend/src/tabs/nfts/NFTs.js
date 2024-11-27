@@ -9,7 +9,8 @@ import {
   getNftsFn,
   getNewNftsFn,
   getTopNftsFn,
-  getHotNftsFn
+  getHotNftsFn,
+  getRoundNftsFn
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
 
@@ -94,9 +95,42 @@ const NFTsMainSection = (props) => {
 };
 
 const NFTsExpandedSection = (props) => {
-  const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '0';
-  const imageURL = `${nftUrl}/nft/round-${roundNumber}/images/`;
-  const metadataURL = `${nftUrl}/nft/round-${roundNumber}/metadata/`;
+  const [currentRound, setCurrentRound] = useState(parseInt('100'));
+  const imageURL = `${nftUrl}/nft/round-${currentRound}/images/`;
+  const metadataURL = `${nftUrl}/nft/round-${currentRound}/metadata/`;
+
+  const handleRoundChange = (direction) => {
+    const maxRound = parseInt('100');
+
+    if (direction === 'prev' && currentRound > 1) {
+      setCurrentRound((prev) => prev - 1);
+      props.setAllNftPagination((prev) => ({ ...prev, page: 1 }));
+    } else if (direction === 'next' && currentRound < maxRound) {
+      setCurrentRound((prev) => prev + 1);
+      props.setAllNftPagination((prev) => ({ ...prev, page: 1 }));
+    }
+  };
+
+  useEffect(() => {
+    async function fetchRoundNfts() {
+      try {
+        const result = await getRoundNftsFn({
+          page: props.allNftPagination.page,
+          pageLength: props.allNftPagination.pageLength,
+          queryAddress: props.queryAddress,
+          roundNumber: currentRound
+        });
+
+        if (result.data) {
+          props.setAllNFTs(result.data);
+        }
+      } catch (error) {
+        console.log('Error fetching round NFTs:', error);
+      }
+    }
+
+    fetchRoundNfts();
+  }, [currentRound, props.allNftPagination.page, props.queryAddress]);
 
   return (
     <div className='NFTs__all'>
@@ -116,9 +150,23 @@ const NFTsExpandedSection = (props) => {
               </div>
             );
           })}
+          <div
+            className='NFTs__button NFTs__filter'
+            onClick={() => handleRoundChange('prev')}
+          >
+            {'<'}
+          </div>
+          <div className='NFTs__button NFTs__filter'>
+            {`Round ${currentRound}`}
+          </div>
+          <div
+            className='NFTs__button NFTs__filter'
+            onClick={() => handleRoundChange('next')}
+          >
+            {'>'}
+          </div>
         </div>
       </div>
-
       <div className='NFTs__all__container'>
         <div className='NFTs__all__grid'>
           {props.allNfts.map((nft, index) => {
@@ -178,7 +226,6 @@ const NFTs = (props) => {
       const response = await fetchWrapper(getNFTByTokenId, { mode: 'cors' });
       if (response.data) {
         let newNFTs = [response.data, ...myNFTs];
-        // Remove duplicate tokenIds
         let uniqueNFTs = newNFTs.filter(
           (nft, index, self) =>
             index === self.findIndex((t) => t.tokenId === nft.tokenId)
@@ -298,7 +345,7 @@ const NFTs = (props) => {
       }
     }
     getNfts();
-  }, [props.queryAddress, expanded, allNftPagination]);
+  }, [props.queryAddress, expanded, allNftPagination, activeFilter]);
 
   const resetPagination = () => {
     setAllNftPagination((prev) => ({

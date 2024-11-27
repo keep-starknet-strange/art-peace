@@ -113,6 +113,13 @@ export const getHotNftsFn = async (params) => {
   );
 };
 
+export const getRoundNftsFn = async (params) => {
+  const { page, pageLength, queryAddress, roundNumber } = params;
+  return await fetchWrapper(
+    `get-round-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}&round=${roundNumber}`
+  );
+};
+
 export const getChainFactionMembers = async (query) => {
   return await fetchWrapper(
     `get-chain-faction-members?factionId=${query.factionId}&page=${query.page}&pageLength=${query.pageLength}`
