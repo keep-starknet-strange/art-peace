@@ -67,9 +67,10 @@ export const getMyNftsFn = async (query) => {
  * @param {number} query.page - The page number to fetch.
  * @returns {Promise<Object>} The response from the fetch call.
  */
-export const getNftsFn = async (query) => {
+export const getNftsFn = async (params) => {
+  const { page, pageLength, queryAddress, roundNumber } = params;
   return await fetchWrapper(
-    `get-nfts?pageLength=${query.pageLength}&page=${query.page}`
+    `get-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}&round=${roundNumber}`
   );
 };
 
@@ -84,9 +85,9 @@ export const getChainFactions = async (query) => {
 };
 
 export const getNewNftsFn = async (params) => {
-  const { page, pageLength, queryAddress } = params;
+  const { page, pageLength, queryAddress, roundNumber } = params;
   return await fetchWrapper(
-    `get-new-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+    `get-new-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}&round=${roundNumber}`
   );
 };
 
@@ -100,16 +101,16 @@ export const getNewNftsFn = async (params) => {
  * @returns {Promise<Object>} The response from the fetch call.
  */
 export const getTopNftsFn = async (params) => {
-  const { page, pageLength, queryAddress } = params;
+  const { page, pageLength, queryAddress, roundNumber } = params;
   return await fetchWrapper(
-    `get-top-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+    `get-top-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}&round=${roundNumber}`
   );
 };
 
 export const getHotNftsFn = async (params) => {
-  const { page, pageLength, queryAddress } = params;
+  const { page, pageLength, queryAddress, roundNumber } = params;
   return await fetchWrapper(
-    `get-hot-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+    `get-hot-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}&round=${roundNumber}`
   );
 };
 

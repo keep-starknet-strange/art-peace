@@ -95,12 +95,13 @@ const NFTsMainSection = (props) => {
 };
 
 const NFTsExpandedSection = (props) => {
-  const [currentRound, setCurrentRound] = useState(parseInt('100'));
+  const [currentRound, setCurrentRound] = useState(1);
+  const dayIndex = currentRound - 1;
   const imageURL = `${nftUrl}/nft/round-${currentRound}/images/`;
   const metadataURL = `${nftUrl}/nft/round-${currentRound}/metadata/`;
 
   const handleRoundChange = (direction) => {
-    const maxRound = parseInt('100');
+    const maxRound = 100;
 
     if (direction === 'prev' && currentRound > 1) {
       setCurrentRound((prev) => prev - 1);
@@ -112,44 +113,88 @@ const NFTsExpandedSection = (props) => {
   };
 
   useEffect(() => {
-    async function fetchRoundNfts() {
+    async function getNfts() {
       try {
-        const result = await getRoundNftsFn({
-          page: props.allNftPagination.page,
-          pageLength: props.allNftPagination.pageLength,
-          queryAddress: props.queryAddress,
-          roundNumber: currentRound
-        });
+        let result;
+        if (props.activeFilter === 'hot') {
+          result = await getHotNftsFn({
+            page: props.allNftPagination.page,
+            pageLength: props.allNftPagination.pageLength,
+            queryAddress: props.queryAddress,
+            roundNumber: dayIndex
+          });
+        } else if (props.activeFilter === 'new') {
+          result = await getNewNftsFn({
+            page: props.allNftPagination.page,
+            pageLength: props.allNftPagination.pageLength,
+            queryAddress: props.queryAddress,
+            roundNumber: dayIndex
+          });
+        } else if (props.activeFilter === 'top') {
+          result = await getTopNftsFn({
+            page: props.allNftPagination.page,
+            pageLength: props.allNftPagination.pageLength,
+            queryAddress: props.queryAddress,
+            roundNumber: dayIndex
+          });
+        } else {
+          result = await getRoundNftsFn({
+            page: props.allNftPagination.page,
+            pageLength: props.allNftPagination.pageLength,
+            queryAddress: props.queryAddress,
+            roundNumber: dayIndex
+          });
+        }
 
         if (result.data) {
-          props.setAllNFTs(result.data);
+          const roundNfts = result.data.filter(
+            (nft) => nft.dayIndex === dayIndex
+          );
+
+          if (props.allNftPagination.page === 1) {
+            props.setAllNFTs(roundNfts);
+          } else {
+            const newNfts = roundNfts.filter(
+              (nft) =>
+                !props.allNfts.some(
+                  (existingNft) => existingNft.tokenId === nft.tokenId
+                )
+            );
+            props.setAllNFTs([...props.allNfts, ...newNfts]);
+          }
         }
       } catch (error) {
-        console.log('Error fetching round NFTs:', error);
+        console.log('Error fetching NFTs:', error);
       }
     }
 
-    fetchRoundNfts();
-  }, [currentRound, props.allNftPagination.page, props.queryAddress]);
+    if (props.expanded) {
+      getNfts();
+    }
+  }, [
+    currentRound,
+    props.allNftPagination,
+    props.activeFilter,
+    props.queryAddress,
+    props.expanded
+  ]);
 
   return (
     <div className='NFTs__all'>
       <div className='NFTs__header'>
         <h2 className='NFTs__heading'>Explore</h2>
         <div className='NFTs__filters'>
-          {props.filters.map((filter, index) => {
-            return (
-              <div
-                key={index}
-                className={`NFTs__button NFTs__filter ${
-                  props.activeFilter === filter ? 'NFTs__button--selected' : ''
-                }`}
-                onClick={() => props.setActiveFilter(filter)}
-              >
-                {filter}
-              </div>
-            );
-          })}
+          {props.filters.map((filter, index) => (
+            <div
+              key={index}
+              className={`NFTs__button NFTs__filter ${
+                props.activeFilter === filter ? 'NFTs__button--selected' : ''
+              }`}
+              onClick={() => props.setActiveFilter(filter)}
+            >
+              {filter}
+            </div>
+          ))}
           <div
             className='NFTs__button NFTs__filter'
             onClick={() => handleRoundChange('prev')}
@@ -169,37 +214,29 @@ const NFTsExpandedSection = (props) => {
       </div>
       <div className='NFTs__all__container'>
         <div className='NFTs__all__grid'>
-          {props.allNfts.map((nft, index) => {
-            return (
+          {props.allNfts
+            .filter((nft) => nft.dayIndex === dayIndex)
+            .map((nft, index) => (
               <NFTItem
                 key={index}
+                {...nft}
                 address={props.address}
                 account={props.account}
                 estimateInvokeFee={props.estimateInvokeFee}
                 artPeaceContract={props.artPeaceContract}
                 canvasNftContract={props.canvasNftContract}
-                tokenId={nft.tokenId}
-                position={nft.position}
                 image={imageURL + 'nft-' + nft.tokenId + '.png'}
                 metadata={metadataURL + 'nft-' + nft.tokenId + '.json'}
-                width={nft.width}
-                height={nft.height}
-                name={nft.name}
-                blockNumber={nft.blockNumber}
-                likes={nft.likes}
-                liked={nft.liked}
-                minter={nft.minter}
                 queryAddress={props.queryAddress}
                 updateLikes={props.updateLikes}
                 setTemplateOverlayMode={props.setTemplateOverlayMode}
                 setOverlayTemplate={props.setOverlayTemplate}
                 setActiveTab={props.setActiveTab}
               />
-            );
-          })}
+            ))}
         </div>
         <PaginationView
-          data={props.allNfts}
+          data={props.allNfts.filter((nft) => nft.dayIndex === dayIndex)}
           setState={props.setAllNftPagination}
           stateValue={props.allNftPagination}
         />
