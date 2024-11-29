@@ -138,6 +138,13 @@ const NFTsExpandedSection = (props) => {
             queryAddress: props.queryAddress,
             roundNumber: dayIndex
           });
+        } else if (props.activeFilter === 'liked') {
+          result = await getLikedNftsFn({
+            page: props.allNftPagination.page,
+            pageLength: props.allNftPagination.pageLength,
+            queryAddress: props.queryAddress,
+            roundNumber: dayIndex
+          });
         } else {
           result = await getRoundNftsFn({
             page: props.allNftPagination.page,
@@ -163,6 +170,8 @@ const NFTsExpandedSection = (props) => {
             );
             props.setAllNFTs([...props.allNfts, ...newNfts]);
           }
+        } else {
+          props.setAllNFTs([]);
         }
       } catch (error) {
         console.log('Error fetching NFTs:', error);
@@ -185,21 +194,17 @@ const NFTsExpandedSection = (props) => {
       <div className='NFTs__header'>
         <h2 className='NFTs__heading'>Explore</h2>
         <div className='NFTs__filters'>
-          {props.activeFilter === 'liked' && props.allNfts.length === 0
-            ? null
-            : props.filters.map((filter, index) => (
-                <div
-                  key={index}
-                  className={`NFTs__button NFTs__filter ${
-                    props.activeFilter === filter
-                      ? 'NFTs__button--selected'
-                      : ''
-                  }`}
-                  onClick={() => props.setActiveFilter(filter)}
-                >
-                  {filter}
-                </div>
-              ))}
+          {props.filters.map((filter, index) => (
+            <div
+              key={index}
+              className={`NFTs__button NFTs__filter ${
+                props.activeFilter === filter ? 'NFTs__button--selected' : ''
+              }`}
+              onClick={() => props.setActiveFilter(filter)}
+            >
+              {filter}
+            </div>
+          ))}
           <div
             className='NFTs__button NFTs__filter'
             onClick={() => handleRoundChange('prev')}
@@ -219,26 +224,27 @@ const NFTsExpandedSection = (props) => {
       </div>
       <div className='NFTs__all__container'>
         <div className='NFTs__all__grid'>
-          {props.allNfts
-            .filter((nft) => nft.dayIndex === dayIndex)
-            .map((nft, index) => (
-              <NFTItem
-                key={index}
-                {...nft}
-                address={props.address}
-                account={props.account}
-                estimateInvokeFee={props.estimateInvokeFee}
-                artPeaceContract={props.artPeaceContract}
-                canvasNftContract={props.canvasNftContract}
-                image={imageURL + 'nft-' + nft.tokenId + '.png'}
-                metadata={metadataURL + 'nft-' + nft.tokenId + '.json'}
-                queryAddress={props.queryAddress}
-                updateLikes={props.updateLikes}
-                setTemplateOverlayMode={props.setTemplateOverlayMode}
-                setOverlayTemplate={props.setOverlayTemplate}
-                setActiveTab={props.setActiveTab}
-              />
-            ))}
+          {(props.allNfts.length > 0 || props.activeFilter !== 'liked') &&
+            props.allNfts
+              .filter((nft) => nft.dayIndex === dayIndex)
+              .map((nft, index) => (
+                <NFTItem
+                  key={index}
+                  {...nft}
+                  address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
+                  artPeaceContract={props.artPeaceContract}
+                  canvasNftContract={props.canvasNftContract}
+                  image={imageURL + 'nft-' + nft.tokenId + '.png'}
+                  metadata={metadataURL + 'nft-' + nft.tokenId + '.json'}
+                  queryAddress={props.queryAddress}
+                  updateLikes={props.updateLikes}
+                  setTemplateOverlayMode={props.setTemplateOverlayMode}
+                  setOverlayTemplate={props.setOverlayTemplate}
+                  setActiveTab={props.setActiveTab}
+                />
+              ))}
         </div>
         <PaginationView
           data={props.allNfts.filter((nft) => nft.dayIndex === dayIndex)}
