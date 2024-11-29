@@ -96,18 +96,17 @@ const NFTsMainSection = (props) => {
 };
 
 const NFTsExpandedSection = (props) => {
-  const [currentRound, setCurrentRound] = useState(1);
+  const round = process.env.REACT_APP_ROUND_NUMBER || 1;
+  const [currentRound, setCurrentRound] = useState(round);
   const dayIndex = currentRound - 1;
   const imageURL = `${nftUrl}/nft/round-${currentRound}/images/`;
   const metadataURL = `${nftUrl}/nft/round-${currentRound}/metadata/`;
 
   const handleRoundChange = (direction) => {
-    const maxRound = 100;
-
     if (direction === 'prev' && currentRound > 1) {
       setCurrentRound((prev) => prev - 1);
       props.setAllNftPagination((prev) => ({ ...prev, page: 1 }));
-    } else if (direction === 'next' && currentRound < maxRound) {
+    } else if (direction === 'next' && currentRound < round) {
       setCurrentRound((prev) => prev + 1);
       props.setAllNftPagination((prev) => ({ ...prev, page: 1 }));
     }
