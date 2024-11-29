@@ -10,7 +10,8 @@ import {
   getNewNftsFn,
   getTopNftsFn,
   getHotNftsFn,
-  getRoundNftsFn
+  getRoundNftsFn,
+  getLikedNftsFn
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
 
@@ -184,17 +185,21 @@ const NFTsExpandedSection = (props) => {
       <div className='NFTs__header'>
         <h2 className='NFTs__heading'>Explore</h2>
         <div className='NFTs__filters'>
-          {props.filters.map((filter, index) => (
-            <div
-              key={index}
-              className={`NFTs__button NFTs__filter ${
-                props.activeFilter === filter ? 'NFTs__button--selected' : ''
-              }`}
-              onClick={() => props.setActiveFilter(filter)}
-            >
-              {filter}
-            </div>
-          ))}
+          {props.activeFilter === 'liked' && props.allNfts.length === 0
+            ? null
+            : props.filters.map((filter, index) => (
+                <div
+                  key={index}
+                  className={`NFTs__button NFTs__filter ${
+                    props.activeFilter === filter
+                      ? 'NFTs__button--selected'
+                      : ''
+                  }`}
+                  onClick={() => props.setActiveFilter(filter)}
+                >
+                  {filter}
+                </div>
+              ))}
           <div
             className='NFTs__button NFTs__filter'
             onClick={() => handleRoundChange('prev')}
@@ -328,7 +333,7 @@ const NFTs = (props) => {
   }, [props.queryAddress, myNftPagination.page, myNftPagination.pageLength]);
 
   const [expanded, setExpanded] = useState(false);
-  const filters = ['hot', 'new', 'top'];
+  const filters = ['hot', 'new', 'top', 'liked'];
   const [activeFilter, setActiveFilter] = useState(filters[0]);
 
   useEffect(() => {
@@ -352,6 +357,12 @@ const NFTs = (props) => {
           });
         } else if (activeFilter === 'top') {
           result = await getTopNftsFn({
+            page: allNftPagination.page,
+            pageLength: allNftPagination.pageLength,
+            queryAddress: props.queryAddress
+          });
+        } else if (activeFilter === 'liked') {
+          result = await getLikedNftsFn({
             page: allNftPagination.page,
             pageLength: allNftPagination.pageLength,
             queryAddress: props.queryAddress

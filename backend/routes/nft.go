@@ -27,6 +27,7 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-top-nfts", getTopNFTs)
 	http.HandleFunc("/get-hot-nfts", getHotNFTs)
 	http.HandleFunc("/get-round-nfts", getRoundNFTs)
+	http.HandleFunc("/get-liked-nfts", getLikedNFTs)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/mint-nft-devnet", mintNFTDevnet)
 		http.HandleFunc("/like-nft-devnet", likeNFTDevnet)
@@ -95,6 +96,11 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
+	roundNumber, err := strconv.Atoi(r.URL.Query().Get("round"))
+	if err != nil {
+		roundNumber = -1
+	}
+
 	query := `
         SELECT 
             nfts.*, 
@@ -113,9 +119,10 @@ func getMyNFTs(w http.ResponseWriter, r *http.Request) {
         ) nftlikes ON nfts.token_id = nftlikes.nftKey
         WHERE 
             nfts.owner = $1
+            AND ($4 < 0 OR nfts.day_index = $4)
         ORDER BY nfts.token_id DESC
         LIMIT $2 OFFSET $3`
-	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset)
+	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset, roundNumber)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
 		return
@@ -577,7 +584,7 @@ func getRoundNFTs(w http.ResponseWriter, r *http.Request) {
 		address = "0"
 	}
 	roundNumber, err := strconv.Atoi(r.URL.Query().Get("round"))
-	if err != nil || roundNumber <= 0 {
+	if err != nil || roundNumber < 0 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid round number")
 		return
 	}
@@ -617,6 +624,66 @@ func getRoundNFTs(w http.ResponseWriter, r *http.Request) {
 	nfts, err := core.PostgresQueryJson[NFTData](query, address, roundNumber, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve NFTs")
+		return
+	}
+	routeutils.WriteDataJson(w, string(nfts))
+}
+
+func getLikedNFTs(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" || address == "0" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Valid address required for liked NFTs")
+		return
+	}
+
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	roundNumber, err := strconv.Atoi(r.URL.Query().Get("round"))
+	if err != nil {
+		roundNumber = -1
+	}
+
+	query := `
+        SELECT 
+            nfts.*, 
+            COALESCE(like_count, 0) AS likes,
+            true as liked
+        FROM 
+            nfts
+        LEFT JOIN (
+            SELECT 
+                nftKey, 
+                COUNT(*) AS like_count
+            FROM 
+                nftlikes
+            GROUP BY 
+                nftKey
+        ) nftlikes ON nfts.token_id = nftlikes.nftKey
+        WHERE 
+            nfts.token_id IN (
+                SELECT nftkey 
+                FROM nftlikes 
+                WHERE liker = $1
+            )
+            AND ($4 < 0 OR nfts.day_index = $4)
+        ORDER BY nfts.token_id DESC
+        LIMIT $2 OFFSET $3`
+
+	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset, roundNumber)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve liked NFTs")
 		return
 	}
 	routeutils.WriteDataJson(w, string(nfts))

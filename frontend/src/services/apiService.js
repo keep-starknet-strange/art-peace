@@ -55,7 +55,7 @@ export const addFactionTemplateDevnet = async (metadata) => {
  */
 export const getMyNftsFn = async (query) => {
   return await fetchWrapper(
-    `get-my-nfts?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
+    `get-my-nfts?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}&round=${query.roundNumber}`
   );
 };
 
@@ -111,6 +111,13 @@ export const getHotNftsFn = async (params) => {
   const { page, pageLength, queryAddress, roundNumber } = params;
   return await fetchWrapper(
     `get-hot-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}&round=${roundNumber}`
+  );
+};
+
+export const getLikedNftsFn = async (params) => {
+  const { page, pageLength, queryAddress, roundNumber } = params;
+  return await fetchWrapper(
+    `get-liked-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}&round=${roundNumber}`
   );
 };
 
