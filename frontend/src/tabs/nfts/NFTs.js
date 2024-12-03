@@ -150,22 +150,22 @@ const NFTsExpandedSection = (props) => {
             (props.allNfts.length > 0 || props.activeFilter !== 'liked') &&
             props.allNfts.map((nft, index) => (
               <NFTItem
-                  key={index}
-                  {...nft}
-                  address={props.address}
-                  account={props.account}
-                  estimateInvokeFee={props.estimateInvokeFee}
-                  artPeaceContract={props.artPeaceContract}
-                  canvasNftContract={props.canvasNftContract}
-                  image={imageURL + 'nft-' + nft.tokenId + '.png'}
-                  metadata={metadataURL + 'nft-' + nft.tokenId + '.json'}
-                  queryAddress={props.queryAddress}
-                  updateLikes={props.updateLikes}
-                  setTemplateOverlayMode={props.setTemplateOverlayMode}
-                  setOverlayTemplate={props.setOverlayTemplate}
-                  setActiveTab={props.setActiveTab}
-                />
-              ))}
+                key={index}
+                {...nft}
+                address={props.address}
+                account={props.account}
+                estimateInvokeFee={props.estimateInvokeFee}
+                artPeaceContract={props.artPeaceContract}
+                canvasNftContract={props.canvasNftContract}
+                image={imageURL + 'nft-' + nft.tokenId + '.png'}
+                metadata={metadataURL + 'nft-' + nft.tokenId + '.json'}
+                queryAddress={props.queryAddress}
+                updateLikes={props.updateLikes}
+                setTemplateOverlayMode={props.setTemplateOverlayMode}
+                setOverlayTemplate={props.setOverlayTemplate}
+                setActiveTab={props.setActiveTab}
+              />
+            ))}
         </div>
         <PaginationView
           data={props.allNfts.filter((nft) => nft.dayIndex === dayIndex)}
