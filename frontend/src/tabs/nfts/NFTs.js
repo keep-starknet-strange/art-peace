@@ -96,9 +96,8 @@ const NFTsMainSection = (props) => {
 };
 
 const NFTsExpandedSection = (props) => {
-  const round = process.env.REACT_APP_ROUND_NUMBER || 1;
-  const [currentRound, setCurrentRound] = useState(round);
-  const dayIndex = currentRound - 1;
+  const maxRound = parseInt(process.env.REACT_APP_ROUND_NUMBER || '1');
+  const [currentRound, setCurrentRound] = useState(maxRound);
   const imageURL = `${nftUrl}/nft/round-${currentRound}/images/`;
   const metadataURL = `${nftUrl}/nft/round-${currentRound}/metadata/`;
 
@@ -106,87 +105,11 @@ const NFTsExpandedSection = (props) => {
     if (direction === 'prev' && currentRound > 1) {
       setCurrentRound((prev) => prev - 1);
       props.setAllNftPagination((prev) => ({ ...prev, page: 1 }));
-    } else if (direction === 'next' && currentRound < round) {
+    } else if (direction === 'next' && currentRound < maxRound) {
       setCurrentRound((prev) => prev + 1);
       props.setAllNftPagination((prev) => ({ ...prev, page: 1 }));
     }
   };
-
-  useEffect(() => {
-    async function getNfts() {
-      try {
-        let result;
-        if (props.activeFilter === 'hot') {
-          result = await getHotNftsFn({
-            page: props.allNftPagination.page,
-            pageLength: props.allNftPagination.pageLength,
-            queryAddress: props.queryAddress,
-            roundNumber: dayIndex
-          });
-        } else if (props.activeFilter === 'new') {
-          result = await getNewNftsFn({
-            page: props.allNftPagination.page,
-            pageLength: props.allNftPagination.pageLength,
-            queryAddress: props.queryAddress,
-            roundNumber: dayIndex
-          });
-        } else if (props.activeFilter === 'top') {
-          result = await getTopNftsFn({
-            page: props.allNftPagination.page,
-            pageLength: props.allNftPagination.pageLength,
-            queryAddress: props.queryAddress,
-            roundNumber: dayIndex
-          });
-        } else if (props.activeFilter === 'liked') {
-          result = await getLikedNftsFn({
-            page: props.allNftPagination.page,
-            pageLength: props.allNftPagination.pageLength,
-            queryAddress: props.queryAddress,
-            roundNumber: dayIndex
-          });
-        } else {
-          result = await getRoundNftsFn({
-            page: props.allNftPagination.page,
-            pageLength: props.allNftPagination.pageLength,
-            queryAddress: props.queryAddress,
-            roundNumber: dayIndex
-          });
-        }
-
-        if (result.data) {
-          const roundNfts = result.data.filter(
-            (nft) => nft.dayIndex === dayIndex
-          );
-
-          if (props.allNftPagination.page === 1) {
-            props.setAllNFTs(roundNfts);
-          } else {
-            const newNfts = roundNfts.filter(
-              (nft) =>
-                !props.allNfts.some(
-                  (existingNft) => existingNft.tokenId === nft.tokenId
-                )
-            );
-            props.setAllNFTs([...props.allNfts, ...newNfts]);
-          }
-        } else {
-          props.setAllNFTs([]);
-        }
-      } catch (error) {
-        console.log('Error fetching NFTs:', error);
-      }
-    }
-
-    if (props.expanded) {
-      getNfts();
-    }
-  }, [
-    currentRound,
-    props.allNftPagination,
-    props.activeFilter,
-    props.queryAddress,
-    props.expanded
-  ]);
 
   return (
     <div className='NFTs__all'>
@@ -223,11 +146,10 @@ const NFTsExpandedSection = (props) => {
       </div>
       <div className='NFTs__all__container'>
         <div className='NFTs__all__grid'>
-          {(props.allNfts.length > 0 || props.activeFilter !== 'liked') &&
-            props.allNfts
-              .filter((nft) => nft.dayIndex === dayIndex)
-              .map((nft, index) => (
-                <NFTItem
+          {currentRound === maxRound &&
+            (props.allNfts.length > 0 || props.activeFilter !== 'liked') &&
+            props.allNfts.map((nft, index) => (
+              <NFTItem
                   key={index}
                   {...nft}
                   address={props.address}
