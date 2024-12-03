@@ -10,7 +10,6 @@ import {
   getNewNftsFn,
   getTopNftsFn,
   getHotNftsFn,
-  getRoundNftsFn,
   getLikedNftsFn
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
@@ -168,7 +167,7 @@ const NFTsExpandedSection = (props) => {
             ))}
         </div>
         <PaginationView
-          data={props.allNfts.filter((nft) => nft.dayIndex === dayIndex)}
+          data={props.allNfts}
           setState={props.setAllNftPagination}
           stateValue={props.allNftPagination}
         />
