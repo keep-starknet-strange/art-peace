@@ -21,13 +21,8 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get round number from query params, default to config round
-	roundNumber := r.URL.Query().Get("round")
-	if roundNumber == "" {
-		roundNumber = strconv.FormatUint(uint64(core.ArtPeaceBackend.CanvasConfig.Round), 10)
-	}
-
-	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
+  roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
+	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
 
 	if core.ArtPeaceBackend.Databases.Redis.Exists(context.Background(), canvasKey).Val() == 0 {
 		totalBitSize := core.ArtPeaceBackend.CanvasConfig.Canvas.Width * core.ArtPeaceBackend.CanvasConfig.Canvas.Height * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
@@ -46,9 +41,9 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		routeutils.WriteResultJson(w, fmt.Sprintf("Canvas for round %s initialized", roundNumber))
+		routeutils.WriteResultJson(w, fmt.Sprintf("Canvas for round %d initialized", roundNumber))
 	} else {
-		routeutils.WriteErrorJson(w, http.StatusConflict, fmt.Sprintf("Canvas for round %s already initialized", roundNumber))
+		routeutils.WriteErrorJson(w, http.StatusConflict, fmt.Sprintf("Canvas for round %d already initialized", roundNumber))
 	}
 }
 
@@ -58,7 +53,7 @@ func getCanvas(w http.ResponseWriter, r *http.Request) {
 	// Get round number from query params, default to config round
 	roundNumber := r.URL.Query().Get("round")
 	if roundNumber == "" {
-		roundNumber = strconv.FormatUint(uint64(core.ArtPeaceBackend.CanvasConfig.Round), 10)
+		roundNumber = strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.Round))
 	}
 
 	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
