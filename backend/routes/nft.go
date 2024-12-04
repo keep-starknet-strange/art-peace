@@ -499,6 +499,9 @@ func getHotNFTs(w http.ResponseWriter, r *http.Request) {
 	if err != nil || hotLimit <= 0 {
 		hotLimit = 100
 	}
+	if hotLimit > 500 {
+		hotLimit = 500
+	}
 	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
 	if err != nil || pageLength <= 0 {
 		pageLength = 25

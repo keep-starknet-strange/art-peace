@@ -62,13 +62,25 @@
   pointer-events: none;
 }
 
-.App__logo--mobile {
+.App__logo {
   position: fixed;
   z-index: 99;
   left: 1rem;
   top: 1rem;
   width: min(8rem, 15%);
-  image-rendering: pixelated;
+}
+
+.App__logo--mobile {
+  position: absolute;
+  z-index: 101;
+  width: 100%;
+}
+
+.App__logo--round {
+  position: absolute;
+  z-index: 102;
+  left: 55%;
+  width: 100%;
 }
 
 .App__logo--rotating {

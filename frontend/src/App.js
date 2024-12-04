@@ -31,14 +31,42 @@ import { fetchWrapper, getTodaysStartTime } from './services/apiService.js';
 import art_peace_abi from './contracts/art_peace.abi.json';
 import username_store_abi from './contracts/username_store.abi.json';
 import canvas_nft_abi from './contracts/canvas_nft.abi.json';
+import multi_canvas_abi from './contracts/multi_canvas.abi.json';
 import NotificationPanel from './tabs/NotificationPanel.js';
 import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
+  const worldsMode = true;
+  const [openedWorldId, setOpenedWorldId] = useState(null);
+  const [activeWorld, setActiveWorld] = useState(null);
+
+  // Page management
+  useEffect(() => {
+    if (location.pathname.startsWith('/worlds/')) {
+      setOpenedWorldId(location.pathname.split('/worlds/')[1]);
+    } else {
+      setOpenedWorldId(null);
+    }
+  }, [location.pathname]);
+
   // Window management
   usePreventZoom();
-  const tabs = ['Canvas', 'Factions', 'Quests', 'Vote', 'NFTs', 'Account'];
+  /*
+  const tabs = [
+    'Canvas',
+    'Factions',
+    'NFTs',
+    'Quests',
+    'Vote',
+    'Worlds',
+    'Account'
+  ];
+  */
+  // TODO: Add features back
+  const tabs = devnetMode
+    ? ['Canvas', 'Worlds', 'Stencils', 'Account']
+    : ['Canvas', 'Factions', 'NFTs', 'Quests', 'Vote', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   useLockScroll(activeTab === 'Canvas');
 
@@ -106,6 +134,7 @@ function App() {
   const [artPeaceContract, setArtPeaceContract] = useState(null);
   const [usernameContract, setUsernameContract] = useState(null);
   const [canvasNftContract, setCanvasNftContract] = useState(null);
+  const [multiCanvasContract, setMultiCanvasContract] = useState(null);
 
   useEffect(() => {
     if (!connected) return;
@@ -125,11 +154,18 @@ function App() {
       process.env.REACT_APP_CANVAS_NFT_CONTRACT_ADDRESS,
       account
     );
+    const multiCanvasContract = new Contract(
+      multi_canvas_abi,
+      process.env.REACT_APP_CANVAS_FACTORY_CONTRACT_ADDRESS,
+      account
+    );
     setArtPeaceContract(artPeaceContract);
     setUsernameContract(usernameContract);
     setCanvasNftContract(canvasNftContract);
+    setMultiCanvasContract(multiCanvasContract);
   }, [connected, account]);
 
+  const [timeBetweenPlacements, setTimeBetweenPlacements] = useState(30 * 1000);
   const [currentDay, setCurrentDay] = useState(0);
   const [isLastDay, setIsLastDay] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
@@ -137,37 +173,56 @@ function App() {
   const [endTimestamp, setEndTimestamp] = useState(0);
   useEffect(() => {
     const fetchGameData = async () => {
-      let response = await fetchWrapper('get-game-data');
-      if (!response.data) {
-        return;
-      }
-      setCurrentDay(response.data.day);
-      if (devnetMode) {
-        const days = 4;
-        if (response.data.day >= days) {
-          setGameEnded(true);
-        } else if (response.data.day === days - 1) {
-          setIsLastDay(true);
+      try {
+        let response = await fetchWrapper('get-game-data');
+        if (!response.data) {
+          return;
         }
-      } else {
-        let now = new Date();
-        const result = await getTodaysStartTime();
-        let dayEnd = new Date(result.data);
-        dayEnd.setHours(dayEnd.getHours() + 24);
-        // Now in seconds
-        let nowInSeconds = Math.floor(now.getTime() / 1000);
-        let dayEndInSeconds = Math.floor(dayEnd.getTime() / 1000);
-        if (nowInSeconds >= response.data.endTime) {
-          setGameEnded(true);
-        } else if (dayEndInSeconds >= response.data.endTime) {
-          setIsLastDay(true);
+        setCurrentDay(response.data.day);
+        if (devnetMode) {
+          const days = 4;
+          if (response.data.day >= days) {
+            setGameEnded(true);
+          } else if (response.data.day === days - 1) {
+            setIsLastDay(true);
+          }
+        } else {
+          let now = new Date();
+          const result = await getTodaysStartTime();
+          let dayEnd = new Date(result.data);
+          dayEnd.setHours(dayEnd.getHours() + 24);
+          // Now in seconds
+          let nowInSeconds = Math.floor(now.getTime() / 1000);
+          let dayEndInSeconds = Math.floor(dayEnd.getTime() / 1000);
+          if (nowInSeconds >= response.data.endTime) {
+            setGameEnded(true);
+          } else if (dayEndInSeconds >= response.data.endTime) {
+            setIsLastDay(true);
+          }
         }
+        setHost(response.data.host);
+        setEndTimestamp(response.data.endTime);
+        setTimeBetweenPlacements(process.env.REACT_APP_BASE_PIXEL_TIMER); // Example: 30 * 1000; // 30 seconds
+      } catch (error) {
+        console.error(error);
       }
-      setHost(response.data.host);
-      setEndTimestamp(response.data.endTime);
     };
-    fetchGameData();
-  }, []);
+    if (!worldsMode && openedWorldId === null) {
+      fetchGameData();
+    } else if (activeWorld !== null) {
+      let now = new Date();
+      let nowInSeconds = Math.floor(now.getTime() / 1000);
+      let endTime = new Date(activeWorld.endTime).getTime() / 1000;
+      if (nowInSeconds >= endTime) {
+        setGameEnded(true);
+      } else {
+        setGameEnded(false);
+      }
+      setHost(activeWorld.host);
+      setEndTimestamp(endTime);
+      setTimeBetweenPlacements(activeWorld.timeBetweenPixels * 1000);
+    }
+  }, [activeWorld, openedWorldId]);
 
   // Websocket
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(wsUrl, {
@@ -197,7 +252,11 @@ function App() {
 
   const fetchColors = async () => {
     try {
-      let getColorsEndpoint = backendUrl + '/get-colors';
+      let getColorsEndpoint =
+        backendUrl +
+        (openedWorldId == null
+          ? '/get-colors'
+          : `/get-worlds-colors?worldId=${openedWorldId}`);
       let response = await fetch(getColorsEndpoint);
       let colors = await response.json();
       if (colors.error) {
@@ -215,13 +274,22 @@ function App() {
   };
   useEffect(() => {
     fetchColors();
-  }, []);
+  }, [openedWorldId]);
 
   useEffect(() => {
     const processMessage = async (message) => {
       if (message) {
         // Check the message type and handle accordingly
         if (message.messageType === 'colorPixel') {
+          if (message.color >= colors.length) {
+            // Get new colors from backend
+            await fetchColors();
+          }
+          colorPixel(message.position, message.color);
+        } else if (message.messageType === 'colorWorldPixel') {
+          if (message.worldId.toString() !== openedWorldId) {
+            return;
+          }
           if (message.color >= colors.length) {
             // Get new colors from backend
             await fetchColors();
@@ -242,8 +310,8 @@ function App() {
   }, [lastJsonMessage]);
 
   // Canvas
-  const width = canvasConfig.canvas.width;
-  const height = canvasConfig.canvas.height;
+  const [width, setWidth] = useState(canvasConfig.canvas.width);
+  const [height, setHeight] = useState(canvasConfig.canvas.height);
 
   const canvasRef = useRef(null);
   const extraPixelsCanvasRef = useRef(null);
@@ -284,7 +352,12 @@ function App() {
   const [isExtraDeleteMode, setIsExtraDeleteMode] = React.useState(false);
 
   useEffect(() => {
-    const getLastPlacedPixel = `get-last-placed-time?address=${queryAddress}`;
+    let getLastPlacedPixel = '';
+    if (openedWorldId === null) {
+      getLastPlacedPixel = `get-last-placed-time?address=${queryAddress}`;
+    } else {
+      getLastPlacedPixel = `get-worlds-last-placed-time?address=${queryAddress}&worldId=${openedWorldId}`;
+    }
     async function fetchGetLastPlacedPixel() {
       const response = await fetchWrapper(getLastPlacedPixel);
       if (!response.data) {
@@ -295,11 +368,9 @@ function App() {
     }
 
     fetchGetLastPlacedPixel();
-  }, [queryAddress]);
+  }, [queryAddress, openedWorldId]);
 
   const updateInterval = 1000; // 1 second
-  // TODO: make this a config
-  const timeBetweenPlacements = process.env.REACT_APP_BASE_PIXEL_TIMER; // Example: 30 * 1000; // 30 seconds
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
 
   useEffect(() => {
@@ -329,7 +400,7 @@ function App() {
     updateBasePixelTimer(); // Call immediately
 
     return () => clearInterval(interval);
-  }, [lastPlacedTime]);
+  }, [lastPlacedTime, timeBetweenPlacements]);
 
   const [chainFactionPixelTimers, setChainFactionPixelTimers] = useState([]);
   useEffect(() => {
@@ -370,7 +441,7 @@ function App() {
     }, updateInterval);
     updateChainFactionPixelTimers();
     return () => clearInterval(interval);
-  }, [chainFactionPixelsData]);
+  }, [chainFactionPixelsData, timeBetweenPlacements]);
 
   const [factionPixelTimers, setFactionPixelTimers] = useState([]);
   useEffect(() => {
@@ -411,7 +482,7 @@ function App() {
     }, updateInterval);
     updateFactionPixelTimers();
     return () => clearInterval(interval);
-  }, [factionPixelsData]);
+  }, [factionPixelsData, timeBetweenPlacements]);
 
   useEffect(() => {
     let totalChainFactionPixels = 0;
@@ -811,6 +882,37 @@ function App() {
   const [nftWidth, setNftWidth] = useState(null);
   const [nftHeight, setNftHeight] = useState(null);
 
+  // Worlds
+  const [worldsCreationMode, setWorldsCreationMode] = useState(false);
+  useEffect(() => {
+    // TODO: Done twice ( here and src/tabs/worlds/Worlds.js )
+    const getWorld = async () => {
+      const getWorldPath = `get-world?worldId=${openedWorldId}`;
+      const response = await fetchWrapper(getWorldPath);
+      if (!response.data) {
+        return;
+      }
+      setActiveWorld(response.data);
+      setWidth(response.data.width);
+      setHeight(response.data.height);
+    };
+    if (openedWorldId === null) {
+      setActiveWorld(null);
+      setWidth(canvasConfig.canvas.width);
+      setHeight(canvasConfig.canvas.height);
+    } else {
+      getWorld();
+    }
+  }, [openedWorldId]);
+
+  // Stencils
+  const [openedStencilId, setOpenedStencilId] = useState(null);
+  const [stencilImage, setStencilImage] = useState(null);
+  const [stencilColorIds, setStencilColorIds] = useState([]);
+  const [stencilCreationMode, setStencilCreationMode] = useState(false);
+  const [stencilCreationSelected, setStencilCreationSelected] = useState(false);
+  const [stencilPosition, setStencilPosition] = useState(0);
+
   const [loadingRequest, _setLoadingRequest] = useState(false);
   const estimateInvokeFee = async ({
     contractAddress,
@@ -1064,10 +1166,22 @@ function App() {
         {modal && <ModalPanel modal={modal} setModal={setModal} />}
         <CanvasContainer
           colorPixel={colorPixel}
+          openedWorldId={openedWorldId}
+          activeWorld={activeWorld}
+          width={width}
+          height={height}
           address={address}
           account={account}
           estimateInvokeFee={estimateInvokeFee}
           artPeaceContract={artPeaceContract}
+          stencilCreationMode={stencilCreationMode}
+          stencilImage={stencilImage}
+          stencilColorIds={stencilColorIds}
+          stencilCreationSelected={stencilCreationSelected}
+          setStencilCreationSelected={setStencilCreationSelected}
+          setStencilCreationMode={setStencilCreationMode}
+          stencilPosition={stencilPosition}
+          setStencilPosition={setStencilPosition}
           colors={colors}
           canvasRef={canvasRef}
           extraPixelsCanvasRef={extraPixelsCanvasRef}
@@ -1113,13 +1227,14 @@ function App() {
           setLastPlacedTime={setLastPlacedTime}
         />
         {(!isMobile || activeTab === tabs[0]) && (
-          <img
-            src={logo}
-            alt='logo'
-            className={`App__logo--mobile ${
-              loadingRequest ? 'App__logo--rotating' : ''
-            }`}
-          />
+          <div className='App__logo'>
+            <img
+              src={logo}
+              alt='logo'
+              className={`App__logo--mobile ${loadingRequest ? 'App__logo--rotating' : ''}`}
+            />
+            <p className='App__logo--round'>3</p>
+          </div>
         )}
         <div
           className={
@@ -1130,6 +1245,11 @@ function App() {
           }
         >
           <TabPanel
+            openedWorldId={openedWorldId}
+            setOpenedWorldId={setOpenedWorldId}
+            openedStencilId={openedStencilId}
+            setOpenedStencilId={setOpenedStencilId}
+            activeWorld={activeWorld}
             colorPixel={colorPixel}
             address={address}
             queryAddress={queryAddress}
@@ -1142,6 +1262,7 @@ function App() {
             artPeaceContract={artPeaceContract}
             usernameContract={usernameContract}
             canvasNftContract={canvasNftContract}
+            multiCanvasContract={multiCanvasContract}
             setNotificationMessage={setNotificationMessage}
             colors={colors}
             activeTab={activeTab}
@@ -1151,8 +1272,20 @@ function App() {
             isMobile={isMobile}
             templateOverlayMode={templateOverlayMode}
             setTemplateOverlayMode={setTemplateOverlayMode}
+            worldsCreationMode={worldsCreationMode}
+            setWorldsCreationMode={setWorldsCreationMode}
+            stencilCreationMode={stencilCreationMode}
+            setStencilCreationMode={setStencilCreationMode}
             overlayTemplate={overlayTemplate}
             setOverlayTemplate={setOverlayTemplate}
+            stencilImage={stencilImage}
+            setStencilImage={setStencilImage}
+            stencilColorIds={stencilColorIds}
+            setStencilColorIds={setStencilColorIds}
+            stencilCreationSelected={stencilCreationSelected}
+            setStencilCreationSelected={setStencilCreationSelected}
+            stencilPosition={stencilPosition}
+            setStencilPosition={setStencilPosition}
             templateFaction={templateFaction}
             setTemplateFaction={setTemplateFaction}
             templateImage={templateImage}
@@ -1226,6 +1359,8 @@ function App() {
             isLastDay={isLastDay}
             endTimestamp={endTimestamp}
             host={host}
+            width={width}
+            height={height}
             isDefending={isDefending}
           />
         </div>

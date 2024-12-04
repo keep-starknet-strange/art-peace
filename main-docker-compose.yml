@@ -1,0 +1,157 @@
+version: "3"
+
+services:
+  redis:
+    image: redis:7.2.4-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    command: redis-server
+    volumes:
+      - redis:/data
+  postgres:
+    image: postgres:14.11-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=art-peace-user
+      - POSTGRES_DB=art-peace-db
+  backend:
+    build:
+      dockerfile: backend/Dockerfile
+      context: .
+    ports:
+      - 8080:8080
+    links:
+      - redis
+      - postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=password
+      - ART_PEACE_END_TIME=3000000000
+      - ART_PEACE_HOST=0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
+      - ROUND_NUMBER=1
+  consumer:
+    build:
+      dockerfile: backend/Dockerfile.consumer
+      context: .
+    ports:
+      - 8081:8081
+    links:
+      - redis
+      - postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=password
+      - ROUND_NUMBER=1
+    volumes:
+      - nfts:/app/nfts
+  devnet:
+    image: shardlabs/starknet-devnet-rs:0.0.3
+    command:
+      - --dump-on=transaction
+      - --dump-path=/data/dump
+      - --seed=42
+    volumes:
+      - devnet:/data
+    ports:
+      - 5050:5050
+  deployer:
+    build:
+      dockerfile: onchain/Dockerfile.init
+      context: .
+    depends_on:
+      - devnet
+    restart: no
+    command: bash -c "./initialize.sh"
+    environment:
+      - SCARB=/root/.local/bin/scarb
+    volumes:
+      - configs:/configs
+  updater:
+    build:
+      dockerfile: onchain/Dockerfile.update
+      context: .
+    depends_on:
+      devnet:
+        condition: service_started
+      deployer:
+        condition: service_completed_successfully
+    command: bash -c "./update_devnet.sh"
+    volumes:
+      - configs:/configs
+  apibara:
+    image: quay.io/apibara/starknet:1.5.0
+    command:
+      - start
+      - --rpc=http://devnet:5050/rpc
+      - --name=devnet
+      - --head-refresh-interval-ms=1000
+      - --wait-for-rpc
+      - --address=0.0.0.0:7171
+    environment:
+      - XDG_DATA_HOME=/data
+    volumes:
+      - apibara:/data
+    ports:
+      - 7171:7171
+    links:
+      - backend
+      - devnet
+    depends_on:
+      devnet:
+        condition: service_started
+  indexer:
+    build:
+      dockerfile: indexer/Dockerfile
+      context: .
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+      apibara:
+        condition: service_started
+    links:
+      - backend
+      - apibara
+    environment:
+      - APIBARA_STREAM_URL=http://art-peace-apibara-1:7171
+      - CONSUMER_TARGET_URL=http://art-peace-consumer-1:8081/consume-indexer-msg
+      - PERSIST_TO_REDIS=redis://art-peace-redis-1:6379
+      - INDEXER_ID=art-peace-indexer-id
+    volumes:
+      - configs:/configs
+    restart: on-failure
+  frontend:
+    build:
+      dockerfile: frontend/Dockerfile
+      context: .
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+    ports:
+      - 3000:3000
+    links:
+      - backend
+      - devnet
+    environment:
+      - REACT_APP_BASE_PIXEL_TIMER=30000
+      - REACT_APP_ROUND_NUMBER=1
+    volumes:
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/package-lock.json:/app/package-lock.json
+      - ./frontend/public/:/app/public
+      - ./frontend/src:/app/src
+      - configs:/app/src/configs
+
+volumes:
+  redis:
+  postgres:
+  nfts:
+  devnet:
+  apibara:
+  configs:

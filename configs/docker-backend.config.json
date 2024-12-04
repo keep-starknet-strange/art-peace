@@ -18,7 +18,15 @@
     "join_faction_devnet": "/scripts/join_faction.sh",
     "leave_faction_devnet": "/scripts/leave_faction.sh",
     "add_faction_template_devnet": "/scripts/add_faction_template.sh",
-    "remove_faction_template_devnet": "/scripts/remove_faction_template.sh"
+    "remove_faction_template_devnet": "/scripts/remove_faction_template.sh",
+    "create_canvas_devnet": "/scripts/create_canvas.sh",
+    "favorite_world_devnet": "/scripts/favorite_world.sh",
+    "unfavorite_world_devnet": "/scripts/unfavorite_world.sh",
+    "place_world_pixel_devnet": "/scripts/place_world_pixel.sh",
+    "add_stencil_devnet": "/scripts/add_stencil.sh",
+    "remove_stencil_devnet": "/scripts/remove_stencil.sh",
+    "favorite_stencil_devnet": "/scripts/favorite_stencil.sh",
+    "unfavorite_stencil_devnet": "/scripts/unfavorite_stencil.sh"
   },
   "production": false,
   "websocket": {

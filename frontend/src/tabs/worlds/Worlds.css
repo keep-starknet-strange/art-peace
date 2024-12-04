@@ -1,0 +1,137 @@
+.Worlds__main {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+
+  transition: all 0.5s;
+}
+
+.Worlds__main__expanded {
+  position: relative;
+  width: min(100%, 40rem);
+  margin: 0 auto;
+  transition: all 0.5s;
+}
+
+.Worlds__container {
+  height: 55vh;
+  display: grid;
+  grid-template-columns: minmax(25rem, 1fr);
+  grid-template-rows: min-content;
+  margin: 0.5rem;
+  padding: 0.5rem;
+  overflow: scroll;
+}
+
+.Worlds__header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: space-between;
+  padding: 0.5rem;
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
+}
+
+.Worlds__heading {
+  font-size: 1.6rem;
+  padding: 0;
+  padding-bottom: 0.5rem;
+  margin: 0;
+  text-decoration: underline;
+}
+
+.Worlds__nowallet {
+  text-align: center;
+}
+
+.Worlds__buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.Worlds__button {
+  padding: 1rem;
+  font-size: 1.2rem;
+  text-align: center;
+  border-radius: 2rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  border: 0.1rem solid rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.Worlds__button:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+}
+
+.Worlds__button:active {
+  transform: scale(1) translateY(2px);
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+}
+
+.Worlds__button--selected {
+  background-color: rgba(30, 30, 70, 0.15);
+  transform: scale(1.02);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(30, 30, 70, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 0.7rem rgba(30, 30, 70, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 30, 70, 0);
+  }
+}
+
+.Worlds__all {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.Worlds__all__container {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  height: 55vh;
+  width: 100%;
+  overflow: scroll;
+}
+
+.Worlds__all__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
+  grid-template-rows: min-content;
+}
+
+.Worlds__all__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+
+  height: 13rem;
+}
+
+.Worlds__filters {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  margin: 0 0.5rem;
+}
+
+.Worlds__filter {
+  margin: 0 0.5rem;
+}
