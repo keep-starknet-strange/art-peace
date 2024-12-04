@@ -272,7 +272,9 @@ const FactionTemplateBuilderPanel = (props) => {
                   Cancel
                 </div>
                 <div
-                  className={`Button__primary FactionTemplateBuilderPanel__button ${!props.templateCreationSelected ? 'Button__disabled' : ''}`}
+                  className={`Button__primary FactionTemplateBuilderPanel__button ${
+                    !props.templateCreationSelected ? 'Button__disabled' : ''
+                  }`}
                   onClick={() => submit()}
                 >
                   Submit

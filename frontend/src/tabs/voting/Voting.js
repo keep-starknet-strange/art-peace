@@ -148,7 +148,9 @@ const Voting = (props) => {
           >
             <p className='Text__medium'>Voting has ended</p>
             <p
-              className={`Text__small Voting__timer ${props.newDayAvailable ? 'Voting__timer--active' : ''}`}
+              className={`Text__small Voting__timer ${
+                props.newDayAvailable ? 'Voting__timer--active' : ''
+              }`}
               onClick={() => props.startNextDay()}
             >
               {props.timeLeftInDay}
@@ -168,7 +170,9 @@ const Voting = (props) => {
           >
             <p className='Text__medium'>Time left to vote</p>
             <p
-              className={`Text__small Voting__timer ${props.newDayAvailable ? 'Voting__timer--active' : ''}`}
+              className={`Text__small Voting__timer ${
+                props.newDayAvailable ? 'Voting__timer--active' : ''
+              }`}
               onClick={() => props.startNextDay()}
             >
               {props.timeLeftInDay}

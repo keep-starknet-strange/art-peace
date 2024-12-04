@@ -154,7 +154,9 @@ const Quests = (props) => {
         >
           <h2 className='Text__large Heading__sub Quests__header'>Todays</h2>
           <p
-            className={`Text__small Quests__timer ${props.newDayAvailable ? 'Quests__timer--active' : ''}`}
+            className={`Text__small Quests__timer ${
+              props.newDayAvailable ? 'Quests__timer--active' : ''
+            }`}
             onClick={() => props.startNextDay()}
           >
             {props.timeLeftInDay}

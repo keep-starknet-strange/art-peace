@@ -3,6 +3,7 @@ package routes
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -26,6 +27,7 @@ func InitTemplateRoutes() {
 	http.HandleFunc("/build-template-img", buildTemplateImg)
 	http.HandleFunc("/add-template-img", addTemplateImg)
 	http.HandleFunc("/add-template-data", addTemplateData)
+	http.HandleFunc("/get-template-pixel-data", getTemplatePixelData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		// http.HandleFunc("/add-template-devnet", addTemplateDevnet)
 		http.HandleFunc("/add-faction-template-devnet", addFactionTemplateDevnet)
@@ -74,7 +76,7 @@ func hexToRGBA(colorBytes string) color.RGBA {
 	return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 }
 
-func imageToPixelData(imageData []byte) ([]int, error) {
+func imageToPixelData(imageData []byte, scaleFactor int) ([]int, error) {
 	img, _, err := image.Decode(bytes.NewReader(imageData))
 	if err != nil {
 		return nil, err
@@ -94,16 +96,20 @@ func imageToPixelData(imageData []byte) ([]int, error) {
 
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
-	pixelData := make([]int, width*height)
+	scaledWidth := width / scaleFactor
+	scaledHeight := height / scaleFactor
+	pixelData := make([]int, scaledWidth*scaledHeight)
 
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
+	for y := 0; y < height; y += scaleFactor {
+		for x := 0; x < width; x += scaleFactor {
+			newX := x / scaleFactor
+			newY := y / scaleFactor
 			rgba := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
 			if rgba.A < 128 { // Consider pixels with less than 50% opacity as transparent
-				pixelData[y*width+x] = 0xFF
+				pixelData[newY*scaledWidth+newX] = 0xFF
 			} else {
 				closestIndex := findClosestColor(rgba, palette)
-				pixelData[y*width+x] = closestIndex
+				pixelData[newY*scaledWidth+newX] = closestIndex
 			}
 		}
 	}
@@ -227,7 +233,7 @@ func buildTemplateImg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imageData, err := imageToPixelData(fileBytes)
+	imageData, err := imageToPixelData(fileBytes, 1)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
@@ -296,7 +302,7 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 	}
 	bounds := img.Bounds()
 	width, height := bounds.Max.X-bounds.Min.X, bounds.Max.Y-bounds.Min.Y
-	if width < 5 || width > 64 || height < 5 || height > 64 {
+	if width < 5 || width > 256 || height < 5 || height > 256 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
@@ -312,7 +318,7 @@ func addTemplateImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	imageData, err := imageToPixelData(fileBytes)
+	imageData, err := imageToPixelData(fileBytes, 1)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
@@ -370,7 +376,7 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if width < 5 || width > 64 || height < 5 || height > 64 {
+	if width < 5 || width > 256 || height < 5 || height > 256 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
@@ -453,6 +459,58 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, hash)
+}
+
+func getTemplatePixelData(w http.ResponseWriter, r *http.Request) {
+	hash := r.URL.Query().Get("hash")
+	if hash == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Hash parameter is required")
+		return
+	}
+
+	// Read the template image file
+	filename := fmt.Sprintf("templates/template-%s.png", hash)
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusNotFound, "Template not found")
+		return
+	}
+
+	// Convert image to pixel data using existing function
+	pixelData, err := imageToPixelData(fileBytes, 1)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
+		return
+	}
+
+	// Get image dimensions
+	img, _, err := image.Decode(bytes.NewReader(fileBytes))
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to decode image")
+		return
+	}
+	bounds := img.Bounds()
+	width, height := bounds.Max.X, bounds.Max.Y
+
+	// Create response structure
+	response := struct {
+		Width     int   `json:"width"`
+		Height    int   `json:"height"`
+		PixelData []int `json:"pixelData"`
+	}{
+		Width:     width,
+		Height:    height,
+		PixelData: pixelData,
+	}
+
+	// Convert to JSON and send response
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create response")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(jsonResponse))
 }
 
 func addTemplateDevnet(w http.ResponseWriter, r *http.Request) {

@@ -36,6 +36,8 @@ services:
       - ART_PEACE_END_TIME=3000000000
       - ART_PEACE_HOST=0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
       - ROUND_NUMBER=1
+    volumes:
+      - nfts:/app/nfts
   consumer:
     build:
       dockerfile: backend/Dockerfile.consumer

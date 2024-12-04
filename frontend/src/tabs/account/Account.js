@@ -334,7 +334,9 @@ const Account = (props) => {
     const interval = setInterval(() => {
       setAnimatedRankColor((animatedRankColor + 3) % 360);
       setRankBackground({
-        background: `linear-gradient(45deg, hsl(${animatedRankColor}, 100%, 50%), hsl(${(animatedRankColor + btrColorOffset) % 360}, 100%, 50%))`
+        background: `linear-gradient(45deg, hsl(${animatedRankColor}, 100%, 50%), hsl(${
+          (animatedRankColor + btrColorOffset) % 360
+        }, 100%, 50%))`
       });
     }, 50);
     return () => clearInterval(interval);
@@ -501,7 +503,11 @@ const Account = (props) => {
                 />
                 <div className='Account__item__pair'>
                   <button
-                    className={`Text__small Button__primary ${isValidUsername && !usernameTaken ? '' : 'Button__disabled'}`}
+                    className={`Text__small Button__primary ${
+                      isValidUsername && !usernameTaken
+                        ? ''
+                        : 'Button__disabled'
+                    }`}
                     type='submit'
                     disabled={!isValidUsername || usernameTaken}
                   >

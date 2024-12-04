@@ -26,7 +26,9 @@ const NFTsMainSection = (props) => {
         <div className='NFTs__buttons'>
           {!props.gameEnded && props.queryAddress !== '0' && (
             <div
-              className={`Button__primary Text__small ${props.nftMintingMode ? 'NFTs__button--selected' : ''}`}
+              className={`Button__primary Text__small ${
+                props.nftMintingMode ? 'NFTs__button--selected' : ''
+              }`}
               onClick={() => {
                 props.setNftMintingMode(true);
                 props.setActiveTab('Canvas');
@@ -75,6 +77,9 @@ const NFTsMainSection = (props) => {
               minter={nft.minter}
               queryAddress={props.queryAddress}
               updateLikes={props.updateLikes}
+              setTemplateOverlayMode={props.setTemplateOverlayMode}
+              setOverlayTemplate={props.setOverlayTemplate}
+              setActiveTab={props.setActiveTab}
             />
           );
         })}
@@ -102,7 +107,9 @@ const NFTsExpandedSection = (props) => {
             return (
               <div
                 key={index}
-                className={`NFTs__button NFTs__filter ${props.activeFilter === filter ? 'NFTs__button--selected' : ''}`}
+                className={`NFTs__button NFTs__filter ${
+                  props.activeFilter === filter ? 'NFTs__button--selected' : ''
+                }`}
                 onClick={() => props.setActiveFilter(filter)}
               >
                 {filter}
@@ -136,6 +143,9 @@ const NFTsExpandedSection = (props) => {
                 minter={nft.minter}
                 queryAddress={props.queryAddress}
                 updateLikes={props.updateLikes}
+                setTemplateOverlayMode={props.setTemplateOverlayMode}
+                setOverlayTemplate={props.setOverlayTemplate}
+                setActiveTab={props.setActiveTab}
               />
             );
           })}
@@ -330,6 +340,8 @@ const NFTs = (props) => {
       filters={filters}
       isMobile={props.isMobile}
       gameEnded={props.gameEnded}
+      setTemplateOverlayMode={props.setTemplateOverlayMode}
+      setOverlayTemplate={props.setOverlayTemplate}
     />
   );
 };

@@ -46,6 +46,8 @@ pub mod MultiCanvas {
     const MAX_COLOR_COUNT: u32 = 25;
     const MIN_SIZE: u128 = 16;
     const MAX_SIZE: u128 = 1024;
+    const MIN_STENCIL_SIZE: u128 = 5;
+    const MAX_STENCIL_SIZE: u128 = 256;
 
     #[derive(Drop, Serde)]
     pub struct CanvasInitParams {
@@ -444,6 +446,10 @@ pub mod MultiCanvas {
 
         fn add_stencil(ref self: ContractState, canvas_id: u32, stencil: StencilMetadata) -> u32 {
             let stencil_id = self.stencil_counts.read(canvas_id);
+            assert(stencil.width >= MIN_STENCIL_SIZE, 'Stencil too small');
+            assert(stencil.height >= MIN_STENCIL_SIZE, 'Stencil too small');
+            assert(stencil.width <= MAX_STENCIL_SIZE, 'Stencil too large');
+            assert(stencil.height <= MAX_STENCIL_SIZE, 'Stencil too large');
             self.stencils.write((canvas_id, stencil_id), stencil.clone());
             self.stencil_counts.write(canvas_id, stencil_id + 1);
             self.emit(StencilAdded { canvas_id, stencil_id, stencil });

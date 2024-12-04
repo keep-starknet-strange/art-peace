@@ -107,7 +107,9 @@ const NFTItem = (props) => {
   const [minterText, setMinterText] = React.useState('');
 
   function handleShare() {
-    const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent('Check out my art/peace! @art_peace_sn')}&url=${encodeURIComponent(props.image)}`;
+    const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent(
+      'Check out my #ArtPeace @art_peace_sn'
+    )}&url=${encodeURIComponent(props.image)}`;
     window.open(twitterShareUrl, '_blank');
   }
 
@@ -143,6 +145,27 @@ const NFTItem = (props) => {
   }, [props.minter]);
 
   const [showInfo, setShowInfo] = React.useState(false);
+  const handleNftClick = (e) => {
+    if (
+      e.target.classList.contains('NFTItem__button') ||
+      e.target.classList.contains('Like__icon') ||
+      e.target.classList.contains('Share__icon')
+    ) {
+      return;
+    }
+    // Format NFT data to match template structure
+    const nftTemplate = {
+      position: props.position,
+      width: props.width,
+      height: props.height,
+      image: props.image,
+      isNft: true,
+      tokenId: props.tokenId
+    };
+    props.setTemplateOverlayMode(true);
+    props.setOverlayTemplate(nftTemplate);
+    props.setActiveTab('Canvas');
+  };
   return (
     <div className='NFTItem'>
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -151,6 +174,7 @@ const NFTItem = (props) => {
             src={props.image}
             alt={`nft-image-${props.tokenId}`}
             className='NFTItem__image'
+            onClick={handleNftClick}
           />
           <p className='Text__xsmall NFTItem__name'>{props.name}</p>
           <div className='NFTItem__overlay'>
@@ -163,7 +187,11 @@ const NFTItem = (props) => {
                 <img className='Share__icon' src={ShareIcon} alt='Share' />
               </div>
               <div
-                className={`NFTItem__button ${liked ? 'Like__button--liked' : ''} ${props.queryAddress === '0' ? 'NFTItem__button--disabled' : ''}`}
+                className={`NFTItem__button ${
+                  liked ? 'Like__button--liked' : ''
+                } ${
+                  props.queryAddress === '0' ? 'NFTItem__button--disabled' : ''
+                }`}
                 onClick={handleLikePress}
               >
                 <img

@@ -344,6 +344,7 @@ function App() {
   const [availablePixels, setAvailablePixels] = useState(0);
   const [availablePixelsUsed, setAvailablePixelsUsed] = useState(0);
   const [extraPixelsData, setExtraPixelsData] = useState([]);
+  const [isDefending, setIsDefending] = useState(false);
 
   const [selectorMode, setSelectorMode] = useState(false);
 
@@ -371,10 +372,12 @@ function App() {
 
   const updateInterval = 1000; // 1 second
   const [basePixelTimer, setBasePixelTimer] = useState('XX:XX');
+
   useEffect(() => {
     const updateBasePixelTimer = () => {
       let timeSinceLastPlacement = Date.now() - lastPlacedTime;
       let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
+
       if (basePixelAvailable) {
         setBasePixelUp(true);
         setBasePixelTimer('00:00');
@@ -383,16 +386,19 @@ function App() {
         let secondsTillPlacement = Math.floor(
           (timeBetweenPlacements - timeSinceLastPlacement) / 1000
         );
-        setBasePixelTimer(
-          `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
-        );
+        let minutes = Math.floor(secondsTillPlacement / 60);
+        let seconds = secondsTillPlacement % 60;
+        setBasePixelTimer(`${minutes}:${seconds.toString().padStart(2, '0')}`);
         setBasePixelUp(false);
       }
     };
+
     const interval = setInterval(() => {
       updateBasePixelTimer();
     }, updateInterval);
-    updateBasePixelTimer();
+
+    updateBasePixelTimer(); // Call immediately
+
     return () => clearInterval(interval);
   }, [lastPlacedTime, timeBetweenPlacements]);
 
@@ -420,7 +426,9 @@ function App() {
             (timeBetweenPlacements - timeSinceLastPlacement) / 1000
           );
           newChainFactionPixelTimers.push(
-            `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
+            `${Math.floor(secondsTillPlacement / 60)}:${
+              secondsTillPlacement % 60 < 10 ? '0' : ''
+            }${secondsTillPlacement % 60}`
           );
           newChainFactionPixels.push(0);
         }
@@ -459,7 +467,9 @@ function App() {
             (timeBetweenPlacements - timeSinceLastPlacement) / 1000
           );
           newFactionPixelTimers.push(
-            `${Math.floor(secondsTillPlacement / 60)}:${secondsTillPlacement % 60 < 10 ? '0' : ''}${secondsTillPlacement % 60}`
+            `${Math.floor(secondsTillPlacement / 60)}:${
+              secondsTillPlacement % 60 < 10 ? '0' : ''
+            }${secondsTillPlacement % 60}`
           );
           newFactionPixels.push(0);
         }
@@ -546,9 +556,11 @@ function App() {
 
   const clearExtraPixels = useCallback(() => {
     setAvailablePixelsUsed(0);
+    setTotalPixelsUsed(0);
     setExtraPixelsData([]);
 
     const canvas = extraPixelsCanvasRef.current;
+    if (!canvas) return;
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, width, height);
   }, [width, height]);
@@ -587,6 +599,239 @@ function App() {
     },
     [extraPixelsData, availablePixelsUsed, selectedColorId]
   );
+
+  const addExtraPixels = async (pixels) => {
+    const available = availablePixels - availablePixelsUsed;
+    if (available < pixels.length) {
+      setNotificationMessage('Not enough available pixels');
+      return;
+    }
+    setAvailablePixelsUsed(availablePixelsUsed + pixels.length);
+    setExtraPixelsData([...extraPixelsData, ...pixels]);
+  };
+
+  const extraPixelPlaceCall = async (positions, colors, now) => {
+    if (devnetMode) return;
+    if (!address || !artPeaceContract || !account) return;
+    // TODO: Validate inputs
+    const placeExtraPixelsCallData = artPeaceContract.populate(
+      'place_extra_pixels',
+      {
+        positions: positions,
+        colors: colors,
+        now: now
+      }
+    );
+    const { suggestedMaxFee } = await estimateInvokeFee({
+      contractAddress: artPeaceContract.address,
+      entrypoint: 'place_extra_pixels',
+      calldata: placeExtraPixelsCallData.calldata
+    });
+    /* global BigInt */
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await artPeaceContract.place_extra_pixels(
+      placeExtraPixelsCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
+  };
+
+  const [basePixelUsed, setBasePixelUsed] = React.useState(false);
+  const [totalChainFactionPixels, setTotalChainFactionPixels] =
+    React.useState(0);
+  const [totalFactionPixels, setTotalFactionPixels] = React.useState(0);
+  const [chainFactionPixelsUsed, setChainFactionPixelsUsed] = React.useState(0);
+  const [factionPixelsUsed, setFactionPixelsUsed] = React.useState(0);
+  const [extraPixelsUsed, setExtraPixelsUsed] = React.useState(0);
+  const [totalPixelsUsed, setTotalPixelsUsed] = React.useState(0);
+  React.useEffect(() => {
+    let pixelsUsed = availablePixelsUsed;
+    if (basePixelUp) {
+      if (pixelsUsed > 0) {
+        setBasePixelUsed(true);
+        pixelsUsed--;
+      } else {
+        setBasePixelUsed(false);
+      }
+    }
+    let allChainFactionPixels = 0;
+    for (let i = 0; i < chainFactionPixels.length; i++) {
+      allChainFactionPixels += chainFactionPixels[i];
+    }
+    setTotalChainFactionPixels(allChainFactionPixels);
+    let allFactionPixels = 0;
+    for (let i = 0; i < factionPixels.length; i++) {
+      allFactionPixels += factionPixels[i];
+    }
+    setTotalFactionPixels(allFactionPixels);
+    if (allChainFactionPixels > 0) {
+      let chainFactionsPixelsUsed = Math.min(
+        pixelsUsed,
+        totalChainFactionPixels
+      );
+      setChainFactionPixelsUsed(chainFactionsPixelsUsed);
+      pixelsUsed -= chainFactionsPixelsUsed;
+    }
+    if (allFactionPixels > 0) {
+      let factionsPixelsUsed = Math.min(pixelsUsed, totalFactionPixels);
+      setFactionPixelsUsed(factionsPixelsUsed);
+      pixelsUsed -= factionsPixelsUsed;
+    }
+    if (extraPixels > 0) {
+      let extraPixelsUsed = Math.min(pixelsUsed, extraPixels);
+      setExtraPixelsUsed(extraPixelsUsed);
+      pixelsUsed -= extraPixelsUsed;
+    }
+    setTotalPixelsUsed(availablePixelsUsed - pixelsUsed);
+  }, [availablePixels, availablePixelsUsed]);
+
+  const clearAll = () => {
+    clearExtraPixels();
+    setSelectedColorId(-1);
+  };
+
+  // TODO: Is rounding down the time always okay?
+  const submit = async () => {
+    let timestamp = Math.floor(Date.now() / 1000);
+    if (!devnetMode) {
+      await extraPixelPlaceCall(
+        extraPixelsData.map(
+          (pixel) => pixel.x + pixel.y * canvasConfig.canvas.width
+        ),
+        extraPixelsData.map((pixel) => pixel.colorId),
+        timestamp
+      );
+    } else {
+      let placeExtraPixelsEndpoint = 'place-extra-pixels-devnet';
+      const response = await fetchWrapper(placeExtraPixelsEndpoint, {
+        mode: 'cors',
+        method: 'POST',
+        body: JSON.stringify({
+          extraPixels: extraPixelsData.map((pixel) => ({
+            position: pixel.x + pixel.y * canvasConfig.canvas.width,
+            colorId: pixel.colorId
+          })),
+          timestamp: timestamp
+        })
+      });
+      if (response.result) {
+        console.log(response.result);
+      }
+    }
+    for (let i = 0; i < extraPixelsData.length; i++) {
+      let position =
+        extraPixelsData[i].x + extraPixelsData[i].y * canvasConfig.canvas.width;
+      colorPixel(position, extraPixelsData[i].colorId);
+    }
+    if (basePixelUsed) {
+      setLastPlacedTime(timestamp * 1000);
+    }
+    if (chainFactionPixelsUsed > 0) {
+      let chainFactionIndex = 0;
+      let chainFactionUsedCounter = 0;
+      let newChainFactionPixels = [];
+      let newChainFactionPixelsData = [];
+      while (chainFactionIndex < chainFactionPixels.length) {
+        if (chainFactionUsedCounter >= chainFactionPixelsUsed) {
+          newChainFactionPixels.push(chainFactionPixels[chainFactionIndex]);
+          newChainFactionPixelsData.push(
+            chainFactionPixelsData[chainFactionIndex]
+          );
+          chainFactionIndex++;
+          continue;
+        }
+        let currChainFactionPixelsUsed = Math.min(
+          chainFactionPixelsUsed - chainFactionUsedCounter,
+          chainFactionPixels[chainFactionIndex]
+        );
+        if (currChainFactionPixelsUsed <= 0) {
+          newChainFactionPixels.push(chainFactionPixels[chainFactionIndex]);
+          newChainFactionPixelsData.push(
+            chainFactionPixelsData[chainFactionIndex]
+          );
+          chainFactionIndex++;
+          continue;
+        }
+        if (
+          currChainFactionPixelsUsed === chainFactionPixels[chainFactionIndex]
+        ) {
+          newChainFactionPixels.push(0);
+          let newChainFactionData = chainFactionPixelsData[chainFactionIndex];
+          newChainFactionData.lastPlacedTime = timestamp * 1000;
+          newChainFactionData.memberPixels = 0;
+          newChainFactionPixelsData.push(newChainFactionData);
+        } else {
+          newChainFactionPixels.push(
+            chainFactionPixels[chainFactionIndex] - currChainFactionPixelsUsed
+          );
+          let newChainFactionData = chainFactionPixelsData[chainFactionIndex];
+          newChainFactionData.memberPixels =
+            chainFactionPixels[chainFactionIndex] - currChainFactionPixelsUsed;
+          newChainFactionPixelsData.push(newChainFactionData);
+        }
+        chainFactionUsedCounter += currChainFactionPixelsUsed;
+        chainFactionIndex++;
+      }
+      setChainFactionPixels(newChainFactionPixels);
+      setChainFactionPixelsData(newChainFactionPixelsData);
+    }
+
+    // TODO: Click faction pixels button to expand out info here
+    if (factionPixelsUsed > 0) {
+      // TODO: Will order always be the same?
+      let factionIndex = 0;
+      let factionUsedCounter = 0;
+      let newFactionPixels = [];
+      let newFactionPixelsData = [];
+      while (factionIndex < factionPixels.length) {
+        if (factionUsedCounter >= factionPixelsUsed) {
+          newFactionPixels.push(factionPixels[factionIndex]);
+          newFactionPixelsData.push(factionPixelsData[factionIndex]);
+          factionIndex++;
+          continue;
+        }
+        let currFactionPixelsUsed = Math.min(
+          factionPixelsUsed - factionUsedCounter,
+          factionPixels[factionIndex]
+        );
+        if (currFactionPixelsUsed <= 0) {
+          newFactionPixels.push(factionPixels[factionIndex]);
+          newFactionPixelsData.push(factionPixelsData[factionIndex]);
+          factionIndex++;
+          continue;
+        }
+        if (currFactionPixelsUsed === factionPixels[factionIndex]) {
+          newFactionPixels.push(0);
+          let newFactionData = factionPixelsData[factionIndex];
+          newFactionData.lastPlacedTime = timestamp * 1000;
+          newFactionData.memberPixels = 0;
+          newFactionPixelsData.push(newFactionData);
+        } else {
+          newFactionPixels.push(
+            factionPixels[factionIndex] - currFactionPixelsUsed
+          );
+          let newFactionData = factionPixelsData[factionIndex];
+          newFactionData.memberPixels =
+            factionPixels[factionIndex] - currFactionPixelsUsed;
+          newFactionPixelsData.push(newFactionData);
+        }
+        factionUsedCounter += currFactionPixelsUsed;
+        factionIndex++;
+      }
+      setFactionPixels(newFactionPixels);
+      setFactionPixelsData(newFactionPixelsData);
+    }
+    if (extraPixelsUsed > 0) {
+      let newExtraPixels = extraPixels - extraPixelsUsed;
+      setExtraPixels(newExtraPixels);
+    }
+    clearAll();
+    setIsEraserMode(false);
+    setSelectorMode(false);
+    clearPixelSelection();
+  };
 
   // Factions
   const [chainFaction, setChainFaction] = useState(null);
@@ -683,7 +928,6 @@ function App() {
       return { suggestedMaxFee };
     } catch (error) {
       console.error(error);
-      /* global BigInt */
       return { suggestedMaxFee: BigInt(1000000000000000) };
     }
   };
@@ -854,6 +1098,64 @@ function App() {
     basePixelUp
   ]);
 
+  const [templatePixels, setTemplatePixels] = useState([]);
+
+  useEffect(() => {
+    const getTemplatePixelData = async (hash) => {
+      if (hash !== null) {
+        const response = await fetchWrapper(
+          `get-template-pixel-data?hash=${hash}`
+        );
+        return response.data;
+      }
+      return [];
+    };
+
+    const getNftPixelData = async (tokenId) => {
+      if (tokenId !== null) {
+        const response = await fetchWrapper(
+          `get-nft-pixel-data?tokenId=${tokenId}`
+        );
+        if (!response.data) {
+          console.error('NFT pixel data not found');
+          return [];
+        }
+        return response.data;
+      }
+      return [];
+    };
+
+    const fetchPixelData = async () => {
+      try {
+        if (!overlayTemplate) {
+          setTemplatePixels([]);
+          return;
+        }
+
+        // Handle NFT overlay case
+        if (overlayTemplate.isNft && overlayTemplate.tokenId !== undefined) {
+          const data = await getNftPixelData(overlayTemplate.tokenId);
+          setTemplatePixels(data);
+          return;
+        }
+
+        // Handle template overlay case
+        if (overlayTemplate.hash) {
+          const data = await getTemplatePixelData(overlayTemplate.hash);
+          setTemplatePixels(data);
+          return;
+        }
+
+        setTemplatePixels([]);
+      } catch (error) {
+        console.error('Error fetching pixel data:', error);
+        setTemplatePixels([]);
+      }
+    };
+
+    fetchPixelData();
+  }, [overlayTemplate]);
+
   return (
     <div className='App'>
       <div className='App--background'>
@@ -953,6 +1255,8 @@ function App() {
             queryAddress={queryAddress}
             account={account}
             usingSessionKeys={usingSessionKeys}
+            submit={submit}
+            clearAll={clearAll}
             // chain={chain}
             setConnected={setConnected}
             artPeaceContract={artPeaceContract}
@@ -1057,6 +1361,7 @@ function App() {
             host={host}
             width={width}
             height={height}
+            isDefending={isDefending}
           />
         </div>
         <div className='App__footer'>
@@ -1064,13 +1369,21 @@ function App() {
             style={{
               width: '100%',
               display: 'flex',
-              justifyContent: `${footerExpanded && isFooterSplit ? 'space-between' : 'center'}`,
-              alignItems: `${footerExpanded && isFooterSplit ? 'flex-end' : 'center'}`
+              justifyContent: `${
+                footerExpanded && isFooterSplit ? 'space-between' : 'center'
+              }`,
+              alignItems: `${
+                footerExpanded && isFooterSplit ? 'flex-end' : 'center'
+              }`
             }}
           >
             {!gameEnded && (
               <PixelSelector
                 colors={colors}
+                submit={submit}
+                clearAll={clearAll}
+                totalPixelsUsed={totalPixelsUsed}
+                setTotalPixelsUsed={setTotalPixelsUsed}
                 selectedColorId={selectedColorId}
                 setSelectedColorId={setSelectedColorId}
                 getDeviceTypeInfo={getDeviceTypeInfo}
@@ -1090,6 +1403,15 @@ function App() {
                 setIsEraseMode={setIsEraserMode}
                 isPortrait={isPortrait}
                 isMobile={isMobile}
+                overlayTemplate={overlayTemplate}
+                templatePixels={templatePixels}
+                width={canvasConfig.canvas.width}
+                canvasRef={canvasRef}
+                addExtraPixel={addExtraPixel}
+                addExtraPixels={addExtraPixels}
+                setLastPlacedTime={setLastPlacedTime}
+                isDefending={isDefending}
+                setIsDefending={setIsDefending}
               />
             )}
             {isFooterSplit && !footerExpanded && (

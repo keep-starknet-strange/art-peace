@@ -386,7 +386,7 @@ func addStencilImg(w http.ResponseWriter, r *http.Request) {
 	}
 	bounds := img.Bounds()
 	width, height := bounds.Max.X-bounds.Min.X, bounds.Max.Y-bounds.Min.Y
-	if width < 5 || width > 64 || height < 5 || height > 64 {
+	if width < 5 || width > 256 || height < 5 || height > 256 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
@@ -402,7 +402,7 @@ func addStencilImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	imageData, err := imageToPixelData(fileBytes)
+	imageData, err := imageToPixelData(fileBytes, 1)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
@@ -466,7 +466,7 @@ func addStencilData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if width < 5 || width > 64 || height < 5 || height > 64 {
+	if width < 5 || width > 256 || height < 5 || height > 256 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid image dimensions")
 		return
 	}
