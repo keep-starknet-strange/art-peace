@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
@@ -20,11 +21,10 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get round number from query params
+	// Get round number from query params, default to config round
 	roundNumber := r.URL.Query().Get("round")
 	if roundNumber == "" {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Round number is required")
-		return
+		roundNumber = strconv.FormatUint(uint64(core.ArtPeaceBackend.CanvasConfig.Round), 10)
 	}
 
 	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
@@ -55,11 +55,10 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 func getCanvas(w http.ResponseWriter, r *http.Request) {
 	routeutils.SetupAccessHeaders(w)
 
-	// Get round number from query params, default to latest round if not specified
+	// Get round number from query params, default to config round
 	roundNumber := r.URL.Query().Get("round")
 	if roundNumber == "" {
-		// TODO: Implement logic to get latest round number
-		roundNumber = "1" // Default to round 1 for now
+		roundNumber = strconv.FormatUint(uint64(core.ArtPeaceBackend.CanvasConfig.Round), 10)
 	}
 
 	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
