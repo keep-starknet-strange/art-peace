@@ -92,6 +92,10 @@ const (
 	canvasHostAwardedUserEvent       = "0x01bf6ede8c6c232cee1830a5227fd638383f5af669701289d113492b1d41fda5"
   canvasFavoritedEvent             = "0x032105bd4f21a32bc92e45a49b30eab9355f7f89619d87e9801628e3acc5b502"
   canvasUnfavoritedEvent           = "0x014ee6480f95acb4b7286d3a7f95b6033299e66e502cfb4b207ccf088b5f601d"
+  stencilAddedEvent                = "0x03384fcf8ff5c539c31feec6626511aa15ae53dba7459fd3a3c67af615ef6b5d"
+  stencilRemovedEvent              = "0x023c933ed3ee3f94b5b82f8e2e570c8354e6f5036c3a079092ceeed15979e7fa"
+  stencilFavoritedEvent            = "0x007cb4ae927fb597834e194e2c950a2d813461c72f372f78d0610ea246f53017"
+  stencilUnfavoritedEvent          = "0x00a5477c7df6522316b652e56317e69e52429ab43a6772fb6f6c2a574f7e196f"
 )
 
 var eventProcessors = map[string](func(IndexerEvent)){
@@ -133,6 +137,10 @@ var eventProcessors = map[string](func(IndexerEvent)){
 	canvasHostAwardedUserEvent:       processCanvasHostAwardedUserEvent,
   canvasFavoritedEvent:             processCanvasFavoritedEvent,
   canvasUnfavoritedEvent:           processCanvasUnfavoritedEvent,
+  stencilAddedEvent:                processStencilAddedEvent,
+  stencilRemovedEvent:              processStencilRemovedEvent,
+  stencilFavoritedEvent:            processStencilFavoritedEvent,
+  stencilUnfavoritedEvent:          processStencilUnfavoritedEvent,
 }
 
 var eventReverters = map[string](func(IndexerEvent)){
@@ -174,6 +182,10 @@ var eventReverters = map[string](func(IndexerEvent)){
 	canvasHostAwardedUserEvent:       revertCanvasHostAwardedUserEvent,
   canvasFavoritedEvent:             revertCanvasFavoritedEvent,
   canvasUnfavoritedEvent:           revertCanvasUnfavoritedEvent,
+  stencilAddedEvent:                revertStencilAddedEvent,
+  stencilRemovedEvent:              revertStencilRemovedEvent,
+  stencilFavoritedEvent:            revertStencilFavoritedEvent,
+  stencilUnfavoritedEvent:          revertStencilUnfavoritedEvent,
 }
 
 // TODO: Rethink this ( & look at values before multicanvas PR )
@@ -216,6 +228,10 @@ var eventRequiresOrdering = map[string]bool{
 	canvasHostAwardedUserEvent:       true,
   canvasFavoritedEvent:             true,
   canvasUnfavoritedEvent:           true,
+  stencilAddedEvent:                true,
+  stencilRemovedEvent:              true,
+  stencilFavoritedEvent:            true,
+  stencilUnfavoritedEvent:          true,
 }
 
 const (

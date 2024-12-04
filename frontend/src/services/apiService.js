@@ -148,3 +148,36 @@ export const getFavoriteWorldsFn = async (query) => {
     `get-favorite-worlds?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}`
   );
 };
+
+export const getFavoriteStencilsFn = async (query) => {
+  return await fetchWrapper(
+    `get-favorite-stencils?address=${query.queryAddress}&pageLength=${query.pageLength}&page=${query.page}&worldId=${query.worldId}`
+  );
+};
+
+export const getStencilsFn = async (query) => {
+  return await fetchWrapper(
+    `get-stencils?pageLength=${query.pageLength}&page=${query.page}&worldId=${query.worldId}`
+  );
+};
+
+export const getNewStencilsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-new-stencils?address=${queryAddress}&page=${page}&pageLength=${pageLength}&worldId=${params.worldId}`
+  );
+};
+
+export const getTopStencilsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-top-stencils?address=${queryAddress}&page=${page}&pageLength=${pageLength}&worldId=${params.worldId}`
+  );
+};
+
+export const getHotStencilsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-hot-stencils?address=${queryAddress}&page=${page}&pageLength=${pageLength}&worldId=${params.worldId}`
+  );
+};

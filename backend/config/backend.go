@@ -26,6 +26,10 @@ type BackendScriptsConfig struct {
 	FavoriteWorldDevnet         string `json:"favorite_world_devnet"`
 	UnfavoriteWorldDevnet       string `json:"unfavorite_world_devnet"`
   PlaceWorldPixelDevnet       string `json:"place_world_pixel_devnet"`
+  AddStencilDevnet            string `json:"add_stencil_devnet"`
+  RemoveStencilDevnet         string `json:"remove_stencil_devnet"`
+  FavoriteStencilDevnet       string `json:"favorite_stencil_devnet"`
+  UnfavoriteStencilDevnet     string `json:"unfavorite_stencil_devnet"`
 }
 
 type WebSocketConfig struct {
@@ -74,6 +78,10 @@ var DefaultBackendConfig = BackendConfig{
 		FavoriteWorldDevnet:         "../scripts/favorite_world.sh",
 		UnfavoriteWorldDevnet:       "../scripts/unfavorite_world.sh",
     PlaceWorldPixelDevnet:       "../scripts/place_world_pixel.sh",
+    AddStencilDevnet:            "../scripts/add_stencil.sh",
+    RemoveStencilDevnet:         "../scripts/remove_stencil.sh",
+    FavoriteStencilDevnet:       "../scripts/favorite_stencil.sh",
+    UnfavoriteStencilDevnet:     "../scripts/unfavorite_stencil.sh",
 	},
 	Production: false,
 	WebSocket: WebSocketConfig{

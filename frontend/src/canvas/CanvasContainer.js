@@ -4,6 +4,7 @@ import Canvas from './Canvas';
 import ExtraPixelsCanvas from './ExtraPixelsCanvas.js';
 import TemplateOverlay from './TemplateOverlay.js';
 import TemplateCreationOverlay from './TemplateCreationOverlay.js';
+import StencilCreationOverlay from './StencilCreationOverlay.js';
 import NFTSelector from './NFTSelector.js';
 import { fetchWrapper } from '../services/apiService.js';
 import { devnetMode } from '../utils/Consts.js';
@@ -16,6 +17,7 @@ const CanvasContainer = (props) => {
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
   const [canvasScale, setCanvasScale] = useState(1.16);
+  const [titleScale, setTitleScale] = useState(1);
   const [touchInitialDistance, setInitialTouchDistance] = useState(0);
   const [touchScale, setTouchScale] = useState(0);
   const canvasContainerRef = useRef(null);
@@ -103,6 +105,9 @@ const CanvasContainer = (props) => {
     setCanvasScale(newScale);
     setCanvasX(newPosX);
     setCanvasY(newPosY);
+
+    const titleScaler = props.width / 512;
+    setTitleScale(newScale * titleScaler);
   };
 
   const handleTouchStart = (e) => {
@@ -163,6 +168,9 @@ const CanvasContainer = (props) => {
       setCanvasScale(newScale);
       setCanvasX(newPosX);
       setCanvasY(newPosY);
+
+      const titleScaler = props.width / 512;
+      setTitleScale(newScale * titleScaler);
       // TODO: Make scroll acceleration based
     }
   };
@@ -387,7 +395,11 @@ const CanvasContainer = (props) => {
       if (props.selectedColorId === -1 && !props.isEraserMode) {
         return;
       }
-      if (props.nftMintingMode || props.templateCreationMode) {
+      if (
+        props.nftMintingMode ||
+        props.templateCreationMode ||
+        props.stencilCreationMode
+      ) {
         return;
       }
       if (
@@ -424,6 +436,7 @@ const CanvasContainer = (props) => {
     props.nftMintingMode,
     props.isEraserMode,
     props.templateCreationMode,
+    props.stencilCreationMode,
     props.width,
     props.height
   ]);
@@ -543,6 +556,18 @@ const CanvasContainer = (props) => {
           transform: `translate(${canvasX}px, ${canvasY}px)`
         }}
       >
+        {props.openedWorldId && props.activeWorld && (
+          <h3
+            className='CanvasContainer__title'
+            style={{
+              top: `calc(-0.75rem * ${titleScale})`,
+              left: '50%',
+              transform: `translate(-50%, -50%) scale(${titleScale})`
+            }}
+          >
+            {props.activeWorld.name}
+          </h3>
+        )}
         {props.pixelSelectedMode && (
           <div
             className='Canvas__selection'
@@ -613,6 +638,22 @@ const CanvasContainer = (props) => {
             height={props.height}
             templatePosition={props.templatePosition}
             setTemplatePosition={props.setTemplatePosition}
+          />
+        )}
+        {props.stencilCreationMode && (
+          <StencilCreationOverlay
+            canvasRef={props.canvasRef}
+            canvasScale={canvasScale}
+            stencilImage={props.stencilImage}
+            stencilColorIds={props.stencilColorIds}
+            stencilCreationMode={props.stencilCreationMode}
+            setStencilCreationMode={props.setStencilCreationMode}
+            stencilCreationSelected={props.stencilCreationSelected}
+            setStencilCreationSelected={props.setStencilCreationSelected}
+            width={props.width}
+            height={props.height}
+            stencilPosition={props.stencilPosition}
+            setStencilPosition={props.setStencilPosition}
           />
         )}
         {props.nftMintingMode && (

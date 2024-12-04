@@ -1,15 +1,12 @@
 import React, { useEffect } from 'react';
-import canvasConfig from '../configs/canvas.config.json';
 import './TemplateOverlay.css';
 
 const TemplateOverlay = (props) => {
   const [posx, setPosx] = React.useState(0);
   const [posy, setPosy] = React.useState(0);
   useEffect(() => {
-    setPosx(props.overlayTemplate.position % canvasConfig.canvas.width);
-    setPosy(
-      Math.floor(props.overlayTemplate.position / canvasConfig.canvas.width)
-    );
+    setPosx(props.overlayTemplate.position % props.width);
+    setPosy(Math.floor(props.overlayTemplate.position / props.width));
   }, [props.overlayTemplate]);
 
   /*

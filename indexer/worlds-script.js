@@ -105,6 +105,46 @@ export const config = {
         includeTransaction: false,
         includeReceipt: false
       },
+      {
+        // Stencil Added Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x03384fcf8ff5c539c31feec6626511aa15ae53dba7459fd3a3c67af615ef6b5d"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Stencil Removed Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x023c933ed3ee3f94b5b82f8e2e570c8354e6f5036c3a079092ceeed15979e7fa"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Stencil Favorited Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x007cb4ae927fb597834e194e2c950a2d813461c72f372f78d0610ea246f53017"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Stencil Unfavorited Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x00a5477c7df6522316b652e56317e69e52429ab43a6772fb6f6c2a574f7e196f"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
     ]
   },
   sinkType: "webhook",

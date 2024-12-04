@@ -37,6 +37,7 @@ import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
+  const worldsMode = true;
   const [openedWorldId, setOpenedWorldId] = useState(null);
   const [activeWorld, setActiveWorld] = useState(null);
 
@@ -51,6 +52,7 @@ function App() {
 
   // Window management
   usePreventZoom();
+  /*
   const tabs = [
     'Canvas',
     'Factions',
@@ -60,6 +62,11 @@ function App() {
     'Worlds',
     'Account'
   ];
+  */
+  // TODO: Add features back
+  const tabs = devnetMode
+    ? ['Canvas', 'Worlds', 'Stencils', 'Account']
+    : ['Canvas', 'Factions', 'NFTs', 'Quests', 'Vote', 'Account'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   useLockScroll(activeTab === 'Canvas');
 
@@ -200,7 +207,7 @@ function App() {
         console.error(error);
       }
     };
-    if (openedWorldId === null) {
+    if (!worldsMode && openedWorldId === null) {
       fetchGameData();
     } else if (activeWorld !== null) {
       let now = new Date();
@@ -653,6 +660,14 @@ function App() {
     }
   }, [openedWorldId]);
 
+  // Stencils
+  const [openedStencilId, setOpenedStencilId] = useState(null);
+  const [stencilImage, setStencilImage] = useState(null);
+  const [stencilColorIds, setStencilColorIds] = useState([]);
+  const [stencilCreationMode, setStencilCreationMode] = useState(false);
+  const [stencilCreationSelected, setStencilCreationSelected] = useState(false);
+  const [stencilPosition, setStencilPosition] = useState(0);
+
   const [loadingRequest, _setLoadingRequest] = useState(false);
   const estimateInvokeFee = async ({
     contractAddress,
@@ -850,12 +865,21 @@ function App() {
         <CanvasContainer
           colorPixel={colorPixel}
           openedWorldId={openedWorldId}
+          activeWorld={activeWorld}
           width={width}
           height={height}
           address={address}
           account={account}
           estimateInvokeFee={estimateInvokeFee}
           artPeaceContract={artPeaceContract}
+          stencilCreationMode={stencilCreationMode}
+          stencilImage={stencilImage}
+          stencilColorIds={stencilColorIds}
+          stencilCreationSelected={stencilCreationSelected}
+          setStencilCreationSelected={setStencilCreationSelected}
+          setStencilCreationMode={setStencilCreationMode}
+          stencilPosition={stencilPosition}
+          setStencilPosition={setStencilPosition}
           colors={colors}
           canvasRef={canvasRef}
           extraPixelsCanvasRef={extraPixelsCanvasRef}
@@ -901,11 +925,14 @@ function App() {
           setLastPlacedTime={setLastPlacedTime}
         />
         {(!isMobile || activeTab === tabs[0]) && (
-          <img
-            src={logo}
-            alt='logo'
-            className={`App__logo--mobile ${loadingRequest ? 'App__logo--rotating' : ''}`}
-          />
+          <div className='App__logo'>
+            <img
+              src={logo}
+              alt='logo'
+              className={`App__logo--mobile ${loadingRequest ? 'App__logo--rotating' : ''}`}
+            />
+            <p className='App__logo--round'>3</p>
+          </div>
         )}
         <div
           className={
@@ -917,6 +944,10 @@ function App() {
         >
           <TabPanel
             openedWorldId={openedWorldId}
+            setOpenedWorldId={setOpenedWorldId}
+            openedStencilId={openedStencilId}
+            setOpenedStencilId={setOpenedStencilId}
+            activeWorld={activeWorld}
             colorPixel={colorPixel}
             address={address}
             queryAddress={queryAddress}
@@ -939,8 +970,18 @@ function App() {
             setTemplateOverlayMode={setTemplateOverlayMode}
             worldsCreationMode={worldsCreationMode}
             setWorldsCreationMode={setWorldsCreationMode}
+            stencilCreationMode={stencilCreationMode}
+            setStencilCreationMode={setStencilCreationMode}
             overlayTemplate={overlayTemplate}
             setOverlayTemplate={setOverlayTemplate}
+            stencilImage={stencilImage}
+            setStencilImage={setStencilImage}
+            stencilColorIds={stencilColorIds}
+            setStencilColorIds={setStencilColorIds}
+            stencilCreationSelected={stencilCreationSelected}
+            setStencilCreationSelected={setStencilCreationSelected}
+            stencilPosition={stencilPosition}
+            setStencilPosition={setStencilPosition}
             templateFaction={templateFaction}
             setTemplateFaction={setTemplateFaction}
             templateImage={templateImage}
@@ -1014,6 +1055,8 @@ function App() {
             isLastDay={isLastDay}
             endTimestamp={endTimestamp}
             host={host}
+            width={width}
+            height={height}
           />
         </div>
         <div className='App__footer'>

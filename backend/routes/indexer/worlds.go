@@ -14,18 +14,6 @@ import (
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
-/*
-TODO
-CREATE TABLE WorldFavorites (
-  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  world_id integer NOT NULL,
-  user_address char(64) NOT NULL,
-  UNIQUE (world_id, user_address)
-);
-CREATE INDEX worldFavorites_world_id_index ON WorldFavorites (world_id);
-CREATE INDEX worldFavorites_user_index ON WorldFavorites (user_address);
-*/
-
 func processCanvasCreatedEvent(event IndexerEvent) {
 	canvasIdHex := event.Event.Keys[1]
 	host := event.Event.Data[0][2:]    // Remove 0x prefix

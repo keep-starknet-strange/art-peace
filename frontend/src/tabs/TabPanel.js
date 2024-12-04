@@ -6,12 +6,14 @@ import ExtraPixelsPanel from './canvas/ExtraPixelsPanel.js';
 import NFTMintingPanel from './nfts/NFTMintingPanel.js';
 import FactionTemplateBuilderPanel from './templates/FactionTemplateBuilderPanel.js';
 import WorldsCreationPanel from './worlds/WorldsCreationPanel.js';
+import StencilCreationPanel from './stencils/StencilCreationPanel.js';
 import Factions from './factions/Factions.js';
 import { TimerInjector } from '../utils/TimerInjector.js';
 import Quests from './quests/Quests.js';
 import Voting from './voting/Voting.js';
 import NFTs from './nfts/NFTs.js';
 import Worlds from './worlds/Worlds.js';
+import Stencils from './stencils/Stencils.js';
 import Account from './account/Account.js';
 import Templates from './templates/Templates.js';
 
@@ -149,6 +151,35 @@ const TabPanel = (props) => {
           setWorldsCreationMode={props.setWorldsCreationMode}
           queryAddress={props.queryAddress}
           setNotificationMessage={props.setNotificationMessage}
+        />
+      </CSSTransition>
+      <CSSTransition
+        in={props.stencilCreationMode}
+        timeout={300}
+        classNames='list-transition'
+        unmountOnExit
+        appear
+      >
+        <StencilCreationPanel
+          setActiveTab={props.setActiveTab}
+          address={props.address}
+          account={props.account}
+          estimateInvokeFee={props.estimateInvokeFee}
+          canvasFactoryContract={props.multiCanvasContract}
+          setStencilCreationMode={props.setStencilCreationMode}
+          queryAddress={props.queryAddress}
+          setNotificationMessage={props.setNotificationMessage}
+          activeWorld={props.activeWorld}
+          worldId={props.openedWorldId}
+          stencilImage={props.stencilImage}
+          stencilPosition={props.stencilPosition}
+          setStencilImage={props.setStencilImage}
+          setStencilPosition={props.setStencilPosition}
+          stencilColorIds={props.stencilColorIds}
+          setStencilColorIds={props.setStencilColorIds}
+          stencilCreationSelected={props.stencilCreationSelected}
+          setStencilCreationSelected={props.setStencilCreationSelected}
+          canvasWidth={props.width}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>
@@ -299,6 +330,31 @@ const TabPanel = (props) => {
                   setWorldsCreationMode={props.setWorldsCreationMode}
                   openedWorldId={props.openedWorldId}
                   canvasFactoryContract={props.multiCanvasContract}
+                />
+              </div>
+            )}
+            {props.activeTab === 'Stencils' && (
+              <div>
+                <Stencils
+                  address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
+                  setActiveTab={props.setActiveTab}
+                  queryAddress={props.queryAddress}
+                  isMobile={props.isMobile}
+                  stencilCreationMode={props.stencilCreationMode}
+                  setTemplateOverlayMode={props.setTemplateOverlayMode}
+                  setOverlayTemplate={props.setOverlayTemplate}
+                  setStencilCreationMode={props.setStencilCreationMode}
+                  setStencilImage={props.setStencilImage}
+                  setStencilPosition={props.setStencilPosition}
+                  setStencilCreationSelected={props.setStencilCreationSelected}
+                  setStencilColorIds={props.setStencilColorIds}
+                  openedStencilId={props.openedStencilId}
+                  setOpenedStencilId={props.setOpenedStencilId}
+                  openedWorldId={props.openedWorldId}
+                  canvasFactoryContract={props.multiCanvasContract}
+                  colors={props.colors}
                 />
               </div>
             )}

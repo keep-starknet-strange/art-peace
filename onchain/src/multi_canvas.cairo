@@ -29,6 +29,12 @@ pub trait IMultiCanvas<TContractState> {
     fn place_pixel_xy(ref self: TContractState, canvas_id: u32, x: u128, y: u128, color: u8, now: u64);
     fn favorite_canvas(ref self: TContractState, canvas_id: u32);
     fn unfavorite_canvas(ref self: TContractState, canvas_id: u32);
+    fn get_stencil_count(self: @TContractState, canvas_id: u32) -> u32;
+    fn get_stencil(self: @TContractState, canvas_id: u32, stencil_id: u32) -> MultiCanvas::StencilMetadata;
+    fn add_stencil(ref self: TContractState, canvas_id: u32, stencil: MultiCanvas::StencilMetadata) -> u32;
+    fn remove_stencil(ref self: TContractState, canvas_id: u32, stencil_id: u32);
+    fn favorite_stencil(ref self: TContractState, canvas_id: u32, stencil_id: u32);
+    fn unfavorite_stencil(ref self: TContractState, canvas_id: u32, stencil_id: u32);
 }
 
 // TODO: Move to factory contract
@@ -61,6 +67,14 @@ pub mod MultiCanvas {
         start_time: u64,
         end_time: u64,
     }
+
+    #[derive(Drop, Clone, Serde, starknet::Store)]
+    pub struct StencilMetadata {
+        hash: felt252,
+        width: u128,
+        height: u128,
+        position: u128
+    }
     
     #[storage]
     struct Storage {
@@ -82,7 +96,11 @@ pub mod MultiCanvas {
         // Map: (canvas_id, color_id) -> color value in RGBA
         color_palettes: LegacyMap::<(u32, u8), u32>,
         // Maps: (canvas_id, user addr) -> if favorited
-        canvas_favorites: LegacyMap::<(u32, ContractAddress), bool>
+        canvas_favorites: LegacyMap::<(u32, ContractAddress), bool>,
+        // Map: canvas_id -> stencil count
+        stencil_counts: LegacyMap::<u32, u32>,
+        // Map: (canvas_id, stencil_id) -> stencil metadata
+        stencils: LegacyMap::<(u32, u32), StencilMetadata>,
     }
 
     #[event]
@@ -99,6 +117,10 @@ pub mod MultiCanvas {
         CanvasHostAwardedUser: CanvasHostAwardedUser,
         CanvasFavorited: CanvasFavorited,
         CanvasUnfavorited: CanvasUnfavorited,
+        StencilAdded: StencilAdded,
+        StencilRemoved: StencilRemoved,
+        StencilFavorited: StencilFavorited,
+        StencilUnfavorited: StencilUnfavorited,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -183,6 +205,44 @@ pub mod MultiCanvas {
     pub struct CanvasUnfavorited {
         #[key]
         pub canvas_id: u32,
+        #[key]
+        pub user: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct StencilAdded {
+        #[key]
+        pub canvas_id: u32,
+        #[key]
+        pub stencil_id: u32,
+        pub stencil: StencilMetadata,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct StencilRemoved {
+        #[key]
+        pub canvas_id: u32,
+        #[key]
+        pub stencil_id: u32,
+        pub stencil: StencilMetadata,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct StencilFavorited {
+        #[key]
+        pub canvas_id: u32,
+        #[key]
+        pub stencil_id: u32,
+        #[key]
+        pub user: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct StencilUnfavorited {
+        #[key]
+        pub canvas_id: u32,
+        #[key]
+        pub stencil_id: u32,
         #[key]
         pub user: ContractAddress,
     }
@@ -372,6 +432,47 @@ pub mod MultiCanvas {
                 canvas_id,
                 user: caller,
             }));
+        }
+
+        fn get_stencil_count(self: @ContractState, canvas_id: u32) -> u32 {
+            self.stencil_counts.read(canvas_id)
+        }
+
+        fn get_stencil(self: @ContractState, canvas_id: u32, stencil_id: u32) -> StencilMetadata {
+            self.stencils.read((canvas_id, stencil_id))
+        }
+
+        fn add_stencil(ref self: ContractState, canvas_id: u32, stencil: StencilMetadata) -> u32 {
+            let stencil_id = self.stencil_counts.read(canvas_id);
+            self.stencils.write((canvas_id, stencil_id), stencil.clone());
+            self.stencil_counts.write(canvas_id, stencil_id + 1);
+            self.emit(StencilAdded { canvas_id, stencil_id, stencil });
+            stencil_id
+        }
+
+        fn remove_stencil(ref self: ContractState, canvas_id: u32, stencil_id: u32) {
+            let caller = get_caller_address();
+            assert(caller == self.hosts.read(canvas_id), 'Only host can remove stencils');
+            let stencil = self.stencils.read((canvas_id, stencil_id));
+            self.emit(StencilRemoved { canvas_id, stencil_id, stencil });
+        }
+
+        fn favorite_stencil(ref self: ContractState, canvas_id: u32, stencil_id: u32) {
+            let caller = get_caller_address();
+            self.emit(StencilFavorited {
+                canvas_id,
+                stencil_id,
+                user: caller,
+            });
+        }
+
+        fn unfavorite_stencil(ref self: ContractState, canvas_id: u32, stencil_id: u32) {
+            let caller = get_caller_address();
+            self.emit(StencilUnfavorited {
+                canvas_id,
+                stencil_id,
+                user: caller,
+            });
         }
     }
 

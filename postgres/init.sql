@@ -186,6 +186,35 @@ CREATE TABLE Templates (
   reward_token char(64) NOT NULL
 );
 
+CREATE TABLE StencilData (
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  hash text NOT NULL,
+  data bytea NOT NULL
+);
+
+CREATE TABLE Stencils (
+  stencil_id integer NOT NULL,
+  world_id integer NOT NULL,
+  hash text NOT NULL,
+  width integer NOT NULL,
+  height integer NOT NULL,
+  position integer NOT NULL,
+  UNIQUE (stencil_id, world_id)
+);
+CREATE INDEX stencils_stencil_id_index ON Stencils (stencil_id);
+CREATE INDEX stencils_world_id_index ON Stencils (world_id);
+
+CREATE TABLE StencilFavorites (
+  key int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  stencil_id integer NOT NULL,
+  world_id integer NOT NULL,
+  user_address char(64) NOT NULL,
+  UNIQUE (stencil_id, world_id, user_address)
+);
+CREATE INDEX stencilFavorites_stencil_id_index ON StencilFavorites (stencil_id);
+CREATE INDEX stencilFavorites_world_id_index ON StencilFavorites (world_id);
+CREATE INDEX stencilFavorites_user_index ON StencilFavorites (user_address);
+
 CREATE TABLE NFTs (
   token_id integer NOT NULL PRIMARY KEY,
   position integer NOT NULL,

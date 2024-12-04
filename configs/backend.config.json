@@ -19,7 +19,11 @@
     "create_canvas_devnet": "../tests/integration/local/create_canvas.sh",
     "favorite_world_devnet": "../tests/integration/local/favorite_world.sh",
     "unfavorite_world_devnet": "../tests/integration/local/unfavorite_world.sh",
-    "place_world_pixel_devnet": "../tests/integration/local/place_world_pixel.sh"
+    "place_world_pixel_devnet": "../tests/integration/local/place_world_pixel.sh",
+    "add_stencil_devnet": "../tests/integration/local/add_stencil.sh",
+    "remove_stencil_devnet": "../tests/integration/local/remove_stencil.sh",
+    "favorite_stencil_devnet": "../tests/integration/local/favorite_stencil.sh",
+    "unfavorite_stencil_devnet": "../tests/integration/local/unfavorite_stencil.sh"
   },
   "production": false,
   "websocket": {

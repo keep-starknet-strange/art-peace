@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
-import './WorldItem.css';
+import './StencilItem.css';
 import { fetchWrapper } from '../../services/apiService';
-import ShareIcon from '../../resources/icons/Share.png';
 import FavoriteIcon from '../../resources/icons/Favorite.png';
 import FavoritedIcon from '../../resources/icons/Favorited.png';
 import Info from '../../resources/icons/Info.png';
 import { devnetMode } from '../../utils/Consts.js';
 
-const WorldItem = (props) => {
+const StencilItem = (props) => {
+  // TODO: Add creator text
   const [creatorText, setCreatorText] = useState('');
   useEffect(() => {
     async function fetchUsernameUrl() {
@@ -32,28 +32,29 @@ const WorldItem = (props) => {
         }
       }
     }
-    if (props.host) {
+    if (props.creator) {
       fetchUsernameUrl();
     }
-  }, [props.host]);
-  const favoriteWorldCall = async (worldId) => {
+  }, [props.creator]);
+
+  const favoriteStencilCall = async (stencilId) => {
     if (devnetMode) return;
     if (!props.address || !props.canvasFactoryContract || !props.account)
       return;
     const favoriteCallData = props.canvasFactoryContract.populate(
-      'favorite_canvas',
+      'favorite_stencil',
       {
-        world_id: worldId
+        stencil_id: stencilId
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
       contractAddress: props.canvasFactoryContract.address,
-      entrypoint: 'favorite_canvas',
+      entrypoint: 'favorite_stencil',
       calldata: favoriteCallData.calldata
     });
     /* global BigInt */
     const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
-    const result = await props.canvasFactoryContract.favorite_canvas(
+    const result = await props.canvasFactoryContract.favorite_stencil(
       favoriteCallData.calldata,
       {
         maxFee
@@ -62,23 +63,23 @@ const WorldItem = (props) => {
     console.log(result);
   };
 
-  const unfavoriteWorldCall = async (worldId) => {
+  const unfavoriteStencilCall = async (stencilId) => {
     if (devnetMode) return;
     if (!props.address || !props.canvasFactoryContract || !props.account)
       return;
     const unfavoriteCallData = props.canvasFactoryContract.populate(
-      'unfavorite_canvas',
+      'unfavorite_stencil',
       {
-        world_id: worldId
+        stencil_id: stencilId
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
       contractAddress: props.canvasFactoryContract.address,
-      entrypoint: 'unfavorite_canvas',
+      entrypoint: 'unfavorite_stencil',
       calldata: unfavoriteCallData.calldata
     });
     const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
-    const result = await props.canvasFactoryContract.unfavorite_canvas(
+    const result = await props.canvasFactoryContract.unfavorite_stencil(
       unfavoriteCallData.calldata,
       {
         maxFee
@@ -94,36 +95,38 @@ const WorldItem = (props) => {
     event.preventDefault();
     if (!devnetMode) {
       if (favorited) {
-        await unfavoriteWorldCall(props.worldId);
-        props.updateFavorites(props.worldId, favorites - 1, false);
+        await unfavoriteStencilCall(props.stencilId);
+        props.updateFavorites(props.stencilId, favorites - 1, false);
       } else {
-        await favoriteWorldCall(props.worldId);
-        props.updateFavorites(props.worldId, favorites + 1, true);
+        await favoriteStencilCall(props.stencilId);
+        props.updateFavorites(props.stencilId, favorites + 1, true);
       }
       return;
     }
 
     if (!favorited) {
-      let favoriteResponse = await fetchWrapper('favorite-world-devnet', {
+      let favoriteResponse = await fetchWrapper('favorite-stencil-devnet', {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          worldId: props.worldId.toString()
+          worldId: props.openedWorldId.toString(),
+          stencilId: props.stencilId.toString()
         })
       });
       if (favoriteResponse.result) {
-        props.updateFavorites(props.worldId, favorites + 1, true);
+        props.updateFavorites(props.stencilId, favorites + 1, true);
       }
     } else {
-      let unfavoriteResponse = await fetchWrapper('unfavorite-world-devnet', {
+      let unfavoriteResponse = await fetchWrapper('unfavorite-stencil-devnet', {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          worldId: props.worldId.toString()
+          worldId: props.openedWorldId.toString(),
+          stencilId: props.stencilId.toString()
         })
       });
       if (unfavoriteResponse.result) {
-        props.updateFavorites(props.worldId, favorites - 1, false);
+        props.updateFavorites(props.stencilId, favorites - 1, false);
       }
     }
   };
@@ -135,108 +138,57 @@ const WorldItem = (props) => {
     setFavorited(props.favorited);
   }, [props.favorites, props.favorited]);
 
+  // TODO: Add share functionality
+  /*
   function handleShare() {
-    const worldLink = `${window.location.origin}/worlds/${props.worldId}`;
+    const worldLink = `${window.location.origin}/worlds/${props.stencilId}`;
     const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent('Gm. Join our forces! Draw on our art/peace World! @art_peace_sn 🗺️')}&url=${encodeURIComponent(worldLink)}`;
     window.open(twitterShareUrl, '_blank');
   }
+                <div onClick={handleShare} className='WorldItem__button'>
+                  <img className='Share__icon' src={ShareIcon} alt='Share' />
+                </div>
+  */
 
-  const [timerText, setTimerText] = useState('');
-  const [isLive, setIsLive] = useState(false);
-  const [endingSoon, setEndingSoon] = useState(false);
-  useEffect(() => {
-    const setupTimer = () => {
-      let now = new Date().getTime();
-      let endTime = new Date(props.endtime).getTime();
-      let timeLeft = endTime - now;
-      if (timeLeft > 0) {
-        setIsLive(true);
-        let hours = Math.floor(
-          (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-        if (hours > 10) {
-          setEndingSoon(false);
-          setTimerText('Live');
-          return;
-        } else {
-          setEndingSoon(true);
-          setTimerText(
-            `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
-          );
-        }
-      } else {
-        setEndingSoon(false);
-        setIsLive(false);
-        setTimerText('Ended');
-      }
+  const selectStencil = (e) => {
+    if (
+      e.target.classList.contains('Favorite__button--favorited') ||
+      e.target.classList.contains('Favorite__count') ||
+      e.target.classList.contains('Favorite__icon')
+    ) {
+      return;
+    }
+    let template = {
+      templateId: props.stencilId,
+      hash: props.hash,
+      width: props.width,
+      height: props.height,
+      position: props.position,
+      image: props.image
     };
-    setupTimer();
-    const interval = setInterval(setupTimer, 1000);
-    return () => clearInterval(interval);
-  }, [props.endtime]);
-
-  const selectWorld = () => {
-    props.setActiveWorldId(props.worldId);
+    props.setTemplateOverlayMode(true);
+    props.setOverlayTemplate(template);
+    props.setOpenedStencilId(props.stencilId);
+    props.setActiveTab('Canvas');
   };
 
   const [showInfo, setShowInfo] = React.useState(false);
   return (
     <div
-      className={`WorldItem ${props.activeWorldId === props.worldId ? 'WorldItem--active' : ''}`}
-      onClick={selectWorld}
+      className={`WorldItem ${props.activeStencilId === props.stencilId ? 'WorldItem--active' : ''}`}
+      onClick={selectStencil}
     >
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <div className='WorldItem__imagecontainer'>
           <img
             src={props.image}
-            alt={`world-image-${props.worldId}`}
+            alt={`stencil-image-${props.stencilId}`}
             className='WorldItem__image'
           />
-          <p className='Text__xsmall WorldItem__name'>{props.name}</p>
           <div className='WorldItem__overlay'>
             <div className='WorldItem__buttons'>
-              <div
-                className={`Buttonlike__primary WorldItem__buttonlike ${endingSoon ? 'WorldItem__buttonlike--endingsoon' : ''}`}
-              >
-                <div
-                  style={{
-                    width: '1rem',
-                    height: '1rem',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(255, 0, 0, 1)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    position: 'relative'
-                  }}
-                >
-                  <div
-                    className='WorldItem__live'
-                    style={{
-                      width: '1rem',
-                      height: '1rem',
-                      borderRadius: '50%',
-                      backgroundColor: 'rgba(255, 0, 0, 1)',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center'
-                    }}
-                    display={isLive ? 'block' : 'none'}
-                  />
-                </div>
-                <p
-                  className='Text__small'
-                  style={{ margin: '0', padding: '3px 3px 3px 0.5rem' }}
-                >
-                  {timerText}
-                </p>
-              </div>
+              <div></div>
               <div className='WorldItem__buttons2'>
-                <div onClick={handleShare} className='WorldItem__button'>
-                  <img className='Share__icon' src={ShareIcon} alt='Share' />
-                </div>
                 <div
                   className={`WorldItem__button ${favorited ? 'Favorite__button--favorited' : ''} ${props.queryAddress === '0' ? 'WorldItem__button--disabled' : ''}`}
                   onClick={handleFavoritePress}
@@ -299,8 +251,10 @@ const WorldItem = (props) => {
             className='WorldItem__info__item'
             style={{ backgroundColor: 'rgba(255, 61, 64, 0.3)' }}
           >
-            <p>Timer</p>
-            <p>{props.timer}s</p>
+            <p>Position</p>
+            <p>
+              {props.x}, {props.y}
+            </p>
           </div>
           <div
             className='WorldItem__info__item'
@@ -317,4 +271,4 @@ const WorldItem = (props) => {
   );
 };
 
-export default WorldItem;
+export default StencilItem;
