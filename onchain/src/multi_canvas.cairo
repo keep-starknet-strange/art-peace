@@ -369,7 +369,9 @@ pub mod MultiCanvas {
                 );
         }
 
-        fn award_user(ref self: ContractState, canvas_id: u32, user: ContractAddress, amount: u32) {// TODO
+        fn award_user(
+            ref self: ContractState, canvas_id: u32, user: ContractAddress, amount: u32
+        ) { // TODO
         // let caller = get_caller_address();
         // assert(caller == self.hosts.read(canvas_id), 'Only host can award users');
         // self.extra_pixels.write((canvas_id, user), self.extra_pixels.read((canvas_id, user)) + amount);
