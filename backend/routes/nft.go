@@ -24,6 +24,7 @@ func InitNFTRoutes() {
 	http.HandleFunc("/get-nft-pixel-data", getNftPixelData)
 	// http.HandleFunc("/like-nft", LikeNFT)
 	// http.HandleFunc("/unlike-nft", UnLikeNFT)
+	http.HandleFunc("/get-liked-nfts", getLikedNFTs)
 	http.HandleFunc("/get-top-nfts", getTopNFTs)
 	http.HandleFunc("/get-hot-nfts", getHotNFTs)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
@@ -544,6 +545,60 @@ func getHotNFTs(w http.ResponseWriter, r *http.Request) {
 	nfts, err := core.PostgresQueryJson[NFTData](query, address, hotLimit, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Hot NFTs")
+		return
+	}
+	routeutils.WriteDataJson(w, string(nfts))
+}
+
+func getLikedNFTs(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" || address == "0" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Valid address required for liked NFTs")
+		return
+	}
+
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	query := `
+        SELECT 
+            nfts.*, 
+            COALESCE(like_count, 0) AS likes,
+            true as liked
+        FROM 
+            nfts
+        LEFT JOIN (
+            SELECT 
+                nftKey, 
+                COUNT(*) AS like_count
+            FROM 
+                nftlikes
+            GROUP BY 
+                nftKey
+        ) nftlikes ON nfts.token_id = nftlikes.nftKey
+        WHERE 
+            nfts.token_id IN (
+                SELECT nftkey 
+                FROM nftlikes 
+                WHERE liker = $1
+            )
+        ORDER BY nfts.token_id DESC
+        LIMIT $2 OFFSET $3`
+
+	nfts, err := core.PostgresQueryJson[NFTData](query, address, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve liked NFTs")
 		return
 	}
 	routeutils.WriteDataJson(w, string(nfts))

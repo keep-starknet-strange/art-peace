@@ -9,7 +9,8 @@ import {
   getNftsFn,
   getNewNftsFn,
   getTopNftsFn,
-  getHotNftsFn
+  getHotNftsFn,
+  getLikedNftsFn
 } from '../../services/apiService.js';
 import { PaginationView } from '../../ui/pagination.js';
 
@@ -94,61 +95,76 @@ const NFTsMainSection = (props) => {
 };
 
 const NFTsExpandedSection = (props) => {
-  const roundNumber = process.env.REACT_APP_ROUND_NUMBER || '0';
-  const imageURL = `${nftUrl}/nft/round-${roundNumber}/images/`;
-  const metadataURL = `${nftUrl}/nft/round-${roundNumber}/metadata/`;
+  const maxRound = parseInt(process.env.REACT_APP_ROUND_NUMBER || '1');
+  const [currentRound, setCurrentRound] = useState(maxRound);
+  const imageURL = `${nftUrl}/nft/round-${currentRound}/images/`;
+  const metadataURL = `${nftUrl}/nft/round-${currentRound}/metadata/`;
+
+  const handleRoundChange = (direction) => {
+    if (direction === 'prev' && currentRound > 1) {
+      setCurrentRound((prev) => prev - 1);
+      props.setAllNftPagination((prev) => ({ ...prev, page: 1 }));
+    } else if (direction === 'next' && currentRound < maxRound) {
+      setCurrentRound((prev) => prev + 1);
+      props.setAllNftPagination((prev) => ({ ...prev, page: 1 }));
+    }
+  };
 
   return (
     <div className='NFTs__all'>
       <div className='NFTs__header'>
         <h2 className='NFTs__heading'>Explore</h2>
         <div className='NFTs__filters'>
-          {props.filters.map((filter, index) => {
-            return (
-              <div
-                key={index}
-                className={`NFTs__button NFTs__filter ${
-                  props.activeFilter === filter ? 'NFTs__button--selected' : ''
-                }`}
-                onClick={() => props.setActiveFilter(filter)}
-              >
-                {filter}
-              </div>
-            );
-          })}
+          {props.filters.map((filter, index) => (
+            <div
+              key={index}
+              className={`NFTs__button NFTs__filter ${
+                props.activeFilter === filter ? 'NFTs__button--selected' : ''
+              }`}
+              onClick={() => props.setActiveFilter(filter)}
+            >
+              {filter}
+            </div>
+          ))}
+          <div
+            className='NFTs__button NFTs__filter'
+            onClick={() => handleRoundChange('prev')}
+          >
+            {'<'}
+          </div>
+          <div className='NFTs__button NFTs__filter'>
+            {`Round ${currentRound}`}
+          </div>
+          <div
+            className='NFTs__button NFTs__filter'
+            onClick={() => handleRoundChange('next')}
+          >
+            {'>'}
+          </div>
         </div>
       </div>
-
       <div className='NFTs__all__container'>
         <div className='NFTs__all__grid'>
-          {props.allNfts.map((nft, index) => {
-            return (
+          {currentRound === maxRound &&
+            (props.allNfts.length > 0 || props.activeFilter !== 'liked') &&
+            props.allNfts.map((nft, index) => (
               <NFTItem
                 key={index}
+                {...nft}
                 address={props.address}
                 account={props.account}
                 estimateInvokeFee={props.estimateInvokeFee}
                 artPeaceContract={props.artPeaceContract}
                 canvasNftContract={props.canvasNftContract}
-                tokenId={nft.tokenId}
-                position={nft.position}
                 image={imageURL + 'nft-' + nft.tokenId + '.png'}
                 metadata={metadataURL + 'nft-' + nft.tokenId + '.json'}
-                width={nft.width}
-                height={nft.height}
-                name={nft.name}
-                blockNumber={nft.blockNumber}
-                likes={nft.likes}
-                liked={nft.liked}
-                minter={nft.minter}
                 queryAddress={props.queryAddress}
                 updateLikes={props.updateLikes}
                 setTemplateOverlayMode={props.setTemplateOverlayMode}
                 setOverlayTemplate={props.setOverlayTemplate}
                 setActiveTab={props.setActiveTab}
               />
-            );
-          })}
+            ))}
         </div>
         <PaginationView
           data={props.allNfts}
@@ -178,7 +194,6 @@ const NFTs = (props) => {
       const response = await fetchWrapper(getNFTByTokenId, { mode: 'cors' });
       if (response.data) {
         let newNFTs = [response.data, ...myNFTs];
-        // Remove duplicate tokenIds
         let uniqueNFTs = newNFTs.filter(
           (nft, index, self) =>
             index === self.findIndex((t) => t.tokenId === nft.tokenId)
@@ -244,7 +259,7 @@ const NFTs = (props) => {
   }, [props.queryAddress, myNftPagination.page, myNftPagination.pageLength]);
 
   const [expanded, setExpanded] = useState(false);
-  const filters = ['hot', 'new', 'top'];
+  const filters = ['hot', 'new', 'top', 'liked'];
   const [activeFilter, setActiveFilter] = useState(filters[0]);
 
   useEffect(() => {
@@ -268,6 +283,12 @@ const NFTs = (props) => {
           });
         } else if (activeFilter === 'top') {
           result = await getTopNftsFn({
+            page: allNftPagination.page,
+            pageLength: allNftPagination.pageLength,
+            queryAddress: props.queryAddress
+          });
+        } else if (activeFilter === 'liked') {
+          result = await getLikedNftsFn({
             page: allNftPagination.page,
             pageLength: allNftPagination.pageLength,
             queryAddress: props.queryAddress
@@ -298,7 +319,7 @@ const NFTs = (props) => {
       }
     }
     getNfts();
-  }, [props.queryAddress, expanded, allNftPagination]);
+  }, [props.queryAddress, expanded, allNftPagination, activeFilter]);
 
   const resetPagination = () => {
     setAllNftPagination((prev) => ({

@@ -181,3 +181,10 @@ export const getHotStencilsFn = async (params) => {
     `get-hot-stencils?address=${queryAddress}&page=${page}&pageLength=${pageLength}&worldId=${params.worldId}`
   );
 };
+
+export const getLikedNftsFn = async (params) => {
+  const { page, pageLength, queryAddress } = params;
+  return await fetchWrapper(
+    `get-liked-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
+  );
+};

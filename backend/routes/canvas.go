@@ -2,7 +2,9 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
@@ -19,7 +21,10 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if core.ArtPeaceBackend.Databases.Redis.Exists(context.Background(), "canvas").Val() == 0 {
+	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
+	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
+
+	if core.ArtPeaceBackend.Databases.Redis.Exists(context.Background(), canvasKey).Val() == 0 {
 		totalBitSize := core.ArtPeaceBackend.CanvasConfig.Canvas.Width * core.ArtPeaceBackend.CanvasConfig.Canvas.Height * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 		totalByteSize := (totalBitSize / 8)
 		if totalBitSize%8 != 0 {
@@ -30,23 +35,31 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 		// Create canvas
 		canvas := make([]byte, totalByteSize)
 		ctx := context.Background()
-		err := core.ArtPeaceBackend.Databases.Redis.Set(ctx, "canvas", canvas, 0).Err()
+		err := core.ArtPeaceBackend.Databases.Redis.Set(ctx, canvasKey, canvas, 0).Err()
 		if err != nil {
 			routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to initialize canvas")
 			return
 		}
 
-		routeutils.WriteResultJson(w, "Canvas initialized")
+		routeutils.WriteResultJson(w, fmt.Sprintf("Canvas for round %d initialized", roundNumber))
 	} else {
-		routeutils.WriteErrorJson(w, http.StatusConflict, "Canvas already initialized")
+		routeutils.WriteErrorJson(w, http.StatusConflict, fmt.Sprintf("Canvas for round %d already initialized", roundNumber))
 	}
 }
 
 func getCanvas(w http.ResponseWriter, r *http.Request) {
 	routeutils.SetupAccessHeaders(w)
 
+	// Get round number from query params, default to config round
+	roundNumber := r.URL.Query().Get("round")
+	if roundNumber == "" {
+		roundNumber = strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.Round))
+	}
+
+	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
+
 	ctx := context.Background()
-	val, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
+	val, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, canvasKey).Result()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get canvas")
 		return
