@@ -1,4 +1,7 @@
 pub mod art_peace;
+pub mod canvas_factory;
+pub mod canvas;
+pub mod multi_canvas;
 pub mod interfaces;
 use art_peace::ArtPeace;
 use interfaces::{

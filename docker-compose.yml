@@ -53,6 +53,7 @@ services:
       - ROUND_NUMBER=1
     volumes:
       - nfts:/app/nfts
+      - worlds:/app/worlds
   devnet:
     image: shardlabs/starknet-devnet-rs:0.0.3
     command:
@@ -65,12 +66,12 @@ services:
       - 5050:5050
   deployer:
     build:
-      dockerfile: onchain/Dockerfile.init
+      dockerfile: onchain/Dockerfile.worlds_init
       context: .
     depends_on:
       - devnet
     restart: no
-    command: bash -c "./initialize.sh"
+    command: bash -c "./initialize_worlds.sh"
     environment:
       - SCARB=/root/.local/bin/scarb
     volumes:
@@ -110,7 +111,7 @@ services:
         condition: service_started
   indexer:
     build:
-      dockerfile: indexer/Dockerfile
+      dockerfile: indexer/Dockerfile.worlds
       context: .
     depends_on:
       deployer:
@@ -124,7 +125,7 @@ services:
       - APIBARA_STREAM_URL=http://art-peace-apibara-1:7171
       - CONSUMER_TARGET_URL=http://art-peace-consumer-1:8081/consume-indexer-msg
       - PERSIST_TO_REDIS=redis://art-peace-redis-1:6379
-      - INDEXER_ID=art-peace-indexer-id
+      - INDEXER_ID=canvas-worlds-indexer-id
     volumes:
       - configs:/configs
     restart: on-failure
@@ -154,6 +155,7 @@ volumes:
   redis:
   postgres:
   nfts:
+  worlds:
   devnet:
   apibara:
   configs:

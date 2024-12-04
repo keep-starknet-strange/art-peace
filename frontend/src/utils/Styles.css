@@ -52,6 +52,26 @@
   text-shadow: 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1);
 }
 
+.Buttonlike__primary {
+  margin: 0.2rem;
+  padding: 0.5rem 1rem;
+  text-align: center;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  border-radius: 2rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+}
+
 .Button__primary {
   margin: 0.2rem;
   padding: 0.5rem 1rem;

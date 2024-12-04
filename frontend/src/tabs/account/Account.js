@@ -310,7 +310,11 @@ const Account = (props) => {
 
   useEffect(() => {
     const fetchPixelCount = async () => {
-      const getPixelCountUrl = `${backendUrl}/get-pixel-count?address=${props.queryAddress}`;
+      const getPixelCountUrl =
+        backendUrl +
+        (props.openedWorldId == null
+          ? `/get-pixel-count?address=${props.queryAddress}`
+          : `/get-worlds-pixel-count?address=${props.queryAddress}&worldId=${props.openedWorldId}`);
       const response = await fetch(getPixelCountUrl);
       if (response.ok) {
         const result = await response.json();
@@ -576,7 +580,13 @@ const Account = (props) => {
             Stats
           </h2>
           <div className='Account__item'>
-            <p className='Text__small Account__item__label'>Pixels placed</p>
+            {props.openedWorldId == null ? (
+              <p className='Text__small Account__item__label'>Pixels placed</p>
+            ) : (
+              <p className='Text__small Account__item__label'>
+                Pixels in world {props.openedWorldId}
+              </p>
+            )}
             <div className='Account__item__pair'>
               <p className='Text__small Account__item__label'>{pixelCount}</p>
               {false && (

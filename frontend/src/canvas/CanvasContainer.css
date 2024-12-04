@@ -48,3 +48,17 @@
   background-color: rgba(0, 0, 0, 0);
   outline: 0.1px solid rgba(255, 0, 0, 0.5);
 }
+
+.CanvasContainer__title {
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  z-index: 4;
+
+  font-size: 1rem;
+  font-weight: bold;
+  white-space: nowrap;
+  color: black;
+
+  pointer-events: none;
+}

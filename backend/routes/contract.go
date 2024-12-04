@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -14,6 +15,8 @@ import (
 func InitContractRoutes() {
 	http.HandleFunc("/get-contract-address", getContractAddress)
 	http.HandleFunc("/set-contract-address", setContractAddress)
+	http.HandleFunc("/get-factory-contract-address", getFactoryContractAddress)
+	http.HandleFunc("/set-factory-contract-address", setFactoryContractAddress)
 	http.HandleFunc("/get-game-data", getGameData)
 }
 
@@ -35,6 +38,28 @@ func setContractAddress(w http.ResponseWriter, r *http.Request) {
 	}
 	os.Setenv("ART_PEACE_CONTRACT_ADDRESS", string(data))
 	routeutils.WriteResultJson(w, "Contract address set")
+}
+
+func getFactoryContractAddress(w http.ResponseWriter, r *http.Request) {
+	contractAddress := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
+	routeutils.WriteDataJson(w, "\""+contractAddress+"\"")
+}
+
+func setFactoryContractAddress(w http.ResponseWriter, r *http.Request) {
+	// Only allow admin to set contract address
+	if routeutils.AdminMiddleware(w, r) {
+		return
+	}
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
+	fmt.Println("Setting factory contract address to: ", string(data))
+	os.Setenv("CANVAS_FACTORY_CONTRACT_ADDRESS", string(data))
+	fmt.Println("Factory contract address set to: ", os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS"))
+	routeutils.WriteResultJson(w, "Factory contract address set")
 }
 
 type GameData struct {

@@ -21,7 +21,11 @@ const Canvas = (props) => {
         const context = canvas.getContext('2d');
         context.imageSmoothingEnabled = false;
 
-        let getCanvasEndpoint = backendUrl + '/get-canvas';
+        let getCanvasEndpoint =
+          backendUrl +
+          (props.openedWorldId === null
+            ? '/get-canvas'
+            : `/get-world-canvas?worldId=${props.openedWorldId}`);
         let response = await fetch(getCanvasEndpoint);
         let canvasData = await response.arrayBuffer();
 
@@ -63,7 +67,7 @@ const Canvas = (props) => {
     };
 
     fetchCanvas();
-  }, [props.width, props.height, props.colors]);
+  }, [props.width, props.height, props.colors, props.openedWorldId]);
 
   return (
     <canvas
