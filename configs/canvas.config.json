@@ -47,5 +47,6 @@
     "898D90",
     "D4D7D9"
   ],
-  "colorsBitwidth": 5
+  "colorsBitwidth": 5,
+  "round": 2
 }
