@@ -33,12 +33,12 @@ func InitWorldsRoutes() {
 		http.HandleFunc("/create-canvas-devnet", createCanvasDevnet)
 		http.HandleFunc("/favorite-world-devnet", favoriteWorldDevnet)
 		http.HandleFunc("/unfavorite-world-devnet", unfavoriteWorldDevnet)
-    http.HandleFunc("/place-world-pixel-devnet", placeWorldPixelDevnet)
+		http.HandleFunc("/place-world-pixel-devnet", placeWorldPixelDevnet)
 	}
 }
 
 func InitWorldsStaticRoutes() {
-  http.Handle("/worlds/", http.StripPrefix("/worlds/", http.FileServer(http.Dir("./worlds"))))
+	http.Handle("/worlds/", http.StripPrefix("/worlds/", http.FileServer(http.Dir("./worlds"))))
 }
 
 func getWorldCanvas(w http.ResponseWriter, r *http.Request) {
@@ -63,16 +63,16 @@ func getWorldCanvas(w http.ResponseWriter, r *http.Request) {
 }
 
 type WorldData struct {
-	WorldId           int    `json:"worldId"`
-	Host              string `json:"host"`
-	Name              string `json:"name"`
-	Width             int    `json:"width"`
-	Height            int    `json:"height"`
-	TimeBetweenPixels int    `json:"timeBetweenPixels"`
-	StartTime         *time.Time    `json:"startTime"`
-	EndTime           *time.Time    `json:"endTime"`
-	Favorites         int    `json:"favorites"`
-	Favorited         bool   `json:"favorited"`
+	WorldId           int        `json:"worldId"`
+	Host              string     `json:"host"`
+	Name              string     `json:"name"`
+	Width             int        `json:"width"`
+	Height            int        `json:"height"`
+	TimeBetweenPixels int        `json:"timeBetweenPixels"`
+	StartTime         *time.Time `json:"startTime"`
+	EndTime           *time.Time `json:"endTime"`
+	Favorites         int        `json:"favorites"`
+	Favorited         bool       `json:"favorited"`
 }
 
 func getWorld(w http.ResponseWriter, r *http.Request) {
@@ -173,7 +173,7 @@ func getNewWorlds(w http.ResponseWriter, r *http.Request) {
         LIMIT $2 OFFSET $3`
 	worlds, err := core.PostgresQueryJson[WorldData](query, address, pageLength, offset)
 	if err != nil {
-    fmt.Println(err)
+		fmt.Println(err)
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
 		return
 	}
@@ -490,12 +490,12 @@ func createCanvasDevnet(w http.ResponseWriter, r *http.Request) {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid color palette")
 		return
 	}
-  for i, color := range palette {
-    colorFormatted := strings.TrimSpace(color)
-    colorFormatted = "0x" + colorFormatted
-    palette[i] = colorFormatted
-  }
-  paletteInput := strings.Join(palette, " ")
+	for i, color := range palette {
+		colorFormatted := strings.TrimSpace(color)
+		colorFormatted = "0x" + colorFormatted
+		palette[i] = colorFormatted
+	}
+	paletteInput := strings.Join(palette, " ")
 
 	startTime, err := strconv.Atoi((*jsonBody)["start_time"])
 	if err != nil || startTime <= 0 {
@@ -577,63 +577,63 @@ func unfavoriteWorldDevnet(w http.ResponseWriter, r *http.Request) {
 }
 
 func placeWorldPixelDevnet(w http.ResponseWriter, r *http.Request) {
-  // Disable this in production
-  if routeutils.NonProductionMiddleware(w, r) {
-    return
-  }
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
 
-  jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
-    return
-  }
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		return
+	}
 
-  worldId, err := strconv.Atoi((*jsonBody)["worldId"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
-    return
-  }
+	worldId, err := strconv.Atoi((*jsonBody)["worldId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+		return
+	}
 
-  position, err := strconv.Atoi((*jsonBody)["position"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid position")
-    return
-  }
+	position, err := strconv.Atoi((*jsonBody)["position"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid position")
+		return
+	}
 
-  color, err := strconv.Atoi((*jsonBody)["color"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid color")
-    return
-  }
+	color, err := strconv.Atoi((*jsonBody)["color"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid color")
+		return
+	}
 
-  timestamp, err := strconv.Atoi((*jsonBody)["timestamp"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid time")
-    return
-  }
+	timestamp, err := strconv.Atoi((*jsonBody)["timestamp"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid time")
+		return
+	}
 
-  //TODO: Validate position range
+	//TODO: Validate position range
 
-  // Validate color format (e.g., validate against allowed colors)
-  colorsLength, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsColors")
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get colors count")
-    return
-  }
-  if color < 0 || color > *colorsLength {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Color out of range")
-    return
-  }
+	// Validate color format (e.g., validate against allowed colors)
+	colorsLength, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsColors")
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get colors count")
+		return
+	}
+	if color < 0 || color > *colorsLength {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Color out of range")
+		return
+	}
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.PlaceWorldPixelDevnet
-  contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.PlaceWorldPixelDevnet
+	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 
-  cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(worldId), strconv.Itoa(position), strconv.Itoa(color), strconv.Itoa(timestamp))
-  _, err = cmd.Output()
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
-    return
-  }
+	cmd := exec.Command(shellCmd, contract, "place_pixel", strconv.Itoa(worldId), strconv.Itoa(position), strconv.Itoa(color), strconv.Itoa(timestamp))
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place pixel on devnet")
+		return
+	}
 
-  routeutils.WriteResultJson(w, "Pixel placed world")
+	routeutils.WriteResultJson(w, "Pixel placed world")
 }

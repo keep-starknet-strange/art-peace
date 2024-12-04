@@ -24,38 +24,38 @@ func InitStencilsRoutes() {
 	// TODO: Hot/top use user interactivity instead of favorite count
 	http.HandleFunc("/get-top-stencils", getTopStencils)
 	http.HandleFunc("/get-hot-stencils", getHotStencils)
-  http.HandleFunc("/add-stencil-img", addStencilImg)
-  http.HandleFunc("/add-stencil-data", addStencilData)
+	http.HandleFunc("/add-stencil-img", addStencilImg)
+	http.HandleFunc("/add-stencil-data", addStencilData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
-    http.HandleFunc("/add-stencil-devnet", addStencilDevnet)
-    http.HandleFunc("/remove-stencil-devnet", removeStencilDevnet)
-    http.HandleFunc("/favorite-stencil-devnet", favoriteStencilDevnet)
-    http.HandleFunc("/unfavorite-stencil-devnet", unfavoriteStencilDevnet)
+		http.HandleFunc("/add-stencil-devnet", addStencilDevnet)
+		http.HandleFunc("/remove-stencil-devnet", removeStencilDevnet)
+		http.HandleFunc("/favorite-stencil-devnet", favoriteStencilDevnet)
+		http.HandleFunc("/unfavorite-stencil-devnet", unfavoriteStencilDevnet)
 	}
 }
 
 func InitStencilsStaticRoutes() {
-  http.Handle("/stencils/", http.StripPrefix("/stencils/", http.FileServer(http.Dir("./stencils"))))
+	http.Handle("/stencils/", http.StripPrefix("/stencils/", http.FileServer(http.Dir("./stencils"))))
 }
 
 type StencilData struct {
-	StencilId         int    `json:"stencilId"`
-  WorldId           int    `json:"worldId"`
-	Name              string `json:"name"`
-  Hash              string `json:"hash"`
-	Width             int    `json:"width"`
-	Height            int    `json:"height"`
-  Position          int    `json:"position"`
-	Favorites         int    `json:"favorites"`
-	Favorited         bool   `json:"favorited"`
+	StencilId int    `json:"stencilId"`
+	WorldId   int    `json:"worldId"`
+	Name      string `json:"name"`
+	Hash      string `json:"hash"`
+	Width     int    `json:"width"`
+	Height    int    `json:"height"`
+	Position  int    `json:"position"`
+	Favorites int    `json:"favorites"`
+	Favorited bool   `json:"favorited"`
 }
 
 func getStencil(w http.ResponseWriter, r *http.Request) {
-  stencilId := r.URL.Query().Get("stencilId")
-  if stencilId == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing stencilId")
-    return
-  }
+	stencilId := r.URL.Query().Get("stencilId")
+	if stencilId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing stencilId")
+		return
+	}
 
 	worldId := r.URL.Query().Get("worldId")
 	if worldId == "" {
@@ -73,20 +73,20 @@ func getStencil(w http.ResponseWriter, r *http.Request) {
 }
 
 func getStencils(w http.ResponseWriter, r *http.Request) {
-  worldId := r.URL.Query().Get("worldId")
-  if worldId == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
-    return
-  }
-  worldIdInt, err := strconv.Atoi(worldId)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
-    return
-  }
-  address := r.URL.Query().Get("address")
-  if address == "" {
-    address = "0"
-  }
+	worldId := r.URL.Query().Get("worldId")
+	if worldId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
+		return
+	}
+	worldIdInt, err := strconv.Atoi(worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+		return
+	}
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
 	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
 	if err != nil || pageLength <= 0 {
 		pageLength = 25
@@ -128,16 +128,16 @@ func getStencils(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNewStencils(w http.ResponseWriter, r *http.Request) {
-  worldId := r.URL.Query().Get("worldId")
-  if worldId == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
-    return
-  }
-  worldIdInt, err := strconv.Atoi(worldId)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
-    return
-  }
+	worldId := r.URL.Query().Get("worldId")
+	if worldId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
+		return
+	}
+	worldIdInt, err := strconv.Atoi(worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+		return
+	}
 	address := r.URL.Query().Get("address")
 	if address == "" {
 		address = "0"
@@ -176,7 +176,7 @@ func getNewStencils(w http.ResponseWriter, r *http.Request) {
         LIMIT $3 OFFSET $4`
 	stencils, err := core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
 	if err != nil {
-    fmt.Println(err)
+		fmt.Println(err)
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
 		return
 	}
@@ -184,16 +184,16 @@ func getNewStencils(w http.ResponseWriter, r *http.Request) {
 }
 
 func getHotStencils(w http.ResponseWriter, r *http.Request) {
-  worldId := r.URL.Query().Get("worldId")
-  if worldId == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
-    return
-  }
-  worldIdInt, err := strconv.Atoi(worldId)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
-    return
-  }
+	worldId := r.URL.Query().Get("worldId")
+	if worldId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
+		return
+	}
+	worldIdInt, err := strconv.Atoi(worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+		return
+	}
 	address := r.URL.Query().Get("address")
 	if address == "" {
 		address = "0"
@@ -256,16 +256,16 @@ func getHotStencils(w http.ResponseWriter, r *http.Request) {
 }
 
 func getTopStencils(w http.ResponseWriter, r *http.Request) {
-  worldId := r.URL.Query().Get("worldId")
-  if worldId == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
-    return
-  }
-  worldIdInt, err := strconv.Atoi(worldId)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
-    return
-  }
+	worldId := r.URL.Query().Get("worldId")
+	if worldId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
+		return
+	}
+	worldIdInt, err := strconv.Atoi(worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+		return
+	}
 	address := r.URL.Query().Get("address")
 	if address == "" {
 		address = "0"
@@ -312,16 +312,16 @@ func getTopStencils(w http.ResponseWriter, r *http.Request) {
 }
 
 func getFavoriteStencils(w http.ResponseWriter, r *http.Request) {
-  worldId := r.URL.Query().Get("worldId")
-  if worldId == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
-    return
-  }
-  worldIdInt, err := strconv.Atoi(worldId)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
-    return
-  }
+	worldId := r.URL.Query().Get("worldId")
+	if worldId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
+		return
+	}
+	worldIdInt, err := strconv.Atoi(worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+		return
+	}
 	address := r.URL.Query().Get("address")
 	if address == "" {
 		address = "0"
@@ -448,11 +448,11 @@ func addStencilData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  worldId, err := strconv.Atoi((*jsonBody)["worldId"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
-    return
-  }
+	worldId, err := strconv.Atoi((*jsonBody)["worldId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+		return
+	}
 
 	width, err := strconv.Atoi((*jsonBody)["width"])
 	if err != nil {
@@ -602,109 +602,109 @@ func addStencilDevnet(w http.ResponseWriter, r *http.Request) {
 }
 
 func removeStencilDevnet(w http.ResponseWriter, r *http.Request) {
-  // Disable this in production
-  if routeutils.NonProductionMiddleware(w, r) {
-    return
-  }
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
 
-  jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
-    return
-  }
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
 
-  worldId, err := strconv.Atoi((*jsonBody)["worldId"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
-    return
-  }
+	worldId, err := strconv.Atoi((*jsonBody)["worldId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
 
-  stencilId, err := strconv.Atoi((*jsonBody)["stencilId"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid stencil ID")
-    return
-  }
+	stencilId, err := strconv.Atoi((*jsonBody)["stencilId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid stencil ID")
+		return
+	}
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.RemoveStencilDevnet
-  contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
-  cmd := exec.Command(shellCmd, contract, "remove_stencil", strconv.Itoa(worldId), strconv.Itoa(stencilId))
-  _, err = cmd.Output()
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to remove stencil from devnet")
-    return
-  }
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.RemoveStencilDevnet
+	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
+	cmd := exec.Command(shellCmd, contract, "remove_stencil", strconv.Itoa(worldId), strconv.Itoa(stencilId))
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to remove stencil from devnet")
+		return
+	}
 
-  routeutils.WriteResultJson(w, "Stencil removed from devnet")
+	routeutils.WriteResultJson(w, "Stencil removed from devnet")
 }
 
 func favoriteStencilDevnet(w http.ResponseWriter, r *http.Request) {
-  // Disable this in production
-  if routeutils.NonProductionMiddleware(w, r) {
-    return
-  }
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
 
-  jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
-    return
-  }
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
 
-  worldId, err := strconv.Atoi((*jsonBody)["worldId"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
-    return
-  }
+	worldId, err := strconv.Atoi((*jsonBody)["worldId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
 
-  stencilId, err := strconv.Atoi((*jsonBody)["stencilId"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid stencil ID")
-    return
-  }
+	stencilId, err := strconv.Atoi((*jsonBody)["stencilId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid stencil ID")
+		return
+	}
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.FavoriteStencilDevnet
-  contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
-  cmd := exec.Command(shellCmd, contract, "favorite_stencil", strconv.Itoa(worldId), strconv.Itoa(stencilId))
-  _, err = cmd.Output()
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to favorite stencil in devnet")
-    return
-  }
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.FavoriteStencilDevnet
+	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
+	cmd := exec.Command(shellCmd, contract, "favorite_stencil", strconv.Itoa(worldId), strconv.Itoa(stencilId))
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to favorite stencil in devnet")
+		return
+	}
 
-  routeutils.WriteResultJson(w, "Stencil favorited in devnet")
+	routeutils.WriteResultJson(w, "Stencil favorited in devnet")
 }
 
 func unfavoriteStencilDevnet(w http.ResponseWriter, r *http.Request) {
-  // Disable this in production
-  if routeutils.NonProductionMiddleware(w, r) {
-    return
-  }
+	// Disable this in production
+	if routeutils.NonProductionMiddleware(w, r) {
+		return
+	}
 
-  jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
-    return
-  }
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
 
-  worldId, err := strconv.Atoi((*jsonBody)["worldId"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
-    return
-  }
+	worldId, err := strconv.Atoi((*jsonBody)["worldId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid faction ID")
+		return
+	}
 
-  stencilId, err := strconv.Atoi((*jsonBody)["stencilId"])
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid stencil ID")
-    return
-  }
+	stencilId, err := strconv.Atoi((*jsonBody)["stencilId"])
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid stencil ID")
+		return
+	}
 
-  shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.UnfavoriteStencilDevnet
-  contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
-  cmd := exec.Command(shellCmd, contract, "unfavorite_stencil", strconv.Itoa(worldId), strconv.Itoa(stencilId))
-  _, err = cmd.Output()
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unfavorite stencil in devnet")
-    return
-  }
+	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.UnfavoriteStencilDevnet
+	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
+	cmd := exec.Command(shellCmd, contract, "unfavorite_stencil", strconv.Itoa(worldId), strconv.Itoa(stencilId))
+	_, err = cmd.Output()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unfavorite stencil in devnet")
+		return
+	}
 
-  routeutils.WriteResultJson(w, "Stencil unfavorited in devnet")
+	routeutils.WriteResultJson(w, "Stencil unfavorited in devnet")
 }

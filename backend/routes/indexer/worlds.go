@@ -109,62 +109,62 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 	} else {
 		PrintIndexerError("processCanvasCreatedEvent", "Canvas already exists in redis", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 	}
-  
-  // Create base directories if they don't exist
-  dirs := []string{
-    "worlds",
-    "worlds/images",
-  }
 
-  for _, dir := range dirs {
-    if _, err := os.Stat(dir); os.IsNotExist(err) {
-      err = os.MkdirAll(dir, os.ModePerm)
-      if err != nil {
-        PrintIndexerError("processCanvasCreatedEvent", "Failed to create directory", dir, err)
-        return
-      }
-    }
-  }
+	// Create base directories if they don't exist
+	dirs := []string{
+		"worlds",
+		"worlds/images",
+	}
 
-  generatedWorldImage := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
+	for _, dir := range dirs {
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			err = os.MkdirAll(dir, os.ModePerm)
+			if err != nil {
+				PrintIndexerError("processCanvasCreatedEvent", "Failed to create directory", dir, err)
+				return
+			}
+		}
+	}
+
+	generatedWorldImage := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
 	baseColorHex := event.Event.Data[6]
-  baseColor := baseColorHex[len(baseColorHex)-6:] // Remove prefix
-  baseColorR, err := strconv.ParseInt(baseColor[0:2], 16, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasCreatedEvent", "Failed to parse baseColorR", baseColor, err)
-    return
-  }
-  baseColorG, err := strconv.ParseInt(baseColor[2:4], 16, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasCreatedEvent", "Failed to parse baseColorG", baseColor, err)
-    return
-  }
-  baseColorB, err := strconv.ParseInt(baseColor[4:6], 16, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasCreatedEvent", "Failed to parse baseColorB", baseColor, err)
-    return
-  }
-  color := color.RGBA{R: uint8(baseColorR), G: uint8(baseColorG), B: uint8(baseColorB), A: 255}
-  for y := 0; y < int(height); y++ {
-    for x := 0; x < int(width); x++ {
-      generatedWorldImage.Set(x, y, color)
-    }
-  }
+	baseColor := baseColorHex[len(baseColorHex)-6:] // Remove prefix
+	baseColorR, err := strconv.ParseInt(baseColor[0:2], 16, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse baseColorR", baseColor, err)
+		return
+	}
+	baseColorG, err := strconv.ParseInt(baseColor[2:4], 16, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse baseColorG", baseColor, err)
+		return
+	}
+	baseColorB, err := strconv.ParseInt(baseColor[4:6], 16, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse baseColorB", baseColor, err)
+		return
+	}
+	color := color.RGBA{R: uint8(baseColorR), G: uint8(baseColorG), B: uint8(baseColorB), A: 255}
+	for y := 0; y < int(height); y++ {
+		for x := 0; x < int(width); x++ {
+			generatedWorldImage.Set(x, y, color)
+		}
+	}
 
-  // Create world image
-  filename := "worlds/images/world-" + strconv.Itoa(int(canvasId)) + ".png"
-  file, err := os.Create(filename)
-  if err != nil {
-    PrintIndexerError("processCanvasCreatedEvent", "Failed to create file", filename, err)
-    return
-  }
-  defer file.Close()
+	// Create world image
+	filename := "worlds/images/world-" + strconv.Itoa(int(canvasId)) + ".png"
+	file, err := os.Create(filename)
+	if err != nil {
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to create file", filename, err)
+		return
+	}
+	defer file.Close()
 
-  err = png.Encode(file, generatedWorldImage)
-  if err != nil {
-    PrintIndexerError("processCanvasCreatedEvent", "Failed to encode image", filename, err)
-    return
-  }
+	err = png.Encode(file, generatedWorldImage)
+	if err != nil {
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to encode image", filename, err)
+		return
+	}
 }
 
 func revertCanvasCreatedEvent(event IndexerEvent) {
@@ -363,108 +363,107 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
-  // Check # of total pixels placed on this world
-  totalPixelsPlaced, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsPixels WHERE world_id = $1", canvasId)
-  if err != nil {
-    PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query totalPixelsPlaced", canvasIdHex, placedBy, posHex, colorHex, err)
-    return
-  }
+	// Check # of total pixels placed on this world
+	totalPixelsPlaced, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsPixels WHERE world_id = $1", canvasId)
+	if err != nil {
+		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query totalPixelsPlaced", canvasIdHex, placedBy, posHex, colorHex, err)
+		return
+	}
 
-  lastPixelPlacedTime, err := core.PostgresQueryOne[*time.Time]("SELECT time FROM WorldsPixels WHERE world_id = $1 ORDER BY time DESC LIMIT 1", canvasId)
-  if err != nil {
-    PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query lastPixelPlacedTime", canvasIdHex, placedBy, posHex, colorHex, err)
-    return
-  }
-  timeSinceLastPixelPlaced := time.Now().Unix() - (*lastPixelPlacedTime).Unix()
-  threeHours := int64(3 * 60 * 60)
+	lastPixelPlacedTime, err := core.PostgresQueryOne[*time.Time]("SELECT time FROM WorldsPixels WHERE world_id = $1 ORDER BY time DESC LIMIT 1", canvasId)
+	if err != nil {
+		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query lastPixelPlacedTime", canvasIdHex, placedBy, posHex, colorHex, err)
+		return
+	}
+	timeSinceLastPixelPlaced := time.Now().Unix() - (*lastPixelPlacedTime).Unix()
+	threeHours := int64(3 * 60 * 60)
 
-  // TODO: Improve this & collect snapshots for a timelapse
-  // Snapshot canvas image every 100 pixels placed || if last pixel placed was more than 3 hours ago
-  if uint(*totalPixelsPlaced) % 100 == 0 || timeSinceLastPixelPlaced > threeHours {
-    worldWidth, err := core.PostgresQueryOne[int]("SELECT width FROM Worlds WHERE world_id = $1", canvasId)
-    if err != nil {
-      PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldWidth", canvasIdHex, placedBy, posHex, colorHex, err)
-      return
-    }
-    worldHeight, err := core.PostgresQueryOne[int]("SELECT height FROM Worlds WHERE world_id = $1", canvasId)
-    if err != nil {
-      PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldHeight", canvasIdHex, placedBy, posHex, colorHex, err)
-      return
-    }
+	// TODO: Improve this & collect snapshots for a timelapse
+	// Snapshot canvas image every 100 pixels placed || if last pixel placed was more than 3 hours ago
+	if uint(*totalPixelsPlaced)%100 == 0 || timeSinceLastPixelPlaced > threeHours {
+		worldWidth, err := core.PostgresQueryOne[int]("SELECT width FROM Worlds WHERE world_id = $1", canvasId)
+		if err != nil {
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldWidth", canvasIdHex, placedBy, posHex, colorHex, err)
+			return
+		}
+		worldHeight, err := core.PostgresQueryOne[int]("SELECT height FROM Worlds WHERE world_id = $1", canvasId)
+		if err != nil {
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldHeight", canvasIdHex, placedBy, posHex, colorHex, err)
+			return
+		}
 
-    ctx := context.Background()
-    canvasRedisKey := "canvas-" + strconv.Itoa(int(canvasId))
-    canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, canvasRedisKey).Result()
-    if err != nil {
-      PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to get canvas", canvasIdHex, placedBy, posHex, colorHex, err)
-      return
-    }
+		ctx := context.Background()
+		canvasRedisKey := "canvas-" + strconv.Itoa(int(canvasId))
+		canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, canvasRedisKey).Result()
+		if err != nil {
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to get canvas", canvasIdHex, placedBy, posHex, colorHex, err)
+			return
+		}
 
-    colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY color_key")
-    if err != nil {
-      PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query colorPaletteHex", canvasIdHex, placedBy, posHex, colorHex, err)
-      return
-    }
+		colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY color_key")
+		if err != nil {
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query colorPaletteHex", canvasIdHex, placedBy, posHex, colorHex, err)
+			return
+		}
 
-    colorPalette := make([]color.RGBA, len(colorPaletteHex))
-    for idx, colorHex := range colorPaletteHex {
-      r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
-      if err != nil {
-        PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
-        return
-      }
-      g, err := strconv.ParseInt(colorHex[2:4], 16, 64)
-      if err != nil {
-        PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
-        return
-      }
-      b, err := strconv.ParseInt(colorHex[4:6], 16, 64)
-      if err != nil {
-        PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
-        return
-      }
-      colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
-    }
+		colorPalette := make([]color.RGBA, len(colorPaletteHex))
+		for idx, colorHex := range colorPaletteHex {
+			r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
+				return
+			}
+			g, err := strconv.ParseInt(colorHex[2:4], 16, 64)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
+				return
+			}
+			b, err := strconv.ParseInt(colorHex[4:6], 16, 64)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
+				return
+			}
+			colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
+		}
 
-    // Create world image
-    generatedWorldImage := image.NewRGBA(image.Rect(0, 0, *worldWidth, *worldHeight))
-    bitWidth := uint(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth)
-	  oneByteBitOffset := uint(8 - bitWidth)
-	  twoByteBitOffset := uint(16 - bitWidth)
+		// Create world image
+		generatedWorldImage := image.NewRGBA(image.Rect(0, 0, *worldWidth, *worldHeight))
+		bitWidth := uint(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth)
+		oneByteBitOffset := uint(8 - bitWidth)
+		twoByteBitOffset := uint(16 - bitWidth)
 
-    for y := 0; y < *worldHeight; y++ {
-      for x := 0; x < *worldWidth; x++ {
-        innerPos := uint(y*(*worldWidth) + x)
-        bitPos := innerPos * bitWidth
-        bytePos := bitPos / 8
-        bitOffset := bitPos % 8
+		for y := 0; y < *worldHeight; y++ {
+			for x := 0; x < *worldWidth; x++ {
+				innerPos := uint(y*(*worldWidth) + x)
+				bitPos := innerPos * bitWidth
+				bytePos := bitPos / 8
+				bitOffset := bitPos % 8
 
-        if bitOffset <= oneByteBitOffset {
-          colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
-          generatedWorldImage.Set(x, y, colorPalette[colorIdx])
-        } else {
-          colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
-          generatedWorldImage.Set(x, y, colorPalette[colorIdx])
-        }
-      }
-    }
+				if bitOffset <= oneByteBitOffset {
+					colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
+					generatedWorldImage.Set(x, y, colorPalette[colorIdx])
+				} else {
+					colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
+					generatedWorldImage.Set(x, y, colorPalette[colorIdx])
+				}
+			}
+		}
 
-    // Create world image
-    filename := "worlds/images/world-" + strconv.Itoa(int(canvasId)) + ".png"
-    file, err := os.Create(filename)
-    if err != nil {
-      PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to create file", filename, err)
-      return
-    }
-    defer file.Close()
+		// Create world image
+		filename := "worlds/images/world-" + strconv.Itoa(int(canvasId)) + ".png"
+		file, err := os.Create(filename)
+		if err != nil {
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to create file", filename, err)
+			return
+		}
+		defer file.Close()
 
-    err = png.Encode(file, generatedWorldImage)
-    if err != nil {
-      PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to encode image", filename, err)
-      return
-  }
-}
-
+		err = png.Encode(file, generatedWorldImage)
+		if err != nil {
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to encode image", filename, err)
+			return
+		}
+	}
 
 	var message = map[string]interface{}{
 		"worldId":     canvasId,
@@ -642,69 +641,69 @@ func revertCanvasHostAwardedUserEvent(event IndexerEvent) {
 }
 
 func processCanvasFavoritedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  user := event.Event.Keys[2][2:] // Remove 0x prefix
+	canvasIdHex := event.Event.Keys[1]
+	user := event.Event.Keys[2][2:] // Remove 0x prefix
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasFavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasFavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
+		return
+	}
 
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldFavorites (world_id, user_address) VALUES ($1, $2)", canvasId, user)
-  if err != nil {
-    PrintIndexerError("processCanvasFavoritedEvent", "Failed to insert into WorldFavorites", canvasIdHex, user, err)
-    return
-  }
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldFavorites (world_id, user_address) VALUES ($1, $2)", canvasId, user)
+	if err != nil {
+		PrintIndexerError("processCanvasFavoritedEvent", "Failed to insert into WorldFavorites", canvasIdHex, user, err)
+		return
+	}
 }
 
 func revertCanvasFavoritedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  user := event.Event.Keys[2][2:] // Remove 0x prefix
+	canvasIdHex := event.Event.Keys[1]
+	user := event.Event.Keys[2][2:] // Remove 0x prefix
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertCanvasFavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertCanvasFavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
+		return
+	}
 
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM WorldFavorites WHERE world_id = $1 AND user_address = $2", canvasId, user)
-  if err != nil {
-    PrintIndexerError("revertCanvasFavoritedEvent", "Failed to delete from WorldFavorites", canvasIdHex, user, err)
-    return
-  }
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM WorldFavorites WHERE world_id = $1 AND user_address = $2", canvasId, user)
+	if err != nil {
+		PrintIndexerError("revertCanvasFavoritedEvent", "Failed to delete from WorldFavorites", canvasIdHex, user, err)
+		return
+	}
 }
 
 func processCanvasUnfavoritedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  user := event.Event.Keys[2][2:] // Remove 0x prefix
+	canvasIdHex := event.Event.Keys[1]
+	user := event.Event.Keys[2][2:] // Remove 0x prefix
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasUnfavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasUnfavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
+		return
+	}
 
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM WorldFavorites WHERE world_id = $1 AND user_address = $2", canvasId, user)
-  if err != nil {
-    PrintIndexerError("processCanvasUnfavoritedEvent", "Failed to delete from WorldFavorites", canvasIdHex, user, err)
-    return
-  }
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM WorldFavorites WHERE world_id = $1 AND user_address = $2", canvasId, user)
+	if err != nil {
+		PrintIndexerError("processCanvasUnfavoritedEvent", "Failed to delete from WorldFavorites", canvasIdHex, user, err)
+		return
+	}
 }
 
 func revertCanvasUnfavoritedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  user := event.Event.Keys[2][2:] // Remove 0x prefix
+	canvasIdHex := event.Event.Keys[1]
+	user := event.Event.Keys[2][2:] // Remove 0x prefix
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertCanvasUnfavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertCanvasUnfavoritedEvent", "Failed to parse canvasIdHex", canvasIdHex, user, err)
+		return
+	}
 
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldFavorites (world_id, user_address) VALUES ($1, $2)", canvasId, user)
-  if err != nil {
-    PrintIndexerError("revertCanvasUnfavoritedEvent", "Failed to insert into WorldFavorites", canvasIdHex, user, err)
-    return
-  }
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldFavorites (world_id, user_address) VALUES ($1, $2)", canvasId, user)
+	if err != nil {
+		PrintIndexerError("revertCanvasUnfavoritedEvent", "Failed to insert into WorldFavorites", canvasIdHex, user, err)
+		return
+	}
 }
