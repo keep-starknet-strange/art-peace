@@ -21,7 +21,7 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
+	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
 	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
 
 	if core.ArtPeaceBackend.Databases.Redis.Exists(context.Background(), canvasKey).Val() == 0 {
