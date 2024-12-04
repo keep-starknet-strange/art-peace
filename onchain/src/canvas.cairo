@@ -226,7 +226,8 @@ pub mod Canvas {
             let caller = starknet::get_caller_address();
             assert(
                 now - self.last_placed_time.read(caller) >= self.time_between_pixels.read(),
-                'Pixel not available'                                                                   );
+                'Pixel not available'
+            );
 
             place_basic_pixel_inner(ref self, pos, color, now);
         }
