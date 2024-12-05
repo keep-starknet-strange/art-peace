@@ -29,6 +29,7 @@ func InitWorldsRoutes() {
 	http.HandleFunc("/get-worlds-colors", getWorldsColors)
 	http.HandleFunc("/get-worlds-pixel-count", getWorldsPixelCount)
 	http.HandleFunc("/get-worlds-pixel-info", getWorldsPixelInfo)
+	http.HandleFunc("/worlds/", handleWorldRoute)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/create-canvas-devnet", createCanvasDevnet)
 		http.HandleFunc("/favorite-world-devnet", favoriteWorldDevnet)
@@ -82,7 +83,18 @@ func getWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	world, err := core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE world_id = $1", worldId)
+	var world []byte
+	var err error
+
+	// Try to parse as numeric ID first
+	if _, parseErr := strconv.Atoi(worldId); parseErr == nil {
+		// It's a numeric ID
+		world, err = core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE world_id = $1", worldId)
+	} else {
+		// Try as name
+		world, err = core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE name = $1", worldId)
+	}
+
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve World")
 		return
@@ -254,14 +266,40 @@ func getWorldsLastPlacedTime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lastTime, err := core.PostgresQueryOne[*time.Time]("SELECT COALESCE((SELECT time FROM WorldsLastPlacedTime WHERE world_id = $1 and address = $2), TO_TIMESTAMP(0))", worldId, address)
+	var query string
+	var args []interface{}
+
+	// Try to parse as numeric ID first
+	if _, parseErr := strconv.Atoi(worldId); parseErr == nil {
+		// It's a numeric ID
+		query = `
+            SELECT COALESCE(
+                (SELECT time FROM WorldsLastPlacedTime 
+                WHERE world_id = $1 and address = $2),
+                TO_TIMESTAMP(0)
+            )`
+		args = []interface{}{worldId, address}
+	} else {
+		// Try as name
+		query = `
+            SELECT COALESCE(
+                (SELECT wlpt.time 
+                FROM WorldsLastPlacedTime wlpt
+                JOIN worlds w ON w.world_id = wlpt.world_id
+                WHERE w.name = $1 and wlpt.address = $2),
+                TO_TIMESTAMP(0)
+            )`
+		args = []interface{}{worldId, address}
+	}
+
+	lastTime, err := core.PostgresQueryOne[*time.Time](query, args...)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get last placed time")
 		return
 	}
 
 	// Return the last placed time in utc z format
-	routeutils.WriteDataJson(w, "\""+string((*lastTime).UTC().Format(time.RFC3339))+"\"")
+	routeutils.WriteDataJson(w, "\""+(*lastTime).UTC().Format(time.RFC3339)+"\"")
 }
 
 func getWorldsExtraPixels(w http.ResponseWriter, r *http.Request) {
@@ -636,4 +674,37 @@ func placeWorldPixelDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Pixel placed world")
+}
+
+func handleWorldRoute(w http.ResponseWriter, r *http.Request) {
+	routeutils.SetupAccessHeaders(w)
+
+	// Extract the identifier from the URL path
+	pathParts := strings.Split(r.URL.Path, "/")
+	if len(pathParts) != 3 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid world path")
+		return
+	}
+
+	identifier := pathParts[2]
+
+	// Try to parse as worldId first
+	if worldId, err := strconv.Atoi(identifier); err == nil {
+		// It's a numeric ID
+		world, err := core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE world_id = $1", worldId)
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusNotFound, "World not found")
+			return
+		}
+		routeutils.WriteDataJson(w, string(world))
+		return
+	}
+
+	// If not numeric, try to find by name
+	world, err := core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE name = $1", identifier)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusNotFound, "World not found")
+		return
+	}
+	routeutils.WriteDataJson(w, string(world))
 }
