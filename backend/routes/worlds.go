@@ -30,6 +30,7 @@ func InitWorldsRoutes() {
 	http.HandleFunc("/get-worlds-pixel-count", getWorldsPixelCount)
 	http.HandleFunc("/get-worlds-pixel-info", getWorldsPixelInfo)
 	http.HandleFunc("/worlds/", handleWorldRoute)
+	http.HandleFunc("/check-world-name", checkWorldName)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/create-canvas-devnet", createCanvasDevnet)
 		http.HandleFunc("/favorite-world-devnet", favoriteWorldDevnet)
@@ -707,4 +708,23 @@ func handleWorldRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	routeutils.WriteDataJson(w, string(world))
+}
+
+func checkWorldName(w http.ResponseWriter, r *http.Request) {
+	routeutils.SetupAccessHeaders(w)
+
+	name := r.URL.Query().Get("name")
+	if name == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing name parameter")
+		return
+	}
+
+	// Check if name exists
+	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE name = $1)", name)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to check world name")
+		return
+	}
+
+	routeutils.WriteDataJson(w, strconv.FormatBool(*exists))
 }

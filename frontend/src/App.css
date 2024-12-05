@@ -107,3 +107,11 @@
   width: 3rem;
   height: 3rem;
 }
+
+.w-full {
+  width: 100%;
+}
+
+.error-message {
+  color: red;
+}

@@ -299,6 +299,10 @@
   border: 1px solid #00000050;
   border-radius: 0.5rem;
   box-shadow: 0px 0px 5px 0px #00000050;
-  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 1));
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 1)
+  );
   width: 100;
 }
