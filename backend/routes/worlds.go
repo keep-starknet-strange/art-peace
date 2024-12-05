@@ -504,6 +504,17 @@ func createCanvasDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if world name already exists
+	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE LOWER(name) = LOWER($1))", name)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to check world name")
+		return
+	}
+	if *exists {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "World name already exists")
+		return
+	}
+
 	width, err := strconv.Atoi((*jsonBody)["width"])
 	if err != nil || width <= 0 {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid width")
@@ -719,12 +730,24 @@ func checkWorldName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Case-insensitive check if name exists
-	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE LOWER(name) = LOWER($1))", name)
+	// Use the helper function
+	exists, err := doesWorldNameExist(name)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to check world name")
 		return
 	}
 
-	routeutils.WriteDataJson(w, strconv.FormatBool(*exists))
+	// Log for debugging
+	fmt.Printf("Checking world name: %s, exists: %v\n", name, exists)
+
+	routeutils.WriteDataJson(w, strconv.FormatBool(exists))
+}
+
+// Add a helper function to check if a world name exists
+func doesWorldNameExist(name string) (bool, error) {
+	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE LOWER(name) = LOWER($1))", name)
+	if err != nil {
+		return false, err
+	}
+	return *exists, nil
 }
