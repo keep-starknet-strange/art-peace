@@ -163,10 +163,8 @@ const WorldsCreationPanel = (props) => {
 
   // Check if name exists
   const checkWorldNameExists = async (name) => {
-    const response = await fetchWrapper(
-      `check-world-name?name=${encodeURIComponent(name)}`
-    );
-    if (response.data === 'true') {
+    const response = await fetchWrapper(`check-world-name?name=${name}`);
+    if (response.data === true) {
       setNameError('This world name already exists');
       return true;
     }
@@ -187,6 +185,7 @@ const WorldsCreationPanel = (props) => {
 
     // Check if name exists before submitting
     const nameExists = await checkWorldNameExists(worldName);
+    console.log('response: ', nameExists);
     if (nameExists) {
       return;
     }

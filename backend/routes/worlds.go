@@ -713,14 +713,14 @@ func handleWorldRoute(w http.ResponseWriter, r *http.Request) {
 func checkWorldName(w http.ResponseWriter, r *http.Request) {
 	routeutils.SetupAccessHeaders(w)
 
-	name := r.URL.Query().Get("name")
+	name := strings.TrimSpace(r.URL.Query().Get("name"))
 	if name == "" {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing name parameter")
 		return
 	}
 
-	// Check if name exists
-	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE name = $1)", name)
+	// Case-insensitive check if name exists
+	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE LOWER(name) = LOWER($1))", name)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to check world name")
 		return
