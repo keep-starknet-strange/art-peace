@@ -286,19 +286,6 @@ const WorldsCreationPanel = (props) => {
           {nameError && <p className='error-message'>{nameError}</p>}
         </div>
         <div className='WorldsCreationPanel__form__item'>
-          <div className='WorldsCreationPanel__competition__toggle'>
-            <input
-              type='checkbox'
-              id='competition-toggle'
-              checked={isCompetitionWorld}
-              onChange={(e) => setIsCompetitionWorld(e.target.checked)}
-            />
-            <label htmlFor='competition-toggle' className='Text__small'>
-              Join Round 3 Competition
-            </label>
-          </div>
-        </div>
-        <div className='WorldsCreationPanel__form__item'>
           <p className='Text__small'>Size</p>
           <div className='WorldsCreationPanel__main__form'>
             <div
@@ -368,13 +355,15 @@ const WorldsCreationPanel = (props) => {
           </div>
         </div>
         <div className='WorldsCreationPanel__form__item'>
-          <p className='Text__small'>Timer</p>
           {isCompetitionWorld ? (
-            <div className='Text__small WorldsCreationPanel__competition__value'>
-              {COMPETITION_TIMER} seconds between pixels
-            </div>
+            <>
+              <div className='Text__small WorldsCreationPanel__competition__value'>
+                Wait {COMPETITION_TIMER} seconds between pixels
+              </div>
+            </>
           ) : (
             <>
+              <p className='Text__small'>Timer</p>
               <input
                 className='Text__small Input__primary WorldsCreationPanel__form__input'
                 type='number'
@@ -572,6 +561,19 @@ const WorldsCreationPanel = (props) => {
               </div>
             </div>
           )}
+        </div>
+        <div className='WorldsCreationPanel__form__item'>
+          <div className='WorldsCreationPanel__competition__toggle'>
+            <input
+              type='checkbox'
+              id='competition-toggle'
+              checked={isCompetitionWorld}
+              onChange={(e) => setIsCompetitionWorld(e.target.checked)}
+            />
+            <label htmlFor='competition-toggle' className='Text__small'>
+              Join Round 3 Competition
+            </label>
+          </div>
         </div>
         <p className='Text__xsmall' style={{ color: 'red' }}>
           {validationMessage}
