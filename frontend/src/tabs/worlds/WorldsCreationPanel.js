@@ -26,6 +26,13 @@ const WorldsCreationPanel = (props) => {
     Yrs: 1000 * 60 * 60 * 24 * 365
   };
 
+  const [isCompetitionWorld, setIsCompetitionWorld] = useState(true);
+
+  // Competition constants
+  const COMPETITION_TIMER = 5; // 5 seconds
+  const COMPETITION_START = new Date('2023-12-06').getTime();
+  const COMPETITION_END = new Date('2024-01-01').getTime();
+
   const createWorldCall = async (
     name,
     width,
@@ -183,23 +190,27 @@ const WorldsCreationPanel = (props) => {
       return;
     }
 
-    // Check if name exists before submitting
     const nameExists = await checkWorldNameExists(worldName);
-    console.log('response: ', nameExists);
     if (nameExists) {
       return;
     }
 
     if (!checkInputs()) return;
+
+    // Use competition values if toggle is on
+    const submitTimer = isCompetitionWorld ? COMPETITION_TIMER : timer;
+    const submitStart = isCompetitionWorld ? COMPETITION_START : start;
+    const submitEnd = isCompetitionWorld ? COMPETITION_END : end;
+
     if (!devnetMode) {
       await createWorldCall(
         worldName,
         worldWidth,
         worldHeight,
-        timer,
+        submitTimer,
         palette,
-        start,
-        end
+        submitStart,
+        submitEnd
       );
       return;
     }
@@ -275,6 +286,19 @@ const WorldsCreationPanel = (props) => {
           {nameError && <p className='error-message'>{nameError}</p>}
         </div>
         <div className='WorldsCreationPanel__form__item'>
+          <div className='WorldsCreationPanel__competition__toggle'>
+            <input
+              type='checkbox'
+              id='competition-toggle'
+              checked={isCompetitionWorld}
+              onChange={(e) => setIsCompetitionWorld(e.target.checked)}
+            />
+            <label htmlFor='competition-toggle' className='Text__small'>
+              Join Round 3 Competition
+            </label>
+          </div>
+        </div>
+        <div className='WorldsCreationPanel__form__item'>
           <p className='Text__small'>Size</p>
           <div className='WorldsCreationPanel__main__form'>
             <div
@@ -345,14 +369,22 @@ const WorldsCreationPanel = (props) => {
         </div>
         <div className='WorldsCreationPanel__form__item'>
           <p className='Text__small'>Timer</p>
-          <input
-            className='Text__small Input__primary WorldsCreationPanel__form__input'
-            type='number'
-            placeholder='Timer (seconds)...'
-            value={timer}
-            onChange={(e) => setTimer(Math.round(e.target.value))}
-          />
-          <p className='Text__xsmall'>Seconds between pixels</p>
+          {isCompetitionWorld ? (
+            <div className='Text__small WorldsCreationPanel__competition__value'>
+              {COMPETITION_TIMER} seconds between pixels
+            </div>
+          ) : (
+            <>
+              <input
+                className='Text__small Input__primary WorldsCreationPanel__form__input'
+                type='number'
+                placeholder='Timer (seconds)...'
+                value={timer}
+                onChange={(e) => setTimer(Math.round(e.target.value))}
+              />
+              <p className='Text__xsmall'>Seconds between pixels</p>
+            </>
+          )}
         </div>
         <div className='WorldsCreationPanel__form__item'>
           <p className='Text__small'>Palette</p>
@@ -447,83 +479,99 @@ const WorldsCreationPanel = (props) => {
         </div>
         <div className='WorldsCreationPanel__form__item'>
           <p className='Text__small'>Start</p>
-          <input
-            className='Text__small Input__primary WorldsCreationPanel__form__input'
-            type='datetime-local'
-            value={new Date(start).toISOString().slice(0, -1)}
-            onChange={(e) => setStart(new Date(e.target.value).getTime())}
-          />
-          <div
-            className='Button__primary WorldsCreationPanel__button'
-            onClick={() => setStart(new Date().getTime())}
-          >
-            Now
-          </div>
+          {isCompetitionWorld ? (
+            <div className='Text__small WorldsCreationPanel__competition__value'>
+              {new Date(COMPETITION_START).toLocaleDateString()}
+            </div>
+          ) : (
+            <>
+              <input
+                className='Text__small Input__primary WorldsCreationPanel__form__input'
+                type='datetime-local'
+                value={new Date(start).toISOString().slice(0, -1)}
+                onChange={(e) => setStart(new Date(e.target.value).getTime())}
+              />
+              <div
+                className='Button__primary WorldsCreationPanel__button'
+                onClick={() => setStart(new Date().getTime())}
+              >
+                Now
+              </div>
+            </>
+          )}
         </div>
         <div className='WorldsCreationPanel__form__item'>
-          <p className='Text__small'>End&nbsp;&nbsp;</p>
-          <div className='WorldsCreationPanel__main__form'>
-            <input
-              className='Text__small Input__primary WorldsCreationPanel__form__input'
-              type='datetime-local'
-              value={new Date(end).toISOString().slice(0, -1)}
-              onChange={(e) => setEnd(new Date(e.target.value).getTime())}
-            />
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                width: '100%'
-              }}
-            >
+          <p className='Text__small'>End</p>
+          {isCompetitionWorld ? (
+            <div className='Text__small WorldsCreationPanel__competition__value'>
+              {new Date(COMPETITION_END).toLocaleDateString()}
+            </div>
+          ) : (
+            <div className='WorldsCreationPanel__main__form'>
+              <input
+                className='Text__small Input__primary WorldsCreationPanel__form__input'
+                type='datetime-local'
+                value={new Date(end).toISOString().slice(0, -1)}
+                onChange={(e) => setEnd(new Date(e.target.value).getTime())}
+              />
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-around',
+                  width: '100%'
                 }}
               >
-                <input
-                  className='Text__small Input__primary WorldsCreationPanel__form__input'
-                  type='number'
-                  placeholder='Duration...'
-                  value={((end - start) / timeUnits[timeUnit]).toFixed(2)}
-                  onChange={(e) => {
-                    let newEnd = start + timeUnits[timeUnit] * e.target.value;
-                    if (newEnd < start + timeUnits[timeUnit]) {
-                      newEnd = start + timeUnits[timeUnit];
-                    }
-                    setEnd(newEnd);
-                  }}
-                  style={{ width: '13rem' }}
-                />
                 <div
-                  className='WorldsCreationPanel__timeUnit Button__primary'
-                  onClick={() => {
-                    let keys = Object.keys(timeUnits);
-                    let index = keys.indexOf(timeUnit);
-                    index++;
-                    if (index >= keys.length) {
-                      index = 0;
-                    }
-                    setTimeUnit(keys[index]);
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between'
                   }}
                 >
-                  <div className='Text__xsmall'>{timeUnit}</div>
+                  <input
+                    className='Text__small Input__primary WorldsCreationPanel__form__input'
+                    type='number'
+                    placeholder='Duration...'
+                    value={((end - start) / timeUnits[timeUnit]).toFixed(2)}
+                    onChange={(e) => {
+                      let newEnd = start + timeUnits[timeUnit] * e.target.value;
+                      if (newEnd < start + timeUnits[timeUnit]) {
+                        newEnd = start + timeUnits[timeUnit];
+                      }
+                      setEnd(newEnd);
+                    }}
+                    style={{ width: '13rem' }}
+                  />
+                  <div
+                    className='WorldsCreationPanel__timeUnit Button__primary'
+                    onClick={() => {
+                      let keys = Object.keys(timeUnits);
+                      let index = keys.indexOf(timeUnit);
+                      index++;
+                      if (index >= keys.length) {
+                        index = 0;
+                      }
+                      setTimeUnit(keys[index]);
+                    }}
+                  >
+                    <div className='Text__xsmall'>{timeUnit}</div>
+                  </div>
+                </div>
+                <div
+                  className='Button__primary WorldsCreationPanel__button'
+                  onClick={
+                    () =>
+                      setEnd(
+                        new Date().getTime() + 1000 * 60 * 60 * 24 * 1000000
+                      ) // "No Limit"
+                  }
+                >
+                  No End
                 </div>
               </div>
-              <div
-                className='Button__primary WorldsCreationPanel__button'
-                onClick={
-                  () =>
-                    setEnd(new Date().getTime() + 1000 * 60 * 60 * 24 * 1000000) // "No Limit"
-                }
-              >
-                No End
-              </div>
             </div>
-          </div>
+          )}
         </div>
         <p className='Text__xsmall' style={{ color: 'red' }}>
           {validationMessage}
