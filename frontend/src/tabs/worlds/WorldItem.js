@@ -136,7 +136,7 @@ const WorldItem = (props) => {
   }, [props.favorites, props.favorited]);
 
   function handleShare() {
-    const worldLink = `${window.location.origin}/worlds/${props.worldId}`;
+    const worldLink = `${window.location.origin}/worlds/${props.name}`;
     const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent('Gm. Join our forces! Draw on our art/peace World! @art_peace_sn 🗺️')}&url=${encodeURIComponent(worldLink)}`;
     window.open(twitterShareUrl, '_blank');
   }

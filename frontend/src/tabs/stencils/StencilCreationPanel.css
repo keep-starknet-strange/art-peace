@@ -127,8 +127,7 @@
   text-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.7);
 }
 
-.StencilCreationPanel__bubble:hover
-  .StencilCreationPanel__bubble__remove {
+.StencilCreationPanel__bubble:hover .StencilCreationPanel__bubble__remove {
   display: block;
   color: red;
 }
