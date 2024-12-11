@@ -704,17 +704,18 @@ function App() {
         timestamp
       );
     } else {
-      let placeExtraPixelsEndpoint = 'place-extra-pixels-devnet';
-      const response = await fetchWrapper(placeExtraPixelsEndpoint, {
+      const formattedData = {
+        extraPixels: extraPixelsData.map((pixel) => ({
+          position: pixel.x + pixel.y * width,
+          colorId: pixel.colorId
+        })),
+        timestamp: timestamp
+      };
+
+      const response = await fetchWrapper('place-extra-pixels-devnet', {
         mode: 'cors',
         method: 'POST',
-        body: JSON.stringify({
-          extraPixels: extraPixelsData.map((pixel) => ({
-            position: pixel.x + pixel.y * canvasConfig.canvas.width,
-            colorId: pixel.colorId
-          })),
-          timestamp: timestamp
-        })
+        body: JSON.stringify(formattedData)
       });
       if (response.result) {
         console.log(response.result);
