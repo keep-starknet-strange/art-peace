@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -32,6 +34,7 @@ func InitStencilsRoutes() {
 		http.HandleFunc("/favorite-stencil-devnet", favoriteStencilDevnet)
 		http.HandleFunc("/unfavorite-stencil-devnet", unfavoriteStencilDevnet)
 	}
+	http.HandleFunc("/get-stencil-pixel-data", getStencilPixelData)
 }
 
 func InitStencilsStaticRoutes() {
@@ -707,4 +710,56 @@ func unfavoriteStencilDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Stencil unfavorited in devnet")
+}
+
+func getStencilPixelData(w http.ResponseWriter, r *http.Request) {
+	// Get stencil hash from query params
+	hash := r.URL.Query().Get("hash")
+	if hash == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Hash parameter is required")
+		return
+	}
+
+	// Read the stencil image file
+	filename := fmt.Sprintf("stencils/stencil-%s.png", hash)
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusNotFound, "Stencil not found")
+		return
+	}
+
+	// Convert image to pixel data
+	pixelData, err := imageToPixelData(fileBytes, 1)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
+		return
+	}
+
+	// Get image dimensions
+	img, _, err := image.Decode(bytes.NewReader(fileBytes))
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to decode image")
+		return
+	}
+	bounds := img.Bounds()
+	width, height := bounds.Max.X, bounds.Max.Y
+
+	// Create response structure
+	response := struct {
+		Width     int   `json:"width"`
+		Height    int   `json:"height"`
+		PixelData []int `json:"pixelData"`
+	}{
+		Width:     width,
+		Height:    height,
+		PixelData: pixelData,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create response")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(jsonResponse))
 }

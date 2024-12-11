@@ -29,7 +29,7 @@ func InitTemplateRoutes() {
 	http.HandleFunc("/add-template-data", addTemplateData)
 	http.HandleFunc("/get-template-pixel-data", getTemplatePixelData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
-		// http.HandleFunc("/add-template-devnet", addTemplateDevnet)
+		http.HandleFunc("/add-template-devnet", addTemplateDevnet)
 		http.HandleFunc("/add-faction-template-devnet", addFactionTemplateDevnet)
 		http.HandleFunc("/remove-faction-template-devnet", removeFactionTemplateDevnet)
 		http.HandleFunc("/add-chain-faction-template-devnet", addChainFactionTemplateDevnet)
@@ -462,6 +462,7 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 }
 
 func getTemplatePixelData(w http.ResponseWriter, r *http.Request) {
+	// Get template hash from query params
 	hash := r.URL.Query().Get("hash")
 	if hash == "" {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Hash parameter is required")
@@ -477,7 +478,7 @@ func getTemplatePixelData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert image to pixel data using existing function
-	pixelData, err := imageToPixelData(fileBytes, 1)
+	pixelData, err := imageToPixelData(fileBytes, 1) // Scale factor 1 for templates
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
 		return

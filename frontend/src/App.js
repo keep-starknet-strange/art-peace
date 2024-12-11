@@ -1111,6 +1111,16 @@ function App() {
       return [];
     };
 
+    const getStencilPixelData = async (hash) => {
+      if (hash !== null) {
+        const response = await fetchWrapper(
+          `get-stencil-pixel-data?hash=${hash}`
+        );
+        return response.data;
+      }
+      return [];
+    };
+
     const getNftPixelData = async (tokenId) => {
       if (tokenId !== null) {
         const response = await fetchWrapper(
@@ -1135,6 +1145,13 @@ function App() {
         // Handle NFT overlay case
         if (overlayTemplate.isNft && overlayTemplate.tokenId !== undefined) {
           const data = await getNftPixelData(overlayTemplate.tokenId);
+          setTemplatePixels(data);
+          return;
+        }
+
+        // Handle stencil overlay case
+        if (overlayTemplate.isStencil && overlayTemplate.hash) {
+          const data = await getStencilPixelData(overlayTemplate.hash);
           setTemplatePixels(data);
           return;
         }

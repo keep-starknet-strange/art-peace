@@ -112,12 +112,16 @@ const StencilCreationPanel = (props) => {
         })
       });
       if (addResponse.result) {
-        // TODO: after tx done, add stencil to backend
-        // TODO: Double check hash match
-        // TODO: Update UI optimistically & go to specific faction in factions tab
-        console.log(addResponse.result);
+        props.setOverlayTemplate({
+          hash: hash,
+          width: props.stencilImage.width,
+          height: props.stencilImage.height,
+          image: props.stencilImage.image,
+          isStencil: true
+        });
+        props.setTemplateOverlayMode(true);
         closePanel();
-        props.setActiveTab('Stencils');
+        props.setActiveTab('Canvas');
       }
       return;
     }
