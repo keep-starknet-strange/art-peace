@@ -611,7 +611,27 @@ function App() {
   };
 
   const extraPixelPlaceCall = async (positions, colors, now) => {
-    if (devnetMode) return;
+    if (devnetMode) {
+      try {
+        const extraPixels = positions.map((pos, idx) => ({
+          position: pos,
+          colorId: colors[idx]
+        }));
+
+        const response = await fetchWrapper('place-extra-pixels-devnet', {
+          mode: 'cors',
+          method: 'POST',
+          body: JSON.stringify({
+            extraPixels: extraPixels,
+            timestamp: now
+          })
+        });
+        return response;
+      } catch (error) {
+        console.error('Failed to place extra pixels:', error);
+        throw error;
+      }
+    }
     if (!address || !artPeaceContract || !account) return;
     // TODO: Validate inputs
     const placeExtraPixelsCallData = artPeaceContract.populate(

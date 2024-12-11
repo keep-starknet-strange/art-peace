@@ -2,6 +2,8 @@ package routes
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -139,11 +141,24 @@ func placePixelDevnet(w http.ResponseWriter, r *http.Request) {
 }
 
 type ExtraPixelJson struct {
-	ExtraPixels []map[string]int `json:"extraPixels"`
-	Timestamp   int              `json:"timestamp"`
+	ExtraPixels []struct {
+		Position int `json:"position"`
+		ColorId  int `json:"colorId"`
+	} `json:"extraPixels"`
+	Timestamp int `json:"timestamp"`
 }
 
 func placeExtraPixelsDevnet(w http.ResponseWriter, r *http.Request) {
+	// Handle CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	// Disable this in production
 	if routeutils.NonProductionMiddleware(w, r) {
 		return
@@ -151,28 +166,105 @@ func placeExtraPixelsDevnet(w http.ResponseWriter, r *http.Request) {
 
 	jsonBody, err := routeutils.ReadJsonBody[ExtraPixelJson](r)
 	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, fmt.Sprintf("Invalid JSON request body: %v", err))
+		return
+	}
+
+	// Validate input
+	if len(jsonBody.ExtraPixels) == 0 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "No pixels provided")
 		return
 	}
 
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.PlaceExtraPixelsDevnet
 	contract := os.Getenv("ART_PEACE_CONTRACT_ADDRESS")
 
-	positions := strconv.Itoa(len(jsonBody.ExtraPixels))
-	colors := strconv.Itoa(len(jsonBody.ExtraPixels))
-	for _, pixel := range jsonBody.ExtraPixels {
-		positions += " " + strconv.Itoa(pixel["position"])
-		colors += " " + strconv.Itoa(pixel["colorId"])
-	}
-
-	cmd := exec.Command(shellCmd, contract, "place_extra_pixels", positions, colors, strconv.Itoa(jsonBody.Timestamp))
-	_, err = cmd.Output()
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to place extra pixels on devnet")
+	if contract == "" {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Contract address not configured")
 		return
 	}
 
-	routeutils.WriteResultJson(w, "Extra pixels placed")
+	// Format calldata for the contract
+	// The contract expects: [pixel_count, pos1, pos2, ..., posN, color1, color2, ..., colorN, timestamp]
+	var args []string
+	args = append(args, contract, "place_extra_pixels")
+
+	// Add pixel count
+	pixelCount := len(jsonBody.ExtraPixels)
+	args = append(args, strconv.Itoa(pixelCount))
+
+	// Add positions
+	for _, pixel := range jsonBody.ExtraPixels {
+		args = append(args, strconv.Itoa(pixel.Position))
+	}
+
+	// Add colors
+	for _, pixel := range jsonBody.ExtraPixels {
+		args = append(args, strconv.Itoa(pixel.ColorId))
+	}
+
+	// Add timestamp
+	args = append(args, strconv.Itoa(jsonBody.Timestamp))
+
+	// Execute the command
+	cmd := exec.Command(shellCmd, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to place extra pixels on devnet: %v - Output: %s", err, string(output)))
+		return
+	}
+
+	// Create response structure
+	response := struct {
+		Message string `json:"message"`
+		Data    struct {
+			PixelsPlaced int   `json:"pixelsPlaced"`
+			Positions    []int `json:"positions"`
+			Colors       []int `json:"colors"`
+			Timestamp    int   `json:"timestamp"`
+		} `json:"data"`
+	}{
+		Message: "Extra pixels placed successfully",
+		Data: struct {
+			PixelsPlaced int   `json:"pixelsPlaced"`
+			Positions    []int `json:"positions"`
+			Colors       []int `json:"colors"`
+			Timestamp    int   `json:"timestamp"`
+		}{
+			PixelsPlaced: pixelCount,
+			Positions:    extractPositions(jsonBody.ExtraPixels),
+			Colors:       extractColors(jsonBody.ExtraPixels),
+			Timestamp:    jsonBody.Timestamp,
+		},
+	}
+
+	// Write response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Helper functions to extract positions and colors
+func extractPositions(pixels []struct {
+	Position int `json:"position"`
+	ColorId  int `json:"colorId"`
+}) []int {
+	positions := make([]int, len(pixels))
+	for i, pixel := range pixels {
+		positions[i] = pixel.Position
+	}
+	return positions
+}
+
+func extractColors(pixels []struct {
+	Position int `json:"position"`
+	ColorId  int `json:"colorId"`
+}) []int {
+	colors := make([]int, len(pixels))
+	for i, pixel := range pixels {
+		colors[i] = pixel.ColorId
+	}
+	return colors
 }
 
 func placePixelRedis(w http.ResponseWriter, r *http.Request) {
