@@ -37,6 +37,7 @@ func InitWorldsRoutes() {
 		http.HandleFunc("/unfavorite-world-devnet", unfavoriteWorldDevnet)
 		http.HandleFunc("/place-world-pixel-devnet", placeWorldPixelDevnet)
 	}
+	http.HandleFunc("/get-all-worlds", getAllWorlds)
 }
 
 func InitWorldsStaticRoutes() {
@@ -750,4 +751,58 @@ func doesWorldNameExist(name string) (bool, error) {
 		return false, err
 	}
 	return *exists, nil
+}
+
+func getAllWorlds(w http.ResponseWriter, r *http.Request) {
+	// Get query parameters
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
+
+	// Parse pagination
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
+
+	query := `
+		SELECT 
+			worlds.*, 
+			COALESCE(worldfavorites.favorite_count, 0) AS favorites,
+			COALESCE((
+				SELECT true FROM worldfavorites 
+				WHERE user_address = $1 
+				AND worldfavorites.world_id = worlds.world_id
+			), false) as favorited
+		FROM 
+			worlds
+		LEFT JOIN (
+			SELECT 
+				world_id, 
+				COUNT(*) AS favorite_count
+			FROM 
+				worldfavorites
+			GROUP BY 
+				world_id
+		) worldfavorites ON worlds.world_id = worldfavorites.world_id
+		ORDER BY worlds.world_id DESC
+		LIMIT $2 OFFSET $3`
+
+	worlds, err := core.PostgresQueryJson[WorldData](query, address, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(worlds))
 }

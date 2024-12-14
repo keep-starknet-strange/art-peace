@@ -8,9 +8,17 @@ const CanvasGrid = (props) => {
 
   useEffect(() => {
     const fetchCanvases = async () => {
-      const response = await fetchWrapper('get-all-canvases');
+      const response = await fetchWrapper('get-all-worlds', {
+        method: 'GET',
+        params: {
+          address: '0',
+          page: 1,
+          pageLength: 50
+        }
+      });
+
       if (response.data) {
-        setCanvases(JSON.parse(response.data));
+        setCanvases(response.data);
       }
 
       console.log('response: ', response);
@@ -22,7 +30,7 @@ const CanvasGrid = (props) => {
   return (
     <div className='canvas-grid'>
       {canvases.map((canvas) => (
-        <div key={canvas.canvasId} className='canvas-grid-item'>
+        <div key={canvas.worldId} className='canvas-grid-item'>
           <h3 className='canvas-title'>{canvas.name}</h3>
           <CanvasContainer
             width={canvas.width}
@@ -30,7 +38,7 @@ const CanvasGrid = (props) => {
             canvasRef={React.createRef()}
             extraPixelsCanvasRef={React.createRef()}
             colors={props.colors}
-            openedWorldId={canvas.canvasId}
+            openedWorldId={canvas.worldId}
             activeWorld={canvas}
           />
         </div>

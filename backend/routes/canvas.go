@@ -13,7 +13,6 @@ import (
 func InitCanvasRoutes() {
 	http.HandleFunc("/init-canvas", initCanvas)
 	http.HandleFunc("/get-canvas", getCanvas)
-	http.HandleFunc("/get-all-canvases", getAllCanvases)
 }
 
 func initCanvas(w http.ResponseWriter, r *http.Request) {
@@ -78,32 +77,4 @@ type CanvasMetadata struct {
 	StartTime     int64  `json:"startTime"`
 	EndTime       int64  `json:"endTime"`
 	FavoriteCount int    `json:"favoriteCount"`
-}
-
-func getAllCanvases(w http.ResponseWriter, r *http.Request) {
-	routeutils.SetupAccessHeaders(w)
-
-	query := `
-		SELECT 
-			worlds.world_id as canvas_id,
-			worlds.name,
-			worlds.width,
-			worlds.height,
-			worlds.host,
-			worlds.start_time,
-			worlds.end_time,
-			COUNT(worldfavorites.world_id) as favorite_count
-		FROM worlds 
-		LEFT JOIN worldfavorites ON worlds.world_id = worldfavorites.world_id
-		GROUP BY worlds.world_id
-		ORDER BY favorite_count DESC, worlds.start_time DESC
-	`
-
-	canvases, err := core.PostgresQueryJson[CanvasMetadata](query)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve canvases")
-		return
-	}
-
-	routeutils.WriteDataJson(w, string(canvases))
 }
