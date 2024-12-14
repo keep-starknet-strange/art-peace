@@ -35,6 +35,7 @@ import multi_canvas_abi from './contracts/multi_canvas.abi.json';
 import NotificationPanel from './tabs/NotificationPanel.js';
 import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
+import CanvasGrid from './canvas/CanvasGrid';
 
 function App() {
   const worldsMode = true;
@@ -1447,6 +1448,9 @@ function App() {
             />
           )}
         </div>
+      </div>
+      <div className='App__grid'>
+        <CanvasGrid colors={colors} />
       </div>
     </div>
   );
