@@ -411,6 +411,10 @@ const CanvasContainer = (props) => {
         return;
       }
 
+      if (!props.canvasRef || !props.canvasRef.current) {
+        return;
+      }
+
       const canvas = props.canvasRef.current;
       const rect = canvas.getBoundingClientRect();
       const x = Math.floor(
