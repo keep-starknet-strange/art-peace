@@ -308,14 +308,14 @@ const Worlds = (props) => {
         return;
       }
       setActiveWorld(response.data);
+      // Route path to "/worlds/:worldId" when activeWorldId changes
+      let path = `/worlds/${response.data.uniqueName}`;
+      window.history.pushState({}, '', path);
     };
     if (activeWorldId === null) {
       return;
     }
     getWorld();
-    // Route path to "/worlds/:worldId" when activeWorldId changes
-    let path = `/worlds/${activeWorldId}`;
-    window.history.pushState({}, '', path);
   }, [activeWorldId]);
 
   const updateFavorites = (worldId, favorites, favorited) => {

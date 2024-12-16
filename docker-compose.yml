@@ -146,7 +146,7 @@ services:
       - REACT_APP_ROUND_NUMBER=2
     volumes:
       - ./frontend/package.json:/app/package.json
-      - ./frontend/package-lock.json:/app/package-lock.json
+      - ./frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml
       - ./frontend/public/:/app/public
       - ./frontend/src:/app/src
       - configs:/app/src/configs

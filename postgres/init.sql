@@ -333,6 +333,7 @@ CREATE TABLE Worlds (
   world_id integer NOT NULL PRIMARY KEY,
   host char(64) NOT NULL,
   name text NOT NULL,
+  unique_name text NOT NULL,
   width integer NOT NULL,
   height integer NOT NULL,
   time_between_pixels integer NOT NULL,
@@ -340,6 +341,8 @@ CREATE TABLE Worlds (
   end_time timestamp NOT NULL
 );
 CREATE INDEX worlds_host_index ON Worlds (host);
+CREATE INDEX worlds_unique_name_index ON Worlds (unique_name);
+CREATE INDEX worlds_start_time_index ON Worlds (start_time);
 CREATE INDEX worlds_end_time_index ON Worlds (end_time);
 
 CREATE TABLE WorldFavorites (

@@ -43,11 +43,25 @@ function App() {
 
   // Page management
   useEffect(() => {
-    if (location.pathname.startsWith('/worlds/')) {
-      setOpenedWorldId(location.pathname.split('/worlds/')[1]);
-    } else {
-      setOpenedWorldId(null);
-    }
+    const getWorldId = async () => {
+      if (location.pathname.startsWith('/worlds/')) {
+        let worldSlug = location.pathname.split('/worlds/')[1];
+        let response = await fetchWrapper(
+          `get-world-id?worldName=${worldSlug}`
+        );
+        if (response.data === undefined || response.data === null) {
+          setActiveWorld(null);
+          setOpenedWorldId(null);
+          return;
+        }
+
+        setOpenedWorldId(response.data);
+      } else {
+        setActiveWorld(null);
+        setOpenedWorldId(null);
+      }
+    };
+    getWorldId();
   }, [location.pathname]);
 
   // Window management

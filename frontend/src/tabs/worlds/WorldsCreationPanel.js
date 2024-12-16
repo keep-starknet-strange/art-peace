@@ -162,8 +162,8 @@ const WorldsCreationPanel = (props) => {
   };
 
   // Check if name exists
-  const checkWorldNameExists = async (name) => {
-    const response = await fetchWrapper(`check-world-name?name=${name}`);
+  const checkWorldSlugExists = async (name) => {
+    const response = await fetchWrapper(`check-world-name?uniqueName=${name}`);
     if (response.data === true) {
       setNameError('This world name already exists');
       return true;
@@ -182,10 +182,10 @@ const WorldsCreationPanel = (props) => {
     if (!validateWorldName(worldName)) {
       return;
     }
+    let worldSlug = worldName.toLowerCase().replace(/ /g, '-');
 
     // Check if name exists before submitting
-    const nameExists = await checkWorldNameExists(worldName);
-    console.log('response: ', nameExists);
+    const nameExists = await checkWorldSlugExists(worldSlug);
     if (nameExists) {
       return;
     }
@@ -194,6 +194,7 @@ const WorldsCreationPanel = (props) => {
     if (!devnetMode) {
       await createWorldCall(
         worldName,
+        worldSlug,
         worldWidth,
         worldHeight,
         timer,
@@ -211,6 +212,7 @@ const WorldsCreationPanel = (props) => {
       body: JSON.stringify({
         host: host,
         name: toHex(worldName),
+        unique_name: toHex(worldSlug),
         width: worldWidth.toString(),
         height: worldHeight.toString(),
         time_between_pixels: timer.toString(),
