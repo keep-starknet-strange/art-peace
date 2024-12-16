@@ -28,13 +28,13 @@ func InitStencilsRoutes() {
 	http.HandleFunc("/get-hot-stencils", getHotStencils)
 	http.HandleFunc("/add-stencil-img", addStencilImg)
 	http.HandleFunc("/add-stencil-data", addStencilData)
+	http.HandleFunc("/get-stencil-pixel-data", getStencilPixelData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/add-stencil-devnet", addStencilDevnet)
 		http.HandleFunc("/remove-stencil-devnet", removeStencilDevnet)
 		http.HandleFunc("/favorite-stencil-devnet", favoriteStencilDevnet)
 		http.HandleFunc("/unfavorite-stencil-devnet", unfavoriteStencilDevnet)
 	}
-	http.HandleFunc("/get-stencil-pixel-data", getStencilPixelData)
 }
 
 func InitStencilsStaticRoutes() {
@@ -405,7 +405,7 @@ func addStencilImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	imageData, err := imageToPixelData(fileBytes, 1)
+	imageData, err := worldImageToPixelData(fileBytes, 1, 0)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
@@ -712,6 +712,47 @@ func unfavoriteStencilDevnet(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteResultJson(w, "Stencil unfavorited in devnet")
 }
 
+func worldImageToPixelData(imageData []byte, scaleFactor int, worldId int) ([]int, error) {
+  img, _, err := image.Decode(bytes.NewReader(imageData))
+  if err != nil {
+    return nil, err
+  }
+
+  colors, err := core.PostgresQuery[ColorType]("SELECT hex FROM WorldsColors WHERE world_id = $1 ORDER BY color_key", worldId)
+  if err != nil {
+    return nil, err
+  }
+
+  colorCount := len(colors)
+  palette := make([]color.Color, colorCount)
+  for i := 0; i < colorCount; i++ {
+    colorHex := colors[i]
+    palette[i] = hexToRGBA(colorHex)
+  }
+
+  bounds := img.Bounds()
+  width, height := bounds.Max.X, bounds.Max.Y
+  scaledWidth := width / scaleFactor
+  scaledHeight := height / scaleFactor
+  pixelData := make([]int, scaledWidth*scaledHeight)
+
+  for y := 0; y < height; y += scaleFactor {
+    for x := 0; x < width; x += scaleFactor {
+      newX := x / scaleFactor
+      newY := y / scaleFactor
+      rgba := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
+      if rgba.A < 128 { // Consider pixels with less than 50% opacity as transparent
+        pixelData[newY*scaledWidth+newX] = 0xFF
+      } else {
+        closestIndex := findClosestColor(rgba, palette)
+        pixelData[newY*scaledWidth+newX] = closestIndex
+      }
+    }
+  }
+
+  return pixelData, nil
+}
+
 func getStencilPixelData(w http.ResponseWriter, r *http.Request) {
 	// Get stencil hash from query params
 	hash := r.URL.Query().Get("hash")
@@ -729,7 +770,7 @@ func getStencilPixelData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert image to pixel data
-	pixelData, err := imageToPixelData(fileBytes, 1)
+	pixelData, err := worldImageToPixelData(fileBytes, 1, 0)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
 		return

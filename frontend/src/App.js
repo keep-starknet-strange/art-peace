@@ -625,27 +625,7 @@ function App() {
   };
 
   const extraPixelPlaceCall = async (positions, colors, now) => {
-    if (devnetMode) {
-      try {
-        const extraPixels = positions.map((pos, idx) => ({
-          position: pos,
-          colorId: colors[idx]
-        }));
-
-        const response = await fetchWrapper('place-extra-pixels-devnet', {
-          mode: 'cors',
-          method: 'POST',
-          body: JSON.stringify({
-            extraPixels: extraPixels,
-            timestamp: now
-          })
-        });
-        return response;
-      } catch (error) {
-        console.error('Failed to place extra pixels:', error);
-        throw error;
-      }
-    }
+    if (devnetMode) return;
     if (!address || !artPeaceContract || !account) return;
     // TODO: Validate inputs
     const placeExtraPixelsCallData = artPeaceContract.populate(
@@ -731,33 +711,49 @@ function App() {
     let timestamp = Math.floor(Date.now() / 1000);
     if (!devnetMode) {
       await extraPixelPlaceCall(
-        extraPixelsData.map(
-          (pixel) => pixel.x + pixel.y * canvasConfig.canvas.width
-        ),
+        extraPixelsData.map((pixel) => pixel.x + pixel.y * width),
         extraPixelsData.map((pixel) => pixel.colorId),
         timestamp
       );
     } else {
-      const formattedData = {
-        extraPixels: extraPixelsData.map((pixel) => ({
-          position: pixel.x + pixel.y * width,
-          colorId: pixel.colorId
-        })),
-        timestamp: timestamp
-      };
+      if (worldsMode) {
+        const firstPixel = extraPixelsData[0];
+        const formattedData = {
+          worldId: openedWorldId.toString(),
+          position: (firstPixel.x + firstPixel.y * width).toString(),
+          color: firstPixel.colorId.toString(),
+          timestamp: timestamp.toString()
+        };
 
-      const response = await fetchWrapper('place-extra-pixels-devnet', {
-        mode: 'cors',
-        method: 'POST',
-        body: JSON.stringify(formattedData)
-      });
-      if (response.result) {
-        console.log(response.result);
+        const response = await fetchWrapper('place-world-pixel-devnet', {
+          mode: 'cors',
+          method: 'POST',
+          body: JSON.stringify(formattedData)
+        });
+        if (response.result) {
+          console.log(response.result);
+        }
+      } else {
+        const formattedData = {
+          extraPixels: extraPixelsData.map((pixel) => ({
+            position: pixel.x + pixel.y * width,
+            colorId: pixel.colorId
+          })),
+          timestamp: timestamp
+        };
+
+        const response = await fetchWrapper('place-extra-pixels-devnet', {
+          mode: 'cors',
+          method: 'POST',
+          body: JSON.stringify(formattedData)
+        });
+        if (response.result) {
+          console.log(response.result);
+        }
       }
     }
     for (let i = 0; i < extraPixelsData.length; i++) {
-      let position =
-        extraPixelsData[i].x + extraPixelsData[i].y * canvasConfig.canvas.width;
+      let position = extraPixelsData[i].x + extraPixelsData[i].y * width;
       colorPixel(position, extraPixelsData[i].colorId);
     }
     if (basePixelUsed) {
@@ -1457,7 +1453,7 @@ function App() {
                 isMobile={isMobile}
                 overlayTemplate={overlayTemplate}
                 templatePixels={templatePixels}
-                width={canvasConfig.canvas.width}
+                width={width}
                 canvasRef={canvasRef}
                 addExtraPixel={addExtraPixel}
                 addExtraPixels={addExtraPixels}

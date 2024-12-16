@@ -121,7 +121,7 @@ const StencilCreationPanel = (props) => {
         });
         props.setTemplateOverlayMode(true);
         closePanel();
-        props.setActiveTab('Canvas');
+        props.setActiveTab('Stencils');
       }
       return;
     }

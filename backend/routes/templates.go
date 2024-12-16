@@ -29,7 +29,7 @@ func InitTemplateRoutes() {
 	http.HandleFunc("/add-template-data", addTemplateData)
 	http.HandleFunc("/get-template-pixel-data", getTemplatePixelData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
-		http.HandleFunc("/add-template-devnet", addTemplateDevnet)
+		// http.HandleFunc("/add-template-devnet", addTemplateDevnet)
 		http.HandleFunc("/add-faction-template-devnet", addFactionTemplateDevnet)
 		http.HandleFunc("/remove-faction-template-devnet", removeFactionTemplateDevnet)
 		http.HandleFunc("/add-chain-faction-template-devnet", addChainFactionTemplateDevnet)
