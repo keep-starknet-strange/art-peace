@@ -667,7 +667,7 @@ const CanvasContainer = (props) => {
         </div>
 
         {/* 12 Surrounding Canvases */}
-        {Array.from({ length: 12 }).map((_, index) => {
+        {props.surroundingWorlds.slice(0, 12).map((world, index) => {
           const gridPositions = [
             { gridColumn: '2', gridRow: '1' }, // Top
             { gridColumn: '3', gridRow: '1' }, // Top
@@ -691,12 +691,18 @@ const CanvasContainer = (props) => {
                 width: Math.round(256 * canvasScale) + 'px',
                 height: Math.round(192 * canvasScale) + 'px',
                 gridColumn: gridPositions[index].gridColumn,
-                gridRow: gridPositions[index].gridRow
+                gridRow: gridPositions[index].gridRow,
+                cursor: world ? 'pointer' : 'default'
               }}
               key={`surrounding-${index}`}
+              onClick={() => {
+                if (world) {
+                  window.location.href = `/worlds/${world.name}`;
+                }
+              }}
             >
               <Canvas
-                openedWorldId={props.openedWorldId}
+                openedWorldId={world ? world.worldId : null}
                 canvasRef={React.createRef()}
                 width={256}
                 height={192}
@@ -706,6 +712,7 @@ const CanvasContainer = (props) => {
                 }}
                 colors={props.colors}
                 pixelClicked={pixelClicked}
+                isEmpty={!world}
               />
             </div>
           );

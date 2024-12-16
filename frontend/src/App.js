@@ -40,6 +40,7 @@ function App() {
   const worldsMode = true;
   const [openedWorldId, setOpenedWorldId] = useState(0);
   const [activeWorld, setActiveWorld] = useState(null);
+  const [surroundingWorlds, setSurroundingWorlds] = useState([]);
 
   // Page management
   useEffect(() => {
@@ -52,10 +53,30 @@ function App() {
         if (response.data === undefined || response.data === null) {
           setActiveWorld(null);
           setOpenedWorldId(0);
+          setSurroundingWorlds([]);
           return;
+        } else {
+          setActiveWorld(response.data);
         }
 
         setOpenedWorldId(response.data);
+
+        // Fetch surrounding worlds
+        const surroundingResponse = await fetchWrapper('get-all-worlds');
+        if (surroundingResponse.data) {
+          // Filter out current world and take up to 12 worlds
+          const otherWorlds = surroundingResponse.data
+            .filter((world) => world.worldId !== response.data)
+            .slice(0, 12);
+
+          // Pad array with null values if less than 12 worlds
+          const paddedWorlds = [...otherWorlds];
+          while (paddedWorlds.length < 12) {
+            paddedWorlds.push(null);
+          }
+
+          setSurroundingWorlds(paddedWorlds);
+        }
       } else {
         const response = await fetchWrapper('get-world?worldId=0');
         if (response.data) {
@@ -1242,6 +1263,7 @@ function App() {
           setIsEraserMode={setIsEraserMode}
           clearExtraPixel={clearExtraPixel}
           setLastPlacedTime={setLastPlacedTime}
+          surroundingWorlds={surroundingWorlds}
         />
         {(!isMobile || activeTab === tabs[0]) && (
           <div className='App__logo'>

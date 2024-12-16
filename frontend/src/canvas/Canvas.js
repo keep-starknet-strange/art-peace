@@ -26,6 +26,14 @@ const Canvas = (props) => {
 
   useEffect(() => {
     const fetchCanvas = async () => {
+      if (props.isEmpty) {
+        const canvas = props.canvasRef.current;
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#f0f0f0';
+        context.fillRect(0, 0, props.width, props.height);
+        return;
+      }
+
       try {
         if (props.colors.length === 0) {
           return;
@@ -80,7 +88,7 @@ const Canvas = (props) => {
     };
 
     fetchCanvas();
-  }, [props.width, props.height, props.colors, props.openedWorldId]);
+  }, [props.colors, props.openedWorldId, props.isEmpty]);
 
   return (
     <canvas
