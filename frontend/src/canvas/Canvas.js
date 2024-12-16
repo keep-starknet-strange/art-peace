@@ -11,8 +11,9 @@ const Canvas = (props) => {
     [props.width, props.height]
   );
 
-  const isCenterCanvas = props.style && 
-    props.style.width === props.width * props.canvasScale && 
+  const isCenterCanvas =
+    props.style &&
+    props.style.width === props.width * props.canvasScale &&
     props.style.height === props.height * props.canvasScale;
 
   const handleClick = (e) => {

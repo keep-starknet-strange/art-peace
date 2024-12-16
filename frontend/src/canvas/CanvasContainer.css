@@ -85,3 +85,21 @@
 
   pointer-events: none;
 }
+
+.CanvasContainer__canvas-wrapper {
+  position: relative;
+}
+
+.Canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.TemplateOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}

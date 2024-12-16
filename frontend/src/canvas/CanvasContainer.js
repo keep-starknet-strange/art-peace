@@ -561,19 +561,41 @@ const CanvasContainer = (props) => {
           }}
           key='center'
         >
-          <Canvas
-            openedWorldId={props.openedWorldId}
-            canvasRef={props.canvasRef}
-            width={518}
-            height={396}
+          <div
+            className='CanvasContainer__canvas-wrapper'
             style={{
+              position: 'relative',
               width: 518 * canvasScale,
               height: 396 * canvasScale
             }}
-            colors={props.colors}
-            pixelClicked={pixelClicked}
-            canvasScale={canvasScale}
-          />
+          >
+            <Canvas
+              openedWorldId={props.openedWorldId}
+              canvasRef={props.canvasRef}
+              width={518}
+              height={396}
+              style={{
+                width: 518 * canvasScale,
+                height: 396 * canvasScale
+              }}
+              colors={props.colors}
+              pixelClicked={pixelClicked}
+              canvasScale={canvasScale}
+            />
+
+            {props.templateOverlayMode && props.overlayTemplate && (
+              <TemplateOverlay
+                canvasRef={props.canvasRef}
+                width={props.width}
+                height={props.height}
+                canvasScale={canvasScale}
+                overlayTemplate={props.overlayTemplate}
+                setTemplateOverlayMode={props.setTemplateOverlayMode}
+                setOverlayTemplate={props.setOverlayTemplate}
+                colors={props.colors}
+              />
+            )}
+          </div>
 
           {/* Move overlay components inside center canvas */}
           {props.availablePixels > 0 && (
@@ -587,19 +609,6 @@ const CanvasContainer = (props) => {
               }}
               colors={props.colors}
               pixelClicked={pixelClicked}
-            />
-          )}
-
-          {props.templateOverlayMode && props.overlayTemplate && (
-            <TemplateOverlay
-              canvasRef={props.canvasRef}
-              width={props.width}
-              height={props.height}
-              canvasScale={canvasScale}
-              overlayTemplate={props.overlayTemplate}
-              setTemplateOverlayMode={props.setTemplateOverlayMode}
-              setOverlayTemplate={props.setOverlayTemplate}
-              colors={props.colors}
             />
           )}
 
