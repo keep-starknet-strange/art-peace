@@ -4,15 +4,16 @@ import './TemplateOverlay.css';
 const TemplateOverlay = (props) => {
   const [posx, setPosx] = React.useState(0);
   const [posy, setPosy] = React.useState(0);
-  
+
   useEffect(() => {
-    // Calculate position relative to canvas dimensions
-    const x = props.overlayTemplate.position % props.width;
-    const y = Math.floor(props.overlayTemplate.position / props.width);
-    
-    setPosx(x);
-    setPosy(y);
-  }, [props.overlayTemplate, props.width]);
+    // Calculate position relative to fixed canvas dimensions (518x396)
+    const x = props.overlayTemplate.position % 518;
+    const y = Math.floor(props.overlayTemplate.position / 518);
+
+    // Apply canvas scale to position
+    setPosx(x * props.canvasScale);
+    setPosy(y * props.canvasScale);
+  }, [props.overlayTemplate, props.canvasScale]);
 
   const [templateOutline, setTemplateOutline] = React.useState('none');
   useEffect(() => {
@@ -34,8 +35,6 @@ const TemplateOverlay = (props) => {
         top: `${posy}px`,
         width: props.overlayTemplate.width * props.canvasScale,
         height: props.overlayTemplate.height * props.canvasScale,
-        transform: `scale(${props.canvasScale})`,
-        transformOrigin: '0 0',
         pointerEvents: 'none',
         display: 'block',
         outline: templateOutline
