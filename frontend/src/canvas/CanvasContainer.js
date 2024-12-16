@@ -552,77 +552,76 @@ const CanvasContainer = (props) => {
       onPointerMove={handlePointerMove}
       onPointerDown={handlePointerDown}
     >
-      {/* Center Canvas */}
-      <div
-        className='CanvasContainer__anchor center'
-        style={{
-          transform: `translate(${canvasX}px, ${canvasY}px)`,
-          width: 518 * canvasScale + 'px',
-          height: 396 * canvasScale + 'px'
-        }}
-        key='center'
-      >
-        {/* Center canvas content */}
-        <Canvas
-          openedWorldId={props.openedWorldId}
-          canvasRef={props.canvasRef}
-          width={518}
-          height={396}
+      <div className="CanvasContainer__inner">
+        {/* Center Canvas */}
+        <div
+          className='CanvasContainer__anchor center'
           style={{
-            width: 518 * canvasScale,
-            height: 396 * canvasScale
+            transform: `translate(${canvasX}px, ${canvasY}px)`,
+            width: 518 * canvasScale + 'px',
+            height: 396 * canvasScale + 'px'
           }}
-          colors={props.colors}
-          pixelClicked={pixelClicked}
-        />
-        {/* Other overlays and components */}
-      </div>
-
-      {/* 12 Surrounding Canvases */}
-      {Array.from({ length: 12 }).map((_, index) => {
-        // Calculate grid position based on index
-        const gridPositions = [
-          { gridColumn: '2', gridRow: '1' }, // Top
-          { gridColumn: '3', gridRow: '1' }, // Top
-          { gridColumn: '4', gridRow: '2' }, // Right
-          { gridColumn: '4', gridRow: '3' }, // Right
-          { gridColumn: '2', gridRow: '4' }, // Bottom
-          { gridColumn: '3', gridRow: '4' }, // Bottom
-          { gridColumn: '1', gridRow: '2' }, // Left
-          { gridColumn: '1', gridRow: '3' }, // Left
-          { gridColumn: '1', gridRow: '1' }, // Corners
-          { gridColumn: '4', gridRow: '1' },
-          { gridColumn: '1', gridRow: '4' },
-          { gridColumn: '4', gridRow: '4' }
-        ];
-
-        return (
-          <div
-            className='CanvasContainer__anchor surrounding'
+          key='center'
+        >
+          <Canvas
+            openedWorldId={props.openedWorldId}
+            canvasRef={props.canvasRef}
+            width={518}
+            height={396}
             style={{
-              transform: `translate(${canvasX}px, ${canvasY}px)`,
-              width: 256 * canvasScale + 'px',
-              height: 192 * canvasScale + 'px',
-              gridColumn: gridPositions[index].gridColumn,
-              gridRow: gridPositions[index].gridRow
+              width: 518 * canvasScale,
+              height: 396 * canvasScale
             }}
-            key={`surrounding-${index}`}
-          >
-            <Canvas
-              openedWorldId={props.openedWorldId}
-              canvasRef={React.createRef()}
-              width={256}
-              height={192}
+            colors={props.colors}
+            pixelClicked={pixelClicked}
+          />
+        </div>
+
+        {/* 12 Surrounding Canvases */}
+        {Array.from({ length: 12 }).map((_, index) => {
+          const gridPositions = [
+            { gridColumn: '2', gridRow: '1' }, // Top
+            { gridColumn: '3', gridRow: '1' }, // Top
+            { gridColumn: '4', gridRow: '2' }, // Right
+            { gridColumn: '4', gridRow: '3' }, // Right
+            { gridColumn: '2', gridRow: '4' }, // Bottom
+            { gridColumn: '3', gridRow: '4' }, // Bottom
+            { gridColumn: '1', gridRow: '2' }, // Left
+            { gridColumn: '1', gridRow: '3' }, // Left
+            { gridColumn: '1', gridRow: '1' }, // Corners
+            { gridColumn: '4', gridRow: '1' },
+            { gridColumn: '1', gridRow: '4' },
+            { gridColumn: '4', gridRow: '4' }
+          ];
+
+          return (
+            <div
+              className='CanvasContainer__anchor surrounding'
               style={{
-                width: 256 * canvasScale,
-                height: 192 * canvasScale
+                transform: `translate(${canvasX}px, ${canvasY}px)`,
+                width: 256 * canvasScale + 'px',
+                height: 192 * canvasScale + 'px',
+                gridColumn: gridPositions[index].gridColumn,
+                gridRow: gridPositions[index].gridRow
               }}
-              colors={props.colors}
-              pixelClicked={pixelClicked}
-            />
-          </div>
-        );
-      })}
+              key={`surrounding-${index}`}
+            >
+              <Canvas
+                openedWorldId={props.openedWorldId}
+                canvasRef={React.createRef()}
+                width={256}
+                height={192}
+                style={{
+                  width: 256 * canvasScale,
+                  height: 192 * canvasScale
+                }}
+                colors={props.colors}
+                pixelClicked={pixelClicked}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
