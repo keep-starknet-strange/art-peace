@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -17,6 +16,7 @@ import (
 // TODO: check-worlds-name-unique?
 func InitWorldsRoutes() {
 	http.HandleFunc("/get-world-canvas", getWorldCanvas)
+	http.HandleFunc("/get-world-id", getWorldId)
 	http.HandleFunc("/get-world", getWorld)
 	http.HandleFunc("/get-worlds", getWorlds)
 	http.HandleFunc("/get-new-worlds", getNewWorlds)
@@ -29,7 +29,6 @@ func InitWorldsRoutes() {
 	http.HandleFunc("/get-worlds-colors", getWorldsColors)
 	http.HandleFunc("/get-worlds-pixel-count", getWorldsPixelCount)
 	http.HandleFunc("/get-worlds-pixel-info", getWorldsPixelInfo)
-	http.HandleFunc("/worlds/", handleWorldRoute)
 	http.HandleFunc("/check-world-name", checkWorldName)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/create-canvas-devnet", createCanvasDevnet)
@@ -69,6 +68,7 @@ type WorldData struct {
 	WorldId           int        `json:"worldId"`
 	Host              string     `json:"host"`
 	Name              string     `json:"name"`
+	UniqueName        string     `json:"uniqueName"`
 	Width             int        `json:"width"`
 	Height            int        `json:"height"`
 	TimeBetweenPixels int        `json:"timeBetweenPixels"`
@@ -78,6 +78,20 @@ type WorldData struct {
 	Favorited         bool       `json:"favorited"`
 }
 
+func getWorldId(w http.ResponseWriter, r *http.Request) {
+	worldName := r.URL.Query().Get("worldName")
+	if worldName == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldName")
+		return
+	}
+	worldId, err := core.PostgresQueryOne[int]("SELECT world_id FROM worlds WHERE unique_name = $1", worldName)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve World")
+		return
+	}
+	routeutils.WriteDataJson(w, strconv.Itoa(*worldId))
+}
+
 func getWorld(w http.ResponseWriter, r *http.Request) {
 	worldId := r.URL.Query().Get("worldId")
 	if worldId == "" {
@@ -85,18 +99,7 @@ func getWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var world []byte
-	var err error
-
-	// Try to parse as numeric ID first
-	if _, parseErr := strconv.Atoi(worldId); parseErr == nil {
-		// It's a numeric ID
-		world, err = core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE world_id = $1", worldId)
-	} else {
-		// Try as name
-		world, err = core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE name = $1", worldId)
-	}
-
+	world, err := core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE world_id = $1", worldId)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve World")
 		return
@@ -187,7 +190,6 @@ func getNewWorlds(w http.ResponseWriter, r *http.Request) {
         LIMIT $2 OFFSET $3`
 	worlds, err := core.PostgresQueryJson[WorldData](query, address, pageLength, offset)
 	if err != nil {
-		fmt.Println(err)
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
 		return
 	}
@@ -268,40 +270,14 @@ func getWorldsLastPlacedTime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var query string
-	var args []interface{}
-
-	// Try to parse as numeric ID first
-	if _, parseErr := strconv.Atoi(worldId); parseErr == nil {
-		// It's a numeric ID
-		query = `
-            SELECT COALESCE(
-                (SELECT time FROM WorldsLastPlacedTime 
-                WHERE world_id = $1 and address = $2),
-                TO_TIMESTAMP(0)
-            )`
-		args = []interface{}{worldId, address}
-	} else {
-		// Try as name
-		query = `
-            SELECT COALESCE(
-                (SELECT wlpt.time 
-                FROM WorldsLastPlacedTime wlpt
-                JOIN worlds w ON w.world_id = wlpt.world_id
-                WHERE w.name = $1 and wlpt.address = $2),
-                TO_TIMESTAMP(0)
-            )`
-		args = []interface{}{worldId, address}
-	}
-
-	lastTime, err := core.PostgresQueryOne[*time.Time](query, args...)
+	lastTime, err := core.PostgresQueryOne[*time.Time]("SELECT COALESCE((SELECT time FROM WorldsLastPlacedTime WHERE world_id = $1 and address = $2), TO_TIMESTAMP(0))", worldId, address)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get last placed time")
 		return
 	}
 
 	// Return the last placed time in utc z format
-	routeutils.WriteDataJson(w, "\""+(*lastTime).UTC().Format(time.RFC3339)+"\"")
+	routeutils.WriteDataJson(w, "\""+string((*lastTime).UTC().Format(time.RFC3339))+"\"")
 }
 
 func getWorldsExtraPixels(w http.ResponseWriter, r *http.Request) {
@@ -499,16 +475,17 @@ func createCanvasDevnet(w http.ResponseWriter, r *http.Request) {
 
 	host := (*jsonBody)["host"]
 	name := (*jsonBody)["name"]
+	uniqueName := (*jsonBody)["unique_name"]
 
-	if host == "" || name == "" {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing host or name")
+	if host == "" || name == "" || uniqueName == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing host or name or uniqueName")
 		return
 	}
 
 	// Check if world name already exists
-	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE LOWER(name) = LOWER($1))", name)
+	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE unique_name = $1)", uniqueName)
 	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to check world name")
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "World unique name check failed")
 		return
 	}
 	if *exists {
@@ -563,7 +540,7 @@ func createCanvasDevnet(w http.ResponseWriter, r *http.Request) {
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.CreateCanvasDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 
-	cmd := exec.Command(shellCmd, contract, "create_canvas", host, name, strconv.Itoa(width), strconv.Itoa(height), strconv.Itoa(timer), strconv.Itoa(len(palette)), paletteInput, strconv.Itoa(startTime), strconv.Itoa(endTime))
+	cmd := exec.Command(shellCmd, contract, "create_canvas", host, name, uniqueName, strconv.Itoa(width), strconv.Itoa(height), strconv.Itoa(timer), strconv.Itoa(len(palette)), paletteInput, strconv.Itoa(startTime), strconv.Itoa(endTime))
 	_, err = cmd.Output()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create canvas")
@@ -689,45 +666,10 @@ func placeWorldPixelDevnet(w http.ResponseWriter, r *http.Request) {
 	routeutils.WriteResultJson(w, "Pixel placed world")
 }
 
-func handleWorldRoute(w http.ResponseWriter, r *http.Request) {
-	routeutils.SetupAccessHeaders(w)
-
-	// Extract the identifier from the URL path
-	pathParts := strings.Split(r.URL.Path, "/")
-	if len(pathParts) != 3 {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid world path")
-		return
-	}
-
-	identifier := pathParts[2]
-
-	// Try to parse as worldId first
-	if worldId, err := strconv.Atoi(identifier); err == nil {
-		// It's a numeric ID
-		world, err := core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE world_id = $1", worldId)
-		if err != nil {
-			routeutils.WriteErrorJson(w, http.StatusNotFound, "World not found")
-			return
-		}
-		routeutils.WriteDataJson(w, string(world))
-		return
-	}
-
-	// If not numeric, try to find by name
-	world, err := core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE name = $1", identifier)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusNotFound, "World not found")
-		return
-	}
-	routeutils.WriteDataJson(w, string(world))
-}
-
 func checkWorldName(w http.ResponseWriter, r *http.Request) {
-	routeutils.SetupAccessHeaders(w)
-
-	name := strings.TrimSpace(r.URL.Query().Get("name"))
+	name := r.URL.Query().Get("uniqueName")
 	if name == "" {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing name parameter")
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing uniqueName parameter")
 		return
 	}
 
@@ -738,15 +680,12 @@ func checkWorldName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log for debugging
-	fmt.Printf("Checking world name: %s, exists: %v\n", name, exists)
-
 	routeutils.WriteDataJson(w, strconv.FormatBool(exists))
 }
 
 // Add a helper function to check if a world name exists
 func doesWorldNameExist(name string) (bool, error) {
-	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE LOWER(name) = LOWER($1))", name)
+	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE unique_name = $1)", name)
 	if err != nil {
 		return false, err
 	}
