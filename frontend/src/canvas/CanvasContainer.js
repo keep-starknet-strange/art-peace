@@ -557,8 +557,8 @@ const CanvasContainer = (props) => {
         className='CanvasContainer__anchor center'
         style={{
           transform: `translate(${canvasX}px, ${canvasY}px)`,
-          width: props.width * canvasScale + 'px',
-          height: props.height * canvasScale + 'px'
+          width: 518 * canvasScale + 'px',
+          height: 396 * canvasScale + 'px'
         }}
         key='center'
       >
@@ -566,11 +566,11 @@ const CanvasContainer = (props) => {
         <Canvas
           openedWorldId={props.openedWorldId}
           canvasRef={props.canvasRef}
-          width={props.width}
-          height={props.height}
+          width={518}
+          height={396}
           style={{
-            width: props.width * canvasScale,
-            height: props.height * canvasScale
+            width: 518 * canvasScale,
+            height: 396 * canvasScale
           }}
           colors={props.colors}
           pixelClicked={pixelClicked}
@@ -601,8 +601,8 @@ const CanvasContainer = (props) => {
             className='CanvasContainer__anchor surrounding'
             style={{
               transform: `translate(${canvasX}px, ${canvasY}px)`,
-              width: props.width * canvasScale + 'px',
-              height: props.height * canvasScale + 'px',
+              width: 256 * canvasScale + 'px',
+              height: 192 * canvasScale + 'px',
               gridColumn: gridPositions[index].gridColumn,
               gridRow: gridPositions[index].gridRow
             }}
@@ -611,11 +611,11 @@ const CanvasContainer = (props) => {
             <Canvas
               openedWorldId={props.openedWorldId}
               canvasRef={React.createRef()}
-              width={props.width}
-              height={props.height}
+              width={256}
+              height={192}
               style={{
-                width: props.width * canvasScale,
-                height: props.height * canvasScale
+                width: 256 * canvasScale,
+                height: 192 * canvasScale
               }}
               colors={props.colors}
               pixelClicked={pixelClicked}
