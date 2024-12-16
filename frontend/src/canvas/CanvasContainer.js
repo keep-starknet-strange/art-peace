@@ -572,6 +572,7 @@ const CanvasContainer = (props) => {
             }}
             colors={props.colors}
             pixelClicked={pixelClicked}
+            canvasScale={canvasScale}
           />
 
           {/* Move overlay components inside center canvas */}

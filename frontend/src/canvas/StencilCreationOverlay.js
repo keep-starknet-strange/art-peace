@@ -30,20 +30,20 @@ const StencilCreationOverlay = (props) => {
           ((event.clientY - rect.top) / (rect.bottom - rect.top)) * props.height
         );
 
-        const maxX = props.width - props.stencilImage.width;
-        const maxY = props.height - props.stencilImage.height;
+        const maxX = 518 - props.stencilImage.width;
+        const maxY = 396 - props.stencilImage.height;
         const boundedX = Math.max(0, Math.min(x, maxX));
         const boundedY = Math.max(0, Math.min(y, maxY));
 
         if (
           boundedX < 0 ||
-          boundedX >= props.width ||
+          boundedX >= 518 ||
           boundedY < 0 ||
-          boundedY >= props.height
+          boundedY >= 396
         ) {
           return;
         }
-        props.setStencilPosition(boundedY * props.width + boundedX);
+        props.setStencilPosition(boundedY * 518 + boundedX);
       }
     };
     if (props.stencilCreationMode && !props.stencilCreationSelected) {
@@ -56,8 +56,8 @@ const StencilCreationOverlay = (props) => {
   }, [
     props.stencilCreationSelected,
     props.stencilCreationMode,
-    props.width,
-    props.height
+    props.stencilImage.width,
+    props.stencilImage.height
   ]);
 
   useEffect(() => {

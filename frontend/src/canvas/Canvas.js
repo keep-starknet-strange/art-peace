@@ -11,6 +11,18 @@ const Canvas = (props) => {
     [props.width, props.height]
   );
 
+  const isCenterCanvas = props.style && 
+    props.style.width === props.width * props.canvasScale && 
+    props.style.height === props.height * props.canvasScale;
+
+  const handleClick = (e) => {
+    if (!isCenterCanvas) {
+      e.preventDefault();
+      return;
+    }
+    props.pixelClicked(e);
+  };
+
   useEffect(() => {
     const fetchCanvas = async () => {
       try {
@@ -76,7 +88,7 @@ const Canvas = (props) => {
       height={props.height}
       style={props.style}
       className='Canvas'
-      onClick={props.pixelClicked}
+      onClick={handleClick}
     />
   );
 };
