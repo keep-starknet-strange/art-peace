@@ -59,6 +59,7 @@ pub mod MultiCanvas {
     pub struct CanvasInitParams {
         pub host: ContractAddress,
         pub name: felt252,
+        pub unique_name: felt252,
         pub width: u128,
         pub height: u128,
         pub time_between_pixels: u64,
@@ -70,6 +71,7 @@ pub mod MultiCanvas {
     #[derive(Drop, Serde, starknet::Store)]
     pub struct CanvasMetadata {
         name: felt252,
+        unique_name: felt252,
         width: u128,
         height: u128,
         start_time: u64,
@@ -105,6 +107,8 @@ pub mod MultiCanvas {
         color_palettes: LegacyMap::<(u32, u8), u32>,
         // Maps: (canvas_id, user addr) -> if favorited
         canvas_favorites: LegacyMap::<(u32, ContractAddress), bool>,
+        // Maps: unique_name -> is taken
+        unique_names: LegacyMap::<felt252, bool>,
         // Map: canvas_id -> stencil count
         stencil_counts: LegacyMap::<u32, u32>,
         // Map: (canvas_id, stencil_id) -> stencil metadata
@@ -288,6 +292,9 @@ pub mod MultiCanvas {
             assert(init_params.height <= MAX_SIZE, 'Height too large');
             assert(init_params.color_palette.len() >= MIN_COLOR_COUNT, 'Too few colors');
             assert(init_params.color_palette.len() <= MAX_COLOR_COUNT, 'Too many colors');
+            assert(init_params.start_time < init_params.end_time, 'Invalid time range');
+            assert(!self.unique_names.read(init_params.unique_name), 'Unique name already taken');
+            assert(validate_unique_name(init_params.unique_name), 'Invalid unique name');
             let canvas_id = self.canvas_count.read();
             self
                 .canvases
@@ -295,6 +302,7 @@ pub mod MultiCanvas {
                     canvas_id,
                     CanvasMetadata {
                         name: init_params.name,
+                        unique_name: init_params.unique_name,
                         width: init_params.width,
                         height: init_params.height,
                         start_time: init_params.start_time,
@@ -317,6 +325,7 @@ pub mod MultiCanvas {
                 i += 1;
             };
             self.canvas_count.write(canvas_id + 1);
+            self.unique_names.write(init_params.unique_name, true);
             self.emit(CanvasCreated { canvas_id, init_params });
             canvas_id
         }
@@ -523,6 +532,33 @@ pub mod MultiCanvas {
         let caller = starknet::get_caller_address();
         self.last_placed_times.write((canvas_id, caller), now);
         self.emit(CanvasBasicPixelPlaced { canvas_id, placed_by: caller, timestamp: now });
+    }
+
+    fn char_is_number(char: u256) -> bool {
+        char >= '0' && char <= '9'
+    }
+
+    fn char_is_lowercase_letter(char: u256) -> bool {
+        char >= 'a' && char <= 'z'
+    }
+
+    fn char_is_valid(char: u256) -> bool {
+        // Check unique_name only contains: a-z, 0-9, -, _
+        char_is_number(char) || char_is_lowercase_letter(char) || char == '-' || char == '_'
+    }
+
+    fn validate_unique_name(unique_name: felt252) -> bool {
+        let mut temp: u256 = unique_name.into();
+        let mut result = true;
+        while temp > 0 {
+            let char = temp % 256;
+            if !char_is_valid(char) {
+                result = false;
+                break;
+            }
+            temp /= 256;
+        };
+        result
     }
 // TODO: Extra pixels
 }

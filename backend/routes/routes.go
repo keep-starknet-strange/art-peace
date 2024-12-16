@@ -28,4 +28,5 @@ func InitRoutes() {
 	InitWorldsRoutes()
 	InitStencilsRoutes()
 	InitStencilsStaticRoutes()
+	InitRoundsRoutes()
 }

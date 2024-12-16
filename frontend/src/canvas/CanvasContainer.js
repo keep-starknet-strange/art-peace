@@ -556,7 +556,7 @@ const CanvasContainer = (props) => {
           transform: `translate(${canvasX}px, ${canvasY}px)`
         }}
       >
-        {props.openedWorldId && props.activeWorld && (
+        {props.openedWorldId !== null && props.activeWorld !== null && (
           <h3
             className='CanvasContainer__title'
             style={{
