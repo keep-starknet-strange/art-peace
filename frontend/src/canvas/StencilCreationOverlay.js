@@ -35,7 +35,12 @@ const StencilCreationOverlay = (props) => {
         const boundedX = Math.max(0, Math.min(x, maxX));
         const boundedY = Math.max(0, Math.min(y, maxY));
 
-        if (boundedX < 0 || boundedX >= props.width || boundedY < 0 || boundedY >= props.height) {
+        if (
+          boundedX < 0 ||
+          boundedX >= props.width ||
+          boundedY < 0 ||
+          boundedY >= props.height
+        ) {
           return;
         }
         props.setStencilPosition(boundedY * props.width + boundedX);
@@ -84,7 +89,12 @@ const StencilCreationOverlay = (props) => {
         const boundedX = Math.max(0, Math.min(x, maxX));
         const boundedY = Math.max(0, Math.min(y, maxY));
 
-        if (boundedX < 0 || boundedX >= props.width || boundedY < 0 || boundedY >= props.height) {
+        if (
+          boundedX < 0 ||
+          boundedX >= props.width ||
+          boundedY < 0 ||
+          boundedY >= props.height
+        ) {
           return;
         }
         props.setStencilPosition(boundedY * props.width + boundedX);

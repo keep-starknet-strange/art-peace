@@ -48,7 +48,7 @@ const Canvas = (props) => {
             dataArray.push(value);
           }
         }
-        let imageDataArray = [];
+        const imageDataArray = [];
         for (let i = 0; i < dataArray.length; i++) {
           const color = '#' + props.colors[dataArray[i]] + 'FF';
           const [r, g, b, a] = color.match(/\w\w/g).map((x) => parseInt(x, 16));

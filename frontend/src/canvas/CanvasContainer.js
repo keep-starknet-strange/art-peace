@@ -103,7 +103,7 @@ const CanvasContainer = (props) => {
     // Calculate position adjustments to maintain cursor position
     const cursorXRelative = (cursorX - canvasX) / (props.width * canvasScale);
     const cursorYRelative = (cursorY - canvasY) / (props.height * canvasScale);
-    
+
     const newCursorX = cursorXRelative * newWidth;
     const newCursorY = cursorYRelative * newHeight;
 
