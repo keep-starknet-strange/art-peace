@@ -19,6 +19,7 @@ func isFlagSet(name string) bool {
 }
 
 func main() {
+	roundsConfigFilename := flag.String("rounds-config", config.DefaultRoundsConfigPath, "Rounds config file")
 	canvasConfigFilename := flag.String("canvas-config", config.DefaultCanvasConfigPath, "Canvas config file")
 	databaseConfigFilename := flag.String("database-config", config.DefaultDatabaseConfigPath, "Database config file")
 	backendConfigFilename := flag.String("backend-config", config.DefaultBackendConfigPath, "Backend config file")
@@ -26,6 +27,11 @@ func main() {
 	admin := flag.Bool("admin", false, "Admin mode")
 
 	flag.Parse()
+
+	roundsConfig, err := config.LoadRoundsConfig(*roundsConfigFilename)
+	if err != nil {
+		panic(err)
+	}
 
 	canvasConfig, err := config.LoadCanvasConfig(*canvasConfigFilename)
 	if err != nil {
@@ -49,7 +55,7 @@ func main() {
 	databases := core.NewDatabases(databaseConfig)
 	defer databases.Close()
 
-	core.ArtPeaceBackend = core.NewBackend(databases, canvasConfig, backendConfig, *admin)
+	core.ArtPeaceBackend = core.NewBackend(databases, roundsConfig, canvasConfig, backendConfig, *admin)
 
 	routes.InitRoutes()
 

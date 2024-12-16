@@ -15,6 +15,7 @@ type Backend struct {
 	WSConnections     []*websocket.Conn
 	WSConnectionsLock sync.Mutex
 
+	RoundsConfig  *config.RoundsConfig
 	CanvasConfig  *config.CanvasConfig
 	BackendConfig *config.BackendConfig
 
@@ -23,9 +24,10 @@ type Backend struct {
 
 var ArtPeaceBackend *Backend
 
-func NewBackend(databases *Databases, canvasConfig *config.CanvasConfig, backendConfig *config.BackendConfig, adminMode bool) *Backend {
+func NewBackend(databases *Databases, roundsConfig *config.RoundsConfig, canvasConfig *config.CanvasConfig, backendConfig *config.BackendConfig, adminMode bool) *Backend {
 	return &Backend{
 		Databases:     databases,
+		RoundsConfig:  roundsConfig,
 		CanvasConfig:  canvasConfig,
 		BackendConfig: backendConfig,
 		AdminMode:     adminMode,
