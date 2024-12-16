@@ -10,13 +10,23 @@ import { fetchWrapper } from '../services/apiService.js';
 import { devnetMode } from '../utils/Consts.js';
 
 const CanvasContainer = (props) => {
-  // TODO: Handle window resize
-  const minScale = 0.6;
+  // Calculate minimum scale based on container and canvas dimensions
+  const containerWidth = 1072;
+  const containerHeight = 804;
+  const centerCanvasWidth = 518;
+  const centerCanvasHeight = 396;
+  const surroundingCanvasWidth = 256;
+  const surroundingCanvasHeight = 192;
+
+  // Calculate minimum scale needed to fill container
+  const widthScale = containerWidth / (centerCanvasWidth + surroundingCanvasWidth * 2);
+  const heightScale = containerHeight / (centerCanvasHeight + surroundingCanvasHeight * 2);
+  const minScale = Math.max(widthScale, heightScale, 0.6); // Keep original minimum if larger
   const maxScale = 40;
 
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(1.16);
+  const [canvasScale, setCanvasScale] = useState(minScale);
   const [titleScale, setTitleScale] = useState(1);
   const [touchInitialDistance, setInitialTouchDistance] = useState(0);
   const [touchScale, setTouchScale] = useState(0);
@@ -69,38 +79,34 @@ const CanvasContainer = (props) => {
 
   // Zoom in/out ( into the cursor position )
   const zoom = (e) => {
-    // Get the cursor position within the canvas ( note the canvas can go outside the viewport )
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
-    if (cursorX < 0) {
-      cursorX = 0;
-    } else if (cursorX > rect.width) {
-      cursorX = rect.width;
-    }
-    if (cursorY < 0) {
-      cursorY = 0;
-    } else if (cursorY > rect.height) {
-      cursorY = rect.height;
-    }
+    
+    // Clamp cursor position
+    cursorX = Math.max(0, Math.min(cursorX, rect.width));
+    cursorY = Math.max(0, Math.min(cursorY, rect.height));
 
-    // Calculate new left and top position to keep cursor over the same rect pos  ition
     let direction = e.deltaY > 0 ? 1 : -1;
     let scaler = Math.log2(1 + Math.abs(e.deltaY) * 2) * direction;
     let newScale = canvasScale * (1 + scaler * -0.01);
-    if (newScale < minScale) {
-      newScale = minScale;
-    } else if (newScale > maxScale) {
-      newScale = maxScale;
-    }
+    
+    // Enforce scale limits
+    newScale = Math.max(minScale, Math.min(newScale, maxScale));
+    
+    // Calculate new dimensions
     const newWidth = props.width * newScale;
     const newHeight = props.height * newScale;
+    
+    // Calculate position adjustments to maintain grid alignment
     const oldCursorXRelative = cursorX / rect.width;
     const oldCursorYRelative = cursorY / rect.height;
     const newCursorX = oldCursorXRelative * newWidth;
     const newCursorY = oldCursorYRelative * newHeight;
-    const newPosX = canvasX - (newCursorX - cursorX);
-    const newPosY = canvasY - (newCursorY - cursorY);
+    
+    // Round positions to prevent subpixel gaps
+    const newPosX = Math.round(canvasX - (newCursorX - cursorX));
+    const newPosY = Math.round(canvasY - (newCursorY - cursorY));
 
     setCanvasScale(newScale);
     setCanvasX(newPosX);
@@ -148,22 +154,11 @@ const CanvasContainer = (props) => {
       }
 
       let newScale = (distance / touchInitialDistance) * touchScale;
-      if (newScale < minScale) {
-        newScale = minScale;
-      } else if (newScale > maxScale) {
-        newScale = maxScale;
-      }
-      const newWidth = props.width * newScale;
-      const newHeight = props.height * newScale;
-
-      const oldCursorXRelative = cursorX / rect.width;
-      const oldCursorYRelative = cursorY / rect.height;
-
-      const newCursorX = oldCursorXRelative * newWidth;
-      const newCursorY = oldCursorYRelative * newHeight;
-
-      const newPosX = canvasX - (newCursorX - cursorX);
-      const newPosY = canvasY - (newCursorY - cursorY);
+      newScale = Math.max(minScale, Math.min(newScale, maxScale));
+      
+      // Round positions to prevent subpixel gaps
+      const newPosX = Math.round(canvasX - (newCursorX - cursorX));
+      const newPosY = Math.round(canvasY - (newCursorY - cursorY));
 
       setCanvasScale(newScale);
       setCanvasX(newPosX);
@@ -557,9 +552,9 @@ const CanvasContainer = (props) => {
         <div
           className='CanvasContainer__anchor center'
           style={{
-            transform: `translate(${canvasX}px, ${canvasY}px)`,
-            width: 518 * canvasScale + 'px',
-            height: 396 * canvasScale + 'px'
+            transform: `translate(${Math.round(canvasX)}px, ${Math.round(canvasY)}px)`,
+            width: Math.round(518 * canvasScale) + 'px',
+            height: Math.round(396 * canvasScale) + 'px'
           }}
           key='center'
         >
@@ -598,9 +593,9 @@ const CanvasContainer = (props) => {
             <div
               className='CanvasContainer__anchor surrounding'
               style={{
-                transform: `translate(${canvasX}px, ${canvasY}px)`,
-                width: 256 * canvasScale + 'px',
-                height: 192 * canvasScale + 'px',
+                transform: `translate(${Math.round(canvasX)}px, ${Math.round(canvasY)}px)`,
+                width: Math.round(256 * canvasScale) + 'px',
+                height: Math.round(192 * canvasScale) + 'px',
                 gridColumn: gridPositions[index].gridColumn,
                 gridRow: gridPositions[index].gridRow
               }}
