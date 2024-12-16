@@ -164,7 +164,8 @@ const StencilItem = (props) => {
       width: props.width,
       height: props.height,
       position: props.position,
-      image: props.image
+      image: props.image,
+      isStencil: true
     };
     props.setTemplateOverlayMode(true);
     props.setOverlayTemplate(template);

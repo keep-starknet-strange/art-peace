@@ -711,32 +711,49 @@ function App() {
     let timestamp = Math.floor(Date.now() / 1000);
     if (!devnetMode) {
       await extraPixelPlaceCall(
-        extraPixelsData.map(
-          (pixel) => pixel.x + pixel.y * canvasConfig.canvas.width
-        ),
+        extraPixelsData.map((pixel) => pixel.x + pixel.y * width),
         extraPixelsData.map((pixel) => pixel.colorId),
         timestamp
       );
     } else {
-      let placeExtraPixelsEndpoint = 'place-extra-pixels-devnet';
-      const response = await fetchWrapper(placeExtraPixelsEndpoint, {
-        mode: 'cors',
-        method: 'POST',
-        body: JSON.stringify({
+      if (worldsMode) {
+        const firstPixel = extraPixelsData[0];
+        const formattedData = {
+          worldId: openedWorldId.toString(),
+          position: (firstPixel.x + firstPixel.y * width).toString(),
+          color: firstPixel.colorId.toString(),
+          timestamp: timestamp.toString()
+        };
+
+        const response = await fetchWrapper('place-world-pixel-devnet', {
+          mode: 'cors',
+          method: 'POST',
+          body: JSON.stringify(formattedData)
+        });
+        if (response.result) {
+          console.log(response.result);
+        }
+      } else {
+        const formattedData = {
           extraPixels: extraPixelsData.map((pixel) => ({
-            position: pixel.x + pixel.y * canvasConfig.canvas.width,
+            position: pixel.x + pixel.y * width,
             colorId: pixel.colorId
           })),
           timestamp: timestamp
-        })
-      });
-      if (response.result) {
-        console.log(response.result);
+        };
+
+        const response = await fetchWrapper('place-extra-pixels-devnet', {
+          mode: 'cors',
+          method: 'POST',
+          body: JSON.stringify(formattedData)
+        });
+        if (response.result) {
+          console.log(response.result);
+        }
       }
     }
     for (let i = 0; i < extraPixelsData.length; i++) {
-      let position =
-        extraPixelsData[i].x + extraPixelsData[i].y * canvasConfig.canvas.width;
+      let position = extraPixelsData[i].x + extraPixelsData[i].y * width;
       colorPixel(position, extraPixelsData[i].colorId);
     }
     if (basePixelUsed) {
@@ -1125,6 +1142,16 @@ function App() {
       return [];
     };
 
+    const getStencilPixelData = async (hash) => {
+      if (hash !== null) {
+        const response = await fetchWrapper(
+          `get-stencil-pixel-data?hash=${hash}`
+        );
+        return response.data;
+      }
+      return [];
+    };
+
     const getNftPixelData = async (tokenId) => {
       if (tokenId !== null) {
         const response = await fetchWrapper(
@@ -1149,6 +1176,13 @@ function App() {
         // Handle NFT overlay case
         if (overlayTemplate.isNft && overlayTemplate.tokenId !== undefined) {
           const data = await getNftPixelData(overlayTemplate.tokenId);
+          setTemplatePixels(data);
+          return;
+        }
+
+        // Handle stencil overlay case
+        if (overlayTemplate.isStencil && overlayTemplate.hash) {
+          const data = await getStencilPixelData(overlayTemplate.hash);
           setTemplatePixels(data);
           return;
         }
@@ -1419,7 +1453,7 @@ function App() {
                 isMobile={isMobile}
                 overlayTemplate={overlayTemplate}
                 templatePixels={templatePixels}
-                width={canvasConfig.canvas.width}
+                width={width}
                 canvasRef={canvasRef}
                 addExtraPixel={addExtraPixel}
                 addExtraPixels={addExtraPixels}
