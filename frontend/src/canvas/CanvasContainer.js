@@ -100,15 +100,16 @@ const CanvasContainer = (props) => {
     const newWidth = props.width * newScale;
     const newHeight = props.height * newScale;
 
-    // Calculate position adjustments to maintain grid alignment
-    const oldCursorXRelative = cursorX / rect.width;
-    const oldCursorYRelative = cursorY / rect.height;
-    const newCursorX = oldCursorXRelative * newWidth;
-    const newCursorY = oldCursorYRelative * newHeight;
+    // Calculate position adjustments to maintain cursor position
+    const cursorXRelative = (cursorX - canvasX) / (props.width * canvasScale);
+    const cursorYRelative = (cursorY - canvasY) / (props.height * canvasScale);
+    
+    const newCursorX = cursorXRelative * newWidth;
+    const newCursorY = cursorYRelative * newHeight;
 
-    // Round positions to prevent subpixel gaps
-    const newPosX = Math.round(canvasX - (newCursorX - cursorX));
-    const newPosY = Math.round(canvasY - (newCursorY - cursorY));
+    // Calculate new positions
+    const newPosX = Math.round(cursorX - newCursorX);
+    const newPosY = Math.round(cursorY - newCursorY);
 
     setCanvasScale(newScale);
     setCanvasX(newPosX);
