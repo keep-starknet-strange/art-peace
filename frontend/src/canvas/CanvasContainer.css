@@ -1,7 +1,8 @@
 .CanvasContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min-content, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 1rem;
   padding: 2rem;
   width: 100%;
   height: 100%;
@@ -18,6 +19,18 @@
   position: relative;
   width: fit-content;
   margin: 0 auto;
+}
+
+.CanvasContainer__anchor.center {
+  grid-column: 2 / span 2;
+  grid-row: 2 / span 2;
+  transform-origin: center;
+}
+
+.CanvasContainer__anchor.surrounding {
+  transform-origin: center;
+  /* Smaller scale for surrounding canvases */
+  transform: scale(0.7);
 }
 
 .Canvas__selection {
