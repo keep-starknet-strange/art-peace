@@ -29,7 +29,6 @@ const CanvasContainer = (props) => {
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
   const [canvasScale, setCanvasScale] = useState(minScale);
-  const [titleScale, setTitleScale] = useState(1);
   const [touchInitialDistance, setInitialTouchDistance] = useState(0);
   const [touchScale, setTouchScale] = useState(0);
   const canvasContainerRef = useRef(null);
@@ -114,9 +113,6 @@ const CanvasContainer = (props) => {
     setCanvasScale(newScale);
     setCanvasX(newPosX);
     setCanvasY(newPosY);
-
-    const titleScaler = props.width / 512;
-    setTitleScale(newScale * titleScaler);
   };
 
   const handleTouchStart = (e) => {
@@ -159,6 +155,10 @@ const CanvasContainer = (props) => {
       let newScale = (distance / touchInitialDistance) * touchScale;
       newScale = Math.max(minScale, Math.min(newScale, maxScale));
 
+      // Calculate cursor positions
+      const newCursorX = cursorX * (newScale / canvasScale);
+      const newCursorY = cursorY * (newScale / canvasScale);
+
       // Round positions to prevent subpixel gaps
       const newPosX = Math.round(canvasX - (newCursorX - cursorX));
       const newPosY = Math.round(canvasY - (newCursorY - cursorY));
@@ -166,10 +166,6 @@ const CanvasContainer = (props) => {
       setCanvasScale(newScale);
       setCanvasX(newPosX);
       setCanvasY(newPosY);
-
-      const titleScaler = props.width / 512;
-      setTitleScale(newScale * titleScaler);
-      // TODO: Make scroll acceleration based
     }
   };
 
@@ -441,106 +437,6 @@ const CanvasContainer = (props) => {
     props.stencilCreationMode,
     props.width,
     props.height
-  ]);
-
-  const getSelectedColorInverse = () => {
-    if (props.selectedPositionX === null || props.selectedPositionY === null) {
-      return null;
-    }
-
-    if (props.selectedColorId === -1) {
-      const existingPixel = props.extraPixelsData.find(
-        (pixel) =>
-          pixel.x == props.selectedPositionX &&
-          pixel.y == props.selectedPositionY
-      );
-
-      if (existingPixel) {
-        let color = props.colors[existingPixel.colorId];
-        return (
-          '#' +
-          (255 - parseInt(color.substring(0, 2), 16))
-            .toString(16)
-            .padStart(2, '0') +
-          (255 - parseInt(color.substring(2, 4), 16))
-            .toString(16)
-            .padStart(2, '0') +
-          (255 - parseInt(color.substring(4, 6), 16))
-            .toString(16)
-            .padStart(2, '0')
-        );
-      }
-
-      let color = props.canvasRef.current
-        .getContext('2d')
-        .getImageData(
-          props.selectedPositionX,
-          props.selectedPositionY,
-          1,
-          1
-        ).data;
-      return (
-        '#' +
-        (255 - color[0]).toString(16).padStart(2, '0') +
-        (255 - color[1]).toString(16).padStart(2, '0') +
-        (255 - color[2]).toString(16).padStart(2, '0') +
-        color[3].toString(16).padStart(2, '0')
-      );
-    }
-
-    if (props.isExtraDeleteMode) {
-      const existingPixel = props.extraPixelsData.find(
-        (pixel) =>
-          pixel.x == props.selectedPositionX &&
-          pixel.y == props.selectedPositionY
-      );
-
-      if (existingPixel) {
-        let color = props.colors[existingPixel.colorId];
-        return (
-          '#' +
-          (255 - parseInt(color.substring(0, 2), 16))
-            .toString(16)
-            .padStart(2, '0') +
-          (255 - parseInt(color.substring(2, 4), 16))
-            .toString(16)
-            .padStart(2, '0') +
-          (255 - parseInt(color.substring(4, 6), 16))
-            .toString(16)
-            .padStart(2, '0')
-        );
-      }
-    }
-
-    return '#' + props.colors[props.selectedColorId] + 'FF';
-  };
-
-  const [selectedBoxShadow, setSelectedBoxShadow] = useState(null);
-  const [selectedBackgroundColor, setSelectedBackgroundColor] = useState(null);
-  useEffect(() => {
-    const base1 = 0.12;
-    const minShadowScale = 0.8;
-    const startVal = Math.max(minShadowScale, base1 * canvasScale);
-    const endVal = startVal * 0.8;
-    setSelectedBoxShadow(
-      `0 0 ${startVal}px ${endVal}px ${getSelectedColorInverse()} inset`
-    );
-
-    if (props.selectedColorId === -1) {
-      setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
-    } else {
-      if (props.isExtraDeleteMode) {
-        setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
-      } else {
-        setSelectedBackgroundColor(`#${props.colors[props.selectedColorId]}FF`);
-      }
-    }
-  }, [
-    canvasScale,
-    props.selectedColorId,
-    props.selectedPositionX,
-    props.selectedPositionY,
-    props.isExtraDeleteMode
   ]);
 
   return (
