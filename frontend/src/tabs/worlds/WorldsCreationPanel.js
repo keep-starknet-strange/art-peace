@@ -194,6 +194,10 @@ const WorldsCreationPanel = (props) => {
 
     if (!checkInputs()) return;
 
+    const submitWidth = isCompetitionWorld ? getCompetitionWidth() : worldWidth;
+    const submitHeight = isCompetitionWorld
+      ? getCompetitionHeight()
+      : worldHeight;
     const submitTimer = isCompetitionWorld ? getCompetitionTimer() : timer;
     const submitStart = isCompetitionWorld ? getCompetitionStart() : start;
     const submitEnd = isCompetitionWorld ? getCompetitionEnd() : end;
@@ -202,8 +206,8 @@ const WorldsCreationPanel = (props) => {
       await createWorldCall(
         worldName,
         worldSlug,
-        worldWidth,
-        worldHeight,
+        submitWidth,
+        submitHeight,
         submitTimer,
         palette,
         submitStart,
@@ -220,12 +224,12 @@ const WorldsCreationPanel = (props) => {
         host: host,
         name: toHex(worldName),
         unique_name: toHex(worldSlug),
-        width: worldWidth.toString(),
-        height: worldHeight.toString(),
-        time_between_pixels: timer.toString(),
+        width: submitWidth.toString(),
+        height: submitHeight.toString(),
+        time_between_pixels: submitTimer.toString(),
         color_palette: palette.toString(),
-        start_time: Math.floor(start / 1000).toString(),
-        end_time: Math.floor(end / 1000).toString()
+        start_time: Math.floor(submitStart / 1000).toString(),
+        end_time: Math.floor(submitEnd / 1000).toString()
       })
     });
     if (response.result) {
@@ -256,41 +260,46 @@ const WorldsCreationPanel = (props) => {
   }, [worldName]);
 
   const [competitionConfig, setCompetitionConfig] = useState(null);
-  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
 
   // Fetch competition config when component mounts
   useEffect(() => {
-    const fetchCompetitionConfig = async () => {
+    const fetchRoundsConfig = async () => {
       try {
-        const response = await fetchWrapper('get-competition-config');
+        const response = await fetchWrapper('get-rounds-config');
         if (response.data) {
           setCompetitionConfig(response.data.round3);
         }
       } catch (error) {
         console.error('Failed to fetch competition config:', error);
-      } finally {
-        setIsLoadingConfig(false);
       }
     };
 
-    fetchCompetitionConfig();
+    fetchRoundsConfig();
   }, []);
+
+  const getCompetitionWidth = () => {
+    return competitionConfig?.width || 128; // Fallback to default
+  };
+
+  const getCompetitionHeight = () => {
+    return competitionConfig?.height || 128; // Fallback to default
+  };
 
   // Use competition values from config when available
   const getCompetitionTimer = () => {
-    return competitionConfig?.timer || 5; // Fallback to default
+    return competitionConfig?.timer || 7; // Fallback to default
   };
 
   const getCompetitionStart = () => {
     return competitionConfig?.startTime
       ? new Date(competitionConfig.startTime).getTime()
-      : new Date('2023-12-06').getTime(); // Fallback
+      : new Date('2024-12-07T00:00:00Z').getTime();
   };
 
   const getCompetitionEnd = () => {
     return competitionConfig?.endTime
       ? new Date(competitionConfig.endTime).getTime()
-      : new Date('2024-01-01').getTime(); // Fallback
+      : new Date('2025-01-02T00:00:00Z').getTime();
   };
 
   return (
@@ -321,77 +330,93 @@ const WorldsCreationPanel = (props) => {
           </div>
           {nameError && <p className='error-message'>{nameError}</p>}
         </div>
-        <div className='WorldsCreationPanel__form__item'>
-          <p className='Text__small'>Size</p>
-          <div className='WorldsCreationPanel__main__form'>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
-            >
+        {isCompetitionWorld ? (
+          <div className='WorldsCreationPanel__form__item'>
+            <p className='Text__small'>Size</p>
+            <p className='Text__small WorldsCreationPanel__competition__value'>
+              {getCompetitionWidth()} x {getCompetitionHeight()}
+            </p>
+          </div>
+        ) : (
+          <div className='WorldsCreationPanel__form__item'>
+            <p className='Text__small'>Size</p>
+            <div className='WorldsCreationPanel__main__form'>
               <div
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexDirection: 'row',
                   justifyContent: 'center',
                   alignItems: 'center'
                 }}
               >
-                <input
-                  className='Text__small Input__primary WorldsCreationPanel__form__input'
-                  type='number'
-                  placeholder='Width...'
-                  value={worldWidth}
-                  onChange={(e) => {
-                    if (e.target.value < minWorldSize) {
-                      setWorldWidth(minWorldSize);
-                    } else if (e.target.value > maxWorldSize) {
-                      setWorldWidth(maxWorldSize);
-                    } else {
-                      setWorldWidth(e.target.value);
-                    }
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
                   }}
-                />
-                <p className='Text__xsmall' style={{ margin: 0, padding: 0 }}>
-                  Width
-                </p>
-              </div>
-              <p className='Text__small'>&nbsp;x&nbsp;</p>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}
-              >
-                <input
-                  className='Text__small Input__primary WorldsCreationPanel__form__input'
-                  type='number'
-                  placeholder='Height...'
-                  value={worldHeight}
-                  onChange={(e) => {
-                    if (e.target.value < minWorldSize) {
-                      setWorldHeight(minWorldSize);
-                    } else if (e.target.value > maxWorldSize) {
-                      setWorldHeight(maxWorldSize);
-                    } else {
-                      setWorldHeight(e.target.value);
-                    }
+                >
+                  <input
+                    className='Text__small Input__primary WorldsCreationPanel__form__input'
+                    type='number'
+                    placeholder='Width...'
+                    value={worldWidth}
+                    onChange={(e) => {
+                      if (e.target.value < minWorldSize) {
+                        setWorldWidth(minWorldSize);
+                      } else if (e.target.value > maxWorldSize) {
+                        setWorldWidth(maxWorldSize);
+                      } else {
+                        setWorldWidth(e.target.value);
+                      }
+                    }}
+                  />
+                  <p className='Text__xsmall' style={{ margin: 0, padding: 0 }}>
+                    Width
+                  </p>
+                </div>
+                <p className='Text__small'>&nbsp;x&nbsp;</p>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
                   }}
-                />
-                <p className='Text__xsmall' style={{ margin: 0, padding: 0 }}>
-                  Height
-                </p>
+                >
+                  <input
+                    className='Text__small Input__primary WorldsCreationPanel__form__input'
+                    type='number'
+                    placeholder='Height...'
+                    value={worldHeight}
+                    onChange={(e) => {
+                      if (e.target.value < minWorldSize) {
+                        setWorldHeight(minWorldSize);
+                      } else if (e.target.value > maxWorldSize) {
+                        setWorldHeight(maxWorldSize);
+                      } else {
+                        setWorldHeight(e.target.value);
+                      }
+                    }}
+                  />
+                  <p className='Text__xsmall' style={{ margin: 0, padding: 0 }}>
+                    Height
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
         <div className='WorldsCreationPanel__form__item'>
-          {isCompetitionWorld && (
+          {isCompetitionWorld ? (
+            <>
+              <p className='Text__small'>Timer</p>
+              <p className='Text__small WorldsCreationPanel__competition__value'>
+                {getCompetitionTimer()} seconds between pixels
+              </p>
+            </>
+          ) : (
             <>
               <p className='Text__small'>Timer</p>
               <input
@@ -496,21 +521,14 @@ const WorldsCreationPanel = (props) => {
             </div>
           </div>
         </div>
-        {isCompetitionWorld && (
-          <p className='Text__small WorldsCreationPanel__competition__value'>
-            {isLoadingConfig
-              ? 'Loading...'
-              : `${getCompetitionTimer()} seconds between pixels`}
-          </p>
-        )}
         <div className='WorldsCreationPanel__form__item'>
           {isCompetitionWorld ? (
-            <p className='Text__small WorldsCreationPanel__competition__value'>
-              Start -{' '}
-              {isLoadingConfig
-                ? ' Loading...'
-                : new Date(getCompetitionStart()).toLocaleDateString()}
-            </p>
+            <>
+              <p className='Text__small'>Start</p>
+              <p className='Text__small WorldsCreationPanel__competition__value'>
+                {new Date(getCompetitionStart()).toLocaleDateString()}
+              </p>
+            </>
           ) : (
             <>
               <p className='Text__small'>Start</p>
@@ -531,12 +549,12 @@ const WorldsCreationPanel = (props) => {
         </div>
         <div className='WorldsCreationPanel__form__item'>
           {isCompetitionWorld ? (
-            <div className='Text__small WorldsCreationPanel__competition__value'>
-              End -{' '}
-              {isLoadingConfig
-                ? 'Loading...'
-                : new Date(getCompetitionEnd()).toLocaleDateString()}
-            </div>
+            <>
+              <p className='Text__small'>End</p>
+              <p className='Text__small WorldsCreationPanel__competition__value'>
+                {new Date(getCompetitionEnd()).toLocaleDateString()}
+              </p>
+            </>
           ) : (
             <>
               <p className='Text__small'>End</p>
