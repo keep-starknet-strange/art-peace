@@ -566,7 +566,8 @@ const CanvasContainer = (props) => {
             style={{
               position: 'relative',
               width: 518 * canvasScale,
-              height: 396 * canvasScale
+              height: 396 * canvasScale,
+              overflow: 'hidden'
             }}
           >
             <Canvas
