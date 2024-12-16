@@ -552,60 +552,50 @@ const CanvasContainer = (props) => {
       onPointerMove={handlePointerMove}
       onPointerDown={handlePointerDown}
     >
-      <div
-        className='CanvasContainer__anchor'
-        style={{
-          top: -props.height / 2,
-          left: -props.width / 2,
-          transform: `translate(${canvasX}px, ${canvasY}px)`
-        }}
-      >
-        {props.openedWorldId && props.activeWorld && (
-          <h3
-            className='CanvasContainer__title'
-            style={{
-              top: `calc(-0.75rem * ${titleScale})`,
-              left: '50%',
-              transform: `translate(-50%, -50%) scale(${titleScale})`
-            }}
-          >
-            {props.activeWorld.name}
-          </h3>
-        )}
-        {props.pixelSelectedMode && (
-          <div
-            className='Canvas__selection'
-            style={{
-              top: props.selectedPositionY * canvasScale,
-              left: props.selectedPositionX * canvasScale
-            }}
-          >
-            <div
-              className='Canvas__selection__pixel'
-              style={{
-                boxShadow: selectedBoxShadow,
-                backgroundColor: selectedBackgroundColor,
-                width: canvasScale,
-                height: canvasScale
-              }}
-            ></div>
-          </div>
-        )}
-        <Canvas
-          openedWorldId={props.openedWorldId}
-          canvasRef={props.canvasRef}
-          width={props.width}
-          height={props.height}
+      {Array.from({ length: 20 }).map((_, index) => (
+        <div
+          className='CanvasContainer__anchor'
           style={{
-            width: props.width * canvasScale,
-            height: props.height * canvasScale
+            transform: `translate(${canvasX}px, ${canvasY}px)`,
+            width: props.width * canvasScale + 'px',
+            height: props.height * canvasScale + 'px'
           }}
-          colors={props.colors}
-          pixelClicked={pixelClicked}
-        />
-        {props.availablePixels > 0 && (
-          <ExtraPixelsCanvas
-            extraPixelsCanvasRef={props.extraPixelsCanvasRef}
+          key={index}
+        >
+          {props.openedWorldId && props.activeWorld && (
+            <h3
+              className='CanvasContainer__title'
+              style={{
+                top: `calc(-0.75rem * ${titleScale})`,
+                left: '50%',
+                transform: `translate(-50%, -50%) scale(${titleScale})`
+              }}
+            >
+              {props.activeWorld.name}
+            </h3>
+          )}
+          {props.pixelSelectedMode && (
+            <div
+              className='Canvas__selection'
+              style={{
+                top: props.selectedPositionY * canvasScale,
+                left: props.selectedPositionX * canvasScale
+              }}
+            >
+              <div
+                className='Canvas__selection__pixel'
+                style={{
+                  boxShadow: selectedBoxShadow,
+                  backgroundColor: selectedBackgroundColor,
+                  width: canvasScale,
+                  height: canvasScale
+                }}
+              ></div>
+            </div>
+          )}
+          <Canvas
+            openedWorldId={props.openedWorldId}
+            canvasRef={props.canvasRef}
             width={props.width}
             height={props.height}
             style={{
@@ -615,69 +605,82 @@ const CanvasContainer = (props) => {
             colors={props.colors}
             pixelClicked={pixelClicked}
           />
-        )}
-        {props.templateOverlayMode && props.overlayTemplate && (
-          <TemplateOverlay
-            canvasRef={props.canvasRef}
-            width={props.width}
-            height={props.height}
-            canvasScale={canvasScale}
-            overlayTemplate={props.overlayTemplate}
-            setTemplateOverlayMode={props.setTemplateOverlayMode}
-            setOverlayTemplate={props.setOverlayTemplate}
-            colors={props.colors}
-          />
-        )}
-        {props.templateCreationMode && (
-          <TemplateCreationOverlay
-            canvasRef={props.canvasRef}
-            canvasScale={canvasScale}
-            templateImage={props.templateImage}
-            templateColorIds={props.templateColorIds}
-            templateCreationMode={props.templateCreationMode}
-            setTemplateCreationMode={props.setTemplateCreationMode}
-            templateCreationSelected={props.templateCreationSelected}
-            setTemplateCreationSelected={props.setTemplateCreationSelected}
-            width={props.width}
-            height={props.height}
-            templatePosition={props.templatePosition}
-            setTemplatePosition={props.setTemplatePosition}
-          />
-        )}
-        {props.stencilCreationMode && (
-          <StencilCreationOverlay
-            canvasRef={props.canvasRef}
-            canvasScale={canvasScale}
-            stencilImage={props.stencilImage}
-            stencilColorIds={props.stencilColorIds}
-            stencilCreationMode={props.stencilCreationMode}
-            setStencilCreationMode={props.setStencilCreationMode}
-            stencilCreationSelected={props.stencilCreationSelected}
-            setStencilCreationSelected={props.setStencilCreationSelected}
-            width={props.width}
-            height={props.height}
-            stencilPosition={props.stencilPosition}
-            setStencilPosition={props.setStencilPosition}
-          />
-        )}
-        {props.nftMintingMode && (
-          <NFTSelector
-            canvasRef={props.canvasRef}
-            canvasScale={canvasScale}
-            width={props.width}
-            height={props.height}
-            nftMintingMode={props.nftMintingMode}
-            nftSelectionStarted={props.nftSelectionStarted}
-            setNftSelectionStarted={props.setNftSelectionStarted}
-            nftSelected={props.nftSelected}
-            setNftSelected={props.setNftSelected}
-            setNftMintingMode={props.setNftMintingMode}
-            setNftPosition={props.setNftPosition}
-            setNftWidth={props.setNftWidth}
-            setNftHeight={props.setNftHeight}
-          />
-        )}
-      </div>
+          {props.availablePixels > 0 && (
+            <ExtraPixelsCanvas
+              extraPixelsCanvasRef={props.extraPixelsCanvasRef}
+              width={props.width}
+              height={props.height}
+              style={{
+                width: props.width * canvasScale,
+                height: props.height * canvasScale
+              }}
+              colors={props.colors}
+              pixelClicked={pixelClicked}
+            />
+          )}
+          {props.templateOverlayMode && props.overlayTemplate && (
+            <TemplateOverlay
+              canvasRef={props.canvasRef}
+              width={props.width}
+              height={props.height}
+              canvasScale={canvasScale}
+              overlayTemplate={props.overlayTemplate}
+              setTemplateOverlayMode={props.setTemplateOverlayMode}
+              setOverlayTemplate={props.setOverlayTemplate}
+              colors={props.colors}
+            />
+          )}
+          {props.templateCreationMode && (
+            <TemplateCreationOverlay
+              canvasRef={props.canvasRef}
+              canvasScale={canvasScale}
+              templateImage={props.templateImage}
+              templateColorIds={props.templateColorIds}
+              templateCreationMode={props.templateCreationMode}
+              setTemplateCreationMode={props.setTemplateCreationMode}
+              templateCreationSelected={props.templateCreationSelected}
+              setTemplateCreationSelected={props.setTemplateCreationSelected}
+              width={props.width}
+              height={props.height}
+              templatePosition={props.templatePosition}
+              setTemplatePosition={props.setTemplatePosition}
+            />
+          )}
+          {props.stencilCreationMode && (
+            <StencilCreationOverlay
+              canvasRef={props.canvasRef}
+              canvasScale={canvasScale}
+              stencilImage={props.stencilImage}
+              stencilColorIds={props.stencilColorIds}
+              stencilCreationMode={props.stencilCreationMode}
+              setStencilCreationMode={props.setStencilCreationMode}
+              stencilCreationSelected={props.stencilCreationSelected}
+              setStencilCreationSelected={props.setStencilCreationSelected}
+              width={props.width}
+              height={props.height}
+              stencilPosition={props.stencilPosition}
+              setStencilPosition={props.setStencilPosition}
+            />
+          )}
+          {props.nftMintingMode && (
+            <NFTSelector
+              canvasRef={props.canvasRef}
+              canvasScale={canvasScale}
+              width={props.width}
+              height={props.height}
+              nftMintingMode={props.nftMintingMode}
+              nftSelectionStarted={props.nftSelectionStarted}
+              setNftSelectionStarted={props.setNftSelectionStarted}
+              nftSelected={props.nftSelected}
+              setNftSelected={props.setNftSelected}
+              setNftMintingMode={props.setNftMintingMode}
+              setNftPosition={props.setNftPosition}
+              setNftWidth={props.setNftWidth}
+              setNftHeight={props.setNftHeight}
+            />
+          )}
+        </div>
+      ))}
     </div>
   );
 };
