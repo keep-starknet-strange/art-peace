@@ -38,7 +38,7 @@ import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
   const worldsMode = true;
-  const [openedWorldId, setOpenedWorldId] = useState(null);
+  const [openedWorldId, setOpenedWorldId] = useState(0);
   const [activeWorld, setActiveWorld] = useState(null);
 
   // Page management
@@ -51,14 +51,17 @@ function App() {
         );
         if (response.data === undefined || response.data === null) {
           setActiveWorld(null);
-          setOpenedWorldId(null);
+          setOpenedWorldId(0);
           return;
         }
 
         setOpenedWorldId(response.data);
       } else {
-        setActiveWorld(null);
-        setOpenedWorldId(null);
+        const response = await fetchWrapper('get-world?worldId=0');
+        if (response.data) {
+          setActiveWorld(response.data);
+        }
+        setOpenedWorldId(0);
       }
     };
     getWorldId();
