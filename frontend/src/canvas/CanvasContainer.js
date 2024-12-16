@@ -19,8 +19,10 @@ const CanvasContainer = (props) => {
   const surroundingCanvasHeight = 192;
 
   // Calculate minimum scale needed to fill container
-  const widthScale = containerWidth / (centerCanvasWidth + surroundingCanvasWidth * 2);
-  const heightScale = containerHeight / (centerCanvasHeight + surroundingCanvasHeight * 2);
+  const widthScale =
+    containerWidth / (centerCanvasWidth + surroundingCanvasWidth * 2);
+  const heightScale =
+    containerHeight / (centerCanvasHeight + surroundingCanvasHeight * 2);
   const minScale = Math.max(widthScale, heightScale, 0.6); // Keep original minimum if larger
   const maxScale = 40;
 
@@ -82,7 +84,7 @@ const CanvasContainer = (props) => {
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
-    
+
     // Clamp cursor position
     cursorX = Math.max(0, Math.min(cursorX, rect.width));
     cursorY = Math.max(0, Math.min(cursorY, rect.height));
@@ -90,20 +92,20 @@ const CanvasContainer = (props) => {
     let direction = e.deltaY > 0 ? 1 : -1;
     let scaler = Math.log2(1 + Math.abs(e.deltaY) * 2) * direction;
     let newScale = canvasScale * (1 + scaler * -0.01);
-    
+
     // Enforce scale limits
     newScale = Math.max(minScale, Math.min(newScale, maxScale));
-    
+
     // Calculate new dimensions
     const newWidth = props.width * newScale;
     const newHeight = props.height * newScale;
-    
+
     // Calculate position adjustments to maintain grid alignment
     const oldCursorXRelative = cursorX / rect.width;
     const oldCursorYRelative = cursorY / rect.height;
     const newCursorX = oldCursorXRelative * newWidth;
     const newCursorY = oldCursorYRelative * newHeight;
-    
+
     // Round positions to prevent subpixel gaps
     const newPosX = Math.round(canvasX - (newCursorX - cursorX));
     const newPosY = Math.round(canvasY - (newCursorY - cursorY));
@@ -155,7 +157,7 @@ const CanvasContainer = (props) => {
 
       let newScale = (distance / touchInitialDistance) * touchScale;
       newScale = Math.max(minScale, Math.min(newScale, maxScale));
-      
+
       // Round positions to prevent subpixel gaps
       const newPosX = Math.round(canvasX - (newCursorX - cursorX));
       const newPosY = Math.round(canvasY - (newCursorY - cursorY));
@@ -547,7 +549,7 @@ const CanvasContainer = (props) => {
       onPointerMove={handlePointerMove}
       onPointerDown={handlePointerDown}
     >
-      <div className="CanvasContainer__inner">
+      <div className='CanvasContainer__inner'>
         {/* Center Canvas */}
         <div
           className='CanvasContainer__anchor center'
@@ -616,6 +618,85 @@ const CanvasContainer = (props) => {
             </div>
           );
         })}
+
+        {props.availablePixels > 0 && (
+          <ExtraPixelsCanvas
+            extraPixelsCanvasRef={props.extraPixelsCanvasRef}
+            width={props.width}
+            height={props.height}
+            style={{
+              width: props.width * canvasScale,
+              height: props.height * canvasScale
+            }}
+            colors={props.colors}
+            pixelClicked={pixelClicked}
+          />
+        )}
+
+        {props.templateOverlayMode && props.overlayTemplate && (
+          <TemplateOverlay
+            canvasRef={props.canvasRef}
+            width={props.width}
+            height={props.height}
+            canvasScale={canvasScale}
+            overlayTemplate={props.overlayTemplate}
+            setTemplateOverlayMode={props.setTemplateOverlayMode}
+            setOverlayTemplate={props.setOverlayTemplate}
+            colors={props.colors}
+          />
+        )}
+
+        {props.templateCreationMode && (
+          <TemplateCreationOverlay
+            canvasRef={props.canvasRef}
+            canvasScale={canvasScale}
+            templateImage={props.templateImage}
+            templateColorIds={props.templateColorIds}
+            templateCreationMode={props.templateCreationMode}
+            setTemplateCreationMode={props.setTemplateCreationMode}
+            templateCreationSelected={props.templateCreationSelected}
+            setTemplateCreationSelected={props.setTemplateCreationSelected}
+            width={props.width}
+            height={props.height}
+            templatePosition={props.templatePosition}
+            setTemplatePosition={props.setTemplatePosition}
+          />
+        )}
+
+        {props.stencilCreationMode && (
+          <StencilCreationOverlay
+            canvasRef={props.canvasRef}
+            canvasScale={canvasScale}
+            stencilImage={props.stencilImage}
+            stencilColorIds={props.stencilColorIds}
+            stencilCreationMode={props.stencilCreationMode}
+            setStencilCreationMode={props.setStencilCreationMode}
+            stencilCreationSelected={props.stencilCreationSelected}
+            setStencilCreationSelected={props.setStencilCreationSelected}
+            width={props.width}
+            height={props.height}
+            stencilPosition={props.stencilPosition}
+            setStencilPosition={props.setStencilPosition}
+          />
+        )}
+
+        {props.nftMintingMode && (
+          <NFTSelector
+            canvasRef={props.canvasRef}
+            canvasScale={canvasScale}
+            width={props.width}
+            height={props.height}
+            nftMintingMode={props.nftMintingMode}
+            nftSelectionStarted={props.nftSelectionStarted}
+            setNftSelectionStarted={props.setNftSelectionStarted}
+            nftSelected={props.nftSelected}
+            setNftSelected={props.setNftSelected}
+            setNftMintingMode={props.setNftMintingMode}
+            setNftPosition={props.setNftPosition}
+            setNftWidth={props.setNftWidth}
+            setNftHeight={props.setNftHeight}
+          />
+        )}
       </div>
     </div>
   );
