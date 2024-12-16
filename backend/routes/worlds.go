@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -17,6 +16,7 @@ import (
 // TODO: check-worlds-name-unique?
 func InitWorldsRoutes() {
 	http.HandleFunc("/get-world-canvas", getWorldCanvas)
+	http.HandleFunc("/get-world-id", getWorldId)
 	http.HandleFunc("/get-world", getWorld)
 	http.HandleFunc("/get-worlds", getWorlds)
 	http.HandleFunc("/get-new-worlds", getNewWorlds)
@@ -29,6 +29,7 @@ func InitWorldsRoutes() {
 	http.HandleFunc("/get-worlds-colors", getWorldsColors)
 	http.HandleFunc("/get-worlds-pixel-count", getWorldsPixelCount)
 	http.HandleFunc("/get-worlds-pixel-info", getWorldsPixelInfo)
+	http.HandleFunc("/check-world-name", checkWorldName)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/create-canvas-devnet", createCanvasDevnet)
 		http.HandleFunc("/favorite-world-devnet", favoriteWorldDevnet)
@@ -66,6 +67,7 @@ type WorldData struct {
 	WorldId           int        `json:"worldId"`
 	Host              string     `json:"host"`
 	Name              string     `json:"name"`
+	UniqueName        string     `json:"uniqueName"`
 	Width             int        `json:"width"`
 	Height            int        `json:"height"`
 	TimeBetweenPixels int        `json:"timeBetweenPixels"`
@@ -73,6 +75,20 @@ type WorldData struct {
 	EndTime           *time.Time `json:"endTime"`
 	Favorites         int        `json:"favorites"`
 	Favorited         bool       `json:"favorited"`
+}
+
+func getWorldId(w http.ResponseWriter, r *http.Request) {
+	worldName := r.URL.Query().Get("worldName")
+	if worldName == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldName")
+		return
+	}
+	worldId, err := core.PostgresQueryOne[int]("SELECT world_id FROM worlds WHERE unique_name = $1", worldName)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve World")
+		return
+	}
+	routeutils.WriteDataJson(w, strconv.Itoa(*worldId))
 }
 
 func getWorld(w http.ResponseWriter, r *http.Request) {
@@ -173,7 +189,6 @@ func getNewWorlds(w http.ResponseWriter, r *http.Request) {
         LIMIT $2 OFFSET $3`
 	worlds, err := core.PostgresQueryJson[WorldData](query, address, pageLength, offset)
 	if err != nil {
-		fmt.Println(err)
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
 		return
 	}
@@ -459,9 +474,21 @@ func createCanvasDevnet(w http.ResponseWriter, r *http.Request) {
 
 	host := (*jsonBody)["host"]
 	name := (*jsonBody)["name"]
+	uniqueName := (*jsonBody)["unique_name"]
 
-	if host == "" || name == "" {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing host or name")
+	if host == "" || name == "" || uniqueName == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing host or name or uniqueName")
+		return
+	}
+
+	// Check if world name already exists
+	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE unique_name = $1)", uniqueName)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "World unique name check failed")
+		return
+	}
+	if *exists {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "World name already exists")
 		return
 	}
 
@@ -512,7 +539,7 @@ func createCanvasDevnet(w http.ResponseWriter, r *http.Request) {
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.CreateCanvasDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 
-	cmd := exec.Command(shellCmd, contract, "create_canvas", host, name, strconv.Itoa(width), strconv.Itoa(height), strconv.Itoa(timer), strconv.Itoa(len(palette)), paletteInput, strconv.Itoa(startTime), strconv.Itoa(endTime))
+	cmd := exec.Command(shellCmd, contract, "create_canvas", host, name, uniqueName, strconv.Itoa(width), strconv.Itoa(height), strconv.Itoa(timer), strconv.Itoa(len(palette)), paletteInput, strconv.Itoa(startTime), strconv.Itoa(endTime))
 	_, err = cmd.Output()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create canvas")
@@ -636,4 +663,30 @@ func placeWorldPixelDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Pixel placed world")
+}
+
+func checkWorldName(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("uniqueName")
+	if name == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing uniqueName parameter")
+		return
+	}
+
+	// Use the helper function
+	exists, err := doesWorldNameExist(name)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to check world name")
+		return
+	}
+
+	routeutils.WriteDataJson(w, strconv.FormatBool(exists))
+}
+
+// Add a helper function to check if a world name exists
+func doesWorldNameExist(name string) (bool, error) {
+	exists, err := core.PostgresQueryOne[bool]("SELECT EXISTS(SELECT 1 FROM worlds WHERE unique_name = $1)", name)
+	if err != nil {
+		return false, err
+	}
+	return *exists, nil
 }

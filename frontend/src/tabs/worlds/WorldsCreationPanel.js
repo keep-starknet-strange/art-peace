@@ -136,12 +136,65 @@ const WorldsCreationPanel = (props) => {
   const [end, setEnd] = useState(
     new Date().getTime() + 1000 * 60 * 60 * 24 * 7
   ); // 1 week
+  const [nameError, setNameError] = useState('');
+
+  // Name validation function
+  const validateWorldName = (name) => {
+    if (name === '') {
+      setNameError('');
+      return true;
+    }
+    // Check if name contains only allowed characters
+    const nameRegex = /^[a-zA-Z0-9\s\-_]+$/;
+    if (!nameRegex.test(name)) {
+      setNameError(
+        'Name can only contain letters, numbers, spaces, hyphens, and underscores'
+      );
+      return false;
+    }
+
+    if (name.length === 0 || name.length > 31) {
+      setNameError('Name must be between 1 and 31 characters');
+      return false;
+    }
+    setNameError('');
+    return true;
+  };
+
+  // Check if name exists
+  const checkWorldSlugExists = async (name) => {
+    const response = await fetchWrapper(`check-world-name?uniqueName=${name}`);
+    if (response.data === true) {
+      setNameError('This world name already exists');
+      return true;
+    }
+    return false;
+  };
+
+  // Modified name change handler
+  const handleNameChange = (e) => {
+    const newName = e.target.value;
+    setWorldName(newName);
+    validateWorldName(newName);
+  };
+
   const submit = async () => {
-    if (worldName.length === 0 || worldName.length > 31) return;
+    if (!validateWorldName(worldName)) {
+      return;
+    }
+    let worldSlug = worldName.toLowerCase().replace(/ /g, '-');
+
+    // Check if name exists before submitting
+    const nameExists = await checkWorldSlugExists(worldSlug);
+    if (nameExists) {
+      return;
+    }
+
     if (!checkInputs()) return;
     if (!devnetMode) {
       await createWorldCall(
         worldName,
+        worldSlug,
         worldWidth,
         worldHeight,
         timer,
@@ -159,6 +212,7 @@ const WorldsCreationPanel = (props) => {
       body: JSON.stringify({
         host: host,
         name: toHex(worldName),
+        unique_name: toHex(worldSlug),
         width: worldWidth.toString(),
         height: worldHeight.toString(),
         time_between_pixels: timer.toString(),
@@ -209,15 +263,18 @@ const WorldsCreationPanel = (props) => {
         <p className='Text__small'>Fill out the form to create your world!</p>
       </div>
       <div className='WorldsCreationPanel__form'>
-        <div className='WorldsCreationPanel__form__item'>
-          <p className='Text__small'>Name</p>
-          <input
-            className='Text__small Input__primary WorldsCreationPanel__form__input'
-            type='text'
-            placeholder='World name...'
-            value={worldName}
-            onChange={(e) => setWorldName(e.target.value)}
-          />
+        <div className='w-full'>
+          <div className='WorldsCreationPanel__form__item'>
+            <p className='Text__small'>Name</p>
+            <input
+              className='Text__small Input__primary WorldsCreationPanel__form__input'
+              type='text'
+              placeholder='World name...'
+              value={worldName}
+              onChange={handleNameChange}
+            />
+          </div>
+          {nameError && <p className='error-message'>{nameError}</p>}
         </div>
         <div className='WorldsCreationPanel__form__item'>
           <p className='Text__small'>Size</p>

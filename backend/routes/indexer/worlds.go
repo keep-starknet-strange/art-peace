@@ -16,32 +16,33 @@ import (
 
 func processCanvasCreatedEvent(event IndexerEvent) {
 	canvasIdHex := event.Event.Keys[1]
-	host := event.Event.Data[0][2:]    // Remove 0x prefix
-	nameHex := event.Event.Data[1][2:] // Remove 0x prefix
-	widthHex := event.Event.Data[2]
-	heightHex := event.Event.Data[3]
-	timeBetweenPixelsHex := event.Event.Data[4]
-	colorPaletteLenHex := event.Event.Data[5]
+	host := event.Event.Data[0][2:]          // Remove 0x prefix
+	nameHex := event.Event.Data[1][2:]       // Remove 0x prefix
+	uniqueNameHex := event.Event.Data[2][2:] // Remove 0x prefix
+	widthHex := event.Event.Data[3]
+	heightHex := event.Event.Data[4]
+	timeBetweenPixelsHex := event.Event.Data[5]
+	colorPaletteLenHex := event.Event.Data[6]
 
 	colorPaletteLen, err := strconv.ParseInt(colorPaletteLenHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse colorPaletteLenHex", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse colorPaletteLenHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 	// Skip colors since they are processed in another event
 
-	startTimeHex := event.Event.Data[6+colorPaletteLen]
-	endTimeHex := event.Event.Data[7+colorPaletteLen]
+	startTimeHex := event.Event.Data[7+colorPaletteLen]
+	endTimeHex := event.Event.Data[8+colorPaletteLen]
 
 	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse canvasIdHex", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse canvasIdHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 
 	decodedName, err := hex.DecodeString(nameHex)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to decode nameHex", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to decode nameHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 	trimmedName := []byte{}
@@ -55,40 +56,56 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 	}
 	name := string(trimmedName)
 
+	decodedUniqueName, err := hex.DecodeString(uniqueNameHex)
+	if err != nil {
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to decode uniqueNameHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		return
+	}
+	trimmedUniqueName := []byte{}
+	trimming = true
+	for _, b := range decodedUniqueName {
+		if b == 0 && trimming {
+			continue
+		}
+		trimming = false
+		trimmedUniqueName = append(trimmedUniqueName, b)
+	}
+	uniqueName := string(trimmedUniqueName)
+
 	width, err := strconv.ParseInt(widthHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse widthHex", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse widthHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 
 	height, err := strconv.ParseInt(heightHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse heightHex", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse heightHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 
 	timeBetweenPixels, err := strconv.ParseInt(timeBetweenPixelsHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse timeBetweenPixelsHex", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse timeBetweenPixelsHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 
 	startTime, err := strconv.ParseInt(startTimeHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse startTimeHex", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse startTimeHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 
 	endTime, err := strconv.ParseInt(endTimeHex, 0, 64)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse endTimeHex", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse endTimeHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 
 	// Insert into Worlds
-	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Worlds (world_id, host, name, width, height, time_between_pixels, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6, TO_TIMESTAMP($7), TO_TIMESTAMP($8))", canvasId, host, name, width, height, timeBetweenPixels, startTime, endTime)
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Worlds (world_id, host, name, unique_name, width, height, time_between_pixels, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6, $7, TO_TIMESTAMP($8), TO_TIMESTAMP($9))", canvasId, host, name, uniqueName, width, height, timeBetweenPixels, startTime, endTime)
 	if err != nil {
-		PrintIndexerError("processCanvasCreatedEvent", "Failed to insert into Worlds", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to insert into Worlds", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 		return
 	}
 
@@ -103,11 +120,11 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 		canvas := make([]byte, totalByteSize)
 		err := core.ArtPeaceBackend.Databases.Redis.Set(context.Background(), canvasRedisKey, canvas, 0).Err()
 		if err != nil {
-			PrintIndexerError("processCanvasCreatedEvent", "Failed to set canvas in redis", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+			PrintIndexerError("processCanvasCreatedEvent", "Failed to set canvas in redis", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 			return
 		}
 	} else {
-		PrintIndexerError("processCanvasCreatedEvent", "Canvas already exists in redis", canvasIdHex, host, nameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		PrintIndexerError("processCanvasCreatedEvent", "Canvas already exists in redis", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
 	}
 
 	// Create base directories if they don't exist
@@ -127,7 +144,7 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 	}
 
 	generatedWorldImage := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
-	baseColorHex := event.Event.Data[6]
+	baseColorHex := event.Event.Data[7]
 	baseColor := baseColorHex[len(baseColorHex)-6:] // Remove prefix
 	baseColorR, err := strconv.ParseInt(baseColor[0:2], 16, 64)
 	if err != nil {
