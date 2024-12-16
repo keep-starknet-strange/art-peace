@@ -462,6 +462,7 @@ func addTemplateData(w http.ResponseWriter, r *http.Request) {
 }
 
 func getTemplatePixelData(w http.ResponseWriter, r *http.Request) {
+	// Get template hash from query params
 	hash := r.URL.Query().Get("hash")
 	if hash == "" {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Hash parameter is required")
@@ -477,7 +478,7 @@ func getTemplatePixelData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert image to pixel data using existing function
-	pixelData, err := imageToPixelData(fileBytes, 1)
+	pixelData, err := imageToPixelData(fileBytes, 1) // Scale factor 1 for templates
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
 		return

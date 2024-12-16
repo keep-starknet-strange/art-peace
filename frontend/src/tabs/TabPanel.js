@@ -182,6 +182,8 @@ const TabPanel = (props) => {
           stencilCreationSelected={props.stencilCreationSelected}
           setStencilCreationSelected={props.setStencilCreationSelected}
           canvasWidth={props.width}
+          setTemplateOverlayMode={props.setTemplateOverlayMode}
+          setOverlayTemplate={props.setOverlayTemplate}
         />
       </CSSTransition>
       <SwitchTransition mode='out-in'>
