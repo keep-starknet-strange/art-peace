@@ -54,36 +54,3 @@ echo "Deployed contract \"$CANVAS_FACTORY_CLASS_NAME\" with address $CANVAS_FACT
 # TODO: Remove these lines?
 echo "CANVAS_FACTORY_CONTRACT_ADDRESS=$CANVAS_FACTORY_CONTRACT_ADDRESS" > /configs/configs.env
 echo "REACT_APP_CANVAS_FACTORY_CONTRACT_ADDRESS=$CANVAS_FACTORY_CONTRACT_ADDRESS" >> /configs/configs.env
-
-ART_PEACE_CLASS_NAME="ArtPeace"
-
-ART_PEACE_CLASS_DECLARE_RESULT=$(cd $CONTRACT_DIR && /root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json declare --contract-name $ART_PEACE_CLASS_NAME | tail -n 1)
-ART_PEACE_CLASS_HASH=$(echo $ART_PEACE_CLASS_DECLARE_RESULT | jq -r '.class_hash')
-echo "Declared class \"$ART_PEACE_CLASS_NAME\" with hash $ART_PEACE_CLASS_HASH"
-
-CANVAS_CONFIG=$WORK_DIR/configs/canvas.config.json
-QUESTS_CONFIG=$WORK_DIR/configs/quests.config.json
-WIDTH=$(jq -r '.canvas.width' $CANVAS_CONFIG)
-HEIGHT=$(jq -r '.canvas.height' $CANVAS_CONFIG)
-PLACE_DELAY=30
-COLOR_COUNT=$(jq -r '.colors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
-COLORS=$(jq -r '.colors[]' $CANVAS_CONFIG | sed 's/^/0x/')
-VOTABLE_COLOR_COUNT=$(jq -r '.votableColors[]' $CANVAS_CONFIG | wc -l | tr -d ' ')
-VOTABLE_COLORS=$(jq -r '.votableColors[]' $CANVAS_CONFIG | sed 's/^/0x/')
-DAILY_NEW_COLORS_COUNT=3
-START_TIME=0
-END_TIME=3000000000
-DAILY_QUESTS_COUNT=$(jq -r '.daily.dailyQuestsCount' $QUESTS_CONFIG)
-DEVNET_MODE=1
-
-CALLDATA=$(echo -n $ACCOUNT_ADDRESS $WIDTH $HEIGHT $PLACE_DELAY $COLOR_COUNT $COLORS $VOTABLE_COLOR_COUNT $VOTABLE_COLORS $DAILY_NEW_COLORS_COUNT $START_TIME $END_TIME $DAILY_QUESTS_COUNT $DEVNET_MODE)
-
-echo "Deploying contract \"$ART_PEACE_CLASS_NAME\"..."
-echo "/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $ART_PEACE_CLASS_HASH --constructor-calldata $CALLDATA"
-ART_PEACE_CONTRACT_DEPLOY_RESULT=$(/root/.local/bin/sncast --url $RPC_URL --accounts-file $ACCOUNT_FILE --account $ACCOUNT_NAME --wait --json deploy --class-hash $ART_PEACE_CLASS_HASH --constructor-calldata $CALLDATA | tail -n 1)
-ART_PEACE_CONTRACT_ADDRESS=$(echo $ART_PEACE_CONTRACT_DEPLOY_RESULT | jq -r '.contract_address')
-echo "Deployed contract \"$ART_PEACE_CLASS_NAME\" with address $ART_PEACE_CONTRACT_ADDRESS"
-
-# Add ArtPeace contract address to configs
-echo "ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> /configs/configs.env
-echo "REACT_APP_ART_PEACE_CONTRACT_ADDRESS=$ART_PEACE_CONTRACT_ADDRESS" >> /configs/configs.env
