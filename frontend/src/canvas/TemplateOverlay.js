@@ -6,20 +6,17 @@ const TemplateOverlay = (props) => {
   const [posy, setPosy] = React.useState(0);
 
   useEffect(() => {
-    // Calculate position relative to fixed canvas dimensions (518x396)
     const x = props.overlayTemplate.position % 518;
     const y = Math.floor(props.overlayTemplate.position / 518);
-
-    // Apply canvas scale to position
-    setPosx(x * props.canvasScale);
-    setPosy(y * props.canvasScale);
-  }, [props.overlayTemplate, props.canvasScale]);
+    setPosx(x);
+    setPosy(y);
+  }, [props.overlayTemplate]);
 
   const [templateOutline, setTemplateOutline] = React.useState('none');
   useEffect(() => {
-    const outlineWidth = 1 * props.canvasScale;
+    const outlineWidth = 1;
     setTemplateOutline(`${outlineWidth}px solid rgba(200, 0, 0, 0.3)`);
-  }, [props.overlayTemplate.image, props.canvasScale]);
+  }, [props.overlayTemplate.image]);
 
   const closeOverlay = () => {
     props.setOverlayTemplate(null);
@@ -33,8 +30,8 @@ const TemplateOverlay = (props) => {
         position: 'absolute',
         left: `${posx}px`,
         top: `${posy}px`,
-        width: props.overlayTemplate.width * props.canvasScale,
-        height: props.overlayTemplate.height * props.canvasScale,
+        width: props.overlayTemplate.width,
+        height: props.overlayTemplate.height,
         pointerEvents: 'none',
         display: 'block',
         outline: templateOutline

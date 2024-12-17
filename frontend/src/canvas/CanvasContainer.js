@@ -60,6 +60,21 @@ const CanvasContainer = (props) => {
   const handlePointerMove = (e) => {
     if (props.nftMintingMode && !props.nftSelected) return;
     if (props.templateCreationMode && !props.templateCreationSelected) return;
+    if (props.stencilCreationMode && !props.stencilCreationSelected) {
+      const canvas = props.canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor(
+        ((e.clientX - rect.left) / (rect.right - rect.left)) * 518
+      );
+      const y = Math.floor(
+        ((e.clientY - rect.top) / (rect.bottom - rect.top)) * 396
+      );
+
+      // Ensure x and y are within bounds
+      if (x >= 0 && x < 518 && y >= 0 && y < 396) {
+        props.setStencilPosition(y * 518 + x);
+      }
+    }
     if (isDragging) {
       setCanvasX(canvasX + e.clientX - dragStartX);
       setCanvasY(canvasY + e.clientY - dragStartY);
@@ -446,54 +461,67 @@ const CanvasContainer = (props) => {
       onPointerMove={handlePointerMove}
       onPointerDown={handlePointerDown}
     >
-      <div className='CanvasContainer__inner'>
+      <div
+        className='CanvasContainer__inner'
+        style={{
+          transform: `translate(-50%, -50%) scale(${canvasScale})`,
+          transformOrigin: 'center center'
+        }}
+      >
         {/* Center Canvas */}
         <div
           className='CanvasContainer__anchor center'
           style={{
             transform: `translate(${Math.round(canvasX)}px, ${Math.round(canvasY)}px)`,
-            width: Math.round(518 * canvasScale) + 'px',
-            height: Math.round(396 * canvasScale) + 'px'
+            width: '518px',
+            height: '396px'
           }}
           key='center'
         >
-          <div
-            className='CanvasContainer__canvas-wrapper'
+          <Canvas
+            openedWorldId={props.openedWorldId}
+            canvasRef={props.canvasRef}
+            width={518}
+            height={396}
             style={{
-              position: 'relative',
-              width: 518 * canvasScale,
-              height: 396 * canvasScale,
-              overflow: 'hidden'
+              width: '518px',
+              height: '396px'
             }}
-          >
-            <Canvas
-              openedWorldId={props.openedWorldId}
+            colors={props.colors}
+            pixelClicked={pixelClicked}
+            canvasScale={canvasScale}
+            isCenter={true}
+          />
+
+          {props.templateOverlayMode && props.overlayTemplate && (
+            <TemplateOverlay
               canvasRef={props.canvasRef}
+              width={props.width}
+              height={props.height}
+              canvasScale={canvasScale}
+              overlayTemplate={props.overlayTemplate}
+              setTemplateOverlayMode={props.setTemplateOverlayMode}
+              setOverlayTemplate={props.setOverlayTemplate}
+              colors={props.colors}
+            />
+          )}
+
+          {props.stencilCreationMode && (
+            <StencilCreationOverlay
+              canvasRef={props.canvasRef}
+              canvasScale={canvasScale}
+              stencilImage={props.stencilImage}
+              stencilColorIds={props.stencilColorIds}
+              stencilCreationMode={props.stencilCreationMode}
+              setStencilCreationMode={props.setStencilCreationMode}
+              stencilCreationSelected={props.stencilCreationSelected}
+              setStencilCreationSelected={props.setStencilCreationSelected}
               width={518}
               height={396}
-              style={{
-                width: 518 * canvasScale,
-                height: 396 * canvasScale
-              }}
-              colors={props.colors}
-              pixelClicked={pixelClicked}
-              canvasScale={canvasScale}
-              isCenter={true}
+              stencilPosition={props.stencilPosition}
+              setStencilPosition={props.setStencilPosition}
             />
-
-            {props.templateOverlayMode && props.overlayTemplate && (
-              <TemplateOverlay
-                canvasRef={props.canvasRef}
-                width={props.width}
-                height={props.height}
-                canvasScale={canvasScale}
-                overlayTemplate={props.overlayTemplate}
-                setTemplateOverlayMode={props.setTemplateOverlayMode}
-                setOverlayTemplate={props.setOverlayTemplate}
-                colors={props.colors}
-              />
-            )}
-          </div>
+          )}
 
           {/* Move overlay components inside center canvas */}
           {props.availablePixels > 0 && (
@@ -526,42 +554,25 @@ const CanvasContainer = (props) => {
               setTemplatePosition={props.setTemplatePosition}
             />
           )}
-
-          {props.stencilCreationMode && (
-            <StencilCreationOverlay
-              canvasRef={props.canvasRef}
-              canvasScale={canvasScale}
-              stencilImage={props.stencilImage}
-              stencilColorIds={props.stencilColorIds}
-              stencilCreationMode={props.stencilCreationMode}
-              setStencilCreationMode={props.setStencilCreationMode}
-              stencilCreationSelected={props.stencilCreationSelected}
-              setStencilCreationSelected={props.setStencilCreationSelected}
-              width={518}
-              height={396}
-              stencilPosition={props.stencilPosition}
-              setStencilPosition={props.setStencilPosition}
-            />
-          )}
-
-          {props.nftMintingMode && (
-            <NFTSelector
-              canvasRef={props.canvasRef}
-              canvasScale={canvasScale}
-              width={props.width}
-              height={props.height}
-              nftMintingMode={props.nftMintingMode}
-              nftSelectionStarted={props.nftSelectionStarted}
-              setNftSelectionStarted={props.setNftSelectionStarted}
-              nftSelected={props.nftSelected}
-              setNftSelected={props.setNftSelected}
-              setNftMintingMode={props.setNftMintingMode}
-              setNftPosition={props.setNftPosition}
-              setNftWidth={props.setNftWidth}
-              setNftHeight={props.setNftHeight}
-            />
-          )}
         </div>
+
+        {props.nftMintingMode && (
+          <NFTSelector
+            canvasRef={props.canvasRef}
+            canvasScale={canvasScale}
+            width={props.width}
+            height={props.height}
+            nftMintingMode={props.nftMintingMode}
+            nftSelectionStarted={props.nftSelectionStarted}
+            setNftSelectionStarted={props.setNftSelectionStarted}
+            nftSelected={props.nftSelected}
+            setNftSelected={props.setNftSelected}
+            setNftMintingMode={props.setNftMintingMode}
+            setNftPosition={props.setNftPosition}
+            setNftWidth={props.setNftWidth}
+            setNftHeight={props.setNftHeight}
+          />
+        )}
 
         {/* 12 Surrounding Canvases */}
         {props.surroundingWorlds.slice(0, 12).map((world, index) => {
@@ -585,11 +596,11 @@ const CanvasContainer = (props) => {
               className='CanvasContainer__anchor surrounding'
               style={{
                 transform: `translate(${Math.round(canvasX)}px, ${Math.round(canvasY)}px)`,
-                width: Math.round(256 * canvasScale) + 'px',
-                height: Math.round(192 * canvasScale) + 'px',
+                width: '256px',
+                height: '192px',
                 gridColumn: gridPositions[index].gridColumn,
                 gridRow: gridPositions[index].gridRow,
-                cursor: world ? 'pointer' : 'default'
+                cursor: 'pointer'
               }}
               key={`surrounding-${index}`}
               onClick={() => {
@@ -601,11 +612,11 @@ const CanvasContainer = (props) => {
               <Canvas
                 openedWorldId={world ? world.worldId : null}
                 canvasRef={React.createRef()}
-                width={256}
-                height={192}
+                width={518}
+                height={396}
                 style={{
-                  width: 256 * canvasScale,
-                  height: 192 * canvasScale
+                  width: '256px',
+                  height: '192px'
                 }}
                 colors={props.colors}
                 pixelClicked={pixelClicked}

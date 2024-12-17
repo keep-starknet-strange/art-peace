@@ -12,35 +12,11 @@ const Canvas = (props) => {
 
   const draw = useCallback(
     (ctx, imageData) => {
-      if (
-        imageData.width !== props.width ||
-        imageData.height !== props.height
-      ) {
-        console.error(
-          'ImageData dimensions mismatch:',
-          imageData.width,
-          imageData.height,
-          'expected:',
-          props.width,
-          props.height
-        );
-        return;
-      }
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.imageSmoothingEnabled = false;
-
-      if (!props.isCenter) {
-        // Scale down from 518x396 to 256x192
-        const scaleX = props.width / 518;
-        const scaleY = props.height / 396;
-        ctx.scale(scaleX, scaleY);
-        ctx.putImageData(imageData, 0, 0);
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
-      } else {
-        ctx.putImageData(imageData, 0, 0);
-      }
+      ctx.putImageData(imageData, 0, 0);
     },
-    [props.width, props.height, props.isCenter]
+    [props.width, props.height]
   );
 
   const isCenterCanvas =
@@ -122,12 +98,19 @@ const Canvas = (props) => {
     fetchCanvas();
   }, [props.colors, props.openedWorldId, props.isEmpty]);
 
+  const displayWidth = props.isCenter ? props.width : 256;
+  const displayHeight = props.isCenter ? props.height : 192;
+
   return (
     <canvas
       ref={props.canvasRef}
       width={props.width}
       height={props.height}
-      style={props.style}
+      style={{
+        ...props.style,
+        width: `${displayWidth}px`,
+        height: `${displayHeight}px`
+      }}
       className='Canvas'
       onClick={handleClick}
     />
