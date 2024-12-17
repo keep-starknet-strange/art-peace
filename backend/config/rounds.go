@@ -19,8 +19,8 @@ type RoundsConfig struct {
 
 var DefaultRoundsConfig = &RoundsConfig{
 	Round3: Round3{
-		Width:     256,
-		Height:    192,
+		Width:     518,
+		Height:    396,
 		Timer:     5,
 		StartTime: "2024-12-01T00:00:00Z",
 		EndTime:   "2025-01-01T00:00:00Z",

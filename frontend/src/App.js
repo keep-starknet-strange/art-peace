@@ -360,15 +360,6 @@ function App() {
     const x = position % width;
     const y = Math.floor(position / width);
 
-    console.debug('Coloring pixel:', {
-      position,
-      x,
-      y,
-      color,
-      canvasWidth: width,
-      canvasHeight: height
-    });
-
     if (x < 0 || x >= width || y < 0 || y >= height) {
       console.error('Invalid pixel position:', x, y);
       return;
