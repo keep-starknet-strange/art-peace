@@ -45,37 +45,21 @@ function App() {
   // Page management
   useEffect(() => {
     const getWorldId = async () => {
+      let currentWorldId = 0;
+
       if (location.pathname.startsWith('/worlds/')) {
         let worldSlug = location.pathname.split('/worlds/')[1];
         let response = await fetchWrapper(
           `get-world-id?worldName=${worldSlug}`
         );
+
         if (response.data === undefined || response.data === null) {
           setActiveWorld(null);
           setOpenedWorldId(0);
-          setSurroundingWorlds([]);
-          return;
         } else {
           setActiveWorld(response.data);
-        }
-
-        setOpenedWorldId(response.data);
-
-        // Fetch surrounding worlds
-        const surroundingResponse = await fetchWrapper('get-all-worlds');
-        if (surroundingResponse.data) {
-          // Filter out current world and take up to 12 worlds
-          const otherWorlds = surroundingResponse.data
-            .filter((world) => world.worldId !== response.data)
-            .slice(0, 12);
-
-          // Pad array with null values if less than 12 worlds
-          const paddedWorlds = [...otherWorlds];
-          while (paddedWorlds.length < 12) {
-            paddedWorlds.push(null);
-          }
-
-          setSurroundingWorlds(paddedWorlds);
+          setOpenedWorldId(response.data);
+          currentWorldId = response.data;
         }
       } else {
         const response = await fetchWrapper('get-world?worldId=0');
@@ -84,7 +68,27 @@ function App() {
         }
         setOpenedWorldId(0);
       }
+
+      // Always fetch surrounding worlds
+      const surroundingResponse = await fetchWrapper('get-all-worlds');
+      if (surroundingResponse.data) {
+        // Filter out current world and take up to 12 worlds
+        const otherWorlds = surroundingResponse.data
+          .filter((world) => world.worldId !== currentWorldId)
+          .slice(0, 12);
+
+        // Pad array with null values if less than 12 worlds
+        const paddedWorlds = [...otherWorlds];
+        while (paddedWorlds.length < 12) {
+          paddedWorlds.push(null);
+        }
+
+        setSurroundingWorlds(paddedWorlds);
+      } else {
+        setSurroundingWorlds(Array(12).fill(null)); // Fill with 12 null values if no worlds found
+      }
     };
+
     getWorldId();
   }, [location.pathname]);
 

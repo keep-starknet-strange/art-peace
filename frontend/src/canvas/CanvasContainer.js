@@ -594,7 +594,7 @@ const CanvasContainer = (props) => {
               key={`surrounding-${index}`}
               onClick={() => {
                 if (world) {
-                  window.location.href = `/worlds/${world.name}`;
+                  window.location.href = `/worlds/${world.uniqueName}`;
                 }
               }}
             >
