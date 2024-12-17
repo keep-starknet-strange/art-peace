@@ -188,3 +188,10 @@ export const getLikedNftsFn = async (params) => {
     `get-liked-nfts?address=${queryAddress}&page=${page}&pageLength=${pageLength}`
   );
 };
+
+export const getAllWorldsFn = async (params) => {
+  const { page, pageLength, queryAddress, filter } = params;
+  return await fetchWrapper(
+    `get-all-worlds?address=${queryAddress}&page=${page}&pageLength=${pageLength}&filter=${filter}`
+  );
+};

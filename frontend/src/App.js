@@ -38,29 +38,57 @@ import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
   const worldsMode = true;
-  const [openedWorldId, setOpenedWorldId] = useState(null);
+  const [openedWorldId, setOpenedWorldId] = useState(0);
   const [activeWorld, setActiveWorld] = useState(null);
+  const [surroundingWorlds, setSurroundingWorlds] = useState([]);
 
   // Page management
   useEffect(() => {
     const getWorldId = async () => {
+      let currentWorldId = 0;
+
       if (location.pathname.startsWith('/worlds/')) {
         let worldSlug = location.pathname.split('/worlds/')[1];
         let response = await fetchWrapper(
           `get-world-id?worldName=${worldSlug}`
         );
+
         if (response.data === undefined || response.data === null) {
           setActiveWorld(null);
-          setOpenedWorldId(null);
-          return;
+          setOpenedWorldId(0);
+        } else {
+          setActiveWorld(response.data);
+          setOpenedWorldId(response.data);
+          currentWorldId = response.data;
+        }
+      } else {
+        const response = await fetchWrapper('get-world?worldId=0');
+        if (response.data) {
+          setActiveWorld(response.data);
+        }
+        setOpenedWorldId(0);
+      }
+
+      // Always fetch surrounding worlds
+      const surroundingResponse = await fetchWrapper('get-all-worlds');
+      if (surroundingResponse.data) {
+        // Filter out current world and take up to 12 worlds
+        const otherWorlds = surroundingResponse.data
+          .filter((world) => world.worldId !== currentWorldId)
+          .slice(0, 12);
+
+        // Pad array with null values if less than 12 worlds
+        const paddedWorlds = [...otherWorlds];
+        while (paddedWorlds.length < 12) {
+          paddedWorlds.push(null);
         }
 
-        setOpenedWorldId(response.data);
+        setSurroundingWorlds(paddedWorlds);
       } else {
-        setActiveWorld(null);
-        setOpenedWorldId(null);
+        setSurroundingWorlds(Array(12).fill(null)); // Fill with 12 null values if no worlds found
       }
     };
+
     getWorldId();
   }, [location.pathname]);
 
@@ -324,8 +352,8 @@ function App() {
   }, [lastJsonMessage]);
 
   // Canvas
-  const [width, setWidth] = useState(canvasConfig.canvas.width);
-  const [height, setHeight] = useState(canvasConfig.canvas.height);
+  const [width, _setWidth] = useState(canvasConfig.canvas.width);
+  const [height, _setHeight] = useState(canvasConfig.canvas.height);
 
   const canvasRef = useRef(null);
   const extraPixelsCanvasRef = useRef(null);
@@ -335,6 +363,12 @@ function App() {
     const context = canvas.getContext('2d');
     const x = position % width;
     const y = Math.floor(position / width);
+
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      console.error('Invalid pixel position:', x, y);
+      return;
+    }
+
     const colorIdx = color;
     const colorHex = `#${colors[colorIdx]}FF`;
     context.fillStyle = colorHex;
@@ -924,13 +958,13 @@ function App() {
         return;
       }
       setActiveWorld(response.data);
-      setWidth(response.data.width);
-      setHeight(response.data.height);
+      // setWidth(response.data.width);
+      // setHeight(response.data.height);
     };
     if (openedWorldId === null) {
       setActiveWorld(null);
-      setWidth(canvasConfig.canvas.width);
-      setHeight(canvasConfig.canvas.height);
+      // setWidth(canvasConfig.canvas.width);
+      // setHeight(canvasConfig.canvas.height);
     } else {
       getWorld();
     }
@@ -1273,6 +1307,7 @@ function App() {
           setIsEraserMode={setIsEraserMode}
           clearExtraPixel={clearExtraPixel}
           setLastPlacedTime={setLastPlacedTime}
+          surroundingWorlds={surroundingWorlds}
         />
         {(!isMobile || activeTab === tabs[0]) && (
           <div className='App__logo'>

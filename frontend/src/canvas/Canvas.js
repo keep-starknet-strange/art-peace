@@ -4,15 +4,44 @@ import { backendUrl } from '../utils/Consts.js';
 import canvasConfig from '../configs/canvas.config.json';
 
 const Canvas = (props) => {
+  useEffect(() => {
+    if (props.width !== 518 || props.height !== 396) {
+      console.error('Invalid canvas dimensions:', props.width, props.height);
+    }
+  }, [props.width, props.height]);
+
   const draw = useCallback(
     (ctx, imageData) => {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.imageSmoothingEnabled = false;
       ctx.putImageData(imageData, 0, 0);
     },
     [props.width, props.height]
   );
 
+  const isCenterCanvas =
+    props.style &&
+    props.style.width === props.width * props.canvasScale &&
+    props.style.height === props.height * props.canvasScale;
+
+  const handleClick = (e) => {
+    if (!isCenterCanvas) {
+      e.preventDefault();
+      return;
+    }
+    props.pixelClicked(e);
+  };
+
   useEffect(() => {
     const fetchCanvas = async () => {
+      if (props.isEmpty) {
+        const canvas = props.canvasRef.current;
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#f0f0f0';
+        context.fillRect(0, 0, props.width, props.height);
+        return;
+      }
+
       try {
         if (props.colors.length === 0) {
           return;
@@ -48,7 +77,7 @@ const Canvas = (props) => {
             dataArray.push(value);
           }
         }
-        let imageDataArray = [];
+        const imageDataArray = [];
         for (let i = 0; i < dataArray.length; i++) {
           const color = '#' + props.colors[dataArray[i]] + 'FF';
           const [r, g, b, a] = color.match(/\w\w/g).map((x) => parseInt(x, 16));
@@ -67,16 +96,23 @@ const Canvas = (props) => {
     };
 
     fetchCanvas();
-  }, [props.width, props.height, props.colors, props.openedWorldId]);
+  }, [props.colors, props.openedWorldId, props.isEmpty]);
+
+  const displayWidth = props.isCenter ? props.width : 256;
+  const displayHeight = props.isCenter ? props.height : 192;
 
   return (
     <canvas
       ref={props.canvasRef}
       width={props.width}
       height={props.height}
-      style={props.style}
+      style={{
+        ...props.style,
+        width: `${displayWidth}px`,
+        height: `${displayHeight}px`
+      }}
       className='Canvas'
-      onClick={props.pixelClicked}
+      onClick={handleClick}
     />
   );
 };
