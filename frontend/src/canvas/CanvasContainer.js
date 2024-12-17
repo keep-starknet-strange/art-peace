@@ -478,6 +478,7 @@ const CanvasContainer = (props) => {
               colors={props.colors}
               pixelClicked={pixelClicked}
               canvasScale={canvasScale}
+              isCenter={true}
             />
 
             {props.templateOverlayMode && props.overlayTemplate && (
@@ -609,6 +610,7 @@ const CanvasContainer = (props) => {
                 colors={props.colors}
                 pixelClicked={pixelClicked}
                 isEmpty={!world}
+                isCenter={false}
               />
             </div>
           );
