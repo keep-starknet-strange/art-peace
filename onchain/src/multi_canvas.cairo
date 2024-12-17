@@ -113,6 +113,8 @@ pub mod MultiCanvas {
         stencil_counts: LegacyMap::<u32, u32>,
         // Map: (canvas_id, stencil_id) -> stencil metadata
         stencils: LegacyMap::<(u32, u32), StencilMetadata>,
+        // Maps: (canvas_id, stencil_id, user addr) -> if favorited
+        stencil_favorites: LegacyMap::<(u32, u32, ContractAddress), bool>
     }
 
     #[event]
@@ -296,19 +298,17 @@ pub mod MultiCanvas {
             assert(!self.unique_names.read(init_params.unique_name), 'Unique name already taken');
             assert(validate_unique_name(init_params.unique_name), 'Invalid unique name');
             let canvas_id = self.canvas_count.read();
-            self
-                .canvases
-                .write(
-                    canvas_id,
-                    CanvasMetadata {
-                        name: init_params.name,
-                        unique_name: init_params.unique_name,
-                        width: init_params.width,
-                        height: init_params.height,
-                        start_time: init_params.start_time,
-                        end_time: init_params.end_time,
-                    }
-                );
+            self.canvases.write(
+                canvas_id,
+                CanvasMetadata {
+                    name: init_params.name,
+                    unique_name: init_params.unique_name,
+                    width: init_params.width,
+                    height: init_params.height,
+                    start_time: init_params.start_time,
+                    end_time: init_params.end_time,
+                }
+            );
             self.hosts.write(canvas_id, init_params.host);
             self.time_between_pixels.write(canvas_id, init_params.time_between_pixels);
             let color_count = init_params.color_palette.len().try_into().unwrap();
@@ -316,16 +316,22 @@ pub mod MultiCanvas {
             let mut i: u8 = 0;
             while i < color_count {
                 self.color_palettes.write((canvas_id, i), *init_params.color_palette.at(i.into()));
-                self
-                    .emit(
-                        CanvasColorAdded {
-                            canvas_id, color_key: i, color: *init_params.color_palette.at(i.into())
-                        }
-                    );
+                self.emit(
+                    CanvasColorAdded {
+                        canvas_id, color_key: i, color: *init_params.color_palette.at(i.into())
+                    }
+                );
                 i += 1;
             };
             self.canvas_count.write(canvas_id + 1);
             self.unique_names.write(init_params.unique_name, true);
+            
+            // Auto-favorite the canvas for the creator
+            let caller = get_caller_address();
+            self.canvas_favorites.write((canvas_id, caller), true);
+            self.emit(Event::CanvasFavorited(CanvasFavorited { canvas_id, user: caller }));
+            
+            // Emit canvas created event
             self.emit(CanvasCreated { canvas_id, init_params });
             canvas_id
         }
@@ -489,6 +495,13 @@ pub mod MultiCanvas {
             assert(stencil.height <= MAX_STENCIL_SIZE, 'Stencil too large');
             self.stencils.write((canvas_id, stencil_id), stencil.clone());
             self.stencil_counts.write(canvas_id, stencil_id + 1);
+            
+            // Auto-favorite the stencil for the creator
+            let caller = get_caller_address();
+            self.stencil_favorites.write((canvas_id, stencil_id, caller), true);
+            self.emit(StencilFavorited { canvas_id, stencil_id, user: caller });
+            
+            // Emit the stencil added event
             self.emit(StencilAdded { canvas_id, stencil_id, stencil });
             stencil_id
         }
@@ -502,12 +515,20 @@ pub mod MultiCanvas {
 
         fn favorite_stencil(ref self: ContractState, canvas_id: u32, stencil_id: u32) {
             let caller = get_caller_address();
-            self.emit(StencilFavorited { canvas_id, stencil_id, user: caller, });
+            if self.stencil_favorites.read((canvas_id, stencil_id, caller)) {
+                return;
+            }
+            self.stencil_favorites.write((canvas_id, stencil_id, caller), true);
+            self.emit(StencilFavorited { canvas_id, stencil_id, user: caller });
         }
 
         fn unfavorite_stencil(ref self: ContractState, canvas_id: u32, stencil_id: u32) {
             let caller = get_caller_address();
-            self.emit(StencilUnfavorited { canvas_id, stencil_id, user: caller, });
+            if !self.stencil_favorites.read((canvas_id, stencil_id, caller)) {
+                return;
+            }
+            self.stencil_favorites.write((canvas_id, stencil_id, caller), false);
+            self.emit(StencilUnfavorited { canvas_id, stencil_id, user: caller });
         }
     }
 

@@ -113,29 +113,27 @@ pub mod CanvasFactory {
         fn create_canvas(
             ref self: ContractState, init_params: super::Canvas::InitParams
         ) -> (ContractAddress, u64) {
-            // TODO: Serialize before calling this function to defer serialization to the contract input
             let mut init_params_serialized = array![];
             init_params.serialize(ref init_params_serialized);
             let deploy_res = deploy_syscall(
                 self.canvas_class_hash.read(),
-                self.canvas_count.read().into(),
+                get_caller_address().into(),
                 init_params_serialized.span(),
-                true
+                false
             );
-            if deploy_res.is_err() {
-                panic!("Failed to deploy canvas contract");
-            }
-            let (addr, _response) = deploy_res.unwrap();
+            let (canvas_address, _) = deploy_res.unwrap();
             let canvas_id = self.canvas_count.read();
-            self.canvases.write(canvas_id, addr);
+            self.canvases.write(canvas_id, canvas_address);
             self.canvas_count.write(canvas_id + 1);
-            self
-                .emit(
-                    Event::CanvasCreated(
-                        CanvasCreated { canvas_id, canvas_address: addr, init_params, }
-                    )
-                );
-            (addr, canvas_id)
+            
+            // Auto-favorite the canvas for the creator
+            let caller = get_caller_address();
+            self.canvas_favorites.write((canvas_id, caller), true);
+            self.emit(Event::CanvasFavorited(CanvasFavorited { canvas_id, user: caller }));
+            
+            // Emit the canvas created event
+            self.emit(Event::CanvasCreated(CanvasCreated { canvas_id, canvas_address, init_params }));
+            (canvas_address, canvas_id)
         }
 
         fn get_canvas(self: @ContractState, canvas_id: u64) -> ContractAddress {
