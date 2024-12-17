@@ -348,8 +348,8 @@ function App() {
   }, [lastJsonMessage]);
 
   // Canvas
-  const [width, setWidth] = useState(canvasConfig.canvas.width);
-  const [height, setHeight] = useState(canvasConfig.canvas.height);
+  const [width, _setWidth] = useState(canvasConfig.canvas.width);
+  const [height, _setHeight] = useState(canvasConfig.canvas.height);
 
   const canvasRef = useRef(null);
   const extraPixelsCanvasRef = useRef(null);
@@ -359,6 +359,21 @@ function App() {
     const context = canvas.getContext('2d');
     const x = position % width;
     const y = Math.floor(position / width);
+
+    console.debug('Coloring pixel:', {
+      position,
+      x,
+      y,
+      color,
+      canvasWidth: width,
+      canvasHeight: height
+    });
+
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      console.error('Invalid pixel position:', x, y);
+      return;
+    }
+
     const colorIdx = color;
     const colorHex = `#${colors[colorIdx]}FF`;
     context.fillStyle = colorHex;
@@ -948,13 +963,13 @@ function App() {
         return;
       }
       setActiveWorld(response.data);
-      setWidth(response.data.width);
-      setHeight(response.data.height);
+      // setWidth(response.data.width);
+      // setHeight(response.data.height);
     };
     if (openedWorldId === null) {
       setActiveWorld(null);
-      setWidth(canvasConfig.canvas.width);
-      setHeight(canvasConfig.canvas.height);
+      // setWidth(canvasConfig.canvas.width);
+      // setHeight(canvasConfig.canvas.height);
     } else {
       getWorld();
     }

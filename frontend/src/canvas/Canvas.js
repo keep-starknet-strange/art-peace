@@ -4,8 +4,30 @@ import { backendUrl } from '../utils/Consts.js';
 import canvasConfig from '../configs/canvas.config.json';
 
 const Canvas = (props) => {
+  useEffect(() => {
+    if (props.width !== 518 || props.height !== 396) {
+      console.error('Invalid canvas dimensions:', props.width, props.height);
+    }
+  }, [props.width, props.height]);
+
   const draw = useCallback(
     (ctx, imageData) => {
+      if (
+        imageData.width !== props.width ||
+        imageData.height !== props.height
+      ) {
+        console.error(
+          'ImageData dimensions mismatch:',
+          imageData.width,
+          imageData.height,
+          'expected:',
+          props.width,
+          props.height
+        );
+        return;
+      }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.imageSmoothingEnabled = false;
       ctx.putImageData(imageData, 0, 0);
     },
     [props.width, props.height]
