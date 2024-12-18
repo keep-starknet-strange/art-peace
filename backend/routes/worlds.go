@@ -36,6 +36,7 @@ func InitWorldsRoutes() {
 		http.HandleFunc("/unfavorite-world-devnet", unfavoriteWorldDevnet)
 		http.HandleFunc("/place-world-pixel-devnet", placeWorldPixelDevnet)
 	}
+	http.HandleFunc("/get-recent-favorite-worlds", getRecentFavoriteWorlds)
 }
 
 func InitWorldsStaticRoutes() {
@@ -689,4 +690,43 @@ func doesWorldNameExist(name string) (bool, error) {
 		return false, err
 	}
 	return *exists, nil
+}
+
+func getRecentFavoriteWorlds(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address")
+		return
+	}
+
+	query := `
+        SELECT 
+            worlds.*, 
+            COALESCE(favorite_count, 0) AS favorites,
+            COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false) as favorited
+        FROM 
+            worlds
+        INNER JOIN (
+            SELECT 
+                world_id,
+                COUNT(*) AS favorite_count,
+                MAX(key) as latest_favorite
+            FROM 
+                worldfavorites
+            WHERE 
+                user_address = $1
+            GROUP BY 
+                world_id
+        ) worldfavorites ON worlds.world_id = worldfavorites.world_id
+        WHERE favorited = true
+        ORDER BY 
+            worldfavorites.latest_favorite DESC
+        LIMIT 8`
+
+	worlds, err := core.PostgresQueryJson[WorldData](query, address)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve recent favorite worlds")
+		return
+	}
+	routeutils.WriteDataJson(w, string(worlds))
 }
