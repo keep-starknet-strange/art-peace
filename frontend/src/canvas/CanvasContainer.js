@@ -39,6 +39,16 @@ const CanvasContainer = (props) => {
 
   const [isErasing, setIsErasing] = useState(false);
 
+  // Add state to track surrounding worlds locally
+  const [localSurroundingWorlds, setLocalSurroundingWorlds] = useState(
+    props.surroundingWorlds
+  );
+
+  // Update local state when props change
+  useEffect(() => {
+    setLocalSurroundingWorlds(props.surroundingWorlds);
+  }, [props.surroundingWorlds]);
+
   const handlePointerDown = (e) => {
     // TODO: Require over canvas?
     if (!props.isEraserMode) {
@@ -496,6 +506,63 @@ const CanvasContainer = (props) => {
           transformOrigin: 'center center'
         }}
       >
+        {/* 12 Surrounding Canvases */}
+        {Array(12)
+          .fill(null)
+          .map((_, index) => {
+            const world = localSurroundingWorlds[index];
+            const gridPositions = [
+              { gridColumn: '2', gridRow: '1' }, // Top
+              { gridColumn: '3', gridRow: '1' }, // Top
+              { gridColumn: '4', gridRow: '2' }, // Right
+              { gridColumn: '4', gridRow: '3' }, // Right
+              { gridColumn: '2', gridRow: '4' }, // Bottom
+              { gridColumn: '3', gridRow: '4' }, // Bottom
+              { gridColumn: '1', gridRow: '2' }, // Left
+              { gridColumn: '1', gridRow: '3' }, // Left
+              { gridColumn: '1', gridRow: '1' }, // Corners
+              { gridColumn: '4', gridRow: '1' },
+              { gridColumn: '1', gridRow: '4' },
+              { gridColumn: '4', gridRow: '4' }
+            ];
+
+            return (
+              <div
+                className='CanvasContainer__anchor surrounding'
+                style={{
+                  transform: `translate(${Math.round(canvasX)}px, ${Math.round(canvasY)}px)`,
+                  width: '256px',
+                  height: '192px',
+                  gridColumn: gridPositions[index].gridColumn,
+                  gridRow: gridPositions[index].gridRow,
+                  cursor: world ? 'pointer' : 'default'
+                }}
+                key={`surrounding-${index}`}
+                onClick={() => {
+                  if (world) {
+                    window.location.href = `/worlds/${world.uniqueName}`;
+                  }
+                }}
+              >
+                <Canvas
+                  openedWorldId={world ? world.worldId : null}
+                  canvasRef={React.createRef()}
+                  width={518}
+                  height={396}
+                  style={{
+                    width: '256px',
+                    height: '192px'
+                  }}
+                  colors={props.colors}
+                  pixelClicked={pixelClicked}
+                  isEmpty={!world}
+                  isCenter={false}
+                  data-world-id={world ? world.worldId : null}
+                />
+              </div>
+            );
+          })}
+
         {/* Center Canvas */}
         <div
           className='CanvasContainer__anchor center'
@@ -601,60 +668,6 @@ const CanvasContainer = (props) => {
             setNftHeight={props.setNftHeight}
           />
         )}
-
-        {/* 12 Surrounding Canvases */}
-        {props.surroundingWorlds.slice(0, 12).map((world, index) => {
-          const gridPositions = [
-            { gridColumn: '2', gridRow: '1' }, // Top
-            { gridColumn: '3', gridRow: '1' }, // Top
-            { gridColumn: '4', gridRow: '2' }, // Right
-            { gridColumn: '4', gridRow: '3' }, // Right
-            { gridColumn: '2', gridRow: '4' }, // Bottom
-            { gridColumn: '3', gridRow: '4' }, // Bottom
-            { gridColumn: '1', gridRow: '2' }, // Left
-            { gridColumn: '1', gridRow: '3' }, // Left
-            { gridColumn: '1', gridRow: '1' }, // Corners
-            { gridColumn: '4', gridRow: '1' },
-            { gridColumn: '1', gridRow: '4' },
-            { gridColumn: '4', gridRow: '4' }
-          ];
-
-          return (
-            <div
-              className='CanvasContainer__anchor surrounding'
-              style={{
-                transform: `translate(${Math.round(canvasX)}px, ${Math.round(canvasY)}px)`,
-                width: '256px',
-                height: '192px',
-                gridColumn: gridPositions[index].gridColumn,
-                gridRow: gridPositions[index].gridRow,
-                cursor: 'pointer'
-              }}
-              key={`surrounding-${index}`}
-              onClick={() => {
-                if (world) {
-                  window.location.href = `/worlds/${world.uniqueName}`;
-                }
-              }}
-            >
-              <Canvas
-                openedWorldId={world ? world.worldId : null}
-                canvasRef={React.createRef()}
-                width={518}
-                height={396}
-                style={{
-                  width: '256px',
-                  height: '192px'
-                }}
-                colors={props.colors}
-                pixelClicked={pixelClicked}
-                isEmpty={!world}
-                isCenter={false}
-                data-world-id={world ? world.worldId : null}
-              />
-            </div>
-          );
-        })}
       </div>
     </div>
   );

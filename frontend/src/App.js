@@ -306,6 +306,14 @@ function App() {
           });
         }
       });
+
+      // Add subscription for new worlds
+      sendJsonMessage({
+        event: 'subscribe',
+        data: {
+          channel: 'worlds'
+        }
+      });
     }
   }, [readyState, openedWorldId, surroundingWorlds]);
 
@@ -343,6 +351,7 @@ function App() {
 
   useEffect(() => {
     const processMessage = async (message) => {
+      console.log('WebSocket message received:', message);
       if (message) {
         if (message.messageType === 'colorPixel') {
           if (message.color >= colors.length) {
@@ -375,6 +384,28 @@ function App() {
               }
             }
           });
+        } else if (message.messageType === 'newWorld') {
+          console.log('New world message received:', message);
+          // Force refresh of surrounding worlds
+          try {
+            const surroundingResponse = await fetchWrapper('get-all-worlds');
+            if (surroundingResponse.data) {
+              // Filter out current world and take up to 12 worlds
+              const otherWorlds = surroundingResponse.data
+                .filter((world) => world.worldId !== openedWorldId)
+                .slice(0, 12);
+
+              // Pad array with null values if less than 12 worlds
+              const paddedWorlds = [...otherWorlds];
+              while (paddedWorlds.length < 12) {
+                paddedWorlds.push(null);
+              }
+
+              setSurroundingWorlds(paddedWorlds);
+            }
+          } catch (error) {
+            console.error('Error fetching surrounding worlds:', error);
+          }
         } else if (
           message.messageType === 'nftMinted' &&
           activeTab === 'NFTs'
@@ -387,7 +418,7 @@ function App() {
     };
 
     processMessage(lastJsonMessage);
-  }, [lastJsonMessage, surroundingWorlds, openedWorldId, colors]);
+  }, [lastJsonMessage, openedWorldId, colors]);
 
   // Canvas
   const [width, _setWidth] = useState(canvasConfig.canvas.width);
