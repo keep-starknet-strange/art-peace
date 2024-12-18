@@ -106,6 +106,7 @@ const Canvas = (props) => {
       ref={props.canvasRef}
       width={props.width}
       height={props.height}
+      data-world-id={props.openedWorldId}
       style={{
         ...props.style,
         width: `${displayWidth}px`,

@@ -7,7 +7,7 @@ import TemplateCreationOverlay from './TemplateCreationOverlay.js';
 import StencilCreationOverlay from './StencilCreationOverlay.js';
 import NFTSelector from './NFTSelector.js';
 import { fetchWrapper } from '../services/apiService.js';
-import { devnetMode } from '../utils/Consts.js';
+import { backendUrl, devnetMode } from '../utils/Consts.js';
 
 const CanvasContainer = (props) => {
   // Calculate minimum scale based on container and canvas dimensions
@@ -279,6 +279,20 @@ const CanvasContainer = (props) => {
         }
       );
       console.log(result);
+
+      // Notify backend about pixel placement
+      await fetch(`${backendUrl}/place-pixel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          worldId: null, // main canvas
+          position,
+          color,
+          address: props.address
+        })
+      });
     } else {
       if (!props.address || !props.worldsContract || !props.account) return;
       const callData = props.worldsContract.populate('place_pixel', {
@@ -297,6 +311,20 @@ const CanvasContainer = (props) => {
         maxFee
       });
       console.log(result);
+
+      // Notify backend about pixel placement
+      await fetch(`${backendUrl}/place-pixel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          worldId: props.openedWorldId,
+          position,
+          color,
+          address: props.address
+        })
+      });
     }
   };
 
@@ -622,6 +650,7 @@ const CanvasContainer = (props) => {
                 pixelClicked={pixelClicked}
                 isEmpty={!world}
                 isCenter={false}
+                data-world-id={world ? world.worldId : null}
               />
             </div>
           );

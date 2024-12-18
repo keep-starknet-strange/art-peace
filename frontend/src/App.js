@@ -277,14 +277,37 @@ function App() {
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
+      // Subscribe to general channel
       sendJsonMessage({
         event: 'subscribe',
         data: {
           channel: 'general'
         }
       });
+
+      // Subscribe to main world channel
+      if (openedWorldId !== null) {
+        sendJsonMessage({
+          event: 'subscribe',
+          data: {
+            channel: `world-${openedWorldId}`
+          }
+        });
+      }
+
+      // Subscribe to surrounding world channels
+      surroundingWorlds.forEach((world) => {
+        if (world && world.worldId) {
+          sendJsonMessage({
+            event: 'subscribe',
+            data: {
+              channel: `world-${world.worldId}`
+            }
+          });
+        }
+      });
     }
-  }, [readyState]);
+  }, [readyState, openedWorldId, surroundingWorlds]);
 
   // Colors
   const staticColors = canvasConfig.colors;
@@ -321,22 +344,37 @@ function App() {
   useEffect(() => {
     const processMessage = async (message) => {
       if (message) {
-        // Check the message type and handle accordingly
         if (message.messageType === 'colorPixel') {
           if (message.color >= colors.length) {
-            // Get new colors from backend
             await fetchColors();
           }
           colorPixel(message.position, message.color);
         } else if (message.messageType === 'colorWorldPixel') {
-          if (message.worldId.toString() !== openedWorldId) {
-            return;
+          if (message.worldId.toString() === openedWorldId.toString()) {
+            if (message.color >= colors.length) {
+              await fetchColors();
+            }
+            colorPixel(message.position, message.color);
           }
-          if (message.color >= colors.length) {
-            // Get new colors from backend
-            await fetchColors();
-          }
-          colorPixel(message.position, message.color);
+
+          surroundingWorlds.forEach((world) => {
+            if (
+              world &&
+              world.worldId.toString() === message.worldId.toString()
+            ) {
+              const surroundingCanvas = document.querySelector(
+                `canvas[data-world-id="${world.worldId}"]`
+              );
+              if (surroundingCanvas) {
+                const context = surroundingCanvas.getContext('2d');
+                const x = message.position % width;
+                const y = Math.floor(message.position / width);
+                const colorHex = `#${colors[message.color]}FF`;
+                context.fillStyle = colorHex;
+                context.fillRect(x, y, 1, 1);
+              }
+            }
+          });
         } else if (
           message.messageType === 'nftMinted' &&
           activeTab === 'NFTs'
@@ -349,7 +387,7 @@ function App() {
     };
 
     processMessage(lastJsonMessage);
-  }, [lastJsonMessage]);
+  }, [lastJsonMessage, surroundingWorlds, openedWorldId, colors]);
 
   // Canvas
   const [width, _setWidth] = useState(canvasConfig.canvas.width);
