@@ -74,6 +74,7 @@ const StencilsMainSection = (props) => {
           return (
             <StencilItem
               key={index}
+              stencil={stencil}
               openedWorldId={props.openedWorldId}
               openedStencilId={props.openedStencilId}
               setOpenedStencilId={props.setOpenedStencilId}
@@ -97,6 +98,27 @@ const StencilsMainSection = (props) => {
             />
           );
         })}
+        {props.recentFavoriteStencils &&
+          props.recentFavoriteStencils.map((stencil, index) => (
+            <StencilItem
+              key={index}
+              stencil={stencil}
+              {...stencil}
+              openedWorldId={props.openedWorldId}
+              openedStencilId={props.openedStencilId}
+              setOpenedStencilId={props.setOpenedStencilId}
+              address={props.address}
+              account={props.account}
+              estimateInvokeFee={props.estimateInvokeFee}
+              queryAddress={props.queryAddress}
+              updateFavorites={props.updateFavorites}
+              canvasFactoryContract={props.canvasFactoryContract}
+              setTemplateOverlayMode={props.setTemplateOverlayMode}
+              setOverlayTemplate={props.setOverlayTemplate}
+              setActiveTab={props.setActiveTab}
+              image={templateUrl + '/stencils/stencil-' + stencil.hash + '.png'}
+            />
+          ))}
         <PaginationView
           data={props.favoriteStencils}
           stateValue={props.myStencilsPagination}
@@ -157,6 +179,7 @@ const StencilsExpandedSection = (props) => {
             return (
               <StencilItem
                 key={index}
+                stencil={stencil}
                 openedStencilId={props.openedStencilId}
                 setOpenedStencilId={props.setOpenedStencilId}
                 address={props.address}

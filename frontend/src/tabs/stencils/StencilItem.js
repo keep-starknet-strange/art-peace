@@ -8,6 +8,7 @@ import Info from '../../resources/icons/Info.png';
 import { devnetMode } from '../../utils/Consts.js';
 
 const StencilItem = (props) => {
+  console.log('stencil: ', props);
   // TODO: Add creator text
   const [creatorText, setCreatorText] = useState('');
   useEffect(() => {
@@ -109,7 +110,7 @@ const StencilItem = (props) => {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          worldId: props.openedWorldId.toString(),
+          worldId: props.stencil.worldId.toString(),
           stencilId: props.stencilId.toString()
         })
       });
@@ -121,7 +122,7 @@ const StencilItem = (props) => {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          worldId: props.openedWorldId.toString(),
+          worldId: props.stencil.worldId.toString(),
           stencilId: props.stencilId.toString()
         })
       });

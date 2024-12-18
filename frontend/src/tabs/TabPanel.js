@@ -362,6 +362,7 @@ const TabPanel = (props) => {
                   openedWorldId={props.openedWorldId}
                   canvasFactoryContract={props.multiCanvasContract}
                   colors={props.colors}
+                  recentFavoriteStencils={props.recentFavoriteStencils}
                 />
               </div>
             )}

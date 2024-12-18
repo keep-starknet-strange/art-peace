@@ -717,43 +717,31 @@ func getRecentFavoriteStencils(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	worldId := r.URL.Query().Get("worldId")
-	if worldId == "" {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
-		return
-	}
-	worldIdInt, err := strconv.Atoi(worldId)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
-		return
-	}
-
 	query := `
         SELECT 
             stencils.*, 
             COALESCE(favorite_count, 0) AS favorites,
-            COALESCE((SELECT true FROM stencilfavorites WHERE user_address = $1 AND stencilfavorites.stencil_id = stencils.stencil_id AND stencilfavorites.world_id = $2), false) as favorited
+            COALESCE((SELECT true FROM stencilfavorites WHERE user_address = $1 AND stencilfavorites.stencil_id = stencils.stencil_id), false) as favorited
         FROM 
             stencils
         INNER JOIN (
             SELECT 
                 stencil_id,
-                world_id,
                 COUNT(*) AS favorite_count,
                 MAX(key) as latest_favorite
             FROM 
                 stencilfavorites
             WHERE 
-                user_address = $1 AND world_id = $2
+                user_address = $1
             GROUP BY 
-                (world_id, stencil_id)
-        ) stencilfavorites ON stencils.stencil_id = stencilfavorites.stencil_id AND stencils.world_id = stencilfavorites.world_id
+                stencil_id
+        ) stencilfavorites ON stencils.stencil_id = stencilfavorites.stencil_id
         WHERE favorited = true
         ORDER BY 
             stencilfavorites.latest_favorite DESC
         LIMIT 8`
 
-	stencils, err := core.PostgresQueryJson[StencilData](query, address, worldIdInt)
+	stencils, err := core.PostgresQueryJson[StencilData](query, address)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve recent favorite stencils")
 		return
