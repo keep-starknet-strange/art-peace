@@ -34,11 +34,12 @@ const Canvas = (props) => {
 
   useEffect(() => {
     const fetchCanvas = async () => {
+      const canvas = props.canvasRef.current;
+      const context = canvas.getContext('2d');
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, props.width, props.height);
+
       if (props.isEmpty) {
-        const canvas = props.canvasRef.current;
-        const context = canvas.getContext('2d');
-        context.fillStyle = '#f0f0f0';
-        context.fillRect(0, 0, props.width, props.height);
         return;
       }
 
@@ -46,8 +47,7 @@ const Canvas = (props) => {
         if (props.colors.length === 0) {
           return;
         }
-        const canvas = props.canvasRef.current;
-        const context = canvas.getContext('2d');
+        
         context.imageSmoothingEnabled = false;
 
         let getCanvasEndpoint =
@@ -64,6 +64,7 @@ const Canvas = (props) => {
         let oneByteBitOffset = 8 - bitwidth;
         let twoByteBitOffset = 16 - bitwidth;
         let canvasBits = props.width * props.height * bitwidth;
+        
         for (let bitPos = 0; bitPos < canvasBits; bitPos += bitwidth) {
           let bytePos = Math.floor(bitPos / 8);
           let bitOffset = bitPos % 8;
@@ -77,26 +78,22 @@ const Canvas = (props) => {
             dataArray.push(value);
           }
         }
-        const imageDataArray = [];
-        for (let i = 0; i < dataArray.length; i++) {
-          const color = '#' + props.colors[dataArray[i]] + 'FF';
-          const [r, g, b, a] = color.match(/\w\w/g).map((x) => parseInt(x, 16));
-          imageDataArray.push(r, g, b, a);
+
+        if (dataArray.length > 0) {
+          for (let i = 0; i < dataArray.length; i++) {
+            const x = i % props.width;
+            const y = Math.floor(i / props.width);
+            context.fillStyle = `#${props.colors[dataArray[i]]}FF`;
+            context.fillRect(x, y, 1, 1);
+          }
         }
-        const uint8ClampedArray = new Uint8ClampedArray(imageDataArray);
-        const imageData = new ImageData(
-          uint8ClampedArray,
-          props.width,
-          props.height
-        );
-        draw(context, imageData);
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching canvas:', error);
       }
     };
 
     fetchCanvas();
-  }, [props.colors, props.openedWorldId, props.isEmpty]);
+  }, [props.colors, props.width, props.height, props.openedWorldId, props.isEmpty]);
 
   const displayWidth = props.isCenter ? props.width : 256;
   const displayHeight = props.isCenter ? props.height : 192;
