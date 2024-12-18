@@ -182,6 +182,24 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 		PrintIndexerError("processCanvasCreatedEvent", "Failed to encode image", filename, err)
 		return
 	}
+
+	// After world creation
+	var message = map[string]interface{}{
+		"messageType": "newWorld",
+		"worldId":     canvasId,
+		"world": map[string]interface{}{
+			"worldId":           canvasId,
+			"host":              host,
+			"name":              name,
+			"uniqueName":        uniqueName,
+			"width":             width,
+			"height":            height,
+			"timeBetweenPixels": timeBetweenPixels,
+			"startTime":         startTime,
+			"endTime":           endTime,
+		},
+	}
+	routeutils.SendWebSocketMessage(message)
 }
 
 func revertCanvasCreatedEvent(event IndexerEvent) {
