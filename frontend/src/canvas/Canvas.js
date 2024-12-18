@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import './Canvas.css';
 import { backendUrl } from '../utils/Consts.js';
 import canvasConfig from '../configs/canvas.config.json';
@@ -9,15 +9,6 @@ const Canvas = (props) => {
       console.error('Invalid canvas dimensions:', props.width, props.height);
     }
   }, [props.width, props.height]);
-
-  const draw = useCallback(
-    (ctx, imageData) => {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.imageSmoothingEnabled = false;
-      ctx.putImageData(imageData, 0, 0);
-    },
-    [props.width, props.height]
-  );
 
   const isCenterCanvas =
     props.style &&
@@ -47,7 +38,7 @@ const Canvas = (props) => {
         if (props.colors.length === 0) {
           return;
         }
-        
+
         context.imageSmoothingEnabled = false;
 
         let getCanvasEndpoint =
@@ -64,7 +55,7 @@ const Canvas = (props) => {
         let oneByteBitOffset = 8 - bitwidth;
         let twoByteBitOffset = 16 - bitwidth;
         let canvasBits = props.width * props.height * bitwidth;
-        
+
         for (let bitPos = 0; bitPos < canvasBits; bitPos += bitwidth) {
           let bytePos = Math.floor(bitPos / 8);
           let bitOffset = bitPos % 8;
@@ -93,7 +84,13 @@ const Canvas = (props) => {
     };
 
     fetchCanvas();
-  }, [props.colors, props.width, props.height, props.openedWorldId, props.isEmpty]);
+  }, [
+    props.colors,
+    props.width,
+    props.height,
+    props.openedWorldId,
+    props.isEmpty
+  ]);
 
   const displayWidth = props.isCenter ? props.width : 256;
   const displayHeight = props.isCenter ? props.height : 192;
