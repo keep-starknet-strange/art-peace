@@ -96,6 +96,9 @@ const WorldsMainSection = (props) => {
           data={props.favoriteWorlds}
           stateValue={props.myWorldsPagination}
           setState={props.setMyWorldsPagination}
+          style={{
+            marginBottom: '25px'
+          }}
         />
         {props.queryAddress !== '0' && (
           <div

@@ -1183,12 +1183,28 @@ function App() {
         return;
       }
 
-      // Fetch recent favorite stencils
-      const stencilsResponse = await fetchWrapper(
-        `get-recent-favorite-stencils?address=${queryAddress}`
-      );
-      if (stencilsResponse.data) {
-        setRecentFavoriteStencils(stencilsResponse.data);
+      try {
+        // Fetch recent favorite worlds
+        const worldsResponse = await fetchWrapper(
+          `get-recent-favorite-worlds?address=${queryAddress}`
+        );
+        if (worldsResponse.data) {
+          setRecentFavoriteWorlds(worldsResponse.data?.slice(0, 8));
+        } else {
+          setRecentFavoriteWorlds([]);
+        }
+
+        // Fetch recent favorite stencils
+        const stencilsResponse = await fetchWrapper(
+          `get-recent-favorite-stencils?address=${queryAddress}`
+        );
+        if (stencilsResponse.data) {
+          setRecentFavoriteStencils(stencilsResponse.data?.slice(0, 8));
+        } else {
+          setRecentFavoriteStencils([]);
+        }
+      } catch (error) {
+        console.log('error: ', error);
       }
     };
 

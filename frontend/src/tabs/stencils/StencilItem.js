@@ -97,10 +97,15 @@ const StencilItem = (props) => {
     if (!devnetMode) {
       if (favorited) {
         await unfavoriteStencilCall(props.stencilId);
-        props.updateFavorites(props.stencilId, favorites - 1, false);
+        props.updateFavorites(
+          props.stencilId,
+          favorites - 1,
+          false,
+          props.hash
+        );
       } else {
         await favoriteStencilCall(props.stencilId);
-        props.updateFavorites(props.stencilId, favorites + 1, true);
+        props.updateFavorites(props.stencilId, favorites + 1, true, props.hash);
       }
       return;
     }
@@ -115,7 +120,7 @@ const StencilItem = (props) => {
         })
       });
       if (favoriteResponse.result) {
-        props.updateFavorites(props.stencilId, favorites + 1, true);
+        props.updateFavorites(props.stencilId, favorites + 1, true, props.hash);
       }
     } else {
       let unfavoriteResponse = await fetchWrapper('unfavorite-stencil-devnet', {
@@ -127,7 +132,12 @@ const StencilItem = (props) => {
         })
       });
       if (unfavoriteResponse.result) {
-        props.updateFavorites(props.stencilId, favorites - 1, false);
+        props.updateFavorites(
+          props.stencilId,
+          favorites - 1,
+          false,
+          props.hash
+        );
       }
     }
   };

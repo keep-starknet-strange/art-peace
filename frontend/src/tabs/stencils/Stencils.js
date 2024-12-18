@@ -75,6 +75,7 @@ const StencilsMainSection = (props) => {
             <StencilItem
               key={index}
               stencil={stencil}
+              {...stencil}
               openedWorldId={props.openedWorldId}
               openedStencilId={props.openedStencilId}
               setOpenedStencilId={props.setOpenedStencilId}
@@ -123,6 +124,9 @@ const StencilsMainSection = (props) => {
           data={props.favoriteStencils}
           stateValue={props.myStencilsPagination}
           setState={props.setMyStencilsPagination}
+          style={{
+            marginBottom: '10px'
+          }}
         />
         {props.queryAddress !== '0' && (
           <div
@@ -460,16 +464,18 @@ const Stencils = (props) => {
     getStencil();
   }, [props.openedStencilId]);
 
-  const updateFavorites = (stencilId, favorites, favorited) => {
+  const updateFavorites = (stencilId, favorites, favorited, hash) => {
+    // Update favorite stencils array
     let newFavoriteStencils = favoriteStencils.map((stencil) => {
-      if (stencil.stencilId === stencilId) {
+      if (stencil.stencilId === stencilId && stencil.hash === hash) {
         return { ...stencil, favorites: favorites, favorited: favorited };
       }
       return stencil;
     });
 
+    // Update all stencils array
     let newAllStencils = allStencils.map((stencil) => {
-      if (stencil.stencilId === stencilId) {
+      if (stencil.stencilId === stencilId && stencil.hash === hash) {
         return { ...stencil, favorites: favorites, favorited: favorited };
       }
       return stencil;

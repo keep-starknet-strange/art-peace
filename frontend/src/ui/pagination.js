@@ -32,6 +32,7 @@ export function PaginationView(props) {
           title='More'
           className='Text__medium Button__primary'
           onClick={handleLoadmore}
+          style={props.style}
         >
           more...
         </div>
