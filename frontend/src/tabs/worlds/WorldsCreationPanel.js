@@ -219,6 +219,11 @@ const WorldsCreationPanel = (props) => {
     const submitStart = isCompetitionWorld ? getCompetitionStart() : start;
     const submitEnd = isCompetitionWorld ? getCompetitionEnd() : end;
 
+    // Check if there are any existing worlds
+    const surroundingResponse = await fetchWrapper('get-all-worlds');
+    const isFirstWorld =
+      !surroundingResponse.data || surroundingResponse.data.length === 0;
+
     if (!devnetMode) {
       await createWorldCall(
         worldName,
@@ -230,7 +235,13 @@ const WorldsCreationPanel = (props) => {
         submitStart,
         submitEnd
       );
-      // Redirect will happen in createWorldCall
+
+      if (isFirstWorld) {
+        window.location.href = `/worlds/${worldSlug}`;
+      } else {
+        closePanel();
+        props.setActiveTab('Worlds');
+      }
       return;
     }
 
@@ -253,8 +264,12 @@ const WorldsCreationPanel = (props) => {
     });
     if (response.result) {
       console.log(response.result);
-      // Redirect to the new world in devnet mode too
-      window.location.href = `/worlds/${worldSlug}`;
+      if (isFirstWorld) {
+        window.location.href = `/worlds/${worldSlug}`;
+      } else {
+        closePanel();
+        props.setActiveTab('Worlds');
+      }
     }
   };
 
