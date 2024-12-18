@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/png"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -589,16 +590,28 @@ func addStencilDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Add the stencil
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.AddStencilDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 	cmd := exec.Command(shellCmd, contract, "add_stencil", strconv.Itoa(worldId), hash, strconv.Itoa(width), strconv.Itoa(height), strconv.Itoa(position))
-	_, err = cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Printf("Add stencil command failed: %v\nOutput: %s\nCommand: %v", err, string(output), cmd.String())
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to add stencil to devnet")
 		return
 	}
 
-	routeutils.WriteResultJson(w, "Stencil added to devnet")
+	// Favorite the newly created stencil
+	shellCmd = core.ArtPeaceBackend.BackendConfig.Scripts.FavoriteStencilDevnet
+	cmd = exec.Command(shellCmd, contract, "favorite_stencil", strconv.Itoa(worldId), strconv.Itoa(position))
+	output, err = cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("Favorite stencil command failed: %v\nOutput: %s\nCommand: %v", err, string(output), cmd.String())
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to favorite newly created stencil")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Stencil added and favorited")
 }
 
 func removeStencilDevnet(w http.ResponseWriter, r *http.Request) {
