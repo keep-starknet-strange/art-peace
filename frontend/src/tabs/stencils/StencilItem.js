@@ -142,11 +142,11 @@ const StencilItem = (props) => {
     }
   };
 
-  const [favorites, setFavorites] = useState(props.favorites);
-  const [favorited, setFavorited] = useState(props.favorited);
+  const [favorites, setFavorites] = useState(props.favorites || 0);
+  const [favorited, setFavorited] = useState(props.favorited || false);
   useEffect(() => {
-    setFavorites(props.favorites);
-    setFavorited(props.favorited);
+    setFavorites(props.favorites || 0);
+    setFavorited(props.favorited || false);
   }, [props.favorites, props.favorited]);
 
   // TODO: Add share functionality
