@@ -125,14 +125,17 @@ pub mod CanvasFactory {
             let canvas_id = self.canvas_count.read();
             self.canvases.write(canvas_id, canvas_address);
             self.canvas_count.write(canvas_id + 1);
-            
+
             // Auto-favorite the canvas for the creator
             let caller = get_caller_address();
             self.canvas_favorites.write((canvas_id, caller), true);
             self.emit(Event::CanvasFavorited(CanvasFavorited { canvas_id, user: caller }));
-            
+
             // Emit the canvas created event
-            self.emit(Event::CanvasCreated(CanvasCreated { canvas_id, canvas_address, init_params }));
+            self
+                .emit(
+                    Event::CanvasCreated(CanvasCreated { canvas_id, canvas_address, init_params })
+                );
             (canvas_address, canvas_id)
         }
 
