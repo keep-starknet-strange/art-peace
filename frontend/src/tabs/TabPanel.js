@@ -336,6 +336,7 @@ const TabPanel = (props) => {
                   setWorldsCreationMode={props.setWorldsCreationMode}
                   openedWorldId={props.openedWorldId}
                   canvasFactoryContract={props.multiCanvasContract}
+                  recentFavoriteWorlds={props.recentFavoriteWorlds}
                 />
               </div>
             )}

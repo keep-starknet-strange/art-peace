@@ -1170,6 +1170,43 @@ function App() {
     fetchPixelData();
   }, [overlayTemplate]);
 
+  // Add new state for recent favorites
+  const [recentFavoriteWorlds, setRecentFavoriteWorlds] = useState([]);
+  const [recentFavoriteStencils, setRecentFavoriteStencils] = useState([]);
+
+  // Add effect to fetch recent favorites
+  useEffect(() => {
+    const fetchRecentFavorites = async () => {
+      if (queryAddress === '0') {
+        setRecentFavoriteWorlds([]);
+        setRecentFavoriteStencils([]);
+        return;
+      }
+
+      // Fetch recent favorite worlds
+      const worldsResponse = await fetchWrapper(
+        `get-recent-favorite-worlds?address=${queryAddress}`
+      );
+      if (worldsResponse.data) {
+        setRecentFavoriteWorlds(worldsResponse.data);
+      }
+
+      // Fetch recent favorite stencils if we have an opened world
+      if (openedWorldId !== null) {
+        const stencilsResponse = await fetchWrapper(
+          `get-recent-favorite-stencils?address=${queryAddress}&worldId=${openedWorldId}`
+        );
+        if (stencilsResponse.data) {
+          setRecentFavoriteStencils(stencilsResponse.data);
+        }
+      } else {
+        setRecentFavoriteStencils([]);
+      }
+    };
+
+    fetchRecentFavorites();
+  }, [queryAddress, openedWorldId]);
+
   return (
     <div className='App'>
       <div className='App--background'>
@@ -1376,6 +1413,8 @@ function App() {
             width={width}
             height={height}
             isDefending={isDefending}
+            recentFavoriteWorlds={recentFavoriteWorlds}
+            // recentFavoriteStencils={recentFavoriteStencils}
           />
         </div>
         <div className='App__footer'>
