@@ -230,8 +230,10 @@ const WorldsCreationPanel = (props) => {
         submitStart,
         submitEnd
       );
+      // Redirect will happen in createWorldCall
       return;
     }
+
     const host = '0x' + props.queryAddress;
     let createWorldEndpoint = 'create-canvas-devnet';
     const response = await fetchWrapper(createWorldEndpoint, {
@@ -251,8 +253,8 @@ const WorldsCreationPanel = (props) => {
     });
     if (response.result) {
       console.log(response.result);
-      closePanel();
-      props.setActiveTab('Worlds');
+      // Redirect to the new world in devnet mode too
+      window.location.href = `/worlds/${worldSlug}`;
     }
   };
 
