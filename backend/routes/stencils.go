@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"image/color"
@@ -105,20 +106,27 @@ func getStencils(w http.ResponseWriter, r *http.Request) {
 	query := `
         SELECT 
             stencils.*, 
-            COALESCE(favortie_count, 0) AS favorites,
-            COALESCE((SELECT true FROM stencilfavorites WHERE user_address = $1 AND stencilfavorites.stencil_id = stencils.stencil_id AND stencilfavorites.world_id = $2), false) as favorited
+            COALESCE(favorite_count, 0) AS favorites,
+            COALESCE(
+                (SELECT true FROM stencilfavorites 
+                 WHERE user_address = $1 
+                 AND stencilfavorites.stencil_id = stencils.stencil_id 
+                 AND stencilfavorites.world_id = stencils.world_id), 
+                false
+            ) as favorited
         FROM 
             stencils
         LEFT JOIN (
             SELECT 
                 stencil_id,
-                world_id, 
-                COUNT(*) AS favorites
+                world_id,
+                COUNT(*) AS favorite_count
             FROM 
                 stencilfavorites
             GROUP BY 
-                (world_id, stencil_id)
-        ) stencilfavorites ON stencils.world_id = stencilfavorites.world_id AND stencils.stencil_id = stencilfavorites.stencil_id
+                stencil_id, world_id
+        ) sf ON stencils.stencil_id = sf.stencil_id AND stencils.world_id = sf.world_id
+        WHERE stencils.world_id = $2
         ORDER BY stencils.stencil_id DESC
         LIMIT $3 OFFSET $4`
 	stencils, err := core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
@@ -675,12 +683,31 @@ func favoriteStencilDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userAddress := (*jsonBody)["userAddress"]
+	if userAddress == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing user address")
+		return
+	}
+
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.FavoriteStencilDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 	cmd := exec.Command(shellCmd, contract, "favorite_stencil", strconv.Itoa(worldId), strconv.Itoa(stencilId))
 	_, err = cmd.Output()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to favorite stencil in devnet")
+		return
+	}
+
+	// Add to stencilfavorites table
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(
+		context.Background(),
+		"INSERT INTO stencilfavorites (stencil_id, world_id, user_address) VALUES ($1, $2, $3)",
+		stencilId,
+		worldId,
+		userAddress,
+	)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert favorite")
 		return
 	}
 
@@ -711,12 +738,31 @@ func unfavoriteStencilDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userAddress := (*jsonBody)["userAddress"]
+	if userAddress == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing user address")
+		return
+	}
+
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.UnfavoriteStencilDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 	cmd := exec.Command(shellCmd, contract, "unfavorite_stencil", strconv.Itoa(worldId), strconv.Itoa(stencilId))
 	_, err = cmd.Output()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to unfavorite stencil in devnet")
+		return
+	}
+
+	// Remove from stencilfavorites table
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(
+		context.Background(),
+		"DELETE FROM stencilfavorites WHERE stencil_id = $1 AND world_id = $2 AND user_address = $3",
+		stencilId,
+		worldId,
+		userAddress,
+	)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to remove favorite")
 		return
 	}
 

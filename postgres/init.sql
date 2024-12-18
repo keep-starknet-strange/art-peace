@@ -211,9 +211,9 @@ CREATE TABLE StencilFavorites (
   user_address char(64) NOT NULL,
   UNIQUE (stencil_id, world_id, user_address)
 );
-CREATE INDEX stencilFavorites_stencil_id_index ON StencilFavorites (stencil_id);
-CREATE INDEX stencilFavorites_world_id_index ON StencilFavorites (world_id);
-CREATE INDEX stencilFavorites_user_index ON StencilFavorites (user_address);
+CREATE INDEX stencilfavorites_stencil_id_index ON StencilFavorites (stencil_id);
+CREATE INDEX stencilfavorites_world_id_index ON StencilFavorites (world_id);
+CREATE INDEX stencilfavorites_user_index ON StencilFavorites (user_address);
 
 CREATE TABLE NFTs (
   token_id integer NOT NULL PRIMARY KEY,

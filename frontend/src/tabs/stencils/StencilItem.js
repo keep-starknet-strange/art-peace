@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { CSSTransition } from 'react-transition-group';
 import './StencilItem.css';
 import { fetchWrapper } from '../../services/apiService';
@@ -9,34 +9,6 @@ import { devnetMode } from '../../utils/Consts.js';
 
 const StencilItem = (props) => {
   console.log('stencil: ', props);
-  // TODO: Add creator text
-  const [creatorText, setCreatorText] = useState('');
-  useEffect(() => {
-    async function fetchUsernameUrl() {
-      const getUsernameUrl = `get-username?address=${props.minter}`;
-      const result = await fetchWrapper(getUsernameUrl);
-      if (result.data === null || result.data === '') {
-        if (props.host.length > 12) {
-          setCreatorText(
-            props.host.substring(0, 4) +
-              '...' +
-              props.host.substring(props.host.length - 4, props.host.length)
-          );
-        } else {
-          setCreatorText(props.host);
-        }
-      } else {
-        if (result.data.length > 11) {
-          setCreatorText(result.data.substring(0, 8) + '...');
-        } else {
-          setCreatorText(result.data);
-        }
-      }
-    }
-    if (props.creator) {
-      fetchUsernameUrl();
-    }
-  }, [props.creator]);
 
   const favoriteStencilCall = async (stencilId) => {
     if (devnetMode) return;
@@ -94,33 +66,30 @@ const StencilItem = (props) => {
       return;
     }
     event.preventDefault();
+
     if (!devnetMode) {
-      if (favorited) {
+      if (props.favorited) {
         await unfavoriteStencilCall(props.stencilId);
-        props.updateFavorites(
-          props.stencilId,
-          favorites - 1,
-          false,
-          props.hash
-        );
+        props.updateFavorites(props.stencilId, props.favorites - 1, false);
       } else {
         await favoriteStencilCall(props.stencilId);
-        props.updateFavorites(props.stencilId, favorites + 1, true, props.hash);
+        props.updateFavorites(props.stencilId, props.favorites + 1, true);
       }
       return;
     }
 
-    if (!favorited) {
+    if (!props.favorited) {
       let favoriteResponse = await fetchWrapper('favorite-stencil-devnet', {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
           worldId: props.stencil.worldId.toString(),
-          stencilId: props.stencilId.toString()
+          stencilId: props.stencilId.toString(),
+          userAddress: props.queryAddress
         })
       });
       if (favoriteResponse.result) {
-        props.updateFavorites(props.stencilId, favorites + 1, true, props.hash);
+        props.updateFavorites(props.stencilId, props.favorites + 1, true);
       }
     } else {
       let unfavoriteResponse = await fetchWrapper('unfavorite-stencil-devnet', {
@@ -128,38 +97,15 @@ const StencilItem = (props) => {
         method: 'POST',
         body: JSON.stringify({
           worldId: props.stencil.worldId.toString(),
-          stencilId: props.stencilId.toString()
+          stencilId: props.stencilId.toString(),
+          userAddress: props.queryAddress
         })
       });
       if (unfavoriteResponse.result) {
-        props.updateFavorites(
-          props.stencilId,
-          favorites - 1,
-          false,
-          props.hash
-        );
+        props.updateFavorites(props.stencilId, props.favorites - 1, false);
       }
     }
   };
-
-  const [favorites, setFavorites] = useState(props.favorites);
-  const [favorited, setFavorited] = useState(props.favorited);
-  useEffect(() => {
-    setFavorites(props.favorites);
-    setFavorited(props.favorited);
-  }, [props.favorites, props.favorited]);
-
-  // TODO: Add share functionality
-  /*
-  function handleShare() {
-    const worldLink = `${window.location.origin}/worlds/${props.stencilId}`;
-    const twitterShareUrl = `https://x.com/intent/post?text=${encodeURIComponent('Gm. Join our forces! Draw on our art/peace World! @art_peace_sn 🗺️')}&url=${encodeURIComponent(worldLink)}`;
-    window.open(twitterShareUrl, '_blank');
-  }
-                <div onClick={handleShare} className='WorldItem__button'>
-                  <img className='Share__icon' src={ShareIcon} alt='Share' />
-                </div>
-  */
 
   const selectStencil = (e) => {
     if (
@@ -201,15 +147,17 @@ const StencilItem = (props) => {
               <div></div>
               <div className='WorldItem__buttons2'>
                 <div
-                  className={`WorldItem__button ${favorited ? 'Favorite__button--favorited' : ''} ${props.queryAddress === '0' ? 'WorldItem__button--disabled' : ''}`}
+                  className={`WorldItem__button ${
+                    props.favorited ? 'Favorite__button--favorited' : ''
+                  } ${props.queryAddress === '0' ? 'WorldItem__button--disabled' : ''}`}
                   onClick={handleFavoritePress}
                 >
                   <img
                     className='Favorite__icon'
-                    src={favorited ? FavoritedIcon : FavoriteIcon}
+                    src={props.favorited ? FavoritedIcon : FavoriteIcon}
                     alt='Favorite'
                   />
-                  <p className='Favorite__count'>{favorites}</p>
+                  <p className='Favorite__count'>{props.favorites}</p>
                 </div>
                 <div
                   onClick={() => setShowInfo(!showInfo)}
@@ -273,7 +221,7 @@ const StencilItem = (props) => {
           >
             <p>Creator</p>
             <p style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {creatorText}
+              {props.creatorText}
             </p>
           </div>
         </div>

@@ -464,18 +464,16 @@ const Stencils = (props) => {
     getStencil();
   }, [props.openedStencilId]);
 
-  const updateFavorites = (stencilId, favorites, favorited, hash) => {
-    // Update favorite stencils array
+  const updateFavorites = (stencilId, favorites, favorited) => {
     let newFavoriteStencils = favoriteStencils.map((stencil) => {
-      if (stencil.stencilId === stencilId && stencil.hash === hash) {
+      if (stencil.stencilId === stencilId) {
         return { ...stencil, favorites: favorites, favorited: favorited };
       }
       return stencil;
     });
 
-    // Update all stencils array
     let newAllStencils = allStencils.map((stencil) => {
-      if (stencil.stencilId === stencilId && stencil.hash === hash) {
+      if (stencil.stencilId === stencilId) {
         return { ...stencil, favorites: favorites, favorited: favorited };
       }
       return stencil;
