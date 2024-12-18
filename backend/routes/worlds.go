@@ -393,7 +393,10 @@ func getTopWorlds(w http.ResponseWriter, r *http.Request) {
         SELECT 
             worlds.*, 
             COALESCE(worldfavorites.favorite_count, 0) AS favorites,
-            COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false) as favorited
+            CASE 
+                WHEN $1 = '0' THEN false
+                ELSE COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false)
+            END as favorited
         FROM 
             worlds
         LEFT JOIN (
@@ -408,6 +411,7 @@ func getTopWorlds(w http.ResponseWriter, r *http.Request) {
         ORDER BY 
             favorites DESC
         LIMIT $2 OFFSET $3`
+
 	worlds, err := core.PostgresQueryJson[WorldData](query, address, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
