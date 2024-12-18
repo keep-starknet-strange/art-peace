@@ -99,8 +99,8 @@ const StencilsMainSection = (props) => {
             />
           );
         })}
-        {props.recentFavoriteStencils &&
-          props.recentFavoriteStencils.map((stencil, index) => (
+        {props.topStencils &&
+          props.topStencils.map((stencil, index) => (
             <StencilItem
               key={index}
               stencil={stencil}
@@ -519,6 +519,7 @@ const Stencils = (props) => {
       handleFileChange={handleFileChange}
       setTemplateOverlayMode={props.setTemplateOverlayMode}
       setOverlayTemplate={props.setOverlayTemplate}
+      topStencils={props.topStencils}
     />
   );
 };

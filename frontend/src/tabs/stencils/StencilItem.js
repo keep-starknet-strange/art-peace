@@ -8,8 +8,6 @@ import Info from '../../resources/icons/Info.png';
 import { devnetMode } from '../../utils/Consts.js';
 
 const StencilItem = (props) => {
-  console.log('stencil: ', props);
-
   const favoriteStencilCall = async (stencilId) => {
     if (devnetMode) return;
     if (!props.address || !props.canvasFactoryContract || !props.account)

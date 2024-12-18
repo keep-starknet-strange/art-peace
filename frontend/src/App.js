@@ -1171,44 +1171,45 @@ function App() {
   }, [overlayTemplate]);
 
   // Add new state for recent favorites
-  const [recentFavoriteWorlds, setRecentFavoriteWorlds] = useState([]);
-  const [recentFavoriteStencils, setRecentFavoriteStencils] = useState([]);
+  const [topWorlds, setTopWorlds] = useState([]);
+  const [topStencils, setTopStencils] = useState([]);
 
   // Add effect to fetch recent favorites
   useEffect(() => {
-    const fetchRecentFavorites = async () => {
-      if (queryAddress === '0') {
-        setRecentFavoriteWorlds([]);
-        setRecentFavoriteStencils([]);
-        return;
-      }
-
+    const fetchTopItems = async () => {
       try {
-        // Fetch recent favorite worlds
+        // Fetch top worlds
         const worldsResponse = await fetchWrapper(
-          `get-recent-favorite-worlds?address=${queryAddress}`
+          `get-top-worlds?address=${queryAddress}&page=1&pageLength=8`
         );
         if (worldsResponse.data) {
-          setRecentFavoriteWorlds(worldsResponse.data?.slice(0, 8));
+          setTopWorlds(worldsResponse.data);
         } else {
-          setRecentFavoriteWorlds([]);
+          setTopWorlds([]);
         }
 
-        // Fetch recent favorite stencils
+        // Fetch top stencils
         const stencilsResponse = await fetchWrapper(
-          `get-recent-favorite-stencils?address=${queryAddress}`
+          `get-top-stencils?address=${queryAddress}&page=1&pageLength=8`
         );
         if (stencilsResponse.data) {
-          setRecentFavoriteStencils(stencilsResponse.data?.slice(0, 8));
+          setTopStencils(stencilsResponse.data);
         } else {
-          setRecentFavoriteStencils([]);
+          setTopStencils([]);
         }
+
+        console.log({
+          topWorlds: topWorlds,
+          topStencils: topStencils
+        });
       } catch (error) {
         console.log('error: ', error);
+        setTopWorlds([]);
+        setTopStencils([]);
       }
     };
 
-    fetchRecentFavorites();
+    fetchTopItems();
   }, [queryAddress]);
 
   return (
@@ -1417,8 +1418,8 @@ function App() {
             width={width}
             height={height}
             isDefending={isDefending}
-            recentFavoriteWorlds={recentFavoriteWorlds}
-            recentFavoriteStencils={recentFavoriteStencils}
+            topWorlds={topWorlds}
+            topStencils={topStencils}
           />
         </div>
         <div className='App__footer'>

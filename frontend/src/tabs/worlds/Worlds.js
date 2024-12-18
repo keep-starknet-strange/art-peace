@@ -40,7 +40,7 @@ const WorldsMainSection = (props) => {
             Please login to view your Worlds
           </p>
         )}
-        {props.recentFavoriteWorlds?.map((world) => {
+        {props.topWorlds?.map((world) => {
           return (
             <WorldItem
               key={world.worldId}
@@ -373,6 +373,7 @@ const Worlds = (props) => {
       isMobile={props.isMobile}
       gameEnded={props.gameEnded}
       canvasFactoryContract={props.canvasFactoryContract}
+      topWorlds={props.topWorlds}
     />
   );
 };
