@@ -306,3 +306,7 @@
   );
   width: 100;
 }
+
+.WorldsCreationPanel__competition__value {
+  padding-left: 1rem;
+}
