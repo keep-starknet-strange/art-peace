@@ -113,6 +113,8 @@ pub mod MultiCanvas {
         stencil_counts: LegacyMap::<u32, u32>,
         // Map: (canvas_id, stencil_id) -> stencil metadata
         stencils: LegacyMap::<(u32, u32), StencilMetadata>,
+        // Maps: (canvas_id, stencil_id, user addr) -> if favorited
+        stencil_favorites: LegacyMap::<(u32, u32, ContractAddress), bool>
     }
 
     #[event]
@@ -327,6 +329,11 @@ pub mod MultiCanvas {
             self.canvas_count.write(canvas_id + 1);
             self.unique_names.write(init_params.unique_name, true);
             self.emit(CanvasCreated { canvas_id, init_params });
+
+            // Auto-favorite the canvas for the creator
+            let caller = get_caller_address();
+            self.canvas_favorites.write((canvas_id, caller), true);
+            self.emit(Event::CanvasFavorited(CanvasFavorited { canvas_id, user: caller }));
             canvas_id
         }
 
@@ -490,6 +497,12 @@ pub mod MultiCanvas {
             self.stencils.write((canvas_id, stencil_id), stencil.clone());
             self.stencil_counts.write(canvas_id, stencil_id + 1);
             self.emit(StencilAdded { canvas_id, stencil_id, stencil });
+
+            // Auto-favorite the stencil for the creator
+            let caller = get_caller_address();
+            self.stencil_favorites.write((canvas_id, stencil_id, caller), true);
+            self.emit(StencilFavorited { canvas_id, stencil_id, user: caller });
+
             stencil_id
         }
 
@@ -502,12 +515,20 @@ pub mod MultiCanvas {
 
         fn favorite_stencil(ref self: ContractState, canvas_id: u32, stencil_id: u32) {
             let caller = get_caller_address();
-            self.emit(StencilFavorited { canvas_id, stencil_id, user: caller, });
+            if self.stencil_favorites.read((canvas_id, stencil_id, caller)) {
+                return;
+            }
+            self.stencil_favorites.write((canvas_id, stencil_id, caller), true);
+            self.emit(StencilFavorited { canvas_id, stencil_id, user: caller });
         }
 
         fn unfavorite_stencil(ref self: ContractState, canvas_id: u32, stencil_id: u32) {
             let caller = get_caller_address();
-            self.emit(StencilUnfavorited { canvas_id, stencil_id, user: caller, });
+            if !self.stencil_favorites.read((canvas_id, stencil_id, caller)) {
+                return;
+            }
+            self.stencil_favorites.write((canvas_id, stencil_id, caller), false);
+            self.emit(StencilUnfavorited { canvas_id, stencil_id, user: caller });
         }
     }
 
