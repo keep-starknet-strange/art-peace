@@ -38,29 +38,57 @@ import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
   const worldsMode = true;
-  const [openedWorldId, setOpenedWorldId] = useState(null);
+  const [openedWorldId, setOpenedWorldId] = useState(0);
   const [activeWorld, setActiveWorld] = useState(null);
+  const [surroundingWorlds, setSurroundingWorlds] = useState([]);
 
   // Page management
   useEffect(() => {
     const getWorldId = async () => {
+      let currentWorldId = 0;
+
       if (location.pathname.startsWith('/worlds/')) {
         let worldSlug = location.pathname.split('/worlds/')[1];
         let response = await fetchWrapper(
           `get-world-id?worldName=${worldSlug}`
         );
+
         if (response.data === undefined || response.data === null) {
           setActiveWorld(null);
-          setOpenedWorldId(null);
-          return;
+          setOpenedWorldId(0);
+        } else {
+          setActiveWorld(response.data);
+          setOpenedWorldId(response.data);
+          currentWorldId = response.data;
+        }
+      } else {
+        const response = await fetchWrapper('get-world?worldId=0');
+        if (response.data) {
+          setActiveWorld(response.data);
+        }
+        setOpenedWorldId(0);
+      }
+
+      // Always fetch surrounding worlds
+      const surroundingResponse = await fetchWrapper('get-all-worlds');
+      if (surroundingResponse.data) {
+        // Filter out current world and take up to 12 worlds
+        const otherWorlds = surroundingResponse.data
+          .filter((world) => world.worldId !== currentWorldId)
+          .slice(0, 12);
+
+        // Pad array with null values if less than 12 worlds
+        const paddedWorlds = [...otherWorlds];
+        while (paddedWorlds.length < 12) {
+          paddedWorlds.push(null);
         }
 
-        setOpenedWorldId(response.data);
+        setSurroundingWorlds(paddedWorlds);
       } else {
-        setActiveWorld(null);
-        setOpenedWorldId(null);
+        setSurroundingWorlds(Array(12).fill(null)); // Fill with 12 null values if no worlds found
       }
     };
+
     getWorldId();
   }, [location.pathname]);
 
@@ -249,14 +277,45 @@ function App() {
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
+      // Subscribe to general channel
       sendJsonMessage({
         event: 'subscribe',
         data: {
           channel: 'general'
         }
       });
+
+      // Subscribe to main world channel
+      if (openedWorldId !== null) {
+        sendJsonMessage({
+          event: 'subscribe',
+          data: {
+            channel: `world-${openedWorldId}`
+          }
+        });
+      }
+
+      // Subscribe to surrounding world channels
+      surroundingWorlds.forEach((world) => {
+        if (world && world.worldId) {
+          sendJsonMessage({
+            event: 'subscribe',
+            data: {
+              channel: `world-${world.worldId}`
+            }
+          });
+        }
+      });
+
+      // Add subscription for new worlds
+      sendJsonMessage({
+        event: 'subscribe',
+        data: {
+          channel: 'worlds'
+        }
+      });
     }
-  }, [readyState]);
+  }, [readyState, openedWorldId, surroundingWorlds]);
 
   // Colors
   const staticColors = canvasConfig.colors;
@@ -292,23 +351,61 @@ function App() {
 
   useEffect(() => {
     const processMessage = async (message) => {
+      console.log('WebSocket message received:', message);
       if (message) {
-        // Check the message type and handle accordingly
         if (message.messageType === 'colorPixel') {
           if (message.color >= colors.length) {
-            // Get new colors from backend
             await fetchColors();
           }
           colorPixel(message.position, message.color);
         } else if (message.messageType === 'colorWorldPixel') {
-          if (message.worldId.toString() !== openedWorldId) {
-            return;
+          if (message.worldId.toString() === openedWorldId.toString()) {
+            if (message.color >= colors.length) {
+              await fetchColors();
+            }
+            colorPixel(message.position, message.color);
           }
-          if (message.color >= colors.length) {
-            // Get new colors from backend
-            await fetchColors();
+
+          surroundingWorlds.forEach((world) => {
+            if (
+              world &&
+              world.worldId.toString() === message.worldId.toString()
+            ) {
+              const surroundingCanvas = document.querySelector(
+                `canvas[data-world-id="${world.worldId}"]`
+              );
+              if (surroundingCanvas) {
+                const context = surroundingCanvas.getContext('2d');
+                const x = message.position % width;
+                const y = Math.floor(message.position / width);
+                const colorHex = `#${colors[message.color]}FF`;
+                context.fillStyle = colorHex;
+                context.fillRect(x, y, 1, 1);
+              }
+            }
+          });
+        } else if (message.messageType === 'newWorld') {
+          console.log('New world message received:', message);
+          // Force refresh of surrounding worlds
+          try {
+            const surroundingResponse = await fetchWrapper('get-all-worlds');
+            if (surroundingResponse.data) {
+              // Filter out current world and take up to 12 worlds
+              const otherWorlds = surroundingResponse.data
+                .filter((world) => world.worldId !== openedWorldId)
+                .slice(0, 12);
+
+              // Pad array with null values if less than 12 worlds
+              const paddedWorlds = [...otherWorlds];
+              while (paddedWorlds.length < 12) {
+                paddedWorlds.push(null);
+              }
+
+              setSurroundingWorlds(paddedWorlds);
+            }
+          } catch (error) {
+            console.error('Error fetching surrounding worlds:', error);
           }
-          colorPixel(message.position, message.color);
         } else if (
           message.messageType === 'nftMinted' &&
           activeTab === 'NFTs'
@@ -321,11 +418,11 @@ function App() {
     };
 
     processMessage(lastJsonMessage);
-  }, [lastJsonMessage]);
+  }, [lastJsonMessage, openedWorldId, colors]);
 
   // Canvas
-  const [width, setWidth] = useState(canvasConfig.canvas.width);
-  const [height, setHeight] = useState(canvasConfig.canvas.height);
+  const [width, _setWidth] = useState(canvasConfig.canvas.width);
+  const [height, _setHeight] = useState(canvasConfig.canvas.height);
 
   const canvasRef = useRef(null);
   const extraPixelsCanvasRef = useRef(null);
@@ -335,6 +432,12 @@ function App() {
     const context = canvas.getContext('2d');
     const x = position % width;
     const y = Math.floor(position / width);
+
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      console.error('Invalid pixel position:', x, y);
+      return;
+    }
+
     const colorIdx = color;
     const colorHex = `#${colors[colorIdx]}FF`;
     context.fillStyle = colorHex;
@@ -924,13 +1027,13 @@ function App() {
         return;
       }
       setActiveWorld(response.data);
-      setWidth(response.data.width);
-      setHeight(response.data.height);
+      // setWidth(response.data.width);
+      // setHeight(response.data.height);
     };
     if (openedWorldId === null) {
       setActiveWorld(null);
-      setWidth(canvasConfig.canvas.width);
-      setHeight(canvasConfig.canvas.height);
+      // setWidth(canvasConfig.canvas.width);
+      // setHeight(canvasConfig.canvas.height);
     } else {
       getWorld();
     }
@@ -1273,6 +1376,7 @@ function App() {
           setIsEraserMode={setIsEraserMode}
           clearExtraPixel={clearExtraPixel}
           setLastPlacedTime={setLastPlacedTime}
+          surroundingWorlds={surroundingWorlds}
         />
         {(!isMobile || activeTab === tabs[0]) && (
           <div className='App__logo'>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './WorldsCreationPanel.css';
 import { fetchWrapper } from '../../services/apiService.js';
-import { devnetMode } from '../../utils/Consts.js';
+import { backendUrl, devnetMode } from '../../utils/Consts.js';
 
 const WorldsCreationPanel = (props) => {
   // TODO: Arrows to control position and size
@@ -71,8 +71,25 @@ const WorldsCreationPanel = (props) => {
         maxFee
       }
     );
-    console.log(result);
-    // TODO: Update the UI with the new World
+    console.log('World creation result:', result); // Debug log
+
+    // Notify backend about new world
+    const response = await fetch(`${backendUrl}/create-world`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        worldId: result.world_id,
+        name: name,
+        width: width,
+        height: height,
+        creator: props.account.address
+      })
+    });
+    const responseData = await response.json();
+    console.log('Backend create-world response:', responseData); // Debug log
+
     closePanel();
     props.setActiveTab('Worlds');
   };
@@ -202,6 +219,11 @@ const WorldsCreationPanel = (props) => {
     const submitStart = isCompetitionWorld ? getCompetitionStart() : start;
     const submitEnd = isCompetitionWorld ? getCompetitionEnd() : end;
 
+    // Check if there are any existing worlds
+    const surroundingResponse = await fetchWrapper('get-all-worlds');
+    const isFirstWorld =
+      !surroundingResponse.data || surroundingResponse.data.length === 0;
+
     if (!devnetMode) {
       await createWorldCall(
         worldName,
@@ -213,8 +235,16 @@ const WorldsCreationPanel = (props) => {
         submitStart,
         submitEnd
       );
+
+      if (isFirstWorld) {
+        window.location.href = `/worlds/${worldSlug}`;
+      } else {
+        closePanel();
+        props.setActiveTab('Worlds');
+      }
       return;
     }
+
     const host = '0x' + props.queryAddress;
     let createWorldEndpoint = 'create-canvas-devnet';
     const response = await fetchWrapper(createWorldEndpoint, {
@@ -234,8 +264,12 @@ const WorldsCreationPanel = (props) => {
     });
     if (response.result) {
       console.log(response.result);
-      closePanel();
-      props.setActiveTab('Worlds');
+      if (isFirstWorld) {
+        window.location.href = `/worlds/${worldSlug}`;
+      } else {
+        closePanel();
+        props.setActiveTab('Worlds');
+      }
     }
   };
 
