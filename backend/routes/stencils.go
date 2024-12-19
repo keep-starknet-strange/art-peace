@@ -1,12 +1,13 @@
 package routes
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
 	"image/png"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -27,6 +28,7 @@ func InitStencilsRoutes() {
 	http.HandleFunc("/get-hot-stencils", getHotStencils)
 	http.HandleFunc("/add-stencil-img", addStencilImg)
 	http.HandleFunc("/add-stencil-data", addStencilData)
+	http.HandleFunc("/get-stencil-pixel-data", getStencilPixelData)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/add-stencil-devnet", addStencilDevnet)
 		http.HandleFunc("/remove-stencil-devnet", removeStencilDevnet)
@@ -403,7 +405,7 @@ func addStencilImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	imageData, err := imageToPixelData(fileBytes, 1)
+	imageData, err := worldImageToPixelData(fileBytes, 1, 0)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
@@ -590,28 +592,16 @@ func addStencilDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Add the stencil
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.AddStencilDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 	cmd := exec.Command(shellCmd, contract, "add_stencil", strconv.Itoa(worldId), hash, strconv.Itoa(width), strconv.Itoa(height), strconv.Itoa(position))
-	output, err := cmd.CombinedOutput()
+	_, err = cmd.Output()
 	if err != nil {
-		log.Printf("Add stencil command failed: %v\nOutput: %s\nCommand: %v", err, string(output), cmd.String())
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to add stencil to devnet")
 		return
 	}
 
-	// Favorite the newly created stencil
-	shellCmd = core.ArtPeaceBackend.BackendConfig.Scripts.FavoriteStencilDevnet
-	cmd = exec.Command(shellCmd, contract, "favorite_stencil", strconv.Itoa(worldId), strconv.Itoa(position))
-	output, err = cmd.CombinedOutput()
-	if err != nil {
-		log.Printf("Favorite stencil command failed: %v\nOutput: %s\nCommand: %v", err, string(output), cmd.String())
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to favorite newly created stencil")
-		return
-	}
-
-	routeutils.WriteResultJson(w, "Stencil added and favorited")
+	routeutils.WriteResultJson(w, "Stencil added to devnet")
 }
 
 func removeStencilDevnet(w http.ResponseWriter, r *http.Request) {
@@ -720,4 +710,97 @@ func unfavoriteStencilDevnet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Stencil unfavorited in devnet")
+}
+
+func worldImageToPixelData(imageData []byte, scaleFactor int, worldId int) ([]int, error) {
+	img, _, err := image.Decode(bytes.NewReader(imageData))
+	if err != nil {
+		return nil, err
+	}
+
+	colors, err := core.PostgresQuery[ColorType]("SELECT hex FROM WorldsColors WHERE world_id = $1 ORDER BY color_key", worldId)
+	if err != nil {
+		return nil, err
+	}
+
+	colorCount := len(colors)
+	palette := make([]color.Color, colorCount)
+	for i := 0; i < colorCount; i++ {
+		colorHex := colors[i]
+		palette[i] = hexToRGBA(colorHex)
+	}
+
+	bounds := img.Bounds()
+	width, height := bounds.Max.X, bounds.Max.Y
+	scaledWidth := width / scaleFactor
+	scaledHeight := height / scaleFactor
+	pixelData := make([]int, scaledWidth*scaledHeight)
+
+	for y := 0; y < height; y += scaleFactor {
+		for x := 0; x < width; x += scaleFactor {
+			newX := x / scaleFactor
+			newY := y / scaleFactor
+			rgba := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
+			if rgba.A < 128 { // Consider pixels with less than 50% opacity as transparent
+				pixelData[newY*scaledWidth+newX] = 0xFF
+			} else {
+				closestIndex := findClosestColor(rgba, palette)
+				pixelData[newY*scaledWidth+newX] = closestIndex
+			}
+		}
+	}
+
+	return pixelData, nil
+}
+
+func getStencilPixelData(w http.ResponseWriter, r *http.Request) {
+	// Get stencil hash from query params
+	hash := r.URL.Query().Get("hash")
+	if hash == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Hash parameter is required")
+		return
+	}
+
+	// Read the stencil image file
+	filename := fmt.Sprintf("stencils/stencil-%s.png", hash)
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusNotFound, "Stencil not found")
+		return
+	}
+
+	// Convert image to pixel data
+	pixelData, err := worldImageToPixelData(fileBytes, 1, 0)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
+		return
+	}
+
+	// Get image dimensions
+	img, _, err := image.Decode(bytes.NewReader(fileBytes))
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to decode image")
+		return
+	}
+	bounds := img.Bounds()
+	width, height := bounds.Max.X, bounds.Max.Y
+
+	// Create response structure
+	response := struct {
+		Width     int   `json:"width"`
+		Height    int   `json:"height"`
+		PixelData []int `json:"pixelData"`
+	}{
+		Width:     width,
+		Height:    height,
+		PixelData: pixelData,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create response")
+		return
+	}
+
+	routeutils.WriteDataJson(w, string(jsonResponse))
 }
