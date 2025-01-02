@@ -336,6 +336,11 @@ pub mod MultiCanvas {
 
             // Emit canvas created event
             self.emit(CanvasCreated { canvas_id, init_params });
+
+            // Auto-favorite the canvas for the creator
+            let caller = get_caller_address();
+            self.canvas_favorites.write((canvas_id, caller), true);
+            self.emit(Event::CanvasFavorited(CanvasFavorited { canvas_id, user: caller }));
             canvas_id
         }
 
@@ -506,6 +511,12 @@ pub mod MultiCanvas {
 
             // Emit the stencil added event
             self.emit(StencilAdded { canvas_id, stencil_id, stencil });
+
+            // Auto-favorite the stencil for the creator
+            let caller = get_caller_address();
+            self.stencil_favorites.write((canvas_id, stencil_id, caller), true);
+            self.emit(StencilFavorited { canvas_id, stencil_id, user: caller });
+
             stencil_id
         }
 
