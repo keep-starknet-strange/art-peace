@@ -6,9 +6,9 @@ import (
 )
 
 type Round3 struct {
-	Width     uint   `json:"width"`
-	Height    uint   `json:"height"`
-	Timer     uint   `json:"timer"`
+	Width     uint `json:"width"`
+	Height    uint `json:"height"`
+	Timer     uint `json:"timer"`
 	StartTime uint `json:"startTime"`
 	EndTime   uint `json:"endTime"`
 }

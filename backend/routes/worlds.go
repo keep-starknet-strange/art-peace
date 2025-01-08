@@ -153,13 +153,13 @@ func getWorlds(w http.ResponseWriter, r *http.Request) {
 }
 
 func getHomeWorlds(w http.ResponseWriter, r *http.Request) {
-  // TODO: Top compute
+	// TODO: Top compute
 	address := r.URL.Query().Get("address")
 	if address == "" {
 		address = "0"
 	}
 
-  roundConfig := core.ArtPeaceBackend.RoundsConfig.Round3
+	roundConfig := core.ArtPeaceBackend.RoundsConfig.Round3
 
 	query := `
         SELECT 
