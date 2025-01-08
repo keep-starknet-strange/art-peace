@@ -67,14 +67,3 @@ func getCanvas(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte(val))
 }
-
-type CanvasMetadata struct {
-	CanvasId      int    `json:"canvasId"`
-	Name          string `json:"name"`
-	Width         int    `json:"width"`
-	Height        int    `json:"height"`
-	Host          string `json:"host"`
-	StartTime     int64  `json:"startTime"`
-	EndTime       int64  `json:"endTime"`
-	FavoriteCount int    `json:"favoriteCount"`
-}

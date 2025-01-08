@@ -38,7 +38,7 @@ import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
   const worldsMode = true;
-  const [openedWorldId, setOpenedWorldId] = useState(0);
+  const [openedWorldId, setOpenedWorldId] = useState(worldsMode ? 0 : null);
   const [activeWorld, setActiveWorld] = useState(null);
   const [surroundingWorlds, setSurroundingWorlds] = useState([]);
 
@@ -70,17 +70,19 @@ function App() {
       }
 
       // Always fetch surrounding worlds
-      const surroundingResponse = await fetchWrapper('get-all-worlds');
+      const surroundingResponse = await fetchWrapper('get-home-worlds');
       if (surroundingResponse.data) {
-        // Filter out current world and take up to 12 worlds
         const otherWorlds = surroundingResponse.data
           .filter((world) => world.worldId !== currentWorldId)
           .slice(0, 12);
 
         // Pad array with null values if less than 12 worlds
-        const paddedWorlds = [...otherWorlds];
+        let paddedWorlds = [...otherWorlds];
         while (paddedWorlds.length < 12) {
           paddedWorlds.push(null);
+        }
+        if (paddedWorlds.length > 12) {
+          paddedWorlds = paddedWorlds.slice(0, 12);
         }
 
         setSurroundingWorlds(paddedWorlds);
@@ -277,45 +279,14 @@ function App() {
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
-      // Subscribe to general channel
       sendJsonMessage({
         event: 'subscribe',
         data: {
           channel: 'general'
         }
       });
-
-      // Subscribe to main world channel
-      if (openedWorldId !== null) {
-        sendJsonMessage({
-          event: 'subscribe',
-          data: {
-            channel: `world-${openedWorldId}`
-          }
-        });
-      }
-
-      // Subscribe to surrounding world channels
-      surroundingWorlds.forEach((world) => {
-        if (world && world.worldId) {
-          sendJsonMessage({
-            event: 'subscribe',
-            data: {
-              channel: `world-${world.worldId}`
-            }
-          });
-        }
-      });
-
-      // Add subscription for new worlds
-      sendJsonMessage({
-        event: 'subscribe',
-        data: {
-          channel: 'worlds'
-        }
-      });
     }
-  }, [readyState, openedWorldId, surroundingWorlds]);
+  }, [readyState]);
 
   // Colors
   const staticColors = canvasConfig.colors;
@@ -351,7 +322,6 @@ function App() {
 
   useEffect(() => {
     const processMessage = async (message) => {
-      console.log('WebSocket message received:', message);
       if (message) {
         if (message.messageType === 'colorPixel') {
           if (message.color >= colors.length) {
@@ -376,36 +346,19 @@ function App() {
               );
               if (surroundingCanvas) {
                 const context = surroundingCanvas.getContext('2d');
-                const x = message.position % width;
-                const y = Math.floor(message.position / width);
-                const colorHex = `#${colors[message.color]}FF`;
+                const canvasWidth = surroundingCanvas[world.worldId].width;
+                const x = message.position % canvasWidth;
+                const y = Math.floor(message.position / canvasWidth);
+                const canvasColors = surroundingCanvas[world.worldId].colors;
+                const colorHex = `#${canvasColors[message.color]}FF`;
                 context.fillStyle = colorHex;
                 context.fillRect(x, y, 1, 1);
               }
             }
           });
         } else if (message.messageType === 'newWorld') {
-          console.log('New world message received:', message);
-          // Force refresh of surrounding worlds
-          try {
-            const surroundingResponse = await fetchWrapper('get-all-worlds');
-            if (surroundingResponse.data) {
-              // Filter out current world and take up to 12 worlds
-              const otherWorlds = surroundingResponse.data
-                .filter((world) => world.worldId !== openedWorldId)
-                .slice(0, 12);
-
-              // Pad array with null values if less than 12 worlds
-              const paddedWorlds = [...otherWorlds];
-              while (paddedWorlds.length < 12) {
-                paddedWorlds.push(null);
-              }
-
-              setSurroundingWorlds(paddedWorlds);
-            }
-          } catch (error) {
-            console.error('Error fetching surrounding worlds:', error);
-          }
+          // TODO
+          setOpenedWorldId(message.worldId);
         } else if (
           message.messageType === 'nftMinted' &&
           activeTab === 'NFTs'
@@ -421,8 +374,8 @@ function App() {
   }, [lastJsonMessage, openedWorldId, colors]);
 
   // Canvas
-  const [width, _setWidth] = useState(canvasConfig.canvas.width);
-  const [height, _setHeight] = useState(canvasConfig.canvas.height);
+  const [width, setWidth] = useState(canvasConfig.canvas.width);
+  const [height, setHeight] = useState(canvasConfig.canvas.height);
 
   const canvasRef = useRef(null);
   const extraPixelsCanvasRef = useRef(null);
@@ -1027,13 +980,13 @@ function App() {
         return;
       }
       setActiveWorld(response.data);
-      // setWidth(response.data.width);
-      // setHeight(response.data.height);
+      setWidth(response.data.width);
+      setHeight(response.data.height);
     };
     if (openedWorldId === null) {
       setActiveWorld(null);
-      // setWidth(canvasConfig.canvas.width);
-      // setHeight(canvasConfig.canvas.height);
+      setWidth(canvasConfig.canvas.width);
+      setHeight(canvasConfig.canvas.height);
     } else {
       getWorld();
     }
@@ -1379,7 +1332,13 @@ function App() {
           surroundingWorlds={surroundingWorlds}
         />
         {(!isMobile || activeTab === tabs[0]) && (
-          <div className='App__logo'>
+          <div
+            className='App__logo'
+            onClick={() => {
+              setActiveTab(tabs[0]);
+              window.location.pathname = '/';
+            }}
+          >
             <img
               src={logo}
               alt='logo'

@@ -19,6 +19,7 @@ func InitWorldsRoutes() {
 	http.HandleFunc("/get-world-id", getWorldId)
 	http.HandleFunc("/get-world", getWorld)
 	http.HandleFunc("/get-worlds", getWorlds)
+	http.HandleFunc("/get-home-worlds", getHomeWorlds)
 	http.HandleFunc("/get-new-worlds", getNewWorlds)
 	http.HandleFunc("/get-favorite-worlds", getFavoriteWorlds)
 	// TODO: Hot/top use user interactivity instead of favorite count
@@ -36,7 +37,6 @@ func InitWorldsRoutes() {
 		http.HandleFunc("/unfavorite-world-devnet", unfavoriteWorldDevnet)
 		http.HandleFunc("/place-world-pixel-devnet", placeWorldPixelDevnet)
 	}
-	http.HandleFunc("/get-all-worlds", getAllWorlds)
 }
 
 func InitWorldsStaticRoutes() {
@@ -145,6 +145,31 @@ func getWorlds(w http.ResponseWriter, r *http.Request) {
         ORDER BY worlds.world_id DESC
         LIMIT $2 OFFSET $3`
 	worlds, err := core.PostgresQueryJson[WorldData](query, address, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
+		return
+	}
+	routeutils.WriteDataJson(w, string(worlds))
+}
+
+func getHomeWorlds(w http.ResponseWriter, r *http.Request) {
+  // TODO: Top compute
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
+
+  roundConfig := core.ArtPeaceBackend.RoundsConfig.Round3
+
+	query := `
+        SELECT 
+            *
+        FROM 
+            worlds
+        WHERE width = $1 AND height = $2 AND time_between_pixels = $3 AND start_time = TO_TIMESTAMP($4) AND end_time = TO_TIMESTAMP($5)
+        ORDER BY worlds.world_id DESC
+        LIMIT 13`
+	worlds, err := core.PostgresQueryJson[WorldData](query, roundConfig.Width, roundConfig.Height, roundConfig.Timer, roundConfig.StartTime, roundConfig.EndTime)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
 		return
@@ -690,58 +715,4 @@ func doesWorldNameExist(name string) (bool, error) {
 		return false, err
 	}
 	return *exists, nil
-}
-
-func getAllWorlds(w http.ResponseWriter, r *http.Request) {
-	// Get query parameters
-	address := r.URL.Query().Get("address")
-	if address == "" {
-		address = "0"
-	}
-
-	// Parse pagination
-	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
-	if err != nil || pageLength <= 0 {
-		pageLength = 25
-	}
-	if pageLength > 50 {
-		pageLength = 50
-	}
-
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page <= 0 {
-		page = 1
-	}
-	offset := (page - 1) * pageLength
-
-	query := `
-		SELECT 
-			worlds.*, 
-			COALESCE(worldfavorites.favorite_count, 0) AS favorites,
-			COALESCE((
-				SELECT true FROM worldfavorites 
-				WHERE user_address = $1 
-				AND worldfavorites.world_id = worlds.world_id
-			), false) as favorited
-		FROM 
-			worlds
-		LEFT JOIN (
-			SELECT 
-				world_id, 
-				COUNT(*) AS favorite_count
-			FROM 
-				worldfavorites
-			GROUP BY 
-				world_id
-		) worldfavorites ON worlds.world_id = worldfavorites.world_id
-		ORDER BY worlds.world_id DESC
-		LIMIT $2 OFFSET $3`
-
-	worlds, err := core.PostgresQueryJson[WorldData](query, address, pageLength, offset)
-	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
-		return
-	}
-
-	routeutils.WriteDataJson(w, string(worlds))
 }

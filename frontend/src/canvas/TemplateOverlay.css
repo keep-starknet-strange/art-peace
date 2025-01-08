@@ -1,19 +1,13 @@
 .TemplateOverlay {
   position: absolute;
-  top: 0;
-  left: 0;
   z-index: 5;
+
   background-color: rgba(0, 0, 0, 0);
-  pointer-events: none;
 }
 
 .TemplateOverlay__image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: 100% 100%;
+  /* stretch image to fill overlay */
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   image-rendering: pixelated;

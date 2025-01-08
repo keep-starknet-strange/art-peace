@@ -178,8 +178,8 @@ const StencilCreationPanel = (props) => {
               <div className='StencilCreationPanel__item'>
                 <p className='Text__small Heading__sub'>Position</p>
                 <p className='Text__small StencilCreationPanel__item__text'>
-                  ({props.stencilPosition % 518},
-                  {Math.floor(props.stencilPosition / 518)})
+                  ({props.stencilPosition % props.canvasWidth},
+                  {Math.floor(props.stencilPosition / props.canvasWidth)})
                 </p>
               </div>
               <div className='StencilCreationPanel__item'>

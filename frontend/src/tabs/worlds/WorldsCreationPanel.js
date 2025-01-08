@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './WorldsCreationPanel.css';
 import { fetchWrapper } from '../../services/apiService.js';
-import { backendUrl, devnetMode } from '../../utils/Consts.js';
+import { devnetMode } from '../../utils/Consts.js';
 
 const WorldsCreationPanel = (props) => {
   // TODO: Arrows to control position and size
@@ -72,23 +72,6 @@ const WorldsCreationPanel = (props) => {
       }
     );
     console.log('World creation result:', result); // Debug log
-
-    // Notify backend about new world
-    const response = await fetch(`${backendUrl}/create-world`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        worldId: result.world_id,
-        name: name,
-        width: width,
-        height: height,
-        creator: props.account.address
-      })
-    });
-    const responseData = await response.json();
-    console.log('Backend create-world response:', responseData); // Debug log
 
     closePanel();
     props.setActiveTab('Worlds');
@@ -219,11 +202,6 @@ const WorldsCreationPanel = (props) => {
     const submitStart = isCompetitionWorld ? getCompetitionStart() : start;
     const submitEnd = isCompetitionWorld ? getCompetitionEnd() : end;
 
-    // Check if there are any existing worlds
-    const surroundingResponse = await fetchWrapper('get-all-worlds');
-    const isFirstWorld =
-      !surroundingResponse.data || surroundingResponse.data.length === 0;
-
     if (!devnetMode) {
       await createWorldCall(
         worldName,
@@ -236,12 +214,7 @@ const WorldsCreationPanel = (props) => {
         submitEnd
       );
 
-      if (isFirstWorld) {
-        window.location.href = `/worlds/${worldSlug}`;
-      } else {
-        closePanel();
-        props.setActiveTab('Worlds');
-      }
+      window.location.href = `/worlds/${worldSlug}`;
       return;
     }
 
@@ -264,12 +237,7 @@ const WorldsCreationPanel = (props) => {
     });
     if (response.result) {
       console.log(response.result);
-      if (isFirstWorld) {
-        window.location.href = `/worlds/${worldSlug}`;
-      } else {
-        closePanel();
-        props.setActiveTab('Worlds');
-      }
+      window.location.href = `/worlds/${worldSlug}`;
     }
   };
 
@@ -326,13 +294,13 @@ const WorldsCreationPanel = (props) => {
 
   const getCompetitionStart = () => {
     return competitionConfig?.startTime
-      ? new Date(competitionConfig.startTime).getTime()
+      ? new Date(competitionConfig.startTime * 1000).getTime()
       : new Date('2024-12-07T00:00:00Z').getTime();
   };
 
   const getCompetitionEnd = () => {
     return competitionConfig?.endTime
-      ? new Date(competitionConfig.endTime).getTime()
+      ? new Date(competitionConfig.endTime * 1000).getTime()
       : new Date('2025-01-02T00:00:00Z').getTime();
   };
 

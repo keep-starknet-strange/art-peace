@@ -7,28 +7,17 @@ import TemplateCreationOverlay from './TemplateCreationOverlay.js';
 import StencilCreationOverlay from './StencilCreationOverlay.js';
 import NFTSelector from './NFTSelector.js';
 import { fetchWrapper } from '../services/apiService.js';
-import { backendUrl, devnetMode } from '../utils/Consts.js';
+import { devnetMode } from '../utils/Consts.js';
 
 const CanvasContainer = (props) => {
-  // Calculate minimum scale based on container and canvas dimensions
-  const containerWidth = 1072;
-  const containerHeight = 804;
-  const centerCanvasWidth = 518;
-  const centerCanvasHeight = 396;
-  const surroundingCanvasWidth = 256;
-  const surroundingCanvasHeight = 192;
-
-  // Calculate minimum scale needed to fill container
-  const widthScale =
-    containerWidth / (centerCanvasWidth + surroundingCanvasWidth * 2);
-  const heightScale =
-    containerHeight / (centerCanvasHeight + surroundingCanvasHeight * 2);
-  const minScale = Math.max(widthScale, heightScale, 0.6); // Keep original minimum if larger
+  // TODO: Handle window resize
+  const minScale = 0.6;
   const maxScale = 40;
 
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(minScale);
+  const [canvasScale, setCanvasScale] = useState(1.16);
+  const [titleScale, setTitleScale] = useState(1);
   const [touchInitialDistance, setInitialTouchDistance] = useState(0);
   const [touchScale, setTouchScale] = useState(0);
   const canvasContainerRef = useRef(null);
@@ -38,16 +27,6 @@ const CanvasContainer = (props) => {
   const [dragStartY, setDragStartY] = useState(0);
 
   const [isErasing, setIsErasing] = useState(false);
-
-  // Add state to track surrounding worlds locally
-  const [localSurroundingWorlds, setLocalSurroundingWorlds] = useState(
-    props.surroundingWorlds
-  );
-
-  // Update local state when props change
-  useEffect(() => {
-    setLocalSurroundingWorlds(props.surroundingWorlds);
-  }, [props.surroundingWorlds]);
 
   const handlePointerDown = (e) => {
     // TODO: Require over canvas?
@@ -70,21 +49,6 @@ const CanvasContainer = (props) => {
   const handlePointerMove = (e) => {
     if (props.nftMintingMode && !props.nftSelected) return;
     if (props.templateCreationMode && !props.templateCreationSelected) return;
-    if (props.stencilCreationMode && !props.stencilCreationSelected) {
-      const canvas = props.canvasRef.current;
-      const rect = canvas.getBoundingClientRect();
-      const x = Math.floor(
-        ((e.clientX - rect.left) / (rect.right - rect.left)) * 518
-      );
-      const y = Math.floor(
-        ((e.clientY - rect.top) / (rect.bottom - rect.top)) * 396
-      );
-
-      // Ensure x and y are within bounds
-      if (x >= 0 && x < 518 && y >= 0 && y < 396) {
-        props.setStencilPosition(y * 518 + x);
-      }
-    }
     if (isDragging) {
       setCanvasX(canvasX + e.clientX - dragStartX);
       setCanvasY(canvasY + e.clientY - dragStartY);
@@ -105,39 +69,45 @@ const CanvasContainer = (props) => {
 
   // Zoom in/out ( into the cursor position )
   const zoom = (e) => {
+    // Get the cursor position within the canvas ( note the canvas can go outside the viewport )
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
+    if (cursorX < 0) {
+      cursorX = 0;
+    } else if (cursorX > rect.width) {
+      cursorX = rect.width;
+    }
+    if (cursorY < 0) {
+      cursorY = 0;
+    } else if (cursorY > rect.height) {
+      cursorY = rect.height;
+    }
 
-    // Clamp cursor position
-    cursorX = Math.max(0, Math.min(cursorX, rect.width));
-    cursorY = Math.max(0, Math.min(cursorY, rect.height));
-
+    // Calculate new left and top position to keep cursor over the same rect pos  ition
     let direction = e.deltaY > 0 ? 1 : -1;
     let scaler = Math.log2(1 + Math.abs(e.deltaY) * 2) * direction;
     let newScale = canvasScale * (1 + scaler * -0.01);
-
-    // Enforce scale limits
-    newScale = Math.max(minScale, Math.min(newScale, maxScale));
-
-    // Calculate new dimensions
+    if (newScale < minScale) {
+      newScale = minScale;
+    } else if (newScale > maxScale) {
+      newScale = maxScale;
+    }
     const newWidth = props.width * newScale;
     const newHeight = props.height * newScale;
-
-    // Calculate position adjustments to maintain cursor position
-    const cursorXRelative = (cursorX - canvasX) / (props.width * canvasScale);
-    const cursorYRelative = (cursorY - canvasY) / (props.height * canvasScale);
-
-    const newCursorX = cursorXRelative * newWidth;
-    const newCursorY = cursorYRelative * newHeight;
-
-    // Calculate new positions
-    const newPosX = Math.round(cursorX - newCursorX);
-    const newPosY = Math.round(cursorY - newCursorY);
+    const oldCursorXRelative = cursorX / rect.width;
+    const oldCursorYRelative = cursorY / rect.height;
+    const newCursorX = oldCursorXRelative * newWidth;
+    const newCursorY = oldCursorYRelative * newHeight;
+    const newPosX = canvasX - (newCursorX - cursorX);
+    const newPosY = canvasY - (newCursorY - cursorY);
 
     setCanvasScale(newScale);
     setCanvasX(newPosX);
     setCanvasY(newPosY);
+
+    const titleScaler = props.width / 512;
+    setTitleScale(newScale * titleScaler);
   };
 
   const handleTouchStart = (e) => {
@@ -178,19 +148,30 @@ const CanvasContainer = (props) => {
       }
 
       let newScale = (distance / touchInitialDistance) * touchScale;
-      newScale = Math.max(minScale, Math.min(newScale, maxScale));
+      if (newScale < minScale) {
+        newScale = minScale;
+      } else if (newScale > maxScale) {
+        newScale = maxScale;
+      }
+      const newWidth = props.width * newScale;
+      const newHeight = props.height * newScale;
 
-      // Calculate cursor positions
-      const newCursorX = cursorX * (newScale / canvasScale);
-      const newCursorY = cursorY * (newScale / canvasScale);
+      const oldCursorXRelative = cursorX / rect.width;
+      const oldCursorYRelative = cursorY / rect.height;
 
-      // Round positions to prevent subpixel gaps
-      const newPosX = Math.round(canvasX - (newCursorX - cursorX));
-      const newPosY = Math.round(canvasY - (newCursorY - cursorY));
+      const newCursorX = oldCursorXRelative * newWidth;
+      const newCursorY = oldCursorYRelative * newHeight;
+
+      const newPosX = canvasX - (newCursorX - cursorX);
+      const newPosY = canvasY - (newCursorY - cursorY);
 
       setCanvasScale(newScale);
       setCanvasX(newPosX);
       setCanvasY(newPosY);
+
+      const titleScaler = props.width / 512;
+      setTitleScale(newScale * titleScaler);
+      // TODO: Make scroll acceleration based
     }
   };
 
@@ -289,20 +270,6 @@ const CanvasContainer = (props) => {
         }
       );
       console.log(result);
-
-      // Notify backend about pixel placement
-      await fetch(`${backendUrl}/place-pixel`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          worldId: null, // main canvas
-          position,
-          color,
-          address: props.address
-        })
-      });
     } else {
       if (!props.address || !props.worldsContract || !props.account) return;
       const callData = props.worldsContract.populate('place_pixel', {
@@ -321,20 +288,6 @@ const CanvasContainer = (props) => {
         maxFee
       });
       console.log(result);
-
-      // Notify backend about pixel placement
-      await fetch(`${backendUrl}/place-pixel`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          worldId: props.openedWorldId,
-          position,
-          color,
-          address: props.address
-        })
-      });
     }
   };
 
@@ -458,10 +411,6 @@ const CanvasContainer = (props) => {
         return;
       }
 
-      if (!props.canvasRef || !props.canvasRef.current) {
-        return;
-      }
-
       const canvas = props.canvasRef.current;
       const rect = canvas.getBoundingClientRect();
       const x = Math.floor(
@@ -492,6 +441,106 @@ const CanvasContainer = (props) => {
     props.height
   ]);
 
+  const getSelectedColorInverse = () => {
+    if (props.selectedPositionX === null || props.selectedPositionY === null) {
+      return null;
+    }
+
+    if (props.selectedColorId === -1) {
+      const existingPixel = props.extraPixelsData.find(
+        (pixel) =>
+          pixel.x == props.selectedPositionX &&
+          pixel.y == props.selectedPositionY
+      );
+
+      if (existingPixel) {
+        let color = props.colors[existingPixel.colorId];
+        return (
+          '#' +
+          (255 - parseInt(color.substring(0, 2), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(2, 4), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(4, 6), 16))
+            .toString(16)
+            .padStart(2, '0')
+        );
+      }
+
+      let color = props.canvasRef.current
+        .getContext('2d')
+        .getImageData(
+          props.selectedPositionX,
+          props.selectedPositionY,
+          1,
+          1
+        ).data;
+      return (
+        '#' +
+        (255 - color[0]).toString(16).padStart(2, '0') +
+        (255 - color[1]).toString(16).padStart(2, '0') +
+        (255 - color[2]).toString(16).padStart(2, '0') +
+        color[3].toString(16).padStart(2, '0')
+      );
+    }
+
+    if (props.isExtraDeleteMode) {
+      const existingPixel = props.extraPixelsData.find(
+        (pixel) =>
+          pixel.x == props.selectedPositionX &&
+          pixel.y == props.selectedPositionY
+      );
+
+      if (existingPixel) {
+        let color = props.colors[existingPixel.colorId];
+        return (
+          '#' +
+          (255 - parseInt(color.substring(0, 2), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(2, 4), 16))
+            .toString(16)
+            .padStart(2, '0') +
+          (255 - parseInt(color.substring(4, 6), 16))
+            .toString(16)
+            .padStart(2, '0')
+        );
+      }
+    }
+
+    return '#' + props.colors[props.selectedColorId] + 'FF';
+  };
+
+  const [selectedBoxShadow, setSelectedBoxShadow] = useState(null);
+  const [selectedBackgroundColor, setSelectedBackgroundColor] = useState(null);
+  useEffect(() => {
+    const base1 = 0.12;
+    const minShadowScale = 0.8;
+    const startVal = Math.max(minShadowScale, base1 * canvasScale);
+    const endVal = startVal * 0.8;
+    setSelectedBoxShadow(
+      `0 0 ${startVal}px ${endVal}px ${getSelectedColorInverse()} inset`
+    );
+
+    if (props.selectedColorId === -1) {
+      setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
+    } else {
+      if (props.isExtraDeleteMode) {
+        setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
+      } else {
+        setSelectedBackgroundColor(`#${props.colors[props.selectedColorId]}FF`);
+      }
+    }
+  }, [
+    canvasScale,
+    props.selectedColorId,
+    props.selectedPositionX,
+    props.selectedPositionY,
+    props.isExtraDeleteMode
+  ]);
+
   return (
     <div
       ref={canvasContainerRef}
@@ -500,157 +549,113 @@ const CanvasContainer = (props) => {
       onPointerDown={handlePointerDown}
     >
       <div
-        className='CanvasContainer__inner'
+        className='CanvasContainer__anchor'
         style={{
-          transform: `translate(-50%, -50%) scale(${canvasScale})`,
-          transformOrigin: 'center center'
+          top: -props.height / 2,
+          left: -props.width / 2,
+          transform: `translate(${canvasX}px, ${canvasY}px)`
         }}
       >
-        {/* 12 Surrounding Canvases */}
-        {Array(12)
-          .fill(null)
-          .map((_, index) => {
-            const world = localSurroundingWorlds[index];
-            const gridPositions = [
-              { gridColumn: '2', gridRow: '1' }, // Top
-              { gridColumn: '3', gridRow: '1' }, // Top
-              { gridColumn: '4', gridRow: '2' }, // Right
-              { gridColumn: '4', gridRow: '3' }, // Right
-              { gridColumn: '2', gridRow: '4' }, // Bottom
-              { gridColumn: '3', gridRow: '4' }, // Bottom
-              { gridColumn: '1', gridRow: '2' }, // Left
-              { gridColumn: '1', gridRow: '3' }, // Left
-              { gridColumn: '1', gridRow: '1' }, // Corners
-              { gridColumn: '4', gridRow: '1' },
-              { gridColumn: '1', gridRow: '4' },
-              { gridColumn: '4', gridRow: '4' }
-            ];
-
-            return (
-              <div
-                className='CanvasContainer__anchor surrounding'
-                style={{
-                  transform: `translate(${Math.round(canvasX)}px, ${Math.round(canvasY)}px)`,
-                  width: '256px',
-                  height: '192px',
-                  gridColumn: gridPositions[index].gridColumn,
-                  gridRow: gridPositions[index].gridRow,
-                  cursor: world ? 'pointer' : 'default'
-                }}
-                key={`surrounding-${index}`}
-                onClick={() => {
-                  if (world) {
-                    window.location.href = `/worlds/${world.uniqueName}`;
-                  }
-                }}
-              >
-                <Canvas
-                  openedWorldId={world ? world.worldId : null}
-                  canvasRef={React.createRef()}
-                  width={518}
-                  height={396}
-                  style={{
-                    width: '256px',
-                    height: '192px'
-                  }}
-                  colors={props.colors}
-                  pixelClicked={pixelClicked}
-                  isEmpty={!world}
-                  isCenter={false}
-                  data-world-id={world ? world.worldId : null}
-                />
-              </div>
-            );
-          })}
-
-        {/* Center Canvas */}
-        <div
-          className='CanvasContainer__anchor center'
-          style={{
-            transform: `translate(${Math.round(canvasX)}px, ${Math.round(canvasY)}px)`,
-            width: '518px',
-            height: '396px'
-          }}
-          key='center'
-        >
-          <Canvas
-            openedWorldId={props.openedWorldId}
-            canvasRef={props.canvasRef}
-            width={518}
-            height={396}
+        {props.openedWorldId !== null && props.activeWorld !== null && (
+          <h3
+            className='CanvasContainer__title'
             style={{
-              width: '518px',
-              height: '396px'
+              top: `calc(-0.75rem * ${titleScale})`,
+              left: '50%',
+              transform: `translate(-50%, -50%) scale(${titleScale})`
+            }}
+          >
+            {props.activeWorld.name}
+          </h3>
+        )}
+        {props.pixelSelectedMode && (
+          <div
+            className='Canvas__selection'
+            style={{
+              top: props.selectedPositionY * canvasScale,
+              left: props.selectedPositionX * canvasScale
+            }}
+          >
+            <div
+              className='Canvas__selection__pixel'
+              style={{
+                boxShadow: selectedBoxShadow,
+                backgroundColor: selectedBackgroundColor,
+                width: canvasScale,
+                height: canvasScale
+              }}
+            ></div>
+          </div>
+        )}
+        <Canvas
+          openedWorldId={props.openedWorldId}
+          canvasRef={props.canvasRef}
+          width={props.width}
+          height={props.height}
+          style={{
+            width: props.width * canvasScale,
+            height: props.height * canvasScale
+          }}
+          colors={props.colors}
+          pixelClicked={pixelClicked}
+        />
+        {props.availablePixels > 0 && (
+          <ExtraPixelsCanvas
+            extraPixelsCanvasRef={props.extraPixelsCanvasRef}
+            width={props.width}
+            height={props.height}
+            style={{
+              width: props.width * canvasScale,
+              height: props.height * canvasScale
             }}
             colors={props.colors}
             pixelClicked={pixelClicked}
-            canvasScale={canvasScale}
-            isCenter={true}
           />
-
-          {props.templateOverlayMode && props.overlayTemplate && (
-            <TemplateOverlay
-              canvasRef={props.canvasRef}
-              width={props.width}
-              height={props.height}
-              canvasScale={canvasScale}
-              overlayTemplate={props.overlayTemplate}
-              setTemplateOverlayMode={props.setTemplateOverlayMode}
-              setOverlayTemplate={props.setOverlayTemplate}
-              colors={props.colors}
-            />
-          )}
-
-          {props.stencilCreationMode && (
-            <StencilCreationOverlay
-              canvasRef={props.canvasRef}
-              canvasScale={canvasScale}
-              stencilImage={props.stencilImage}
-              stencilColorIds={props.stencilColorIds}
-              stencilCreationMode={props.stencilCreationMode}
-              setStencilCreationMode={props.setStencilCreationMode}
-              stencilCreationSelected={props.stencilCreationSelected}
-              setStencilCreationSelected={props.setStencilCreationSelected}
-              width={518}
-              height={396}
-              stencilPosition={props.stencilPosition}
-              setStencilPosition={props.setStencilPosition}
-            />
-          )}
-
-          {/* Move overlay components inside center canvas */}
-          {props.availablePixels > 0 && (
-            <ExtraPixelsCanvas
-              extraPixelsCanvasRef={props.extraPixelsCanvasRef}
-              width={props.width}
-              height={props.height}
-              style={{
-                width: props.width * canvasScale,
-                height: props.height * canvasScale
-              }}
-              colors={props.colors}
-              pixelClicked={pixelClicked}
-            />
-          )}
-
-          {props.templateCreationMode && (
-            <TemplateCreationOverlay
-              canvasRef={props.canvasRef}
-              canvasScale={canvasScale}
-              templateImage={props.templateImage}
-              templateColorIds={props.templateColorIds}
-              templateCreationMode={props.templateCreationMode}
-              setTemplateCreationMode={props.setTemplateCreationMode}
-              templateCreationSelected={props.templateCreationSelected}
-              setTemplateCreationSelected={props.setTemplateCreationSelected}
-              width={props.width}
-              height={props.height}
-              templatePosition={props.templatePosition}
-              setTemplatePosition={props.setTemplatePosition}
-            />
-          )}
-        </div>
-
+        )}
+        {props.templateOverlayMode && props.overlayTemplate && (
+          <TemplateOverlay
+            canvasRef={props.canvasRef}
+            width={props.width}
+            height={props.height}
+            canvasScale={canvasScale}
+            overlayTemplate={props.overlayTemplate}
+            setTemplateOverlayMode={props.setTemplateOverlayMode}
+            setOverlayTemplate={props.setOverlayTemplate}
+            colors={props.colors}
+          />
+        )}
+        {props.templateCreationMode && (
+          <TemplateCreationOverlay
+            canvasRef={props.canvasRef}
+            canvasScale={canvasScale}
+            templateImage={props.templateImage}
+            templateColorIds={props.templateColorIds}
+            templateCreationMode={props.templateCreationMode}
+            setTemplateCreationMode={props.setTemplateCreationMode}
+            templateCreationSelected={props.templateCreationSelected}
+            setTemplateCreationSelected={props.setTemplateCreationSelected}
+            width={props.width}
+            height={props.height}
+            templatePosition={props.templatePosition}
+            setTemplatePosition={props.setTemplatePosition}
+          />
+        )}
+        {props.stencilCreationMode && (
+          <StencilCreationOverlay
+            canvasRef={props.canvasRef}
+            canvasScale={canvasScale}
+            stencilImage={props.stencilImage}
+            stencilColorIds={props.stencilColorIds}
+            stencilCreationMode={props.stencilCreationMode}
+            setStencilCreationMode={props.setStencilCreationMode}
+            stencilCreationSelected={props.stencilCreationSelected}
+            setStencilCreationSelected={props.setStencilCreationSelected}
+            width={props.width}
+            height={props.height}
+            stencilPosition={props.stencilPosition}
+            setStencilPosition={props.setStencilPosition}
+          />
+        )}
         {props.nftMintingMode && (
           <NFTSelector
             canvasRef={props.canvasRef}

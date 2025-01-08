@@ -9,8 +9,8 @@ type Round3 struct {
 	Width     uint   `json:"width"`
 	Height    uint   `json:"height"`
 	Timer     uint   `json:"timer"`
-	StartTime string `json:"startTime"`
-	EndTime   string `json:"endTime"`
+	StartTime uint `json:"startTime"`
+	EndTime   uint `json:"endTime"`
 }
 
 type RoundsConfig struct {
@@ -19,11 +19,11 @@ type RoundsConfig struct {
 
 var DefaultRoundsConfig = &RoundsConfig{
 	Round3: Round3{
-		Width:     518,
-		Height:    396,
+		Width:     256,
+		Height:    192,
 		Timer:     5,
-		StartTime: "2024-12-01T00:00:00Z",
-		EndTime:   "2025-01-01T00:00:00Z",
+		StartTime: 0,
+		EndTime:   3000000000000,
 	},
 }
 
