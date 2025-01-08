@@ -37,7 +37,7 @@ import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
-  const worldsMode = true;
+  const worldsMode = devnetMode;
   const [openedWorldId, setOpenedWorldId] = useState(worldsMode ? 0 : null);
   const [activeWorld, setActiveWorld] = useState(null);
   const [surroundingWorlds, setSurroundingWorlds] = useState([]);
@@ -106,11 +106,10 @@ function App() {
     'Worlds',
     'Account'
   ];
+  //  : ['Canvas', 'Factions', 'NFTs', 'Quests', 'Vote', 'Account'];
   */
   // TODO: Add features back
-  const tabs = devnetMode
-    ? ['Canvas', 'Worlds', 'Stencils', 'Account']
-    : ['Canvas', 'Factions', 'NFTs', 'Quests', 'Vote', 'Account'];
+  const tabs = devnetMode ? ['Canvas', 'Worlds', 'Stencils', 'Account'] : [];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   useLockScroll(activeTab === 'Canvas');
 
@@ -1270,6 +1269,7 @@ function App() {
         {modal && <ModalPanel modal={modal} setModal={setModal} />}
         <CanvasContainer
           colorPixel={colorPixel}
+          worldsMode={worldsMode}
           openedWorldId={openedWorldId}
           activeWorld={activeWorld}
           width={width}

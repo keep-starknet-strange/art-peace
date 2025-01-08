@@ -587,18 +587,57 @@ const CanvasContainer = (props) => {
             ></div>
           </div>
         )}
-        <Canvas
-          openedWorldId={props.openedWorldId}
-          canvasRef={props.canvasRef}
-          width={props.width}
-          height={props.height}
-          style={{
-            width: props.width * canvasScale,
-            height: props.height * canvasScale
-          }}
-          colors={props.colors}
-          pixelClicked={pixelClicked}
-        />
+        {props.worldsMode ? (
+          <Canvas
+            openedWorldId={props.openedWorldId}
+            canvasRef={props.canvasRef}
+            width={props.width}
+            height={props.height}
+            style={{
+              width: props.width * canvasScale,
+              height: props.height * canvasScale
+            }}
+            colors={props.colors}
+            pixelClicked={pixelClicked}
+          />
+        ) : (
+          <div
+            style={{
+              display: 'relative'
+            }}
+          >
+            <Canvas
+              canvasRef={props.canvasRef}
+              width={props.width}
+              height={props.height}
+              style={{
+                width: props.width * canvasScale,
+                height: props.height * canvasScale
+              }}
+              disabled={true}
+            />
+            <h2
+              className='CanvasContainer__title CanvasContainer__title--worlds'
+              style={{
+                top: '10%',
+                left: '50%',
+                transform: `translate(-50%, -50%) scale(${titleScale})`
+              }}
+            >
+              art/peace Worlds
+            </h2>
+            <h2
+              className='CanvasContainer__title CanvasContainer__title--worlds'
+              style={{
+                top: '90%',
+                left: '50%',
+                transform: `translate(-50%, -50%) scale(${titleScale})`
+              }}
+            >
+              coming soon...
+            </h2>
+          </div>
+        )}
         {props.availablePixels > 0 && (
           <ExtraPixelsCanvas
             extraPixelsCanvasRef={props.extraPixelsCanvasRef}

@@ -62,3 +62,11 @@
 
   pointer-events: none;
 }
+
+.CanvasContainer__title--worlds {
+  font-size: 2rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
