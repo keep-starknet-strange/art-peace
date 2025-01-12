@@ -37,30 +37,60 @@ import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
-  const worldsMode = true;
-  const [openedWorldId, setOpenedWorldId] = useState(null);
+  const worldsMode = devnetMode;
+  const [openedWorldId, setOpenedWorldId] = useState(worldsMode ? 0 : null);
   const [activeWorld, setActiveWorld] = useState(null);
+  const [surroundingWorlds, setSurroundingWorlds] = useState([]);
 
   // Page management
   useEffect(() => {
     const getWorldId = async () => {
+      let currentWorldId = 0;
+
       if (location.pathname.startsWith('/worlds/')) {
         let worldSlug = location.pathname.split('/worlds/')[1];
         let response = await fetchWrapper(
           `get-world-id?worldName=${worldSlug}`
         );
+
         if (response.data === undefined || response.data === null) {
           setActiveWorld(null);
-          setOpenedWorldId(null);
-          return;
+          setOpenedWorldId(0);
+        } else {
+          setActiveWorld(response.data);
+          setOpenedWorldId(response.data);
+          currentWorldId = response.data;
+        }
+      } else {
+        const response = await fetchWrapper('get-world?worldId=0');
+        if (response.data) {
+          setActiveWorld(response.data);
+        }
+        setOpenedWorldId(0);
+      }
+
+      // Always fetch surrounding worlds
+      const surroundingResponse = await fetchWrapper('get-home-worlds');
+      if (surroundingResponse.data) {
+        const otherWorlds = surroundingResponse.data
+          .filter((world) => world.worldId !== currentWorldId)
+          .slice(0, 12);
+
+        // Pad array with null values if less than 12 worlds
+        let paddedWorlds = [...otherWorlds];
+        while (paddedWorlds.length < 12) {
+          paddedWorlds.push(null);
+        }
+        if (paddedWorlds.length > 12) {
+          paddedWorlds = paddedWorlds.slice(0, 12);
         }
 
-        setOpenedWorldId(response.data);
+        setSurroundingWorlds(paddedWorlds);
       } else {
-        setActiveWorld(null);
-        setOpenedWorldId(null);
+        setSurroundingWorlds(Array(12).fill(null)); // Fill with 12 null values if no worlds found
       }
     };
+
     getWorldId();
   }, [location.pathname]);
 
@@ -76,11 +106,10 @@ function App() {
     'Worlds',
     'Account'
   ];
+  //  : ['Canvas', 'Factions', 'NFTs', 'Quests', 'Vote', 'Account'];
   */
   // TODO: Add features back
-  const tabs = devnetMode
-    ? ['Canvas', 'Worlds', 'Stencils', 'Account']
-    : ['Canvas', 'Factions', 'NFTs', 'Quests', 'Vote', 'Account'];
+  const tabs = devnetMode ? ['Canvas', 'Worlds', 'Stencils', 'Account'] : [];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   useLockScroll(activeTab === 'Canvas');
 
@@ -293,22 +322,42 @@ function App() {
   useEffect(() => {
     const processMessage = async (message) => {
       if (message) {
-        // Check the message type and handle accordingly
         if (message.messageType === 'colorPixel') {
           if (message.color >= colors.length) {
-            // Get new colors from backend
             await fetchColors();
           }
           colorPixel(message.position, message.color);
         } else if (message.messageType === 'colorWorldPixel') {
-          if (message.worldId.toString() !== openedWorldId) {
-            return;
+          if (message.worldId.toString() === openedWorldId.toString()) {
+            if (message.color >= colors.length) {
+              await fetchColors();
+            }
+            colorPixel(message.position, message.color);
           }
-          if (message.color >= colors.length) {
-            // Get new colors from backend
-            await fetchColors();
-          }
-          colorPixel(message.position, message.color);
+
+          surroundingWorlds.forEach((world) => {
+            if (
+              world &&
+              world.worldId.toString() === message.worldId.toString()
+            ) {
+              const surroundingCanvas = document.querySelector(
+                `canvas[data-world-id="${world.worldId}"]`
+              );
+              if (surroundingCanvas) {
+                const context = surroundingCanvas.getContext('2d');
+                const canvasWidth = surroundingCanvas[world.worldId].width;
+                const x = message.position % canvasWidth;
+                const y = Math.floor(message.position / canvasWidth);
+                const canvasColors = surroundingCanvas[world.worldId].colors;
+                const colorHex = `#${canvasColors[message.color]}FF`;
+                context.fillStyle = colorHex;
+                context.fillRect(x, y, 1, 1);
+              }
+            }
+          });
+        } else if (message.messageType === 'newWorld') {
+          // TODO
+          setOpenedWorldId(message.worldId);
         } else if (
           message.messageType === 'nftMinted' &&
           activeTab === 'NFTs'
@@ -321,7 +370,7 @@ function App() {
     };
 
     processMessage(lastJsonMessage);
-  }, [lastJsonMessage]);
+  }, [lastJsonMessage, openedWorldId, colors]);
 
   // Canvas
   const [width, setWidth] = useState(canvasConfig.canvas.width);
@@ -335,6 +384,12 @@ function App() {
     const context = canvas.getContext('2d');
     const x = position % width;
     const y = Math.floor(position / width);
+
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      console.error('Invalid pixel position:', x, y);
+      return;
+    }
+
     const colorIdx = color;
     const colorHex = `#${colors[colorIdx]}FF`;
     context.fillStyle = colorHex;
@@ -1256,6 +1311,7 @@ function App() {
         {modal && <ModalPanel modal={modal} setModal={setModal} />}
         <CanvasContainer
           colorPixel={colorPixel}
+          worldsMode={worldsMode}
           openedWorldId={openedWorldId}
           activeWorld={activeWorld}
           width={width}
@@ -1315,9 +1371,16 @@ function App() {
           setIsEraserMode={setIsEraserMode}
           clearExtraPixel={clearExtraPixel}
           setLastPlacedTime={setLastPlacedTime}
+          surroundingWorlds={surroundingWorlds}
         />
         {(!isMobile || activeTab === tabs[0]) && (
-          <div className='App__logo'>
+          <div
+            className='App__logo'
+            onClick={() => {
+              setActiveTab(tabs[0]);
+              window.location.pathname = '/';
+            }}
+          >
             <img
               src={logo}
               alt='logo'

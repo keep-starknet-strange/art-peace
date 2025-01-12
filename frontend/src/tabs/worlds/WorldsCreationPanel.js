@@ -71,8 +71,8 @@ const WorldsCreationPanel = (props) => {
         maxFee
       }
     );
-    console.log(result);
-    // TODO: Update the UI with the new World
+    console.log('World creation result:', result); // Debug log
+
     closePanel();
     props.setActiveTab('Worlds');
   };
@@ -213,8 +213,11 @@ const WorldsCreationPanel = (props) => {
         submitStart,
         submitEnd
       );
+
+      window.location.href = `/worlds/${worldSlug}`;
       return;
     }
+
     const host = '0x' + props.queryAddress;
     let createWorldEndpoint = 'create-canvas-devnet';
     const response = await fetchWrapper(createWorldEndpoint, {
@@ -234,8 +237,7 @@ const WorldsCreationPanel = (props) => {
     });
     if (response.result) {
       console.log(response.result);
-      closePanel();
-      props.setActiveTab('Worlds');
+      window.location.href = `/worlds/${worldSlug}`;
     }
   };
 
@@ -292,13 +294,13 @@ const WorldsCreationPanel = (props) => {
 
   const getCompetitionStart = () => {
     return competitionConfig?.startTime
-      ? new Date(competitionConfig.startTime).getTime()
+      ? new Date(competitionConfig.startTime * 1000).getTime()
       : new Date('2024-12-07T00:00:00Z').getTime();
   };
 
   const getCompetitionEnd = () => {
     return competitionConfig?.endTime
-      ? new Date(competitionConfig.endTime).getTime()
+      ? new Date(competitionConfig.endTime * 1000).getTime()
       : new Date('2025-01-02T00:00:00Z').getTime();
   };
 
