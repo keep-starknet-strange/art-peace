@@ -184,22 +184,11 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 	}
 
 	// After world creation
-	var message = map[string]interface{}{
+	var message = map[string]string {
 		"messageType": "newWorld",
-		"worldId":     canvasId,
-		"world": map[string]interface{}{
-			"worldId":           canvasId,
-			"host":              host,
-			"name":              name,
-			"uniqueName":        uniqueName,
-			"width":             width,
-			"height":            height,
-			"timeBetweenPixels": timeBetweenPixels,
-			"startTime":         startTime,
-			"endTime":           endTime,
-		},
+		"worldId": strconv.Itoa(int(canvasId)),
 	}
-	routeutils.SendWebSocketMessage(message)
+	routeutils.SendMessageToWSS(message)
 }
 
 func revertCanvasCreatedEvent(event IndexerEvent) {
@@ -500,13 +489,13 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		}
 	}
 
-	var message = map[string]interface{}{
-		"worldId":     canvasId,
-		"position":    pos,
-		"color":       colorVal,
+	var message = map[string]string {
+		"worldId":     strconv.Itoa(int(canvasId)),
+		"position":    strconv.Itoa(int(pos)),
+		"color":       strconv.Itoa(int(colorVal)),
 		"messageType": "colorWorldPixel",
 	}
-	routeutils.SendWebSocketMessage(message)
+	routeutils.SendMessageToWSS(message)
 }
 
 func revertCanvasPixelPlacedEvent(event IndexerEvent) {

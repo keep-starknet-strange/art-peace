@@ -43,30 +43,42 @@ function App() {
   const [surroundingWorlds, setSurroundingWorlds] = useState([]);
 
   // Page management
+  const [isHome, setIsHome] = useState(true);
   useEffect(() => {
     const getWorldId = async () => {
       let currentWorldId = 0;
 
       if (location.pathname.startsWith('/worlds/')) {
-        let worldSlug = location.pathname.split('/worlds/')[1];
-        let response = await fetchWrapper(
-          `get-world-id?worldName=${worldSlug}`
-        );
+        setIsHome(false);
+        try {
+          let worldSlug = location.pathname.split('/worlds/')[1];
+          let response = await fetchWrapper(
+            `get-world-id?worldName=${worldSlug}`
+          );
 
-        if (response.data === undefined || response.data === null) {
+          if (response.data === undefined || response.data === null) {
+            setActiveWorld(null);
+            setOpenedWorldId(0);
+          } else {
+            setActiveWorld(response.data);
+            setOpenedWorldId(response.data);
+            currentWorldId = response.data;
+          }
+        } catch (error) {
           setActiveWorld(null);
           setOpenedWorldId(0);
-        } else {
-          setActiveWorld(response.data);
-          setOpenedWorldId(response.data);
-          currentWorldId = response.data;
         }
       } else {
-        const response = await fetchWrapper('get-world?worldId=0');
-        if (response.data) {
-          setActiveWorld(response.data);
+        setIsHome(true);
+        try {
+          const response = await fetchWrapper('get-world?worldId=0');
+          if (response.data) {
+            setActiveWorld(response.data);
+          }
+          setOpenedWorldId(0);
+        } catch (error) {
+          console.error(error);
         }
-        setOpenedWorldId(0);
       }
 
       // Always fetch surrounding worlds
@@ -85,6 +97,8 @@ function App() {
           paddedWorlds = paddedWorlds.slice(0, 12);
         }
 
+        // Randomize order of worlds
+        paddedWorlds.sort(() => Math.random() - 0.5);
         setSurroundingWorlds(paddedWorlds);
       } else {
         setSurroundingWorlds(Array(12).fill(null)); // Fill with 12 null values if no worlds found
@@ -93,6 +107,11 @@ function App() {
 
     getWorldId();
   }, [location.pathname]);
+
+  useEffect(() => {
+    setOverlayTemplate(null);
+    setTemplateOverlayMode(false);
+  }, [openedWorldId]);
 
   // Window management
   usePreventZoom();
@@ -973,14 +992,21 @@ function App() {
   useEffect(() => {
     // TODO: Done twice ( here and src/tabs/worlds/Worlds.js )
     const getWorld = async () => {
-      const getWorldPath = `get-world?worldId=${openedWorldId}`;
-      const response = await fetchWrapper(getWorldPath);
-      if (!response.data) {
-        return;
+      try {
+        const getWorldPath = `get-world?worldId=${openedWorldId}`;
+        const response = await fetchWrapper(getWorldPath);
+        if (!response.data) {
+          return;
+        }
+        setActiveWorld(response.data);
+        setWidth(response.data.width);
+        setHeight(response.data.height);
+      } catch (error) {
+        console.error(error);
+        setActiveWorld(null);
+        setWidth(canvasConfig.canvas.width);
+        setHeight(canvasConfig.canvas.height);
       }
-      setActiveWorld(response.data);
-      setWidth(response.data.width);
-      setHeight(response.data.height);
     };
     if (openedWorldId === null) {
       setActiveWorld(null);
@@ -1310,6 +1336,8 @@ function App() {
         />
         {modal && <ModalPanel modal={modal} setModal={setModal} />}
         <CanvasContainer
+          isHome={isHome}
+          setOpenedWorldId={setOpenedWorldId}
           colorPixel={colorPixel}
           worldsMode={worldsMode}
           openedWorldId={openedWorldId}
@@ -1372,6 +1400,7 @@ function App() {
           clearExtraPixel={clearExtraPixel}
           setLastPlacedTime={setLastPlacedTime}
           surroundingWorlds={surroundingWorlds}
+          setSurroundingWorlds={setSurroundingWorlds}
         />
         {(!isMobile || activeTab === tabs[0]) && (
           <div
@@ -1398,6 +1427,7 @@ function App() {
           }
         >
           <TabPanel
+            isHome={isHome}
             openedWorldId={openedWorldId}
             setOpenedWorldId={setOpenedWorldId}
             openedStencilId={openedStencilId}
@@ -1535,6 +1565,7 @@ function App() {
             {!gameEnded && (
               <PixelSelector
                 colors={colors}
+                openedWorldId={openedWorldId}
                 submit={submit}
                 clearAll={clearAll}
                 totalPixelsUsed={totalPixelsUsed}

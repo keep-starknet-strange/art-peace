@@ -132,6 +132,7 @@ const WorldsCreationPanel = (props) => {
   const [worldWidth, setWorldWidth] = useState(128);
   const [worldHeight, setWorldHeight] = useState(128);
   const [timer, setTimer] = useState(10);
+  const [newBaseColor, setNewBaseColor] = useState('');
   const [newColor, setNewColor] = useState('');
   const [palette, setPalette] = useState(defaultPalette);
   const [start, setStart] = useState(new Date().getTime());
@@ -364,14 +365,10 @@ const WorldsCreationPanel = (props) => {
                     type='number'
                     placeholder='Width...'
                     value={worldWidth}
+                    min='16'
+                    max='1024'
                     onChange={(e) => {
-                      if (e.target.value < minWorldSize) {
-                        setWorldWidth(minWorldSize);
-                      } else if (e.target.value > maxWorldSize) {
-                        setWorldWidth(maxWorldSize);
-                      } else {
-                        setWorldWidth(e.target.value);
-                      }
+                      setWorldWidth(e.target.value);
                     }}
                   />
                   <p className='Text__xsmall' style={{ margin: 0, padding: 0 }}>
@@ -392,14 +389,10 @@ const WorldsCreationPanel = (props) => {
                     type='number'
                     placeholder='Height...'
                     value={worldHeight}
+                    min='16'
+                    max='1024'
                     onChange={(e) => {
-                      if (e.target.value < minWorldSize) {
-                        setWorldHeight(minWorldSize);
-                      } else if (e.target.value > maxWorldSize) {
-                        setWorldHeight(maxWorldSize);
-                      } else {
-                        setWorldHeight(e.target.value);
-                      }
+                      setWorldHeight(e.target.value);
                     }}
                   />
                   <p className='Text__xsmall' style={{ margin: 0, padding: 0 }}>
@@ -426,7 +419,10 @@ const WorldsCreationPanel = (props) => {
                 type='number'
                 placeholder='Timer (seconds)...'
                 value={timer}
-                onChange={(e) => setTimer(Math.round(e.target.value))}
+                min='1'
+                onChange={(e) => {
+                  setTimer(e.target.value);
+                }}
               />
               <p className='Text__xsmall'>Seconds between pixels</p>
             </>
@@ -440,16 +436,104 @@ const WorldsCreationPanel = (props) => {
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'left',
+                gap: '1rem'
+              }}
+            >
+              <p className='Text__xsmall'>Base Color</p>
+              {palette.length > 0 && (
+                <div
+                  key='0'
+                  className='WorldsCreationPanel__form__color'
+                  onClick={() => {
+                    let newPalette = [...palette];
+                    newPalette.splice(0, 1);
+                    setPalette(newPalette);
+                  }}
+                  style={{
+                    backgroundColor: `#${palette[0]}`
+                  }}
+                >
+                  <p className='Text__small WorldsCreationPanel__bubble__remove'>
+                    X
+                  </p>
+                </div>
+              )}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <input
+                  className='Text__small Input__primary WorldsCreationPanel__form__input'
+                  type='text'
+                  placeholder='New Base (#FFFFFFF)...'
+                  value={newBaseColor}
+                  onChange={(e) => {
+                    setNewBaseColor(e.target.value);
+                  }}
+                />
+                <div
+                  className={`Button__primary WorldsCreationPanel__button__add ${newBaseColor.length !== 7 ? 'Button__disabled' : ''}`}
+                  onClick={() => {
+                    // TODO: Allow host to add colors later?
+                    // TODO: Color wheel?
+                    // TODO: Pressing enter should add the color too
+                    // TODO: Display color when done typing
+                    // Check if the color is valid
+                    let formattedColor = newBaseColor.replace('#', '');
+                    // To uppercase
+                    formattedColor = formattedColor.toUpperCase();
+                    if (formattedColor.length !== 6) {
+                      setValidationMessage(
+                        'Invalid color: must be #FFFFFF format'
+                      );
+                      return;
+                    }
+                    if (!/^[0-9A-F]{6}$/i.test(formattedColor)) {
+                      setValidationMessage(
+                        'Invalid color: must be #FFFFFF format'
+                      );
+                      return;
+                    }
+                    // Check if the color is already in the palette
+                    if (palette.includes(formattedColor)) {
+                      setValidationMessage('Color already in palette');
+                      return;
+                    }
+                    // Remove the base color if it exists
+                    setPalette([formattedColor, ...palette]);
+                    setNewBaseColor('');
+                    setValidationMessage('');
+                  }}
+                >
+                  <p
+                    className='Text__medium'
+                    style={{
+                      transform: 'translate(1px, -2px)'
+                    }}
+                  >
+                    +
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'left',
                 flexWrap: 'wrap'
               }}
             >
-              {palette.map((color, index) => (
+              {palette.slice(1).map((color, index) => (
                 <div
                   key={index}
                   className='WorldsCreationPanel__form__color'
                   onClick={() => {
                     let newPalette = [...palette];
-                    newPalette.splice(index, 1);
+                    newPalette.splice(index + 1, 1);
                     setPalette(newPalette);
                   }}
                   style={{

@@ -2,6 +2,8 @@
   "host": "backend.art-peace-sepolia.svc.cluster.local",
   "port": 8080,
   "consumer_port": 8081,
+  "ws_host": "websockets.art-peace-sepolia.svc.cluster.local",
+  "ws_port": 8082,
   "scripts": {
     "place_pixel_devnet": "/scripts/place_pixel.sh",
     "place_extra_pixels_devnet": "/scripts/place_extra_pixels.sh",
