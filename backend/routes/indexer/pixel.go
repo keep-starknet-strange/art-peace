@@ -61,7 +61,7 @@ func processPixelPlacedEvent(event IndexerEvent) {
 	}
 
 	// Send message to all connected clients
-	var message = map[string]string {
+	var message = map[string]string{
 		"position":    strconv.FormatInt(position, 10),
 		"color":       strconv.FormatInt(color, 10),
 		"messageType": "colorPixel",
@@ -105,7 +105,7 @@ func revertPixelPlacedEvent(event IndexerEvent) {
 	}
 
 	// Send message to all connected clients
-	var message = map[string]string {
+	var message = map[string]string{
 		"position":    strconv.FormatInt(position, 10),
 		"color":       strconv.Itoa(*oldColor),
 		"messageType": "colorPixel",

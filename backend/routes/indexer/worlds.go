@@ -184,9 +184,9 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 	}
 
 	// After world creation
-	var message = map[string]string {
+	var message = map[string]string{
 		"messageType": "newWorld",
-		"worldId": strconv.Itoa(int(canvasId)),
+		"worldId":     strconv.Itoa(int(canvasId)),
 	}
 	routeutils.SendMessageToWSS(message)
 }
@@ -489,7 +489,7 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		}
 	}
 
-	var message = map[string]string {
+	var message = map[string]string{
 		"worldId":     strconv.Itoa(int(canvasId)),
 		"position":    strconv.Itoa(int(pos)),
 		"color":       strconv.Itoa(int(colorVal)),

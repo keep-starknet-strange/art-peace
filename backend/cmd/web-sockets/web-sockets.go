@@ -57,8 +57,8 @@ func main() {
 	core.ArtPeaceBackend = core.NewBackend(databases, roundsConfig, canvasConfig, backendConfig, false)
 
 	routes.InitBaseRoutes()
-  routes.InitWebsocketRoutes()
-  routes.StartWebsocketServer()
+	routes.InitWebsocketRoutes()
+	routes.StartWebsocketServer()
 
 	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.WsPort)
 }
