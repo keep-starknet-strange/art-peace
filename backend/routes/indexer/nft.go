@@ -250,7 +250,7 @@ func processNFTMintedEvent(event IndexerEvent) {
 		return
 	}
 
-	message := map[string]string {
+	message := map[string]string{
 		"token_id":    strconv.FormatUint(tokenId, 10),
 		"minter":      minter,
 		"messageType": "nftMinted",

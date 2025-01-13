@@ -83,14 +83,14 @@ func SendWebSocketMessage(message map[string]string) {
 }
 
 func SendMessageToWSS(message map[string]string) {
-  websocketHost := core.ArtPeaceBackend.BackendConfig.WsHost + ":" + strconv.Itoa(core.ArtPeaceBackend.BackendConfig.WsPort) + "/ws-msg"
-  messageBytes, err := json.Marshal(message)
-  if err != nil {
-    fmt.Println("Failed to marshal websocket message")
-    return
-  }
-  _, err = http.Post("http://" + websocketHost, "application/json", strings.NewReader(string(messageBytes)))
-  if err != nil {
-    fmt.Println("Failed to send message to websocket server", err)
-  }
+	websocketHost := core.ArtPeaceBackend.BackendConfig.WsHost + ":" + strconv.Itoa(core.ArtPeaceBackend.BackendConfig.WsPort) + "/ws-msg"
+	messageBytes, err := json.Marshal(message)
+	if err != nil {
+		fmt.Println("Failed to marshal websocket message")
+		return
+	}
+	_, err = http.Post("http://"+websocketHost, "application/json", strings.NewReader(string(messageBytes)))
+	if err != nil {
+		fmt.Println("Failed to send message to websocket server", err)
+	}
 }

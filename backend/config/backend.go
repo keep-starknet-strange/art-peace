@@ -47,8 +47,8 @@ type BackendConfig struct {
 	Host         string               `json:"host"`
 	Port         int                  `json:"port"`
 	ConsumerPort int                  `json:"consumer_port"`
-  WsHost       string               `json:"ws_host"`
-  WsPort       int                  `json:"ws_port"`
+	WsHost       string               `json:"ws_host"`
+	WsPort       int                  `json:"ws_port"`
 	Scripts      BackendScriptsConfig `json:"scripts"`
 	Production   bool                 `json:"production"`
 	WebSocket    WebSocketConfig      `json:"websocket"`
@@ -59,8 +59,8 @@ var DefaultBackendConfig = BackendConfig{
 	Host:         "localhost",
 	Port:         8080,
 	ConsumerPort: 8081,
-  WsHost:       "localhost",
-  WsPort:       8082,
+	WsHost:       "localhost",
+	WsPort:       8082,
 	Scripts: BackendScriptsConfig{
 		PlacePixelDevnet:            "../scripts/place_pixel.sh",
 		PlaceExtraPixelsDevnet:      "../scripts/place_extra_pixels.sh",

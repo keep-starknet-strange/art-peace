@@ -99,12 +99,12 @@ func getWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  address := r.URL.Query().Get("address")
-  if address == "" {
-    address = "0"
-  }
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		address = "0"
+	}
 
-  query := `
+	query := `
     SELECT
       worlds.*,
       COALESCE(worldfavorites.favorite_count, 0) AS favorites,
