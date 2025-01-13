@@ -7,7 +7,8 @@ import TemplateCreationOverlay from './TemplateCreationOverlay.js';
 import StencilCreationOverlay from './StencilCreationOverlay.js';
 import NFTSelector from './NFTSelector.js';
 import { fetchWrapper } from '../services/apiService.js';
-import { devnetMode } from '../utils/Consts.js';
+import { devnetMode, backendUrl } from '../utils/Consts.js';
+import canvasConfig from '../configs/canvas.config.json';
 
 const CanvasContainer = (props) => {
   // TODO: Handle window resize
@@ -73,6 +74,7 @@ const CanvasContainer = (props) => {
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
+    console.log(rect, cursorX, cursorY);
     if (cursorX < 0) {
       cursorX = 0;
     } else if (cursorX > rect.width) {
@@ -93,8 +95,8 @@ const CanvasContainer = (props) => {
     } else if (newScale > maxScale) {
       newScale = maxScale;
     }
-    const newWidth = props.width * newScale;
-    const newHeight = props.height * newScale;
+    const newWidth = props.width * newScale * artificialZoom;
+    const newHeight = props.height * newScale * artificialZoom;
     const oldCursorXRelative = cursorX / rect.width;
     const oldCursorYRelative = cursorY / rect.height;
     const newCursorX = oldCursorXRelative * newWidth;
@@ -193,12 +195,16 @@ const CanvasContainer = (props) => {
   }, [canvasScale, canvasX, canvasY, touchInitialDistance]);
 
   // Init canvas transform to center of the viewport
+  const [hasInit, setHasInit] = useState(false);
   useEffect(() => {
+    if (hasInit) return;
     const containerRect = canvasContainerRef.current.getBoundingClientRect();
+    console.log(containerRect);
     const adjustX = ((canvasScale - 1) * props.width) / 2;
     const adjustY = ((canvasScale - 1) * props.height) / 2;
     setCanvasX(containerRect.width / 2 - adjustX);
     setCanvasY(containerRect.height / 2 - adjustY);
+    setHasInit(true);
   }, [canvasContainerRef, props.width, props.height]);
 
   const colorExtraPixel = (x, y, colorId) => {
@@ -390,6 +396,14 @@ const CanvasContainer = (props) => {
     // TODO: Fix last placed time if error in placing pixel
   };
 
+  const openWorld = (index, world) => {
+    // Set current world to surrounding world at index
+    let newSurroundingWorlds = [...props.surroundingWorlds];
+    newSurroundingWorlds[index] = props.activeWorld;
+    props.setSurroundingWorlds(newSurroundingWorlds);
+    props.setOpenedWorldId(world.worldId);
+  };
+
   useEffect(() => {
     const hoverColor = (e) => {
       if (props.selectedColorId === -1 && !props.isEraserMode) {
@@ -541,6 +555,197 @@ const CanvasContainer = (props) => {
     props.isExtraDeleteMode
   ]);
 
+  const baseWorldX = 528;
+  const baseWorldY = 396;
+  const getWorldPosition = (index) => {
+    // TODO: To config
+    let xGap = 16;
+    let yGap = 12;
+    if (index === 0) {
+      return {
+        x: -(baseWorldX + xGap) / 2,
+        y: -(baseWorldY + yGap) / 2
+      };
+    } else if (index === 1) {
+      return {
+        x: 0,
+        y: -(baseWorldY + yGap) / 2
+      };
+    } else if (index === 2) {
+      return {
+        x: (baseWorldX + xGap) / 2,
+        y: -(baseWorldY + yGap) / 2
+      };
+    } else if (index === 3) {
+      return {
+        x: baseWorldX + xGap,
+        y: -(baseWorldY + yGap) / 2
+      };
+    } else if (index === 4) {
+      return {
+        x: -(baseWorldX + xGap) / 2,
+        y: 0
+      };
+    } else if (index === 5) {
+      return {
+        x: baseWorldX + xGap,
+        y: 0
+      };
+    } else if (index === 6) {
+      return {
+        x: -(baseWorldX + xGap) / 2,
+        y: (baseWorldY + yGap) / 2
+      };
+    } else if (index === 7) {
+      return {
+        x: baseWorldX + xGap,
+        y: (baseWorldY + yGap) / 2
+      };
+    } else if (index === 8) {
+      return {
+        x: -(baseWorldX + xGap) / 2,
+        y: baseWorldY + yGap
+      };
+    } else if (index === 9) {
+      return {
+        x: 0,
+        y: baseWorldY + yGap
+      };
+    } else if (index === 10) {
+      return {
+        x: (baseWorldX + xGap) / 2,
+        y: baseWorldY + yGap
+      };
+    } else if (index === 11) {
+      return {
+        x: baseWorldX + xGap,
+        y: baseWorldY + yGap
+      };
+    }
+    // Circle around the center
+    return {
+      x: baseWorldX * 2,
+      y: baseWorldY * 2
+    };
+  };
+
+  const [surroundingCanvasRefs, setSurroundingCanvasRefs] = useState([]);
+  useEffect(() => {
+    setSurroundingCanvasRefs(
+      Array.from({ length: props.surroundingWorlds.length }, () =>
+        React.createRef()
+      )
+    );
+  }, [props.surroundingWorlds]);
+
+  useEffect(() => {
+    const fetchCanvas = async (
+      width,
+      height,
+      colors,
+      canvasRef,
+      openedWorldId
+    ) => {
+      try {
+        let canvasColors = colors;
+        if (colors.length === 0) {
+          // Try to fetch colors from the backend
+          let canvasColorsEndpoint =
+            backendUrl +
+            (openedWorldId === null
+              ? '/get-colors'
+              : `/get-worlds-colors?worldId=${openedWorldId}`);
+          let response = await fetch(canvasColorsEndpoint);
+          let canvasColorsData = await response.json();
+          canvasColors = canvasColorsData.data;
+          if (canvasColors.length === 0) {
+            console.error('No colors found');
+            return;
+          }
+        }
+        const canvas = canvasRef.current;
+        if (!canvas) {
+          return;
+        }
+        const context = canvas.getContext('2d');
+        context.imageSmoothingEnabled = false;
+
+        let getCanvasEndpoint =
+          backendUrl +
+          (openedWorldId === null
+            ? '/get-canvas'
+            : `/get-world-canvas?worldId=${openedWorldId}`);
+        let response = await fetch(getCanvasEndpoint);
+        let canvasData = await response.arrayBuffer();
+
+        let colorData = new Uint8Array(canvasData, 0, canvasData.byteLength);
+        let dataArray = [];
+        let bitwidth = canvasConfig.colorsBitwidth;
+        let oneByteBitOffset = 8 - bitwidth;
+        let twoByteBitOffset = 16 - bitwidth;
+        let canvasBits = width * height * bitwidth;
+        for (let bitPos = 0; bitPos < canvasBits; bitPos += bitwidth) {
+          let bytePos = Math.floor(bitPos / 8);
+          let bitOffset = bitPos % 8;
+          if (bitOffset <= oneByteBitOffset) {
+            let byte = colorData[bytePos];
+            let value = (byte >> (oneByteBitOffset - bitOffset)) & 0b11111;
+            dataArray.push(value);
+          } else {
+            let byte = (colorData[bytePos] << 8) | colorData[bytePos + 1];
+            let value = (byte >> (twoByteBitOffset - bitOffset)) & 0b11111;
+            dataArray.push(value);
+          }
+        }
+        let imageDataArray = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const color = '#' + canvasColors[dataArray[i]] + 'FF';
+          const [r, g, b, a] = color.match(/\w\w/g).map((x) => parseInt(x, 16));
+          imageDataArray.push(r, g, b, a);
+        }
+        const uint8ClampedArray = new Uint8ClampedArray(imageDataArray);
+        const imageData = new ImageData(uint8ClampedArray, width, height);
+        context.putImageData(imageData, 0, 0);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (props.openedWorldId !== null) {
+      fetchCanvas(
+        props.width,
+        props.height,
+        props.colors,
+        props.canvasRef,
+        props.openedWorldId
+      );
+    }
+    for (let i = 0; i < surroundingCanvasRefs.length; i++) {
+      if (surroundingCanvasRefs[i].current) {
+        let canvasConfig = props.surroundingWorlds[i];
+        fetchCanvas(
+          canvasConfig.width,
+          canvasConfig.height,
+          [],
+          surroundingCanvasRefs[i],
+          canvasConfig.worldId
+        );
+      }
+    }
+  }, [surroundingCanvasRefs, props.openedWorldId, props.activeWorld]);
+
+  const [artificialZoom, setArtificialZoom] = useState(1);
+  useEffect(() => {
+    if (
+      props.openedWorldId === 0 ||
+      (props.activeWorld && props.activeWorld.worldId === 0)
+    ) {
+      setArtificialZoom(1);
+    } else {
+      setArtificialZoom(2.0625);
+    }
+  }, [props.isHome, props.worldsMode, props.activeWorld, props.openedWorldId]);
+
   return (
     <div
       ref={canvasContainerRef}
@@ -551,23 +756,58 @@ const CanvasContainer = (props) => {
       <div
         className='CanvasContainer__anchor'
         style={{
-          top: -props.height / 2,
-          left: -props.width / 2,
+          top: -baseWorldY / 2,
+          left: -baseWorldX / 2,
           transform: `translate(${canvasX}px, ${canvasY}px)`
         }}
       >
-        {props.openedWorldId !== null && props.activeWorld !== null && (
-          <h3
-            className='CanvasContainer__title'
-            style={{
-              top: `calc(-0.75rem * ${titleScale})`,
-              left: '50%',
-              transform: `translate(-50%, -50%) scale(${titleScale})`
-            }}
-          >
-            {props.activeWorld.name}
-          </h3>
-        )}
+        {props.isHome &&
+          props.worldsMode &&
+          props.surroundingWorlds &&
+          props.surroundingWorlds.length > 0 &&
+          props.surroundingWorlds.map((world, index) => {
+            if (world === null) return null;
+            const position = getWorldPosition(index);
+            if (!position) return null;
+            let surroundingWorldScaler = 1;
+            if (world.worldId === 0) {
+              surroundingWorldScaler = 1 / 2.0625;
+            }
+            return (
+              <Canvas
+                key={index}
+                openedWorldId={world.worldId}
+                canvasRef={surroundingCanvasRefs[index]}
+                width={world.width}
+                height={world.height}
+                style={{
+                  width: world.width * canvasScale * surroundingWorldScaler,
+                  height: world.height * canvasScale * surroundingWorldScaler,
+                  position: 'absolute',
+                  top: position.y * canvasScale,
+                  left: position.x * canvasScale,
+                  cursor: 'pointer'
+                }}
+                className='Canvas__surrounding'
+                colors={[]}
+                pixelClicked={() => openWorld(index, world)}
+              />
+            );
+          })}
+        {!props.isHome &&
+          props.openedWorldId !== null &&
+          props.activeWorld !== null && (
+            <h3
+              className='CanvasContainer__title'
+              style={{
+                top: `calc(-0.75rem * ${titleScale})`,
+                left: '50%',
+                transform: `translate(-50%, -50%) scale(${titleScale})`
+              }}
+            >
+              {props.activeWorld.name}
+            </h3>
+          )}
         {props.pixelSelectedMode && (
           <div
             className='Canvas__selection'
@@ -594,8 +834,8 @@ const CanvasContainer = (props) => {
             width={props.width}
             height={props.height}
             style={{
-              width: props.width * canvasScale,
-              height: props.height * canvasScale
+              width: props.width * canvasScale * artificialZoom,
+              height: props.height * canvasScale * artificialZoom
             }}
             colors={props.colors}
             pixelClicked={pixelClicked}
@@ -661,6 +901,7 @@ const CanvasContainer = (props) => {
             setTemplateOverlayMode={props.setTemplateOverlayMode}
             setOverlayTemplate={props.setOverlayTemplate}
             colors={props.colors}
+            openedWorldId={props.openedWorldId}
           />
         )}
         {props.templateCreationMode && (

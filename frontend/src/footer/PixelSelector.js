@@ -170,6 +170,10 @@ const PixelSelector = (props) => {
     setEnded(false);
   };
 
+  useEffect(() => {
+    cancelSelector();
+  }, [props.openedWorldId]);
+
   return (
     <div className='PixelSelector'>
       {(props.selectorMode || ended) && (

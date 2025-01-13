@@ -188,16 +188,6 @@ const StencilsExpandedSection = (props) => {
           stateValue={props.allStencilsPagination}
         />
       </div>
-      {props.queryAddress !== '0' && (
-        <div>
-          <p
-            className='Text__medium Button__primary'
-            onClick={props.uploadStencil}
-          >
-            Create Stencil
-          </p>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.labels.websocket.name }}-secret
+  labels:
+    app: {{ .Values.labels.websocket.name }}
+data:
+  ART_PEACE_CONTRACT_ADDRESS: {{ .Values.contracts.artPeace }}

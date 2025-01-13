@@ -99,7 +99,31 @@ func getWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	world, err := core.PostgresQueryOneJson[WorldData]("SELECT * FROM worlds WHERE world_id = $1", worldId)
+  address := r.URL.Query().Get("address")
+  if address == "" {
+    address = "0"
+  }
+
+  query := `
+    SELECT
+      worlds.*,
+      COALESCE(worldfavorites.favorite_count, 0) AS favorites,
+      COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false) as favorited
+    FROM
+      worlds
+    LEFT JOIN (
+      SELECT
+        world_id,
+        COUNT(*) AS favorite_count
+      FROM
+        worldfavorites
+      GROUP BY
+        world_id
+    ) worldfavorites ON worlds.world_id = worldfavorites.world_id
+    WHERE
+      worlds.world_id = $2`
+
+	world, err := core.PostgresQueryOneJson[WorldData](query, address, worldId)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve World")
 		return

@@ -40,7 +40,7 @@ const WorldsMainSection = (props) => {
             Please login to view your Worlds
           </p>
         )}
-        {props.activeWorld && !props.activeWorld.favorited && (
+        {props.activeWorld && (
           <WorldItem
             key={props.activeWorld.worldId}
             activeWorldId={props.activeWorldId}
@@ -62,6 +62,7 @@ const WorldsMainSection = (props) => {
             queryAddress={props.queryAddress}
             updateFavorites={props.updateFavorites}
             canvasFactoryContract={props.canvasFactoryContract}
+            uniqueName={props.activeWorld.uniqueName}
           />
         )}
         {props.favoriteWorlds.map((world, index) => {
@@ -87,6 +88,7 @@ const WorldsMainSection = (props) => {
               queryAddress={props.queryAddress}
               updateFavorites={props.updateFavorites}
               canvasFactoryContract={props.canvasFactoryContract}
+              uniqueName={world.uniqueName}
             />
           );
         })}
@@ -164,6 +166,7 @@ const WorldsExpandedSection = (props) => {
                 queryAddress={props.queryAddress}
                 updateFavorites={props.updateFavorites}
                 canvasFactoryContract={props.canvasFactoryContract}
+                uniqueName={world.uniqueName}
               />
             );
           })}
@@ -174,19 +177,6 @@ const WorldsExpandedSection = (props) => {
           stateValue={props.allWorldsPagination}
         />
       </div>
-      {props.queryAddress !== '0' && (
-        <div>
-          <p
-            className='Text__medium Button__primary'
-            onClick={() => {
-              props.setWorldsCreationMode(true);
-              props.setActiveTab('Canvas');
-            }}
-          >
-            Create World
-          </p>
-        </div>
-      )}
     </div>
   );
 };
@@ -213,11 +203,24 @@ const Worlds = (props) => {
         });
 
         if (result.data) {
+          let newFavoriteWorlds = [];
           if (myWorldsPagination.page === 1) {
-            setFavoriteWorlds(result.data);
+            newFavoriteWorlds = result.data;
           } else {
-            setFavoriteWorlds([...favoriteWorlds, ...result.data]);
+            newFavoriteWorlds = [...favoriteWorlds, ...result.data];
           }
+          // Remove duplicates
+          newFavoriteWorlds = newFavoriteWorlds.filter(
+            (world, index, self) =>
+              index === self.findIndex((t) => t.worldId === world.worldId)
+          );
+          // Remove active world from favorite worlds
+          if (props.openedWorldId !== null) {
+            newFavoriteWorlds = newFavoriteWorlds.filter(
+              (world) => world.worldId !== props.openedWorldId
+            );
+          }
+          setFavoriteWorlds(newFavoriteWorlds);
         }
       } catch (error) {
         console.log('Error fetching Worlds', error);
@@ -227,7 +230,8 @@ const Worlds = (props) => {
   }, [
     props.queryAddress,
     myWorldsPagination.page,
-    myWorldsPagination.pageLength
+    myWorldsPagination.pageLength,
+    props.openedWorldId
   ]);
 
   const [expanded, setExpanded] = useState(false);
@@ -302,15 +306,20 @@ const Worlds = (props) => {
   const [activeWorld, setActiveWorld] = useState(null);
   useEffect(() => {
     const getWorld = async () => {
-      const getWorldPath = `get-world?worldId=${activeWorldId}`;
-      const response = await fetchWrapper(getWorldPath);
-      if (!response.data) {
-        return;
+      try {
+        const getWorldPath = `get-world?worldId=${activeWorldId}&address=${props.queryAddress}`;
+        const response = await fetchWrapper(getWorldPath);
+        if (!response.data) {
+          return;
+        }
+        setActiveWorld(response.data);
+        // Route path to "/worlds/:worldId" when activeWorldId changes
+        // let path = `/worlds/${response.data.uniqueName}`;
+        // window.history.pushState({}, '', path);
+      } catch (error) {
+        console.log('Error fetching World', error);
+        setActiveWorld(null);
       }
-      setActiveWorld(response.data);
-      // Route path to "/worlds/:worldId" when activeWorldId changes
-      let path = `/worlds/${response.data.uniqueName}`;
-      window.history.pushState({}, '', path);
     };
     if (activeWorldId === null) {
       return;
@@ -325,6 +334,17 @@ const Worlds = (props) => {
       }
       return world;
     });
+    // Filter out duplicates
+    newFavoriteWorlds = newFavoriteWorlds.filter(
+      (world, index, self) =>
+        index === self.findIndex((t) => t.worldId === world.worldId)
+    );
+    // Filter out active world
+    if (activeWorldId !== null) {
+      newFavoriteWorlds = newFavoriteWorlds.filter(
+        (world) => world.worldId !== activeWorldId
+      );
+    }
 
     let newAllWorldss = allWorlds.map((world) => {
       if (world.worldId === worldId) {
@@ -332,6 +352,11 @@ const Worlds = (props) => {
       }
       return world;
     });
+    // Filter out duplicates
+    newAllWorldss = newAllWorldss.filter(
+      (world, index, self) =>
+        index === self.findIndex((t) => t.worldId === world.worldId)
+    );
 
     setFavoriteWorlds(newFavoriteWorlds);
     setAllWorlds(newAllWorldss);
