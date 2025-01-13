@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -59,7 +60,7 @@ func WriteDataJson(w http.ResponseWriter, data string) {
 	w.Write(BasicDataJson(data))
 }
 
-func SendWebSocketMessage(message map[string]interface{}) {
+func SendWebSocketMessage(message map[string]string) {
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
 		fmt.Println("Failed to marshal websocket message")
@@ -79,4 +80,17 @@ func SendWebSocketMessage(message map[string]interface{}) {
 		}
 	}
 	core.ArtPeaceBackend.WSConnectionsLock.Unlock()
+}
+
+func SendMessageToWSS(message map[string]string) {
+	websocketHost := core.ArtPeaceBackend.BackendConfig.WsHost + ":" + strconv.Itoa(core.ArtPeaceBackend.BackendConfig.WsPort) + "/ws-msg"
+	messageBytes, err := json.Marshal(message)
+	if err != nil {
+		fmt.Println("Failed to marshal websocket message")
+		return
+	}
+	_, err = http.Post("http://"+websocketHost, "application/json", strings.NewReader(string(messageBytes)))
+	if err != nil {
+		fmt.Println("Failed to send message to websocket server", err)
+	}
 }

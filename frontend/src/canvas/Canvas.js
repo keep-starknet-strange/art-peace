@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import './Canvas.css';
-import { backendUrl } from '../utils/Consts.js';
-import canvasConfig from '../configs/canvas.config.json';
+// import { backendUrl } from '../utils/Consts.js';
+// import canvasConfig from '../configs/canvas.config.json';
 
 const Canvas = (props) => {
+  /*
   const draw = useCallback(
     (ctx, imageData) => {
       ctx.putImageData(imageData, 0, 0);
@@ -14,10 +15,26 @@ const Canvas = (props) => {
   useEffect(() => {
     const fetchCanvas = async () => {
       try {
+        let canvasColors = props.colors;
         if (props.colors.length === 0) {
-          return;
+          // Try to fetch colors from the backend
+          let canvasColorsEndpoint =
+            backendUrl +
+            (props.openedWorldId === null
+              ? '/get-colors'
+              : `/get-worlds-colors?worldId=${props.openedWorldId}`);
+          let response = await fetch(canvasColorsEndpoint);
+          let canvasColorsData = await response.json();
+          canvasColors = canvasColorsData.data;
+          if (canvasColors.length === 0) {
+            console.error('No colors found');
+            return;
+          }
         }
         const canvas = props.canvasRef.current;
+        if (!canvas) {
+          return;
+        }
         const context = canvas.getContext('2d');
         context.imageSmoothingEnabled = false;
 
@@ -50,7 +67,7 @@ const Canvas = (props) => {
         }
         let imageDataArray = [];
         for (let i = 0; i < dataArray.length; i++) {
-          const color = '#' + props.colors[dataArray[i]] + 'FF';
+          const color = '#' + canvasColors[dataArray[i]] + 'FF';
           const [r, g, b, a] = color.match(/\w\w/g).map((x) => parseInt(x, 16));
           imageDataArray.push(r, g, b, a);
         }
@@ -68,6 +85,7 @@ const Canvas = (props) => {
 
     fetchCanvas();
   }, [props.width, props.height, props.colors, props.openedWorldId]);
+  */
 
   return (
     <canvas
@@ -75,7 +93,7 @@ const Canvas = (props) => {
       width={props.width}
       height={props.height}
       style={props.style}
-      className='Canvas'
+      className={`Canvas ${props.className}`}
       onClick={props.pixelClicked}
     />
   );

@@ -7,7 +7,7 @@ export const backendUrl = backendConfig.production
 
 export const wsUrl = backendConfig.production
   ? 'wss://' + backendConfig.host + '/ws'
-  : 'ws://' + backendConfig.host + ':' + backendConfig.consumer_port + '/ws';
+  : 'ws://' + backendConfig.host + ':' + backendConfig.ws_port + '/ws';
 
 export const nftUrl = backendConfig.production
   ? 'https://' + backendConfig.host

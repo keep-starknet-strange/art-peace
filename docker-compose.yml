@@ -54,6 +54,15 @@ services:
     volumes:
       - nfts:/app/nfts
       - worlds:/app/worlds
+  websockets:
+    build:
+      dockerfile: backend/Dockerfile.websocket
+      context: .
+    ports:
+      - 8082:8082
+    links:
+      - consumer
+    restart: always
   devnet:
     image: shardlabs/starknet-devnet-rs:0.0.3
     command:

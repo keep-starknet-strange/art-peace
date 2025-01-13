@@ -61,12 +61,12 @@ func processPixelPlacedEvent(event IndexerEvent) {
 	}
 
 	// Send message to all connected clients
-	var message = map[string]interface{}{
-		"position":    position,
-		"color":       color,
+	var message = map[string]string{
+		"position":    strconv.FormatInt(position, 10),
+		"color":       strconv.FormatInt(color, 10),
 		"messageType": "colorPixel",
 	}
-	routeutils.SendWebSocketMessage(message)
+	routeutils.SendMessageToWSS(message)
 }
 
 func revertPixelPlacedEvent(event IndexerEvent) {
@@ -105,12 +105,12 @@ func revertPixelPlacedEvent(event IndexerEvent) {
 	}
 
 	// Send message to all connected clients
-	var message = map[string]interface{}{
-		"position":    position,
-		"color":       oldColor,
+	var message = map[string]string{
+		"position":    strconv.FormatInt(position, 10),
+		"color":       strconv.Itoa(*oldColor),
 		"messageType": "colorPixel",
 	}
-	routeutils.SendWebSocketMessage(message)
+	routeutils.SendMessageToWSS(message)
 }
 
 func processBasicPixelPlacedEvent(event IndexerEvent) {
