@@ -13,35 +13,35 @@ import (
 var WsMsgQueue chan map[string]string
 
 func InitWebsocketRoutes() {
-  WsMsgQueue = make(chan map[string]string, 10000)
+	WsMsgQueue = make(chan map[string]string, 10000)
 	http.HandleFunc("/ws", wsEndpoint)
-  http.HandleFunc("/ws-msg", wsMsgEndpoint)
+	http.HandleFunc("/ws-msg", wsMsgEndpoint)
 }
 
 func wsMsgEndpoint(w http.ResponseWriter, r *http.Request) {
-  // TODO: Only allow consumer to send messages
-  msg, err := routeutils.ReadJsonBody[map[string]string](r)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid request body")
-    return
-  }
+	// TODO: Only allow consumer to send messages
+	msg, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
 
-  WsMsgQueue <- *msg
-  routeutils.WriteResultJson(w, "WS message added to queue")
+	WsMsgQueue <- *msg
+	routeutils.WriteResultJson(w, "WS message added to queue")
 }
 
 func wsWriter() {
-  for {
-    msg := <-WsMsgQueue
-    routeutils.SendWebSocketMessage(msg)
-  }
+	for {
+		msg := <-WsMsgQueue
+		routeutils.SendWebSocketMessage(msg)
+	}
 }
 
 func StartWebsocketServer() {
-  go wsWriter()
-  go wsWriter()
-  go wsWriter()
-  go wsWriter()
+	go wsWriter()
+	go wsWriter()
+	go wsWriter()
+	go wsWriter()
 }
 
 func wsReader(conn *websocket.Conn) {
