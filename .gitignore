@@ -34,3 +34,5 @@ node_modules/
 # Terraform
 .terraform
 terraform.tfstate*
+eliza/cache/
+eliza/cache/
