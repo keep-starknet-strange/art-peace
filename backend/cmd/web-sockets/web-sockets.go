@@ -6,7 +6,6 @@ import (
 	"github.com/keep-starknet-strange/art-peace/backend/config"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	"github.com/keep-starknet-strange/art-peace/backend/routes"
-	"github.com/keep-starknet-strange/art-peace/backend/routes/indexer"
 )
 
 func isFlagSet(name string) bool {
@@ -58,10 +57,8 @@ func main() {
 	core.ArtPeaceBackend = core.NewBackend(databases, roundsConfig, canvasConfig, backendConfig, false)
 
 	routes.InitBaseRoutes()
-	indexer.InitIndexerRoutes()
-	routes.InitNFTStaticRoutes()
-	routes.InitWorldsStaticRoutes()
-	indexer.StartMessageProcessor()
+  routes.InitWebsocketRoutes()
+  routes.StartWebsocketServer()
 
-	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.ConsumerPort)
+	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.WsPort)
 }

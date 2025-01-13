@@ -250,12 +250,12 @@ func processNFTMintedEvent(event IndexerEvent) {
 		return
 	}
 
-	message := map[string]interface{}{
-		"token_id":    tokenId,
+	message := map[string]string {
+		"token_id":    strconv.FormatUint(tokenId, 10),
 		"minter":      minter,
 		"messageType": "nftMinted",
 	}
-	routeutils.SendWebSocketMessage(message)
+	routeutils.SendMessageToWSS(message)
 
 	// TODO: Response?
 }

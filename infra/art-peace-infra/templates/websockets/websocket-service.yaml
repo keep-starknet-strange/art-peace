@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.labels.websocket.name }}
+  labels:
+    app: {{ .Values.labels.websocket.name }}
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.ports.websocket }}
+  selector:
+    app: {{ .Values.labels.websocket.name }}
