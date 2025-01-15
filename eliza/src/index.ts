@@ -6,6 +6,9 @@ import {
   stringToUuid,
   type Character,
 } from "@elizaos/core";
+import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
+import { createNodePlugin } from "@elizaos/plugin-node";
+import { solanaPlugin } from "@elizaos/plugin-solana";
 import fs from "fs";
 import net from "net";
 import path from "path";
@@ -20,8 +23,7 @@ import {
   parseArguments,
 } from "./config/index.ts";
 import { initializeDatabase } from "./database/index.ts";
-import tweetAchievementAction from "./actions/tweet-achievement.ts";
-import TwitterClientInterface from "@elizaos/client-twitter";
+import announceFavoriteMilestoneAction from "./actions/announce_favorite_milestone.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,11 +34,13 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
   return new Promise((resolve) => setTimeout(resolve, waitTime));
 };
 
+let nodePlugin: any | undefined;
+
 export function createAgent(
   character: Character,
   db: any,
   cache: any,
-  token: string,
+  token: string
 ) {
   elizaLogger.success(
     elizaLogger.successesTitle,
@@ -44,17 +48,21 @@ export function createAgent(
     character.name,
   );
 
+  nodePlugin ??= createNodePlugin();
+
   return new AgentRuntime({
     databaseAdapter: db,
     token,
     modelProvider: character.modelProvider,
     evaluators: [],
     character,
-    plugins: [],
+    plugins: [
+      bootstrapPlugin,
+      nodePlugin,
+      character.settings?.secrets?.WALLET_PUBLIC_KEY ? solanaPlugin : null,
+    ].filter(Boolean),
     providers: [],
-    actions: [
-      tweetAchievementAction,
-    ],
+    actions: [announceFavoriteMilestoneAction],
     services: [],
     managers: [],
     cacheManager: cache,
@@ -84,7 +92,7 @@ async function startAgent(character: Character, directClient: DirectClient) {
 
     runtime.clients = await initializeClients(character, runtime);
 
-    directClient.registerAgent(runtime);
+    directClient.registerAgent(runtime as any);
 
     // report to console
     elizaLogger.debug(`Started ${character.name} as ${runtime.agentId}`);
@@ -157,9 +165,12 @@ const startAgents = async () => {
     elizaLogger.log(`Server started on alternate port ${serverPort}`);
   }
 
-  elizaLogger.log("Chat started. Type 'exit' to quit.");
-  const chat = startChat(characters);
-  chat();
+  const isDaemonProcess = process.env.DAEMON_PROCESS === "true";
+  if(!isDaemonProcess) {
+    elizaLogger.log("Chat started. Type 'exit' to quit.");
+    const chat = startChat(characters);
+    chat();
+  }
 };
 
 startAgents().catch((error) => {

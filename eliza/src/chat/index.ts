@@ -30,7 +30,7 @@ async function handleUserInput(input, agentId) {
           userId: "user",
           userName: "User",
         }),
-      },
+      }
     );
 
     const data = await response.json();
@@ -42,7 +42,7 @@ async function handleUserInput(input, agentId) {
 
 export function startChat(characters) {
   function chat() {
-    const agentId = characters[0].name ?? "Agent";
+    const agentId = characters[0].name;
     rl.question("You: ", async (input) => {
       await handleUserInput(input, agentId);
       if (input.toLowerCase() !== "exit") {
