@@ -42,6 +42,8 @@ docker-push:
 	docker push "brandonjroberts/art-peace-backend:$(APP_VERSION)-$(COMMIT_SHA)"
 	@echo "Pushing consumer..."
 	docker push "brandonjroberts/art-peace-consumer:$(APP_VERSION)-$(COMMIT_SHA)"
+	@echo "Pushing websocket..."
+	docker push "brandonjroberts/art-peace-websocket:$(APP_VERSION)-$(COMMIT_SHA)"
 	@echo "Pushing indexer..."
 	docker push "brandonjroberts/art-peace-indexer:$(APP_VERSION)-$(COMMIT_SHA)"
 
