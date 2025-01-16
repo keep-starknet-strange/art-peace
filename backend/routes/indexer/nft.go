@@ -90,7 +90,9 @@ func processNFTMintedEvent(event IndexerEvent) {
 
 	// Load image from redis
 	ctx := context.Background()
-	canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, "canvas").Result()
+	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
+	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
+	canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, canvasKey).Result()
 	if err != nil {
 		PrintIndexerError("processNFTMintedEvent", "Error getting canvas from redis", tokenIdLowHex, tokenIdHighHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return

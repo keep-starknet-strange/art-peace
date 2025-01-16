@@ -90,3 +90,4 @@ contracts:
   nft: 0x042dbc0bbdb0faaad99d0b116d0105f9e213ac0d2faf75c878f49d69b544befb
   host: "05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa"
   end: "1727769600"
+  roundNumber: "2"

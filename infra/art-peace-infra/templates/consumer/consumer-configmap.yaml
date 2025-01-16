@@ -8,3 +8,4 @@ data:
   ART_PEACE_CONTRACT_ADDRESS: {{ .Values.contracts.artPeace }}
   USERNAME_STORE_CONTRACT_ADDRESS: {{ .Values.contracts.usernameStore }}
   POSTGRES_PASSWORD: {{ .Values.postgres.password }}
+  ROUND_NUMBER: {{ .Values.contracts.roundNumber }}
