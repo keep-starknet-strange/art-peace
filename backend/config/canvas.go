@@ -15,7 +15,7 @@ type CanvasConfig struct {
 	Colors         []string   `json:"colors"`
 	VotableColors  []string   `json:"votableColors"`
 	ColorsBitWidth uint       `json:"colorsBitwidth"`
-	Round          uint       `json:"round"`
+	Round          string     `json:"round"`
 }
 
 var DefaultCanvasConfig = &CanvasConfig{
@@ -43,7 +43,7 @@ var DefaultCanvasConfig = &CanvasConfig{
 		"#00DDDD",
 	},
 	ColorsBitWidth: 5,
-	Round:          2,
+	Round:          "2",
 }
 
 var DefaultCanvasConfigPath = "../configs/canvas.config.json"

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
@@ -53,7 +52,7 @@ func getCanvas(w http.ResponseWriter, r *http.Request) {
 	// Get round number from query params, default to config round
 	roundNumber := r.URL.Query().Get("round")
 	if roundNumber == "" {
-		roundNumber = strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.Round))
+		roundNumber = core.ArtPeaceBackend.CanvasConfig.Round
 	}
 
 	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
