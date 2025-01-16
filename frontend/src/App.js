@@ -70,6 +70,10 @@ function App() {
         }
       } else {
         setIsHome(true);
+        if (!worldsMode) {
+          setOpenedWorldId(null);
+          return;
+        }
         try {
           const response = await fetchWrapper('get-world?worldId=0');
           if (response.data) {
@@ -81,6 +85,9 @@ function App() {
         }
       }
 
+      if (!worldsMode) {
+        return;
+      }
       // Always fetch surrounding worlds
       const surroundingResponse = await fetchWrapper('get-home-worlds');
       if (surroundingResponse.data) {
