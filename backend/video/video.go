@@ -42,11 +42,13 @@ func GenerateImageFromCanvas(orderId int) {
 	}
 	generatedImage := image.NewRGBA(image.Rect(0, 0, canvasWidth, canvasHeight))
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
+	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
+	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
 	for y := 0; y < canvasHeight; y++ {
 		for x := 0; x < canvasWidth; x++ {
 			position := y*canvasWidth + x
 			pos := position * int(colorWidth)
-			val, err := core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas", "GET", bitfieldType, pos).Result()
+			val, err := core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasKey, "GET", bitfieldType, pos).Result()
 			if err != nil {
 				fmt.Println("Failed to get bitfield value. Error: ", err)
 				return
