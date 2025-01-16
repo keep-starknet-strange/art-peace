@@ -29,6 +29,8 @@ docker-build:
 	docker build . -f backend/Dockerfile.prod -t "brandonjroberts/art-peace-backend:$(APP_VERSION)-$(COMMIT_SHA)"
 	@echo "Building consumer..."
 	docker build . -f backend/Dockerfile.consumer.prod -t "brandonjroberts/art-peace-consumer:$(APP_VERSION)-$(COMMIT_SHA)"
+	@echo "Building websocket..."
+	docker build . -f backend/Dockerfile.websocket.prod -t "brandonjroberts/art-peace-websocket:$(APP_VERSION)-$(COMMIT_SHA)"
 	@echo "Building indexer..."	
 	docker build . -f indexer/Dockerfile.prod -t "brandonjroberts/art-peace-indexer:$(APP_VERSION)-$(COMMIT_SHA)"
 
