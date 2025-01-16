@@ -199,7 +199,6 @@ const CanvasContainer = (props) => {
   useEffect(() => {
     if (hasInit) return;
     const containerRect = canvasContainerRef.current.getBoundingClientRect();
-    console.log(containerRect);
     const adjustX = ((canvasScale - 1) * props.width) / 2;
     const adjustY = ((canvasScale - 1) * props.height) / 2;
     setCanvasX(containerRect.width / 2 - adjustX);
