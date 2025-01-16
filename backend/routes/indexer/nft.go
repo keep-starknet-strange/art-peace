@@ -164,7 +164,6 @@ func processNFTMintedEvent(event IndexerEvent) {
 	}
 
 	// TODO: Check if file exists
-	roundNumber := os.Getenv("ROUND_NUMBER")
 	if roundNumber == "" {
 		PrintIndexerError("processNFTMintedEvent", "Error getting round number from environment", tokenIdLowHex, positionHex, widthHex, heightHex, nameHex, imageHashHex, blockNumberHex, minter)
 		return
