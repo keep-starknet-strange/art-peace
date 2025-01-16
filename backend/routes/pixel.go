@@ -41,7 +41,7 @@ func getPixel(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
-	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
+	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
 	val, err := core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasKey, "GET", bitfieldType, pos).Result()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error getting pixel")
@@ -219,7 +219,7 @@ func placePixelRedis(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
-	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
+	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
 	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasKey, "SET", bitfieldType, pos, color).Err()
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error setting pixel on redis")
