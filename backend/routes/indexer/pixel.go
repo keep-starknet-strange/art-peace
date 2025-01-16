@@ -48,7 +48,7 @@ func processPixelPlacedEvent(event IndexerEvent) {
 
 	ctx := context.Background()
 	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
-	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
+	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
 	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasKey, "SET", bitfieldType, pos, color).Err()
 	if err != nil {
 		PrintIndexerError("processPixelPlacedEvent", "Error setting pixel in redis", address, posHex, dayIdxHex, colorHex)
@@ -102,7 +102,7 @@ func revertPixelPlacedEvent(event IndexerEvent) {
 
 	ctx := context.Background()
 	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
-	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
+	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
 	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasKey, "SET", bitfieldType, pos, oldColor).Err()
 	if err != nil {
 		PrintIndexerError("revertPixelPlacedEvent", "Error resetting pixel in redis", address, posHex)
