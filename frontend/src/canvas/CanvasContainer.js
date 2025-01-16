@@ -854,7 +854,8 @@ const CanvasContainer = (props) => {
                 width: props.width * canvasScale,
                 height: props.height * canvasScale
               }}
-              disabled={true}
+              colors={props.colors}
+              pixelClicked={pixelClicked}
             />
             <h2
               className='CanvasContainer__title CanvasContainer__title--worlds'
