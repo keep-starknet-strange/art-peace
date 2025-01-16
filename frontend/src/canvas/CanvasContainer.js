@@ -74,7 +74,6 @@ const CanvasContainer = (props) => {
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
-    console.log(rect, cursorX, cursorY);
     if (cursorX < 0) {
       cursorX = 0;
     } else if (cursorX > rect.width) {
