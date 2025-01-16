@@ -1,5 +1,9 @@
 {
   "canvas": {
+    "width": 1024,
+    "height": 768
+  },
+  "world": {
     "width": 528,
     "height": 396
   },
