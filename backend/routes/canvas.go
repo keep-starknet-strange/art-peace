@@ -21,7 +21,7 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 	}
 
 	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
-	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
+	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
 
 	if core.ArtPeaceBackend.Databases.Redis.Exists(context.Background(), canvasKey).Val() == 0 {
 		totalBitSize := core.ArtPeaceBackend.CanvasConfig.Canvas.Width * core.ArtPeaceBackend.CanvasConfig.Canvas.Height * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
@@ -40,9 +40,9 @@ func initCanvas(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		routeutils.WriteResultJson(w, fmt.Sprintf("Canvas for round %d initialized", roundNumber))
+		routeutils.WriteResultJson(w, fmt.Sprintf("Canvas for round %s initialized", roundNumber))
 	} else {
-		routeutils.WriteErrorJson(w, http.StatusConflict, fmt.Sprintf("Canvas for round %d already initialized", roundNumber))
+		routeutils.WriteErrorJson(w, http.StatusConflict, fmt.Sprintf("Canvas for round %s already initialized", roundNumber))
 	}
 }
 

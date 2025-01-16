@@ -43,7 +43,7 @@ func GenerateImageFromCanvas(orderId int) {
 	generatedImage := image.NewRGBA(image.Rect(0, 0, canvasWidth, canvasHeight))
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
-	canvasKey := fmt.Sprintf("canvas-%d", roundNumber)
+	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
 	for y := 0; y < canvasHeight; y++ {
 		for x := 0; x < canvasWidth; x++ {
 			position := y*canvasWidth + x
