@@ -363,6 +363,7 @@ const TabPanel = (props) => {
                   openedWorldId={props.openedWorldId}
                   canvasFactoryContract={props.multiCanvasContract}
                   colors={props.colors}
+                  username={props.username}
                 />
               </div>
             )}
@@ -386,6 +387,8 @@ const TabPanel = (props) => {
                   gameEnded={props.gameEnded}
                   setModal={props.setModal}
                   openedWorldId={props.openedWorldId}
+                  username={props.username}
+                  setUsername={props.setUsername}
                 />
               </div>
             )}

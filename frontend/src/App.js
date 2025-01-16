@@ -41,6 +41,7 @@ function App() {
   const [openedWorldId, setOpenedWorldId] = useState(worldsMode ? 0 : null);
   const [activeWorld, setActiveWorld] = useState(null);
   const [surroundingWorlds, setSurroundingWorlds] = useState([]);
+  const [username, setUsername] = useState('');
 
   // Page management
   const [isHome, setIsHome] = useState(true);
@@ -1510,6 +1511,8 @@ function App() {
             width={width}
             height={height}
             isDefending={isDefending}
+            username={username}
+            setUsername={setUsername}
           />
         </div>
         <div className='App__footer'>

@@ -63,7 +63,7 @@ export default {
             const favorites = parseInt(favoritesStr);
 
             // Check if it's a milestone number
-            const milestones = [10, 100, 1000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000];
+            const milestones = [1, 10, 100, 1000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000];
             
             if (!milestones.includes(favorites)) {
                 elizaLogger.log(`Not a milestone achievement: ${favorites}`);

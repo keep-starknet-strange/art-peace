@@ -68,6 +68,7 @@ const StencilsMainSection = (props) => {
             setTemplateOverlayMode={props.setTemplateOverlayMode}
             setOverlayTemplate={props.setOverlayTemplate}
             setActiveTab={props.setActiveTab}
+            username={props.username}
           />
         )}
         {props.favoriteStencils.map((stencil, index) => {
@@ -94,6 +95,7 @@ const StencilsMainSection = (props) => {
               setTemplateOverlayMode={props.setTemplateOverlayMode}
               setOverlayTemplate={props.setOverlayTemplate}
               setActiveTab={props.setActiveTab}
+              username={props.username}
             />
           );
         })}
@@ -159,6 +161,7 @@ const StencilsExpandedSection = (props) => {
                 key={index}
                 openedStencilId={props.openedStencilId}
                 setOpenedStencilId={props.setOpenedStencilId}
+                openedWorldId={props.openedWorldId}
                 address={props.address}
                 account={props.account}
                 estimateInvokeFee={props.estimateInvokeFee}
@@ -178,6 +181,7 @@ const StencilsExpandedSection = (props) => {
                 setTemplateOverlayMode={props.setTemplateOverlayMode}
                 setOverlayTemplate={props.setOverlayTemplate}
                 setActiveTab={props.setActiveTab}
+                username={props.username}
               />
             );
           })}
@@ -453,6 +457,7 @@ const Stencils = (props) => {
       expandedSection={StencilsExpandedSection}
       activeStencil={activeStencil}
       openedStencilId={props.openedStencilId}
+      openedWorldId={props.openedWorldId}
       setOpenedStencilId={props.setOpenedStencilId}
       address={props.address}
       account={props.account}

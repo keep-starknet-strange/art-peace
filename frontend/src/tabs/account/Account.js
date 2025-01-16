@@ -15,7 +15,6 @@ import ArgentIcon from '../../resources/icons/Argent.png';
 import BraavosIcon from '../../resources/icons/Braavos.png';
 
 const Account = (props) => {
-  const [username, setUsername] = useState('');
   const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState('');
   // TODO: Mint rank images when reached w/ button
@@ -33,21 +32,21 @@ const Account = (props) => {
   let [usernameTaken, setUsernameTaken] = useState(false);
   useEffect(() => {
     setUsernameTaken(false);
-    if (username === '') {
+    if (props.username === '') {
       setIsValidUsername(false);
       return;
     }
-    if (username.length > 30 || username.length < 3) {
+    if (props.username.length > 30 || props.username.length < 3) {
       setIsValidUsername(false);
       return;
     }
     // Allow: a-z, A-Z, 0-9, -, _, .
-    if (!/^[a-zA-Z0-9-_.]*$/.test(username)) {
+    if (!/^[a-zA-Z0-9-_.]*$/.test(props.username)) {
       setIsValidUsername(false);
       return;
     }
     setIsValidUsername(true);
-  }, [username]);
+  }, [props.username]);
 
   const toHex = (str) => {
     let hex = '0x';
@@ -225,7 +224,7 @@ const Account = (props) => {
     // Check if username is unique
     if (!isValidUsername) return;
     if (usernameTaken) return;
-    let uniqueRequestUrl = `check-username-unique?username=${username}`;
+    let uniqueRequestUrl = `check-username-unique?username=${props.username}`;
     const uniqueResponse = await fetchWrapper(uniqueRequestUrl);
     if (uniqueResponse.data === null) {
       console.error('Failed to check if username is unique:', uniqueResponse);
@@ -235,11 +234,11 @@ const Account = (props) => {
       return;
     }
     if (!devnetMode) {
-      setUsername(username.trim());
+      props.setUsername(props.username.trim());
       if (usernameBeforeEdit === '') {
-        await claimCall(username.trim());
+        await claimCall(props.username.trim());
       } else {
-        await changeCall(username.trim());
+        await changeCall(props.username.trim());
       }
       setUsernameSaved(true);
       setIsEditing(false);
@@ -254,7 +253,7 @@ const Account = (props) => {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          username: toHex(username)
+          username: toHex(props.username)
         })
       });
     } else {
@@ -262,19 +261,19 @@ const Account = (props) => {
         mode: 'cors',
         method: 'POST',
         body: JSON.stringify({
-          username: toHex(username)
+          username: toHex(props.username)
         })
       });
     }
     if (usernameResponse.result) {
       // TODO: Only change if tx is successful
-      setUsername(username);
+      props.setUsername(props.username);
       setUsernameSaved(true);
       setIsEditing(false);
       setUsernameBeforeEdit('');
       console.log(usernameResponse.result);
     } else {
-      setUsername(usernameBeforeEdit);
+      props.setUsername(usernameBeforeEdit);
       setUsernameSaved(false);
       setIsEditing(false);
       setUsernameBeforeEdit('');
@@ -284,11 +283,11 @@ const Account = (props) => {
   // TODO: Non editable while loading get-username
   const editUsername = () => {
     setIsEditing(true);
-    setUsernameBeforeEdit(username);
+    setUsernameBeforeEdit(props.username);
   };
 
   const handleCancelEdit = () => {
-    setUsername(usernameBeforeEdit);
+    props.setUsername(usernameBeforeEdit);
     setIsEditing(false);
     setUsernameBeforeEdit('');
   };
@@ -298,10 +297,10 @@ const Account = (props) => {
     async function fetchUsernameUrl() {
       const result = await fetchWrapper(getUsernameUrl);
       if (result.data === null || result.data === '') {
-        setUsername('');
+        props.setUsername('');
         setUsernameSaved(false);
       } else {
-        setUsername(result.data);
+        props.setUsername(result.data);
         setUsernameSaved(true);
       }
     }
@@ -472,7 +471,9 @@ const Account = (props) => {
             <div className='Account__item__user'>
               <p className='Text__small Account__item__label'>Username</p>
               <div className='Account__item__username'>
-                <p className='Text__small Account__item__un'>{username}</p>
+                <p className='Text__small Account__item__un'>
+                  {props.username}
+                </p>
                 {!props.gameEnded && (
                   <div
                     className='Text__small Button__primary Account__item__button'
@@ -497,9 +498,9 @@ const Account = (props) => {
                 <input
                   className='Text__small Input__primary Account__username__input'
                   type='text'
-                  value={username}
+                  value={props.username}
                   required
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => props.setUsername(e.target.value)}
                 />
                 <div className='Account__item__pair'>
                   <button
@@ -524,7 +525,7 @@ const Account = (props) => {
                   )}
                 </div>
               </form>
-              {!isValidUsername && username.length > 3 && (
+              {!isValidUsername && props.username.length > 3 && (
                 <p className='Text__xsmall Account__form__error'>
                   Invalid username: 3 - 30 characters, a-z, A-Z, 0-9, -, _, .
                 </p>

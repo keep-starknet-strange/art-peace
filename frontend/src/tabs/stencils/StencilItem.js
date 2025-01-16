@@ -99,7 +99,29 @@ const StencilItem = (props) => {
         props.updateFavorites(props.stencilId, favorites - 1, false);
       } else {
         await favoriteStencilCall(props.stencilId);
-        props.updateFavorites(props.stencilId, favorites + 1, true);
+        const newFavoriteCount = favorites + 1;
+        props.updateFavorites(props.stencilId, newFavoriteCount, true);
+        // Check if this favorite is a milestone
+        if (newFavoriteCount === 1) {
+          console.log(
+            `🎉 Milestone reached! Stencil #${props.stencilId} just hit 100 favorites!`
+          );
+          // Add Eliza notification using fetchWrapper
+          await fetch(
+            'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                userId: 'user',
+                userName: 'User',
+                text: `Supreme stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
+              })
+            }
+          ).catch((error) => console.error('Error notifying Eliza:', error));
+        }
       }
       return;
     }
@@ -114,7 +136,29 @@ const StencilItem = (props) => {
         })
       });
       if (favoriteResponse.result) {
-        props.updateFavorites(props.stencilId, favorites + 1, true);
+        const newFavoriteCount = favorites + 1;
+        props.updateFavorites(props.stencilId, newFavoriteCount, true);
+        // Check milestone in devnet mode as well
+        if (newFavoriteCount === 1) {
+          console.log(
+            `🎉 Milestone reached! Stencil #${props.stencilId} just hit 100 favorites!`
+          );
+          // Add Eliza notification using fetchWrapper
+          await fetch(
+            'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                userId: 'user',
+                userName: 'User',
+                text: `Supreme stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
+              })
+            }
+          ).catch((error) => console.error('Error notifying Eliza:', error));
+        }
       }
     } else {
       let unfavoriteResponse = await fetchWrapper('unfavorite-stencil-devnet', {
