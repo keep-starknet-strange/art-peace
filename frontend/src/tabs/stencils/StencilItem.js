@@ -106,6 +106,9 @@ const StencilItem = (props) => {
           console.log(
             `🎉 Milestone reached! Stencil #${props.stencilId} just hit 100 favorites!`
           );
+          console.log(
+            `${props.userName || 'Jacob'} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
+          );
           // Add Eliza notification using fetchWrapper
           await fetch(
             'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',

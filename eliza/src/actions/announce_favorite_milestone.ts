@@ -7,6 +7,8 @@ import {
     IAgentRuntime,
     Memory,
     State,
+    generateText,
+    ModelClass
 } from "@elizaos/core";
 
 interface StencilAchievement {
@@ -96,9 +98,13 @@ export default {
             // Use AI to generate congratulatory message
             const aiPrompt = `Generate a short, exciting tweet (max 280 chars) congratulating ${username} for reaching ${favorites} favorites on their stencil. Include emojis and hashtags #ArtPeace #PixelArt. The message should be enthusiastic and encouraging.`;
             
-            // const aiResponse = await runtime.ai.complete(aiPrompt);
-            const aiResponse = undefined;
-            const tweetText = aiResponse || `🎉 ACHIEVEMENT UNLOCKED! ${username} just reached ${favorites.toLocaleString()} favorites! Check out their amazing stencil: ${stencilUrl} #ArtPeace #PixelArt`;
+            const aiResponse = await generateText({
+                runtime,
+                context: aiPrompt,
+                modelClass: ModelClass.SMALL
+            });
+
+            const tweetText = aiResponse;
 
             try {
                 // First send the standard tweet
