@@ -17,6 +17,6 @@ COPY ./backend .
 # Build the app & run it
 RUN go build -o web-sockets ./cmd/web-sockets/web-sockets.go
 
-EXPOSE 8082
+EXPOSE 8083
 
 CMD ["./web-sockets"]
