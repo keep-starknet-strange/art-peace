@@ -9,6 +9,8 @@ labels:
     name: admin-backend
   consumer:
     name: consumer
+  websocket:
+    name: websocket
   indexer:
     name: indexer
 
@@ -17,6 +19,7 @@ ports:
   postgres: 5432
   backend: 8080
   adminBackend: 8082
+  websocket: 8083
   consumer: 8081
 
 volumes:
@@ -63,6 +66,9 @@ deployments:
   consumer:
     replicas: 1
     image: brandonjroberts/art-peace-consumer
+  websocket:
+    replicas: 1
+    image: brandonjroberts/art-peace-websocket
   indexer:
     replicas: 1
     image: brandonjroberts/art-peace-indexer
