@@ -3,5 +3,5 @@ name: art-peace-infra
 description: Helm charts for the art/peace infrastructure
 
 type: application
-version: 0.1.0
-appVersion: "v2.0.0"
+version: 0.1.1
+appVersion: "v2.0.1"
