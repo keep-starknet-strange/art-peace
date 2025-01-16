@@ -12,9 +12,9 @@ spec:
     pathType: Exact
     backend:
       service:
-        name: {{ .Values.labels.consumer.name }}
+        name: {{ .Values.labels.websocket.name }}
         port:
-          number: {{ .Values.ports.consumer }}
+          number: {{ .Values.ports.websocket }}
   - path: /nft-images
     pathType: Prefix
     backend:
@@ -49,9 +49,9 @@ spec:
         pathType: Exact
         backend:
           service:
-            name: {{ .Values.labels.consumer.name }}
+            name: {{ .Values.labels.websocket.name }}
             port:
-              number: {{ .Values.ports.consumer }}
+              number: {{ .Values.ports.websocket }}
       - path: /
         pathType: Prefix
         backend:
