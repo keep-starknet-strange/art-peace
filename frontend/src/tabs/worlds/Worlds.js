@@ -103,6 +103,63 @@ const WorldsMainSection = (props) => {
             }}
           />
         )}
+        {props.activeWorld && (
+          <WorldItem
+            key={props.activeWorld.worldId}
+            activeWorldId={props.activeWorldId}
+            setActiveWorldId={props.setActiveWorldId}
+            address={props.address}
+            account={props.account}
+            estimateInvokeFee={props.estimateInvokeFee}
+            worldId={props.activeWorld.worldId}
+            name={props.activeWorld.name}
+            favorites={props.activeWorld.favorites}
+            favorited={props.activeWorld.favorited}
+            width={props.activeWorld.width}
+            height={props.activeWorld.height}
+            timer={props.activeWorld.timeBetweenPixels}
+            host={props.activeWorld.host}
+            starttime={props.activeWorld.startTime}
+            endtime={props.activeWorld.endTime}
+            image={worldImgUrl + '/world-' + props.activeWorld.worldId + '.png'}
+            queryAddress={props.queryAddress}
+            updateFavorites={props.updateFavorites}
+            canvasFactoryContract={props.canvasFactoryContract}
+            uniqueName={props.activeWorld.uniqueName}
+          />
+        )}
+        {props.favoriteWorlds.map((world, index) => {
+          return (
+            <WorldItem
+              key={index}
+              activeWorldId={props.activeWorldId}
+              setActiveWorldId={props.setActiveWorldId}
+              address={props.address}
+              account={props.account}
+              estimateInvokeFee={props.estimateInvokeFee}
+              worldId={world.worldId}
+              name={world.name}
+              favorites={world.favorites}
+              favorited={world.favorited}
+              width={world.width}
+              height={world.height}
+              timer={world.timeBetweenPixels}
+              host={world.host}
+              starttime={world.startTime}
+              endtime={world.endTime}
+              image={worldImgUrl + '/world-' + world.worldId + '.png'}
+              queryAddress={props.queryAddress}
+              updateFavorites={props.updateFavorites}
+              canvasFactoryContract={props.canvasFactoryContract}
+              uniqueName={world.uniqueName}
+            />
+          );
+        })}
+        <PaginationView
+          data={props.favoriteWorlds}
+          stateValue={props.myWorldsPagination}
+          setState={props.setMyWorldsPagination}
+        />
         {props.queryAddress !== '0' && (
           <div
             style={{
