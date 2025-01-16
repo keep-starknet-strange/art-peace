@@ -60,7 +60,7 @@ var DefaultBackendConfig = BackendConfig{
 	Port:         8080,
 	ConsumerPort: 8081,
 	WsHost:       "localhost",
-	WsPort:       8082,
+	WsPort:       8083,
 	Scripts: BackendScriptsConfig{
 		PlacePixelDevnet:            "../scripts/place_pixel.sh",
 		PlaceExtraPixelsDevnet:      "../scripts/place_extra_pixels.sh",
