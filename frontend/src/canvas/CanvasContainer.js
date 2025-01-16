@@ -74,7 +74,6 @@ const CanvasContainer = (props) => {
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
-    console.log(rect, cursorX, cursorY);
     if (cursorX < 0) {
       cursorX = 0;
     } else if (cursorX > rect.width) {
@@ -710,15 +709,13 @@ const CanvasContainer = (props) => {
       }
     };
 
-    if (props.openedWorldId !== null) {
-      fetchCanvas(
-        props.width,
-        props.height,
-        props.colors,
-        props.canvasRef,
-        props.openedWorldId
-      );
-    }
+    fetchCanvas(
+      props.width,
+      props.height,
+      props.colors,
+      props.canvasRef,
+      props.openedWorldId
+    );
     for (let i = 0; i < surroundingCanvasRefs.length; i++) {
       if (surroundingCanvasRefs[i].current) {
         let canvasConfig = props.surroundingWorlds[i];
@@ -736,6 +733,7 @@ const CanvasContainer = (props) => {
   const [artificialZoom, setArtificialZoom] = useState(1);
   useEffect(() => {
     if (
+      props.openedWorldId === null ||
       props.openedWorldId === 0 ||
       (props.activeWorld && props.activeWorld.worldId === 0)
     ) {
@@ -856,12 +854,24 @@ const CanvasContainer = (props) => {
               colors={props.colors}
               pixelClicked={pixelClicked}
             />
+            <div
+              style={{
+                top: 0,
+                left: 0,
+                width: props.width * canvasScale,
+                height: props.height * canvasScale,
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                position: 'absolute',
+                pointerEvents: 'none'
+              }}
+            ></div>
             <h2
               className='CanvasContainer__title CanvasContainer__title--worlds'
               style={{
                 top: '10%',
                 left: '50%',
-                transform: `translate(-50%, -50%) scale(${titleScale})`
+                transform: `translate(-50%, -50%) scale(${titleScale})`,
+                color: 'rgba(255, 120, 30, 1)'
               }}
             >
               art/peace Worlds
@@ -871,7 +881,8 @@ const CanvasContainer = (props) => {
               style={{
                 top: '90%',
                 left: '50%',
-                transform: `translate(-50%, -50%) scale(${titleScale})`
+                transform: `translate(-50%, -50%) scale(${titleScale})`,
+                color: 'rgba(255, 120, 30, 1)'
               }}
             >
               coming soon...
