@@ -88,15 +88,8 @@ export default {
                 return false;
             }
 
-            // Generate AI congratulatory message
-            const achievement: StencilAchievement = {
-                username,
-                favorites,
-                stencilUrl
-            };
-
             // Use AI to generate congratulatory message
-            const aiPrompt = `Generate a short, exciting tweet (max 280 chars) congratulating ${username} for reaching ${favorites} favorites on their stencil. Include emojis and hashtags #ArtPeace #PixelArt. The message should be enthusiastic and encouraging.`;
+            const aiPrompt = `Generate a short, exciting tweet (max 280 chars) congratulating ${username} for reaching ${favorites} favorites on their stencil. Include emojis and hashtags #ArtPeace #PixelArt. The message should be enthusiastic and encouraging. Do not use @ mentions.`;
             
             const aiResponse = await generateText({
                 runtime,
@@ -169,21 +162,5 @@ export default {
         }
     },
 
-    examples: [
-        [
-            {
-                user: "{{user1}}",
-                content: {
-                    text: "Supreme stencil just reached 1000 favorites, view the stencil on art peace here https://art-peace.net/stencils/12345",
-                },
-            },
-            {
-                user: "{{agent}}",
-                content: {
-                    text: "🎉 Amazing work, Supreme! 1,000 favorites on your pixel art stencil! Your creativity shines bright! Check it out: https://art-peace.net/stencils/12345 #ArtPeace #PixelArt",
-                    action: "TWEET_ACHIEVEMENT",
-                },
-            },
-        ],
-    ] as ActionExample[][],
+    examples: [] as ActionExample[][],
 } as Action;

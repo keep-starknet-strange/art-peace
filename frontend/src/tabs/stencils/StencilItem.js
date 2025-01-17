@@ -101,29 +101,53 @@ const StencilItem = (props) => {
         await favoriteStencilCall(props.stencilId);
         const newFavoriteCount = favorites + 1;
         props.updateFavorites(props.stencilId, newFavoriteCount, true);
+
         // Check if this favorite is a milestone
-        if (newFavoriteCount === 1) {
-          console.log(
-            `🎉 Milestone reached! Stencil #${props.stencilId} just hit 100 favorites!`
-          );
-          console.log(
-            `${props.userName || 'Jacob'} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
-          );
-          // Add Eliza notification using fetchWrapper
-          await fetch(
-            'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                userId: 'user',
-                userName: 'User',
-                text: `Supreme stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
-              })
+        switch (newFavoriteCount) {
+          case 1:
+          case 10:
+          case 100:
+          case 1000:
+          case 10000:
+          case 100000:
+          case 1000000:
+          case 10000000:
+          case 100000000:
+            await fetch(
+              'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  userId: 'user',
+                  userName: 'User',
+                  text: `${props.userName} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
+                })
+              }
+            ).catch((error) => console.error('Error notifying Eliza:', error));
+            break;
+          default:
+            if (newFavoriteCount > 1000000000) {
+              await fetch(
+                'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    userId: 'user',
+                    userName: 'User',
+                    text: `${props.userName} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
+                  })
+                }
+              ).catch((error) =>
+                console.error('Error notifying Eliza:', error)
+              );
             }
-          ).catch((error) => console.error('Error notifying Eliza:', error));
+            break;
         }
       }
       return;
@@ -142,25 +166,57 @@ const StencilItem = (props) => {
         const newFavoriteCount = favorites + 1;
         props.updateFavorites(props.stencilId, newFavoriteCount, true);
         // Check milestone in devnet mode as well
-        if (newFavoriteCount === 1) {
-          console.log(
-            `🎉 Milestone reached! Stencil #${props.stencilId} just hit 100 favorites!`
-          );
-          // Add Eliza notification using fetchWrapper
-          await fetch(
-            'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                userId: 'user',
-                userName: 'User',
-                text: `Supreme stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
-              })
+        switch (newFavoriteCount) {
+          case 1:
+          case 10:
+          case 100:
+          case 1000:
+          case 10000:
+          case 100000:
+          case 1000000:
+          case 10000000:
+          case 100000000:
+            console.log(
+              `🎉 Milestone reached! Stencil #${props.stencilId} just hit ${newFavoriteCount} favorites!`
+            );
+            await fetch(
+              'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  userId: 'user',
+                  userName: 'User',
+                  text: `${props.userName} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
+                })
+              }
+            ).catch((error) => console.error('Error notifying Eliza:', error));
+            break;
+          default:
+            if (newFavoriteCount > 1000000000) {
+              console.log(
+                `🎉 Milestone reached! Stencil #${props.stencilId} just hit ${newFavoriteCount} favorites!`
+              );
+              await fetch(
+                'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    userId: 'user',
+                    userName: 'User',
+                    text: `${props.userName} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
+                  })
+                }
+              ).catch((error) =>
+                console.error('Error notifying Eliza:', error)
+              );
             }
-          ).catch((error) => console.error('Error notifying Eliza:', error));
+            break;
         }
       }
     } else {
