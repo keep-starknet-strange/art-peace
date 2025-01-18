@@ -43,7 +43,7 @@ const WorldItem = (props) => {
     const favoriteCallData = props.canvasFactoryContract.populate(
       'favorite_canvas',
       {
-        world_id: worldId
+        canvas_id: worldId
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
@@ -69,7 +69,7 @@ const WorldItem = (props) => {
     const unfavoriteCallData = props.canvasFactoryContract.populate(
       'unfavorite_canvas',
       {
-        world_id: worldId
+        canvas_id: worldId
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
