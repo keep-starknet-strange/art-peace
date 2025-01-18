@@ -82,6 +82,20 @@
   },
   {
     "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "struct",
     "name": "art_peace::templates::interfaces::FactionTemplateMetadata",
     "members": [
       {
@@ -815,6 +829,26 @@
       },
       {
         "type": "function",
+        "name": "already_liked_nft",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "nft_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
         "name": "add_faction_template",
         "inputs": [
           {
@@ -1131,22 +1165,43 @@
   },
   {
     "type": "impl",
-    "name": "TemplateStoreComponentImpl",
-    "interface_name": "art_peace::templates::interfaces::ITemplateStore"
+    "name": "ArtPeaceCanvasNFTLikeAndUnlike",
+    "interface_name": "art_peace::nfts::interfaces::ICanvasNFTLikeAndUnlike"
   },
   {
-    "type": "struct",
-    "name": "core::integer::u256",
-    "members": [
+    "type": "interface",
+    "name": "art_peace::nfts::interfaces::ICanvasNFTLikeAndUnlike",
+    "items": [
       {
-        "name": "low",
-        "type": "core::integer::u128"
+        "type": "function",
+        "name": "like_nft",
+        "inputs": [
+          {
+            "name": "token_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
       },
       {
-        "name": "high",
-        "type": "core::integer::u128"
+        "type": "function",
+        "name": "unlike_nft",
+        "inputs": [
+          {
+            "name": "token_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
       }
     ]
+  },
+  {
+    "type": "impl",
+    "name": "TemplateStoreComponentImpl",
+    "interface_name": "art_peace::templates::interfaces::ITemplateStore"
   },
   {
     "type": "struct",
@@ -1491,65 +1546,6 @@
   },
   {
     "type": "event",
-    "name": "art_peace::art_peace::ArtPeace::DailyQuestClaimed",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "day_index",
-        "type": "core::integer::u32",
-        "kind": "key"
-      },
-      {
-        "name": "quest_id",
-        "type": "core::integer::u32",
-        "kind": "key"
-      },
-      {
-        "name": "user",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
-      },
-      {
-        "name": "reward",
-        "type": "core::integer::u32",
-        "kind": "data"
-      },
-      {
-        "name": "calldata",
-        "type": "core::array::Span::<core::felt252>",
-        "kind": "data"
-      }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "art_peace::art_peace::ArtPeace::MainQuestClaimed",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "quest_id",
-        "type": "core::integer::u32",
-        "kind": "key"
-      },
-      {
-        "name": "user",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
-      },
-      {
-        "name": "reward",
-        "type": "core::integer::u32",
-        "kind": "data"
-      },
-      {
-        "name": "calldata",
-        "type": "core::array::Span::<core::felt252>",
-        "kind": "data"
-      }
-    ]
-  },
-  {
-    "type": "event",
     "name": "art_peace::art_peace::ArtPeace::VoteColor",
     "kind": "struct",
     "members": [
@@ -1769,23 +1765,6 @@
   },
   {
     "type": "event",
-    "name": "art_peace::art_peace::ArtPeace::HostAwardedUser",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "user",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
-      },
-      {
-        "name": "amount",
-        "type": "core::integer::u32",
-        "kind": "data"
-      }
-    ]
-  },
-  {
-    "type": "event",
     "name": "art_peace::templates::component::TemplateStoreComponent::TemplateAdded",
     "kind": "struct",
     "members": [
@@ -1826,6 +1805,126 @@
       {
         "name": "TemplateCompleted",
         "type": "art_peace::templates::component::TemplateStoreComponent::TemplateCompleted",
+        "kind": "nested"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::DailyQuestClaimed",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "day_index",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "quest_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "reward",
+        "type": "core::integer::u32",
+        "kind": "data"
+      },
+      {
+        "name": "calldata",
+        "type": "core::array::Span::<core::felt252>",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::MainQuestClaimed",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "quest_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "reward",
+        "type": "core::integer::u32",
+        "kind": "data"
+      },
+      {
+        "name": "calldata",
+        "type": "core::array::Span::<core::felt252>",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::HostAwardedUser",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "amount",
+        "type": "core::integer::u32",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::LikeNftAwarded",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "amount",
+        "type": "core::integer::u32",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::art_peace::ArtPeace::ExtraPixelsAwarded",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "DailyQuest",
+        "type": "art_peace::art_peace::ArtPeace::DailyQuestClaimed",
+        "kind": "nested"
+      },
+      {
+        "name": "MainQuest",
+        "type": "art_peace::art_peace::ArtPeace::MainQuestClaimed",
+        "kind": "nested"
+      },
+      {
+        "name": "HostAwardedUser",
+        "type": "art_peace::art_peace::ArtPeace::HostAwardedUser",
+        "kind": "nested"
+      },
+      {
+        "name": "LikeNft",
+        "type": "art_peace::art_peace::ArtPeace::LikeNftAwarded",
         "kind": "nested"
       }
     ]
@@ -1873,16 +1972,6 @@
       {
         "name": "ExtraPixelsPlaced",
         "type": "art_peace::art_peace::ArtPeace::ExtraPixelsPlaced",
-        "kind": "nested"
-      },
-      {
-        "name": "DailyQuestClaimed",
-        "type": "art_peace::art_peace::ArtPeace::DailyQuestClaimed",
-        "kind": "nested"
-      },
-      {
-        "name": "MainQuestClaimed",
-        "type": "art_peace::art_peace::ArtPeace::MainQuestClaimed",
         "kind": "nested"
       },
       {
@@ -1946,13 +2035,13 @@
         "kind": "nested"
       },
       {
-        "name": "HostAwardedUser",
-        "type": "art_peace::art_peace::ArtPeace::HostAwardedUser",
-        "kind": "nested"
-      },
-      {
         "name": "TemplateEvent",
         "type": "art_peace::templates::component::TemplateStoreComponent::Event",
+        "kind": "flat"
+      },
+      {
+        "name": "ExtraPixelsAwardedEvent",
+        "type": "art_peace::art_peace::ArtPeace::ExtraPixelsAwarded",
         "kind": "flat"
       }
     ]
