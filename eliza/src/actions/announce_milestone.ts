@@ -111,7 +111,7 @@ export default {
             };
 
             // Use AI to generate congratulatory message
-            const aiPrompt = `Generate a short, exciting tweet (max 280 chars) celebrating that ${worldName} world has reached ${formatNumber(pixels)} pixels! Include emojis and hashtags #ArtPeace #PixelArt. The message should be enthusiastic and focus on community growth.`;
+            const aiPrompt = `Generate a short, exciting tweet (max 280 chars) celebrating that ${worldName} world has reached ${formatNumber(pixels)} pixels! Include the world URL https://artpeace.net/worlds/${worldName}. Include emojis and hashtags #ArtPeace #PixelArt. The message should be enthusiastic and focus on community growth.`;
             
             const aiResponse = await generateText({
                 runtime,

@@ -74,6 +74,7 @@ const CanvasContainer = (props) => {
     const rect = props.canvasRef.current.getBoundingClientRect();
     let cursorX = e.clientX - rect.left;
     let cursorY = e.clientY - rect.top;
+    console.log(rect, cursorX, cursorY);
     if (cursorX < 0) {
       cursorX = 0;
     } else if (cursorX > rect.width) {
@@ -198,6 +199,7 @@ const CanvasContainer = (props) => {
   useEffect(() => {
     if (hasInit) return;
     const containerRect = canvasContainerRef.current.getBoundingClientRect();
+    console.log(containerRect);
     const adjustX = ((canvasScale - 1) * props.width) / 2;
     const adjustY = ((canvasScale - 1) * props.height) / 2;
     setCanvasX(containerRect.width / 2 - adjustX);
