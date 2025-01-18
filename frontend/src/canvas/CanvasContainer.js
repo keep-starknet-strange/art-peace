@@ -353,7 +353,16 @@ const CanvasContainer = (props) => {
     if (!devnetMode) {
       props.setSelectedColorId(-1);
       props.colorPixel(position, colorId);
-      await placePixelCall(position, colorId, timestamp);
+      if (props.worldsMode) {
+        await props.placeWorldPixelCall(
+          props.openedWorldId,
+          [position],
+          [colorId],
+          timestamp
+        );
+      } else {
+        await placePixelCall(position, colorId, timestamp);
+      }
       props.clearPixelSelection();
       props.setLastPlacedTime(timestamp * 1000);
       return;
