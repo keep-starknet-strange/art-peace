@@ -37,7 +37,8 @@ import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
 
 function App() {
-  const worldsMode = devnetMode;
+  const [worldsMode, setWorldsMode] = useState(devnetMode);
+  const [homeCounter, setHomeCounter] = useState(0);
   const [openedWorldId, setOpenedWorldId] = useState(worldsMode ? 0 : null);
   const [activeWorld, setActiveWorld] = useState(null);
   const [surroundingWorlds, setSurroundingWorlds] = useState([]);
@@ -113,7 +114,7 @@ function App() {
     };
 
     getWorldId();
-  }, [location.pathname]);
+  }, [location.pathname, worldsMode]);
 
   useEffect(() => {
     setOverlayTemplate(null);
@@ -1413,6 +1414,11 @@ function App() {
           <div
             className='App__logo'
             onClick={() => {
+              setHomeCounter(homeCounter + 1);
+              if (homeCounter > 2) {
+                setWorldsMode(true);
+                setOpenedWorldId(0);
+              }
               setActiveTab(tabs[0]);
               window.location.pathname = '/';
             }}

@@ -6,3 +6,4 @@ metadata:
     app: {{ .Values.labels.websocket.name }}
 data:
   ART_PEACE_CONTRACT_ADDRESS: {{ .Values.contracts.artPeace }}
+  CANVAS_FACTORY_CONTRACT_ADDRESS: {{ .Values.contracts.canvasFactory }}

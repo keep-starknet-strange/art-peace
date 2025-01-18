@@ -8,6 +8,7 @@ data:
   ART_PEACE_CONTRACT_ADDRESS: {{ .Values.contracts.artPeace }}
   USERNAME_STORE_ADDRESS: {{ .Values.contracts.usernameStore }}
   NFT_CONTRACT_ADDRESS: {{ .Values.contracts.nft }}
+  CANVAS_FACTORY_CONTRACT_ADDRESS: {{ .Values.contracts.canvasFactory }}
   CONSUMER_TARGET_URL: http://{{ .Values.labels.consumer.name }}.art-peace-sepolia.svc.cluster.local:{{ .Values.ports.consumer }}/consume-indexer-msg
   APIBARA_STREAM_URL: {{ .Values.apibara.streamUrl }}
   AUTH_TOKEN: {{ .Values.apibara.authToken }}
