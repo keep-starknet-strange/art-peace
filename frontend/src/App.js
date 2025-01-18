@@ -1370,6 +1370,7 @@ function App() {
           colorPixel={colorPixel}
           worldsMode={worldsMode}
           openedWorldId={openedWorldId}
+          placeWorldPixelCall={placeWorldPixelCall}
           activeWorld={activeWorld}
           width={width}
           height={height}
