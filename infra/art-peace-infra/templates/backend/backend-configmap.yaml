@@ -10,3 +10,4 @@ data:
   POSTGRES_PASSWORD: {{ .Values.postgres.password }}
   ART_PEACE_HOST: {{ .Values.contracts.host }}
   ART_PEACE_END_TIME: {{ .Values.contracts.end }}
+  CANVAS_FACTORY_CONTRACT_ADDRESS: {{ .Values.contracts.canvasFactory }}

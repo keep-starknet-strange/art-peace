@@ -17,7 +17,11 @@ spec:
         kubernetes.io/arch: arm64
       containers:
         - name: {{ .Values.labels.indexer.name }}
+          {{- if .Values.contracts.worldsMode}}
+          image: {{ .Values.deployments.indexerWorlds.image }}:{{ .Chart.AppVersion }}-{{ .Values.deployments.sha }}
+          {{- else }}
           image: {{ .Values.deployments.indexer.image }}:{{ .Chart.AppVersion }}-{{ .Values.deployments.sha }}
+          {{- end }}
           imagePullPolicy: Always
           envFrom:
             - configMapRef:

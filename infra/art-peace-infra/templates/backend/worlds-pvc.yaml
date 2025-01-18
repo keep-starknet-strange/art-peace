@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.volumes.worlds.claim }}
+  labels:
+    app: worlds
+spec:
+  storageClassName: {{ .Values.volumes.worlds.class }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.volumes.worlds.storage }}

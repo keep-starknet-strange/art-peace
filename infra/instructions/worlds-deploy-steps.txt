@@ -1,0 +1,50 @@
+setup .env w/ STARKNET_KEYSTORE=$HOME/.starkli-sepolia/starkli-keystore.json
+              STARKNET_ACCOUNT=$HOME/.starkli-sepolia/starkli-account.json
+
+source .env
+
+build contracts : scarb build
+deploy worlds to sepolia
+    ./tests/integration/sepolia/deploy-multi.sh
+    save address
+
+setup indexer starting block
+
+copy abis to frontend
+    make update-frontend-contracts
+
+build prod docker images w/ new version & push to docker hub
+   Update docker version in infra/art-peace-infra/Chart.yaml if needed
+   Update contracts in values.yaml & worldsMode
+   commit and merge changes
+   make docker-build
+   make docker-push
+
+apply changes to cloud
+   cloud console
+   clone / pull latest main
+     git clone https://github.com/keep-starknet-strange/art-peace.git
+     git pull origin main
+   cd art-peace
+   If full reset
+     make helm-uninstall
+     POSTGRES_PASSWORD=test AUTH_TOKEN=dna_abc make helm-install
+     make init-infra-prod
+  else
+     POSTGRES_PASSWORD=test AUTH_TOKEN=dna_abc make helm-upgrade
+
+change frontend contract addresses in vercel
+    https://vercel.com/keep-starknet-strange/art-peace/settings
+
+
+    kubectl cp ../postgres/init.sql pod:/home
+      kubectl exec -it pod/pod-name bash
+      psql -U art-peace-user -d art-peace-db -f /home/init.sql
+      kubectl delete pvc redis-volume-claim
+      kubectl delete deployment.apps/redis
+      kubectl delete deployment.apps/indexer
+      POSTGRES_PASSWORD=test AUTH_TOKEN=dna_abc make helm-upgrade
+      kubectl exec -it pod/admin-backend-xxx bash
+    reset :
+      kubectl delete pvc nft-volume-claim redis-volume-claim
+      kubectl delete deployment.apps/backend deployment.apps/admin-backend deployment.apps/consumer deployment.apps/indexer deployment.apps/redis
