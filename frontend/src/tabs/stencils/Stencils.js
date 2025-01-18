@@ -195,6 +195,7 @@ const StencilsExpandedSection = (props) => {
                 stencil={stencil}
                 openedStencilId={props.openedStencilId}
                 setOpenedStencilId={props.setOpenedStencilId}
+                openedWorldId={props.openedWorldId}
                 address={props.address}
                 account={props.account}
                 estimateInvokeFee={props.estimateInvokeFee}

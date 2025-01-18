@@ -156,14 +156,14 @@ func getWorlds(w http.ResponseWriter, r *http.Request) {
 	query := `
         SELECT 
             worlds.*, 
-            COALESCE(favortie_count, 0) AS favorites,
+            COALESCE(worldfavorites.favorite_count, 0) AS favorites,
             COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false) as favorited
         FROM 
             worlds
         LEFT JOIN (
             SELECT 
                 world_id, 
-                COUNT(*) AS favorites
+                COUNT(*) AS favorite_count
             FROM 
                 worldfavorites
             GROUP BY 
@@ -492,7 +492,7 @@ func getFavoriteWorlds(w http.ResponseWriter, r *http.Request) {
         SELECT * FROM (
           SELECT 
               worlds.*, 
-              COALESCE(favorite_count, 0) AS favorites,
+              COALESCE(worldfavorites.favorite_count, 0) AS favorites,
               COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false) as favorited
           FROM 
               worlds

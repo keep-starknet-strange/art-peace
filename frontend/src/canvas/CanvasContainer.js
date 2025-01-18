@@ -818,8 +818,8 @@ const CanvasContainer = (props) => {
           <div
             className='Canvas__selection'
             style={{
-              top: props.selectedPositionY * canvasScale,
-              left: props.selectedPositionX * canvasScale
+              top: props.selectedPositionY * canvasScale * artificialZoom,
+              left: props.selectedPositionX * canvasScale * artificialZoom
             }}
           >
             <div
@@ -827,8 +827,8 @@ const CanvasContainer = (props) => {
               style={{
                 boxShadow: selectedBoxShadow,
                 backgroundColor: selectedBackgroundColor,
-                width: canvasScale,
-                height: canvasScale
+                width: canvasScale * artificialZoom,
+                height: canvasScale * artificialZoom
               }}
             ></div>
           </div>
@@ -916,7 +916,7 @@ const CanvasContainer = (props) => {
             canvasRef={props.canvasRef}
             width={props.width}
             height={props.height}
-            canvasScale={canvasScale}
+            canvasScale={canvasScale * artificialZoom}
             overlayTemplate={props.overlayTemplate}
             setTemplateOverlayMode={props.setTemplateOverlayMode}
             setOverlayTemplate={props.setOverlayTemplate}
