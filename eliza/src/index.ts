@@ -23,7 +23,7 @@ import {
   parseArguments,
 } from "./config/index.ts";
 import { initializeDatabase } from "./database/index.ts";
-import announceFavoriteMilestoneAction from "./actions/announce_favorite_milestone.ts";
+import announceMilestoneAction from "./actions/announce_milestone.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,7 +62,7 @@ export function createAgent(
       character.settings?.secrets?.WALLET_PUBLIC_KEY ? solanaPlugin : null,
     ].filter(Boolean),
     providers: [],
-    actions: [announceFavoriteMilestoneAction],
+    actions: [announceMilestoneAction],
     services: [],
     managers: [],
     cacheManager: cache,
@@ -71,10 +71,18 @@ export function createAgent(
 
 async function startAgent(character: Character, directClient: DirectClient) {
   try {
+    if (!character.name || !character.system) {
+      throw new Error(`Character ${character.name} is missing required fields (name or system)`);
+    }
+
     character.id ??= stringToUuid(character.name);
     character.username ??= character.name;
 
     const token = getTokenForProvider(character.modelProvider, character);
+    if (!token) {
+      throw new Error(`No API token found for model provider ${character.modelProvider}`);
+    }
+
     const dataDir = path.join(__dirname, "../data");
 
     if (!fs.existsSync(dataDir)) {
@@ -82,7 +90,6 @@ async function startAgent(character: Character, directClient: DirectClient) {
     }
 
     const db = initializeDatabase(dataDir);
-
     await db.init();
 
     const cache = initializeDbCache(character, db);
@@ -90,20 +97,28 @@ async function startAgent(character: Character, directClient: DirectClient) {
 
     await runtime.initialize();
 
-    runtime.clients = await initializeClients(character, runtime);
+    try {
+      runtime.clients = await initializeClients(character, runtime);
+    } catch (clientError) {
+      elizaLogger.warn(`Error initializing clients for ${character.name}:`, clientError);
+      runtime.clients = [];
+    }
 
-    directClient.registerAgent(runtime as any);
+    try {
+      directClient.registerAgent(runtime as any);
+    } catch (registerError) {
+      elizaLogger.error(`Error registering agent with direct client:`, registerError);
+      throw registerError;
+    }
 
-    // report to console
     elizaLogger.debug(`Started ${character.name} as ${runtime.agentId}`);
-
     return runtime;
+
   } catch (error) {
     elizaLogger.error(
       `Error starting agent for character ${character.name}:`,
       error,
     );
-    console.error(error);
     throw error;
   }
 }

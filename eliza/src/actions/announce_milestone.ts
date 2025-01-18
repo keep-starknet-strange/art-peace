@@ -1,7 +1,6 @@
 import {
     type Action,
     ActionExample,
-    Content,
     elizaLogger,
     HandlerCallback,
     IAgentRuntime,
@@ -11,16 +10,10 @@ import {
     ModelClass
 } from "@elizaos/core";
 
-interface StencilAchievement {
-    username: string;
-    favorites: number;
-    stencilUrl: string;
-}
-
 export default {
-    name: "TWEET_ACHIEVEMENT",
-    similes: ["ANNOUNCE_ACHIEVEMENT", "CELEBRATE_MILESTONE", "TWEET"],
-    description: "Use this action when announcing user achievement milestones.",
+    name: "TWEET_MILESTONE",
+    similes: ["ANNOUNCE_MILESTONE", "CELEBRATE_PIXELS", "TWEET"],
+    description: "Use this action when announcing world pixel count milestones.",
     
     validate: async (runtime: IAgentRuntime, _message: Memory): Promise<boolean> => {
         const twitterClient = runtime.clients.find(
@@ -37,10 +30,16 @@ export default {
         runtime: IAgentRuntime,
         message: Memory,
     ): Promise<boolean> => {
-        const messageText = message.content?.text?.toLowerCase() || "";
-        return messageText.includes("favorites") || 
-               messageText.includes("achievement") ||
-               messageText.includes("milestone");
+        // Ensure message has content before checking
+        if (!message?.content?.text) {
+            elizaLogger.log("Message content is empty");
+            return false;
+        }
+
+        const messageText = message.content.text.toLowerCase();
+        return messageText.includes("pixels") || 
+               messageText.includes("milestone") ||
+               messageText.includes("world");
     },
 
     handler: async (
@@ -50,25 +49,34 @@ export default {
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
     ): Promise<boolean> => {
-        elizaLogger.log("Starting TWEET_ACHIEVEMENT handler...");
+        elizaLogger.log("Starting TWEET_MILESTONE handler...");
+
+        // Validate message content
+        if (!message?.content?.text) {
+            elizaLogger.error("Message content is empty in handler");
+            return false;
+        }
 
         try {
-            const messageText = message.content?.text || "";
-            const matches = messageText.match(/(\w+) stencil just reached (\d+) favorites,.*?(https:\/\/art-peace\.net\/stencils\/\d+)/i);
+            const messageText = message.content.text;
+            const matches = messageText.match(/(\w+) world just reached (\d+) pixels,.*?(https:\/\/art-peace\.net\/worlds\/\d+)/i);
             
             if (!matches) {
-                elizaLogger.log("No achievement pattern found in message");
+                elizaLogger.log("No milestone pattern found in message");
                 return false;
             }
 
-            const [_, username, favoritesStr, stencilUrl] = matches;
-            const favorites = parseInt(favoritesStr);
+            const [_, worldName, pixelsStr, worldUrl] = matches;
+            const pixels = parseInt(pixelsStr);
 
             // Check if it's a milestone number
-            const milestones = [1, 10, 100, 1000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000];
+            const milestones = [
+                1, 100, 1000, 10000, 50000, 100000, 1000000, 10000000, 100000000,
+                1000000000, 10000000000, 100000000000, 1000000000000
+            ];
             
-            if (!milestones.includes(favorites)) {
-                elizaLogger.log(`Not a milestone achievement: ${favorites}`);
+            if (!milestones.includes(pixels)) {
+                elizaLogger.log(`Not a milestone achievement: ${pixels}`);
                 return false;
             }
 
@@ -88,8 +96,22 @@ export default {
                 return false;
             }
 
+            // Format number nicely for display
+            const formatNumber = (num) => {
+                if (num >= 1_000_000_000_000) {
+                  return `${(num / 1_000_000_000_000).toFixed(1)}T`;
+                } else if (num >= 1_000_000_000) {
+                  return `${(num / 1_000_000_000).toFixed(1)}B`;
+                } else if (num >= 1_000_000) {
+                  return `${(num / 1_000_000).toFixed(1)}M`;
+                } else if (num >= 1_000) {
+                  return `${(num / 1_000).toFixed(1)}K`;
+                }
+                return num.toString();
+            };
+
             // Use AI to generate congratulatory message
-            const aiPrompt = `Generate a short, exciting tweet (max 280 chars) congratulating ${username} for reaching ${favorites} favorites on their stencil. Include emojis and hashtags #ArtPeace #PixelArt. The message should be enthusiastic and encouraging. Do not use @ mentions.`;
+            const aiPrompt = `Generate a short, exciting tweet (max 280 chars) celebrating that ${worldName} world has reached ${formatNumber(pixels)} pixels! Include emojis and hashtags #ArtPeace #PixelArt. The message should be enthusiastic and focus on community growth.`;
             
             const aiResponse = await generateText({
                 runtime,
@@ -122,16 +144,16 @@ export default {
                         tweetText
                     );
 
-                    elizaLogger.success(`Successfully tweeted achievement for ${username}!`);
+                    elizaLogger.success(`Successfully tweeted milestone for ${worldName}!`);
                     
                     if (callback) {
                         callback({
-                            text: `Achievement announced for ${username}!`,
+                            text: `Milestone announced for ${worldName}!`,
                             content: {
                                 success: true,
-                                achievement: {
-                                    username,
-                                    favorites,
+                                milestone: {
+                                    worldName,
+                                    pixels,
                                     platform: "twitter"
                                 },
                             },
@@ -141,20 +163,20 @@ export default {
                     return true;
                 }
             } catch (error) {
-                elizaLogger.error("Error in TWEET_ACHIEVEMENT handler:", error);
+                elizaLogger.error("Error in TWEET_MILESTONE handler:", error);
                 if (callback) {
                     callback({
-                        text: `Error announcing achievement: ${error.message}`,
+                        text: `Error announcing milestone: ${error.message}`,
                         content: { error: error.message },
                     });
                 }
                 return false;
             }
         } catch (error) {
-            elizaLogger.error("Error in TWEET_ACHIEVEMENT handler:", error);
+            elizaLogger.error("Error in TWEET_MILESTONE handler:", error);
             if (callback) {
                 callback({
-                    text: `Error announcing achievement: ${error.message}`,
+                    text: `Error announcing milestone: ${error.message}`,
                     content: { error: error.message },
                 });
             }

@@ -390,6 +390,60 @@ const CanvasContainer = (props) => {
       }
       props.clearPixelSelection();
       props.setLastPlacedTime(timestamp * 1000);
+
+      // Check world pixel count milestones after successful placement
+      if (response.result) {
+        try {
+          // Count non-empty pixels directly from canvas
+          const ctx = props.canvasRef.current.getContext('2d');
+          const imageData = ctx.getImageData(0, 0, props.width, props.height);
+          const data = imageData.data;
+          let pixelCount = 0;
+
+          // Count pixels that have full opacity and aren't white
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const a = data[i + 3];
+            // Check if pixel is fully opaque and not white
+            if (a === 255 && (r < 250 || g < 250 || b < 250)) {
+              pixelCount++;
+            }
+          }
+
+          const milestones = [
+            1, 100, 1000, 10000, 50000, 100000, 1000000, 10000000, 100000000,
+            1000000000, 10000000000, 100000000000, 1000000000000
+          ];
+
+          if (milestones.includes(pixelCount)) {
+            // Notify about milestone
+            try {
+              await fetch(
+                'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
+                {
+                  mode: 'cors',
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    userId: 'user',
+                    userName: 'User',
+                    text: `${props.activeWorld.name} world just reached ${pixelCount} pixels, view the world on art peace here https://art-peace.net/worlds/${props.openedWorldId}`
+                  })
+                }
+              );
+            } catch (error) {
+              console.error('Error notifying milestone:', error);
+            }
+          }
+        } catch (error) {
+          console.error('Error checking canvas pixels:', error);
+          // Continue execution - this is a non-critical feature
+        }
+      }
     }
     // TODO: Fix last placed time if error in placing pixel
   };
