@@ -720,6 +720,46 @@ function App() {
     setExtraPixelsData([...extraPixelsData, ...pixels]);
   };
 
+  /* global BigInt */
+  const placeWorldPixelCall = async (worldId, positions, colors, now) => {
+    if (devnetMode) return;
+    if (!address || !multiCanvasContract || !account) return;
+    if (positions.length !== colors.length) {
+      console.error('Positions and colors length mismatch');
+      return;
+    }
+    if (positions.length === 0) {
+      console.error('No pixels to place');
+      return;
+    }
+    if (positions.length > 1) {
+      console.error('Only one pixel placement supported');
+      return;
+    }
+    const placeWorldPixelCallData = multiCanvasContract.populate(
+      'place_pixel',
+      {
+        canvas_id: worldId,
+        pos: positions[0],
+        color: colors[0],
+        now: now
+      }
+    );
+    const { suggestedMaxFee } = await estimateInvokeFee({
+      contractAddress: multiCanvasContract.address,
+      entrypoint: 'place_pixel',
+      calldata: placeWorldPixelCallData.calldata
+    });
+    const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
+    const result = await multiCanvasContract.place_pixel(
+      placeWorldPixelCallData.calldata,
+      {
+        maxFee
+      }
+    );
+    console.log(result);
+  };
+
   const extraPixelPlaceCall = async (positions, colors, now) => {
     if (devnetMode) return;
     if (!address || !artPeaceContract || !account) return;
@@ -737,7 +777,6 @@ function App() {
       entrypoint: 'place_extra_pixels',
       calldata: placeExtraPixelsCallData.calldata
     });
-    /* global BigInt */
     const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
     const result = await artPeaceContract.place_extra_pixels(
       placeExtraPixelsCallData.calldata,
@@ -806,11 +845,20 @@ function App() {
   const submit = async () => {
     let timestamp = Math.floor(Date.now() / 1000);
     if (!devnetMode) {
-      await extraPixelPlaceCall(
-        extraPixelsData.map((pixel) => pixel.x + pixel.y * width),
-        extraPixelsData.map((pixel) => pixel.colorId),
-        timestamp
-      );
+      if (worldsMode) {
+        await placeWorldPixelCall(
+          openedWorldId,
+          extraPixelsData.map((pixel) => pixel.x + pixel.y * width),
+          extraPixelsData.map((pixel) => pixel.colorId),
+          timestamp
+        );
+      } else {
+        await extraPixelPlaceCall(
+          extraPixelsData.map((pixel) => pixel.x + pixel.y * width),
+          extraPixelsData.map((pixel) => pixel.colorId),
+          timestamp
+        );
+      }
     } else {
       if (worldsMode) {
         const firstPixel = extraPixelsData[0];
