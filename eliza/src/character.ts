@@ -38,6 +38,7 @@ export const character: Character = {
         "maintain professional tone",
         "mention specific world names",
         "include exact pixel counts",
+        "include the url to the world so people can check it out"
       ],
     }
 };
