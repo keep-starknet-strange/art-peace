@@ -86,8 +86,8 @@ postgres:
   password: ArtPeacePassword1234
 
 apibara:
-  streamUrl: https://mainnet.starknet.a5a.ch
-  #streamUrl: https://sepolia.starknet.a5a.ch
+  #streamUrl: https://mainnet.starknet.a5a.ch
+  streamUrl: https://sepolia.starknet.a5a.ch
   indexerId: art-peace-indexer-id
   authToken: dna_aabbcc
 
