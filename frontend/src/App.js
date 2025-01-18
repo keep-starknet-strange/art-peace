@@ -1372,13 +1372,16 @@ function App() {
           <div
             className='App__logo'
             onClick={() => {
-              setHomeCounter(homeCounter + 1);
-              if (homeCounter > 2) {
+              let newCounter = homeCounter + 1;
+              setHomeCounter(newCounter);
+              console.log('Home counter:', newCounter);
+              if (homeCounter === 2) {
                 setWorldsMode(true);
                 setOpenedWorldId(0);
+                console.log('Worlds mode activated');
               }
               setActiveTab(tabs[0]);
-              window.location.pathname = '/';
+              //TODO: window.location.pathname = '/';
             }}
           >
             <img
