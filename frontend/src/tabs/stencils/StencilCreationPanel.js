@@ -18,9 +18,8 @@ const StencilCreationPanel = (props) => {
     if (!props.address || !props.canvasFactoryContract || !props.account)
       return;
     // TODO: Validate the position, width, and height
-    console.log('Adding Stencil:', position, width, height);
+    console.log('Adding Stencil:', hash, position, width, height);
     let addStencilParams = {
-      world_id: worldId,
       hash: hash,
       width: width,
       height: height,
@@ -29,7 +28,8 @@ const StencilCreationPanel = (props) => {
     const addStencilCalldata = props.canvasFactoryContract.populate(
       'add_stencil',
       {
-        stencil_metadata: addStencilParams
+        canvas_id: worldId,
+        stencil: addStencilParams
       }
     );
     const { suggestedMaxFee } = await props.estimateInvokeFee({
