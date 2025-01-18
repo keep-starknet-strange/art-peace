@@ -407,15 +407,18 @@ pub mod MultiCanvas {
             self.awards_enabled.write(false);
         }
 
-        fn award_user(
-            ref self: ContractState, canvas_id: u32, user: ContractAddress, amount: u32
-        ) {
+        fn award_user(ref self: ContractState, canvas_id: u32, user: ContractAddress, amount: u32) {
             if !self.awards_enabled.read() {
                 return;
             }
             let caller = get_caller_address();
-            assert(caller == self.hosts.read(canvas_id) || caller == self.game_master.read(), 'Only hosts can award');
-            self.extra_pixels.write((canvas_id, user), self.extra_pixels.read((canvas_id, user)) + amount);
+            assert(
+                caller == self.hosts.read(canvas_id) || caller == self.game_master.read(),
+                'Only hosts can award'
+            );
+            self
+                .extra_pixels
+                .write((canvas_id, user), self.extra_pixels.read((canvas_id, user)) + amount);
             self.emit(CanvasHostAwardedUser { canvas_id, user, amount });
         }
 
