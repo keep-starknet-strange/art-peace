@@ -673,6 +673,10 @@
       {
         "name": "symbol",
         "type": "core::byte_array::ByteArray"
+      },
+      {
+        "name": "round_number",
+        "type": "core::felt252"
       }
     ]
   },

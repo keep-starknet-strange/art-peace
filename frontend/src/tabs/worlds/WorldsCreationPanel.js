@@ -30,6 +30,7 @@ const WorldsCreationPanel = (props) => {
 
   const createWorldCall = async (
     name,
+    slug,
     width,
     height,
     timer,
@@ -42,13 +43,15 @@ const WorldsCreationPanel = (props) => {
       return;
     // TODO: Validate ...
     const host = props.account.address;
+    let formattedPalette = palette.map((color) => '0x' + color);
     let createWorldParams = {
       host: host,
       name: toHex(name),
+      unique_name: toHex(slug),
       width: width,
       height: height,
       time_between_pixels: timer,
-      color_palette: palette,
+      color_palette: formattedPalette,
       start_time: start,
       end_time: end
     };
@@ -61,12 +64,12 @@ const WorldsCreationPanel = (props) => {
     const { suggestedMaxFee } = await props.estimateInvokeFee({
       contractAddress: props.canvasFactoryContract.address,
       entrypoint: 'create_canvas',
-      calldata: createWorldsCalldata
+      calldata: createWorldsCalldata.calldata
     });
     /* global BigInt */
     const maxFee = (suggestedMaxFee * BigInt(15)) / BigInt(10);
     const result = await props.canvasFactoryContract.create_canvas(
-      createWorldParams.calldata,
+      createWorldsCalldata.calldata,
       {
         maxFee
       }
