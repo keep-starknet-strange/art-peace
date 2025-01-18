@@ -52,8 +52,8 @@ const WorldsCreationPanel = (props) => {
       height: height,
       time_between_pixels: timer,
       color_palette: formattedPalette,
-      start_time: start,
-      end_time: end
+      start_time: start / 1000,
+      end_time: end / 1000
     };
     const createWorldsCalldata = props.canvasFactoryContract.populate(
       'create_canvas',
