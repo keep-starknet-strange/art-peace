@@ -13,6 +13,10 @@
         "type": "core::felt252"
       },
       {
+        "name": "unique_name",
+        "type": "core::felt252"
+      },
+      {
         "name": "width",
         "type": "core::integer::u128"
       },
@@ -53,6 +57,10 @@
         "type": "core::felt252"
       },
       {
+        "name": "unique_name",
+        "type": "core::felt252"
+      },
+      {
         "name": "width",
         "type": "core::integer::u128"
       },
@@ -75,6 +83,28 @@
       {
         "name": "end_time",
         "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "art_peace::multi_canvas::MultiCanvas::StencilMetadata",
+    "members": [
+      {
+        "name": "hash",
+        "type": "core::felt252"
+      },
+      {
+        "name": "width",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "height",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "position",
+        "type": "core::integer::u128"
       }
     ]
   },
@@ -282,6 +312,20 @@
       },
       {
         "type": "function",
+        "name": "enable_awards",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "disable_awards",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
         "name": "award_user",
         "inputs": [
           {
@@ -478,6 +522,110 @@
         "inputs": [
           {
             "name": "canvas_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_stencil_count",
+        "inputs": [
+          {
+            "name": "canvas_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_stencil",
+        "inputs": [
+          {
+            "name": "canvas_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "stencil_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "art_peace::multi_canvas::MultiCanvas::StencilMetadata"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "add_stencil",
+        "inputs": [
+          {
+            "name": "canvas_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "stencil",
+            "type": "art_peace::multi_canvas::MultiCanvas::StencilMetadata"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "remove_stencil",
+        "inputs": [
+          {
+            "name": "canvas_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "stencil_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "favorite_stencil",
+        "inputs": [
+          {
+            "name": "canvas_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "stencil_id",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "unfavorite_stencil",
+        "inputs": [
+          {
+            "name": "canvas_id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "stencil_id",
             "type": "core::integer::u32"
           }
         ],
@@ -708,6 +856,94 @@
   },
   {
     "type": "event",
+    "name": "art_peace::multi_canvas::MultiCanvas::StencilAdded",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "canvas_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "stencil_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "stencil",
+        "type": "art_peace::multi_canvas::MultiCanvas::StencilMetadata",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::multi_canvas::MultiCanvas::StencilRemoved",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "canvas_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "stencil_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "stencil",
+        "type": "art_peace::multi_canvas::MultiCanvas::StencilMetadata",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::multi_canvas::MultiCanvas::StencilFavorited",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "canvas_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "stencil_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "art_peace::multi_canvas::MultiCanvas::StencilUnfavorited",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "canvas_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "stencil_id",
+        "type": "core::integer::u32",
+        "kind": "key"
+      },
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
     "name": "art_peace::multi_canvas::MultiCanvas::Event",
     "kind": "enum",
     "variants": [
@@ -759,6 +995,26 @@
       {
         "name": "CanvasUnfavorited",
         "type": "art_peace::multi_canvas::MultiCanvas::CanvasUnfavorited",
+        "kind": "nested"
+      },
+      {
+        "name": "StencilAdded",
+        "type": "art_peace::multi_canvas::MultiCanvas::StencilAdded",
+        "kind": "nested"
+      },
+      {
+        "name": "StencilRemoved",
+        "type": "art_peace::multi_canvas::MultiCanvas::StencilRemoved",
+        "kind": "nested"
+      },
+      {
+        "name": "StencilFavorited",
+        "type": "art_peace::multi_canvas::MultiCanvas::StencilFavorited",
+        "kind": "nested"
+      },
+      {
+        "name": "StencilUnfavorited",
+        "type": "art_peace::multi_canvas::MultiCanvas::StencilUnfavorited",
         "kind": "nested"
       }
     ]

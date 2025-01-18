@@ -124,22 +124,35 @@ function App() {
 
   // Window management
   usePreventZoom();
+  const defaultWorldsTabs = ['Canvas', 'Worlds', 'Stencils', 'Account'];
+  const defaultTabs = [];
+  // TODO: Add features back
   /*
-  const tabs = [
+  [
     'Canvas',
     'Factions',
     'NFTs',
     'Quests',
     'Vote',
-    'Worlds',
     'Account'
   ];
-  //  : ['Canvas', 'Factions', 'NFTs', 'Quests', 'Vote', 'Account'];
   */
-  // TODO: Add features back
-  const tabs = devnetMode ? ['Canvas', 'Worlds', 'Stencils', 'Account'] : [];
-  const [activeTab, setActiveTab] = useState(tabs[0]);
+  const [tabs, setTabs] = useState(
+    worldsMode ? defaultWorldsTabs : defaultTabs
+  );
+  const [activeTab, setActiveTab] = useState(
+    worldsMode ? defaultWorldsTabs[0] : defaultTabs[0]
+  );
   useLockScroll(activeTab === 'Canvas');
+  useEffect(() => {
+    if (worldsMode) {
+      setTabs(defaultWorldsTabs);
+      setActiveTab(defaultWorldsTabs[0]);
+    } else {
+      setTabs(defaultTabs);
+      setActiveTab(defaultTabs[0]);
+    }
+  }, [worldsMode]);
 
   const isDesktopOrLaptop = useMediaQuery({
     query: '(min-width: 1224px)'
@@ -227,6 +240,7 @@ function App() {
     );
     const multiCanvasContract = new Contract(
       multi_canvas_abi,
+      // '0x03ce937f91fa0c88a4023f582c729935a5366385091166a763e53281e45ac410',
       process.env.REACT_APP_CANVAS_FACTORY_CONTRACT_ADDRESS,
       account
     );
