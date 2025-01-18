@@ -36,6 +36,11 @@ volumes:
     claim: nft-volume-claim
     class: standard-rwo
     storage: 50Gi
+  worlds:
+    name: worlds-data
+    claim: worlds-volume-claim
+    class: standard-rwo
+    storage: 50Gi
   factions:
     name: faction-data
     claim: faction-volume-claim
@@ -72,6 +77,8 @@ deployments:
   indexer:
     replicas: 1
     image: brandonjroberts/art-peace-indexer
+  indexerWorlds:
+    image: brandonjroberts/art-peace-worlds-indexer
 
 postgres:
   db: art-peace-db
@@ -91,3 +98,5 @@ contracts:
   host: "05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa"
   end: "1727769600"
   roundNumber: "2"
+  canvasFactory: 0x03ce937f91fa0c88a4023f582c729935a5366385091166a763e53281e45ac410
+  worldsMode: true

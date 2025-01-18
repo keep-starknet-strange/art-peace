@@ -1,0 +1,6 @@
+FROM quay.io/apibara/sink-webhook:0.6.0 as sink-webhook
+
+WORKDIR /indexer
+COPY ./indexer/prod-worlds-script.js .
+
+CMD ["run", "prod-worlds-script.js", "--allow-env-from-env", "CONSUMER_TARGET_URL,APIBARA_STREAM_URL,PERSIST_TO_REDIS,INDEXER_ID,CANVAS_FACTORY_CONTRACT_ADDRESS", "--allow-net", "--sink-id", "canvas-factory-sink-id"]

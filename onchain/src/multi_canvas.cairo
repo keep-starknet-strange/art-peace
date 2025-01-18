@@ -15,6 +15,8 @@ pub trait IMultiCanvas<TContractState> {
     fn get_last_placed_time(self: @TContractState, canvas_id: u32, user: ContractAddress) -> u64;
     fn get_time_between_pixels(self: @TContractState, canvas_id: u32) -> u64;
     fn set_time_between_pixels(ref self: TContractState, canvas_id: u32, time_between_pixels: u64);
+    fn enable_awards(ref self: TContractState);
+    fn disable_awards(ref self: TContractState);
     fn award_user(ref self: TContractState, canvas_id: u32, user: ContractAddress, amount: u32);
     fn get_color_count(self: @TContractState, canvas_id: u32) -> u8;
     fn get_colors(self: @TContractState, canvas_id: u32) -> Span<u32>;
@@ -114,7 +116,8 @@ pub mod MultiCanvas {
         // Map: (canvas_id, stencil_id) -> stencil metadata
         stencils: LegacyMap::<(u32, u32), StencilMetadata>,
         // Maps: (canvas_id, stencil_id, user addr) -> if favorited
-        stencil_favorites: LegacyMap::<(u32, u32, ContractAddress), bool>
+        stencil_favorites: LegacyMap::<(u32, u32, ContractAddress), bool>,
+        awards_enabled: bool,
     }
 
     #[event]
@@ -385,13 +388,28 @@ pub mod MultiCanvas {
                 );
         }
 
+        fn enable_awards(ref self: ContractState) {
+            let caller = get_caller_address();
+            assert(caller == self.game_master.read(), 'Only game master can enable');
+            self.awards_enabled.write(true);
+        }
+
+        fn disable_awards(ref self: ContractState) {
+            let caller = get_caller_address();
+            assert(caller == self.game_master.read(), 'Only game master can disable');
+            self.awards_enabled.write(false);
+        }
+
         fn award_user(
             ref self: ContractState, canvas_id: u32, user: ContractAddress, amount: u32
-        ) { // TODO
-        // let caller = get_caller_address();
-        // assert(caller == self.hosts.read(canvas_id), 'Only host can award users');
-        // self.extra_pixels.write((canvas_id, user), self.extra_pixels.read((canvas_id, user)) + amount);
-        // self.emit(CanvasHostAwardedUser { canvas_id, user, amount });
+        ) {
+            if !self.awards_enabled.read() {
+                return;
+            }
+            let caller = get_caller_address();
+            assert(caller == self.hosts.read(canvas_id) || caller == self.game_master.read(), 'Only hosts can award');
+            self.extra_pixels.write((canvas_id, user), self.extra_pixels.read((canvas_id, user)) + amount);
+            self.emit(CanvasHostAwardedUser { canvas_id, user, amount });
         }
 
         fn get_color_count(self: @ContractState, canvas_id: u32) -> u8 {
