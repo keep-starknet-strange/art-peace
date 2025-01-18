@@ -15,6 +15,7 @@ const StencilItem = (props) => {
     const favoriteCallData = props.canvasFactoryContract.populate(
       'favorite_stencil',
       {
+        canvas_id: props.openedWorldId,
         stencil_id: stencilId
       }
     );
@@ -41,6 +42,7 @@ const StencilItem = (props) => {
     const unfavoriteCallData = props.canvasFactoryContract.populate(
       'unfavorite_stencil',
       {
+        canvas_id: props.openedWorldId,
         stencil_id: stencilId
       }
     );
