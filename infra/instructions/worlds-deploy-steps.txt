@@ -29,7 +29,6 @@ apply changes to cloud
    If full reset
      make helm-uninstall
      POSTGRES_PASSWORD=test AUTH_TOKEN=dna_abc make helm-install
-     make init-infra-prod
   else
      POSTGRES_PASSWORD=test AUTH_TOKEN=dna_abc make helm-upgrade
 
