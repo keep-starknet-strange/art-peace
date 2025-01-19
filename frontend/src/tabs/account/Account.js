@@ -423,8 +423,6 @@ const Account = (props) => {
             flexDirection: 'column',
             alignItems: 'center',
             width: '100%'
-            alignItems: 'center',
-            width: '100%'
           }}
         >
           <div className='Account__login'>
