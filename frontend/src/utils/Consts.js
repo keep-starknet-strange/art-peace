@@ -59,6 +59,12 @@ export const provider = new RpcProvider({
   chainId: STARKNET_CHAIN_ID
 });
 
+export function getProvider() {
+  return new RpcProvider({
+    nodeUrl: NODE_URL
+  });
+}
+
 export const allowedMethods = [
   {
     'Contract Address': process.env.REACT_APP_USERNAME_STORE_CONTRACT_ADDRESS,
