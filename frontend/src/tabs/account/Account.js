@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { constants } from 'starknet';
+import { useConnect, useDisconnect } from '@starknet-react/core';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
@@ -392,7 +393,8 @@ const Account = (props) => {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center'
+            alignItems: 'center',
+            width: '100%'
           }}
         >
           <div className='Account__login'>
@@ -401,6 +403,14 @@ const Account = (props) => {
               onClick={props.connectWallet}
             >
               Starknet Login
+            </div>
+            <div
+              className='Text__medium Button__primary Account__login__button'
+              onClick={() => {
+                props.address ? disconnect() : doConnect();
+              }}
+            >
+              Cartridge Login
             </div>
           </div>
           <div
