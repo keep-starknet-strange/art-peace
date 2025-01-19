@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { constants } from 'starknet';
-import { useConnect, useDisconnect } from '@starknet-react/core';
+import { useAccount, useConnect, useDisconnect } from '@starknet-react/core';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
@@ -92,13 +92,24 @@ const Account = (props) => {
 
   const [addressShort, setAddressShort] = useState('');
   useEffect(() => {
-    if (!props.address) return;
-    setAddressShort(
-      props.address
-        ? `${props.address.slice(0, 6)}...${props.address.slice(-4)}`
-        : ''
-    );
-  }, [props.address]);
+    if (props.isCartridgeConnected) {
+      if (!reactAddress) return;
+      setAddressShort(
+        reactAddress
+          ? `${reactAddress.slice(0, 6)}...${reactAddress.slice(-4)}`
+          : ''
+      );
+      connector.username()?.then((n) => setUsername(n));
+      return;
+    } else {
+      if (!props.address) return;
+      setAddressShort(
+        props.address
+          ? `${props.address.slice(0, 6)}...${props.address.slice(-4)}`
+          : ''
+      );
+    }
+  }, [props.address, reactAddress, props.isCartridgeConnected, connector]);
 
   const [userAwards, setUserAwards] = useState([]);
   const [claimText, setClaimText] = useState('');
@@ -407,7 +418,7 @@ const Account = (props) => {
             <div
               className='Text__medium Button__primary Account__login__button'
               onClick={() => {
-                props.address ? disconnect() : doConnect();
+                props.address ? doDisconnect() : doConnect();
               }}
             >
               Cartridge Login
@@ -633,36 +644,47 @@ const Account = (props) => {
             </div>
           </div>
           <div className='Account__disconnect__button__separator'></div>
-          <div className='Account__footer'>
-            <div className='Account__kudos'>
-              {!props.usingSessionKeys && props.isSessionable ? (
-                <p className='Text__small Account__kudos__label'>
-                  Tired of approving each pixel? Sessions coming soon!
-                </p>
-              ) : (
-                <p className='Text__small Account__kudos__label'>
-                  Session active
-                </p>
-              )}
-            </div>
-            <div>
-              {!props.usingSessionKeys && props.isSessionable && (
+          {props.isCartridgeConnected ? (
+            <div className='Account__footer'>
+              <div className='Account__kudos'>
+                {!props.usingSessionKeys && props.isSessionable ? (
+                  <p className='Text__small Account__kudos__label'>
+                    Tired of approving each pixel? Sessions coming soon!
+                  </p>
+                ) : (
+                  <p className='Text__small Account__kudos__label'>
+                    Session active
+                  </p>
+                )}
+              </div>
+              <div>
+                {!props.usingSessionKeys && props.isSessionable && (
+                  <div
+                    className='Text__small Button__primary Button__disabled'
+                    style={{ marginBottom: '0.3rem', backgroundColor: '#f00' }}
+                    onClick={() => props.startSession()}
+                  >
+                    Start session
+                  </div>
+                )}
                 <div
-                  className='Text__small Button__primary Button__disabled'
-                  style={{ marginBottom: '0.3rem', backgroundColor: '#f00' }}
-                  onClick={() => props.startSession()}
+                  className='Text__small Button__primary Account__disconnect__button'
+                  onClick={() => props.disconnectWallet()}
                 >
-                  Start session
+                  Logout
                 </div>
-              )}
+              </div>
+            </div>
+          ) : (
+            <div className='Account__footer'>
               <div
                 className='Text__small Button__primary Account__disconnect__button'
-                onClick={() => props.disconnectWallet()}
+                onClick={() => doDisconnect()}
               >
                 Logout
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </BasicTab>

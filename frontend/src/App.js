@@ -192,7 +192,13 @@ function App() {
   const [usingSessionKeys, setUsingSessionKeys] = useState(false);
   const [queryAddress, setQueryAddress] = useState('0');
   const [connected, setConnected] = useState(false); // TODO: change to only devnet
+  const [isCartridgeConnected, setIsCartridgeConnected] = useState(false);
   useEffect(() => {
+    if (isCartridgeConnected) {
+      // TODO
+      setQueryAddress('123');
+      return;
+    }
     if (devnetMode) {
       if (connected) {
         setQueryAddress(
@@ -211,7 +217,7 @@ function App() {
         setAddress(connectorData.account);
       }
     }
-  }, [connectorData, connected]);
+  }, [connectorData, connected, isCartridgeConnected]);
 
   // Contracts
   // TODO: Pull addrs from api?
@@ -1465,6 +1471,8 @@ function App() {
           }
         >
           <TabPanel
+            isCartridgeConnected={isCartridgeConnected}
+            setIsCartridgeConnected={setIsCartridgeConnected}
             isHome={isHome}
             openedWorldId={openedWorldId}
             setOpenedWorldId={setOpenedWorldId}
