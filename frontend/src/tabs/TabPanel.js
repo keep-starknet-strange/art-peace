@@ -369,6 +369,8 @@ const TabPanel = (props) => {
             {props.activeTab === 'Account' && (
               <div>
                 <Account
+                  isCartridgeConnected={props.isCartridgeConnected}
+                  setIsCartridgeConnected={props.setIsCartridgeConnected}
                   address={props.address}
                   account={props.account}
                   usingSessionKeys={props.usingSessionKeys}
