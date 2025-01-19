@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { constants } from 'starknet';
-import { useAccount, useConnect, useDisconnect } from '@starknet-react/core';
+import { useConnect, useDisconnect } from '@starknet-react/core';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
@@ -16,6 +16,16 @@ import ArgentIcon from '../../resources/icons/Argent.png';
 import BraavosIcon from '../../resources/icons/Braavos.png';
 
 const Account = (props) => {
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  const connector = connectors[0];
+
+  const doConnect = async () => {
+    const conn = connector;
+    connect({ connector: conn });
+  };
+
+  const [username, setUsername] = useState('');
   const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState('');
   // TODO: Mint rank images when reached w/ button
@@ -406,6 +416,8 @@ const Account = (props) => {
             flexDirection: 'column',
             alignItems: 'center',
             width: '100%'
+            alignItems: 'center',
+            width: '100%'
           }}
         >
           <div className='Account__login'>
@@ -418,7 +430,7 @@ const Account = (props) => {
             <div
               className='Text__medium Button__primary Account__login__button'
               onClick={() => {
-                props.address ? doDisconnect() : doConnect();
+                props.address ? disconnect() : doConnect();
               }}
             >
               Cartridge Login
