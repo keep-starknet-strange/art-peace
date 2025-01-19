@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { constants } from 'starknet';
-import { useConnect, useDisconnect } from '@starknet-react/core';
+import { useAccount, useConnect, useDisconnect } from '@starknet-react/core';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
@@ -18,11 +18,18 @@ import BraavosIcon from '../../resources/icons/Braavos.png';
 const Account = (props) => {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
+  const { address: reactAddress } = useAccount();
   const connector = connectors[0];
 
   const doConnect = async () => {
     const conn = connector;
     connect({ connector: conn });
+    props.setIsCartridgeConnected(true);
+  };
+
+  const doDisconnect = async () => {
+    disconnect();
+    props.setIsCartridgeConnected(false);
   };
 
   const [username, setUsername] = useState('');
@@ -430,7 +437,7 @@ const Account = (props) => {
             <div
               className='Text__medium Button__primary Account__login__button'
               onClick={() => {
-                props.address ? disconnect() : doConnect();
+                props.address ? doDisconnect() : doConnect();
               }}
             >
               Cartridge Login
