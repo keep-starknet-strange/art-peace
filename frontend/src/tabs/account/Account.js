@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { constants } from 'starknet';
+import { useConnect, useDisconnect } from '@starknet-react/core';
 import './Account.css';
 import BasicTab from '../BasicTab.js';
 import '../../utils/Styles.css';
@@ -15,6 +16,15 @@ import ArgentIcon from '../../resources/icons/Argent.png';
 import BraavosIcon from '../../resources/icons/Braavos.png';
 
 const Account = (props) => {
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  const connector = connectors[0];
+
+  const doConnect = async () => {
+    const conn = connector;
+    connect({ connector: conn });
+  };
+
   const [username, setUsername] = useState('');
   const [pixelCount, setPixelCount] = useState(0);
   const [accountRank, setAccountRank] = useState('');
@@ -393,7 +403,8 @@ const Account = (props) => {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center'
+            alignItems: 'center',
+            width: '100%'
           }}
         >
           <div className='Account__login'>
@@ -402,6 +413,14 @@ const Account = (props) => {
               onClick={props.connectWallet}
             >
               Starknet Login
+            </div>
+            <div
+              className='Text__medium Button__primary Account__login__button'
+              onClick={() => {
+                props.address ? disconnect() : doConnect();
+              }}
+            >
+              Cartridge Login
             </div>
           </div>
           <div

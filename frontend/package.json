@@ -5,7 +5,11 @@
   "dependencies": {
     "@argent/x-sessions": "^6.7.4",
     "@argent/x-shared": "^1.32.1",
+    "@cartridge/connector": "v0.3.46",
+    "@cartridge/controller": "v0.3.46",
     "@starknet-io/types-js": "^0.7.7",
+    "@starknet-react/chains": "^3.1.2",
+    "@starknet-react/core": "^3.4.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -56,5 +60,10 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^3.2.5",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@cartridge/controller@0.3.46": "patches/@cartridge__controller@0.3.46.patch"
+    }
   }
 }

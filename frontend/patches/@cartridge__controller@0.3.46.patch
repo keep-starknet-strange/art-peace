@@ -1,0 +1,88 @@
+diff --git a/dist/device.js b/dist/device.js
+index 9e95fe49d47a46ab0e986d939362935196462daa..8f9fa4d7a977dd78d6ce3efe6bbb9e1985f98109 100644
+--- a/dist/device.js
++++ b/dist/device.js
+@@ -1,6 +1,6 @@
+ import { Account, RpcProvider, } from "starknet";
+-import { ResponseCodes, } from "./types";
+-import { Signer } from "./signer";
++import { ResponseCodes, } from "./types.js";
++import { Signer } from "./signer.js";
+ class DeviceAccount extends Account {
+     constructor(rpcUrl, address, keychain, options, modal) {
+         super(new RpcProvider({ nodeUrl: rpcUrl }), address, new Signer(keychain, modal));
+diff --git a/dist/iframe/base.js b/dist/iframe/base.js
+index 0f3c1abf231567730bd21357ea30982f116b5427..f2626b31fe2889e59692dbab6c0aa8e0b4219e81 100644
+--- a/dist/iframe/base.js
++++ b/dist/iframe/base.js
+@@ -1,5 +1,5 @@
+ import { connectToChild } from "@cartridge/penpal";
+-import { defaultPresets } from "../presets";
++import { defaultPresets } from "../presets.js";
+ export class IFrame {
+     constructor({ id, url, theme, config, colorMode, onClose, onConnect, methods = {}, }) {
+         if (typeof document === "undefined") {
+diff --git a/dist/iframe/index.js b/dist/iframe/index.js
+index 1614957914b46d137c324e8c202b44cc8e05192e..3edef3a92ff26f8345d657b1d32a0dce7817874d 100644
+--- a/dist/iframe/index.js
++++ b/dist/iframe/index.js
+@@ -1,4 +1,4 @@
+-export * from "./base";
+-export * from "./keychain";
+-export * from "./profile";
++export * from "./base.js";
++export * from "./keychain.js";
++export * from "./profile.js";
+ //# sourceMappingURL=index.js.map
+\ No newline at end of file
+diff --git a/dist/iframe/keychain.js b/dist/iframe/keychain.js
+index ca27739a0f3b34e9d9a0ecae607d6bdb4c43c4f8..aad21ca1ca31e52562535a428d79ba9fe8c02da3 100644
+--- a/dist/iframe/keychain.js
++++ b/dist/iframe/keychain.js
+@@ -1,5 +1,5 @@
+-import { KEYCHAIN_URL } from "../constants";
+-import { IFrame } from "./base";
++import { KEYCHAIN_URL } from "../constants.js";
++import { IFrame } from "./base.js";
+ export class KeychainIFrame extends IFrame {
+     constructor({ url, paymaster, policies, ...iframeOptions }) {
+         const _url = new URL(url ?? KEYCHAIN_URL);
+diff --git a/dist/iframe/profile.js b/dist/iframe/profile.js
+index 5aa52233a9318afee9659826de4b36951bf8f35b..6f931736bbe117248a198f251edfe8f2b3f9c950 100644
+--- a/dist/iframe/profile.js
++++ b/dist/iframe/profile.js
+@@ -1,5 +1,5 @@
+-import { PROFILE_URL } from "../constants";
+-import { IFrame } from "./base";
++import { PROFILE_URL } from "../constants.js";
++import { IFrame } from "./base.js";
+ export class ProfileIFrame extends IFrame {
+     constructor({ profileUrl, address, username, indexerUrl, rpcUrl, tokens, ...iframeOptions }) {
+         const _url = new URL(profileUrl ?? PROFILE_URL);
+diff --git a/dist/index.js b/dist/index.js
+index 9dbaed03dde2d6ce0fc4ff2434a269588decd3ba..d48244932d61e9716987e8d25a24f18aba713961 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1,13 +1,13 @@
+-export * from "./errors";
+-export * from "./types";
+-export { defaultPresets } from "./presets";
+-export * from "./verified";
++export * from "./errors.js";
++export * from "./types.js";
++export { defaultPresets } from "./presets.js";
++export * from "./verified.js";
+ import { addAddressPadding } from "starknet";
+-import DeviceAccount from "./device";
+-import { ResponseCodes, } from "./types";
+-import { KeychainIFrame, ProfileIFrame } from "./iframe";
+-import { NotReadyToConnect, ProfileNotReady } from "./errors";
+-import { RPC_SEPOLIA } from "./constants";
++import DeviceAccount from "./device.js";
++import { ResponseCodes, } from "./types.js";
++import { KeychainIFrame, ProfileIFrame } from "./iframe/index.js";
++import { NotReadyToConnect, ProfileNotReady } from "./errors.js";
++import { RPC_SEPOLIA } from "./constants.js";
+ export default class Controller {
+     constructor({ policies, url, rpc, paymaster, ...options } = {}) {
+         this.iframes = {
