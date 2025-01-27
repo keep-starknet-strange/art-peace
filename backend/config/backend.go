@@ -44,23 +44,25 @@ type HttpConfig struct {
 }
 
 type BackendConfig struct {
-	Host         string               `json:"host"`
-	Port         int                  `json:"port"`
-	ConsumerPort int                  `json:"consumer_port"`
-	WsHost       string               `json:"ws_host"`
-	WsPort       int                  `json:"ws_port"`
-	Scripts      BackendScriptsConfig `json:"scripts"`
-	Production   bool                 `json:"production"`
-	WebSocket    WebSocketConfig      `json:"websocket"`
-	Http         HttpConfig           `json:"http_config"`
+	Host              string               `json:"host"`
+	Port              int                  `json:"port"`
+	ConsumerPort      int                  `json:"consumer_port"`
+	WsHost            string               `json:"ws_host"`
+	WsPort            int                  `json:"ws_port"`
+	AchievementBotUrl string               `json:"achievement_bot_url"`
+	Scripts           BackendScriptsConfig `json:"scripts"`
+	Production        bool                 `json:"production"`
+	WebSocket         WebSocketConfig      `json:"websocket"`
+	Http              HttpConfig           `json:"http_config"`
 }
 
 var DefaultBackendConfig = BackendConfig{
-	Host:         "localhost",
-	Port:         8080,
-	ConsumerPort: 8081,
-	WsHost:       "localhost",
-	WsPort:       8083,
+	Host:              "localhost",
+	Port:              8080,
+	ConsumerPort:      8081,
+	WsHost:            "localhost",
+	WsPort:            8083,
+	AchievementBotUrl: "http://localhost:3001/Art%20Peace%20Achievement%20Bot/message",
 	Scripts: BackendScriptsConfig{
 		PlacePixelDevnet:            "../scripts/place_pixel.sh",
 		PlaceExtraPixelsDevnet:      "../scripts/place_extra_pixels.sh",

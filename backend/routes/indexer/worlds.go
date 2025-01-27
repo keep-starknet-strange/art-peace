@@ -410,7 +410,7 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 
 			// Send milestone notification
 			_, err = http.Post(
-				"http://localhost:3001/Art%20Peace%20Achievement%20Bot/message",
+				core.ArtPeaceBackend.BackendConfig.AchievementBotUrl,
 				"application/json",
 				strings.NewReader(fmt.Sprintf(`{
 					"userId": "user",
