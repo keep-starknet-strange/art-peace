@@ -3,11 +3,14 @@ package indexer
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
@@ -392,6 +395,33 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 	if err != nil {
 		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query totalPixelsPlaced", canvasIdHex, placedBy, posHex, colorHex, err)
 		return
+	}
+
+	// Check milestones
+	milestones := []int{1, 100, 1000, 10000, 50000, 100000, 1000000, 10000000, 100000000, 1000000000}
+	for _, milestone := range milestones {
+		if *totalPixelsPlaced == milestone {
+			// Get world name for notification
+			worldName, err := core.PostgresQueryOne[string]("SELECT name FROM Worlds WHERE world_id = $1", canvasId)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query world name", canvasIdHex, placedBy, posHex, colorHex, err)
+				continue
+			}
+
+			// Send milestone notification
+			_, err = http.Post(
+				"http://localhost:3001/Art%20Peace%20Achievement%20Bot/message",
+				"application/json",
+				strings.NewReader(fmt.Sprintf(`{
+					"userId": "user",
+					"userName": "User",
+					"text": "%s world just reached %d pixels, view the world on art peace here https://art-peace.net/worlds/%d"
+				}`, *worldName, milestone, canvasId)),
+			)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to send milestone notification", canvasIdHex, placedBy, posHex, colorHex, err)
+			}
+		}
 	}
 
 	lastPixelPlacedTime, err := core.PostgresQueryOne[*time.Time]("SELECT time FROM WorldsPixels WHERE world_id = $1 ORDER BY time DESC LIMIT 1", canvasId)
