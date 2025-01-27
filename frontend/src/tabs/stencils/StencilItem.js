@@ -101,7 +101,8 @@ const StencilItem = (props) => {
         props.updateFavorites(props.stencilId, favorites - 1, false);
       } else {
         await favoriteStencilCall(props.stencilId);
-        props.updateFavorites(props.stencilId, favorites + 1, true);
+        const newFavoriteCount = favorites + 1;
+        props.updateFavorites(props.stencilId, newFavoriteCount, true);
       }
       return;
     }
@@ -116,7 +117,8 @@ const StencilItem = (props) => {
         })
       });
       if (favoriteResponse.result) {
-        props.updateFavorites(props.stencilId, favorites + 1, true);
+        const newFavoriteCount = favorites + 1;
+        props.updateFavorites(props.stencilId, newFavoriteCount, true);
       }
     } else {
       let unfavoriteResponse = await fetchWrapper('unfavorite-stencil-devnet', {
