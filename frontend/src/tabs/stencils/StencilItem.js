@@ -103,54 +103,6 @@ const StencilItem = (props) => {
         await favoriteStencilCall(props.stencilId);
         const newFavoriteCount = favorites + 1;
         props.updateFavorites(props.stencilId, newFavoriteCount, true);
-
-        // Check if this favorite is a milestone
-        // switch (newFavoriteCount) {
-        //   case 1:
-        //   case 10:
-        //   case 100:
-        //   case 1000:
-        //   case 10000:
-        //   case 100000:
-        //   case 1000000:
-        //   case 10000000:
-        //   case 100000000:
-        //     await fetch(
-        //       'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
-        //       {
-        //         method: 'POST',
-        //         headers: {
-        //           'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify({
-        //           userId: 'user',
-        //           userName: 'User',
-        //           text: `${props.userName} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
-        //         })
-        //       }
-        //     ).catch((error) => console.error('Error notifying Eliza:', error));
-        //     break;
-        //   default:
-        //     if (newFavoriteCount > 1000000000) {
-        //       await fetch(
-        //         'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
-        //         {
-        //           method: 'POST',
-        //           headers: {
-        //             'Content-Type': 'application/json'
-        //           },
-        //           body: JSON.stringify({
-        //             userId: 'user',
-        //             userName: 'User',
-        //             text: `${props.userName} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
-        //           })
-        //         }
-        //       ).catch((error) =>
-        //         console.error('Error notifying Eliza:', error)
-        //       );
-        //     }
-        //     break;
-        // }
       }
       return;
     }
@@ -167,59 +119,6 @@ const StencilItem = (props) => {
       if (favoriteResponse.result) {
         const newFavoriteCount = favorites + 1;
         props.updateFavorites(props.stencilId, newFavoriteCount, true);
-        // Check milestone in devnet mode as well
-        // switch (newFavoriteCount) {
-        //   case 1:
-        //   case 10:
-        //   case 100:
-        //   case 1000:
-        //   case 10000:
-        //   case 100000:
-        //   case 1000000:
-        //   case 10000000:
-        //   case 100000000:
-        //     console.log(
-        //       `🎉 Milestone reached! Stencil #${props.stencilId} just hit ${newFavoriteCount} favorites!`
-        //     );
-        //     await fetch(
-        //       'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
-        //       {
-        //         method: 'POST',
-        //         headers: {
-        //           'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify({
-        //           userId: 'user',
-        //           userName: 'User',
-        //           text: `${props.userName} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
-        //         })
-        //       }
-        //     ).catch((error) => console.error('Error notifying Eliza:', error));
-        //     break;
-        //   default:
-        //     if (newFavoriteCount > 1000000000) {
-        //       console.log(
-        //         `🎉 Milestone reached! Stencil #${props.stencilId} just hit ${newFavoriteCount} favorites!`
-        //       );
-        //       await fetch(
-        //         'http://localhost:3001/Art%20Peace%20Achievement%20Bot/message',
-        //         {
-        //           method: 'POST',
-        //           headers: {
-        //             'Content-Type': 'application/json'
-        //           },
-        //           body: JSON.stringify({
-        //             userId: 'user',
-        //             userName: 'User',
-        //             text: `${props.userName} stencil just reached ${newFavoriteCount} favorites, view the stencil on art peace here https://art-peace.net/stencils/${props.stencilId}`
-        //           })
-        //         }
-        //       ).catch((error) =>
-        //         console.error('Error notifying Eliza:', error)
-        //       );
-        //     }
-        //     break;
-        // }
       }
     } else {
       let unfavoriteResponse = await fetchWrapper('unfavorite-stencil-devnet', {
