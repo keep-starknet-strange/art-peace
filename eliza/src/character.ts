@@ -4,7 +4,7 @@ export const character: Character = {
     name: "Art Peace Achievement Bot",
     plugins: [],
     clients: [Clients.TWITTER],
-    modelProvider: ModelProviderName.ANTHROPIC,
+    modelProvider: ModelProviderName.OPENAI,
     settings: {
       secrets: {},
     },
