@@ -123,87 +123,139 @@ async function main() {
             const stencilData = await stencilResponse.json();
             console.log(chalk.green("\n✨ Stencil uploaded successfully!"));
             console.log("Stencil hash:", stencilData);
+
+            // Add a small delay to ensure the file is written
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Fetch pixel data using the hash
+            const pixelDataResponse = await fetch(`http://localhost:8080/get-stencil-pixel-data?hash=${stencilData.result}`);
+            
+            if (!pixelDataResponse.ok) {
+                throw new Error(`Failed to fetch pixel data: ${pixelDataResponse.statusText}`);
+            }
+
+            const responseJson = await pixelDataResponse.json();
+            const pixelData = responseJson.data;  // Extract the nested data object
+            console.log(chalk.green("\n✨ Pixel data retrieved successfully!"));
+            console.log(`Width: ${pixelData.width}, Height: ${pixelData.height}`);
+            console.log(`Total pixels: ${pixelData.pixelData.length}`);
+
+            // Convert pixel data to position and color pairs
+            const pixelsWithPosition = pixelData.pixelData.map((colorIndex: number, position: number) => ({
+                position: position.toString(16),
+                color: colorIndex.toString(16)
+            }));
+
+            // After pixels are processed, start placing them on chain
+            console.log(chalk.cyan("\n🔄 Starting pixel placement loop..."));
+
+            // Create interval to place pixels every 5 seconds
+            const interval = setInterval(async () => {
+                if (pixelsWithPosition.length === 0) {
+                    console.log(chalk.yellow("No more pixels to place. Stopping..."));
+                    clearInterval(interval);
+                    process.exit(0);
+                    return;
+                }
+
+                const pixel = pixelsWithPosition.shift();
+
+                try {
+                    await placePixelOnChain(
+                        starknet,
+                        pixel?.position ?? '',
+                        pixel?.color ?? '',
+                    );
+                } catch (error) {
+                    console.error(chalk.red("Failed to place pixel:"), error);
+                    // Add failed pixel back to the queue
+                    pixelsWithPosition.push(pixel as { position: string; color: string });
+                }
+
+                console.log(chalk.blue(`Remaining pixels: ${pixelsWithPosition.length}`));
+            }, 5000); // 5 seconds interval
+
         } catch (error) {
             console.error(chalk.red("Failed to upload stencil:"), error);
             throw error;
         }
 
-        // Convert buffer to pixels array
-        const pixels: { r: number; g: number; b: number }[] = [];
-        for (let i = 0; i < resizedImage.length; i += 3) {
-            pixels.push({
-                r: resizedImage[i],
-                g: resizedImage[i + 1],
-                b: resizedImage[i + 2]
-            });
-        }
-        console.log(`Total Pixels: ${pixels.length}`);
+        // // Convert buffer to pixels array
+        // const pixels: { r: number; g: number; b: number }[] = [];
+        // for (let i = 0; i < resizedImage.length; i += 3) {
+        //     pixels.push({
+        //         r: resizedImage[i],
+        //         g: resizedImage[i + 1],
+        //         b: resizedImage[i + 2]
+        //     });
+        // }
+        // console.log(`Total Pixels: ${pixels.length}`);
 
-        // Define color palette
-        const color_palette = [
-            0x000000, 0xFFFFFF, 0xFF0000, 0x00FF00, 0x0000FF,
-            0xFFFF00, 0xFF00FF, 0x00FFFF, 0x880000, 0x008800,
-            0x000088, 0x888800
-        ];
+        // // Define color palette
+        // const color_palette = [
+        //     0x000000, 0xFFFFFF, 0xFF0000, 0x00FF00, 0x0000FF,
+        //     0xFFFF00, 0xFF00FF, 0x00FFFF, 0x880000, 0x008800,
+        //     0x000088, 0x888800
+        // ];
 
-        // Function to calculate color distance
-        const colorDistance = (color1: { r: number, g: number, b: number }, color2: number) => {
-            const r2 = (color2 >> 16) & 0xFF;
-            const g2 = (color2 >> 8) & 0xFF;
-            const b2 = color2 & 0xFF;
+        // // Function to calculate color distance
+        // const colorDistance = (color1: { r: number, g: number, b: number }, color2: number) => {
+        //     const r2 = (color2 >> 16) & 0xFF;
+        //     const g2 = (color2 >> 8) & 0xFF;
+        //     const b2 = color2 & 0xFF;
 
-            return Math.sqrt(
-                Math.pow(color1.r - r2, 2) +
-                Math.pow(color1.g - g2, 2) +
-                Math.pow(color1.b - b2, 2)
-            );
-        };
+        //     return Math.sqrt(
+        //         Math.pow(color1.r - r2, 2) +
+        //         Math.pow(color1.g - g2, 2) +
+        //         Math.pow(color1.b - b2, 2)
+        //     );
+        // };
 
-        // Find closest palette color for each pixel and store position
-        const pixelsWithPosition = pixels.map((pixel, index) => {
-            const closestColor = color_palette.reduce((prev, curr) => {
-                const prevDistance = colorDistance(pixel, prev);
-                const currDistance = colorDistance(pixel, curr);
-                return currDistance < prevDistance ? curr : prev;
-            });
+        // // Find closest palette color for each pixel and store position
+        // const pixelsWithPosition = pixels.map((pixel, index) => {
+        //     const closestColor = color_palette.reduce((prev, curr) => {
+        //         const prevDistance = colorDistance(pixel, prev);
+        //         const currDistance = colorDistance(pixel, curr);
+        //         return currDistance < prevDistance ? curr : prev;
+        //     });
 
-            // Get the index of the closest color in the palette instead of the color itself
-            const colorIndex = color_palette.indexOf(closestColor);
+        //     // Get the index of the closest color in the palette instead of the color itself
+        //     const colorIndex = color_palette.indexOf(closestColor);
 
-            return {
-                position: index.toString(16),
-                color: colorIndex.toString(16)
-            };
-        });
+        //     return {
+        //         position: index.toString(16),
+        //         color: colorIndex.toString(16)
+        //     };
+        // });
 
-        // After pixels are processed, start placing them on chain
-        console.log(chalk.cyan("\n🔄 Starting pixel placement loop..."));
+        // // After pixels are processed, start placing them on chain
+        // console.log(chalk.cyan("\n🔄 Starting pixel placement loop..."));
 
-        // Create interval to place pixels every 5 seconds
-        const interval = setInterval(async () => {
-            if (pixelsWithPosition.length === 0) {
-                console.log(chalk.yellow("No more pixels to place. Stopping..."));
-                clearInterval(interval);
-                process.exit(0);
-                return;
-            }
+        // // Create interval to place pixels every 5 seconds
+        // const interval = setInterval(async () => {
+        //     if (pixelsWithPosition.length === 0) {
+        //         console.log(chalk.yellow("No more pixels to place. Stopping..."));
+        //         clearInterval(interval);
+        //         process.exit(0);
+        //         return;
+        //     }
 
-            const pixel = pixelsWithPosition.shift();
+        //     const pixel = pixelsWithPosition.shift();
 
-            try {
-                await placePixelOnChain(
-                    starknet,
-                    pixel?.position ?? '',
-                    pixel?.color ?? '',
-                );
-            } catch (error) {
-                console.error(chalk.red("Failed to place pixel:"), error);
-                // Add failed pixel back to the queue
-                pixelsWithPosition.push(pixel as { position: string; color: string });
-            }
+        //     try {
+        //         await placePixelOnChain(
+        //             starknet,
+        //             pixel?.position ?? '',
+        //             pixel?.color ?? '',
+        //         );
+        //     } catch (error) {
+        //         console.error(chalk.red("Failed to place pixel:"), error);
+        //         // Add failed pixel back to the queue
+        //         pixelsWithPosition.push(pixel as { position: string; color: string });
+        //     }
 
-            console.log(chalk.blue(`Remaining pixels: ${pixelsWithPosition.length}`));
-        }, 5000); // 5 seconds interval
+        //     console.log(chalk.blue(`Remaining pixels: ${pixelsWithPosition.length}`));
+        // }, 5000); // 5 seconds interval
 
     } catch (error) {
         console.error(chalk.red("Error in main process:"), error);

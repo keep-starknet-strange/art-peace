@@ -761,8 +761,8 @@ func getStencilPixelData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Read the stencil image file
-	filename := fmt.Sprintf("stencils/stencil-%s.png", hash)
+	// Read the stencil image file - Updated filename format to match addStencilImg
+	filename := fmt.Sprintf("stencils/stencils-%s.png", hash) // Changed from stencil- to stencils-
 	fileBytes, err := os.ReadFile(filename)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusNotFound, "Stencil not found")
