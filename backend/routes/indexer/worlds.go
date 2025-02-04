@@ -1,11 +1,14 @@
 package indexer
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"image"
 	"image/color"
 	"image/png"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -324,6 +327,10 @@ func processCanvasColorAddedEvent(event IndexerEvent) {
 
 	// Insert into WorldsColors
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldsColors (world_id, color_key, hex) VALUES ($1, $2, $3)", canvasId, colorKey, color)
+	if err != nil {
+		PrintIndexerError("processCanvasColorAddedEvent", "Failed to insert into WorldsColors", canvasIdHex, colorKeyHex, colorHex, err)
+		return
+	}
 }
 
 func revertCanvasColorAddedEvent(event IndexerEvent) {
@@ -344,6 +351,58 @@ func revertCanvasColorAddedEvent(event IndexerEvent) {
 
 	// Delete from WorldsColors
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "DELETE FROM WorldsColors WHERE world_id = $1 AND color_key = $2", canvasId, colorKey)
+	if err != nil {
+		PrintIndexerError("revertCanvasColorAddedEvent", "Failed to delete from WorldsColors", canvasIdHex, colorKeyHex, err)
+		return
+	}
+}
+
+func checkAndNotifyMilestone(uniqueName string, totalPixels int) {
+	if core.ArtPeaceBackend.BackendConfig.MilestoneBot == "" {
+		return
+	}
+
+	milestones := []int{
+		1, 100, 1000, 10000, 50000, 100000, 1000000, 10000000, 100000000,
+		1000000000, 10000000000, 100000000000, 1000000000000,
+	}
+
+	// Check if current count matches a milestone
+	isMilestone := false
+	for _, milestone := range milestones {
+		if totalPixels == milestone {
+			isMilestone = true
+			break
+		}
+	}
+
+	if !isMilestone {
+		return
+	}
+
+	// Prepare milestone notification
+	payload := map[string]interface{}{
+		"worldName": uniqueName,
+		"pixels":    totalPixels,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		PrintIndexerError("checkAndNotifyMilestone", "Failed to marshal milestone payload", err)
+		return
+	}
+
+	// Send milestone notification
+	resp, err := http.Post(
+		core.ArtPeaceBackend.BackendConfig.MilestoneBot,
+		"application/json",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		PrintIndexerError("checkAndNotifyMilestone", "Failed to send milestone notification", err)
+		return
+	}
+	defer resp.Body.Close()
 }
 
 func processCanvasPixelPlacedEvent(event IndexerEvent) {
@@ -488,6 +547,22 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 			return
 		}
 	}
+
+	// After inserting the pixel, get total pixel count and world name
+	totalPixels, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsPixels WHERE world_id = $1", canvasId)
+	if err != nil {
+		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query total pixels", err)
+		return
+	}
+
+	uniqueName, err := core.PostgresQueryOne[string]("SELECT unique_name FROM Worlds WHERE world_id = $1", canvasId)
+	if err != nil {
+		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query world name", err)
+		return
+	}
+
+	// Check for milestone and notify if needed
+	checkAndNotifyMilestone(*uniqueName, *totalPixels)
 
 	var message = map[string]string{
 		"worldId":     strconv.Itoa(int(canvasId)),

@@ -17,6 +17,7 @@ import { Logger } from "../packages/core/src/core/logger";
 import { makeFlowLifecycle } from "../packages/core/src/core/life-cycle";
 import express from "express";
 import cors from "cors";
+import backend_config from "../../configs/backend.config.json";
 
 function formatNumber(num: number): string {
     if (num >= 1_000_000_000_000) {
@@ -258,7 +259,7 @@ async function main() {
     app.listen(API_PORT, () => {
         console.log(
             chalk.cyan(
-                `[API] Twitter milestone API listening on http://localhost:${API_PORT}`
+                `[API] Twitter milestone API listening on ${backend_config.milestone_bot}`
             )
         );
     });
