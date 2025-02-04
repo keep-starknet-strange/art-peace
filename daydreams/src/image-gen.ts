@@ -9,6 +9,7 @@ async function placePixelOnChain(
 ) {
     try {
         // Convert parameters to the format expected by the contract
+        const canvasId = "0x0";
         const positionFelt = `0x${position}`; // Ensure hex format
         const colorFelt = `0x${color}`; // Ensure hex format
         const timestamp = Math.floor(Date.now() / 1000);
@@ -19,9 +20,9 @@ async function placePixelOnChain(
         console.log("Timestamp:", timestamp);
 
         const result = await starknet.write({
-            contractAddress: "0x0038838d6ffc818d6237b23d5b99bd2935c1c75d94319b700e03612ca2e0a3dd",
+            contractAddress: "0x03ce937f91fa0c88a4023f582c729935a5366385091166a763e53281e45ac410",
             entrypoint: "place_pixel",
-            calldata: [positionFelt, colorFelt, timestamp]
+            calldata: [canvasId, positionFelt, colorFelt, timestamp]
         });
 
         // Check if result is an Error
