@@ -2,9 +2,10 @@
     "name": "daydreams",
     "version": "0.0.0",
     "scripts": {
+        "twitter": "bun run src/twitter.ts",
         "goal": "bun run examples/example-goal.ts",
         "task": "bun run examples/example-basic.ts",
-        "twitter": "bun run examples/example-twitter.ts",
+        "twitter-example": "bun run examples/example-twitter.ts",
         "server": "bun run examples/example-server.ts",
         "discord": "bun run examples/example-discord.ts",
         "telegram": "bun run examples/example-telegram.ts",
