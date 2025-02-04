@@ -1,7 +1,6 @@
 import { StarknetChain } from "../packages/core/src/core/chains/starknet";
 import chalk from "chalk";
 import sharp from "sharp";
-import { backendUrl } from "../../frontend/src/utils/Consts";
 
 async function placePixelOnChain(
     starknet: StarknetChain,
@@ -9,10 +8,9 @@ async function placePixelOnChain(
     color: string,
 ) {
     try {
-        // Convert parameters to the format expected by the contract
         const canvasId = "0x0";
-        const positionFelt = `0x${position}`; // Ensure hex format
-        const colorFelt = `0x${color}`; // Ensure hex format
+        const positionFelt = `0x${position}`;
+        const colorFelt = `0x${color}`;
         const timestamp = Math.floor(Date.now() / 1000);
 
         console.log(chalk.cyan("Attempting to place pixel with:"));
@@ -26,12 +24,10 @@ async function placePixelOnChain(
             calldata: [canvasId, positionFelt, colorFelt, timestamp]
         });
 
-        // Check if result is an Error
         if (result instanceof Error) {
             throw result;
         }
 
-        // The transaction receipt will have status and other details
         console.log(chalk.green(`✨ Pixel placed successfully at position ${position}`));
         console.log(chalk.blue(`Transaction hash: ${result.transaction_hash}`));
 
@@ -46,7 +42,6 @@ async function placePixelOnChain(
 }
 
 async function main() {
-    // Initialize Starknet chain
     const starknet = new StarknetChain(
         {
             rpcUrl: process.env.STARKNET_RPC_URL ?? "",
@@ -63,7 +58,7 @@ async function main() {
             throw new Error("OpenAI API key not found");
         }
 
-        const prompt = "Generate a completely random 256x256 pixel image with random colors and patterns. The image should be abstract and non-representational.";
+        const prompt = "Generate a completely random image of actual cool things, it could be puss in boots drinking milk before a battle or a rabbit eating a carrot going to the moon, it could be anything, just make it random real things doing random things";
 
         const response = await fetch(
             "https://api.openai.com/v1/images/generations",
@@ -94,26 +89,21 @@ async function main() {
         const result = await response.json();
         console.log(chalk.green("\n✨ Image generated successfully!"));
 
-        // Convert base64 to buffer
         const imageBuffer = Buffer.from(result.data[0].b64_json, 'base64');
 
-        // Process with Sharp
-        const resizedImage = await sharp(imageBuffer)
+        const resizedBuffer = await sharp(imageBuffer)
             .resize(64, 64)
             .toBuffer();
 
-        // Create FormData and upload to stencil endpoint
         const formData = new FormData();
-        const imageBlob = new Blob([resizedImage], { type: 'image/png' });
+        const imageBlob = new Blob([resizedBuffer], { type: 'image/png' });
         formData.append('image', imageBlob, 'image.png'); // Added filename
 
         try {
             const stencilResponse = await fetch(`http://localhost:8080/add-stencil-img`, {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    // Don't set Content-Type header - browser will set it with boundary
-                },
+                headers: {},
             });
 
             if (!stencilResponse.ok) {
@@ -124,10 +114,8 @@ async function main() {
             console.log(chalk.green("\n✨ Stencil uploaded successfully!"));
             console.log("Stencil hash:", stencilData);
 
-            // Add a small delay to ensure the file is written
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Fetch pixel data using the hash
             const pixelDataResponse = await fetch(`http://localhost:8080/get-stencil-pixel-data?hash=${stencilData.result}`);
             
             if (!pixelDataResponse.ok) {
@@ -135,58 +123,50 @@ async function main() {
             }
 
             const responseJson = await pixelDataResponse.json();
-            const pixelData = responseJson.data;  // Extract the nested data object
+            const pixelData = responseJson.data;
             console.log(chalk.green("\n✨ Pixel data retrieved successfully!"));
             console.log(`Width: ${pixelData.width}, Height: ${pixelData.height}`);
             console.log(`Total pixels: ${pixelData.pixelData.length}`);
 
-            // Calculate starting position for centering
-            const CANVAS_WIDTH = 512; // Updated to correct canvas width
-            const CANVAS_HEIGHT = 384; // Added canvas height constant
+            const CANVAS_WIDTH = 512;
+            const CANVAS_HEIGHT = 384;
             const startX = Math.floor(CANVAS_WIDTH/2) - Math.floor(pixelData.width / 2);
             const startY = Math.floor(CANVAS_HEIGHT/2) - Math.floor(pixelData.height / 2);
 
-            // Convert pixel data to position and color pairs with centered coordinates
-            const pixelsWithPosition = pixelData.pixelData.map((colorIndex: number, index: number) => {
-                const x = index % pixelData.width;
-                const y = Math.floor(index / pixelData.width);
-                const absoluteX = startX + x;
-                const absoluteY = startY + y;
-                const position = absoluteX + (absoluteY * CANVAS_WIDTH);
-                return {
-                    position: position.toString(16),
-                    color: colorIndex.toString(16)
-                };
-            });
-
-            // After pixels are processed, start placing them on chain
             console.log(chalk.cyan("\n🔄 Starting pixel placement loop..."));
 
-            // Create interval to place pixels every 5 seconds
+            let currentIndex = 0;
+            const totalPixels = pixelData.pixelData.length;
+
             const interval = setInterval(async () => {
-                if (pixelsWithPosition.length === 0) {
+                if (currentIndex >= totalPixels) {
                     console.log(chalk.yellow("No more pixels to place. Stopping..."));
                     clearInterval(interval);
                     process.exit(0);
                     return;
                 }
 
-                const pixel = pixelsWithPosition.shift();
+                const colorIndex = pixelData.pixelData[currentIndex];
+                const x = currentIndex % pixelData.width;
+                const y = Math.floor(currentIndex / pixelData.width);
+                const absoluteX = startX + x;
+                const absoluteY = startY + y;
+                const position = absoluteX + (absoluteY * CANVAS_WIDTH);
 
                 try {
                     await placePixelOnChain(
                         starknet,
-                        pixel?.position ?? '',
-                        pixel?.color ?? '',
+                        position.toString(16),
+                        colorIndex.toString(16)
                     );
                 } catch (error) {
                     console.error(chalk.red("Failed to place pixel:"), error);
-                    // Add failed pixel back to the queue
-                    pixelsWithPosition.push(pixel as { position: string; color: string });
+                    return;
                 }
 
-                console.log(chalk.blue(`Remaining pixels: ${pixelsWithPosition.length}`));
-            }, 5000); // 5 seconds interval
+                currentIndex++;
+                console.log(chalk.blue(`Progress: ${currentIndex}/${totalPixels} pixels`));
+            }, 5000);
 
         } catch (error) {
             console.error(chalk.red("Failed to upload stencil:"), error);
@@ -199,7 +179,6 @@ async function main() {
     }
 }
 
-// Run the example
 main().catch((error) => {
     console.error(chalk.red("Fatal error:"), error);
     process.exit(1);
