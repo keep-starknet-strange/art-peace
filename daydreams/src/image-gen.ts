@@ -1,6 +1,7 @@
 import { StarknetChain } from "../packages/core/src/core/chains/starknet";
 import chalk from "chalk";
 import sharp from "sharp";
+import { backendUrl } from "../../frontend/src/utils/Consts";
 
 async function placePixelOnChain(
     starknet: StarknetChain,
@@ -99,16 +100,41 @@ async function main() {
         // Process with Sharp
         const resizedImage = await sharp(imageBuffer)
             .resize(64, 64)
-            .raw()
-            .toBuffer({ resolveWithObject: true });
+            .toBuffer();
+
+        // Create FormData and upload to stencil endpoint
+        const formData = new FormData();
+        const imageBlob = new Blob([resizedImage], { type: 'image/png' });
+        formData.append('image', imageBlob, 'image.png'); // Added filename
+
+        try {
+            const stencilResponse = await fetch(`http://localhost:8080/add-stencil-img`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    // Don't set Content-Type header - browser will set it with boundary
+                },
+            });
+
+            if (!stencilResponse.ok) {
+                throw new Error(`Upload failed: ${stencilResponse.statusText}`);
+            }
+
+            const stencilData = await stencilResponse.json();
+            console.log(chalk.green("\n✨ Stencil uploaded successfully!"));
+            console.log("Stencil hash:", stencilData);
+        } catch (error) {
+            console.error(chalk.red("Failed to upload stencil:"), error);
+            throw error;
+        }
 
         // Convert buffer to pixels array
         const pixels: { r: number; g: number; b: number }[] = [];
-        for (let i = 0; i < resizedImage.data.length; i += 3) {
+        for (let i = 0; i < resizedImage.length; i += 3) {
             pixels.push({
-                r: resizedImage.data[i],
-                g: resizedImage.data[i + 1],
-                b: resizedImage.data[i + 2]
+                r: resizedImage[i],
+                g: resizedImage[i + 1],
+                b: resizedImage[i + 2]
             });
         }
         console.log(`Total Pixels: ${pixels.length}`);

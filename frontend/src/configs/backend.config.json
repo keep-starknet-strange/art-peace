@@ -9,7 +9,7 @@
     "add_template_devnet": "../tests/integration/local/add_template.sh",
     "mint_nft_devnet": "../tests/integration/local/mint_nft.sh"
   },
-  "production": true,
+  "production": false,
   "websocket": {
     "read_buffer_size": 1024,
     "write_buffer_size": 1024
