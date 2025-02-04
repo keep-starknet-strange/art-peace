@@ -98,7 +98,7 @@ async function main() {
 
         // Process with Sharp
         const resizedImage = await sharp(imageBuffer)
-            .resize(256, 256)
+            .resize(64, 64)
             .raw()
             .toBuffer({ resolveWithObject: true });
 
@@ -153,7 +153,7 @@ async function main() {
         // After pixels are processed, start placing them on chain
         console.log(chalk.cyan("\n🔄 Starting pixel placement loop..."));
 
-        // Create interval to place pixels every 30 seconds
+        // Create interval to place pixels every 5 seconds
         const interval = setInterval(async () => {
             if (pixelsWithPosition.length === 0) {
                 console.log(chalk.yellow("No more pixels to place. Stopping..."));
@@ -177,7 +177,7 @@ async function main() {
             }
 
             console.log(chalk.blue(`Remaining pixels: ${pixelsWithPosition.length}`));
-        }, 30000); // 30 seconds interval
+        }, 5000); // 5 seconds interval
 
     } catch (error) {
         console.error(chalk.red("Error in main process:"), error);
