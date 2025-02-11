@@ -4,6 +4,7 @@
   "consumer_port": 8081,
   "ws_host": "art-peace-websockets-1",
   "ws_port": 8083,
+  "milestone_bot": "http://localhost:8082/api/milestone",
   "scripts": {
     "place_pixel_devnet": "/scripts/place_pixel.sh",
     "place_extra_pixels_devnet": "/scripts/place_extra_pixels.sh",

@@ -1,0 +1,8 @@
+{
+    "entryPoints": ["../packages/core/src/core/index.ts"],
+    "out": "docs/pages/api-reference",
+    "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-frontmatter"],
+    "hidePageHeader": true,
+    "hideBreadcrumbs": true,
+    "outputFileStrategy": "modules"
+ }

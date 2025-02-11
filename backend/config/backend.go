@@ -53,6 +53,7 @@ type BackendConfig struct {
 	Production   bool                 `json:"production"`
 	WebSocket    WebSocketConfig      `json:"websocket"`
 	Http         HttpConfig           `json:"http_config"`
+	MilestoneBot string               `json:"milestone_bot"`
 }
 
 var DefaultBackendConfig = BackendConfig{
@@ -61,6 +62,7 @@ var DefaultBackendConfig = BackendConfig{
 	ConsumerPort: 8081,
 	WsHost:       "localhost",
 	WsPort:       8083,
+	MilestoneBot: "http://localhost:8082/api/milestone",
 	Scripts: BackendScriptsConfig{
 		PlacePixelDevnet:            "../scripts/place_pixel.sh",
 		PlaceExtraPixelsDevnet:      "../scripts/place_extra_pixels.sh",
