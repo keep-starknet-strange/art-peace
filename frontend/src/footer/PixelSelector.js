@@ -138,7 +138,7 @@ const PixelSelector = (props) => {
     submit();
   }, [props.totalPixelsUsed]);
 
-  const toSelectorMode = (event) => {
+  const toSelectorMode = async (event) => {
     event.preventDefault();
     // Only works if not hitting the close button
     if (event.target.classList.contains('Button__close')) {
@@ -146,7 +146,8 @@ const PixelSelector = (props) => {
     }
 
     if (props.queryAddress === '0') {
-      props.setActiveTab('Account');
+      props.doControllerConnect();
+      // props.setActiveTab('Account');
       return;
     }
 

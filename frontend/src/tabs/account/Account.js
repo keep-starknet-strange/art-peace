@@ -116,7 +116,12 @@ const Account = (props) => {
           ? `${reactAddress.slice(0, 6)}...${reactAddress.slice(-4)}`
           : ''
       );
-      connector.username()?.then((n) => setUsername(n));
+      connector.username()?.then((n) => {
+        setUsername(n);
+        setUsernameSaved(true);
+        setIsEditing(false);
+        setUsernameBeforeEdit('');
+      });
       return;
     } else {
       if (!props.address) return;
@@ -510,7 +515,7 @@ const Account = (props) => {
               <p className='Text__small Account__item__label'>Username</p>
               <div className='Account__item__username'>
                 <p className='Text__small Account__item__un'>{username}</p>
-                {!props.gameEnded && (
+                {!props.gameEnded && !props.isCartridgeConnected && (
                   <div
                     className='Text__small Button__primary Account__item__button'
                     onClick={editUsername}

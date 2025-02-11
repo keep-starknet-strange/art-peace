@@ -446,6 +446,7 @@ pub mod MultiCanvas {
         fn check_valid_pixel(self: @ContractState, canvas_id: u32, pos: u128, color: u8) {
             let canvas = self.canvases.read(canvas_id);
             let total_pixels = canvas.width * canvas.height;
+            assert(canvas_id < self.canvas_count.read(), 'Invalid canvas');
             assert(pos < total_pixels, 'Position out of bounds');
             assert(color < self.color_counts.read(canvas_id), 'Invalid color');
         }
