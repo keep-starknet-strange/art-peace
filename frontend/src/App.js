@@ -100,7 +100,7 @@ const contConn = new ControllerConnector({
 
 function App() {
   // Starknet react
-  const { connect, _connectors } = useConnect();
+  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { account: reactAccount, address: reactAddress } = useAccount();
   const controller = contConn; // connectors[0];
@@ -111,7 +111,8 @@ function App() {
   }, [reactAddress, controller]);
   const doControllerConnect = () => {
     console.log('Controller connecting');
-    console.log('Controller', controller, contConn);
+    contConn._wallet = connectors[0]._wallet;
+    console.log('Controller', connectors[0], contConn);
     connect({ connector: contConn });
   };
   const _doControllerDisconnect = () => {
