@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
-import { stark, Contract } from 'starknet';
+import { constants, stark, Contract } from 'starknet';
 // import { connect } from 'starknetkit-next';
 import {
   openSession,
@@ -36,20 +36,83 @@ import NotificationPanel from './tabs/NotificationPanel.js';
 import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
 import { useAccount, useConnect, useDisconnect } from '@starknet-react/core';
+import ControllerConnector from '@cartridge/connector/controller';
+
+const canvasFactory =
+  '0x03ce937f91fa0c88a4023f582c729935a5366385091166a763e53281e45ac410'; // TODO: process.env.REACT_APP_CANVAS_FACTORY_CONTRACT_ADDRESS;
+const policies = {
+  contracts: {
+    [canvasFactory]: {
+      methods: [
+        {
+          name: 'create_canvas',
+          entrypoints: 'create_canvas',
+          description: 'Create a new canvas/world'
+        },
+        {
+          name: 'place_pixel',
+          entrypoints: 'place_pixel',
+          description: 'Place a pixel on the canvas'
+        },
+        {
+          name: 'favorite_canvas',
+          entrypoints: 'favorite_canvas',
+          description: 'Favorite a canvas'
+        },
+        {
+          name: 'unfavorite_canvas',
+          entrypoints: 'unfavorite_canvas',
+          description: 'Unfavorite a canvas'
+        },
+        {
+          name: 'add_stencil',
+          entrypoints: 'add_stencil',
+          description: 'Add a stencil to the canvas'
+        },
+        {
+          name: 'remove_stencil',
+          entrypoints: 'remove_stencil',
+          description: 'Remove a stencil from the canvas'
+        },
+        {
+          name: 'favorite_stencil',
+          entrypoints: 'favorite_stencil',
+          description: 'Favorite a stencil'
+        },
+        {
+          name: 'unfavorite_stencil',
+          entrypoints: 'unfavorite_stencil',
+          description: 'Unfavorite a stencil'
+        }
+      ]
+    }
+  }
+};
+
+const contConn = new ControllerConnector({
+  policies,
+  chains: [
+    { rpcUrl: 'https://api.cartridge.gg/x/starknet/sepolia' },
+    { rpcUrl: 'https://api.cartridge.gg/x/starknet/mainnet' }
+  ],
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA
+});
 
 function App() {
   // Starknet react
-  const { connect, connectors } = useConnect();
+  const { connect, _connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { account: reactAccount, address: reactAddress } = useAccount();
-  const controller = connectors[0];
+  const controller = contConn; // connectors[0];
   const [username, setUsername] = useState('');
   useEffect(() => {
     if (!reactAddress) return;
     controller.username()?.then((n) => setUsername(n));
   }, [reactAddress, controller]);
   const doControllerConnect = () => {
-    connect({ connector: controller });
+    console.log('Controller connecting');
+    console.log('Controller', controller, contConn);
+    connect({ connector: contConn });
   };
   const _doControllerDisconnect = () => {
     console.log('Controller', username, 'disconnecting');
