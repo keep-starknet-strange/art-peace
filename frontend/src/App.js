@@ -1476,6 +1476,48 @@ function App() {
     fetchPixelData();
   }, [overlayTemplate]);
 
+  // Add new state for recent favorites
+  const [topWorlds, setTopWorlds] = useState([]);
+  const [topStencils, setTopStencils] = useState([]);
+
+  // Add effect to fetch recent favorites
+  useEffect(() => {
+    const fetchTopItems = async () => {
+      try {
+        // Fetch top worlds
+        const worldsResponse = await fetchWrapper(
+          `get-top-worlds?address=${queryAddress}&page=1&pageLength=8`
+        );
+        if (worldsResponse.data) {
+          setTopWorlds(worldsResponse.data);
+        } else {
+          setTopWorlds([]);
+        }
+
+        // Fetch top stencils
+        const stencilsResponse = await fetchWrapper(
+          `get-top-stencils?address=${queryAddress}&page=1&pageLength=8`
+        );
+        if (stencilsResponse.data) {
+          setTopStencils(stencilsResponse.data);
+        } else {
+          setTopStencils([]);
+        }
+
+        console.log({
+          topWorlds: topWorlds,
+          topStencils: topStencils
+        });
+      } catch (error) {
+        console.log('error: ', error);
+        setTopWorlds([]);
+        setTopStencils([]);
+      }
+    };
+
+    fetchTopItems();
+  }, [queryAddress]);
+
   return (
     <div className='App'>
       <div className='App--background'>
@@ -1705,6 +1747,8 @@ function App() {
             width={width}
             height={height}
             isDefending={isDefending}
+            topWorlds={topWorlds}
+            topStencils={topStencils}
           />
         </div>
         <div className='App__footer'>

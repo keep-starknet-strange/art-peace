@@ -40,6 +40,69 @@ const WorldsMainSection = (props) => {
             Please login to view your Worlds
           </p>
         )}
+        {props.queryAddress === '0'
+          ? props.topWorlds?.map((world) => {
+              return (
+                <WorldItem
+                  key={world.worldId}
+                  activeWorldId={props.activeWorldId}
+                  setActiveWorldId={props.setActiveWorldId}
+                  address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
+                  worldId={world.worldId}
+                  name={world.name}
+                  favorites={world.favorites}
+                  favorited={world.favorited}
+                  width={world.width}
+                  height={world.height}
+                  timer={world.timeBetweenPixels}
+                  host={world.host}
+                  starttime={world.startTime}
+                  endtime={world.endTime}
+                  image={worldImgUrl + '/world-' + world.worldId + '.png'}
+                  queryAddress={props.queryAddress}
+                  updateFavorites={props.updateFavorites}
+                  canvasFactoryContract={props.canvasFactoryContract}
+                />
+              );
+            })
+          : props.favoriteWorlds.map((world, index) => {
+              return (
+                <WorldItem
+                  key={index}
+                  activeWorldId={props.activeWorldId}
+                  setActiveWorldId={props.setActiveWorldId}
+                  address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
+                  worldId={world.worldId}
+                  name={world.name}
+                  favorites={world.favorites}
+                  favorited={world.favorited}
+                  width={world.width}
+                  height={world.height}
+                  timer={world.timeBetweenPixels}
+                  host={world.host}
+                  starttime={world.startTime}
+                  endtime={world.endTime}
+                  image={worldImgUrl + '/world-' + world.worldId + '.png'}
+                  queryAddress={props.queryAddress}
+                  updateFavorites={props.updateFavorites}
+                  canvasFactoryContract={props.canvasFactoryContract}
+                />
+              );
+            })}
+        {props.queryAddress !== '0' && (
+          <PaginationView
+            data={props.favoriteWorlds}
+            stateValue={props.myWorldsPagination}
+            setState={props.setMyWorldsPagination}
+            style={{
+              marginBottom: '25px'
+            }}
+          />
+        )}
         {props.activeWorld && (
           <WorldItem
             key={props.activeWorld.worldId}
@@ -393,6 +456,7 @@ const Worlds = (props) => {
       isMobile={props.isMobile}
       gameEnded={props.gameEnded}
       canvasFactoryContract={props.canvasFactoryContract}
+      topWorlds={props.topWorlds}
     />
   );
 };

@@ -15,6 +15,7 @@ import {
 import { PaginationView } from '../../ui/pagination.js';
 
 const StencilsMainSection = (props) => {
+  console.log('query address: ', props.queryAddress);
   return (
     <div
       className={`${props.expanded ? 'Stencils__main__expanded' : 'Stencils__main'}`}
@@ -70,38 +71,72 @@ const StencilsMainSection = (props) => {
             setActiveTab={props.setActiveTab}
           />
         )}
-        {props.favoriteStencils.map((stencil, index) => {
-          return (
-            <StencilItem
-              key={index}
-              openedWorldId={props.openedWorldId}
-              openedStencilId={props.openedStencilId}
-              setOpenedStencilId={props.setOpenedStencilId}
-              address={props.address}
-              account={props.account}
-              estimateInvokeFee={props.estimateInvokeFee}
-              stencilId={stencil.stencilId}
-              queryAddress={props.queryAddress}
-              updateFavorites={props.updateFavorites}
-              canvasFactoryContract={props.canvasFactoryContract}
-              favorites={stencil.favorites}
-              favorited={stencil.favorited}
-              width={stencil.width}
-              height={stencil.height}
-              hash={stencil.hash}
-              position={stencil.position}
-              image={templateUrl + '/stencils/stencil-' + stencil.hash + '.png'}
-              setTemplateOverlayMode={props.setTemplateOverlayMode}
-              setOverlayTemplate={props.setOverlayTemplate}
-              setActiveTab={props.setActiveTab}
-            />
-          );
-        })}
-        <PaginationView
-          data={props.favoriteStencils}
-          stateValue={props.myStencilsPagination}
-          setState={props.setMyStencilsPagination}
-        />
+        {props.queryAddress === '0'
+          ? props.topStencils &&
+            props.topStencils.map((stencil, index) => (
+              <StencilItem
+                key={index}
+                stencil={stencil}
+                {...stencil}
+                openedWorldId={props.openedWorldId}
+                openedStencilId={props.openedStencilId}
+                setOpenedStencilId={props.setOpenedStencilId}
+                address={props.address}
+                account={props.account}
+                estimateInvokeFee={props.estimateInvokeFee}
+                queryAddress={props.queryAddress}
+                updateFavorites={props.updateFavorites}
+                canvasFactoryContract={props.canvasFactoryContract}
+                setTemplateOverlayMode={props.setTemplateOverlayMode}
+                setOverlayTemplate={props.setOverlayTemplate}
+                setActiveTab={props.setActiveTab}
+                image={
+                  templateUrl + '/stencils/stencil-' + stencil.hash + '.png'
+                }
+              />
+            ))
+          : props.favoriteStencils.map((stencil, index) => {
+              return (
+                <StencilItem
+                  key={index}
+                  stencil={stencil}
+                  {...stencil}
+                  openedWorldId={props.openedWorldId}
+                  openedStencilId={props.openedStencilId}
+                  setOpenedStencilId={props.setOpenedStencilId}
+                  address={props.address}
+                  account={props.account}
+                  estimateInvokeFee={props.estimateInvokeFee}
+                  stencilId={stencil.stencilId}
+                  queryAddress={props.queryAddress}
+                  updateFavorites={props.updateFavorites}
+                  canvasFactoryContract={props.canvasFactoryContract}
+                  favorites={stencil.favorites}
+                  favorited={stencil.favorited}
+                  width={stencil.width}
+                  height={stencil.height}
+                  hash={stencil.hash}
+                  position={stencil.position}
+                  image={
+                    templateUrl + '/stencils/stencil-' + stencil.hash + '.png'
+                  }
+                  setTemplateOverlayMode={props.setTemplateOverlayMode}
+                  setOverlayTemplate={props.setOverlayTemplate}
+                  setActiveTab={props.setActiveTab}
+                />
+              );
+            })}
+
+        {props.queryAddress !== '0' && (
+          <PaginationView
+            data={props.favoriteStencils}
+            stateValue={props.myStencilsPagination}
+            setState={props.setMyStencilsPagination}
+            style={{
+              marginBottom: '10px'
+            }}
+          />
+        )}
         {props.queryAddress !== '0' && (
           <div
             style={{
@@ -157,6 +192,7 @@ const StencilsExpandedSection = (props) => {
             return (
               <StencilItem
                 key={index}
+                stencil={stencil}
                 openedStencilId={props.openedStencilId}
                 setOpenedStencilId={props.setOpenedStencilId}
                 openedWorldId={props.openedWorldId}
@@ -483,6 +519,7 @@ const Stencils = (props) => {
       handleFileChange={handleFileChange}
       setTemplateOverlayMode={props.setTemplateOverlayMode}
       setOverlayTemplate={props.setOverlayTemplate}
+      topStencils={props.topStencils}
     />
   );
 };

@@ -338,6 +338,7 @@ const TabPanel = (props) => {
                   setWorldsCreationMode={props.setWorldsCreationMode}
                   openedWorldId={props.openedWorldId}
                   canvasFactoryContract={props.multiCanvasContract}
+                  topWorlds={props.topWorlds}
                 />
               </div>
             )}
@@ -363,6 +364,7 @@ const TabPanel = (props) => {
                   openedWorldId={props.openedWorldId}
                   canvasFactoryContract={props.multiCanvasContract}
                   colors={props.colors}
+                  topStencils={props.topStencils}
                 />
               </div>
             )}

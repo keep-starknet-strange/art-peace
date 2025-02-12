@@ -2,6 +2,8 @@ package routes
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -37,6 +39,7 @@ func InitWorldsRoutes() {
 		http.HandleFunc("/unfavorite-world-devnet", unfavoriteWorldDevnet)
 		http.HandleFunc("/place-world-pixel-devnet", placeWorldPixelDevnet)
 	}
+	http.HandleFunc("/get-recent-favorite-worlds", getRecentFavoriteWorlds)
 }
 
 func InitWorldsStaticRoutes() {
@@ -440,7 +443,10 @@ func getTopWorlds(w http.ResponseWriter, r *http.Request) {
         SELECT 
             worlds.*, 
             COALESCE(worldfavorites.favorite_count, 0) AS favorites,
-            COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false) as favorited
+            CASE 
+                WHEN $1 = '0' THEN false
+                ELSE COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false)
+            END as favorited
         FROM 
             worlds
         LEFT JOIN (
@@ -455,6 +461,7 @@ func getTopWorlds(w http.ResponseWriter, r *http.Request) {
         ORDER BY 
             favorites DESC
         LIMIT $2 OFFSET $3`
+
 	worlds, err := core.PostgresQueryJson[WorldData](query, address, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
@@ -590,13 +597,24 @@ func createCanvasDevnet(w http.ResponseWriter, r *http.Request) {
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
 
 	cmd := exec.Command(shellCmd, contract, "create_canvas", host, name, uniqueName, strconv.Itoa(width), strconv.Itoa(height), strconv.Itoa(timer), strconv.Itoa(len(palette)), paletteInput, strconv.Itoa(startTime), strconv.Itoa(endTime))
-	_, err = cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create canvas")
+		log.Printf("Create canvas command failed: %v\nOutput: %s\nCommand: %v", err, string(output), cmd.String())
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, fmt.Sprintf("Failed to create canvas: %v", err))
 		return
 	}
 
-	routeutils.WriteResultJson(w, "Canvas created")
+	// Favorite the newly created canvas
+	shellCmd = core.ArtPeaceBackend.BackendConfig.Scripts.FavoriteWorldDevnet
+	cmd = exec.Command(shellCmd, contract, "favorite_canvas", uniqueName)
+	output, err = cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("Favorite canvas command failed: %v\nOutput: %s\nCommand: %v", err, string(output), cmd.String())
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, fmt.Sprintf("Failed to favorite newly created canvas: %v", err))
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Canvas created and favorited")
 }
 
 func favoriteWorldDevnet(w http.ResponseWriter, r *http.Request) {
@@ -611,7 +629,22 @@ func favoriteWorldDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	worldId := (*jsonBody)["worldId"]
+	// Try to get worldId either directly or from worldName
+	var worldId string
+	if (*jsonBody)["worldId"] != "" {
+		worldId = (*jsonBody)["worldId"]
+	} else if (*jsonBody)["worldName"] != "" {
+		// Get worldId from worldName
+		id, err := core.PostgresQueryOne[int]("SELECT world_id FROM worlds WHERE unique_name = $1", (*jsonBody)["worldName"])
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid world name")
+			return
+		}
+		worldId = strconv.Itoa(*id)
+	} else {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Must provide either worldId or worldName")
+		return
+	}
 
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.FavoriteWorldDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
@@ -638,7 +671,22 @@ func unfavoriteWorldDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	worldId := (*jsonBody)["worldId"]
+	// Try to get worldId either directly or from worldName
+	var worldId string
+	if (*jsonBody)["worldId"] != "" {
+		worldId = (*jsonBody)["worldId"]
+	} else if (*jsonBody)["worldName"] != "" {
+		// Get worldId from worldName
+		id, err := core.PostgresQueryOne[int]("SELECT world_id FROM worlds WHERE unique_name = $1", (*jsonBody)["worldName"])
+		if err != nil {
+			routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid world name")
+			return
+		}
+		worldId = strconv.Itoa(*id)
+	} else {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Must provide either worldId or worldName")
+		return
+	}
 
 	shellCmd := core.ArtPeaceBackend.BackendConfig.Scripts.UnfavoriteWorldDevnet
 	contract := os.Getenv("CANVAS_FACTORY_CONTRACT_ADDRESS")
@@ -739,4 +787,43 @@ func doesWorldNameExist(name string) (bool, error) {
 		return false, err
 	}
 	return *exists, nil
+}
+
+func getRecentFavoriteWorlds(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address")
+		return
+	}
+
+	query := `
+        SELECT 
+            worlds.*, 
+            COALESCE(favorite_count, 0) AS favorites,
+            COALESCE((SELECT true FROM worldfavorites WHERE user_address = $1 AND worldfavorites.world_id = worlds.world_id), false) as favorited
+        FROM 
+            worlds
+        INNER JOIN (
+            SELECT 
+                world_id,
+                COUNT(*) AS favorite_count,
+                MAX(key) as latest_favorite
+            FROM 
+                worldfavorites
+            WHERE 
+                user_address = $1
+            GROUP BY 
+                world_id
+        ) worldfavorites ON worlds.world_id = worldfavorites.world_id
+        WHERE favorited = true
+        ORDER BY 
+            worldfavorites.latest_favorite DESC
+        LIMIT 8`
+
+	worlds, err := core.PostgresQueryJson[WorldData](query, address)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve recent favorite worlds")
+		return
+	}
+	routeutils.WriteDataJson(w, string(worlds))
 }

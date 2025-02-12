@@ -331,6 +331,13 @@ pub mod MultiCanvas {
             };
             self.canvas_count.write(canvas_id + 1);
             self.unique_names.write(init_params.unique_name, true);
+
+            // Auto-favorite the canvas for the creator
+            let caller = get_caller_address();
+            self.canvas_favorites.write((canvas_id, caller), true);
+            self.emit(Event::CanvasFavorited(CanvasFavorited { canvas_id, user: caller }));
+
+            // Emit canvas created event
             self.emit(CanvasCreated { canvas_id, init_params });
 
             // Auto-favorite the canvas for the creator
@@ -518,6 +525,13 @@ pub mod MultiCanvas {
             assert(stencil.height <= MAX_STENCIL_SIZE, 'Stencil too large');
             self.stencils.write((canvas_id, stencil_id), stencil.clone());
             self.stencil_counts.write(canvas_id, stencil_id + 1);
+
+            // Auto-favorite the stencil for the creator
+            let caller = get_caller_address();
+            self.stencil_favorites.write((canvas_id, stencil_id, caller), true);
+            self.emit(StencilFavorited { canvas_id, stencil_id, user: caller });
+
+            // Emit the stencil added event
             self.emit(StencilAdded { canvas_id, stencil_id, stencil });
 
             // Auto-favorite the stencil for the creator
