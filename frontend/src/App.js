@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
-import { stark, Contract } from 'starknet';
-import { connect } from 'starknetkit-next';
+import { constants, stark, Contract } from 'starknet';
+// import { connect } from 'starknetkit-next';
 import {
   openSession,
   createSessionRequest,
@@ -35,8 +35,120 @@ import multi_canvas_abi from './contracts/multi_canvas.abi.json';
 import NotificationPanel from './tabs/NotificationPanel.js';
 import ModalPanel from './ui/ModalPanel.js';
 import Hamburger from './resources/icons/Hamburger.png';
+import { useAccount, useConnect, useDisconnect } from '@starknet-react/core';
+import ControllerConnector from '@cartridge/connector/controller';
+
+const canvasFactory =
+  '0x03ce937f91fa0c88a4023f582c729935a5366385091166a763e53281e45ac410'; // TODO: process.env.REACT_APP_CANVAS_FACTORY_CONTRACT_ADDRESS;
+const policies = {
+  contracts: {
+    [canvasFactory]: {
+      methods: [
+        {
+          name: 'create_canvas',
+          entrypoints: 'create_canvas',
+          description: 'Create a new canvas/world'
+        },
+        {
+          name: 'place_pixel',
+          entrypoints: 'place_pixel',
+          description: 'Place a pixel on the canvas'
+        },
+        {
+          name: 'favorite_canvas',
+          entrypoints: 'favorite_canvas',
+          description: 'Favorite a canvas'
+        },
+        {
+          name: 'unfavorite_canvas',
+          entrypoints: 'unfavorite_canvas',
+          description: 'Unfavorite a canvas'
+        },
+        {
+          name: 'add_stencil',
+          entrypoints: 'add_stencil',
+          description: 'Add a stencil to the canvas'
+        },
+        {
+          name: 'remove_stencil',
+          entrypoints: 'remove_stencil',
+          description: 'Remove a stencil from the canvas'
+        },
+        {
+          name: 'favorite_stencil',
+          entrypoints: 'favorite_stencil',
+          description: 'Favorite a stencil'
+        },
+        {
+          name: 'unfavorite_stencil',
+          entrypoints: 'unfavorite_stencil',
+          description: 'Unfavorite a stencil'
+        }
+      ]
+    }
+  }
+};
+
+const contConn = new ControllerConnector({
+  policies,
+  chains: [
+    { rpcUrl: 'https://api.cartridge.gg/x/starknet/sepolia' },
+    { rpcUrl: 'https://api.cartridge.gg/x/starknet/mainnet' }
+  ],
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA
+});
 
 function App() {
+  // Starknet react
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { account: reactAccount, address: reactAddress } = useAccount();
+  const controller = contConn; // connectors[0];
+  const [username, setUsername] = useState('');
+  useEffect(() => {
+    if (!reactAddress) return;
+    controller.username()?.then((n) => setUsername(n));
+  }, [reactAddress, controller]);
+  const doControllerConnect = () => {
+    console.log('Controller connecting');
+    contConn._wallet = connectors[0]._wallet;
+    console.log('Controller', connectors[0], contConn);
+    connect({ connector: contConn });
+  };
+  const _doControllerDisconnect = () => {
+    console.log('Controller', username, 'disconnecting');
+    disconnect();
+  };
+  const [submitted, setSubmitted] = useState(false);
+  const [txnHash, setTxnHash] = useState(undefined);
+  const placePixelReact = useCallback(
+    async (world_id, position, color, now) => {
+      if (!reactAccount) return;
+      setSubmitted(true);
+      setTxnHash(undefined);
+      try {
+        const calldata = [world_id, position, color, now];
+        console.log('Calldata:', calldata);
+        const result = await reactAccount.execute([
+          {
+            contractAddress: multiCanvasContract.address,
+            entrypoint: 'place_pixel',
+            calldata
+          }
+        ]);
+        setTxnHash(result.transaction_hash);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setSubmitted(false);
+      }
+    },
+    [reactAccount]
+  );
+  useEffect(() => {
+    console.log('Tx status:', submitted, txnHash);
+  }, [submitted, txnHash]);
+
   const [worldsMode, setWorldsMode] = useState(devnetMode);
   const [homeCounter, setHomeCounter] = useState(0);
   const [openedWorldId, setOpenedWorldId] = useState(worldsMode ? 0 : null);
@@ -729,6 +841,8 @@ function App() {
   /* global BigInt */
   const placeWorldPixelCall = async (worldId, positions, colors, now) => {
     if (devnetMode) return;
+    placePixelReact(worldId, positions[0], colors[0], now);
+    /*
     if (!address || !multiCanvasContract || !account) return;
     if (positions.length !== colors.length) {
       console.error('Positions and colors length mismatch');
@@ -764,6 +878,7 @@ function App() {
       }
     );
     console.log(result);
+    */
   };
 
   const extraPixelPlaceCall = async (positions, colors, now) => {
@@ -1651,6 +1766,7 @@ function App() {
           >
             {!gameEnded && (
               <PixelSelector
+                doControllerConnect={doControllerConnect}
                 colors={colors}
                 openedWorldId={openedWorldId}
                 submit={submit}

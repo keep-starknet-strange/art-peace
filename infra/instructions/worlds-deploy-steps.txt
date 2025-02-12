@@ -47,3 +47,14 @@ change frontend contract addresses in vercel
     reset :
       kubectl delete pvc nft-volume-claim redis-volume-claim
       kubectl delete deployment.apps/backend deployment.apps/admin-backend deployment.apps/consumer deployment.apps/indexer deployment.apps/redis
+
+Launch
+Create world-0:
+  name: Art Peace 3
+  size: 528x396
+  Timer: 5
+  Start: - End: -
+
+Create world-1 - world-12:
+  name: World X
+  join art-peace round 3 button on
