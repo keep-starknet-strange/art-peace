@@ -1,0 +1,55 @@
+.Canva {
+  background-color: rgba(120, 120, 120, 1);
+  image-rendering: pixelated;
+  box-shadow: 0 0 0.05rem 0.01rem rgba(0, 0, 0, 0.4);
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+
+.Canvas__surrounding {
+  transition: transform 0.2s ease;
+}
+
+.Canvas__surrounding:hover {
+  box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.3);
+  outline: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.Canvas__surrounding:active {
+  box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.2);
+  outline: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Glowing border animation */
+@keyframes glow {
+  0% {
+    outline: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px 0px rgba(255, 255, 255, 0.2);
+  }
+  20% {
+    outline: 2px solid rgba(255, 255, 0, 0.3);
+    box-shadow: 0 0 10px 5px rgba(255, 255, 0, 0.3);
+  }
+  40% {
+    outline: 2px solid rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.2);
+  }
+  60% {
+    outline: 2px solid rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 10px 5px rgba(0, 255, 0, 0.3);
+  }
+  80% {
+    outline: 2px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 10px 5px rgba(0, 255, 255, 0.3);
+  }
+  100% {
+    outline: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px 0px rgba(255, 255, 255, 0.2);
+  }
+}
+.Canvas__selected {
+  outline: 2px solid rgba(255, 0, 0, 0);
+  animation: glow 3s infinite;
+}

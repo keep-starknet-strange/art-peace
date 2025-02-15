@@ -101,7 +101,7 @@ const StarknetProvider = ({ children }) => {
   return (
     <StarknetConfig
       autoConnect
-      chains={[sepolia, mainnet]}
+      chains={[mainnet, sepolia]}
       connectors={[connector]}
       explorer={starkscan}
       provider={provider}

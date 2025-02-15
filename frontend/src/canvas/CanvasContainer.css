@@ -72,16 +72,35 @@
 }
 
 .Canvas__surrounding {
-  transition: transform 0.3s ease;
+  transition: transform 0.2s;
   transform: scale(1);
 }
 
 .Canvas__surrounding:hover {
-  transform: scale(1.02);
+  transform: scale(1.01);
   box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.2);
 }
 
 .Canvas__surrounding:active {
   transform: scale(1);
   box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Glowing border animation */
+@keyframes glow {
+  0% {
+    border-color: rgba(255, 0, 0, 0);
+    box-shadow: 0 0 10px 0px rgba(255, 0, 0, 0.5);
+  }
+  50% {
+    border-color: rgba(255, 0, 0, 0.5);
+    box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.5);
+  }
+  100% {
+    border-color: rgba(255, 0, 0, 0);
+    box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0);
+  }
+}
+.Canvas__selected {
+  border: 2px solid rgba(255, 0, 0, 100);
 }

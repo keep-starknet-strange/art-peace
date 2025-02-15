@@ -138,9 +138,9 @@ services:
     volumes:
       - configs:/configs
     restart: on-failure
-  frontend:
+  frontend-next:
     build:
-      dockerfile: frontend/Dockerfile
+      dockerfile: frontend-next/Dockerfile
       context: .
     depends_on:
       deployer:
@@ -153,11 +153,15 @@ services:
     environment:
       - REACT_APP_BASE_PIXEL_TIMER=30000
       - REACT_APP_ROUND_NUMBER=2
+      - NEXT_PUBLIC_CANVAS_CONTRACT_ADDRESS=0x03ce937f91fa0c88a4023f582c729935a5366385091166a763e53281e45ac410
+      - NEXT_PUBLIC_BASE_PIXEL_TIMER=30000
+      - NEXT_PUBLIC_ROUND_NUMBER=3
+      - NEXT_PUBLIC_BACKEND_URL=https://api.art-peace.net
     volumes:
-      - ./frontend/package.json:/app/package.json
-      - ./frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml
-      - ./frontend/public/:/app/public
-      - ./frontend/src:/app/src
+      - ./frontend-next/package.json:/app/package.json
+      - ./frontend-next/pnpm-lock.yaml:/app/pnpm-lock.yaml
+      - ./frontend-next/public/:/app/public
+      - ./frontend-next/src:/app/src
       - configs:/app/src/configs
 
 volumes:

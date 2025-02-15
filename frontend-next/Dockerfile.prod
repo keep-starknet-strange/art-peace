@@ -1,0 +1,21 @@
+FROM node:21.7.1-alpine
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+RUN mkdir -p /app
+WORKDIR /app
+
+COPY ./frontend-next/package.json ./frontend-next/pnpm-lock.yaml ./
+COPY ./frontend-next ./
+COPY ./configs/docker-backend.config.json ./src/backend.config.json
+
+ENV PORT 3000
+EXPOSE 3000
+
+RUN pnpm install -g serve
+RUN pnpm install
+RUN npm run build
+
+CMD ["serve", "-s", "-l", "3000", "./build"]

@@ -46,42 +46,42 @@ const policies = {
       methods: [
         {
           name: 'create_canvas',
-          entrypoints: 'create_canvas',
+          entrypoint: 'create_canvas',
           description: 'Create a new canvas/world'
         },
         {
           name: 'place_pixel',
-          entrypoints: 'place_pixel',
+          entrypoint: 'place_pixel',
           description: 'Place a pixel on the canvas'
         },
         {
           name: 'favorite_canvas',
-          entrypoints: 'favorite_canvas',
+          entrypoint: 'favorite_canvas',
           description: 'Favorite a canvas'
         },
         {
           name: 'unfavorite_canvas',
-          entrypoints: 'unfavorite_canvas',
+          entrypoint: 'unfavorite_canvas',
           description: 'Unfavorite a canvas'
         },
         {
           name: 'add_stencil',
-          entrypoints: 'add_stencil',
+          entrypoint: 'add_stencil',
           description: 'Add a stencil to the canvas'
         },
         {
           name: 'remove_stencil',
-          entrypoints: 'remove_stencil',
+          entrypoint: 'remove_stencil',
           description: 'Remove a stencil from the canvas'
         },
         {
           name: 'favorite_stencil',
-          entrypoints: 'favorite_stencil',
+          entrypoint: 'favorite_stencil',
           description: 'Favorite a stencil'
         },
         {
           name: 'unfavorite_stencil',
-          entrypoints: 'unfavorite_stencil',
+          entrypoint: 'unfavorite_stencil',
           description: 'Unfavorite a stencil'
         }
       ]
@@ -103,7 +103,7 @@ function App() {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { account: reactAccount, address: reactAddress } = useAccount();
-  const controller = contConn; // connectors[0];
+  const controller = connectors[0];
   const [username, setUsername] = useState('');
   useEffect(() => {
     if (!reactAddress) return;
@@ -111,9 +111,8 @@ function App() {
   }, [reactAddress, controller]);
   const doControllerConnect = () => {
     console.log('Controller connecting');
-    contConn._wallet = connectors[0]._wallet;
     console.log('Controller', connectors[0], contConn);
-    connect({ connector: contConn });
+    connect({ connector: controller });
   };
   const _doControllerDisconnect = () => {
     console.log('Controller', username, 'disconnecting');
