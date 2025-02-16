@@ -171,67 +171,6 @@ export const StencilsTab = (props: any) => {
 
   const maxImageSize = 128;
 
-  const imageToPalette = (image: any) => {
-    // Convert image pixels to be within the color palette
-
-    // Get image data
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      return;
-    }
-    canvas.width = image.width;
-    canvas.height = image.height;
-    ctx.drawImage(image, 0, 0);
-    const imageData = ctx.getImageData(0, 0, image.width, image.height);
-    const data = imageData.data;
-
-    let imagePalleteIds = [];
-    // Convert image data to color palette
-    for (let i = 0; i < data.length; i += 4) {
-      if (data[i + 3] < 128) {
-        data[i] = 255;
-        data[i + 1] = 255;
-        data[i + 2] = 255;
-        data[i + 3] = 0;
-        imagePalleteIds.push(255);
-        continue;
-      }
-      let minDistance = 1000000;
-      let minColor = props.colors[0];
-      let minColorIndex = 0;
-      for (let j = 0; j < props.colors.length; j++) {
-        const color = props.colors[j]
-          .match(/[A-Za-z0-9]{2}/g)
-          .map((x: string) => parseInt(x, 16));
-        const distance = Math.sqrt(
-          Math.pow(data[i] - color[0], 2) +
-            Math.pow(data[i + 1] - color[1], 2) +
-            Math.pow(data[i + 2] - color[2], 2)
-        );
-        if (distance < minDistance) {
-          minDistance = distance;
-          minColor = color;
-          minColorIndex = j;
-        }
-      }
-      data[i] = minColor[0];
-      data[i + 1] = minColor[1];
-      data[i + 2] = minColor[2];
-      imagePalleteIds.push(minColorIndex);
-    }
-
-    // Set image data back to canvas
-    ctx.putImageData(imageData, 0, 0);
-    return [canvas.toDataURL(), imagePalleteIds];
-  };
-
-  const inputFile = useRef(null as any);
-  const uploadStencil = () => {
-    if (!inputFile.current) return;
-    inputFile.current.click();
-  };
-
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
     if (file === undefined) {
@@ -268,19 +207,8 @@ export const StencilsTab = (props: any) => {
           return;
         }
 
-        const [paletteImage, colorIds] = imageToPalette(image) as any;
-        // TODO: Upload to backend and get template hash back
-        let stencilImage = {
-          image: paletteImage,
-          width: width,
-          height: height
-        };
-        props.setStencilImage(stencilImage);
-        props.setStencilColorIds(colorIds);
-        props.setStencilCreationMode(true);
-        props.setStencilCreationSelected(false);
-        props.setActiveTab("Canvas");
-      };
+        props.setRawStencilImage(image);
+      }
     };
   };
 
@@ -413,6 +341,12 @@ export const StencilsTab = (props: any) => {
 
     setFavoriteStencils(newFavoriteStencils);
     setAllStencils(newAllStencils);
+  };
+
+  const inputFile = useRef(null as any);
+  const uploadStencil = () => {
+    if (!inputFile.current) return;
+    inputFile.current.click();
   };
 
   return (

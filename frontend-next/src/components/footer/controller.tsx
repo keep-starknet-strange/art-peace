@@ -1,7 +1,11 @@
+import Image from 'next/image';
 import { useEffect, useState } from "react";
 import { useConnect, useAccount } from '@starknet-react/core'
 import ControllerConnector from "@cartridge/connector/controller";
 import { getCanvasColors } from "../../api/canvas";
+import bot from "../../../public/icons/bot.png";
+import { AIController } from "./ai-agent";
+import { StencilBotController } from "./stencil-bot";
 
 export const GameController = (props: any) => {
   const { address } = useAccount();
@@ -103,7 +107,7 @@ export const GameController = (props: any) => {
 
   return (
     <div className="flex flex-row items-center justify-center w-full m-[1rem]">
-      {(props.selectorMode || ended) && (
+      {(props.selectorMode || ended) && !props.botMode && (
         <div className="m-[0.2rem] px-[0.5rem] flex flex-row justify-center items-center Gradient__secondary rounded-[1rem] shadow-[0.5rem] border-[0.1rem] border-[#00000070] pointer-events-auto">
           <div className="px-[0.5rem] flex flex-row justify-center items-center flex-wrap">
             {colors.map((color: string, idx: number) => {
@@ -123,7 +127,7 @@ export const GameController = (props: any) => {
           </div>
         </div>
       )}
-      {!props.selectorMode && !ended && (
+      {!props.selectorMode && !ended && !props.botMode && (
         <div
           className={
             "Button__primary Text__large " +
@@ -159,6 +163,59 @@ export const GameController = (props: any) => {
               </div>
             </div>
           )}
+        </div>
+      )}
+      {props.botMode && props.selectedBotOption === null && (
+        props.botOptions.map((option: any, idx: number) => {
+          return (
+            <div className="ml-[0.5rem] first:ml-0" key={idx}>
+            <div
+              className="Button__primary Text__large"
+              onClick={() => option.selectOption()}
+            >
+              <p className="m-0 p-[0.25rem]">{option.name}</p>
+            </div>
+            </div>
+          )
+        }
+      ))}
+      {props.botMode && props.selectedBotOption === "Stencil Bot" && (
+        <StencilBotController
+          address={address}
+          botMode={props.botMode}
+          toggleBotMode={props.toggleBotMode}
+          setSelectedBotOption={props.setSelectedBotOption}
+        />
+      )}
+      {props.botMode && props.selectedBotOption === "AI Agent" && (
+        <AIController
+          address={address}
+          botMode={props.botMode}
+          toggleBotMode={props.toggleBotMode}
+          setSelectedBotOption={props.setSelectedBotOption}
+        />
+      )}
+      {address && (
+        <div
+          className="ml-[0.5rem] Button__circle relative"
+          onClick={props.toggleBotMode}
+        >
+          {props.botMode && (
+            <>
+            <div
+              className="absolute top-0 left-0 w-full h-full rounded-full bg-[#FF000040] border-[0.1rem] border-[#00000070]"
+              style={{ boxShadow: "0 0 0.5rem #FF0000" }}
+            ></div>
+            <div className="absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center">
+              <div className="w-[0.4rem] h-[4rem] bg-[#FF0000A0] transform -rotate-45 shadow-xl rounded-md"></div>
+            </div>
+            </>
+          )}
+          <Image
+            src={bot}
+            alt="Bot"
+            className="w-[2.6rem] h-[2.6rem] m-[2px]"
+          />
         </div>
       )}
     </div>

@@ -33,6 +33,16 @@ export const AccountTab = (props: any) => {
     }
   }
 
+  const [totalPixelsPlaced, setTotalPixelsPlaced] = useState<number>(0);
+  const [pixelsOnWorld, setPixelsOnWorld] = useState<number>(0);
+  const [totalStencilLikes, setTotalStencilLikes] = useState<number>(0);
+  const [stencilLikesOnWorld, setStencilLikesOnWorld] = useState<number>(0);
+  useEffect(() => {
+    if (!address) return;
+    //TODO
+    console.log("TODO: Fetch total pixels placed and pixels on world");
+  }, [address]);
+
   return (
     <BasicTab title="Account" {...props}>
       {!address && (
@@ -70,10 +80,41 @@ export const AccountTab = (props: any) => {
           </div>
 
           <h2 className="Text__large Heading__sub p-[0.5rem] my-[1rem]">
-            Stats
+            User Stats
           </h2>
-
-          <div className="flex flex-row align-center justify-center w-full">
+          <div className="mx-[1rem]">
+            <h3 className="Text__medium underline mb-[1rem]">
+              Totals
+            </h3>
+            <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between">
+              <p className="Text__medium pr-[1rem]">Pixels Placed&nbsp;:</p>
+              <p className="Text__medium pr-[0.5rem] text-right">
+                {totalPixelsPlaced}
+              </p>
+            </div>
+            <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between mt-[0.5rem]">
+              <p className="Text__medium pr-[1rem]">Stencil Likes&nbsp;:</p>
+              <p className="Text__medium pr-[0.5rem] text-right">
+                {totalStencilLikes}
+              </p>
+            </div>
+            <h3 className="Text__medium underline mt-[1rem] mb-[1rem]">
+              On World "{props.activeWorld.name}"
+            </h3>
+            <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between">
+              <p className="Text__medium pr-[1rem]">Pixels Placed&nbsp;:</p>
+              <p className="Text__medium pr-[0.5rem] text-right">
+                {pixelsOnWorld}
+              </p>
+            </div>
+            <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between mt-[0.5rem]">
+              <p className="Text__medium pr-[1rem]">Stencil Likes&nbsp;:</p>
+              <p className="Text__medium pr-[0.5rem] text-right">
+                {stencilLikesOnWorld}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-row align-center justify-center w-full pt-[1rem]">
             <button
               className="w-[70%] py-[0.7rem] px-[1rem] Text__medium Button__primary"
               onClick={() => disconnect()}

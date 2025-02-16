@@ -89,9 +89,52 @@ body {
   );
 }
 
+.Button__circle {
+  padding: 0.5rem;
+  text-align: center;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+
+  cursor: pointer;
+  pointer-events: fill;
+  transition: 0.2s;
+}
+
+.Button__circle:hover {
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.9)
+  );
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.4);
+  transform: scale(1.05) translateY(-0.1rem);
+}
+
+.Button__circle:active {
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
+  transform: scale(1) translateY(0);
+}
+
 .Button__primary {
   margin: 0.2rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.5rem;
   text-align: center;
 
   display: flex;
@@ -145,6 +188,8 @@ body {
   background-color: rgba(200, 200, 200, 0.7) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   box-shadow: none !important;
+  color: rgba(0, 0, 60, 0.4) !important;
+  cursor: not-allowed !important;
 }
 
 .Button--disabled:hover {
@@ -155,6 +200,27 @@ body {
 .Button--disabled:active {
   transform: none !important;
   box-shadow: none !important;
+}
+
+.Buttonlike__primary {
+  margin: 0.2rem;
+  text-align: center;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8)
+  );
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+  border-radius: 2rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+
+  pointer-events: fill;
 }
 
 @keyframes pulse {
@@ -304,4 +370,37 @@ body {
   animation:
     pulse 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1),
     shadow-color 3s infinite;
+}
+
+.Input__primary {
+  border: 0.1rem solid rgba(0, 0, 0, 0.4);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+  padding: 0.5rem;
+  transition: all 0.2s;
+}
+
+.Input__primary:focus {
+  border: 0.1rem solid rgba(0, 0, 0, 0.6);
+  outline: none;
+  box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.6);
+  transform: translateY(-0.1rem) scale(1.02);
+}
+
+.Transform__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.Transform__center--text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-45%, -50%);
+}
+
+.Text__shadow--lg {
+  text-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.6);
 }

@@ -5,6 +5,13 @@ import { placePixelCall } from "../../contract/calls";
 import "./canvas.css";
 
 export const Canva = (props: any) => {
+  const [softClickSound, setSoftClickSound] = useState(null as any);
+  const [clickSound, setClickSound] = useState(null as any);
+  useEffect(() => {
+    setSoftClickSound(new Audio("/sounds/soft-click.wav"));
+    setClickSound(new Audio("/sounds/click.wav"));
+  }, []);
+
   const { account } = useAccount();
   const [colors, setColors] = useState([] as string[]);
   useEffect(() => {
@@ -113,9 +120,16 @@ export const Canva = (props: any) => {
     }
 
     if(!props.selectPixel(x, y)) return;
-    if (!props.selectedColorId || props.selectedColorId === -1 || !props.basePixelUp) {
+    if (props.selectedColorId == null || props.selectedColorId === -1 || !props.basePixelUp) {
+      softClickSound.currentTime = 0;
+      softClickSound.volume = 0.5;
+      softClickSound.play();
       return;
     }
+
+    clickSound.currentTime = 0;
+    clickSound.volume = 0.5;
+    clickSound.play();
 
     // Color the pixel if color is selected & available
     const position = y * props.width + x;

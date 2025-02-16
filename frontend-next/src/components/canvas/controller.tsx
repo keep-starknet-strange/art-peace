@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, createRef } from "react";
 
-import { getCanvasColors } from "../../api/canvas";
+import { StencilCreationOverlay } from "./stencil-overlay";
 import { Canva } from "./canvas";
 
 export const CanvasController = (props: any) => {
@@ -15,7 +15,15 @@ export const CanvasController = (props: any) => {
       Array.from({ length: props.surroundingWorlds.length }, () => createRef())
     );
   }, [props.surroundingWorlds]);
+  const [shutterSound, setShutterSound] = useState(null as any);
+  useEffect(() => {
+    setShutterSound(new Audio("/sounds/shutter.wav"));
+  }, []);
   const openWorld = (world: any) => {
+    shutterSound.currentTime = 0;
+    shutterSound.volume = 0.5;
+    shutterSound.play();
+
     props.clearPixelSelection();
     props.setOpenedWorldId(world.worldId);
   }
@@ -296,20 +304,14 @@ export const CanvasController = (props: any) => {
     setHasInit(true);
   }, [canvasControllerRef, props.width, height]);
 
-  const [colors, setColors] = useState([] as string[]);
-  useEffect(() => {
-    const getColors = async (worldId: number) => {
-      const canvasColors = await getCanvasColors(worldId);
-      setColors(canvasColors);
-    };
-    getColors(props.openedWorldId);
-  }, [props.openedWorldId]);
-
   // Pixel Selection Data
   const [selectedBoxShadow, setSelectedBoxShadow] = useState("")
   const [selectedBackgroundColor, setSelectedBackgroundColor] = useState("")
   const selectPixel = (x: number, y: number) => {
     // Clear selection if same pixel is clicked
+    if (props.stencilCreationMode) {
+      return;
+    }
     if (
       props.selectedColorId === -1 &&
       props.pixelSelectedMode &&
@@ -336,27 +338,29 @@ export const CanvasController = (props: any) => {
     if (props.selectedColorId === -1) {
       setSelectedBackgroundColor('rgba(255, 255, 255, 0)');
     } else {
-      setSelectedBackgroundColor(`#${colors[props.selectedColorId]}FF`);
+      setSelectedBackgroundColor(`#${props.colors[props.selectedColorId]}FF`);
     }
   }, [
     canvasScale,
     props.selectedColorId,
     props.selectedPixelX,
     props.selectedPixelY,
-    colors
+    props.colors
   ]);
+  const getCurrentCanvasRef = () => {
+    let canvasRef = mainCanvasRef;
+    if (props.openedWorldId !== 0) {
+      canvasRef = surroundingCanvasRefs[props.surroundingWorlds.findIndex(
+        (world: any) => world.worldId === props.openedWorldId
+      )];
+    }
+    return canvasRef;
+  }
   const getSelectedColorInverse = () => {
     if (!props.pixelSelectedMode) return 'rgba(255, 255, 255, 0)';
     if (props.selectedColorId === -1) {
-      let canvasRef = mainCanvasRef.current;
-      if (props.openedWorldId !== 0) {
-        let selectedWorld = surroundingCanvasRefs[props.surroundingWorlds.findIndex(
-          (world: any) => world.worldId === props.openedWorldId
-        )];
-        if (!selectedWorld) return 'rgba(255, 255, 255, 0)';
-        canvasRef = selectedWorld.current;
-      }
-      let color = canvasRef
+      let color = getCurrentCanvasRef()
+        .current
         .getContext('2d')
         .getImageData(
           props.selectedPixelX,
@@ -373,7 +377,7 @@ export const CanvasController = (props: any) => {
       );
     }
 
-    return '#' + colors[props.selectedColorId] + 'FF';
+    return '#' + props.colors[props.selectedColorId] + 'FF';
   };
   useEffect(() => {
     const hoverColor = (e: any) => {
@@ -388,14 +392,7 @@ export const CanvasController = (props: any) => {
         return;
       }
 
-      let canvas = mainCanvasRef.current;
-      if (props.openedWorldId !== 0) {
-        canvas = surroundingCanvasRefs[
-          props.surroundingWorlds.findIndex(
-            (world: any) => world.worldId === props.openedWorldId
-          )
-        ].current;
-      }
+      let canvas = getCurrentCanvasRef().current;
       const rect = canvas.getBoundingClientRect();
       const x = Math.floor(
         ((e.clientX - rect.left) / (rect.right - rect.left)) * props.width
@@ -454,6 +451,26 @@ export const CanvasController = (props: any) => {
               }}
             ></div>
           </div>
+        )}
+        {props.stencilCreationMode && (
+          <StencilCreationOverlay
+            stencilImage={props.stencilImage}
+            canvasWidth={props.width}
+            canvasHeight={height}
+            canvasScale={canvasScale}
+            stencilPosition={props.stencilPosition}
+            setStencilPosition={props.setStencilPosition}
+            endStencilCreation={props.endStencilCreation}
+            stencilCreationMode={props.stencilCreationMode}
+            stencilCreationSelected={props.stencilCreationSelected}
+            origin={{
+              x: selectedWorldOrigin.x,
+              y: selectedWorldOrigin.y
+            }}
+            getCanvasRef={getCurrentCanvasRef}
+            worldId={props.openedWorldId}
+            setStencilCreationSelected={props.setStencilCreationSelected}
+          />
         )}
         {props.surroundingWorlds &&
          props.surroundingWorlds.length > 0 &&

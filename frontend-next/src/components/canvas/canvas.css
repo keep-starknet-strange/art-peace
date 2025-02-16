@@ -1,7 +1,7 @@
 .Canva {
   background-color: rgba(120, 120, 120, 1);
   image-rendering: pixelated;
-  box-shadow: 0 0 0.05rem 0.01rem rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.2);
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* Internet Explorer/Edge */
