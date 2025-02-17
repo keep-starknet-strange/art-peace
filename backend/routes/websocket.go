@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 
@@ -10,10 +11,9 @@ import (
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
-var WsMsgQueue chan map[string]string
+var WsMsgPool []map[string]string
 
 func InitWebsocketRoutes() {
-	WsMsgQueue = make(chan map[string]string, 10000)
 	http.HandleFunc("/ws", wsEndpoint)
 	http.HandleFunc("/ws-msg", wsMsgEndpoint)
 }
@@ -26,22 +26,20 @@ func wsMsgEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	WsMsgQueue <- *msg
+  WsMsgPool = append(WsMsgPool, *msg)
 	routeutils.WriteResultJson(w, "WS message added to queue")
 }
 
-func wsWriter() {
-	for {
-		msg := <-WsMsgQueue
-		routeutils.SendWebSocketMessage(msg)
-	}
-}
-
 func StartWebsocketServer() {
-	go wsWriter()
-	go wsWriter()
-	go wsWriter()
-	go wsWriter()
+  // Send all messages in the pool every 5 seconds
+  timer := 5
+  for {
+    msgPoolCopy := make([]map[string]string, len(WsMsgPool))
+    copy(msgPoolCopy, WsMsgPool)
+    WsMsgPool = WsMsgPool[:0]
+    routeutils.SendWebSocketMessages(msgPoolCopy)
+    time.Sleep(time.Duration(timer) * time.Second)
+  }
 }
 
 func wsReader(conn *websocket.Conn) {

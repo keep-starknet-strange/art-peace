@@ -157,6 +157,7 @@ services:
       - NEXT_PUBLIC_BASE_PIXEL_TIMER=30000
       - NEXT_PUBLIC_ROUND_NUMBER=3
       - NEXT_PUBLIC_BACKEND_URL=https://api.art-peace.net
+      - NEXT_PUBLIC_HAS_LAUNCHED=true
     volumes:
       - ./frontend-next/package.json:/app/package.json
       - ./frontend-next/pnpm-lock.yaml:/app/pnpm-lock.yaml

@@ -2,6 +2,7 @@
   "round3": {
     "width": 256,
     "height": 192,
+    "pixels": 5,
     "timer": 5,
     "startTime": 1734654796,
     "endTime": 1737333196

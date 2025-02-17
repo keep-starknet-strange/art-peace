@@ -26,10 +26,40 @@ export const config = {
         includeReceipt: false
       },
       {
+        // Canvas Pixels Per Time Changed Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x0053fef88f7744f78868b97051032869570d31ef6be6c86e2c60ca33b8d4b49d"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
         // Canvas Time Between Pixels Changed Event
         fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
         keys: [
           "0x02e1eccce24e49cc4ab3df0795f173bbe667dd4fddbc52c8af731b4e2ad78cf5"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Canvas Start Time Changed Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x029dcf060d1b84c30a9a0c25f8c9b0bcb841557eb482d198524fef77e8879673"
+        ],
+        includeReverted: false,
+        includeTransaction: false,
+        includeReceipt: false
+      },
+      {
+        // Canvas End Time Changed Event
+        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
+        keys: [
+          "0x0208008de905364fb24915201b629fe7bcbc4adeced02a2696df5e1c48758acd"
         ],
         includeReverted: false,
         includeTransaction: false,

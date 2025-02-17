@@ -336,6 +336,7 @@ CREATE TABLE Worlds (
   unique_name text NOT NULL,
   width integer NOT NULL,
   height integer NOT NULL,
+  pixels_per_time integer NOT NULL,
   time_between_pixels integer NOT NULL,
   start_time timestamp NOT NULL,
   end_time timestamp NOT NULL

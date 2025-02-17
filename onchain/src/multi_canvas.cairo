@@ -187,7 +187,10 @@ pub mod MultiCanvas {
     enum Event {
         CanvasCreated: CanvasCreated,
         CanvasHostChanged: CanvasHostChanged,
+        CanvasPixelsPerTimeChanged: CanvasPixelsPerTimeChanged,
         CanvasTimeBetweenPixelsChanged: CanvasTimeBetweenPixelsChanged,
+        CanvasStartTimeChanged: CanvasStartTimeChanged,
+        CanvasEndTimeChanged: CanvasEndTimeChanged,
         CanvasColorAdded: CanvasColorAdded,
         CanvasPixelPlaced: CanvasPixelPlaced,
         CanvasBasicPixelPlaced: CanvasBasicPixelPlaced,
@@ -217,11 +220,35 @@ pub mod MultiCanvas {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct CanvasPixelsPerTimeChanged {
+        #[key]
+        canvas_id: u32,
+        old_pixels: u32,
+        new_pixels: u32,
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct CanvasTimeBetweenPixelsChanged {
         #[key]
         canvas_id: u32,
         old_time: u64,
         new_time: u64,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct CanvasStartTimeChanged {
+        #[key]
+        canvas_id: u32,
+        old_start: u64,
+        start_time: u64,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct CanvasEndTimeChanged {
+        #[key]
+        canvas_id: u32,
+        old_end: u64,
+        end_time: u64,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -451,6 +478,12 @@ pub mod MultiCanvas {
             let caller = get_caller_address();
             assert(caller == self.hosts.read(canvas_id), 'Only host can change pixels');
             self.pixels_per_time.write(canvas_id, pixels_per_time);
+            self
+                .emit(
+                  CanvasPixelsPerTimeChanged {
+                      canvas_id, old_pixels: self.pixels_per_time.read(canvas_id), new_pixels: pixels_per_time
+                  }
+                );
         }
 
         fn get_time_between_pixels(self: @ContractState, canvas_id: u32) -> u64 {
@@ -545,6 +578,7 @@ pub mod MultiCanvas {
             assert(caller == self.hosts.read(canvas_id), 'Only host can change start time');
             let mut canvas_metadata = self.canvases.read(canvas_id);
             assert(start_time < canvas_metadata.end_time, 'Invalid time range');
+            self.emit(CanvasStartTimeChanged { canvas_id, old_start: canvas_metadata.start_time, start_time });
             canvas_metadata.start_time = start_time;
             self.canvases.write(canvas_id, canvas_metadata);
         }
@@ -558,6 +592,7 @@ pub mod MultiCanvas {
             assert(caller == self.hosts.read(canvas_id), 'Only host can change end time');
             let mut canvas_metadata = self.canvases.read(canvas_id);
             assert(end_time > canvas_metadata.start_time, 'Invalid time range');
+            self.emit(CanvasEndTimeChanged { canvas_id, old_end: canvas_metadata.end_time, end_time });
             canvas_metadata.end_time = end_time;
             self.canvases.write(canvas_id, canvas_metadata);
         }

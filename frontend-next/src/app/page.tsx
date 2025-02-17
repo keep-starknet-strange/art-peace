@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import { StarknetProvider } from "../components/StarknetProvider";
 import { usePreventZoom } from './window';
 import { Canvas } from "../pages/canvas";
+import { Teaser } from "../pages/teaser";
 
 import logo from '../../public/logo/logo.png';
 
@@ -68,6 +69,9 @@ function App() {
     };
   }, [currentBackgroundSongIndex, hasPlayedYet]);
 
+  const [hasLaunched, setHasLaunched] = useState(process.env.NEXT_PUBLIC_HAS_LAUNCHED === "true" || false);
+  const [homeClickCount, setHomeClickCount] = useState(0);
+
   return (
     <div className="h-[100vh] w-[100vw] bg-[#fefdfb] flex flex-col align-center">
       <div className="Page__bg">
@@ -78,16 +82,22 @@ function App() {
               alt="logo"
               className="w-full h-full object-contain"
               onClick={() => {
-                window.location.href = '/';
+                let newCount = homeClickCount + 1;
+                setHomeClickCount(newCount);
+                if (newCount >= 3) {
+                  setHasLaunched(true);
+                }
+                // TODO: window.location.href = '/';
               }}
             />
             <p className="text-md text-black absolute top-[45%] left-[65%]
-              transform translate-x-[-50%] translate-y-[-50%]
+              transform translate-x-[-50%] translate-y-[-50%] pointer-events-none
               ">3</p>
           </div>
         </div>
         <Routes>
-          <Route path="/" element={<Canvas />} />
+          {hasLaunched && <Route path="/" element={<Canvas />} />}
+          {!hasLaunched && <Route path="/" element={<Teaser />} />}
         </Routes>
       </div>
     </div>

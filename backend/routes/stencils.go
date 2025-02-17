@@ -569,7 +569,7 @@ func addStencilImg(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	filename := fmt.Sprintf("stencils/stencils-%s.png", hash)
+	filename := fmt.Sprintf("stencils/stencil-%s.png", hash)
 	newimg, err := os.Create(filename)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to create image file")
