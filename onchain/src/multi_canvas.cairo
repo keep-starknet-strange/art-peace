@@ -92,12 +92,12 @@ pub mod MultiCanvas {
 
     #[derive(Drop, Serde)]
     pub struct GameBounds {
-      min_color_count: u32,
-      max_color_count: u32,
-      min_size: u128,
-      max_size: u128,
-      min_stencil_size: u128,
-      max_stencil_size: u128,
+        min_color_count: u32,
+        max_color_count: u32,
+        min_size: u128,
+        max_size: u128,
+        min_stencil_size: u128,
+        max_stencil_size: u128,
     }
 
     #[derive(Drop, Serde)]
@@ -145,7 +145,6 @@ pub mod MultiCanvas {
         max_size: u128,
         min_stencil_size: u128,
         max_stencil_size: u128,
-
         // Canvas/Worlds Data
         canvas_count: u32,
         // Map: canvas_id -> canvas metadata
@@ -158,19 +157,16 @@ pub mod MultiCanvas {
         time_between_pixels: LegacyMap::<u32, u64>,
         // Maps: unique_name -> is taken
         unique_names: LegacyMap::<felt252, bool>,
-
         // Colors Data
         // Map: canvas_id -> color count
         color_counts: LegacyMap::<u32, u8>,
         // Map: (canvas_id, color_id) -> color value in RGBA
         color_palettes: LegacyMap::<(u32, u8), u32>,
-
         // Stencils Data
         // Map: canvas_id -> stencil count
         stencil_counts: LegacyMap::<u32, u32>,
         // Map: (canvas_id, stencil_id) -> stencil metadata
         stencils: LegacyMap::<(u32, u32), StencilMetadata>,
-
         // User Data
         // Map: (canvas_id, user's address) -> last time they placed a pixel
         last_placed_times: LegacyMap::<(u32, ContractAddress), u64>,
@@ -388,13 +384,23 @@ pub mod MultiCanvas {
         }
 
         fn create_canvas(ref self: ContractState, init_params: CanvasInitParams) -> u32 {
-            assert(self.world_creation_enabled.read() || get_caller_address() == self.game_master.read(), 'World creation disabled');
+            assert(
+                self.world_creation_enabled.read()
+                    || get_caller_address() == self.game_master.read(),
+                'World creation disabled'
+            );
             assert(init_params.width >= self.min_size.read(), 'Width too small');
             assert(init_params.height >= self.min_size.read(), 'Height too small');
             assert(init_params.width <= self.max_size.read(), 'Width too large');
             assert(init_params.height <= self.max_size.read(), 'Height too large');
-            assert(init_params.color_palette.len() >= self.min_color_count.read().try_into().unwrap(), 'Not enough colors');
-            assert(init_params.color_palette.len() <= self.max_color_count.read().try_into().unwrap(), 'Too many colors');
+            assert(
+                init_params.color_palette.len() >= self.min_color_count.read().try_into().unwrap(),
+                'Not enough colors'
+            );
+            assert(
+                init_params.color_palette.len() <= self.max_color_count.read().try_into().unwrap(),
+                'Too many colors'
+            );
             assert(init_params.start_time < init_params.end_time, 'Invalid time range');
             assert(!self.unique_names.read(init_params.unique_name), 'Unique name already taken');
             assert(validate_unique_name(init_params.unique_name), 'Invalid unique name');
@@ -445,7 +451,10 @@ pub mod MultiCanvas {
 
         fn set_host(ref self: ContractState, canvas_id: u32, host: ContractAddress) {
             let caller = get_caller_address();
-            assert(caller == self.game_master.read() || caller == self.hosts.read(canvas_id), 'Only host can change host');
+            assert(
+                caller == self.game_master.read() || caller == self.hosts.read(canvas_id),
+                'Only host can change host'
+            );
             self.hosts.write(canvas_id, host);
             self.emit(CanvasHostChanged { canvas_id, old_host: caller, new_host: host });
         }
@@ -472,17 +481,17 @@ pub mod MultiCanvas {
             self.pixels_per_time.read(canvas_id)
         }
 
-        fn set_pixels_per_time(
-            ref self: ContractState, canvas_id: u32, pixels_per_time: u32
-        ) {
+        fn set_pixels_per_time(ref self: ContractState, canvas_id: u32, pixels_per_time: u32) {
             let caller = get_caller_address();
             assert(caller == self.hosts.read(canvas_id), 'Only host can change pixels');
             self.pixels_per_time.write(canvas_id, pixels_per_time);
             self
                 .emit(
-                  CanvasPixelsPerTimeChanged {
-                      canvas_id, old_pixels: self.pixels_per_time.read(canvas_id), new_pixels: pixels_per_time
-                  }
+                    CanvasPixelsPerTimeChanged {
+                        canvas_id,
+                        old_pixels: self.pixels_per_time.read(canvas_id),
+                        new_pixels: pixels_per_time
+                    }
                 );
         }
 
@@ -505,6 +514,10 @@ pub mod MultiCanvas {
                 );
         }
 
+        fn get_awards_enabled(self: @ContractState) -> bool {
+            self.awards_enabled.read()
+        }
+
         fn enable_awards(ref self: ContractState) {
             let caller = get_caller_address();
             assert(caller == self.game_master.read(), 'Only game master can enable');
@@ -517,6 +530,10 @@ pub mod MultiCanvas {
             self.awards_enabled.write(false);
         }
 
+        fn get_world_creation_enabled(self: @ContractState) -> bool {
+            self.world_creation_enabled.read()
+        }
+
         fn enable_world_creation(ref self: ContractState) {
             let caller = get_caller_address();
             assert(caller == self.game_master.read(), 'Only game master can enable');
@@ -527,6 +544,10 @@ pub mod MultiCanvas {
             let caller = get_caller_address();
             assert(caller == self.game_master.read(), 'Only game master can disable');
             self.world_creation_enabled.write(false);
+        }
+
+        fn get_stencil_creation_enabled(self: @ContractState) -> bool {
+            self.stencil_creation_enabled.read()
         }
 
         fn enable_stencil_creation(ref self: ContractState) {
@@ -542,7 +563,10 @@ pub mod MultiCanvas {
         }
 
         fn award_user(ref self: ContractState, canvas_id: u32, user: ContractAddress, amount: u32) {
-            assert(self.awards_enabled.read() || get_caller_address() == self.game_master.read(), 'Awards disabled');
+            assert(
+                self.awards_enabled.read() || get_caller_address() == self.game_master.read(),
+                'Awards disabled'
+            );
             let caller = get_caller_address();
             assert(
                 caller == self.hosts.read(canvas_id) || caller == self.game_master.read(),
@@ -569,6 +593,10 @@ pub mod MultiCanvas {
             colors.span()
         }
 
+        fn is_name_taken(self: @ContractState, unique_name: felt252) -> bool {
+            self.unique_names.read(unique_name)
+        }
+
         fn get_start_time(self: @ContractState, canvas_id: u32) -> u64 {
             self.canvases.read(canvas_id).start_time
         }
@@ -578,7 +606,12 @@ pub mod MultiCanvas {
             assert(caller == self.hosts.read(canvas_id), 'Only host can change start time');
             let mut canvas_metadata = self.canvases.read(canvas_id);
             assert(start_time < canvas_metadata.end_time, 'Invalid time range');
-            self.emit(CanvasStartTimeChanged { canvas_id, old_start: canvas_metadata.start_time, start_time });
+            self
+                .emit(
+                    CanvasStartTimeChanged {
+                        canvas_id, old_start: canvas_metadata.start_time, start_time
+                    }
+                );
             canvas_metadata.start_time = start_time;
             self.canvases.write(canvas_id, canvas_metadata);
         }
@@ -592,7 +625,10 @@ pub mod MultiCanvas {
             assert(caller == self.hosts.read(canvas_id), 'Only host can change end time');
             let mut canvas_metadata = self.canvases.read(canvas_id);
             assert(end_time > canvas_metadata.start_time, 'Invalid time range');
-            self.emit(CanvasEndTimeChanged { canvas_id, old_end: canvas_metadata.end_time, end_time });
+            self
+                .emit(
+                    CanvasEndTimeChanged { canvas_id, old_end: canvas_metadata.end_time, end_time }
+                );
             canvas_metadata.end_time = end_time;
             self.canvases.write(canvas_id, canvas_metadata);
         }
@@ -628,7 +664,13 @@ pub mod MultiCanvas {
             assert(now <= block_timestamp + 2 * expected_block_time, 'Timestamp too far ahead');
         }
 
-        fn place_pixels(ref self: ContractState, canvas_id: u32, positions: Span<u128>, colors: Span<u8>, now: u64) {
+        fn place_pixels(
+            ref self: ContractState,
+            canvas_id: u32,
+            positions: Span<u128>,
+            colors: Span<u8>,
+            now: u64
+        ) {
             self.check_game_running(canvas_id);
             self.check_timing(now);
             let caller = starknet::get_caller_address();
@@ -642,7 +684,8 @@ pub mod MultiCanvas {
                 'Pixels not available'
             );
             assert(positions.len() == colors.len(), 'Invalid pos & color lengths');
-            let available_pixels = self.pixels_per_time.read(canvas_id) + self.extra_pixels.read((canvas_id, caller));
+            let available_pixels = self.pixels_per_time.read(canvas_id)
+                + self.extra_pixels.read((canvas_id, caller));
             assert(positions.len() <= available_pixels, 'Too many pixels');
             place_basic_pixels_inner(ref self, canvas_id, positions, colors, now);
         }
@@ -665,6 +708,17 @@ pub mod MultiCanvas {
             }
             self.canvas_favorites.write((canvas_id, caller), true);
             self.emit(Event::CanvasFavorited(CanvasFavorited { canvas_id, user: caller, }));
+        }
+
+        fn get_game_bounds(self: @ContractState) -> GameBounds {
+            GameBounds {
+                min_color_count: self.min_color_count.read(),
+                max_color_count: self.max_color_count.read(),
+                min_size: self.min_size.read(),
+                max_size: self.max_size.read(),
+                min_stencil_size: self.min_stencil_size.read(),
+                max_stencil_size: self.max_stencil_size.read(),
+            }
         }
 
         fn set_game_bounds(ref self: ContractState, game_bounds: GameBounds) {
@@ -696,7 +750,11 @@ pub mod MultiCanvas {
         }
 
         fn add_stencil(ref self: ContractState, canvas_id: u32, stencil: StencilMetadata) -> u32 {
-            assert(self.stencil_creation_enabled.read() || get_caller_address() == self.game_master.read(), 'Stencil creation disabled');
+            assert(
+                self.stencil_creation_enabled.read()
+                    || get_caller_address() == self.game_master.read(),
+                'Stencil creation disabled'
+            );
             let stencil_id = self.stencil_counts.read(canvas_id);
             assert(stencil.width >= self.min_stencil_size.read(), 'Stencil too small');
             assert(stencil.height >= self.min_stencil_size.read(), 'Stencil too small');
@@ -716,7 +774,10 @@ pub mod MultiCanvas {
 
         fn remove_stencil(ref self: ContractState, canvas_id: u32, stencil_id: u32) {
             let caller = get_caller_address();
-            assert(caller == self.hosts.read(canvas_id) || caller == self.game_master.read(), 'Only host can remove');
+            assert(
+                caller == self.hosts.read(canvas_id) || caller == self.game_master.read(),
+                'Only host can remove'
+            );
             let stencil = self.stencils.read((canvas_id, stencil_id));
             self.emit(StencilRemoved { canvas_id, stencil_id, stencil });
         }
@@ -751,17 +812,28 @@ pub mod MultiCanvas {
         ref self: ContractState, canvas_id: u32, positions: Span<u128>, colors: Span<u8>, now: u64
     ) {
         let mut i = 0;
-        while i < positions.len() {
-            place_pixel_inner(ref self, canvas_id, *positions.at(i), *colors.at(i));
-            i += 1;
-        };
+        while i < positions
+            .len() {
+                place_pixel_inner(ref self, canvas_id, *positions.at(i), *colors.at(i));
+                i += 1;
+            };
         let caller = starknet::get_caller_address();
         self.last_placed_times.write((canvas_id, caller), now);
         self.emit(CanvasBasicPixelPlaced { canvas_id, placed_by: caller, timestamp: now });
         if positions.len() > self.pixels_per_time.read(canvas_id) {
             let extra_pixels_used = positions.len() - self.pixels_per_time.read(canvas_id);
-            self.extra_pixels.write((canvas_id, caller), self.extra_pixels.read((canvas_id, caller)) - extra_pixels_used);
-            self.emit(CanvasExtraPixelsPlaced { canvas_id, placed_by: caller, extra_pixels: extra_pixels_used });
+            self
+                .extra_pixels
+                .write(
+                    (canvas_id, caller),
+                    self.extra_pixels.read((canvas_id, caller)) - extra_pixels_used
+                );
+            self
+                .emit(
+                    CanvasExtraPixelsPlaced {
+                        canvas_id, placed_by: caller, extra_pixels: extra_pixels_used
+                    }
+                );
         }
     }
 
