@@ -1,4 +1,6 @@
-export const Teaser = (props: any) => {
+'use client';
+
+const Teaser = (props: any) => {
   return (
     <div className="relative">
       <div className="w-[100vw] h-[100vh] overflow-hidden relative
@@ -23,3 +25,5 @@ export const Teaser = (props: any) => {
     </div>
   );
 }
+
+export default Teaser;

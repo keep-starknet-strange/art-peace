@@ -43,8 +43,8 @@ export const CanvasController = (props: any) => {
 
   const getWorldPosition = (index: number) => {
     // TODO: To config
-    let xGap = 16;
-    let yGap = 12;
+    const xGap = 16;
+    const yGap = 12;
     if (index === 0) {
       return {
         x: -(baseWorldX + xGap) / 2,
@@ -182,8 +182,8 @@ export const CanvasController = (props: any) => {
     }
 
     // Calculate new left and top position to keep cursor over the same rect pos  ition
-    let direction = e.deltaY > 0 ? 1 : -1;
-    let scaler = Math.log2(1 + Math.abs(e.deltaY) * 2) * direction;
+    const direction = e.deltaY > 0 ? 1 : -1;
+    const scaler = Math.log2(1 + Math.abs(e.deltaY) * 2) * direction;
     let newScale = canvasScale * (1 + scaler * -0.01);
     if (newScale < minScale) {
       newScale = minScale;
@@ -359,7 +359,7 @@ export const CanvasController = (props: any) => {
   const getSelectedColorInverse = () => {
     if (!props.pixelSelectedMode) return 'rgba(255, 255, 255, 0)';
     if (props.selectedColorId === -1) {
-      let color = getCurrentCanvasRef()
+      const color = getCurrentCanvasRef()
         .current
         .getContext('2d')
         .getImageData(
@@ -392,7 +392,7 @@ export const CanvasController = (props: any) => {
         return;
       }
 
-      let canvas = getCurrentCanvasRef().current;
+      const canvas = getCurrentCanvasRef().current;
       const rect = canvas.getBoundingClientRect();
       const x = Math.floor(
         ((e.clientX - rect.left) / (rect.right - rect.left)) * props.width

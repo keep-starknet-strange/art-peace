@@ -32,7 +32,7 @@ export const WorldItem = (props: any) => {
     >
       <div className="relative w-full h-full">
         <div className="flex flex-col w-full h-full justify-center items-center p-0 m-0">
-          <img
+          <Image
             src={props.world.image}
             alt={`world-image-${props.world.worldId}`}
             className="w-full h-auto block object-contain m-0 p-0 Pixel__img"

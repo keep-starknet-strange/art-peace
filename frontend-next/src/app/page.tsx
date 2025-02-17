@@ -6,8 +6,9 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 
 import { StarknetProvider } from "../components/StarknetProvider";
 import { usePreventZoom } from './window';
-import { Canvas } from "../pages/canvas";
-import { Teaser } from "../pages/teaser";
+// TODO: Proper routing here
+import Canvas from "../screens/canvas";
+import Teaser from "../screens/teaser";
 
 import logo from '../../public/logo/logo.png';
 
@@ -28,7 +29,7 @@ function App() {
       if (currentBackgroundSong) {
         currentBackgroundSong.pause();
       }
-      let audio = new Audio(musicList[currentBackgroundSongIndex]);
+      const audio = new Audio(musicList[currentBackgroundSongIndex]);
       audio.loop = false;
       audio.volume = 0.25;
       try {
@@ -55,8 +56,8 @@ function App() {
   const [hasPlayedYet, setHasPlayedYet] = useState(false);
   useEffect(() => {
     // Change the song every 5 minutes
-    let refreshInterval = hasPlayedYet ? 4 * 60 * 1000 : 3000;
-    let interval = setInterval(() => {
+    const refreshInterval = hasPlayedYet ? 4 * 60 * 1000 : 3000;
+    const interval = setInterval(() => {
       console.log("Changing song");
       let rndIndex = Math.floor(Math.random() * musicList.length);
       while (rndIndex === currentBackgroundSongIndex) {
@@ -82,7 +83,7 @@ function App() {
               alt="logo"
               className="w-full h-full object-contain"
               onClick={() => {
-                let newCount = homeClickCount + 1;
+                const newCount = homeClickCount + 1;
                 setHomeClickCount(newCount);
                 if (newCount >= 3) {
                   setHasLaunched(true);
@@ -95,23 +96,25 @@ function App() {
               ">3</p>
           </div>
         </div>
-        <Routes>
-          {hasLaunched && <Route path="/" element={<Canvas />} />}
-          {!hasLaunched && <Route path="/" element={<Teaser />} />}
-        </Routes>
+        {hasLaunched && <Canvas />}
+        {!hasLaunched && <Teaser />}
       </div>
     </div>
   );
 }
+// TODO
+// <BrowserRouter>
+// <Routes>
+//   {hasLaunched && <Route path="/" element={<Canvas />} />}
+//   {!hasLaunched && <Route path="/" element={<Teaser />} />}
+// </Routes>
 
 export default function Home() {
   return (
     <StrictMode>
-      <BrowserRouter>
-        <StarknetProvider>
-          <App />
-        </StarknetProvider>
-      </BrowserRouter>
+      <StarknetProvider>
+        <App />
+      </StarknetProvider>
     </StrictMode>
   );
 }

@@ -268,14 +268,14 @@ export const WorldsTab = (props: any) => {
   }, [props.openedWorldId]);
 
   const updateFavorites = (worldId: number, favorites: number, favorited: boolean) => {
-    let newFavoriteWorlds = favoriteWorlds.map((world: any) => {
+    const newFavoriteWorlds = favoriteWorlds.map((world: any) => {
       if (world.worldId === worldId) {
         return { ...world, favorites: favorites, favorited: favorited };
       }
       return world;
     });
 
-    let newAllWorlds = allWorlds.map((world: any) => {
+    const newAllWorlds = allWorlds.map((world: any) => {
       if (world.worldId === worldId) {
         return { ...world, favorites: favorites, favorited: favorited };
       }

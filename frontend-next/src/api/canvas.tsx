@@ -2,8 +2,8 @@ import { backendUrl, fetchJsonData, fetchArrayBuffer } from './api';
 
 export const getWorld = async (worldId: number): Promise<any> => {
   try {
-    let worldEndpoint = `${backendUrl}/get-world?worldId=${worldId}`;
-    let world = await fetchJsonData(worldEndpoint);
+    const worldEndpoint = `${backendUrl}/get-world?worldId=${worldId}`;
+    const world = await fetchJsonData(worldEndpoint);
     return world;
   } catch (error) {
     console.error("Error getting world", error);
@@ -13,8 +13,8 @@ export const getWorld = async (worldId: number): Promise<any> => {
 
 export const getCanvasColors = async (worldId: number): Promise<string[]> => {
   try {
-    let canvasColorsEndpoint = `${backendUrl}/get-worlds-colors?worldId=${worldId}`;
-    let canvasColors = await fetchJsonData(canvasColorsEndpoint);
+    const canvasColorsEndpoint = `${backendUrl}/get-worlds-colors?worldId=${worldId}`;
+    const canvasColors = await fetchJsonData(canvasColorsEndpoint);
     if (canvasColors.length === 0) {
       console.error("No colors found for world", worldId);
       return [];
@@ -28,8 +28,8 @@ export const getCanvasColors = async (worldId: number): Promise<string[]> => {
 
 export const getCanvas = async (worldId: number): Promise<ArrayBuffer> => {
   try {
-    let canvasEndpoint = `${backendUrl}/get-world-canvas?worldId=${worldId}`;
-    let canvas = await fetchArrayBuffer(canvasEndpoint);
+    const canvasEndpoint = `${backendUrl}/get-world-canvas?worldId=${worldId}`;
+    const canvas = await fetchArrayBuffer(canvasEndpoint);
     return canvas;
   } catch (error) {
     console.error("Error getting canvas", error);
@@ -39,8 +39,8 @@ export const getCanvas = async (worldId: number): Promise<ArrayBuffer> => {
 
 export const getPixelInfo = async (worldId: number, position: number): Promise<string> => {
   try {
-    let pixelInfoEndpoint = `${backendUrl}/get-worlds-pixel-info?worldId=${worldId}&position=${position}`;
-    let pixelInfo = await fetchJsonData(pixelInfoEndpoint);
+    const pixelInfoEndpoint = `${backendUrl}/get-worlds-pixel-info?worldId=${worldId}&position=${position}`;
+    const pixelInfo = await fetchJsonData(pixelInfoEndpoint);
     return pixelInfo;
   } catch (error) {
     console.error("Error getting pixel info", error);
@@ -50,8 +50,8 @@ export const getPixelInfo = async (worldId: number, position: number): Promise<s
 
 export const getHomeWorlds = async (): Promise<any[]> => {
   try {
-    let homeWorldsEndpoint = `${backendUrl}/get-home-worlds`;
-    let homeWorlds = await fetchJsonData(homeWorldsEndpoint);
+    const homeWorldsEndpoint = `${backendUrl}/get-home-worlds`;
+    const homeWorlds = await fetchJsonData(homeWorldsEndpoint);
     return homeWorlds;
   } catch (error) {
     console.error("Error getting home worlds", error);

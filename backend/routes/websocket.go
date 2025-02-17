@@ -26,20 +26,20 @@ func wsMsgEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  WsMsgPool = append(WsMsgPool, *msg)
+	WsMsgPool = append(WsMsgPool, *msg)
 	routeutils.WriteResultJson(w, "WS message added to queue")
 }
 
 func StartWebsocketServer() {
-  // Send all messages in the pool every 5 seconds
-  timer := 5
-  for {
-    msgPoolCopy := make([]map[string]string, len(WsMsgPool))
-    copy(msgPoolCopy, WsMsgPool)
-    WsMsgPool = WsMsgPool[:0]
-    routeutils.SendWebSocketMessages(msgPoolCopy)
-    time.Sleep(time.Duration(timer) * time.Second)
-  }
+	// Send all messages in the pool every 5 seconds
+	timer := 5
+	for {
+		msgPoolCopy := make([]map[string]string, len(WsMsgPool))
+		copy(msgPoolCopy, WsMsgPool)
+		WsMsgPool = WsMsgPool[:0]
+		routeutils.SendWebSocketMessages(msgPoolCopy)
+		time.Sleep(time.Duration(timer) * time.Second)
+	}
 }
 
 func wsReader(conn *websocket.Conn) {

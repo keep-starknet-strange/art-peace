@@ -32,7 +32,7 @@ export const StencilItem = (props: any) => {
     >
       <div className="relative w-full h-full">
         <div className="flex flex-col w-full h-full justify-center items-center p-0 m-0">
-          <img
+          <Image
             src={props.stencil.image}
             alt={`stencil-image-${props.stencil.stencilId}`}
             className="w-full h-auto block object-contain m-0 p-0 Pixel__img"

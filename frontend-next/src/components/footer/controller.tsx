@@ -31,7 +31,7 @@ export const GameController = (props: any) => {
       return;
     }
     if (props.availablePixels > 0) {
-      let amountAvailable = props.availablePixels - props.availablePixelsUsed;
+      const amountAvailable = props.availablePixels - props.availablePixelsUsed;
       if (amountAvailable > 1) {
         setControllerText("Place Pixels");
         return;

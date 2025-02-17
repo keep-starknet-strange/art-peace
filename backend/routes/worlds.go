@@ -31,11 +31,11 @@ func InitWorldsRoutes() {
 	http.HandleFunc("/get-worlds-pixel-count", getWorldsPixelCount)
 	http.HandleFunc("/get-worlds-pixel-info", getWorldsPixelInfo)
 	http.HandleFunc("/check-world-name", checkWorldName)
-  http.HandleFunc("/leaderboard-pixels", getLeaderboardPixels)
-  http.HandleFunc("/leaderboard-worlds", getLeaderboardWorlds)
-  http.HandleFunc("/leaderboard-pixels-world", getLeaderboardPixelsWorld)
-  http.HandleFunc("/leaderboard-pixels-user", getLeaderboardPixelsUser)
-  http.HandleFunc("/leaderboard-pixels-world-user", getLeaderboardPixelsWorldUser)
+	http.HandleFunc("/leaderboard-pixels", getLeaderboardPixels)
+	http.HandleFunc("/leaderboard-worlds", getLeaderboardWorlds)
+	http.HandleFunc("/leaderboard-pixels-world", getLeaderboardPixelsWorld)
+	http.HandleFunc("/leaderboard-pixels-user", getLeaderboardPixelsUser)
+	http.HandleFunc("/leaderboard-pixels-world-user", getLeaderboardPixelsWorldUser)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/create-canvas-devnet", createCanvasDevnet)
 		http.HandleFunc("/favorite-world-devnet", favoriteWorldDevnet)
@@ -76,7 +76,7 @@ type WorldData struct {
 	UniqueName        string     `json:"uniqueName"`
 	Width             int        `json:"width"`
 	Height            int        `json:"height"`
-  PixelsPerTime     int        `json:"pixelsPerTime"`
+	PixelsPerTime     int        `json:"pixelsPerTime"`
 	TimeBetweenPixels int        `json:"timeBetweenPixels"`
 	StartTime         *time.Time `json:"startTime"`
 	EndTime           *time.Time `json:"endTime"`
@@ -560,11 +560,11 @@ func createCanvasDevnet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  pixelsPerTime, err := strconv.Atoi((*jsonBody)["pixels_per_time"])
-  if err != nil || pixelsPerTime <= 0 {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid pixels per time")
-    return
-  }
+	pixelsPerTime, err := strconv.Atoi((*jsonBody)["pixels_per_time"])
+	if err != nil || pixelsPerTime <= 0 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid pixels per time")
+		return
+	}
 
 	timer, err := strconv.Atoi((*jsonBody)["time_between_pixels"])
 	if err != nil || timer <= 0 {
@@ -745,26 +745,26 @@ func checkWorldName(w http.ResponseWriter, r *http.Request) {
 }
 
 type LeaderboardEntry struct {
-  Key   string `json:"key"`
-  Score int    `json:"score"`
+	Key   string `json:"key"`
+	Score int    `json:"score"`
 }
 
 // Get the leaderboard for total pixels placed by user
 func getLeaderboardPixels(w http.ResponseWriter, r *http.Request) {
-  pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
-  if err != nil || pageLength <= 0 {
-    pageLength = 25
-  }
-  if pageLength > 50 {
-    pageLength = 50
-  }
-  page, err := strconv.Atoi(r.URL.Query().Get("page"))
-  if err != nil || page <= 0 {
-    page = 1
-  }
-  offset := (page - 1) * pageLength
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
 
-  query := `
+	query := `
     SELECT
       address AS key,
       COUNT(*) AS score
@@ -775,30 +775,30 @@ func getLeaderboardPixels(w http.ResponseWriter, r *http.Request) {
     ORDER BY
       score DESC
     LIMIT $1 OFFSET $2`
-  leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, pageLength, offset)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
-    return
-  }
-  routeutils.WriteDataJson(w, string(leaderboard))
+	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
+		return
+	}
+	routeutils.WriteDataJson(w, string(leaderboard))
 }
 
 // Get the leaderboard for total pixels on each world
 func getLeaderboardWorlds(w http.ResponseWriter, r *http.Request) {
-  pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
-  if err != nil || pageLength <= 0 {
-    pageLength = 25
-  }
-  if pageLength > 50 {
-    pageLength = 50
-  }
-  page, err := strconv.Atoi(r.URL.Query().Get("page"))
-  if err != nil || page <= 0 {
-    page = 1
-  }
-  offset := (page - 1) * pageLength
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
 
-  query := `
+	query := `
     SELECT
       w.name AS key,
       COUNT(*) AS score
@@ -813,36 +813,36 @@ func getLeaderboardWorlds(w http.ResponseWriter, r *http.Request) {
     ORDER BY
       score DESC
     LIMIT $1 OFFSET $2`
-  leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, pageLength, offset)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
-    return
-  }
-  routeutils.WriteDataJson(w, string(leaderboard))
+	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
+		return
+	}
+	routeutils.WriteDataJson(w, string(leaderboard))
 }
 
 // Get the leaderboard for total pixels placed on specific world
 func getLeaderboardPixelsWorld(w http.ResponseWriter, r *http.Request) {
-  worldId := r.URL.Query().Get("worldId")
-  if worldId == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
-    return
-  }
+	worldId := r.URL.Query().Get("worldId")
+	if worldId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
+		return
+	}
 
-  pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
-  if err != nil || pageLength <= 0 {
-    pageLength = 25
-  }
-  if pageLength > 50 {
-    pageLength = 50
-  }
-  page, err := strconv.Atoi(r.URL.Query().Get("page"))
-  if err != nil || page <= 0 {
-    page = 1
-  }
-  offset := (page - 1) * pageLength
+	pageLength, err := strconv.Atoi(r.URL.Query().Get("pageLength"))
+	if err != nil || pageLength <= 0 {
+		pageLength = 25
+	}
+	if pageLength > 50 {
+		pageLength = 50
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageLength
 
-  query := `
+	query := `
     SELECT
       address AS key,
       COUNT(*) AS score
@@ -855,23 +855,23 @@ func getLeaderboardPixelsWorld(w http.ResponseWriter, r *http.Request) {
     ORDER BY
       score DESC
     LIMIT $2 OFFSET $3`
-  leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, worldId, pageLength, offset)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
-    return
-  }
-  routeutils.WriteDataJson(w, string(leaderboard))
+	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, worldId, pageLength, offset)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
+		return
+	}
+	routeutils.WriteDataJson(w, string(leaderboard))
 }
 
 // Get the leaderboard for total pixels placed by specific user
 func getLeaderboardPixelsUser(w http.ResponseWriter, r *http.Request) {
-  address := r.URL.Query().Get("address")
-  if address == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address")
-    return
-  }
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address")
+		return
+	}
 
-  query := `
+	query := `
     SELECT
       COUNT(*) AS score
     FROM
@@ -881,29 +881,29 @@ func getLeaderboardPixelsUser(w http.ResponseWriter, r *http.Request) {
     GROUP BY
       address
     LIMIT 1`
-  leaderboard, err := core.PostgresQueryOne[int](query, address)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
-    return
-  }
-  routeutils.WriteDataJson(w, strconv.Itoa(*leaderboard))
+	leaderboard, err := core.PostgresQueryOne[int](query, address)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
+		return
+	}
+	routeutils.WriteDataJson(w, strconv.Itoa(*leaderboard))
 }
 
 // Get the leaderboard for total pixels placed by specific user on specific world
 func getLeaderboardPixelsWorldUser(w http.ResponseWriter, r *http.Request) {
-  worldId := r.URL.Query().Get("worldId")
-  if worldId == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
-    return
-  }
+	worldId := r.URL.Query().Get("worldId")
+	if worldId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
+		return
+	}
 
-  address := r.URL.Query().Get("address")
-  if address == "" {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address")
-    return
-  }
+	address := r.URL.Query().Get("address")
+	if address == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address")
+		return
+	}
 
-  query := `
+	query := `
     SELECT
       COUNT(*) AS score
     FROM
@@ -913,12 +913,12 @@ func getLeaderboardPixelsWorldUser(w http.ResponseWriter, r *http.Request) {
     GROUP BY
       address
     LIMIT 1`
-  leaderboard, err := core.PostgresQueryOne[int](query, address, worldId)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
-    return
-  }
-  routeutils.WriteDataJson(w, strconv.Itoa(*leaderboard))
+	leaderboard, err := core.PostgresQueryOne[int](query, address, worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
+		return
+	}
+	routeutils.WriteDataJson(w, strconv.Itoa(*leaderboard))
 }
 
 // Add a helper function to check if a world name exists

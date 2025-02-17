@@ -180,14 +180,14 @@ export const StencilsTab = (props: any) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async (e) => {
-      var image = new Image();
+      const image = new Image();
       if (!e.target) {
         return;
       }
       image.src = e.target.result as string;
       image.onload = () => {
-        var height = image.height;
-        var width = image.width;
+        const height = image.height;
+        const width = image.width;
         if (height < 5 || width < 5) {
           alert(
             "Image is too small, minimum size is 5x5. Given size is " +
@@ -325,14 +325,14 @@ export const StencilsTab = (props: any) => {
   }, [props.openedStencilId]);
 
   const updateFavorites = (stencilId: number, favorites: number, favorited: boolean) => {
-    let newFavoriteStencils = favoriteStencils.map((stencil: any) => {
+    const newFavoriteStencils = favoriteStencils.map((stencil: any) => {
       if (stencil.stencilId === stencilId) {
         return { ...stencil, favorites: favorites, favorited: favorited };
       }
       return stencil;
     });
 
-    let newAllStencils = allStencils.map((stencil: any) => {
+    const newAllStencils = allStencils.map((stencil: any) => {
       if (stencil.stencilId === stencilId) {
         return { ...stencil, favorites: favorites, favorited: favorited };
       }

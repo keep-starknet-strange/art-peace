@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { CanvasController } from '../components/canvas/controller';
 import { useLockScroll } from '../app/window';
@@ -5,7 +7,7 @@ import { TabPanel } from "../components/tabs/panel";
 import { Footer } from "../components/footer/footer";
 import { getCanvasColors, getHomeWorlds, getWorld } from "../api/canvas";
 
-export const Canvas = (props: any) => {
+const Canvas = (props: any) => {
   // Game Data
   const updateInterval = 1000;
   const secondsBetweenPlacements =
@@ -19,8 +21,9 @@ export const Canvas = (props: any) => {
   useEffect(() => {
     const fetchWorldData = async () => {
       const worlds = await getHomeWorlds();
-      const homeWorlds = worlds.filter((world) => world.worldId !== openedWorldId).slice(0, 12);
-      let paddedWorlds = [...homeWorlds];
+      // TODO: Once center can be a home world:
+      //   const homeWorlds = worlds.filter((world) => world.worldId !== openedWorldId).slice(0, 12);
+      let paddedWorlds = [...worlds];
       while (paddedWorlds.length < 12) {
         paddedWorlds.push(null);
       }
@@ -59,19 +62,19 @@ export const Canvas = (props: any) => {
   const [availablePixelsUsed, setAvailablePixelsUsed] = useState<number>(0)
   useEffect(() => {
     const updateBasePixelTimer = () => {
-      let timeSinceLastPlacement = Date.now() - lastPlacedTime;
-      let basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
+      const timeSinceLastPlacement = Date.now() - lastPlacedTime;
+      const basePixelAvailable = timeSinceLastPlacement > timeBetweenPlacements;
 
       if (basePixelAvailable) {
         setBasePixelUp(true);
         setBasePixelTimer('00:00');
         clearInterval(interval);
       } else {
-        let secondsTillPlacement = Math.floor(
+        const secondsTillPlacement = Math.floor(
           (timeBetweenPlacements - timeSinceLastPlacement) / 1000
         );
-        let minutes = Math.floor(secondsTillPlacement / 60);
-        let seconds = secondsTillPlacement % 60;
+        const minutes = Math.floor(secondsTillPlacement / 60);
+        const seconds = secondsTillPlacement % 60;
         setBasePixelTimer(`${minutes}:${seconds.toString().padStart(2, '0')}`);
         setBasePixelUp(false);
       }
@@ -126,7 +129,7 @@ export const Canvas = (props: any) => {
     const imageData = ctx.getImageData(0, 0, rawStencilImage.width, rawStencilImage.height);
     const data = imageData.data;
 
-    let imagePalleteIds = [];
+    const imagePalleteIds = [];
     // Convert image data to color palette
     for (let i = 0; i < data.length; i += 4) {
       if (data[i + 3] < 128) {
@@ -173,7 +176,7 @@ export const Canvas = (props: any) => {
     const colorIds = imagePalleteIds;
     
     // TODO: Upload to backend and get template hash back
-    let stencilImage = {
+    const stencilImage = {
       image: paletteImage,
       width: rawStencilImage.width,
       height: rawStencilImage.height
@@ -318,3 +321,5 @@ export const Canvas = (props: any) => {
     </div>
   );
 }
+
+export default Canvas;

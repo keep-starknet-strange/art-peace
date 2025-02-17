@@ -16,11 +16,16 @@ export const PixelInfoTab = (props: any) => {
         return;
       }
       const addressMap = await lookupAddresses([ownerAddress]);
-      if (addressMap.size === 0) {
+      if (!addressMap || addressMap.size === 0) {
         setOwnerUsername(`${ownerAddress.slice(0, 6)}...${ownerAddress.slice(-4)}`);
         return;
       }
-      let ownerUsername = addressMap.entries().next().value[1];
+      const value = addressMap.entries().next().value;
+      if (value === undefined) {
+        setOwnerUsername(`${ownerAddress.slice(0, 6)}...${ownerAddress.slice(-4)}`);
+        return;
+      }
+      const ownerUsername = value[1];
       setOwnerUsername(ownerUsername);
     }
     getOwnerUsername();

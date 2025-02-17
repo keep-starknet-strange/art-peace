@@ -5,7 +5,7 @@ import { sha256 } from "js-sha256";
 export const StencilCreationTab = (props: any) => {
   const hashStencilImage = () => {
     // TODO: Change hash to Poseidon
-    let hash = sha256(props.stencilColorIds).slice(2);
+    const hash = sha256(props.stencilColorIds).slice(2);
     return "0x" + hash;
   }
 
@@ -26,7 +26,7 @@ export const StencilCreationTab = (props: any) => {
                 alt="Stencil"
                 className="Pixel__img mx-auto h-[14rem] w-[20rem] object-contain"
               />
-              <p className="Text__xsmall text-center">(colors converted to world's palette)</p>
+              <p className="Text__xsmall text-center">(colors converted to world&lsquo;s palette)</p>
             </div>
             <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between">
               <p className="Text__medium pr-[1rem]">World&nbsp;&nbsp;&nbsp;&nbsp;:</p>

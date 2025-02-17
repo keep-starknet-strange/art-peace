@@ -30,7 +30,7 @@ export const Canva = (props: any) => {
     ) => {
       try {
         // Try to fetch colors from the backend
-        let canvasColors = colors;
+        const canvasColors = colors;
         if (!canvasRef) return;
         const canvas = canvasRef.current;
         if (!canvas) {
@@ -40,27 +40,27 @@ export const Canva = (props: any) => {
         const context = canvas.getContext("2d");
         context.imageSmoothingEnabled = false;
 
-        let canvasData = await getCanvas(worldId);
-        let colorData = new Uint8Array(canvasData, 0, canvasData.byteLength);
-        let dataArray = [];
-        let bitwidth = process.env.NEXT_PUBLIC_CANVAS_BITWIDTH as unknown as number || 5;
-        let oneByteBitOffset = 8 - bitwidth;
-        let twoByteBitOffset = 16 - bitwidth;
-        let canvasBits = width * height * bitwidth;
+        const canvasData = await getCanvas(worldId);
+        const colorData = new Uint8Array(canvasData, 0, canvasData.byteLength);
+        const dataArray = [];
+        const bitwidth = process.env.NEXT_PUBLIC_CANVAS_BITWIDTH as unknown as number || 5;
+        const oneByteBitOffset = 8 - bitwidth;
+        const twoByteBitOffset = 16 - bitwidth;
+        const canvasBits = width * height * bitwidth;
         for (let bitPos = 0; bitPos < canvasBits; bitPos += bitwidth) {
-          let bytePos = Math.floor(bitPos / 8);
-          let bitOffset = bitPos % 8;
+          const bytePos = Math.floor(bitPos / 8);
+          const bitOffset = bitPos % 8;
           if (bitOffset <= oneByteBitOffset) {
-            let byte = colorData[bytePos];
-            let value = (byte >> (oneByteBitOffset - bitOffset)) & 0b11111;
+            const byte = colorData[bytePos];
+            const value = (byte >> (oneByteBitOffset - bitOffset)) & 0b11111;
             dataArray.push(value);
           } else {
-            let byte = (colorData[bytePos] << 8) | colorData[bytePos + 1];
-            let value = (byte >> (twoByteBitOffset - bitOffset)) & 0b11111;
+            const byte = (colorData[bytePos] << 8) | colorData[bytePos + 1];
+            const value = (byte >> (twoByteBitOffset - bitOffset)) & 0b11111;
             dataArray.push(value);
           }
         }
-        let imageDataArray = [];
+        const imageDataArray = [];
         for (let i = 0; i < dataArray.length; i++) {
           let color = "#" + canvasColors[dataArray[i]] + "FF";
           if (!color) {

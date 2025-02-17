@@ -8,7 +8,7 @@ import (
 type Round3 struct {
 	Width     uint `json:"width"`
 	Height    uint `json:"height"`
-  Pixels    uint `json:"pixels"`
+	Pixels    uint `json:"pixels"`
 	Timer     uint `json:"timer"`
 	StartTime uint `json:"startTime"`
 	EndTime   uint `json:"endTime"`
@@ -22,7 +22,7 @@ var DefaultRoundsConfig = &RoundsConfig{
 	Round3: Round3{
 		Width:     256,
 		Height:    192,
-    Pixels:    5,
+		Pixels:    5,
 		Timer:     5,
 		StartTime: 0,
 		EndTime:   3000000000000,

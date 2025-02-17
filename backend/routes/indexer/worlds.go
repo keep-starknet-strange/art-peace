@@ -21,7 +21,7 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 	uniqueNameHex := event.Event.Data[2][2:] // Remove 0x prefix
 	widthHex := event.Event.Data[3]
 	heightHex := event.Event.Data[4]
-  pixelsPerTimeHex := event.Event.Data[5]
+	pixelsPerTimeHex := event.Event.Data[5]
 	timeBetweenPixelsHex := event.Event.Data[6]
 	colorPaletteLenHex := event.Event.Data[7]
 
@@ -85,11 +85,11 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 		return
 	}
 
-  pixelsPerTime, err := strconv.ParseInt(pixelsPerTimeHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasCreatedEvent", "Failed to parse pixelsPerTimeHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, pixelsPerTimeHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
-    return
-  }
+	pixelsPerTime, err := strconv.ParseInt(pixelsPerTimeHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasCreatedEvent", "Failed to parse pixelsPerTimeHex", canvasIdHex, host, nameHex, uniqueNameHex, widthHex, heightHex, pixelsPerTimeHex, timeBetweenPixelsHex, colorPaletteLenHex, err)
+		return
+	}
 
 	timeBetweenPixels, err := strconv.ParseInt(timeBetweenPixelsHex, 0, 64)
 	if err != nil {
@@ -261,53 +261,53 @@ func revertCanvasHostChangedEvent(event IndexerEvent) {
 }
 
 func processCanvasPixelsPerTimeChangedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  oldPixelsPerTimeHex := event.Event.Data[0]
-  newPixelsPerTimeHex := event.Event.Data[1]
+	canvasIdHex := event.Event.Keys[1]
+	oldPixelsPerTimeHex := event.Event.Data[0]
+	newPixelsPerTimeHex := event.Event.Data[1]
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasPixelsPerTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasPixelsPerTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
+		return
+	}
 
-  newPixelsPerTime, err := strconv.ParseInt(newPixelsPerTimeHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasPixelsPerTimeChangedEvent", "Failed to parse newPixelsPerTimeHex", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
-    return
-  }
+	newPixelsPerTime, err := strconv.ParseInt(newPixelsPerTimeHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasPixelsPerTimeChangedEvent", "Failed to parse newPixelsPerTimeHex", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
+		return
+	}
 
-  // Update Worlds
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET pixels_per_time = $1 WHERE world_id = $2", newPixelsPerTime, canvasId)
-  if err != nil {
-    PrintIndexerError("processCanvasPixelsPerTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
-    return
-  }
+	// Update Worlds
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET pixels_per_time = $1 WHERE world_id = $2", newPixelsPerTime, canvasId)
+	if err != nil {
+		PrintIndexerError("processCanvasPixelsPerTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
+		return
+	}
 }
 
 func revertCanvasPixelsPerTimeChangedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  oldPixelsPerTimeHex := event.Event.Data[0]
-  newPixelsPerTimeHex := event.Event.Data[1]
+	canvasIdHex := event.Event.Keys[1]
+	oldPixelsPerTimeHex := event.Event.Data[0]
+	newPixelsPerTimeHex := event.Event.Data[1]
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertCanvasPixelsPerTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertCanvasPixelsPerTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
+		return
+	}
 
-  oldPixelsPerTime, err := strconv.ParseInt(oldPixelsPerTimeHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertCanvasPixelsPerTimeChangedEvent", "Failed to parse oldPixelsPerTimeHex", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
-    return
-  }
+	oldPixelsPerTime, err := strconv.ParseInt(oldPixelsPerTimeHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertCanvasPixelsPerTimeChangedEvent", "Failed to parse oldPixelsPerTimeHex", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
+		return
+	}
 
-  // Update Worlds
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET pixels_per_time = $1 WHERE world_id = $2", oldPixelsPerTime, canvasId)
-  if err != nil {
-    PrintIndexerError("revertCanvasPixelsPerTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
-    return
-  }
+	// Update Worlds
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET pixels_per_time = $1 WHERE world_id = $2", oldPixelsPerTime, canvasId)
+	if err != nil {
+		PrintIndexerError("revertCanvasPixelsPerTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldPixelsPerTimeHex, newPixelsPerTimeHex, err)
+		return
+	}
 }
 
 func processCanvasTimerChangedEvent(event IndexerEvent) {
@@ -361,103 +361,103 @@ func revertCanvasTimerChangedEvent(event IndexerEvent) {
 }
 
 func processCanvasStartTimeChangedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  oldStartTimeHex := event.Event.Data[0]
-  newStartTimeHex := event.Event.Data[1]
+	canvasIdHex := event.Event.Keys[1]
+	oldStartTimeHex := event.Event.Data[0]
+	newStartTimeHex := event.Event.Data[1]
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasStartTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasStartTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
+		return
+	}
 
-  newStartTime, err := strconv.ParseInt(newStartTimeHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasStartTimeChangedEvent", "Failed to parse newStartTimeHex", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
-    return
-  }
+	newStartTime, err := strconv.ParseInt(newStartTimeHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasStartTimeChangedEvent", "Failed to parse newStartTimeHex", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
+		return
+	}
 
-  // Update Worlds
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET start_time = TO_TIMESTAMP($1) WHERE world_id = $2", newStartTime, canvasId)
-  if err != nil {
-    PrintIndexerError("processCanvasStartTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
-    return
-  }
+	// Update Worlds
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET start_time = TO_TIMESTAMP($1) WHERE world_id = $2", newStartTime, canvasId)
+	if err != nil {
+		PrintIndexerError("processCanvasStartTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
+		return
+	}
 }
 
 func revertCanvasStartTimeChangedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  oldStartTimeHex := event.Event.Data[0]
-  newStartTimeHex := event.Event.Data[1]
+	canvasIdHex := event.Event.Keys[1]
+	oldStartTimeHex := event.Event.Data[0]
+	newStartTimeHex := event.Event.Data[1]
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertCanvasStartTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertCanvasStartTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
+		return
+	}
 
-  oldStartTime, err := strconv.ParseInt(oldStartTimeHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertCanvasStartTimeChangedEvent", "Failed to parse oldStartTimeHex", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
-    return
-  }
+	oldStartTime, err := strconv.ParseInt(oldStartTimeHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertCanvasStartTimeChangedEvent", "Failed to parse oldStartTimeHex", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
+		return
+	}
 
-  // Update Worlds
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET start_time = TO_TIMESTAMP($1) WHERE world_id = $2", oldStartTime, canvasId)
-  if err != nil {
-    PrintIndexerError("revertCanvasStartTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
-    return
-  }
+	// Update Worlds
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET start_time = TO_TIMESTAMP($1) WHERE world_id = $2", oldStartTime, canvasId)
+	if err != nil {
+		PrintIndexerError("revertCanvasStartTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldStartTimeHex, newStartTimeHex, err)
+		return
+	}
 }
 
 func processCanvasEndTimeChangedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  oldEndTimeHex := event.Event.Data[0]
-  newEndTimeHex := event.Event.Data[1]
+	canvasIdHex := event.Event.Keys[1]
+	oldEndTimeHex := event.Event.Data[0]
+	newEndTimeHex := event.Event.Data[1]
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasEndTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasEndTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
+		return
+	}
 
-  newEndTime, err := strconv.ParseInt(newEndTimeHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("processCanvasEndTimeChangedEvent", "Failed to parse newEndTimeHex", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
-    return
-  }
+	newEndTime, err := strconv.ParseInt(newEndTimeHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("processCanvasEndTimeChangedEvent", "Failed to parse newEndTimeHex", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
+		return
+	}
 
-  // Update Worlds
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET end_time = TO_TIMESTAMP($1) WHERE world_id = $2", newEndTime, canvasId)
-  if err != nil {
-    PrintIndexerError("processCanvasEndTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
-    return
-  }
+	// Update Worlds
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET end_time = TO_TIMESTAMP($1) WHERE world_id = $2", newEndTime, canvasId)
+	if err != nil {
+		PrintIndexerError("processCanvasEndTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
+		return
+	}
 }
 
 func revertCanvasEndTimeChangedEvent(event IndexerEvent) {
-  canvasIdHex := event.Event.Keys[1]
-  oldEndTimeHex := event.Event.Data[0]
-  newEndTimeHex := event.Event.Data[1]
+	canvasIdHex := event.Event.Keys[1]
+	oldEndTimeHex := event.Event.Data[0]
+	newEndTimeHex := event.Event.Data[1]
 
-  canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertCanvasEndTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
-    return
-  }
+	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertCanvasEndTimeChangedEvent", "Failed to parse canvasIdHex", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
+		return
+	}
 
-  oldEndTime, err := strconv.ParseInt(oldEndTimeHex, 0, 64)
-  if err != nil {
-    PrintIndexerError("revertCanvasEndTimeChangedEvent", "Failed to parse oldEndTimeHex", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
-    return
-  }
+	oldEndTime, err := strconv.ParseInt(oldEndTimeHex, 0, 64)
+	if err != nil {
+		PrintIndexerError("revertCanvasEndTimeChangedEvent", "Failed to parse oldEndTimeHex", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
+		return
+	}
 
-  // Update Worlds
-  _, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET end_time = TO_TIMESTAMP($1) WHERE world_id = $2", oldEndTime, canvasId)
-  if err != nil {
-    PrintIndexerError("revertCanvasEndTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
-    return
-  }
+	// Update Worlds
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "UPDATE Worlds SET end_time = TO_TIMESTAMP($1) WHERE world_id = $2", oldEndTime, canvasId)
+	if err != nil {
+		PrintIndexerError("revertCanvasEndTimeChangedEvent", "Failed to update Worlds", canvasIdHex, oldEndTimeHex, newEndTimeHex, err)
+		return
+	}
 }
 
 func processCanvasColorAddedEvent(event IndexerEvent) {
@@ -646,7 +646,7 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		}
 	}
 
-  // TODO: Dont resend on revert & reindex
+	// TODO: Dont resend on revert & reindex
 	var message = map[string]string{
 		"worldId":     strconv.Itoa(int(canvasId)),
 		"position":    strconv.Itoa(int(pos)),

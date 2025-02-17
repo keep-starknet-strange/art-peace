@@ -16,7 +16,7 @@ export const AccountTab = (props: any) => {
   const [addressShort, setAddressShort] = useState<string>();
   useEffect(() => {
     if (!address) return;
-    let controller = connector as ControllerConnector;
+    const controller = connector as ControllerConnector;
     controller.username()?.then((n) => setUsername(n));
     setAddressShort(`${address.slice(0, 6)}...${address.slice(-4)}`);
   }, [address]);
@@ -99,7 +99,7 @@ export const AccountTab = (props: any) => {
               </p>
             </div>
             <h3 className="Text__medium underline mt-[1rem] mb-[1rem]">
-              On World "{props.activeWorld.name}"
+              On World &quot;{props.activeWorld.name}&quot;
             </h3>
             <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between">
               <p className="Text__medium pr-[1rem]">Pixels Placed&nbsp;:</p>

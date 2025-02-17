@@ -241,7 +241,7 @@ export const WorldCreationTab = (props: any) => {
                     <div className="w-[3rem] h-[3rem] m-[2px] border-2 border-[rgba(0,0,0,0.2)] rounded-lg shadow-md relative WorldCreation__color"
                       style={{ backgroundColor: `#${palette[0]}` }}
                       onClick={() => {
-                        let newPalette = [...palette];
+                        const newPalette = [...palette];
                         newPalette.splice(0, 1);
                         setPalette(newPalette);
                       }}
@@ -262,7 +262,7 @@ export const WorldCreationTab = (props: any) => {
                         className="w-[3rem] h-[3rem] m-[2px] border-2 border-[rgba(0,0,0,0.2)] rounded-lg shadow-md relative WorldCreation__color"
                         style={{ backgroundColor: `#${color}` }}
                         onClick={() => {
-                          let newPalette = [...palette];
+                          const newPalette = [...palette];
                           newPalette.splice(index + 1, 1);
                           setPalette(newPalette);
                         }}

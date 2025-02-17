@@ -8,7 +8,7 @@ export const getFavoriteStencils = async (address: string, pageLength: number, p
     } else {
       getFavoriteStencilsEndpoint = `${backendUrl}/get-favorite-stencils?address=${address}&pageLength=${pageLength}&page=${page}&worldId=${worldId}`;
     }
-    let favoriteStencils = await fetchJsonData(getFavoriteStencilsEndpoint);
+    const favoriteStencils = await fetchJsonData(getFavoriteStencilsEndpoint);
     return favoriteStencils;
   } catch (error) {
     console.error("Error getting favorite stencils", error);
@@ -24,7 +24,7 @@ export const getNewStencils = async (address: string, pageLength: number, page: 
     } else {
       getNewStencilsEndpoint = `${backendUrl}/get-new-stencils?address=${address}&pageLength=${pageLength}&page=${page}&worldId=${worldId}`;
     }
-    let newStencils = await fetchJsonData(getNewStencilsEndpoint);
+    const newStencils = await fetchJsonData(getNewStencilsEndpoint);
     return newStencils;
   } catch (error) {
     console.error("Error getting new stencils", error);
@@ -40,7 +40,7 @@ export const getTopStencils = async (address: string, pageLength: number, page: 
     } else {
       getTopStencilsEndpoint = `${backendUrl}/get-top-stencils?address=${address}&pageLength=${pageLength}&page=${page}&worldId=${worldId}`;
     }
-    let topStencils = await fetchJsonData(getTopStencilsEndpoint);
+    const topStencils = await fetchJsonData(getTopStencilsEndpoint);
     return topStencils;
   } catch (error) {
     console.error("Error getting top stencils", error);
@@ -56,7 +56,7 @@ export const getHotStencils = async (address: string, pageLength: number, page: 
     } else {
       getHotStencilsEndpoint = `${backendUrl}/get-hot-stencils?address=${address}&pageLength=${pageLength}&page=${page}&worldId=${worldId}`;
     }
-    let hotStencils = await fetchJsonData(getHotStencilsEndpoint);
+    const hotStencils = await fetchJsonData(getHotStencilsEndpoint);
     return hotStencils;
   } catch (error) {
     console.error("Error getting hot stencils", error);
@@ -72,7 +72,7 @@ export const getStencils = async (pageLength: number, page: number, worldId: any
     } else {
       getStencilsEndpoint = `${backendUrl}/get-stencils?pageLength=${pageLength}&page=${page}&worldId=${worldId}`;
     }
-    let stencils = await fetchJsonData(getStencilsEndpoint);
+    const stencils = await fetchJsonData(getStencilsEndpoint);
     return stencils;
   } catch (error) {
     console.error("Error getting stencils", error);
@@ -82,8 +82,8 @@ export const getStencils = async (pageLength: number, page: number, worldId: any
 
 export const getStencil = async (stencilId: string): Promise<any> => {
   try {
-    let getStencilEndpoint = `${backendUrl}/get-stencil?stencilId=${stencilId}`;
-    let stencil = await fetchJsonData(getStencilEndpoint);
+    const getStencilEndpoint = `${backendUrl}/get-stencil?stencilId=${stencilId}`;
+    const stencil = await fetchJsonData(getStencilEndpoint);
     return stencil;
   } catch (error) {
     console.error("Error getting stencil", error);

@@ -61,13 +61,13 @@ func getStencil(w http.ResponseWriter, r *http.Request) {
 	}
 
 	worldId := r.URL.Query().Get("worldId")
-  var stencil []byte
-  var err error
+	var stencil []byte
+	var err error
 	if worldId == "" {
-    stencil, err = core.PostgresQueryOneJson[StencilData]("SELECT * FROM stencils WHERE stencil_id = $1", stencilId)
+		stencil, err = core.PostgresQueryOneJson[StencilData]("SELECT * FROM stencils WHERE stencil_id = $1", stencilId)
 	} else {
-    stencil, err = core.PostgresQueryOneJson[StencilData]("SELECT * FROM stencils WHERE stencil_id = $1 and world_id = $2", stencilId, worldId)
-  }
+		stencil, err = core.PostgresQueryOneJson[StencilData]("SELECT * FROM stencils WHERE stencil_id = $1 and world_id = $2", stencilId, worldId)
+	}
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Stencil")
 		return
@@ -78,10 +78,10 @@ func getStencil(w http.ResponseWriter, r *http.Request) {
 
 func getStencils(w http.ResponseWriter, r *http.Request) {
 	worldId := r.URL.Query().Get("worldId")
-  checkWorldId := true
+	checkWorldId := true
 	if worldId == "" {
-    worldId = "0"
-    checkWorldId = false
+		worldId = "0"
+		checkWorldId = false
 	}
 	worldIdInt, err := strconv.Atoi(worldId)
 	if err != nil {
@@ -105,9 +105,9 @@ func getStencils(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
-  var stencils []byte
-  if checkWorldId {
-	  query := `
+	var stencils []byte
+	if checkWorldId {
+		query := `
           SELECT 
               stencils.*, 
               COALESCE(favortie_count, 0) AS favorites,
@@ -127,9 +127,9 @@ func getStencils(w http.ResponseWriter, r *http.Request) {
           WHERE stencils.world_id = $2
           ORDER BY stencils.stencil_id DESC
           LIMIT $3 OFFSET $4`
-	  stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
-  } else {
-	  query := `
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
+	} else {
+		query := `
           SELECT 
               stencils.*, 
               COALESCE(favortie_count, 0) AS favorites,
@@ -148,8 +148,8 @@ func getStencils(w http.ResponseWriter, r *http.Request) {
           ) stencilfavorites ON stencils.world_id = stencilfavorites.world_id AND stencils.stencil_id = stencilfavorites.stencil_id
           ORDER BY stencils.stencil_id DESC
           LIMIT $2 OFFSET $3`
-	  stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
-  }
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
+	}
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
 		return
@@ -159,10 +159,10 @@ func getStencils(w http.ResponseWriter, r *http.Request) {
 
 func getNewStencils(w http.ResponseWriter, r *http.Request) {
 	worldId := r.URL.Query().Get("worldId")
-  checkWorldId := true
+	checkWorldId := true
 	if worldId == "" {
-    worldId = "0"
-    checkWorldId = false
+		worldId = "0"
+		checkWorldId = false
 	}
 	worldIdInt, err := strconv.Atoi(worldId)
 	if err != nil {
@@ -186,9 +186,9 @@ func getNewStencils(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
-  var stencils []byte
-  if checkWorldId {
-	  query := `
+	var stencils []byte
+	if checkWorldId {
+		query := `
           SELECT 
               stencils.*, 
               COALESCE(stencilfavorites.favorites, 0) AS favorites,
@@ -208,9 +208,9 @@ func getNewStencils(w http.ResponseWriter, r *http.Request) {
           WHERE stencils.world_id = $2
           ORDER BY stencils.stencil_id DESC
           LIMIT $3 OFFSET $4`
-	  stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
-  } else {
-	  query := `
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
+	} else {
+		query := `
           SELECT 
               stencils.*, 
               COALESCE(stencilfavorites.favorites, 0) AS favorites,
@@ -229,8 +229,8 @@ func getNewStencils(w http.ResponseWriter, r *http.Request) {
           ) stencilfavorites ON stencils.world_id = stencilfavorites.world_id AND stencils.stencil_id = stencilfavorites.stencil_id
           ORDER BY stencils.stencil_id DESC
           LIMIT $2 OFFSET $3`
-	  stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
-  }
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
+	}
 	if err != nil {
 		fmt.Println(err)
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
@@ -241,10 +241,10 @@ func getNewStencils(w http.ResponseWriter, r *http.Request) {
 
 func getHotStencils(w http.ResponseWriter, r *http.Request) {
 	worldId := r.URL.Query().Get("worldId")
-  checkWorldId := true
+	checkWorldId := true
 	if worldId == "" {
-    worldId = "0"
-    checkWorldId = false
+		worldId = "0"
+		checkWorldId = false
 	}
 	worldIdInt, err := strconv.Atoi(worldId)
 	if err != nil {
@@ -276,9 +276,9 @@ func getHotStencils(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
-  var stencils []byte
-  if checkWorldId {
-	  query := `
+	var stencils []byte
+	if checkWorldId {
+		query := `
         SELECT
             stencils.*,
             COALESCE(stencilfavorites.favorite_count, 0) AS favorites,
@@ -307,9 +307,9 @@ func getHotStencils(w http.ResponseWriter, r *http.Request) {
         WHERE stencils.world_id = $2
         ORDER BY COALESCE(rank, 0) DESC
         LIMIT $4 OFFSET $5;`
-	  stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, hotLimit, pageLength, offset)
-  } else {
-	  query := `
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, hotLimit, pageLength, offset)
+	} else {
+		query := `
         SELECT
             stencils.*,
             COALESCE(stencilfavorites.favorite_count, 0) AS favorites,
@@ -337,8 +337,8 @@ func getHotStencils(w http.ResponseWriter, r *http.Request) {
         ) rank ON stencils.stencil_id = rank.stencil_id AND stencils.world_id = rank.world_id
         ORDER BY COALESCE(rank, 0) DESC
         LIMIT $3 OFFSET $4;`
-	  stencils, err = core.PostgresQueryJson[StencilData](query, address, hotLimit, pageLength, offset)
-  }
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, hotLimit, pageLength, offset)
+	}
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Hot Worlds")
 		return
@@ -348,10 +348,10 @@ func getHotStencils(w http.ResponseWriter, r *http.Request) {
 
 func getTopStencils(w http.ResponseWriter, r *http.Request) {
 	worldId := r.URL.Query().Get("worldId")
-  checkWorldId := true
+	checkWorldId := true
 	if worldId == "" {
-    worldId = "0"
-    checkWorldId = false
+		worldId = "0"
+		checkWorldId = false
 	}
 	worldIdInt, err := strconv.Atoi(worldId)
 	if err != nil {
@@ -375,9 +375,9 @@ func getTopStencils(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
-  var stencils []byte
-  if checkWorldId {
-	  query := `
+	var stencils []byte
+	if checkWorldId {
+		query := `
           SELECT 
               stencils.*, 
               COALESCE(stencilfavorites.favorite_count, 0) AS favorites,
@@ -398,9 +398,9 @@ func getTopStencils(w http.ResponseWriter, r *http.Request) {
           ORDER BY 
               favorites DESC
           LIMIT $3 OFFSET $4`
-	  stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
-  } else {
-	  query := `
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
+	} else {
+		query := `
           SELECT 
               stencils.*, 
               COALESCE(stencilfavorites.favorite_count, 0) AS favorites,
@@ -420,8 +420,8 @@ func getTopStencils(w http.ResponseWriter, r *http.Request) {
           ORDER BY 
               favorites DESC
           LIMIT $2 OFFSET $3`
-	  stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
-  }
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
+	}
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
 		return
@@ -431,10 +431,10 @@ func getTopStencils(w http.ResponseWriter, r *http.Request) {
 
 func getFavoriteStencils(w http.ResponseWriter, r *http.Request) {
 	worldId := r.URL.Query().Get("worldId")
-  checkWorldId := true
+	checkWorldId := true
 	if worldId == "" {
-    worldId = "0"
-    checkWorldId = false
+		worldId = "0"
+		checkWorldId = false
 	}
 	worldIdInt, err := strconv.Atoi(worldId)
 	if err != nil {
@@ -458,9 +458,9 @@ func getFavoriteStencils(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
-  var stencils []byte
-  if checkWorldId {
-	  query := `
+	var stencils []byte
+	if checkWorldId {
+		query := `
           SELECT * FROM (
             SELECT 
                 stencils.*, 
@@ -483,9 +483,9 @@ func getFavoriteStencils(w http.ResponseWriter, r *http.Request) {
           ORDER BY 
               w.favorites DESC
           LIMIT $3 OFFSET $4`
-    stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
-  } else {
-	  query := `
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
+	} else {
+		query := `
           SELECT * FROM (
             SELECT 
                 stencils.*, 
@@ -508,8 +508,8 @@ func getFavoriteStencils(w http.ResponseWriter, r *http.Request) {
           ORDER BY 
               w.favorites DESC
           LIMIT $2 OFFSET $3`
-    stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
-  }
+		stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
+	}
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve Worlds")
 		return
