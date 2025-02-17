@@ -70,7 +70,7 @@ function App() {
     };
   }, [currentBackgroundSongIndex, hasPlayedYet]);
 
-  const [hasLaunched, setHasLaunched] = useState(process.env.NEXT_PUBLIC_HAS_LAUNCHED === "true" || false);
+  const [hasLaunched, setHasLaunched] = useState(false);
   const [homeClickCount, setHomeClickCount] = useState(0);
 
   return (

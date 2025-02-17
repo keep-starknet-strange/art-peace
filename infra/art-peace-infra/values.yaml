@@ -97,6 +97,6 @@ contracts:
   nft: 0x042dbc0bbdb0faaad99d0b116d0105f9e213ac0d2faf75c878f49d69b544befb
   host: "05bd7adfE8AfaA58300aDC72bF5584b191E236987Fe16A217b1a3e067869A0Aa"
   end: "1727769600"
-  roundNumber: "2"
-  canvasFactory: 0x03ce937f91fa0c88a4023f582c729935a5366385091166a763e53281e45ac410
+  roundNumber: "3"
+  canvasFactory: 0x011195b78f3765b1b8cfe841363e60f2335adf67af2443364d4b15cf8dff60ac
   worldsMode: true

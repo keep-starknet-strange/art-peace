@@ -4,4 +4,4 @@ description: Helm charts for the art/peace infrastructure
 
 type: application
 version: 0.1.2
-appVersion: "v2.1.0"
+appVersion: "v2.2.0"
