@@ -97,6 +97,16 @@ export const Canva = (props: any) => {
     context.fillStyle = colorHex;
     context.fillRect(x, y, 1, 1);
   }
+  useEffect(() => {
+    if (!props.gameUpdate) return;
+    if (props.gameUpdate.type !== "pixel") return;
+    if (props.gameUpdate.worldId !== props.worldId) return;
+    const x = props.gameUpdate.position % props.width;
+    const y = Math.floor(props.gameUpdate.position / props.width);
+    colorPixel(x, y, props.gameUpdate.colorId);
+    props.setLastPlacedTime(props.gameUpdate.timestamp * 1000);
+    props.setGameUpdate(null);
+  }, [props.gameUpdate]);
 
   const addStagingPixel = (x: number, y: number, colorId: number) => {
     let newStaging = props.stagingPixels;

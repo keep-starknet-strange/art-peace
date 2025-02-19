@@ -125,11 +125,20 @@ const Canvas = (props: any) => {
       return;
     }
     const now = Math.floor(Date.now() / 1000);
+    const commitWorldId = openedWorldId;
     await placePixelsCall(account, openedWorldId, stagingPixels, now);
     let stagedPixels = [...stagingPixels];
     while (stagedPixels.length > 0) {
       playPixelPlaced2();
+      const stagedPixel = stagedPixels[0];
       stagedPixels = stagedPixels.slice(1);
+      updateGame({
+        type: "pixel",
+        position: stagedPixel.position,
+        colorId: stagedPixel.colorId,
+        worldId: commitWorldId,
+        timestamp: now
+      });
       setStagingPixels(stagedPixels);
       await new Promise((resolve) => setTimeout(resolve, 150));
     }
@@ -290,6 +299,23 @@ const Canvas = (props: any) => {
     setSelectedBotOption(null);
   }
 
+  const [gameUpdates, setGameUpdates] = useState<any[]>([]);
+  const [gameUpdate, setGameUpdate] = useState<any>(null);
+  const updateGame = (update: any) => {
+    setGameUpdates([...gameUpdates, update]);
+  }
+  useEffect(() => {
+    if (gameUpdates.length === 0) {
+      return;
+    }
+    if (gameUpdate !== null) {
+      return;
+    }
+    const update = gameUpdates[0];
+    setGameUpdate(update);
+    setGameUpdates(gameUpdates.slice(1));
+  }, [gameUpdates, gameUpdate]);
+
   return (
     <div className="relative">
       <CanvasController
@@ -322,6 +348,8 @@ const Canvas = (props: any) => {
         endStencilCreation={endStencilCreation}
         stencilPosition={stencilPosition}
         setStencilCreationSelected={setStencilCreationSelected}
+        gameUpdate={gameUpdate}
+        setGameUpdate={setGameUpdate}
       />
       <TabPanel
         setIsMusicMuted={props.setIsMusicMuted}
@@ -350,6 +378,8 @@ const Canvas = (props: any) => {
         stagingPixels={stagingPixels}
         setStagingPixels={setStagingPixels}
         commitStagingPixels={commitStagingPixels}
+        gameUpdate={gameUpdate}
+        setGameUpdate={setGameUpdate}
       />
       <Footer
         basePixelTimer={basePixelTimer}

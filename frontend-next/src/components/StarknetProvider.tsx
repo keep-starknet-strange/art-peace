@@ -27,6 +27,11 @@ const policies: SessionPolicies = {
           description: 'Place a pixel on the canvas'
         },
         {
+          name: 'place_pixels',
+          entrypoint: 'place_pixels',
+          description: 'Place multiple pixels on the canvas'
+        },
+        {
           name: 'favorite_canvas',
           entrypoint: 'favorite_canvas',
           description: 'Favorite a canvas'
