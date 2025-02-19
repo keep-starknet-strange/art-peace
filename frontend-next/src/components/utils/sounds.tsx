@@ -61,8 +61,12 @@ export const playShutter = () => {
 }
 
 const notification = typeof Audio !== "undefined" ? new Audio("/sounds/notif.wav") : null;
+const notifDelay = 1000;
+let lastNotif = 0;
 export const playNotification = () => {
   if (!notification) return;
+  if (Date.now() - lastNotif < notifDelay) return;
+  lastNotif = Date.now();
   notification.currentTime = 0;
   notification.volume = 0.15 * soundEffectVolume;
   notification.playbackRate = Math.random() * 0.5 + 0.75;

@@ -20,6 +20,7 @@ export const CanvasController = (props: any) => {
     playShutter();
 
     props.clearPixelSelection();
+    props.setOpenedStencil(null);
     props.setOpenedWorldId(world.worldId);
   }
   const [selectedWorldOrigin, setSelectedWorldOrigin] = useState({ x: 0, y: 0 });
@@ -351,6 +352,9 @@ export const CanvasController = (props: any) => {
     }
     return canvasRef;
   }
+  useEffect(() => {
+    props.setWorldCanvasRef(getCurrentCanvasRef());
+  }, [props.openedWorldId, mainCanvasRef, surroundingCanvasRefs]);
   const getSelectedColorInverse = () => {
     if (!props.pixelSelectedMode) return 'rgba(255, 255, 255, 0)';
     if (props.selectedColorId === -1) {
@@ -465,6 +469,24 @@ export const CanvasController = (props: any) => {
             getCanvasRef={getCurrentCanvasRef}
             worldId={props.openedWorldId}
             setStencilCreationSelected={props.setStencilCreationSelected}
+            isCreationOverlay={true}
+          />
+        )}
+        {props.openedStencil && (
+          <StencilCreationOverlay
+            stencilImage={props.openedStencil}
+            canvasWidth={props.width}
+            canvasHeight={height}
+            canvasScale={canvasScale}
+            stencilPosition={props.openedStencil.position}
+            origin={{
+              x: selectedWorldOrigin.x,
+              y: selectedWorldOrigin.y
+            }}
+            getCanvasRef={getCurrentCanvasRef}
+            worldId={props.openedWorldId}
+            setOpenedStencil={props.setOpenedStencil}
+            isCreationOverlay={false}
           />
         )}
         {props.surroundingWorlds &&

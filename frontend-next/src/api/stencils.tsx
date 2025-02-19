@@ -106,3 +106,14 @@ export const addStencilData = async (worldId: number, width: number, height: num
     return null;
   }
 }
+
+export const getStencilPixelData = async (hash: string): Promise<any> => {
+  try {
+    const getStencilPixelDataEndpoint = `${backendUrl}/get-stencil-pixel-data?hash=${hash}`;
+    const pixelData = await fetchJsonData(getStencilPixelDataEndpoint);
+    return pixelData;
+  } catch (error) {
+    console.error("Error getting stencil pixel data", error);
+    return null;
+  }
+}

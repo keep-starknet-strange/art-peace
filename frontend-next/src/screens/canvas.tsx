@@ -61,6 +61,7 @@ const Canvas = (props: any) => {
     fetchWorldData();
   }, [openedWorldId]);
   const [worldColors, setWorldColors] = useState([] as string[]);
+  const [worldCanvasRef, setWorldCanvasRef] = useState<any>(null);
   useEffect(() => {
     const getColors = async (worldId: number) => {
       const canvasColors = await getCanvasColors(worldId);
@@ -259,6 +260,7 @@ const Canvas = (props: any) => {
     setRawStencilImage(null);
     setActiveTab("Stencils");
   }
+  const [openedStencil, setOpenedStencil] = useState<any>(null);
   
   // Worlds
   const [worldCreationMode, setWorldCreationMode] = useState<boolean>(false);
@@ -345,11 +347,14 @@ const Canvas = (props: any) => {
         stencilCreationSelected={stencilCreationSelected}
         setStencilPosition={setStencilPosition}
         stencilImage={stencilImage}
+        openedStencil={openedStencil}
+        setOpenedStencil={setOpenedStencil}
         endStencilCreation={endStencilCreation}
         stencilPosition={stencilPosition}
         setStencilCreationSelected={setStencilCreationSelected}
         gameUpdate={gameUpdate}
         setGameUpdate={setGameUpdate}
+        setWorldCanvasRef={setWorldCanvasRef}
       />
       <TabPanel
         setIsMusicMuted={props.setIsMusicMuted}
@@ -372,6 +377,8 @@ const Canvas = (props: any) => {
         stencilColorIds={stencilColorIds}
         setRawStencilImage={setRawStencilImage}
         stencilCreationSelected={stencilCreationSelected}
+        openedStencil={openedStencil}
+        setOpenedStencil={setOpenedStencil}
         startWorldCreation={startWorldCreation}
         endWorldCreation={endWorldCreation}
         worldCreationMode={worldCreationMode}
@@ -394,12 +401,18 @@ const Canvas = (props: any) => {
         tabs={tabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        activeWorld={activeWorld}
         worldId={openedWorldId}
         toggleBotMode={toggleBotMode}
         botMode={botMode}
         botOptions={botOptions}
         selectedBotOption={selectedBotOption}
         setSelectedBotOption={setSelectedBotOption}
+        openedStencil={openedStencil}
+        canvasRef={worldCanvasRef}
+        worldColors={worldColors}
+        stagingPixels={stagingPixels}
+        setStagingPixels={setStagingPixels}
       />
     </div>
   );

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { playSoftClick2 } from '../utils/sounds';
+import { backendUrl } from '../../api/api';
 
 export const StencilCreationOverlay = (props: any) => {
   const [posX, setPosX] = useState(0);
@@ -34,6 +36,7 @@ export const StencilCreationOverlay = (props: any) => {
         props.setStencilPosition(y * props.canvasWidth + x);
       }
     };
+    if (!props.isCreationOverlay) return;
     if (props.stencilCreationMode && !props.stencilCreationSelected) {
       window.addEventListener('mousemove', updateFromEvent);
     }
@@ -79,6 +82,7 @@ export const StencilCreationOverlay = (props: any) => {
         props.setStencilCreationSelected(true);
       }
     };
+    if (!props.isCreationOverlay) return;
     window.addEventListener('mouseup', mouseUp);
 
     return () => {
@@ -114,7 +118,11 @@ export const StencilCreationOverlay = (props: any) => {
       <div
         className="bg-cover bg-no-repeat bg-center Pixel__img opacity-[0.4]"
         style={{
-          backgroundImage: `url(${props.stencilImage.image})`,
+          backgroundImage: `url(${
+            props.isCreationOverlay
+            ? props.stencilImage.image
+            : backendUrl + "/stencils/stencil-" + props.stencilImage.hash + ".png"
+          })`,
           width: '100%',
           height: '100%'
         }}
@@ -133,7 +141,14 @@ export const StencilCreationOverlay = (props: any) => {
           fontSize: `calc(0.5rem * ${props.canvasScale})`,
           outline: `calc(0.05rem * ${props.canvasScale}) solid rgba(0,0,0,0.3)`
         }}
-        onClick={props.endStencilCreation}
+        onClick={() => {
+          playSoftClick2();
+          if (props.isCreationOverlay) {
+            props.endStencilCreation();
+          } else {
+            props.setOpenedStencil(null);
+          }
+        }}
       >
         <p
           className="text-black"

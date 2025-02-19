@@ -99,7 +99,6 @@ export const GameController = (props: any) => {
   };
 
   const cancelSelector = () => {
-    playSoftClick2();
     props.setSelectedColorId(-1);
     props.setSelectorMode(false);
     setPlacementMode(false);
@@ -162,7 +161,10 @@ export const GameController = (props: any) => {
               ></div>
               <div
                 className="Button__close ml-[1rem]"
-                onClick={() => cancelSelector()}
+                onClick={() => {
+                  playSoftClick2();
+                  cancelSelector();
+                }}
               >
                 x
               </div>
@@ -193,6 +195,14 @@ export const GameController = (props: any) => {
           botMode={props.botMode}
           toggleBotMode={props.toggleBotMode}
           setSelectedBotOption={props.setSelectedBotOption}
+          openedStencil={props.openedStencil}
+          activeWorld={props.activeWorld}
+          canvasRef={props.canvasRef}
+          worldColors={props.worldColors}
+          stagingPixels={props.stagingPixels}
+          setStagingPixels={props.setStagingPixels}
+          availablePixelsUsed={props.availablePixelsUsed}
+          availablePixels={props.availablePixels}
         />
       )}
       {props.botMode && props.selectedBotOption === "AI Agent" && (

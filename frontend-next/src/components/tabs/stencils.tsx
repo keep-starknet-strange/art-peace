@@ -43,14 +43,14 @@ const StencilsMainSection = (props: any) => {
             Please login to view your favorite stencils
           </p>
         )}
-        {props.activeStencil && !props.activeStencil.favorited && (
+        {props.openedStencil && !props.openedStencil.favorited && (
           <StencilItem
-            key={props.activeStencil.stencilId}
-            stencil={props.activeStencil}
+            key={props.openedStencil.stencilId}
+            stencil={props.openedStencil}
             image={
               backendUrl +
               "/stencils/stencil-" +
-              props.activeStencil.hash +
+              props.openedStencil.hash +
               ".png"
             }
             {...props}
@@ -153,18 +153,6 @@ const StencilsExpandedSection = (props: any) => {
 
 export const StencilsTab = (props: any) => {
   const { address } = useAccount();
-  const [queryAddress, setQueryAddress] = useState("0".repeat(64));
-  useEffect(() => {
-    if (!address) {
-      setQueryAddress("");
-      return;
-    }
-    // Remove 0x prefix and convert to lowercase
-    let newAddr = address.slice(2).toLowerCase();
-    // Left pad with 0s to 64 characters
-    newAddr = newAddr.padStart(64, "0");
-    setQueryAddress(newAddr);
-  }, [address]);
 
   const [favoriteStencils, setFavoriteStencils] = useState([] as any[]);
   const [allStencils, setAllStencils] = useState([] as any[]);
@@ -222,20 +210,25 @@ export const StencilsTab = (props: any) => {
 
   useEffect(() => {
     async function getMyStencils() {
+      if (!address) {
+        return;
+      }
       try {
-        const result = await getFavoriteStencils(
-          queryAddress,
+        const stencils = await getFavoriteStencils(
+          address.slice(2),
           myStencilsPagination.pageLength,
           myStencilsPagination.page,
           showOnlyThisWorld ? props.worldId : null
         );
 
-        if (result.data) {
+        if (stencils) {
           if (myStencilsPagination.page === 1) {
-            setFavoriteStencils(result.data);
+            setFavoriteStencils(stencils);
           } else {
-            setFavoriteStencils([...favoriteStencils, ...result.data]);
+            setFavoriteStencils([...favoriteStencils, ...stencils]);
           }
+        } else if (myStencilsPagination.page === 1) {
+          setFavoriteStencils([]);
         }
       } catch (error) {
         console.log("Error fetching Stencils", error);
@@ -243,7 +236,8 @@ export const StencilsTab = (props: any) => {
     }
     getMyStencils();
   }, [
-    queryAddress,
+    address,
+    props.worldId,
     myStencilsPagination.page,
     myStencilsPagination.pageLength
   ]);
@@ -258,42 +252,45 @@ export const StencilsTab = (props: any) => {
       return;
     }
     async function getFilterStencils() {
+      if (!address) {
+        return;
+      }
       try {
-        let result;
+        let stencils;
         if (activeFilter === "hot") {
-          result = await getHotStencils(
-            queryAddress,
+          stencils = await getHotStencils(
+            address.slice(2),
             allStencilsPagination.pageLength,
             allStencilsPagination.page,
             showOnlyThisWorld ? props.worldId : null
           );
         } else if (activeFilter === "new") {
-          result = await getNewStencils(
-            queryAddress,
+          stencils = await getNewStencils(
+            address.slice(2),
             allStencilsPagination.pageLength,
             allStencilsPagination.page,
             showOnlyThisWorld ? props.worldId : null
           );
         } else if (activeFilter === "top") {
-          result = await getTopStencils(
-            queryAddress,
+          stencils = await getTopStencils(
+            address.slice(2),
             allStencilsPagination.pageLength,
             allStencilsPagination.page,
             showOnlyThisWorld ? props.worldId : null
           );
         } else {
-          result = await getStencils(
+          stencils = await getStencils(
             allStencilsPagination.pageLength,
             allStencilsPagination.page,
             showOnlyThisWorld ? props.worldId : null
           );
         }
 
-        if (result.data) {
+        if (stencils) {
           if (allStencilsPagination.page === 1) {
-            setAllStencils(result.data);
+            setAllStencils(stencils);
           } else {
-            const newStencils = result.data.filter(
+            const newStencils = stencils.filter(
               (stencil: any) =>
                 !allStencils.some(
                   (existingStencil) => existingStencil.id === stencil.id
@@ -301,13 +298,15 @@ export const StencilsTab = (props: any) => {
             );
             setAllStencils([...allStencils, ...newStencils]);
           }
+        } else if (allStencilsPagination.page === 1) {
+          setAllStencils([]);
         }
       } catch (error) {
         console.log("Error fetching Stencils", error);
       }
     }
     getFilterStencils();
-  }, [queryAddress, expanded, allStencilsPagination]);
+  }, [address, props.worldId, expanded, allStencilsPagination]);
 
   const resetPagination = () => {
     setAllStencilsPagination((prev) => ({
@@ -319,18 +318,6 @@ export const StencilsTab = (props: any) => {
   useEffect(() => {
     resetPagination();
   }, [activeFilter]);
-
-  const [activeStencil, setActiveStencil] = useState(null);
-  useEffect(() => {
-    const getActiveStencil = async () => {
-      if (!props.openedStencilId) {
-        return;
-      }
-      const stencil = await getStencil(props.openedStencilId);
-      setActiveStencil(stencil);
-    };
-    getActiveStencil();
-  }, [props.openedStencilId]);
 
   const updateFavorites = (stencilId: number, favorites: number, favorited: boolean) => {
     const newFavoriteStencils = favoriteStencils.map((stencil: any) => {
@@ -377,7 +364,8 @@ export const StencilsTab = (props: any) => {
       uploadStencil={uploadStencil}
       inputFile={inputFile}
       handleFileChange={handleFileChange}
-      activeStencil={activeStencil}
+      openedStencil={props.openedStencil}
+      setOpenedStencil={props.setOpenedStencil}
     >
     </ExpandableTab>
   );

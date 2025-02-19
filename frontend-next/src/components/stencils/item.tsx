@@ -5,6 +5,7 @@ import { useAccount } from '@starknet-react/core';
 import FavoriteIcon from "../../../public/icons/Favorite.png";
 import FavoritedIcon from "../../../public/icons/Favorited.png";
 import Info from "../../../public/icons/Info.png";
+import { playSoftClick2 } from "../utils/sounds";
 
 export const StencilItem = (props: any) => {
   const { address } = useAccount();
@@ -12,15 +13,59 @@ export const StencilItem = (props: any) => {
   const [creatorText, setCreatorText] = useState("");
 
   const selectStencil = () => {
-    console.log("Selecting stencil", props.stencil.stencilId);
+    playSoftClick2();
+    props.setOpenedStencil(props.stencil);
   }
 
   const handleFavoritePress = () => {
+    playSoftClick2();
     console.log("Favorite pressed");
   }
 
   const [showInfo, setShowInfo] = useState(false);
 
+  return (
+    <div
+      className="relative w-full h-[20rem] bg-[rgba(255,255,255,0.4)]
+        border-2 border-[#00000030] rounded-lg shadow-md
+        overflow-hidden cursor-pointer"
+      onClick={selectStencil}
+    >
+      <Image
+        loader={() => props.image}
+        src={props.image}
+        alt={`stencil-image-${props.stencil.stencilId}`}
+        width={props.stencil.width}
+        height={props.stencil.height}
+        className="w-full h-full object-contain m-0 p-0 Pixel__img bg-[#00000040]"
+      />
+      <div className="absolute bottom-0 right-0 w-full flex flex-row justify-end items-center">
+        <button className="Button__primary h-[3rem]" onClick={handleFavoritePress}>
+          <Image
+            src={props.stencil.favorited ? FavoritedIcon : FavoriteIcon}
+            alt="Favorite"
+            width={24}
+            height={24}
+            className="p-0 m-0"
+          />
+          <p className="Text__medium p-0 m-0 text-center w-[3.5rem]">{props.stencil.favorites}</p>
+        </button>
+        <button className="Button__circle h-[3rem] w-[3rem] m-2" onClick={() => {
+          playSoftClick2();
+          setShowInfo(!showInfo);
+        }}>
+          <Image
+            src={Info}
+            alt="Info"
+            width={24}
+            height={24}
+            className="p-0 m-0"
+          />
+        </button>
+      </div>
+    </div>
+  );
+  /*
   return (
     <div
       className={`flex flex-row p-0 m-[0.5rem] border-[1px solid rgba(0,0,0,0.4)] shadow-md relative h-[22rem] overflow-hidden bg-[rgba(255,255,255,0.7)]
@@ -33,8 +78,11 @@ export const StencilItem = (props: any) => {
       <div className="relative w-full h-full">
         <div className="flex flex-col w-full h-full justify-center items-center p-0 m-0">
           <Image
-            src={props.stencil.image}
+            loader={() => props.image}
+            src={props.image}
             alt={`stencil-image-${props.stencil.stencilId}`}
+            width={props.stencil.width}
+            height={props.stencil.height}
             className="w-full h-auto block object-contain m-0 p-0 Pixel__img"
           />
           <div className="absolute bottom-0 right-0 my-[0.5rem] w-full">
@@ -72,6 +120,8 @@ export const StencilItem = (props: any) => {
                     <Image
                       src={Info}
                       alt="Info"
+                      width={24}
+                      height={24}
                       style={{
                         backgroundColor: "rgba(255, 255, 255, 0.5)",
                         borderRadius: "50%",
@@ -128,4 +178,5 @@ export const StencilItem = (props: any) => {
       </CSSTransition>
     </div>
   );
+  */
 };
