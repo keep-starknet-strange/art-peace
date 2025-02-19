@@ -124,7 +124,7 @@ const Canvas = (props: any) => {
     if (stagingPixels.length === 0) {
       return;
     }
-    let now = Math.floor(Date.now() / 1000);
+    const now = Math.floor(Date.now() / 1000);
     await placePixelsCall(account, openedWorldId, stagingPixels, now);
     let stagedPixels = [...stagingPixels];
     while (stagedPixels.length > 0) {

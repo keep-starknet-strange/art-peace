@@ -50,8 +50,8 @@ export const placePixelsCall =
       console.error("Account not connected");
       return;
     }
-    let pixel_positions = [];
-    let pixel_colors = [];
+    const pixel_positions = [];
+    const pixel_colors = [];
     for (let i = 0; i < pixels.length; i++) {
       pixel_positions.push(pixels[i].position);
       pixel_colors.push(pixels[i].colorId);

@@ -17,7 +17,7 @@ export const StencilCreationTab = (props: any) => {
 
   const submit = async () => {
     playSoftClick2();
-    let hash = hashStencilImage();
+    const hash = hashStencilImage();
     if (!account) return;
     try {
       await addStencilCall(account, props.worldId, hash, props.stencilImage.width, props.stencilImage.height, props.stencilPosition);
@@ -25,7 +25,7 @@ export const StencilCreationTab = (props: any) => {
       console.error("Error submitting stencil:", error);
       return;
     }
-    let res = await addStencilData(props.worldId, props.stencilImage.width, props.stencilImage.height, props.stencilColorIds.toString());
+    const res = await addStencilData(props.worldId, props.stencilImage.width, props.stencilImage.height, props.stencilColorIds.toString());
     console.log("Stencil added to DB:", res);
     props.endStencilCreation();
     props.setActiveTab("Stencils");

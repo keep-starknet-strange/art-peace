@@ -42,7 +42,7 @@ export const LeaderboardTab = (props: any) => {
           res = await getLeaderboardPixelsWorld(leaderboardPagination.limit, leaderboardPagination.page, props.activeWorld ? props.activeWorld.worldId : 0);
           setUseKeyNames(true);
         }
-        let newKeyNameMap = keyNameMap;
+        const newKeyNameMap = keyNameMap;
         if (res && res.length !== 0) {
           res.forEach((stat: any) => {
             newKeyNameMap[stat.key] = "0x" + stat.key.slice(0, 4) + "..." + stat.key.slice(-4);
