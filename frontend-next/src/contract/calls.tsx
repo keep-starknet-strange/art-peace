@@ -56,7 +56,7 @@ export const placePixelsCall =
       pixel_positions.push(pixels[i].position);
       pixel_colors.push(pixels[i].colorId);
     }
-    const calldata = [worldId, pixels.length, pixel_positions, pixels.length, pixel_colors, now];
+    const calldata = [worldId, pixels.length, ...pixel_positions, pixels.length, ...pixel_colors, now];
     printCalldata(calldata);
     const result = await account.execute([
       {
