@@ -1,4 +1,5 @@
 import { GameController } from "./controller";
+import { playSoftClick2 } from "../utils/sounds";
 
 export const Footer = (props: any) => {
   return (
@@ -12,7 +13,10 @@ export const Footer = (props: any) => {
               `Button__primary Text__large py-[0.7rem] px-[1.5rem]` +
               (props.activeTab === name ? "TabsFooter__tab--active " : " ")
             }
-            onClick={() => props.setActiveTab(name)}
+            onClick={() => {
+              props.setActiveTab(name);
+              playSoftClick2();
+            }}
           >
             {name}
           </button>

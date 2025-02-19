@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 
 import { StarknetProvider } from "../components/StarknetProvider";
 import { usePreventZoom } from './window';
+import { playSoftClick2, getMusicVolume } from '../components/utils/sounds';
 // TODO: Proper routing here
 import Canvas from "../screens/canvas";
 import Teaser from "../screens/teaser";
@@ -24,6 +25,7 @@ function App() {
   ];
   const [currentBackgroundSong, setCurrentBackgroundSong] = useState(null as HTMLAudioElement | null);
   const [currentBackgroundSongIndex, setCurrentBackgroundSongIndex] = useState(0);
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
   useEffect(() => {
     const playSong = async () => {
       if (currentBackgroundSong) {
@@ -31,7 +33,7 @@ function App() {
       }
       const audio = new Audio(musicList[currentBackgroundSongIndex]);
       audio.loop = false;
-      audio.volume = 0.25;
+      audio.volume = 0.25 * getMusicVolume();
       try {
         await audio.play();
         setCurrentBackgroundSong(audio);
@@ -52,13 +54,19 @@ function App() {
       setHasPlayedYet(true);
     }
   }, [currentBackgroundSong]);
+  useEffect(() => {
+    let rndIndex = Math.floor(Math.random() * musicList.length);
+    while (rndIndex === currentBackgroundSongIndex) {
+      rndIndex = Math.floor(Math.random() * musicList.length);
+    }
+    setCurrentBackgroundSongIndex(rndIndex);
+  }, [isMusicMuted]);
 
   const [hasPlayedYet, setHasPlayedYet] = useState(false);
   useEffect(() => {
     // Change the song every 5 minutes
     const refreshInterval = hasPlayedYet ? 4 * 60 * 1000 : 3000;
     const interval = setInterval(() => {
-      console.log("Changing song");
       let rndIndex = Math.floor(Math.random() * musicList.length);
       while (rndIndex === currentBackgroundSongIndex) {
         rndIndex = Math.floor(Math.random() * musicList.length);
@@ -88,6 +96,7 @@ function App() {
                 if (newCount >= 3) {
                   setHasLaunched(true);
                 }
+                playSoftClick2();
                 // TODO: window.location.href = '/';
               }}
             />
@@ -96,7 +105,7 @@ function App() {
               ">3</p>
           </div>
         </div>
-        {hasLaunched && <Canvas />}
+        {hasLaunched && <Canvas setIsMusicMuted={setIsMusicMuted} />}
         {!hasLaunched && <Teaser />}
       </div>
     </div>

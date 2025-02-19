@@ -44,7 +44,7 @@ export const getHotWorlds = async (address: string, pageLength: number, page: nu
   }
 }
 
-export const getWorlds = async (pageLength: number, page: number, worldId: any = null): Promise<any> => {
+export const getWorlds = async (pageLength: number, page: number): Promise<any> => {
   try {
     const getWorldsEndpoint = `${backendUrl}/get-worlds?pageLength=${pageLength}&page=${page}`;
     const worlds = await fetchJsonData(getWorldsEndpoint);
@@ -62,6 +62,28 @@ export const getWorld = async (worldId: string): Promise<any> => {
     return world;
   } catch (error) {
     console.error("Error getting world", error);
+    return null;
+  }
+}
+
+export const getHomeWorlds = async (): Promise<any[]> => {
+  try {
+    const homeWorldsEndpoint = `${backendUrl}/get-home-worlds`;
+    const homeWorlds = await fetchJsonData(homeWorldsEndpoint);
+    return homeWorlds;
+  } catch (error) {
+    console.error("Error getting home worlds", error);
+    return [];
+  }
+}
+
+export const getRoundsConfig = async (): Promise<any> => {
+  try {
+    const roundsConfigEndpoint = `${backendUrl}/get-rounds-config`;
+    const roundsConfig = await fetchJsonData(roundsConfigEndpoint);
+    return roundsConfig;
+  } catch (error) {
+    console.error("Error getting rounds config", error);
     return null;
   }
 }

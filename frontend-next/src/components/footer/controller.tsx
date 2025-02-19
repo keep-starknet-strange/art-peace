@@ -6,6 +6,7 @@ import { getCanvasColors } from "../../api/canvas";
 import bot from "../../../public/icons/bot.png";
 import { AIController } from "./ai-agent";
 import { StencilBotController } from "./stencil-bot";
+import { playNotification, playSoftClick2 } from "../utils/sounds";
 
 export const GameController = (props: any) => {
   const { address } = useAccount();
@@ -53,6 +54,7 @@ export const GameController = (props: any) => {
       controllerText !== "Out of Pixels" as string &&
       controllerText !== "Login to Play" as string
     ) {
+      playNotification();
       setEnded(true);
     } else {
       setEnded(false);
@@ -67,6 +69,7 @@ export const GameController = (props: any) => {
   ]);
 
   const toSelectorMode = async (event: any) => {
+    playSoftClick2();
     event.preventDefault();
     // Only works if not hitting the close button
     if (event.target.classList.contains("Button__close")) {
@@ -90,11 +93,13 @@ export const GameController = (props: any) => {
   };
 
   const selectColor = (idx: number) => {
+    playSoftClick2();
     props.setSelectedColorId(idx);
     props.setSelectorMode(false);
   };
 
   const cancelSelector = () => {
+    playSoftClick2();
     props.setSelectedColorId(-1);
     props.setSelectorMode(false);
     setPlacementMode(false);
@@ -140,7 +145,7 @@ export const GameController = (props: any) => {
           <p className="m-0 p-[0.25rem]">{controllerText}</p>
           {props.availablePixels > (props.basePixelUp ? 1 : 0) && (
             <div className="flex flex-row justify-center items-center">
-              <div className="mx-1 h-[2.4rem] w-[0.5rem] rounded-[0.25rem] Gradient__secondary"></div>
+              <div className="mx-3 h-[2.4rem] w-[0.5rem] rounded-[0.25rem] bg-[#00000060]"></div>
               <p className="m-0 p-[0.25rem]">
                 {props.availablePixels - props.availablePixelsUsed} left
               </p>
@@ -171,7 +176,10 @@ export const GameController = (props: any) => {
             <div className="ml-[0.5rem] first:ml-0" key={idx}>
             <div
               className="Button__primary Text__large"
-              onClick={() => option.selectOption()}
+              onClick={() => {
+                playSoftClick2();
+                option.selectOption();
+              }}
             >
               <p className="m-0 p-[0.25rem]">{option.name}</p>
             </div>
@@ -198,7 +206,10 @@ export const GameController = (props: any) => {
       {address && (
         <div
           className="ml-[0.5rem] Button__circle relative"
-          onClick={props.toggleBotMode}
+          onClick={() => {
+            playSoftClick2();
+            props.toggleBotMode();
+          }}
         >
           {props.botMode && (
             <>

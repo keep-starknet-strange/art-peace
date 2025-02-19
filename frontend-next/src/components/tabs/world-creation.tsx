@@ -1,12 +1,33 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useAccount } from "@starknet-react/core";
 import { BasicTab } from "./basic";
+import { createCanvasCall } from "../../contract/calls";
+import { getRoundsConfig } from "../../api/worlds";
 import plus from "../../../public/icons/Edit.png";
 import "./world-creation.css";
+import { playSoftClick2 } from "../utils/sounds";
 
 export const WorldCreationTab = (props: any) => {
+  const { account, address } = useAccount();
+  const [usingCompetitionConfig, setUsingCompetitionConfig] = useState(true);
   const submit = async () => {
+    playSoftClick2();
     console.log("Submitting world...");
+    let hexPalette = palette.map((color) => `0x${color.toLowerCase()}`);
+    if (!usingCompetitionConfig) {
+      await createCanvasCall(account, address as string, toHex(worldName), toHex(worldSlug), worldWidth, worldHeight, pixelsPer, timer, hexPalette, Math.floor(start / 1000), Math.floor(end / 1000));
+    } else {
+      await createCanvasCall(account, address as string, toHex(worldName), toHex(worldSlug), getCompetitionWidth(), getCompetitionHeight(), getCompetitionPixelsPer(), getCompetitionTimer(), hexPalette, Math.floor(getCompetitionStart() / 1000), Math.floor(getCompetitionEnd() / 1000));
+    }
+  };
+
+  const toHex = (str: string) => {
+    let hex = '0x';
+    for (let i = 0; i < str.length; i++) {
+      hex += '' + str.charCodeAt(i).toString(16);
+    }
+    return hex;
   };
 
   const [timeUnit, setTimeUnit] = useState("Days");
@@ -41,6 +62,7 @@ export const WorldCreationTab = (props: any) => {
     'C1D9E6'
   ];
   const defaultWorldSize = process.env.NEXT_PUBLIC_DEFAULT_WORLD_SIZE as unknown as number || 128;
+  const defaultPixelsPer = process.env.NEXT_PUBLIC_DEFAULT_PIXELS_PER as unknown as number || 5;
   const defaultTimer = process.env.NEXT_PUBLIC_DEFAULT_TIMER as unknown as number || 5;
   const minPaletteSize = 2;
   const maxPaletteSize = 25;
@@ -62,6 +84,10 @@ export const WorldCreationTab = (props: any) => {
       setValidationMessage('Invalid world height: 16-1024');
       return false;
     }
+    if (pixelsPer < 1) {
+      setValidationMessage('Invalid pixels per: 1+ required');
+      return false;
+    }
     if (timer < 1) {
       setValidationMessage('Invalid timer: 1+ seconds required');
       return false;
@@ -76,8 +102,10 @@ export const WorldCreationTab = (props: any) => {
 
   const [isCompetitionWorld, setIsCompetitionWorld] = useState(true);
   const [worldName, setWorldName] = useState('');
+  const [worldSlug, setWorldSlug] = useState('');
   const [worldWidth, setWorldWidth] = useState(defaultWorldSize);
   const [worldHeight, setWorldHeight] = useState(defaultWorldSize);
+  const [pixelsPer, setPixelsPer] = useState(defaultPixelsPer);
   const [timer, setTimer] = useState(defaultTimer);
   const [newColorType, setNewColorType] = useState("Color");
   const [newColor, setNewColor] = useState('');
@@ -107,6 +135,7 @@ export const WorldCreationTab = (props: any) => {
       setNameError('Name must be between 1 and 31 characters');
       return false;
     }
+    setWorldSlug(name.toLowerCase().replace(/\s/g, '-'));
     setNameError('');
     return true;
   };
@@ -132,6 +161,7 @@ export const WorldCreationTab = (props: any) => {
     setWorldName('');
     setWorldWidth(defaultWorldSize);
     setWorldHeight(defaultWorldSize);
+    setPixelsPer(defaultPixelsPer);
     setTimer(defaultTimer);
     setPalette(defaultPalette);
     setStart(new Date().getTime());
@@ -147,22 +177,17 @@ export const WorldCreationTab = (props: any) => {
       setIsValidName(true);
     }
   }, [worldName]);
-  const [competitionConfig, setCompetitionConfig] = useState(null as any);
 
-  // Fetch competition config when component mounts
+  const [competitionConfig, setCompetitionConfig] = useState(null as any);
   useEffect(() => {
     const fetchRoundsConfig = async () => {
-      // TODO
-      // try {
-      //   const response = await fetchWrapper('get-rounds-config');
-      //   if (response.data) {
-      //     setCompetitionConfig(response.data.round3);
-      //   }
-      // } catch (error) {
-      //   console.error('Failed to fetch competition config:', error);
-      // }
-    };
-
+      try {
+        const roundsConfig = await getRoundsConfig();
+        setCompetitionConfig(roundsConfig.round3);
+      } catch (error) {
+        console.error('Failed to fetch competition config:', error);
+      }
+    }
     fetchRoundsConfig();
   }, []);
 
@@ -173,6 +198,10 @@ export const WorldCreationTab = (props: any) => {
   const getCompetitionHeight = () => {
     return competitionConfig?.height || defaultWorldSize; // Fallback to default
   };
+
+  const getCompetitionPixelsPer = () => {
+    return competitionConfig?.pixelsPer || defaultPixelsPer; // Fallback to default
+  }
 
   // Use competition values from config when available
   const getCompetitionTimer = () => {
@@ -197,7 +226,7 @@ export const WorldCreationTab = (props: any) => {
     if (worldName.length > 0) {
       setFormComplete(true);
     }
-  }, [worldName, worldWidth, worldHeight, timer, palette]);
+  }, [worldName, worldWidth, worldHeight, pixelsPer, timer, palette]);
 
   return (
     <BasicTab title="Create a World" {...props} style={{ marginBottom: "0.5rem" }} onClose={props.endWorldCreation}>
@@ -215,8 +244,8 @@ export const WorldCreationTab = (props: any) => {
                 <p className="Text__small text-right">{getCompetitionWidth()}x{getCompetitionHeight()}</p>
               </div>
               <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] flex flex-row align-center justify-between">
-                <p className="Text__medium pr-[1rem]">Timer&nbsp;:</p>
-                <p className="Text__small text-right">{getCompetitionTimer()} secs between pixels</p>
+                <p className="Text__medium pr-[1rem]">Allow&nbsp;:</p>
+                <p className="Text__small text-right">{getCompetitionPixelsPer()} pixels per {getCompetitionTimer()} secs</p>
               </div>
               <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] flex flex-row align-center justify-between">
                 <p className="Text__medium pr-[1rem]">Start&nbsp;:</p>
@@ -241,6 +270,7 @@ export const WorldCreationTab = (props: any) => {
                     <div className="w-[3rem] h-[3rem] m-[2px] border-2 border-[rgba(0,0,0,0.2)] rounded-lg shadow-md relative WorldCreation__color"
                       style={{ backgroundColor: `#${palette[0]}` }}
                       onClick={() => {
+                        playSoftClick2();
                         const newPalette = [...palette];
                         newPalette.splice(0, 1);
                         setPalette(newPalette);
@@ -262,6 +292,7 @@ export const WorldCreationTab = (props: any) => {
                         className="w-[3rem] h-[3rem] m-[2px] border-2 border-[rgba(0,0,0,0.2)] rounded-lg shadow-md relative WorldCreation__color"
                         style={{ backgroundColor: `#${color}` }}
                         onClick={() => {
+                          playSoftClick2();
                           const newPalette = [...palette];
                           newPalette.splice(index + 1, 1);
                           setPalette(newPalette);
@@ -278,13 +309,19 @@ export const WorldCreationTab = (props: any) => {
               <div className="flex flex-row justify-around align-center my-[0.5rem] w-[90%] mx-auto bg-[#00000020] p-[3px] rounded-2xl outline outline-[rgba(0,0,0,0.15)]">
                 <p
                   className={`Text__small rounded-2xl py-[0.5rem] px-[5rem] ${newColorType === "Base" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer`}
-                  onClick={() => setNewColorType("Base")}
+                  onClick={() => {
+                    playSoftClick2();
+                    setNewColorType("Base");
+                  }}
                 >
                   Base
                 </p>
                 <p
                   className={`Text__small rounded-2xl py-[0.5rem] px-[5rem] ${newColorType === "Color" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer`}
-                  onClick={() => setNewColorType("Color")}
+                  onClick={() => {
+                    playSoftClick2();
+                    setNewColorType("Color");
+                  }}
                 >
                   Color
                 </p>
@@ -304,6 +341,7 @@ export const WorldCreationTab = (props: any) => {
                     hover:scale-110 transform transition duration-300 ease-in-out
                     active:scale-100"
                   onClick={() => {
+                    playSoftClick2();
                     let formattedColor = newColor.replace('#', '');
                     // To uppercase
                     formattedColor = formattedColor.toUpperCase();
@@ -353,7 +391,10 @@ export const WorldCreationTab = (props: any) => {
         <div className="flex flex-row justify-around mt-[1.5rem] align-center">
           <div
             className="Button__primary Text__medium"
-            onClick={() => props.endWorldCreation()}
+            onClick={() => {
+              playSoftClick2();
+              props.endWorldCreation();
+            }}
           >
             Cancel
           </div>

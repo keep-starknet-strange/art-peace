@@ -1,13 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAccount } from '@starknet-react/core';
 import { CanvasController } from '../components/canvas/controller';
 import { useLockScroll } from '../app/window';
 import { TabPanel } from "../components/tabs/panel";
 import { Footer } from "../components/footer/footer";
-import { getCanvasColors, getHomeWorlds, getWorld } from "../api/canvas";
+import { getWorlds, getHomeWorlds, getWorld } from "../api/worlds";
+import { getCanvasColors } from "../api/canvas";
+import { placePixelsCall } from "../contract/calls";
+import { playPixelPlaced2 } from "../components/utils/sounds";
 
 const Canvas = (props: any) => {
+  const { account } = useAccount();
+
   // Game Data
   const updateInterval = 1000;
   const secondsBetweenPlacements =
@@ -20,16 +26,24 @@ const Canvas = (props: any) => {
   const [surroundingWorlds, setSurroundingWorlds] = useState<any[]>([]);
   useEffect(() => {
     const fetchWorldData = async () => {
-      const worlds = await getHomeWorlds();
+      const worlds = await getWorlds(13, 0);
+      // TODO: const worlds = await getHomeWorlds();
       // TODO: Once center can be a home world:
       //   const homeWorlds = worlds.filter((world) => world.worldId !== openedWorldId).slice(0, 12);
-      let paddedWorlds = [...worlds];
+      let paddedWorlds: any[] = [];
+      if (worlds && worlds.length > 0) {
+        paddedWorlds = [...worlds];
+        // Remove the last world & reverse the order
+        paddedWorlds.pop();
+        paddedWorlds.reverse();
+      } 
       while (paddedWorlds.length < 12) {
         paddedWorlds.push(null);
       }
       if (paddedWorlds.length > 12) {
         paddedWorlds = paddedWorlds.slice(0, 12);
       }
+      // Reverse order of worlds
       setSurroundingWorlds(paddedWorlds);
     };
 
@@ -37,12 +51,13 @@ const Canvas = (props: any) => {
   }, []);
   useEffect(() => {
     const fetchWorldData = async () => {
-      const world = await getWorld(openedWorldId);
+      const world = await getWorld(openedWorldId.toString());
       setActiveWorld(world);
       setWorldWidth(world.width);
       setTimeBetweenPlacements(world.timeBetweenPixels * 1000);
     };
 
+    setStagingPixels([]);
     fetchWorldData();
   }, [openedWorldId]);
   const [worldColors, setWorldColors] = useState([] as string[]);
@@ -60,6 +75,7 @@ const Canvas = (props: any) => {
   const [basePixelUp, setBasePixelUp] = useState<boolean>(false)
   const [availablePixels, setAvailablePixels] = useState<number>(0)
   const [availablePixelsUsed, setAvailablePixelsUsed] = useState<number>(0)
+  const [stagingPixels, setStagingPixels] = useState<any[]>([]);
   useEffect(() => {
     const updateBasePixelTimer = () => {
       const timeSinceLastPlacement = Date.now() - lastPlacedTime;
@@ -89,8 +105,36 @@ const Canvas = (props: any) => {
     return () => clearInterval(interval);
   }, [lastPlacedTime, timeBetweenPlacements]);
   useEffect(() => {
-    setAvailablePixels((basePixelUp ? 1 : 0));
-  }, [basePixelUp]);
+    if (!activeWorld) {
+      setAvailablePixels(0);
+      return;
+    }
+    setAvailablePixels((basePixelUp ? activeWorld.pixelsPerTime : 0));
+  }, [basePixelUp, activeWorld]);
+  useEffect(() => {
+    if (!stagingPixels) {
+      return;
+    }
+    setAvailablePixelsUsed(stagingPixels.length);
+    if (stagingPixels.length !== 0 && stagingPixels.length === availablePixels) {
+      commitStagingPixels();
+    }
+  }, [stagingPixels]);
+  const commitStagingPixels = async () => {
+    if (stagingPixels.length === 0) {
+      return;
+    }
+    let now = Math.floor(Date.now() / 1000);
+    await placePixelsCall(account, openedWorldId, stagingPixels, now);
+    let stagedPixels = [...stagingPixels];
+    while (stagedPixels.length > 0) {
+      playPixelPlaced2();
+      stagedPixels = stagedPixels.slice(1);
+      setStagingPixels(stagedPixels);
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    setStagingPixels([]);
+  };
 
   // Pixel Selection
   const [selectedColorId, setSelectedColorId] = useState<number>(-1);
@@ -219,7 +263,7 @@ const Canvas = (props: any) => {
   }
 
   // Tabs
-  const defaultTabs = ["Canvas", "Worlds", "Stencils", "Account"];
+  const defaultTabs = ["Canvas", "Worlds", "Stencils", "Rankings", "Account"];
   const [tabs, setTabs] = useState<string[]>(defaultTabs);
   const [activeTab, setActiveTab] = useState<string>(defaultTabs[0]);
   useLockScroll(activeTab === "Canvas");
@@ -250,6 +294,10 @@ const Canvas = (props: any) => {
     <div className="relative">
       <CanvasController
         colors={worldColors}
+        stagingPixels={stagingPixels}
+        setStagingPixels={setStagingPixels}
+        availablePixels={availablePixels}
+        availablePixelsUsed={availablePixelsUsed}
         openedWorldId={openedWorldId}
         setOpenedWorldId={setOpenedWorldId}
         activeWorld={activeWorld}
@@ -276,6 +324,7 @@ const Canvas = (props: any) => {
         setStencilCreationSelected={setStencilCreationSelected}
       />
       <TabPanel
+        setIsMusicMuted={props.setIsMusicMuted}
         tabs={tabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -292,11 +341,15 @@ const Canvas = (props: any) => {
         stencilCreationMode={stencilCreationMode}
         stencilImage={stencilImage}
         stencilPosition={stencilPosition}
+        stencilColorIds={stencilColorIds}
         setRawStencilImage={setRawStencilImage}
         stencilCreationSelected={stencilCreationSelected}
         startWorldCreation={startWorldCreation}
         endWorldCreation={endWorldCreation}
         worldCreationMode={worldCreationMode}
+        stagingPixels={stagingPixels}
+        setStagingPixels={setStagingPixels}
+        commitStagingPixels={commitStagingPixels}
       />
       <Footer
         basePixelTimer={basePixelTimer}

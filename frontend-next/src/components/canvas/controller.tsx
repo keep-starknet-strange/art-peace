@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, createRef } from "react";
 
 import { StencilCreationOverlay } from "./stencil-overlay";
+import { playShutter } from "../utils/sounds";
 import { Canva } from "./canvas";
 
 export const CanvasController = (props: any) => {
@@ -15,14 +16,8 @@ export const CanvasController = (props: any) => {
       Array.from({ length: props.surroundingWorlds.length }, () => createRef())
     );
   }, [props.surroundingWorlds]);
-  const [shutterSound, setShutterSound] = useState(null as any);
-  useEffect(() => {
-    setShutterSound(new Audio("/sounds/shutter.wav"));
-  }, []);
   const openWorld = (world: any) => {
-    shutterSound.currentTime = 0;
-    shutterSound.volume = 0.5;
-    shutterSound.play();
+    playShutter();
 
     props.clearPixelSelection();
     props.setOpenedWorldId(world.worldId);
@@ -124,7 +119,7 @@ export const CanvasController = (props: any) => {
 
   const [canvasX, setCanvasX] = useState(0);
   const [canvasY, setCanvasY] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(1.16);
+  const [canvasScale, setCanvasScale] = useState(1.02);
   const [titleScale, setTitleScale] = useState(1);
   const [touchInitialDistance, setInitialTouchDistance] = useState(0);
   const [touchScale, setTouchScale] = useState(0);
@@ -308,10 +303,10 @@ export const CanvasController = (props: any) => {
   const [selectedBoxShadow, setSelectedBoxShadow] = useState("")
   const [selectedBackgroundColor, setSelectedBackgroundColor] = useState("")
   const selectPixel = (x: number, y: number) => {
-    // Clear selection if same pixel is clicked
     if (props.stencilCreationMode) {
       return;
     }
+    // Clear selection if same pixel is clicked
     if (
       props.selectedColorId === -1 &&
       props.pixelSelectedMode &&
@@ -516,6 +511,12 @@ export const CanvasController = (props: any) => {
                 titleScale={titleScale}
                 title={props.openedWorldId === world.worldId && props.activeWorld ? world.name : ""}
                 canvasScale={canvasScale}
+                artificialZoom={artificialZoom}
+                stagingPixels={props.stagingPixels}
+                setStagingPixels={props.setStagingPixels}
+                availablePixels={props.availablePixels}
+                availablePixelsUsed={props.availablePixelsUsed}
+                isActive={props.openedWorldId === world.worldId}
               />
             );
           }
@@ -551,7 +552,13 @@ export const CanvasController = (props: any) => {
           showTitle={props.openedWorldId === 0}
           titleScale={titleScale}
           title={props.openedWorldId === 0 && props.activeWorld ? props.activeWorld.name : ""}
+          isActive={props.openedWorldId === 0}
           canvasScale={canvasScale}
+          artificialZoom={artificialZoom}
+          stagingPixels={props.stagingPixels}
+          setStagingPixels={props.setStagingPixels}
+          availablePixels={props.availablePixels}
+          availablePixelsUsed={props.availablePixelsUsed}
         />
       </div>
     </div>

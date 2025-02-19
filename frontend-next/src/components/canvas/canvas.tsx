@@ -2,16 +2,10 @@ import { useEffect, useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { getCanvas, getCanvasColors } from "../../api/canvas";
 import { placePixelCall } from "../../contract/calls";
+import { playSoftClick, playPixelPlaced2 } from "../utils/sounds";
 import "./canvas.css";
 
 export const Canva = (props: any) => {
-  const [softClickSound, setSoftClickSound] = useState(null as any);
-  const [clickSound, setClickSound] = useState(null as any);
-  useEffect(() => {
-    setSoftClickSound(new Audio("/sounds/soft-click.wav"));
-    setClickSound(new Audio("/sounds/click.wav"));
-  }, []);
-
   const { account } = useAccount();
   const [colors, setColors] = useState([] as string[]);
   useEffect(() => {
@@ -104,6 +98,14 @@ export const Canva = (props: any) => {
     context.fillRect(x, y, 1, 1);
   }
 
+  const addStagingPixel = (x: number, y: number, colorId: number) => {
+    let newStaging = props.stagingPixels;
+    const position = y * props.width + x;
+    const pixel = { position, colorId };
+    newStaging = [...newStaging, pixel];
+    props.setStagingPixels(newStaging);
+  }
+
   const pixelClicked = async (event: any) => {
     const canvas = props.canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -121,15 +123,23 @@ export const Canva = (props: any) => {
 
     if(!props.selectPixel(x, y)) return;
     if (props.selectedColorId == null || props.selectedColorId === -1 || !props.basePixelUp) {
-      softClickSound.currentTime = 0;
-      softClickSound.volume = 0.5;
-      softClickSound.play();
+      playSoftClick();
       return;
     }
 
-    clickSound.currentTime = 0;
-    clickSound.volume = 0.5;
-    clickSound.play();
+    if (props.availablePixels > 1) {
+      if (props.availablePixelsUsed < props.availablePixels) {
+        playSoftClick();
+        addStagingPixel(x, y, props.selectedColorId);
+        return;
+      } else {
+        playSoftClick();
+        props.setSelectedColorId(-1);
+        return;
+      }
+    }
+
+    playPixelPlaced2();
 
     // Color the pixel if color is selected & available
     const position = y * props.width + x;
@@ -162,6 +172,25 @@ export const Canva = (props: any) => {
       >
         {props.title}
       </h3>
+      {props.isActive && props.stagingPixels && props.stagingPixels.length > 0 && (
+        props.stagingPixels.map((pixel: any, index: number) => {
+          const x = pixel.position % props.width
+          const y = Math.floor(pixel.position / props.width);
+          return (
+            <div
+              key={index}
+              className="absolute z-[8]"
+              style={{
+                top: y * props.canvasScale * props.artificialZoom + props.origin.y,
+                left: x * props.canvasScale * props.artificialZoom + props.origin.x,
+                backgroundColor: `#${colors[pixel.colorId]}`,
+                width: 1 * props.canvasScale * props.artificialZoom,
+                height: 1 * props.canvasScale * props.artificialZoom,
+              }}
+            />
+          );
+        }
+      ))}
       <canvas
         ref={props.canvasRef}
         width={props.width}

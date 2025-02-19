@@ -4,7 +4,11 @@ import { constants } from "starknet";
 import { useAccount, useConnect, useDisconnect } from '@starknet-react/core';
 import ControllerConnector from "@cartridge/connector/controller";
 import { BasicTab } from "./basic";
+import { getLeaderboardPixelsUser, getLeaderboardWorldUser } from "../../api/stats";
 import copyIcon from "../../../public/icons/copy.png";
+import muteIcon from "../../../public/icons/mute.png";
+import unmuteIcon from "../../../public/icons/unmute.png";
+import { getSoundEffectVolume, setSoundEffectVolume, getMusicVolume, setMusicVolume, playSoftClick2 } from "../utils/sounds";
 
 export const AccountTab = (props: any) => {
   const { address } = useAccount();
@@ -43,6 +47,20 @@ export const AccountTab = (props: any) => {
     console.log("TODO: Fetch total pixels placed and pixels on world");
   }, [address]);
 
+  useEffect(() => {
+    const getStats = async () => {
+      if (!address) return;
+      const leaderboardPixelsUser = await getLeaderboardPixelsUser(address.slice(2));
+      const leaderboardPixelsWorldUser = await getLeaderboardWorldUser(address.slice(2), props.activeWorld?.worldId);
+      setTotalPixelsPlaced(leaderboardPixelsUser ? leaderboardPixelsUser : 0);
+      setPixelsOnWorld(leaderboardPixelsWorldUser ? leaderboardPixelsWorldUser : 0);
+    }
+    getStats();
+  }, [address, props.activeWorld]);
+
+  const [isFXMuted, setIsFXMuted] = useState<boolean>(getSoundEffectVolume() === 0);
+  const [isMusicMuted, setIsMusicMuted] = useState<boolean>(getMusicVolume() === 0);
+
   return (
     <BasicTab title="Account" {...props}>
       {!address && (
@@ -65,7 +83,10 @@ export const AccountTab = (props: any) => {
             <p className="Text__medium pr-[1rem]">Address&nbsp;:</p>
             <div className="flex flex-row align-center">
               <p className="Text__medium pr-[0.5rem] truncate w-[21rem] text-right">{addressShort}</p>
-              <div className="w-[2rem] h-[2rem] cursor-pointer" onClick={() => copyToClipboard(address)}>
+              <div className="w-[2rem] h-[2rem] cursor-pointer" onClick={() => {
+                playSoftClick2();
+                copyToClipboard(address);
+              }}>
                 <Image src={copyIcon} alt="Copy icon" />
               </div>
             </div>
@@ -74,8 +95,8 @@ export const AccountTab = (props: any) => {
             <p className="Text__medium pr-[1rem]">Network&nbsp;:</p>
             <p className="Text__medium pr-[0.5rem] text-right">
               {process.env.NEXT_PUBLIC_CHAIN_ID === constants.NetworkName.SN_MAIN
-                ? "Mainnet"
-                : "Sepolia"}
+                ? "Starknet Mainnet"
+                : "Starknet Sepolia"}
             </p>
           </div>
 
@@ -118,7 +139,41 @@ export const AccountTab = (props: any) => {
               </>
             )}
           </div>
-          <div className="flex flex-row align-center justify-center w-full pt-[1rem]">
+          <h2 className="Text__large Heading__sub p-[0.5rem] my-[1rem]">
+            Settings
+          </h2>
+          <div className="px-[0.5rem] ml-[0.5rem] mr-[1rem] flex flex-row align-center justify-around">
+            <div className="flex flex-row align-center">
+              <p className="Text__medium pr-[1rem] my-auto">Sound FX</p>
+              <Image
+                src={isFXMuted ? muteIcon : unmuteIcon}
+                alt="Mute icon"
+                onClick={() => {
+                  playSoftClick2();
+                  const newVolume = isFXMuted ? 1 : 0;
+                  setSoundEffectVolume(newVolume);
+                  setIsFXMuted(!isFXMuted);
+                }}
+                className="cursor-pointer h-[2.5rem] w-[2.5rem] hover:scale-105"
+              />
+            </div>
+            <div className="flex flex-row align-center">
+              <p className="Text__medium pr-[1rem] my-auto">Music</p>
+              <Image
+                src={isMusicMuted ? muteIcon : unmuteIcon}
+                alt="Mute icon"
+                onClick={() => {
+                  playSoftClick2();
+                  const newVolume = isMusicMuted ? 1 : 0;
+                  props.setIsMusicMuted(newVolume === 0);
+                  setMusicVolume(newVolume);
+                  setIsMusicMuted(!isMusicMuted);
+                }}
+                className="cursor-pointer h-[2.5rem] w-[2.5rem] hover:scale-105"
+              />
+            </div>
+          </div>
+          <div className="flex flex-row align-center justify-center w-full pt-[2rem]">
             <button
               className="w-[70%] py-[0.7rem] px-[1rem] Text__medium Button__primary"
               onClick={() => disconnect()}

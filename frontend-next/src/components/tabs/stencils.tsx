@@ -12,6 +12,7 @@ import {
   getStencil
 } from "../../api/stencils";
 import { PaginationView } from "../utils/pagination";
+import { playSoftClick2 } from "../utils/sounds";
 
 const StencilsMainSection = (props: any) => {
   const { address } = useAccount();
@@ -27,6 +28,7 @@ const StencilsMainSection = (props: any) => {
             <div
               className="Text__medium Button__primary"
               onClick={() => {
+                playSoftClick2();
                 props.setExpanded(true);
               }}
             >
@@ -80,7 +82,10 @@ const StencilsMainSection = (props: any) => {
           >
             <p
               className="Text__medium Button__primary"
-              onClick={props.uploadStencil}
+              onClick={() => {
+                playSoftClick2();
+                props.uploadStencil();
+              }}
             >
               Create Stencil
             </p>
@@ -110,7 +115,10 @@ const StencilsExpandedSection = (props: any) => {
               <div
                 key={index}
                 className={`Button__primary Text__medium flex flex-row align-center mx-[0.5rem] ${props.activeFilter === filter ? "Button--selected" : ""}`}
-                onClick={() => props.setActiveFilter(filter)}
+                onClick={() => {
+                  playSoftClick2();
+                  props.setActiveFilter(filter);
+                }}
               >
                 {filter}
               </div>

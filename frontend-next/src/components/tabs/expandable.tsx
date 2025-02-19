@@ -1,3 +1,5 @@
+import { playSoftClick2 } from "../utils/sounds";
+
 export const ExpandableTab = (props: any) => {
   const MainSection = props.mainSection;
   const ExpandedSection = props.expandedSection;
@@ -25,6 +27,7 @@ export const ExpandableTab = (props: any) => {
       <p
         className="Button__close absolute top-[0.5rem] right-[0.5rem]"
         onClick={() => {
+          playSoftClick2();
           if(props.onClose) {
             props.onClose();
           } else {

@@ -12,6 +12,7 @@ import {
   getWorlds
 } from "../../api/worlds";
 import { WorldItem } from "../worlds/item";
+import { playSoftClick2 } from "../utils/sounds";
 
 const WorldsMainSection = (props: any) => {
   const { address } = useAccount();
@@ -27,6 +28,7 @@ const WorldsMainSection = (props: any) => {
             <div
               className="Text__medium Button__primary"
               onClick={() => {
+                playSoftClick2();
                 props.setExpanded(true);
               }}
             >
@@ -80,7 +82,10 @@ const WorldsMainSection = (props: any) => {
           >
             <p
               className="Text__medium Button__primary"
-              onClick={props.startWorldCreation}
+              onClick={() => {
+                playSoftClick2();
+                props.startWorldCreation();
+              }}
             >
               Create World
             </p>
@@ -102,7 +107,10 @@ const WorldsExpandedSection = (props: any) => {
               <div
                 key={index}
                 className={`Button__primary Text__medium flex flex-row align-center mx-[0.5rem] ${props.activeFilter === filter ? "Button--selected" : ""}`}
-                onClick={() => props.setActiveFilter(filter)}
+                onClick={() => {
+                  playSoftClick2();
+                  props.setActiveFilter(filter);
+                }}
               >
                 {filter}
               </div>

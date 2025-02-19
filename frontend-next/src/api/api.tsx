@@ -22,3 +22,17 @@ export const fetchArrayBuffer = async (endpoint: string): Promise<any> => {
     return null;
   }
 }
+
+export const postJsonData = async (endpoint: string, data: any): Promise<any> => {
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    console.error(`Error posting data to ${endpoint}: ${error}`);
+    return null;
+  }
+}

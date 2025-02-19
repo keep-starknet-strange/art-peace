@@ -1,16 +1,5 @@
 import { backendUrl, fetchJsonData, fetchArrayBuffer } from './api';
 
-export const getWorld = async (worldId: number): Promise<any> => {
-  try {
-    const worldEndpoint = `${backendUrl}/get-world?worldId=${worldId}`;
-    const world = await fetchJsonData(worldEndpoint);
-    return world;
-  } catch (error) {
-    console.error("Error getting world", error);
-    return null;
-  }
-}
-
 export const getCanvasColors = async (worldId: number): Promise<string[]> => {
   try {
     const canvasColorsEndpoint = `${backendUrl}/get-worlds-colors?worldId=${worldId}`;
@@ -45,16 +34,5 @@ export const getPixelInfo = async (worldId: number, position: number): Promise<s
   } catch (error) {
     console.error("Error getting pixel info", error);
     return "";
-  }
-}
-
-export const getHomeWorlds = async (): Promise<any[]> => {
-  try {
-    const homeWorldsEndpoint = `${backendUrl}/get-home-worlds`;
-    const homeWorlds = await fetchJsonData(homeWorldsEndpoint);
-    return homeWorlds;
-  } catch (error) {
-    console.error("Error getting home worlds", error);
-    return [];
   }
 }

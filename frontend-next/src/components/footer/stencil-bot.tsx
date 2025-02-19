@@ -1,3 +1,5 @@
+import { playSoftClick2 } from "../utils/sounds";
+
 export const StencilBotController = (props: any) => {
   return (
     <div
@@ -6,7 +8,10 @@ export const StencilBotController = (props: any) => {
       <p className="Text__medium">Please select a stencil...</p>
       <div
         className="Button__close"
-        onClick={() => props.setSelectedBotOption(null)}
+        onClick={() => {
+          playSoftClick2();
+          props.setSelectedBotOption(null);
+        }}
       >
         x
       </div>

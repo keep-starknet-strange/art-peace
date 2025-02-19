@@ -88,7 +88,8 @@ export const StencilCreationOverlay = (props: any) => {
     props.stencilCreationSelected,
     props.stencilCreationMode,
     props.canvasWidth,
-    props.canvasHeight
+    props.canvasHeight,
+    props.worldId
   ]);
 
   const [stencilOutline, setStencilOutline] = useState('none');

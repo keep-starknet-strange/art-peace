@@ -12,6 +12,8 @@ setup indexer starting block
 
 copy abis to frontend
     make update-frontend-contracts
+Change rounds config
+    configs/rounds.config.json
 
 build prod docker images w/ new version & push to docker hub
    Update docker version in infra/art-peace-infra/Chart.yaml if needed
@@ -58,3 +60,4 @@ Create world-0:
 Create world-1 - world-12:
   name: World X
   join art-peace round 3 button on
+

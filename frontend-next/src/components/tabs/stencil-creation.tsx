@@ -1,8 +1,14 @@
 import Image from "next/image";
+import { useAccount } from "@starknet-react/core";
 import { BasicTab } from "./basic";
 import { sha256 } from "js-sha256";
+import { playSoftClick2 } from "../utils/sounds";
+import { addStencilData } from "../../api/stencils";
+import { addStencilCall } from "../../contract/calls";
 
 export const StencilCreationTab = (props: any) => {
+  const { account } = useAccount();
+
   const hashStencilImage = () => {
     // TODO: Change hash to Poseidon
     const hash = sha256(props.stencilColorIds).slice(2);
@@ -10,7 +16,19 @@ export const StencilCreationTab = (props: any) => {
   }
 
   const submit = async () => {
-    console.log("Submitting stencil...");
+    playSoftClick2();
+    let hash = hashStencilImage();
+    if (!account) return;
+    try {
+      await addStencilCall(account, props.worldId, hash, props.stencilImage.width, props.stencilImage.height, props.stencilPosition);
+    } catch (error) {
+      console.error("Error submitting stencil:", error);
+      return;
+    }
+    let res = await addStencilData(props.worldId, props.stencilImage.width, props.stencilImage.height, props.stencilColorIds.toString());
+    console.log("Stencil added to DB:", res);
+    props.endStencilCreation();
+    props.setActiveTab("Stencils");
   };
 
   return (
@@ -58,7 +76,10 @@ export const StencilCreationTab = (props: any) => {
           <div className="flex flex-row justify-around mt-[1.5rem] align-center">
             <div
               className="Button__primary Text__medium"
-              onClick={() => props.endStencilCreation()}
+              onClick={() => {
+                playSoftClick2();
+                props.endStencilCreation();
+              }}
             >
               Cancel
             </div>

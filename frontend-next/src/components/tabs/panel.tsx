@@ -1,15 +1,18 @@
 import { useRef } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import { AccountTab } from './account';
+import { LeaderboardTab } from './leaderboard';
 import { StencilsTab } from './stencils';
 import { WorldsTab } from './worlds';
 import { StencilCreationTab } from './stencil-creation';
 import { WorldCreationTab } from './world-creation';
 import { PixelInfoTab } from './pixel';
+import { StagingPixelsTab } from './staging';
 
 export const TabPanel = (props: any) => {
   const nodeRef = useRef(null);
   const pixelInfoNodeRef = useRef(null);
+  const stagingPixelsNodeRef = useRef(null);
   const stencilCreationNodeRef = useRef(null);
   const worldCreationNodeRef = useRef(null);
   return (
@@ -32,6 +35,21 @@ export const TabPanel = (props: any) => {
         />
       </CSSTransition>
       <CSSTransition
+        nodeRef={stagingPixelsNodeRef}
+        in={props.stagingPixels.length > 0}
+        timeout={150}
+        classNames="list-transition"
+        unmountOnExit
+        appear
+      >
+        <StagingPixelsTab
+          stagingPixels={props.stagingPixels}
+          setStagingPixels={props.setStagingPixels}
+          worldColors={props.colors}
+          commitStagingPixels={props.commitStagingPixels}
+        />
+      </CSSTransition>
+      <CSSTransition
         nodeRef={stencilCreationNodeRef}
         in={props.stencilCreationMode}
         timeout={150}
@@ -49,6 +67,8 @@ export const TabPanel = (props: any) => {
           stencilImage={props.stencilImage}
           stencilPosition={props.stencilPosition}
           stencilCreationSelected={props.stencilCreationSelected}
+          setActiveTab={props.setActiveTab}
+          stencilColorIds={props.stencilColorIds}
         />
       </CSSTransition>
       <CSSTransition
@@ -76,6 +96,7 @@ export const TabPanel = (props: any) => {
             <div ref={nodeRef}>
               {props.activeTab === "Worlds" && <WorldsTab {...props} />}
               {props.activeTab === "Stencils" && <StencilsTab {...props} />}
+              {props.activeTab === "Rankings" && <LeaderboardTab {...props} />}
               {props.activeTab === "Account" && <AccountTab {...props} />}
             </div>
           </CSSTransition>

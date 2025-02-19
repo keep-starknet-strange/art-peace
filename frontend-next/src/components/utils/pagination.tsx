@@ -1,5 +1,8 @@
 export function PaginationView(props: any) {
   const hasMore = () => {
+    if (!props.data || !props.data.length) {
+      return false;
+    }
     return (
       props.data.length >= props.stateValue.pageLength * props.stateValue.page
     );

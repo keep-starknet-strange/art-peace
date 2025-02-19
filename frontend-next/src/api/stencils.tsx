@@ -1,4 +1,4 @@
-import { backendUrl, fetchJsonData } from './api';
+import { backendUrl, fetchJsonData, postJsonData } from './api';
 
 export const getFavoriteStencils = async (address: string, pageLength: number, page: number, worldId: any = null): Promise<any> => {
   try {
@@ -87,6 +87,22 @@ export const getStencil = async (stencilId: string): Promise<any> => {
     return stencil;
   } catch (error) {
     console.error("Error getting stencil", error);
+    return null;
+  }
+}
+
+export const addStencilData = async (worldId: number, width: number, height: number, image: string): Promise<any> => {
+  try {
+    const addStencilDataEndpoint = `${backendUrl}/add-stencil-data`;
+    const result = await postJsonData(addStencilDataEndpoint, {
+      worldId: worldId.toString(),
+      width: width.toString(),
+      height: height.toString(),
+      image
+    });
+    return result;
+  } catch (error) {
+    console.error("Error adding stencil data", error);
     return null;
   }
 }

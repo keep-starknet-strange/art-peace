@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { playSoftClick2 } from "../utils/sounds";
 
 export const AIController = (props: any) => {
   const [agentPrompt, setAgentPrompt] = useState("");
@@ -52,7 +53,10 @@ export const AIController = (props: any) => {
       )}
       <div
         className="Button__close"
-        onClick={() => props.setSelectedBotOption(null)}
+        onClick={() => {
+          playSoftClick2();
+          props.setSelectedBotOption(null);
+        }}
       >
         x
       </div>
