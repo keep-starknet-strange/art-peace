@@ -52,6 +52,11 @@ export const StencilBotController = (props: any) => {
         const x = xStart + xIdx;
         const y = yStart + yIdx;
         if (x >= props.activeWorld.width || y >= props.activeWorld.height) {
+          // Out of bounds
+          continue;
+        }
+        if (rawTemplatePixels[rawIdx] === 255) {
+          // Transparent pixel
           continue;
         }
         if (rawTemplatePixels[rawIdx] !== getCanvasColorAt(x, y)) {
