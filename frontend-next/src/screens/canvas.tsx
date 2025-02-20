@@ -145,6 +145,13 @@ const Canvas = (props: any) => {
     }
     setStagingPixels([]);
   };
+  const commitPixels = async (pixels: any[]) => {
+    if (pixels.length === 0) {
+      return;
+    }
+    const now = Math.floor(Date.now() / 1000);
+    await placePixelsCall(account, openedWorldId, pixels, now);
+  }
 
   // Pixel Selection
   const [selectedColorId, setSelectedColorId] = useState<number>(-1);
@@ -299,6 +306,39 @@ const Canvas = (props: any) => {
     setBotMode(!botMode);
     setSelectedBotOption(null);
   }
+  const [agentTransactions, setAgentTransactions] = useState<any[]>([]);
+  useEffect(() => {
+    if (agentTransactions.length === 0) {
+      return;
+    }
+    if (stagingPixels.length !== 0) {
+      return;
+    }
+    let newStagingPixels: any[] = [];
+    agentTransactions.forEach((transaction) => {
+      const calldata = transaction.calldata;
+      // TODO: const worldId = calldata[0];
+      const position = calldata[1];
+      const colorId = calldata[2];
+      newStagingPixels = [...newStagingPixels, {
+        position: position,
+        colorId: colorId
+      }];
+    });
+    const newAgentTransactions = [...agentTransactions].slice(availablePixels);
+    if (newAgentTransactions.length === 0) {
+      commitPixels(newStagingPixels);
+      setAgentTransactions([]);
+    } else {
+      setStagingPixels(newStagingPixels.slice(0, availablePixels));
+      setAgentTransactions(newAgentTransactions);
+    }
+  }, [agentTransactions, stagingPixels, availablePixels]);
+  useEffect(() => {
+    if (!botMode || selectedBotOption !== "AI Agent") {
+      setAgentTransactions([]);
+    }
+  }, [botMode, selectedBotOption]);
 
   const [gameUpdates, setGameUpdates] = useState<any[]>([]);
   const [gameUpdate, setGameUpdate] = useState<any>(null);
@@ -414,6 +454,8 @@ const Canvas = (props: any) => {
         worldColors={worldColors}
         stagingPixels={stagingPixels}
         setStagingPixels={setStagingPixels}
+        agentTransactions={agentTransactions}
+        setAgentTransactions={setAgentTransactions}
       />
     </div>
   );

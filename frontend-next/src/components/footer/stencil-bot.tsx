@@ -51,6 +51,9 @@ export const StencilBotController = (props: any) => {
         const rawIdx = xIdx + yIdx * props.openedStencil.width;
         const x = xStart + xIdx;
         const y = yStart + yIdx;
+        if (x >= props.activeWorld.width || y >= props.activeWorld.height) {
+          continue;
+        }
         if (rawTemplatePixels[rawIdx] !== getCanvasColorAt(x, y)) {
           newRemaining.push({
             position: x + y * props.activeWorld.width,

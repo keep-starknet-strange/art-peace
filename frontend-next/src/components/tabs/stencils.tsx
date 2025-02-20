@@ -1,4 +1,4 @@
-import Image from "next/image";
+import NextImg from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { ExpandableTab } from "./expandable";
@@ -107,7 +107,7 @@ const StencilsMainSection = (props: any) => {
                 <p className="Text__large p-2 pl-6 text-nowrap">Upload PNG</p>
                 <p className="Text__xsmall pt-0 p-2">Max 128x128</p>
               </div>
-              <Image
+              <NextImg
                 src={uploadIcon}
                 alt="Upload"
                 width={24}
@@ -201,7 +201,7 @@ export const StencilsTab = (props: any) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async (e: any) => {
-      const image = new (Image as any)();
+      const image = new Image();
       if (!e.target) {
         return;
       }

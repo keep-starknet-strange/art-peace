@@ -146,7 +146,7 @@ export const GameController = (props: any) => {
           onClick={toSelectorMode}
         >
           <p className="m-0 p-[0.25rem]">{controllerText}</p>
-          {props.availablePixels > (props.basePixelUp ? 1 : 0) && (
+          {address && props.availablePixels > (props.basePixelUp ? 1 : 0) && (
             <div className="flex flex-row justify-center items-center">
               <div className="mx-3 h-[2.4rem] w-[0.5rem] rounded-[0.25rem] bg-[#00000060]"></div>
               <p className="m-0 p-[0.25rem]">
@@ -215,6 +215,8 @@ export const GameController = (props: any) => {
           botMode={props.botMode}
           toggleBotMode={props.toggleBotMode}
           setSelectedBotOption={props.setSelectedBotOption}
+          agentTransactions={props.agentTransactions}
+          setAgentTransactions={props.setAgentTransactions}
         />
       )}
       {address && (
