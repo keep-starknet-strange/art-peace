@@ -51,6 +51,11 @@ volumes:
     claim: template-volume-claim
     class: standard-rwo
     storage: 50Gi
+  stencils:
+    name: stencils-data
+    claim: stencils-volume-claim
+    class: standard-rwo
+    storage: 50Gi
 
 deployments:
   sha: aabbccdd

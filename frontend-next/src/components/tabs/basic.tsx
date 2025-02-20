@@ -20,7 +20,7 @@ export const BasicTab = (props: any) => {
             if(props.onClose) {
               props.onClose();
             } else {
-              props.setActiveTab("Canvas")
+              props.setActiveTab("")
             }
           }}
         >

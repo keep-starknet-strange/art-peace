@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { ExpandableTab } from "./expandable";
@@ -13,6 +14,7 @@ import {
 } from "../../api/stencils";
 import { PaginationView } from "../utils/pagination";
 import { playSoftClick2 } from "../utils/sounds";
+import uploadIcon from "../../../public/icons/Share.png";
 
 const StencilsMainSection = (props: any) => {
   const { address } = useAccount();
@@ -21,12 +23,11 @@ const StencilsMainSection = (props: any) => {
     <div
       className={`${props.expanded ? "relative w-[min(100%,40rem)] mx-auto my-0 transition-all duration-500 ease-in-out" : "relative w-full mx-auto my-0 transition-all duration-500 ease-in-out"}`}
     >
-      <div className="flex flex-row justify-between items-between p-[0.5rem] mx-[0.5rem] w-[calc(100%-1rem)]">
-        <h2 className="Text__large p-0 m-0 pb-[0.5rem] underline">Favorites</h2>
-        <div className="flex flex-row align-center">
+      <div className="flex flex-row justify-between items-between px-[0.5rem] mx-[0.5rem] w-[calc(100%-1rem) relative]">
+        <div className="flex flex-row align-center absolute top-0 right-[1rem] z-[20]">
           {!props.expanded && (
             <div
-              className="Text__medium Button__primary"
+              className="Text__xlarge Button__primary"
               onClick={() => {
                 playSoftClick2();
                 props.setExpanded(true);
@@ -37,13 +38,10 @@ const StencilsMainSection = (props: any) => {
           )}
         </div>
       </div>
-      <div className="h-[55vh] grid grid-rows-[min-content] grid-cols-[minmax(25rem,1fr)] m-[0.5rem] p-[0.5rem] overflow-scroll">
-        {!address && (
-          <p className="Text__medium text-center">
-            Please login to view your favorite stencils
-          </p>
-        )}
+      <div className="h-[55vh] grid grid-rows-[min-content] grid-cols-[minmax(25rem,1fr)] px-[2rem] overflow-scroll">
         {props.openedStencil && !props.openedStencil.favorited && (
+          <>
+          <h2 className="Text__xlarge p-0 m-0 pb-[0.5rem] underline">Opened:</h2>
           <StencilItem
             key={props.openedStencil.stencilId}
             stencil={props.openedStencil}
@@ -55,8 +53,31 @@ const StencilsMainSection = (props: any) => {
             }
             {...props}
           />
+          </>
         )}
-        {props.favoriteStencils.map((stencil: any, index: number) => {
+        {props.favoriteStencils.length > 0 && (
+          <div className="flex flex-col gap-2">
+          <h2 className="Text__xlarge p-0 m-0 pb-[0.5rem] underline">Favorites:</h2>
+          {props.favoriteStencils.map((stencil: any, index: number) => {
+            return (
+              <StencilItem
+                key={index}
+                stencil={stencil}
+                image={backendUrl + "/stencils/stencil-" + stencil.hash + ".png"}
+                {...props}
+              />
+            );
+          })}
+          </div>
+        )}
+        <PaginationView
+          data={props.favoriteStencils}
+          stateValue={props.myStencilsPagination}
+          setState={props.setMyStencilsPagination}
+        />
+        <div className="flex flex-col gap-2">
+        <h2 className="Text__xlarge p-0 m-0 pb-[0.5rem] underline">Top:</h2>
+        {props.allStencils.map((stencil: any, index: number) => {
           return (
             <StencilItem
               key={index}
@@ -66,29 +87,34 @@ const StencilsMainSection = (props: any) => {
             />
           );
         })}
+        </div>
         <PaginationView
-          data={props.favoriteStencils}
-          stateValue={props.myStencilsPagination}
-          setState={props.setMyStencilsPagination}
+          data={props.allStencils}
+          stateValue={props.allStencilsPagination}
+          setState={props.setAllStencilsPagination}
         />
+      </div>
         {address && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "0",
-              left: "50%",
-              transform: "translateX(-50%)"
-            }}
-          >
-            <p
-              className="Text__medium Button__primary"
+          <div className="flex flex-row justify-center items-center w-full mt-2">
+            <div
+              className="Button__primary"
               onClick={() => {
                 playSoftClick2();
                 props.uploadStencil();
               }}
             >
-              Create Stencil
-            </p>
+              <div className="flex flex-col align-center justify-center">
+                <p className="Text__large p-2 pl-6 text-nowrap">Upload PNG</p>
+                <p className="Text__xsmall pt-0 p-2">Max 128x128</p>
+              </div>
+              <Image
+                src={uploadIcon}
+                alt="Upload"
+                width={24}
+                height={24}
+                className="w-[3.4rem] h-[3.4rem] ml-[0.5rem] Pixel__img"
+              />
+            </div>
             <input
               type="file"
               id="file"
@@ -99,7 +125,6 @@ const StencilsMainSection = (props: any) => {
             />
           </div>
         )}
-      </div>
     </div>
   );
 };
@@ -108,7 +133,7 @@ const StencilsExpandedSection = (props: any) => {
   return (
     <div className="flex flex-col w-full align-center">
       <div className="flex flex-row justify-between items-between p-[0.5rem] mx-[0.5rem] w-[calc(100%-1rem)]">
-        <h2 className="Text__large p-0 pb-[0.5rem] underline">Explore</h2>
+        <h2 className="Text__xlarge p-0 pb-[0.5rem] underline">Explore</h2>
         <div className="flex flex-row align-center justify-between p-[0.5rem] mx-[0.5rem]">
           {props.filters.map((filter: string, index: number) => {
             return (
@@ -175,8 +200,8 @@ export const StencilsTab = (props: any) => {
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = async (e) => {
-      const image = new Image();
+    reader.onload = async (e: any) => {
+      const image = new (Image as any)();
       if (!e.target) {
         return;
       }
@@ -210,12 +235,10 @@ export const StencilsTab = (props: any) => {
 
   useEffect(() => {
     async function getMyStencils() {
-      if (!address) {
-        return;
-      }
+      const queryAddress = address ? address.slice(2) : "0";
       try {
         const stencils = await getFavoriteStencils(
-          address.slice(2),
+          queryAddress,
           myStencilsPagination.pageLength,
           myStencilsPagination.page,
           showOnlyThisWorld ? props.worldId : null
@@ -243,37 +266,32 @@ export const StencilsTab = (props: any) => {
   ]);
 
   const [expanded, setExpanded] = useState(false);
-  const filters = ["hot", "new", "top"];
+  const filters = ["top", "new"];
   const [activeFilter, setActiveFilter] = useState(filters[0]);
 
   const [showOnlyThisWorld, setShowOnlyThisWorld] = useState(true);
   useEffect(() => {
-    if (!expanded) {
-      return;
-    }
     async function getFilterStencils() {
-      if (!address) {
-        return;
-      }
+      const queryAddress = address ? address.slice(2) : "0";
       try {
         let stencils;
         if (activeFilter === "hot") {
           stencils = await getHotStencils(
-            address.slice(2),
+            queryAddress,
             allStencilsPagination.pageLength,
             allStencilsPagination.page,
             showOnlyThisWorld ? props.worldId : null
           );
         } else if (activeFilter === "new") {
           stencils = await getNewStencils(
-            address.slice(2),
+            queryAddress,
             allStencilsPagination.pageLength,
             allStencilsPagination.page,
             showOnlyThisWorld ? props.worldId : null
           );
         } else if (activeFilter === "top") {
           stencils = await getTopStencils(
-            address.slice(2),
+            queryAddress,
             allStencilsPagination.pageLength,
             allStencilsPagination.page,
             showOnlyThisWorld ? props.worldId : null

@@ -4,9 +4,23 @@ import { CSSTransition } from "react-transition-group";
 import { useAccount } from '@starknet-react/core';
 import FavoriteIcon from "../../../public/icons/Favorite.png";
 import FavoritedIcon from "../../../public/icons/Favorited.png";
-import Info from "../../../public/icons/Info.png";
+//import Info from "../../../public/icons/Info.png";
 import { playSoftClick2 } from "../utils/sounds";
 
+/* TODO
+ <button className="Button__circle h-[3rem] w-[3rem] m-2" onClick={() => {
+   playSoftClick2();
+   setShowInfo(!showInfo);
+ }}>
+   <Image
+     src={Info}
+     alt="Info"
+     width={24}
+     height={24}
+     className="p-0 m-0"
+   />
+ </button>
+*/
 export const StencilItem = (props: any) => {
   const { address } = useAccount();
 
@@ -40,7 +54,10 @@ export const StencilItem = (props: any) => {
         className="w-full h-full object-contain m-0 p-0 Pixel__img bg-[#00000040]"
       />
       <div className="absolute bottom-0 right-0 w-full flex flex-row justify-end items-center">
-        <button className="Button__primary h-[3rem]" onClick={handleFavoritePress}>
+        <button
+          className={`${address ? "" : "Button--disabled"} Button__primary h-[3rem]`}
+          onClick={handleFavoritePress}
+        >
           <Image
             src={props.stencil.favorited ? FavoritedIcon : FavoriteIcon}
             alt="Favorite"
@@ -49,18 +66,6 @@ export const StencilItem = (props: any) => {
             className="p-0 m-0"
           />
           <p className="Text__medium p-0 m-0 text-center w-[3.5rem]">{props.stencil.favorites}</p>
-        </button>
-        <button className="Button__circle h-[3rem] w-[3rem] m-2" onClick={() => {
-          playSoftClick2();
-          setShowInfo(!showInfo);
-        }}>
-          <Image
-            src={Info}
-            alt="Info"
-            width={24}
-            height={24}
-            className="p-0 m-0"
-          />
         </button>
       </div>
     </div>

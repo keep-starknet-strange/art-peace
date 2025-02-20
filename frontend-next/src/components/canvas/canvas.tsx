@@ -173,7 +173,7 @@ export const Canva = (props: any) => {
   return (
     <div>
       <h3
-        className="p-0 m-0 absolute z-5 text-lg font-bold whitespace-nowrap pointer-events-none text-black drop-shadow-lg"
+        className="p-0 m-0 absolute z-[5] text-lg font-bold whitespace-nowrap pointer-events-none text-black drop-shadow-lg"
         style={{
           top: `calc(-0.75rem * ${props.titleScale} + ${props.origin.y}px)`,
           left: `calc(${props.origin.x}px + ${props.width * props.canvasScale / 2}px)`,

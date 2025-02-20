@@ -560,8 +560,8 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 	threeHours := int64(3 * 60 * 60)
 
 	// TODO: Improve this & collect snapshots for a timelapse
-	// Snapshot canvas image every 100 pixels placed || if last pixel placed was more than 3 hours ago
-	if uint(*totalPixelsPlaced)%100 == 0 || timeSinceLastPixelPlaced > threeHours {
+	// Snapshot canvas image every 200 pixels placed || if last pixel placed was more than 3 hours ago
+	if uint(*totalPixelsPlaced)%200 == 0 || timeSinceLastPixelPlaced > threeHours {
 		worldWidth, err := core.PostgresQueryOne[int]("SELECT width FROM Worlds WHERE world_id = $1", canvasId)
 		if err != nil {
 			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldWidth", canvasIdHex, placedBy, posHex, colorHex, err)
@@ -581,7 +581,7 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 			return
 		}
 
-		colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM colors ORDER BY color_key")
+		colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM WorldsColors WHERE world_id = $1 ORDER BY color_key", strconv.Itoa(int(canvasId)))
 		if err != nil {
 			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query colorPaletteHex", canvasIdHex, placedBy, posHex, colorHex, err)
 			return

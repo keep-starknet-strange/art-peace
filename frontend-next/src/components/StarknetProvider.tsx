@@ -4,12 +4,18 @@ import {
   StarknetConfig,
   jsonRpcProvider,
   starkscan,
+  useInjectedConnectors,
+  argent,
+  braavos,
 } from "@starknet-react/core";
+import { ArgentMobileConnector } from "starknetkit/argentMobile"
+import { WebWalletConnector } from "starknetkit/webwallet"
+
 import ControllerConnector from "@cartridge/connector/controller";
 import { SessionPolicies } from "@cartridge/controller";
 
-export const CANVAS_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CANVAS_CONTRACT_ADDRESS ||
-  '0x03ce937f91fa0c88a4023f582c729935a5366385091166a763e53281e45ac410'
+export const CANVAS_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CANVAS_CONTRACT_ADDRESS || 
+"0x011195b78f3765b1b8cfe841363e60f2335adf67af2443364d4b15cf8dff60ac"
 
 // Define session policies
 const policies: SessionPolicies = {
@@ -70,7 +76,7 @@ const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || 'https://api.cartridge.gg
 const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL || 'https://api.cartridge.gg/x/starknet/mainnet'
  
 // Initialize the connector
-const connector = new ControllerConnector({
+const controllerConnector = new ControllerConnector({
   policies,
   chains: [
       { rpcUrl: SEPOLIA_RPC_URL },
@@ -93,12 +99,31 @@ const provider = jsonRpcProvider({
 })
  
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
+  const { connectors } = useInjectedConnectors({
+    // Show these connectors if the user has no connector installed.
+    recommended: [
+      argent(),
+      braavos(),
+    ],
+    // Hide recommended connectors if the user has any connector installed.
+    includeRecommended: "onlyIfNoConnectors",
+    // Randomize the order of the connectors.
+    order: "random"
+  });
+  const mobileConnector = ArgentMobileConnector.init({
+    options: {
+        dappName: "art/peace",
+        url: typeof location !== "undefined" ? location.hostname : "localhost",
+        chainId: "SN_SEPOLIA" as any,
+        icons: [],
+      },
+    });
   return (
     <StarknetConfig
       autoConnect
-      chains={[mainnet, sepolia]}
+      chains={[sepolia]}
       provider={provider}
-      connectors={[connector]}
+      connectors={[controllerConnector, ...connectors, mobileConnector, new WebWalletConnector()]}
       explorer={starkscan}
     >
       {children}

@@ -117,8 +117,12 @@ export const GameController = (props: any) => {
             {colors.map((color: string, idx: number) => {
               return (
                 <div
-                  className="w-[2.5rem] h-[2.5rem] rounded-[1rem] m-[0.5rem] border-[0.1rem] border-[#00000070] shadow-[0.5rem] flex flex-row align-center justify-center cursor pointer-events-auto
-                    hover:shadow-[0.25rem] hover:transform hover:scale-105 cursor-pointer"
+                  className={`w-[2.5rem] h-[2.5rem] rounded-[1rem] m-[0.5rem] border-[0.1rem] border-[#00000070] shadow-[0.5rem] flex flex-row align-center justify-center cursor pointer-events-auto
+                    hover:shadow-[0.25rem] hover:transform hover:scale-105 cursor-pointer ${
+                      idx === props.selectedColorId
+                        ? "border-[0.2rem] border-[#00000070] scale-[130%] hover:scale-[130%] shadow-xl"
+                        : ""
+                    }`}
                   key={idx}
                   style={{ backgroundColor: `#${color}FF` }}
                   onClick={() => selectColor(idx)}

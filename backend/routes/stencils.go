@@ -524,6 +524,13 @@ func addStencilImg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
+  
+  r.ParseForm()
+  worldId := r.FormValue("worldId")
+  if worldId == "" {
+    worldId = "0"
+  }
+  worldIdInt, err := strconv.Atoi(worldId)
 
 	// Decode the image to check dimensions
 	img, _, err := image.Decode(file)
@@ -549,7 +556,7 @@ func addStencilImg(w http.ResponseWriter, r *http.Request) {
 
 	r.Body.Close()
 
-	imageData, err := worldImageToPixelData(fileBytes, 1, 0)
+	imageData, err := worldImageToPixelData(fileBytes, 1, worldIdInt)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to convert image to pixel data")
 		return
@@ -904,6 +911,15 @@ func getStencilPixelData(w http.ResponseWriter, r *http.Request) {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Hash parameter is required")
 		return
 	}
+  worldId := r.URL.Query().Get("worldId")
+  if worldId == "" {
+    worldId = "0"
+  }
+  worldIdInt, err := strconv.Atoi(worldId)
+  if err != nil {
+    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid worldId")
+    return
+  }
 
 	// Read the stencil image file
 	filename := fmt.Sprintf("stencils/stencil-%s.png", hash)
@@ -914,7 +930,7 @@ func getStencilPixelData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert image to pixel data
-	pixelData, err := worldImageToPixelData(fileBytes, 1, 0)
+	pixelData, err := worldImageToPixelData(fileBytes, 1, worldIdInt)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to process image")
 		return

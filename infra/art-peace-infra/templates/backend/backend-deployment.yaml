@@ -27,6 +27,8 @@ spec:
               name: {{ .Values.volumes.factions.name }}
             - mountPath: /app/templates
               name: {{ .Values.volumes.templates.name }}
+            - mountPath: /app/stencils
+              name: {{ .Values.volumes.stencils.name }}
       volumes:
         - name: {{ .Values.volumes.factions.name }}
           persistentVolumeClaim:
@@ -34,3 +36,6 @@ spec:
         - name: {{ .Values.volumes.templates.name }}
           persistentVolumeClaim:
             claimName: {{ .Values.volumes.templates.claim }}
+        - name: {{ .Values.volumes.stencils.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.stencils.claim }}

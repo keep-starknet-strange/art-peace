@@ -266,7 +266,6 @@ const Canvas = (props: any) => {
   const [worldCreationMode, setWorldCreationMode] = useState<boolean>(false);
   const startWorldCreation = () => {
     setWorldCreationMode(true);
-    setActiveTab("Canvas");
   }
   const endWorldCreation = () => {
     setWorldCreationMode(false);
@@ -274,7 +273,7 @@ const Canvas = (props: any) => {
   }
 
   // Tabs
-  const defaultTabs = ["Canvas", "Worlds", "Stencils", "Rankings", "Account"];
+  const defaultTabs = ["Canvas", "Stencils", "Rankings", "Account"];
   const [tabs, setTabs] = useState<string[]>(defaultTabs);
   const [activeTab, setActiveTab] = useState<string>(defaultTabs[0]);
   useLockScroll(activeTab === "Canvas");
@@ -321,6 +320,8 @@ const Canvas = (props: any) => {
   return (
     <div className="relative">
       <CanvasController
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         colors={worldColors}
         stagingPixels={stagingPixels}
         setStagingPixels={setStagingPixels}

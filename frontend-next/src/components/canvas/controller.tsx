@@ -299,6 +299,19 @@ export const CanvasController = (props: any) => {
     setCanvasY(containerRect.height / 2 - adjustY);
     setHasInit(true);
   }, [canvasControllerRef, props.width, height]);
+  useEffect(() => {
+    if (props.activeTab !== "Canvas") return;
+    if (props.activeTab === "Canvas") props.setActiveTab("");
+    if (!canvasControllerRef.current) return;
+    const containerRect = canvasControllerRef.current.getBoundingClientRect();
+    const resetCanvasScale = 1.02;
+    const adjustX = ((resetCanvasScale - 1) * props.width) / 2;
+    const adjustY = ((resetCanvasScale - 1) * height) / 2;
+    setCanvasX(containerRect.width / 2 - adjustX);
+    setCanvasY(containerRect.height / 2 - adjustY);
+    setTitleScale(1);
+    setCanvasScale(resetCanvasScale);
+  }, [props.activeTab]);
 
   // Pixel Selection Data
   const [selectedBoxShadow, setSelectedBoxShadow] = useState("")

@@ -21,7 +21,11 @@ export const AccountTab = (props: any) => {
   useEffect(() => {
     if (!address) return;
     const controller = connector as ControllerConnector;
-    controller.username()?.then((n) => setUsername(n));
+    if (!controller.username) {
+      setUsername("N/A");
+    } else {
+      controller.username()?.then((n) => setUsername(n));
+    }
     setAddressShort(`${address.slice(0, 6)}...${address.slice(-4)}`);
   }, [address]);
 
@@ -29,9 +33,17 @@ export const AccountTab = (props: any) => {
     navigator.clipboard.writeText(text);
   };
 
-  const tryConnect = () => {
+  const tryConnectController = () => {
     try {
       connect({ connector: controller });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  const tryConnectWallet = (connector: any) => {
+    try {
+      connect({ connector: connector });
     } catch (e) {
       console.log(e);
     }
@@ -64,13 +76,31 @@ export const AccountTab = (props: any) => {
   return (
     <BasicTab title="Account" {...props}>
       {!address && (
-        <div className="flex flex-row align-center justify-center w-full">
-          <button
-            className="w-[70%] py-[0.7rem] px-[1rem] Text__medium Button__primary"
-            onClick={() => tryConnect()}
+        <div className="flex flex-col align-center justify-center w-full gap-[0.5rem]">
+          <h2 className="Text__large p-[0.5rem] my-[1rem]">
+            Login!
+          </h2>
+          <div
+            className="w-[100%] py-[0.7rem] px-[1rem] Text__medium Button__primary"
+            onClick={() => tryConnectController()}
           >
-            Cartridge Login
-          </button>
+            <div className="flex flex-col align-center justify-center gap-[0.5rem]">
+              <p className="Text__large">Controller</p>
+              <p className="Txt__small text-blue-500">No fees + Sessions!</p>
+            </div>
+          </div>
+          {connectors.slice(1).map((connector, index) => (
+            <div
+              key={index}
+              className="w-[100%] py-[0.7rem] px-[1rem] Text__medium Button__primary"
+              onClick={() => tryConnectWallet(connector)}
+            >
+              <div className="flex flex-col align-center justify-center gap-[0.5rem]">
+                <p className="Text__large">{connector.name}</p>
+                <p className="Txt__small text-green-700">Standard</p>
+              </div>
+            </div>
+          ))}
         </div>
       )}
       {address && (
