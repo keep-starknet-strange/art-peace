@@ -136,7 +136,7 @@ const Canvas = (props: any) => {
       const stagedPixel = stagedPixels[0];
       stagedPixels = stagedPixels.slice(1);
       updateGame({
-        type: "pixel",
+        messageType: "pixel",
         position: stagedPixel.position,
         colorId: stagedPixel.colorId,
         worldId: commitWorldId,
@@ -347,6 +347,9 @@ const Canvas = (props: any) => {
   const updateGame = (update: any) => {
     setGameUpdates([...gameUpdates, update]);
   }
+  const updatesGame = (updates: any[]) => {
+    setGameUpdates([...gameUpdates, ...updates]);
+  }
   useEffect(() => {
     if (gameUpdates.length === 0) {
       return;
@@ -378,8 +381,10 @@ const Canvas = (props: any) => {
   }, [readyState]);
   useEffect(() => {
     const processMessage = async (message: any) => {
-      if (message) {
-        console.log(message);
+      const supportedTypes = ["colorWorldPixel"];
+      if (message && message.length > 0) {
+        const updates = message.filter((update: any) => supportedTypes.includes(update.messageType));
+        updatesGame(updates);
       }
     };
     processMessage(lastJsonMessage);

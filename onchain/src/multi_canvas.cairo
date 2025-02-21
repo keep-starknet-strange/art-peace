@@ -645,6 +645,10 @@ pub mod MultiCanvas {
 
         fn check_game_running(self: @ContractState, canvas_id: u32) {
             let block_timestamp = starknet::get_block_timestamp();
+            assert(
+                block_timestamp >= self.canvases.read(canvas_id).start_time,
+                'This world has not started.'
+            );
             assert(block_timestamp <= self.canvases.read(canvas_id).end_time, 'This world ended.')
         }
 

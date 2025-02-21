@@ -99,12 +99,24 @@ export const Canva = (props: any) => {
   }
   useEffect(() => {
     if (!props.gameUpdate) return;
-    if (props.gameUpdate.type !== "pixel") return;
+    if (props.gameUpdate.messageType !== "pixel") return;
     if (props.gameUpdate.worldId !== props.worldId) return;
     const x = props.gameUpdate.position % props.width;
     const y = Math.floor(props.gameUpdate.position / props.width);
     colorPixel(x, y, props.gameUpdate.colorId);
     props.setLastPlacedTime(props.gameUpdate.timestamp * 1000);
+    props.setGameUpdate(null);
+  }, [props.gameUpdate]);
+  useEffect(() => {
+    if (!props.gameUpdate) return;
+    if (props.gameUpdate.messageType !== "colorWorldPixel") return;
+    if (parseInt(props.gameUpdate.worldId) !== props.worldId) return;
+    const strPos = props.gameUpdate.position;
+    const numPos = parseInt(strPos);
+    const x = numPos % props.width;
+    const y = Math.floor(numPos / props.width);
+    const colorId = parseInt(props.gameUpdate.color);
+    colorPixel(x, y, colorId);
     props.setGameUpdate(null);
   }, [props.gameUpdate]);
 
