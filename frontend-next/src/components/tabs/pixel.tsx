@@ -34,7 +34,7 @@ export const PixelInfoTab = (props: any) => {
   const [hasGotOwnerAddress, setHasGotOwnerAddress] = useState<boolean>(false);
   useEffect(() => {
     setHasGotOwnerAddress(false);
-    setOwnerUsername("Loading...");
+    setOwnerUsername(ownerAddress);
   }, [props.worldId, props.x, props.y]);
   useEffect(() => {
     const getOwnerAddress = async () => {

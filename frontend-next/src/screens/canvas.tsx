@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { useAccount } from '@starknet-react/core';
 import { CanvasController } from '../components/canvas/controller';
 import { useLockScroll } from '../app/window';
 import { TabPanel } from "../components/tabs/panel";
 import { Footer } from "../components/footer/footer";
+import { websocketUrl } from "../api/api";
 import { getWorlds, getHomeWorlds, getWorld } from "../api/worlds";
 import { getCanvasColors } from "../api/canvas";
 import { placePixelsCall } from "../contract/calls";
@@ -356,6 +358,32 @@ const Canvas = (props: any) => {
     setGameUpdate(update);
     setGameUpdates(gameUpdates.slice(1));
   }, [gameUpdates, gameUpdate]);
+
+  // Websocket
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(websocketUrl + '/ws', {
+    share: false,
+    shouldReconnect: (_e) => true,
+    reconnectAttempts: 10,
+    reconnectInterval: (attempt) => Math.min(10000, Math.pow(2, attempt) * 1000)
+  });
+  useEffect(() => {
+    if (readyState === ReadyState.OPEN) {
+      sendJsonMessage({
+        event: 'subscribe',
+        data: {
+          channel: 'general'
+        }
+      });
+    }
+  }, [readyState]);
+  useEffect(() => {
+    const processMessage = async (message: any) => {
+      if (message) {
+        console.log(message);
+      }
+    };
+    processMessage(lastJsonMessage);
+  }, [lastJsonMessage]);
 
   return (
     <div className="relative">

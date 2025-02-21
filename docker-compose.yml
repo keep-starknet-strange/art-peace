@@ -156,6 +156,7 @@ services:
       - NEXT_PUBLIC_CANVAS_CONTRACT_ADDRESS=0x011195b78f3765b1b8cfe841363e60f2335adf67af2443364d4b15cf8dff60ac
       - NEXT_PUBLIC_BASE_PIXEL_TIMER=30000
       - NEXT_PUBLIC_ROUND_NUMBER=3
+      - NEXT_PUBLIC_WEBSOCKET_URL=wss://api.art-peace.net
       - NEXT_PUBLIC_BACKEND_URL=https://api.art-peace.net
       - NEXT_PUBLIC_HAS_LAUNCHED=true
     volumes:

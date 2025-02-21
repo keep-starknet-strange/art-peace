@@ -21,6 +21,7 @@
     "react-dom": "^19.0.0",
     "react-router": "^7.1.5",
     "react-transition-group": "^4.4.5",
+    "react-use-websocket": "^4.13.0",
     "starknet": "^6.23.1",
     "starknetkit": "^2.6.1"
   },

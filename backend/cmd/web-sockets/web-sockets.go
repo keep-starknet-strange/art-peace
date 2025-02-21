@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/keep-starknet-strange/art-peace/backend/config"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
@@ -58,7 +59,8 @@ func main() {
 
 	routes.InitBaseRoutes()
 	routes.InitWebsocketRoutes()
-	routes.StartWebsocketServer()
+	go routes.StartWebsocketServer()
 
+  fmt.Println("Starting websocket server on port", core.ArtPeaceBackend.BackendConfig.WsPort)
 	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.WsPort)
 }
