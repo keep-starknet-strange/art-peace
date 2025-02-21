@@ -42,10 +42,12 @@ func processPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
+  fmt.Println("Processing pixel placed event", address, position, dayIdx, color)
 	// Set pixel in redis
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 	pos := uint(position) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 
+  fmt.Println("Setting pixel in redis", bitfieldType, pos, color)
 	ctx := context.Background()
 	roundNumber := core.ArtPeaceBackend.CanvasConfig.Round
 	canvasKey := fmt.Sprintf("canvas-%s", roundNumber)
@@ -55,6 +57,7 @@ func processPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
+  fmt.Println("Setting pixel in postgres")
 	// Set pixel in postgres
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO Pixels (address, position, day, color) VALUES ($1, $2, $3, $4)", address, position, dayIdx, color)
 	if err != nil {
@@ -63,6 +66,7 @@ func processPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
+  fmt.Println("Sending message to all connected clients")
 	// Send message to all connected clients
 	var message = map[string]string{
 		"position":    strconv.FormatInt(position, 10),

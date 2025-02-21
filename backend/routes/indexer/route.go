@@ -290,6 +290,7 @@ func ProcessMessageEvents(message IndexerMessage) {
 	for _, event := range message.Data.Batch[0].Events {
 		eventKey := event.Event.Keys[0]
 		eventProcessor, ok := eventProcessors[eventKey]
+    fmt.Println("Processing event:", eventKey)
 		if !ok {
 			PrintIndexerError("consumeIndexerMsg", "error processing event", eventKey)
 			return
