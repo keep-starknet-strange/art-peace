@@ -22,3 +22,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.labels.websocket.name }}-secret
+          livenessProbe:
+            exec:
+              command:
+              - bash
+              - -c
+              - exit 1
+            failureThreshold: 1
+            periodSeconds: 300
+            successThreshold: 1
+            timeoutSeconds: 1

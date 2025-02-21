@@ -35,12 +35,12 @@ export const LeaderboardTab = (props: any) => {
     {
       name: "Players",
       key: "User",
-      value: "Total Pixels"
+      value: "Pixels"
     },
     {
       name: "Worlds",
       key: "World",
-      value: "Total Pixels"
+      value: "Pixels"
     },
     {
       name: "World Pxs",
@@ -133,12 +133,12 @@ export const LeaderboardTab = (props: any) => {
       </div>
       <div className="flex flex-col mx-2 mt-4 border-2 border-[rgba(0,0,0,0.6)] rounded-2xl h-[40rem]
         overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <div className={`flex justify-between items-center px-4 py-1 border-b-2 border-[rgba(0,0,0,0.6)] bg-[rgba(0,0,100,0.25)]`}>
+        <div className={`flex justify-between items-center py-1 border-b-2 border-[rgba(0,0,0,0.6)] bg-[rgba(0,0,100,0.25)]`}>
           <div className="flex items-center gap-8 py-2">
             <div className="text-black text-md w-[min(3rem)]"></div>
             <div className="Text__medium">{selectedOption.key}</div>
           </div>
-          <div className="flex items-center mr-8">
+          <div className="flex items-center mr-2">
             <div className="Text__medium">{selectedOption.value}</div>
           </div>
         </div>

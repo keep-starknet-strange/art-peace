@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
@@ -290,7 +289,6 @@ func ProcessMessageEvents(message IndexerMessage) {
 	for _, event := range message.Data.Batch[0].Events {
 		eventKey := event.Event.Keys[0]
 		eventProcessor, ok := eventProcessors[eventKey]
-		fmt.Println("Processing event:", eventKey)
 		if !ok {
 			PrintIndexerError("consumeIndexerMsg", "error processing event", eventKey)
 			return
@@ -486,7 +484,7 @@ func StartMessageProcessor() {
 			}
 
 			// No messages to process, sleep for 1 second
-			time.Sleep(1 * time.Second)
+			// time.Sleep( * time.Second)
 		}
 	}()
 }

@@ -205,7 +205,7 @@ func getNewStencils(w http.ResponseWriter, r *http.Request) {
               GROUP BY 
                   (world_id, stencil_id)
           ) stencilfavorites ON stencils.world_id = stencilfavorites.world_id AND stencils.stencil_id = stencilfavorites.stencil_id
-          WHERE stencils.world_id = $2
+          WHERE stencils.world_id = $2 and stencilfavorites.favorites > 0
           ORDER BY stencils.stencil_id DESC
           LIMIT $3 OFFSET $4`
 		stencils, err = core.PostgresQueryJson[StencilData](query, address, worldIdInt, pageLength, offset)
@@ -227,6 +227,7 @@ func getNewStencils(w http.ResponseWriter, r *http.Request) {
               GROUP BY 
                   (world_id, stencil_id)
           ) stencilfavorites ON stencils.world_id = stencilfavorites.world_id AND stencils.stencil_id = stencilfavorites.stencil_id
+          WHERE stencilfavorites.favorites > 0
           ORDER BY stencils.stencil_id DESC
           LIMIT $2 OFFSET $3`
 		stencils, err = core.PostgresQueryJson[StencilData](query, address, pageLength, offset)
@@ -394,7 +395,7 @@ func getTopStencils(w http.ResponseWriter, r *http.Request) {
               GROUP BY 
                   (world_id, stencil_id)
           ) stencilfavorites ON stencils.world_id = stencilfavorites.world_id AND stencils.stencil_id = stencilfavorites.stencil_id
-          WHERE stencils.world_id = $2
+          WHERE stencils.world_id = $2 AND stencilfavorites.favorite_count > 0
           ORDER BY 
               favorites DESC
           LIMIT $3 OFFSET $4`
@@ -417,6 +418,7 @@ func getTopStencils(w http.ResponseWriter, r *http.Request) {
               GROUP BY 
                   (world_id, stencil_id)
           ) stencilfavorites ON stencils.world_id = stencilfavorites.world_id AND stencils.stencil_id = stencilfavorites.stencil_id
+          WHERE stencilfavorites.favorite_count > 0
           ORDER BY 
               favorites DESC
           LIMIT $2 OFFSET $3`
