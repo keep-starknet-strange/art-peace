@@ -78,9 +78,7 @@ function App() {
     };
   }, [currentBackgroundSongIndex, hasPlayedYet]);
 
-  const [hasLaunched, setHasLaunched] = useState(false);
-  const [homeClickCount, setHomeClickCount] = useState(0);
-
+  const [homeClicked, setHomeClicked] = useState(false);
   return (
     <div className="h-[100vh] w-[100vw] bg-[#fefdfb] flex flex-col align-center">
       <div className="Page__bg">
@@ -91,12 +89,8 @@ function App() {
               alt="logo"
               className="w-full h-full object-contain"
               onClick={() => {
-                const newCount = homeClickCount + 1;
-                setHomeClickCount(newCount);
-                if (newCount >= 3) {
-                  setHasLaunched(true);
-                }
                 playSoftClick2();
+                setHomeClicked(true);
                 // TODO: window.location.href = '/';
               }}
             />
@@ -105,8 +99,7 @@ function App() {
               ">3</p>
           </div>
         </div>
-        {hasLaunched && <Canvas setIsMusicMuted={setIsMusicMuted} />}
-        {!hasLaunched && <Teaser />}
+        <Canvas setIsMusicMuted={setIsMusicMuted} homeClicked={homeClicked} setHomeClicked={setHomeClicked} />
       </div>
     </div>
   );

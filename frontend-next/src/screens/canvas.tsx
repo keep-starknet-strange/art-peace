@@ -285,7 +285,7 @@ const Canvas = (props: any) => {
   const defaultTabs = ["Canvas", "Stencils", "Rankings", "Account"];
   const [tabs, setTabs] = useState<string[]>(defaultTabs);
   const [activeTab, setActiveTab] = useState<string>(defaultTabs[0]);
-  useLockScroll(activeTab === "Canvas");
+  useLockScroll(activeTab === "Canvas" || activeTab === "");
 
   // Bot mode
   const botOptions = [{
@@ -389,6 +389,13 @@ const Canvas = (props: any) => {
     };
     processMessage(lastJsonMessage);
   }, [lastJsonMessage]);
+
+  useEffect(() => {
+    if (props.homeClicked) {
+      setActiveTab("Canvas");
+    }
+    props.setHomeClicked(false);
+  }, [props.homeClicked]);
 
   return (
     <div className="relative">
