@@ -11,6 +11,19 @@ import { playSoftClick2 } from "../utils/sounds";
 export const LeaderboardTab = (props: any) => {
   const { address } = useAccount();
 
+  const shortFormNumber = (num: number) => {
+    if (num < 10000) {
+      return num;
+    }
+    if (num < 1000000) {
+      return (num / 1000).toFixed(1) + "K";
+    }
+    if (num < 1000000000) {
+      return (num / 1000000).toFixed(1) + "M";
+    }
+    return (num / 1000000000).toFixed(1) + "B";
+  }
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
@@ -20,7 +33,7 @@ export const LeaderboardTab = (props: any) => {
   // TODO: View icon on worlds to select world
   const leaderboardOptions = [
     {
-      name: "Pixels",
+      name: "Players",
       key: "User",
       value: "Total Pixels"
     },
@@ -44,7 +57,7 @@ export const LeaderboardTab = (props: any) => {
     const fetchLeaderboard = async () => {
       try {
         let res = [];
-        if (selectedOption.name === "Pixels") {
+        if (selectedOption.name === "Players") {
           res = await getLeaderboardPixels(leaderboardPagination.limit, leaderboardPagination.page);
           setUseKeyNames(true);
         } else if (selectedOption.name === "Worlds") {
@@ -91,16 +104,16 @@ export const LeaderboardTab = (props: any) => {
     <BasicTab title="Leaderboard" {...props}>
       <div className="flex flex-row justify-around align-center mt-[1rem] mb-[0.5rem] w-[90%] mx-auto bg-[#00000020] p-[3px] rounded-2xl outline outline-[rgba(0,0,0,0.15)] text-nowrap">
         <p
-          className={`Text__small rounded-2xl py-[0.5rem] px-[4rem] ${selectedOption.name === "Pixels" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer`}
+          className={`Text__small rounded-2xl py-[0.5rem] flex-1 text-center ${selectedOption.name === "Players" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer`}
           onClick={() => {
             playSoftClick2();
             setSelectedOption(leaderboardOptions[0]);
           }}
         >
-          Pixels
+          Players
         </p>
         <p
-          className={`Text__small rounded-2xl py-[0.5rem] px-[4rem] ${selectedOption.name === "Worlds" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer`}
+          className={`Text__small rounded-2xl py-[0.5rem] flex-1 text-center ${selectedOption.name === "Worlds" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer`}
           onClick={() => {
             playSoftClick2();
             setSelectedOption(leaderboardOptions[1]);
@@ -109,24 +122,24 @@ export const LeaderboardTab = (props: any) => {
           Worlds
         </p>
         <p
-          className={`Text__small rounded-2xl py-[0.5rem] px-[2.5rem] ${selectedOption.name === "World Pxs" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer truncate`}
+          className={`Text__small rounded-2xl py-[0.5rem] flex-1 text-center ${selectedOption.name === "World Pxs" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer truncate`}
           onClick={() => {
             playSoftClick2();
             setSelectedOption(leaderboardOptions[2]);
           }}
         >
-          This World
+          World
         </p>
       </div>
       <div className="flex flex-col mx-2 mt-4 border-2 border-[rgba(0,0,0,0.6)] rounded-2xl h-[40rem]
         overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <div className={`flex justify-between items-center px-4 py-1 border-b-2 border-[rgba(0,0,0,0.6)]`}>
-          <div className="flex items-center gap-8">
-            <div className="text-black text-md">&nbsp;</div>
-            <div className="Text__small">{selectedOption.key}</div>
+        <div className={`flex justify-between items-center px-4 py-1 border-b-2 border-[rgba(0,0,0,0.6)] bg-[rgba(0,0,100,0.25)]`}>
+          <div className="flex items-center gap-8 py-2">
+            <div className="text-black text-md w-[min(3rem)]"></div>
+            <div className="Text__medium">{selectedOption.key}</div>
           </div>
           <div className="flex items-center mr-8">
-            <div className="Text__small">{selectedOption.value}</div>
+            <div className="Text__medium">{selectedOption.value}</div>
           </div>
         </div>
         {leaderboardStats && leaderboardStats.map((stat, i) => (
@@ -134,17 +147,17 @@ export const LeaderboardTab = (props: any) => {
             border-b-2 border-[rgba(0,0,0,0.6)] last:border-b-0
             ${i % 2 !== 0 ? "bg-[rgba(0,0,0,0.15)]" : ""}
             `}>
-            <div className="flex items-center gap-8 flex-grow">
-              <div className="text-black text-md">{i + 1}</div>
-              <div className="text-black text-md truncate w-[23rem]">{useKeyNames ? keyNameMap[stat.key] : stat.key}</div>
+            <div className="flex items-center">
+              <div className="text-black text-md w-[min(3rem)] mr-4">{i + 1}</div>
+              <div className="text-black text-md w-[max(25rem)] md:w-[max(22rem)] truncate">{useKeyNames ? keyNameMap[stat.key] : stat.key}</div>
               <Image src={copyIcon} alt="copy" width={16} height={16} onClick={() => {
                 playSoftClick2();
                 copyToClipboard(useKeyNames ? "0x" + stat.key : stat.key);
               }}
-              className="cursor-pointer hover:scale-105 transform transition-transform active:scale-100"/>
+              className="cursor-pointer hover:scale-105 transform transition-transform active:scale-100 mr-8"/>
             </div>
-            <div className="flex items-center mr-8">
-              <div className="text-black text-bold text-md">{stat.score}</div>
+            <div className="flex items-center">
+              <div className="text-black text-bold text-md w-[8rem] text-right">{shortFormNumber(stat.score)}</div>
             </div>
           </div>
         ))}
@@ -154,6 +167,9 @@ export const LeaderboardTab = (props: any) => {
         stateValue={leaderboardPagination}
         setState={setLeaderboardPagination}
       />
+      {selectedOption.name === "World Pxs" && (
+        <p className="Text__xsmall mx-[0.5rem] my-[1rem] truncate">Stats for world: {props.activeWorld.name}</p>
+      )}
     </BasicTab>
   );
 }

@@ -17,7 +17,7 @@ export const StencilBotController = (props: any) => {
   const [remainingTemplatePixels, setRemainingTemplatePixels] = useState([] as any[]);
   useEffect(() => {
     const getStencilData = async () => {
-      const stencilData = await getStencilPixelData(props.openedStencil.hash);
+      const stencilData = await getStencilPixelData(props.openedStencil.hash, props.activeWorld.worldId);
       setRawTemplatePixels(stencilData.pixelData);
     };
     if (props.openedStencil) {

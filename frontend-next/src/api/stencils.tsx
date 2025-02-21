@@ -107,9 +107,9 @@ export const addStencilData = async (worldId: number, width: number, height: num
   }
 }
 
-export const getStencilPixelData = async (hash: string): Promise<any> => {
+export const getStencilPixelData = async (hash: string, worldId: number): Promise<any> => {
   try {
-    const getStencilPixelDataEndpoint = `${backendUrl}/get-stencil-pixel-data?hash=${hash}`;
+    const getStencilPixelDataEndpoint = `${backendUrl}/get-stencil-pixel-data?hash=${hash}&worldId=${worldId}`;
     const pixelData = await fetchJsonData(getStencilPixelDataEndpoint);
     return pixelData;
   } catch (error) {

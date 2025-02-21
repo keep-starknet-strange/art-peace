@@ -6,6 +6,7 @@ import FavoriteIcon from "../../../public/icons/Favorite.png";
 import FavoritedIcon from "../../../public/icons/Favorited.png";
 //import Info from "../../../public/icons/Info.png";
 import { playSoftClick2 } from "../utils/sounds";
+import { favoriteStencilCall, unfavoriteStencilCall } from "../../contract/calls";
 
 /* TODO
  <button className="Button__circle h-[3rem] w-[3rem] m-2" onClick={() => {
@@ -22,18 +23,27 @@ import { playSoftClick2 } from "../utils/sounds";
  </button>
 */
 export const StencilItem = (props: any) => {
-  const { address } = useAccount();
+  const { account, address } = useAccount();
 
   const [creatorText, setCreatorText] = useState("");
 
-  const selectStencil = () => {
+  const selectStencil = (e: any) => {
+    e.preventDefault();
+    // Ignore clicks on the favorite button
+    if (e.target.classList.contains("FavoriteButton")) return;
     playSoftClick2();
     props.setOpenedStencil(props.stencil);
   }
 
-  const handleFavoritePress = () => {
+  const handleFavoritePress = async () => {
     playSoftClick2();
-    console.log("Favorite pressed");
+    if (props.stencil.favorited) {
+      await unfavoriteStencilCall(account, props.activeWorld.worldId, props.stencil.stencilId);
+      props.setStencilFavorited(props.stencil.stencilId, false);
+    } else {
+      await favoriteStencilCall(account, props.activeWorld.worldId, props.stencil.stencilId);
+      props.setStencilFavorited(props.stencil.stencilId, true);
+    }
   }
 
   const [showInfo, setShowInfo] = useState(false);
@@ -43,7 +53,6 @@ export const StencilItem = (props: any) => {
       className="relative w-full h-[20rem] bg-[rgba(255,255,255,0.4)]
         border-2 border-[#00000030] rounded-lg shadow-md
         overflow-hidden cursor-pointer"
-      onClick={selectStencil}
     >
       <Image
         loader={() => props.image}
@@ -52,8 +61,9 @@ export const StencilItem = (props: any) => {
         width={props.stencil.width}
         height={props.stencil.height}
         className="w-full h-full object-contain m-0 p-0 Pixel__img bg-[#00000040]"
+        onClick={selectStencil}
       />
-      <div className="absolute bottom-0 right-0 w-full flex flex-row justify-end items-center">
+      <div className="FavoriteButton absolute bottom-0 right-0 w-full flex flex-row justify-end items-center pointer-events-none">
         <button
           className={`${address ? "" : "Button--disabled"} Button__primary h-[3rem]`}
           onClick={handleFavoritePress}

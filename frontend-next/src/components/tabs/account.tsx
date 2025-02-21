@@ -111,8 +111,8 @@ export const AccountTab = (props: any) => {
           </div>
           <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] flex flex-row align-center justify-between">
             <p className="Text__medium pr-[1rem]">Address&nbsp;:</p>
-            <div className="flex flex-row align-center">
-              <p className="Text__medium pr-[0.5rem] truncate w-[21rem] text-right">{addressShort}</p>
+            <div className="flex flex-row align-center flex-grow">
+              <p className="Text__medium pr-[0.5rem] truncate text-right w-[100%]">{addressShort}</p>
               <div className="w-[2rem] h-[2rem] cursor-pointer" onClick={() => {
                 playSoftClick2();
                 copyToClipboard(address);
@@ -130,77 +130,81 @@ export const AccountTab = (props: any) => {
             </p>
           </div>
 
-          <h2 className="Text__large Heading__sub p-[0.5rem] my-[1rem]">
-            User Stats
-          </h2>
-          <div className="mx-[1rem]">
-            <h3 className="Text__medium underline mb-[1rem]">
-              Totals
-            </h3>
-            <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between">
-              <p className="Text__medium pr-[1rem]">Pixels Placed&nbsp;:</p>
-              <p className="Text__medium pr-[0.5rem] text-right">
-                {totalPixelsPlaced}
-              </p>
-            </div>
-            <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between mt-[0.5rem]">
-              <p className="Text__medium pr-[1rem]">Stencil Likes&nbsp;:</p>
-              <p className="Text__medium pr-[0.5rem] text-right">
-                {totalStencilLikes}
-              </p>
-            </div>
-            {props.activeWorld && (
-              <>
-              <h3 className="Text__medium underline mt-[1rem] mb-[1rem]">
-                On World &quot;{props.activeWorld.name}&quot;
+          <div className="border-y-2 border-black mx-[1rem] mt-[1rem] py-[1rem]">
+            <h2 className="Text__large Heading__sub p-[0.5rem] mb-[1rem]">
+              Stats
+            </h2>
+            <div className="mx-[1rem]">
+              <h3 className="text-black text-xl truncate underline mb-[1rem]">
+                Totals
               </h3>
               <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between">
                 <p className="Text__medium pr-[1rem]">Pixels Placed&nbsp;:</p>
                 <p className="Text__medium pr-[0.5rem] text-right">
-                  {pixelsOnWorld}
+                  {totalPixelsPlaced}
                 </p>
               </div>
               <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between mt-[0.5rem]">
                 <p className="Text__medium pr-[1rem]">Stencil Likes&nbsp;:</p>
                 <p className="Text__medium pr-[0.5rem] text-right">
-                  {stencilLikesOnWorld}
+                  {totalStencilLikes}
                 </p>
               </div>
-              </>
-            )}
-          </div>
-          <h2 className="Text__large Heading__sub p-[0.5rem] my-[1rem]">
-            Settings
-          </h2>
-          <div className="px-[0.5rem] ml-[0.5rem] mr-[1rem] flex flex-row align-center justify-around">
-            <div className="flex flex-row align-center">
-              <p className="Text__medium pr-[1rem] my-auto">Sound FX</p>
-              <Image
-                src={isFXMuted ? muteIcon : unmuteIcon}
-                alt="Mute icon"
-                onClick={() => {
-                  playSoftClick2();
-                  const newVolume = isFXMuted ? 1 : 0;
-                  setSoundEffectVolume(newVolume);
-                  setIsFXMuted(!isFXMuted);
-                }}
-                className="cursor-pointer h-[2.5rem] w-[2.5rem] hover:scale-105"
-              />
+              {props.activeWorld && (
+                <>
+                <h3 className="text-black text-xl truncate underline mt-[1rem] mb-[1rem]">
+                  On World &quot;{props.activeWorld.name}&quot;
+                </h3>
+                <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between">
+                  <p className="Text__medium pr-[1rem]">Pixels Placed&nbsp;:</p>
+                  <p className="Text__medium pr-[0.5rem] text-right">
+                    {pixelsOnWorld}
+                  </p>
+                </div>
+                <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between mt-[0.5rem]">
+                  <p className="Text__medium pr-[1rem]">Stencil Likes&nbsp;:</p>
+                  <p className="Text__medium pr-[0.5rem] text-right">
+                    {stencilLikesOnWorld}
+                  </p>
+                </div>
+                </>
+              )}
             </div>
-            <div className="flex flex-row align-center">
-              <p className="Text__medium pr-[1rem] my-auto">Music</p>
-              <Image
-                src={isMusicMuted ? muteIcon : unmuteIcon}
-                alt="Mute icon"
-                onClick={() => {
-                  playSoftClick2();
-                  const newVolume = isMusicMuted ? 1 : 0;
-                  props.setIsMusicMuted(newVolume === 0);
-                  setMusicVolume(newVolume);
-                  setIsMusicMuted(!isMusicMuted);
-                }}
-                className="cursor-pointer h-[2.5rem] w-[2.5rem] hover:scale-105"
-              />
+          </div>
+          <div className="mx-[1rem] mt-[1rem] py-[1rem]">
+            <h2 className="Text__large Heading__sub px-[0.5rem]">
+              Settings
+            </h2>
+            <div className="px-[0.5rem] ml-[0.5rem] mr-[1rem] flex flex-row align-center justify-around mt-[1rem]">
+              <div className="flex flex-row align-center">
+                <p className="Text__medium pr-[1rem] my-auto">Sound FX</p>
+                <Image
+                  src={isFXMuted ? muteIcon : unmuteIcon}
+                  alt="Mute icon"
+                  onClick={() => {
+                    playSoftClick2();
+                    const newVolume = isFXMuted ? 1 : 0;
+                    setSoundEffectVolume(newVolume);
+                    setIsFXMuted(!isFXMuted);
+                  }}
+                  className="cursor-pointer h-[2.5rem] w-[2.5rem] hover:scale-105"
+                />
+              </div>
+              <div className="flex flex-row align-center">
+                <p className="Text__medium pr-[1rem] my-auto">Music</p>
+                <Image
+                  src={isMusicMuted ? muteIcon : unmuteIcon}
+                  alt="Mute icon"
+                  onClick={() => {
+                    playSoftClick2();
+                    const newVolume = isMusicMuted ? 1 : 0;
+                    props.setIsMusicMuted(newVolume === 0);
+                    setMusicVolume(newVolume);
+                    setIsMusicMuted(!isMusicMuted);
+                  }}
+                  className="cursor-pointer h-[2.5rem] w-[2.5rem] hover:scale-105"
+                />
+              </div>
             </div>
           </div>
           <div className="flex flex-row align-center justify-center w-full pt-[2rem]">

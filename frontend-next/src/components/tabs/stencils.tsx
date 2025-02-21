@@ -27,7 +27,7 @@ const StencilsMainSection = (props: any) => {
         <div className="flex flex-row align-center absolute top-0 right-[1rem] z-[20]">
           {!props.expanded && (
             <div
-              className="Text__xlarge Button__primary"
+              className="Text__large Button__primary"
               onClick={() => {
                 playSoftClick2();
                 props.setExpanded(true);
@@ -38,12 +38,15 @@ const StencilsMainSection = (props: any) => {
           )}
         </div>
       </div>
-      <div className="h-[55vh] grid grid-rows-[min-content] grid-cols-[minmax(25rem,1fr)] px-[2rem] overflow-scroll">
-        {props.openedStencil && !props.openedStencil.favorited && (
+      <div className="h-[55vh] px-[2rem] overflow-scroll">
+        {props.openedStencil && (
           <>
-          <h2 className="Text__xlarge p-0 m-0 pb-[0.5rem] underline">Opened:</h2>
+          <h2 className="Text__xlarge p-0 m-0 pb-[1rem] underline">Current:</h2>
+          <div className="w-[70%] mx-auto">
           <StencilItem
             key={props.openedStencil.stencilId}
+            activeWorld={props.activeWorld}
+            setStencilFavorited={props.setStencilFavorited}
             stencil={props.openedStencil}
             image={
               backendUrl +
@@ -53,21 +56,26 @@ const StencilsMainSection = (props: any) => {
             }
             {...props}
           />
+          </div>
           </>
         )}
         {props.favoriteStencils.length > 0 && (
           <div className="flex flex-col gap-2">
-          <h2 className="Text__xlarge p-0 m-0 pb-[0.5rem] underline">Favorites:</h2>
+          <h2 className="Text__xlarge p-0 m-0 pb-[1rem] underline">Favorites:</h2>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] grid-rows-[min-content] gap-2">
           {props.favoriteStencils.map((stencil: any, index: number) => {
             return (
               <StencilItem
                 key={index}
+                activeWorld={props.activeWorld}
+                setStencilFavorited={props.setStencilFavorited}
                 stencil={stencil}
                 image={backendUrl + "/stencils/stencil-" + stencil.hash + ".png"}
                 {...props}
               />
             );
           })}
+          </div>
           </div>
         )}
         <PaginationView
@@ -76,11 +84,16 @@ const StencilsMainSection = (props: any) => {
           setState={props.setMyStencilsPagination}
         />
         <div className="flex flex-col gap-2">
-        <h2 className="Text__xlarge p-0 m-0 pb-[0.5rem] underline">Top:</h2>
+        {!props.expanded && (
+        <>
+        <h2 className="Text__xlarge p-0 m-0 pb-[1rem] underline">For you :</h2>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] grid-rows-[min-content] gap-2">
         {props.allStencils.map((stencil: any, index: number) => {
           return (
             <StencilItem
               key={index}
+              activeWorld={props.activeWorld}
+              setStencilFavorited={props.setStencilFavorited}
               stencil={stencil}
               image={backendUrl + "/stencils/stencil-" + stencil.hash + ".png"}
               {...props}
@@ -93,6 +106,9 @@ const StencilsMainSection = (props: any) => {
           stateValue={props.allStencilsPagination}
           setState={props.setAllStencilsPagination}
         />
+        </>
+        )}
+      </div>
       </div>
         {address && (
           <div className="flex flex-row justify-center items-center w-full mt-2">
@@ -132,9 +148,9 @@ const StencilsMainSection = (props: any) => {
 const StencilsExpandedSection = (props: any) => {
   return (
     <div className="flex flex-col w-full align-center">
-      <div className="flex flex-row justify-between items-between p-[0.5rem] mx-[0.5rem] w-[calc(100%-1rem)]">
+      <div className="flex flex-col sm:flex-row justify-between items-between p-[0.5rem] mx-[0.5rem] w-[calc(100%-1rem)]">
         <h2 className="Text__xlarge p-0 pb-[0.5rem] underline">Explore</h2>
-        <div className="flex flex-row align-center justify-between p-[0.5rem] mx-[0.5rem]">
+        <div className="flex flex-row align-center justify-around p-[0.5rem] mx-[0.5rem] gap-2">
           {props.filters.map((filter: string, index: number) => {
             return (
               <div
@@ -151,12 +167,14 @@ const StencilsExpandedSection = (props: any) => {
           })}
         </div>
       </div>
-      <div className="mt-[0.5rem] p-[0.5rem] h-[55vh] overflow-scroll w-full">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(25rem,1fr))] grid-rows-[min-content]">
+      <div className="mt-[0.5rem] p-[0.5rem] h-[55vh] overflow-y-scroll w-full">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(22rem,1fr))] grid-rows-[min-content] gap-2">
           {props.allStencils.map((stencil: any, index: number) => {
             return (
               <StencilItem
                 key={index}
+                activeWorld={props.activeWorld}
+                setStencilFavorited={props.setStencilFavorited}
                 stencil={stencil}
                 image={
                   backendUrl + "/stencils/stencil-" + stencil.hash + ".png"
@@ -216,6 +234,8 @@ export const StencilsTab = (props: any) => {
               "x" +
               height
           );
+          event.target.value = "";
+          event.target.files = null;
           return;
         }
         if (height > maxImageSize || width > maxImageSize) {
@@ -225,6 +245,8 @@ export const StencilsTab = (props: any) => {
               "x" +
               height
           );
+          event.target.value = "";
+          event.target.files = null
           return;
         }
 
@@ -362,6 +384,29 @@ export const StencilsTab = (props: any) => {
     inputFile.current.click();
   };
 
+  const setStencilFavorited = (stencilId: number, favorited: boolean) => {
+    const newFavoriteOffset = favorited ? 1 : -1;
+    const newStencils = favoriteStencils.map((stencil: any) => {
+      if (stencil.stencilId === stencilId) {
+        return { ...stencil, favorited: favorited, favorites: stencil.favorites + newFavoriteOffset };
+      }
+      return stencil;
+    });
+    setFavoriteStencils(newStencils);
+    const newAllStencils = allStencils.map((stencil: any) => {
+      if (stencil.stencilId === stencilId) {
+        return { ...stencil, favorited: favorited, favorites: stencil.favorites + newFavoriteOffset };
+      }
+      return stencil;
+    }
+    );
+    setAllStencils(newAllStencils);
+    const newOpenedStencil = props.openedStencil;
+    if (newOpenedStencil && newOpenedStencil.stencilId === stencilId) {
+      props.setOpenedStencil({ ...newOpenedStencil, favorited: favorited, favorites: newOpenedStencil.favorites + newFavoriteOffset });
+    }
+  }
+
   return (
     <ExpandableTab
       title="Stencils"
@@ -384,6 +429,8 @@ export const StencilsTab = (props: any) => {
       handleFileChange={handleFileChange}
       openedStencil={props.openedStencil}
       setOpenedStencil={props.setOpenedStencil}
+      activeWorld={props.activeWorld}
+      setStencilFavorited={setStencilFavorited}
     >
     </ExpandableTab>
   );

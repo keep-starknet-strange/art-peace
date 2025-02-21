@@ -69,7 +69,7 @@ export const PixelInfoTab = (props: any) => {
       <div className="flex flex-col w-full mt-[1rem]"> 
         <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between">
           <p className="Text__medium pr-[1rem]">World&nbsp;&nbsp;&nbsp;&nbsp;:</p>
-          <p className="Text__medium pr-[0.5rem] text-right">
+          <p className="Text__medium pr-[0.5rem] text-right truncate">
             {props.worldName}
           </p>
         </div>

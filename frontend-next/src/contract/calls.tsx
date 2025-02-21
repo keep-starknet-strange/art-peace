@@ -125,6 +125,56 @@ export const addStencilCall =
   }
 }
 
+export const favoriteStencilCall =
+  async (account: any, worldId: number, stencilId: number) => {
+  try {
+    if (!account) {
+      console.error("Account not connected");
+      return;
+    }
+
+    const calldata = [worldId, stencilId];
+    printCalldata(calldata);
+    const result = await account.execute([
+      {
+        contractAddress: CANVAS_CONTRACT_ADDRESS,
+        entrypoint: "favorite_stencil",
+        calldata,
+      },
+    ]);
+    console.log("Tx hash:", result.transaction_hash);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    console.log("Done.");
+  }
+}
+
+export const unfavoriteStencilCall =
+  async (account: any, worldId: number, stencilId: number) => {
+  try {
+    if (!account) {
+      console.error("Account not connected");
+      return;
+    }
+
+    const calldata = [worldId, stencilId];
+    printCalldata(calldata);
+    const result = await account.execute([
+      {
+        contractAddress: CANVAS_CONTRACT_ADDRESS,
+        entrypoint: "unfavorite_stencil",
+        calldata,
+      },
+    ]);
+    console.log("Tx hash:", result.transaction_hash);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    console.log("Done.");
+  }
+}
+
 /*
 useEffect(() => {
   console.log('Tx status:', submitted, txHash)

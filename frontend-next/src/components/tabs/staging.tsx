@@ -7,7 +7,7 @@ import { playSoftClick2 } from "../utils/sounds";
 export const StagingPixelsTab = (props: any) => {
   // TODO: Style scrollbar better
   return (
-    <BasicTab title={null} {...props} style={{ marginBottom: "0.5rem" }} onClose={props.clearPixelSelection} hideClose={true}>
+    <BasicTab title={null} {...props} style={{ marginTop: "0.5rem" }} onClose={props.clearPixelSelection} hideClose={true}>
       <div className="flex flex-row items-center justify-between w-full gap-[1rem]">
         <div className="flex flex-row items-center justify-left overflow-x-auto flex-grow
           gap-[0.4rem] px-2 py-1 border-2 border-[#00000030] rounded-[1rem] shadow-[0.5rem]">

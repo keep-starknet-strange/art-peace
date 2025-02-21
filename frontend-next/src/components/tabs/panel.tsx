@@ -16,7 +16,7 @@ export const TabPanel = (props: any) => {
   const stencilCreationNodeRef = useRef(null);
   const worldCreationNodeRef = useRef(null);
   return (
-    <div className="fixed z-[100] right-0 top-0 w-[max(25rem,30%)] m-[0.5rem] p-0 flex flex-col align-center justify-center">
+    <div className="fixed z-[100] right-0 top-0 w-[calc(100%-1rem)] sm:w-[max(40rem,70%)] md:w-[max(40rem,45%)] lg:w-[max(40rem,30%)] xl:w-[max(40rem,25%)] m-[0.5rem] p-0 flex flex-col align-center justify-center">
       <CSSTransition
         nodeRef={pixelInfoNodeRef}
         in={props.pixelSelectedMode}
@@ -32,21 +32,6 @@ export const TabPanel = (props: any) => {
           worldId={props.worldId}
           worldName={props.activeWorld ? props.activeWorld.name : ""}
           clearPixelSelection={props.clearPixelSelection}
-        />
-      </CSSTransition>
-      <CSSTransition
-        nodeRef={stagingPixelsNodeRef}
-        in={props.stagingPixels.length > 0}
-        timeout={150}
-        classNames="list-transition"
-        unmountOnExit
-        appear
-      >
-        <StagingPixelsTab
-          stagingPixels={props.stagingPixels}
-          setStagingPixels={props.setStagingPixels}
-          worldColors={props.colors}
-          commitStagingPixels={props.commitStagingPixels}
         />
       </CSSTransition>
       <CSSTransition
@@ -102,6 +87,21 @@ export const TabPanel = (props: any) => {
           </CSSTransition>
         </SwitchTransition>
       </div>
+      <CSSTransition
+        nodeRef={stagingPixelsNodeRef}
+        in={props.stagingPixels.length > 0}
+        timeout={150}
+        classNames="list-transition"
+        unmountOnExit
+        appear
+      >
+        <StagingPixelsTab
+          stagingPixels={props.stagingPixels}
+          setStagingPixels={props.setStagingPixels}
+          worldColors={props.colors}
+          commitStagingPixels={props.commitStagingPixels}
+        />
+      </CSSTransition>
     </div>
   );
 }
