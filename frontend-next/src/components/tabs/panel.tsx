@@ -68,7 +68,22 @@ export const TabPanel = (props: any) => {
           endWorldCreation={props.endWorldCreation}
         />
       </CSSTransition>
-      <div className="relative w-full h-full">
+      <CSSTransition
+        nodeRef={stagingPixelsNodeRef}
+        in={props.stagingPixels.length > 0 && props.activeTab === "Stencils"}
+        timeout={150}
+        classNames="list-transition"
+        unmountOnExit
+        appear
+      >
+        <StagingPixelsTab
+          stagingPixels={props.stagingPixels}
+          setStagingPixels={props.setStagingPixels}
+          worldColors={props.colors}
+          commitStagingPixels={props.commitStagingPixels}
+        />
+      </CSSTransition>
+      <div className="relative w-full h-full mb-[0.5rem]">
         <SwitchTransition mode="out-in">
           <CSSTransition
             key={props.activeTab}
@@ -89,7 +104,7 @@ export const TabPanel = (props: any) => {
       </div>
       <CSSTransition
         nodeRef={stagingPixelsNodeRef}
-        in={props.stagingPixels.length > 0}
+        in={props.stagingPixels.length > 0 && props.activeTab !== "Stencils"}
         timeout={150}
         classNames="list-transition"
         unmountOnExit

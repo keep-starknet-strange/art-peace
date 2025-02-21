@@ -171,6 +171,8 @@ export const AccountTab = (props: any) => {
               )}
             </div>
           </div>
+          </div>
+          )}
           <div className="mx-[1rem] mt-[1rem] py-[1rem]">
             <h2 className="Text__large Heading__sub px-[0.5rem]">
               Settings
@@ -207,6 +209,7 @@ export const AccountTab = (props: any) => {
               </div>
             </div>
           </div>
+          {address && (
           <div className="flex flex-row align-center justify-center w-full pt-[2rem]">
             <button
               className="w-[70%] py-[0.7rem] px-[1rem] Text__medium Button__primary"
@@ -215,8 +218,7 @@ export const AccountTab = (props: any) => {
               Logout
             </button>
           </div>
-        </div>
-      )}
+          )}
     </BasicTab>
   );
 }
