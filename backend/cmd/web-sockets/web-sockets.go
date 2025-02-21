@@ -61,6 +61,6 @@ func main() {
 	routes.InitWebsocketRoutes()
 	go routes.StartWebsocketServer()
 
-  fmt.Println("Starting websocket server on port", core.ArtPeaceBackend.BackendConfig.WsPort)
+	fmt.Println("Starting websocket server on port", core.ArtPeaceBackend.BackendConfig.WsPort)
 	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.WsPort)
 }
