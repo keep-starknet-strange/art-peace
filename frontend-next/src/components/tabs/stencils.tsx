@@ -279,6 +279,9 @@ export const StencilsTab = (props: any) => {
         console.log("Error fetching Stencils", error);
       }
     }
+    if (!address) {
+      return;
+    }
     getMyStencils();
   }, [
     address,

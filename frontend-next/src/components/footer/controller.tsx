@@ -110,7 +110,7 @@ export const GameController = (props: any) => {
   }, [props.worldId]);
 
   return (
-    <div className="flex flex-row items-center justify-center w-full m-[1rem]">
+    <div className="flex flex-row items-center justify-center m-[1rem]">
       {(props.selectorMode || ended) && !props.botMode && (
         <div className="m-[0.2rem] px-[0.5rem] flex flex-row justify-center items-center Gradient__secondary rounded-[1rem] shadow-[0.5rem] border-[0.1rem] border-[#00000070] pointer-events-auto">
           <div className="px-[0.5rem] flex flex-row justify-center items-center flex-wrap">

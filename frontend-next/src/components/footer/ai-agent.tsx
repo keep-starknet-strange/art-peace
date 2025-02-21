@@ -49,7 +49,7 @@ export const AIController = (props: any) => {
 
   return (
     <div
-      className="Buttonlike__primary pl-[1rem] pr-[0.5rem] gap-2 w-[50rem]"
+      className="Buttonlike__primary pl-[1rem] pr-[0.5rem] gap-2 w-[40rem] sm:w-[50rem]"
     >
       {promptStatus.status === "idle" && (
         <input
