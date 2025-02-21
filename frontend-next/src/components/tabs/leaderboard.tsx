@@ -52,19 +52,19 @@ export const LeaderboardTab = (props: any) => {
   const [leaderboardStats, setLeaderboardStats] = useState([] as any[]);
   const [keyNameMap, setKeyNameMap] = useState({} as any);
   const [useKeyNames, setUseKeyNames] = useState(false);
-  const [leaderboardPagination, setLeaderboardPagination] = useState({ page: 1, limit: 16 });
+  const [leaderboardPagination, setLeaderboardPagination] = useState({ page: 1, pageLength: 16 });
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
         let res = [];
         if (selectedOption.name === "Players") {
-          res = await getLeaderboardPixels(leaderboardPagination.limit, leaderboardPagination.page);
+          res = await getLeaderboardPixels(leaderboardPagination.pageLength, leaderboardPagination.page);
           setUseKeyNames(true);
         } else if (selectedOption.name === "Worlds") {
-          res = await getLeaderboardWorlds(leaderboardPagination.limit, leaderboardPagination.page);
+          res = await getLeaderboardWorlds(leaderboardPagination.pageLength, leaderboardPagination.page);
           setUseKeyNames(false);
         } else if (selectedOption.name === "World Pxs") {
-          res = await getLeaderboardPixelsWorld(leaderboardPagination.limit, leaderboardPagination.page, props.activeWorld ? props.activeWorld.worldId : 0);
+          res = await getLeaderboardPixelsWorld(leaderboardPagination.pageLength, leaderboardPagination.page, props.activeWorld ? props.activeWorld.worldId : 0);
           setUseKeyNames(true);
         }
         const newKeyNameMap = keyNameMap;
@@ -97,7 +97,7 @@ export const LeaderboardTab = (props: any) => {
     fetchLeaderboard();
   }, [leaderboardPagination]);
   useEffect(() => {
-    setLeaderboardPagination({ page: 1, limit: 16 });
+    setLeaderboardPagination({ page: 1, pageLength: 16 });
   }, [selectedOption, props.activeWorld]);
 
   return (
@@ -162,6 +162,12 @@ export const LeaderboardTab = (props: any) => {
           </div>
         ))}
       </div>
+      {selectedOption.name === "Worlds" && (
+        <div className="flex flex-row justify-between align-center mx-[2rem] my-[1rem]">
+          <p className="Text__medium">Total Pixels:</p>
+          <p className="Text__medium">{shortFormNumber(leaderboardStats.reduce((acc, stat) => acc + stat.score, 0))}</p>
+        </div>
+      )}
       <PaginationView
         data={leaderboardStats}
         stateValue={leaderboardPagination}
