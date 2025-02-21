@@ -336,7 +336,7 @@ export const StencilsTab = (props: any) => {
             const newStencils = stencils.filter(
               (stencil: any) =>
                 !allStencils.some(
-                  (existingStencil) => existingStencil.id === stencil.id
+                  (existingStencil) => existingStencil.stencilId === stencil.stencilId
                 )
             );
             setAllStencils([...allStencils, ...newStencils]);
