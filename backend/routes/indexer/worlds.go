@@ -3,6 +3,7 @@ package indexer
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -527,9 +528,12 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
+	fmt.Println("processCanvasPixelPlacedEvent", canvasId, placedBy, pos, colorVal)
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 	position := uint(pos) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 
+	now := time.Now()
+	fmt.Println("Inserting into redis", now)
 	ctx := context.Background()
 	canvasRedisKey := "canvas-" + strconv.Itoa(int(canvasId))
 	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasRedisKey, "SET", bitfieldType, position, colorVal).Err()
@@ -538,12 +542,16 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
+	now = time.Now()
+	fmt.Println("Inserting into postgres", now)
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldsPixels (world_id, address, position, color) VALUES ($1, $2, $3, $4)", canvasId, placedBy, pos, colorVal)
 	if err != nil {
 		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to insert into WorldsPixels", canvasIdHex, placedBy, posHex, colorHex, err)
 		return
 	}
 
+	now = time.Now()
+	fmt.Println("Checking total pixels placed", now)
 	// Check # of total pixels placed on this world
 	totalPixelsPlaced, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsPixels WHERE world_id = $1", canvasId)
 	if err != nil {
@@ -551,6 +559,8 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
+	now = time.Now()
+	fmt.Println("Checking last pixel placed time", now)
 	lastPixelPlacedTime, err := core.PostgresQueryOne[*time.Time]("SELECT time FROM WorldsPixels WHERE world_id = $1 ORDER BY time DESC LIMIT 1", canvasId)
 	if err != nil {
 		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query lastPixelPlacedTime", canvasIdHex, placedBy, posHex, colorHex, err)
@@ -562,6 +572,8 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 	// TODO: Improve this & collect snapshots for a timelapse
 	// Snapshot canvas image every 200 pixels placed || if last pixel placed was more than 3 hours ago
 	if uint(*totalPixelsPlaced)%200 == 0 || timeSinceLastPixelPlaced > threeHours {
+		now = time.Now()
+		fmt.Println("Snapshotting canvas image", canvasId, now)
 		worldWidth, err := core.PostgresQueryOne[int]("SELECT width FROM Worlds WHERE world_id = $1", canvasId)
 		if err != nil {
 			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldWidth", canvasIdHex, placedBy, posHex, colorHex, err)
@@ -646,6 +658,8 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		}
 	}
 
+	now = time.Now()
+	fmt.Println("Sending websocket message", now)
 	// TODO: Dont resend on revert & reindex
 	var message = map[string]string{
 		"worldId":     strconv.Itoa(int(canvasId)),
