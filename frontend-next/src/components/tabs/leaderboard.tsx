@@ -157,7 +157,7 @@ export const LeaderboardTab = (props: any) => {
               className="cursor-pointer hover:scale-105 transform transition-transform active:scale-100 mr-8"/>
             </div>
             <div className="flex items-center">
-              <div className="text-black text-bold text-md w-[8rem] text-right">{shortFormNumber(stat.score)}</div>
+              <div className="text-black text-bold text-[1.4rem] w-[8rem] text-right">{shortFormNumber(stat.score)}</div>
             </div>
           </div>
         ))}

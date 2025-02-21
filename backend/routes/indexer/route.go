@@ -411,11 +411,11 @@ func ProcessMessage(message IndexerMessage) {
 
 func TryProcessFinalizedMessages() bool {
 	FinalizedMessageLock.Lock()
+	message := FinalizedMessageQueue[0]
+	FinalizedMessageQueue = FinalizedMessageQueue[1:]
 	defer FinalizedMessageLock.Unlock()
 
 	if len(FinalizedMessageQueue) > 0 {
-		message := FinalizedMessageQueue[0]
-		FinalizedMessageQueue = FinalizedMessageQueue[1:]
 		if message.Data.Cursor.OrderKey <= LastFinalizedCursor {
 			// Skip message
 			return true
@@ -429,11 +429,11 @@ func TryProcessFinalizedMessages() bool {
 
 func TryProcessAcceptedMessages() bool {
 	AcceptedMessageLock.Lock()
-	defer AcceptedMessageLock.Unlock()
+	message := AcceptedMessageQueue[0]
+	AcceptedMessageQueue = AcceptedMessageQueue[1:]
+	AcceptedMessageLock.Unlock()
 
 	if len(AcceptedMessageQueue) > 0 {
-		message := AcceptedMessageQueue[0]
-		AcceptedMessageQueue = AcceptedMessageQueue[1:]
 		// TODO: Check if message is already processed?
 		ProcessMessage(message)
 		// TODO
