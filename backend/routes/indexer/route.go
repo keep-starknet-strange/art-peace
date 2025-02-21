@@ -421,6 +421,7 @@ func TryProcessFinalizedMessages() bool {
 			return true
 		}
 		ProcessMessage(message)
+    fmt.Println("Processed finalized message:", message.Data.Cursor.OrderKey)
 		LastFinalizedCursor = message.Data.Cursor.OrderKey
 		return true
 	}
@@ -437,6 +438,7 @@ func TryProcessAcceptedMessages() bool {
 		// TODO: Check if message is already processed?
 		ProcessMessage(message)
 		// TODO
+    fmt.Println("Processed accepted message:", message.Data.Cursor.OrderKey)
 		LastFinalizedCursor = message.Data.Cursor.OrderKey
 		return true
 	}
@@ -452,6 +454,7 @@ func TryProcessPendingMessage() bool {
 	}
 
 	ProcessMessage(*LatestPendingMessage)
+  fmt.Println("Processed pending message:", LatestPendingMessage.Data.Cursor.OrderKey)
 	LastProcessedPendingMessage = LatestPendingMessage
 	LatestPendingMessage = nil
 	return true
