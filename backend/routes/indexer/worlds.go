@@ -684,22 +684,22 @@ func revertCanvasPixelPlacedEvent(event IndexerEvent) {
 	}
 
 	/*
-	  TODO
-		oldColor, err := core.PostgresQueryOne[int]("SELECT color FROM WorldsPixels WHERE world_id = $1 AND address = $2 AND position = $3 ORDER BY time DESC LIMIT 1", worldId, placedBy, pos)
-		if err != nil {
-			PrintIndexerError("revertPixelPlacedEvent", "Failed to query old color", worldIdHex, placedBy, posHex, err)
-			return
-		}
+		  TODO
+			oldColor, err := core.PostgresQueryOne[int]("SELECT color FROM WorldsPixels WHERE world_id = $1 AND address = $2 AND position = $3 ORDER BY time DESC LIMIT 1", worldId, placedBy, pos)
+			if err != nil {
+				PrintIndexerError("revertPixelPlacedEvent", "Failed to query old color", worldIdHex, placedBy, posHex, err)
+				return
+			}
 
-		bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
-		position := uint(pos) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+			bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
+			position := uint(pos) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 
-		ctx := context.Background()
-		err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas-"+strconv.Itoa(int(worldId)), "SET", bitfieldType, position, oldColor).Err()
-		if err != nil {
-			PrintIndexerError("revertPixelPlacedEvent", "Failed to set bitfield", worldIdHex, placedBy, posHex, err)
-			return
-		}
+			ctx := context.Background()
+			err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas-"+strconv.Itoa(int(worldId)), "SET", bitfieldType, position, oldColor).Err()
+			if err != nil {
+				PrintIndexerError("revertPixelPlacedEvent", "Failed to set bitfield", worldIdHex, placedBy, posHex, err)
+				return
+			}
 	*/
 
 	// TODO: Send websocket message?
