@@ -8,7 +8,6 @@ import (
 	"image/png"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
@@ -527,133 +526,138 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
-	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
-	position := uint(pos) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
-
-	ctx := context.Background()
-	canvasRedisKey := "canvas-" + strconv.Itoa(int(canvasId))
-	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasRedisKey, "SET", bitfieldType, position, colorVal).Err()
-	if err != nil {
-		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to set bitfield", canvasIdHex, placedBy, posHex, colorHex, err)
-		return
-	}
-
 	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO WorldsPixels (world_id, address, position, color) VALUES ($1, $2, $3, $4)", canvasId, placedBy, pos, colorVal)
 	if err != nil {
 		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to insert into WorldsPixels", canvasIdHex, placedBy, posHex, colorHex, err)
 		return
 	}
 
-	// Check # of total pixels placed on this world
-	totalPixelsPlaced, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsPixels WHERE world_id = $1", canvasId)
-	if err != nil {
-		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query totalPixelsPlaced", canvasIdHex, placedBy, posHex, colorHex, err)
-		return
-	}
-
-	lastPixelPlacedTime, err := core.PostgresQueryOne[*time.Time]("SELECT time FROM WorldsPixels WHERE world_id = $1 ORDER BY time DESC LIMIT 1", canvasId)
-	if err != nil {
-		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query lastPixelPlacedTime", canvasIdHex, placedBy, posHex, colorHex, err)
-		return
-	}
-	timeSinceLastPixelPlaced := time.Now().Unix() - (*lastPixelPlacedTime).Unix()
-	threeHours := int64(3 * 60 * 60)
-
-	// TODO: Improve this & collect snapshots for a timelapse
-	// Snapshot canvas image every 200 pixels placed || if last pixel placed was more than 3 hours ago
-	if uint(*totalPixelsPlaced)%2000 == 0 || timeSinceLastPixelPlaced > threeHours {
-		worldWidth, err := core.PostgresQueryOne[int]("SELECT width FROM Worlds WHERE world_id = $1", canvasId)
-		if err != nil {
-			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldWidth", canvasIdHex, placedBy, posHex, colorHex, err)
-			return
-		}
-		worldHeight, err := core.PostgresQueryOne[int]("SELECT height FROM Worlds WHERE world_id = $1", canvasId)
-		if err != nil {
-			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldHeight", canvasIdHex, placedBy, posHex, colorHex, err)
-			return
-		}
+	go func() {
+		bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
+		position := uint(pos) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 
 		ctx := context.Background()
 		canvasRedisKey := "canvas-" + strconv.Itoa(int(canvasId))
-		canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, canvasRedisKey).Result()
+		err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasRedisKey, "SET", bitfieldType, position, colorVal).Err()
 		if err != nil {
-			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to get canvas", canvasIdHex, placedBy, posHex, colorHex, err)
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to set bitfield", canvasIdHex, placedBy, posHex, colorHex, err)
 			return
 		}
 
-		colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM WorldsColors WHERE world_id = $1 ORDER BY color_key", strconv.Itoa(int(canvasId)))
+		// TODO: Dont resend on revert & reindex
+		var message = map[string]string{
+			"worldId":     strconv.Itoa(int(canvasId)),
+			"position":    strconv.Itoa(int(pos)),
+			"color":       strconv.Itoa(int(colorVal)),
+			"messageType": "colorWorldPixel",
+		}
+		routeutils.SendMessageToWSS(message)
+	}()
+
+	// Check # of total pixels placed on this world
+	/*
+		totalPixelsPlaced, err := core.PostgresQueryOne[int]("SELECT COUNT(*) FROM WorldsPixels WHERE world_id = $1", canvasId)
 		if err != nil {
-			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query colorPaletteHex", canvasIdHex, placedBy, posHex, colorHex, err)
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query totalPixelsPlaced", canvasIdHex, placedBy, posHex, colorHex, err)
 			return
 		}
 
-		colorPalette := make([]color.RGBA, len(colorPaletteHex))
-		for idx, colorHex := range colorPaletteHex {
-			r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
-			if err != nil {
-				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
-				return
-			}
-			g, err := strconv.ParseInt(colorHex[2:4], 16, 64)
-			if err != nil {
-				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
-				return
-			}
-			b, err := strconv.ParseInt(colorHex[4:6], 16, 64)
-			if err != nil {
-				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
-				return
-			}
-			colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
+		lastPixelPlacedTime, err := core.PostgresQueryOne[*time.Time]("SELECT time FROM WorldsPixels WHERE world_id = $1 ORDER BY time DESC LIMIT 1", canvasId)
+		if err != nil {
+			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query lastPixelPlacedTime", canvasIdHex, placedBy, posHex, colorHex, err)
+			return
 		}
+		timeSinceLastPixelPlaced := time.Now().Unix() - (*lastPixelPlacedTime).Unix()
+		threeHours := int64(3 * 60 * 60)
 
-		// Create world image
-		generatedWorldImage := image.NewRGBA(image.Rect(0, 0, *worldWidth, *worldHeight))
-		bitWidth := uint(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth)
-		oneByteBitOffset := uint(8 - bitWidth)
-		twoByteBitOffset := uint(16 - bitWidth)
+		// TODO: Improve this & collect snapshots for a timelapse
+		// Snapshot canvas image every 200 pixels placed || if last pixel placed was more than 3 hours ago
+		if uint(*totalPixelsPlaced)%2000 == 0 || timeSinceLastPixelPlaced > threeHours {
+			worldWidth, err := core.PostgresQueryOne[int]("SELECT width FROM Worlds WHERE world_id = $1", canvasId)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldWidth", canvasIdHex, placedBy, posHex, colorHex, err)
+				return
+			}
+			worldHeight, err := core.PostgresQueryOne[int]("SELECT height FROM Worlds WHERE world_id = $1", canvasId)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query worldHeight", canvasIdHex, placedBy, posHex, colorHex, err)
+				return
+			}
 
-		for y := 0; y < *worldHeight; y++ {
-			for x := 0; x < *worldWidth; x++ {
-				innerPos := uint(y*(*worldWidth) + x)
-				bitPos := innerPos * bitWidth
-				bytePos := bitPos / 8
-				bitOffset := bitPos % 8
+			ctx := context.Background()
+			canvasRedisKey := "canvas-" + strconv.Itoa(int(canvasId))
+			canvas, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, canvasRedisKey).Result()
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to get canvas", canvasIdHex, placedBy, posHex, colorHex, err)
+				return
+			}
 
-				if bitOffset <= oneByteBitOffset {
-					colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
-					generatedWorldImage.Set(x, y, colorPalette[colorIdx])
-				} else {
-					colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
-					generatedWorldImage.Set(x, y, colorPalette[colorIdx])
+			colorPaletteHex, err := core.PostgresQuery[string]("SELECT hex FROM WorldsColors WHERE world_id = $1 ORDER BY color_key", strconv.Itoa(int(canvasId)))
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to query colorPaletteHex", canvasIdHex, placedBy, posHex, colorHex, err)
+				return
+			}
+
+			colorPalette := make([]color.RGBA, len(colorPaletteHex))
+			for idx, colorHex := range colorPaletteHex {
+				r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
+				if err != nil {
+					PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
+					return
+				}
+				g, err := strconv.ParseInt(colorHex[2:4], 16, 64)
+				if err != nil {
+					PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
+					return
+				}
+				b, err := strconv.ParseInt(colorHex[4:6], 16, 64)
+				if err != nil {
+					PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse colorHex", colorHex, err)
+					return
+				}
+				colorPalette[idx] = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
+			}
+
+			// Create world image
+			generatedWorldImage := image.NewRGBA(image.Rect(0, 0, *worldWidth, *worldHeight))
+			bitWidth := uint(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth)
+			oneByteBitOffset := uint(8 - bitWidth)
+			twoByteBitOffset := uint(16 - bitWidth)
+
+			for y := 0; y < *worldHeight; y++ {
+				for x := 0; x < *worldWidth; x++ {
+					innerPos := uint(y*(*worldWidth) + x)
+					bitPos := innerPos * bitWidth
+					bytePos := bitPos / 8
+					bitOffset := bitPos % 8
+
+					if bitOffset <= oneByteBitOffset {
+						colorIdx := (canvas[bytePos] >> (oneByteBitOffset - bitOffset)) & 0b11111
+						generatedWorldImage.Set(x, y, colorPalette[colorIdx])
+					} else {
+						colorIdx := (((uint16(canvas[bytePos]) << 8) | uint16(canvas[bytePos+1])) >> (twoByteBitOffset - bitOffset)) & 0b11111
+						generatedWorldImage.Set(x, y, colorPalette[colorIdx])
+					}
 				}
 			}
-		}
 
-		// Create world image
-		filename := "worlds/images/world-" + strconv.Itoa(int(canvasId)) + ".png"
-		file, err := os.Create(filename)
-		if err != nil {
-			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to create file", filename, err)
-			return
-		}
-		defer file.Close()
+			// Create world image
+			filename := "worlds/images/world-" + strconv.Itoa(int(canvasId)) + ".png"
+			file, err := os.Create(filename)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to create file", filename, err)
+				return
+			}
+			defer file.Close()
 
-		err = png.Encode(file, generatedWorldImage)
-		if err != nil {
-			PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to encode image", filename, err)
-			return
+			err = png.Encode(file, generatedWorldImage)
+			if err != nil {
+				PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to encode image", filename, err)
+				return
+			}
 		}
-	}
+	*/
 
-	// TODO: Dont resend on revert & reindex
-	var message = map[string]string{
-		"worldId":     strconv.Itoa(int(canvasId)),
-		"position":    strconv.Itoa(int(pos)),
-		"color":       strconv.Itoa(int(colorVal)),
-		"messageType": "colorWorldPixel",
-	}
-	routeutils.SendMessageToWSS(message)
 }
 
 func revertCanvasPixelPlacedEvent(event IndexerEvent) {
@@ -679,21 +683,24 @@ func revertCanvasPixelPlacedEvent(event IndexerEvent) {
 		return
 	}
 
-	oldColor, err := core.PostgresQueryOne[int]("SELECT color FROM WorldsPixels WHERE world_id = $1 AND address = $2 AND position = $3 ORDER BY time DESC LIMIT 1", worldId, placedBy, pos)
-	if err != nil {
-		PrintIndexerError("revertPixelPlacedEvent", "Failed to query old color", worldIdHex, placedBy, posHex, err)
-		return
-	}
+	/*
+	  TODO
+		oldColor, err := core.PostgresQueryOne[int]("SELECT color FROM WorldsPixels WHERE world_id = $1 AND address = $2 AND position = $3 ORDER BY time DESC LIMIT 1", worldId, placedBy, pos)
+		if err != nil {
+			PrintIndexerError("revertPixelPlacedEvent", "Failed to query old color", worldIdHex, placedBy, posHex, err)
+			return
+		}
 
-	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
-	position := uint(pos) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+		bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
+		position := uint(pos) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
 
-	ctx := context.Background()
-	err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas-"+strconv.Itoa(int(worldId)), "SET", bitfieldType, position, oldColor).Err()
-	if err != nil {
-		PrintIndexerError("revertPixelPlacedEvent", "Failed to set bitfield", worldIdHex, placedBy, posHex, err)
-		return
-	}
+		ctx := context.Background()
+		err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, "canvas-"+strconv.Itoa(int(worldId)), "SET", bitfieldType, position, oldColor).Err()
+		if err != nil {
+			PrintIndexerError("revertPixelPlacedEvent", "Failed to set bitfield", worldIdHex, placedBy, posHex, err)
+			return
+		}
+	*/
 
 	// TODO: Send websocket message?
 }
