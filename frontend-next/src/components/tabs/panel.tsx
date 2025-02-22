@@ -54,6 +54,7 @@ export const TabPanel = (props: any) => {
           stencilCreationSelected={props.stencilCreationSelected}
           setActiveTab={props.setActiveTab}
           stencilColorIds={props.stencilColorIds}
+          setOpenedStencil={props.setOpenedStencil}
         />
       </CSSTransition>
       <CSSTransition

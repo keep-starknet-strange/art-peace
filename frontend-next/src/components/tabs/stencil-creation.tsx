@@ -29,6 +29,19 @@ export const StencilCreationTab = (props: any) => {
     console.log("Stencil added to DB:", res);
     props.endStencilCreation();
     props.setActiveTab("Stencils");
+    const imgHash = hash.substr(2).padStart(64, "0");
+    const newStencil = {
+      favorited: true,
+      favorites: 1,
+      hash: imgHash,
+      height: props.stencilImage.height,
+      name: "",
+      position: props.stencilPosition,
+      stencilId: res.stencilId,
+      width: props.stencilImage.width,
+      worldId: props.worldId,
+    };
+    props.setOpenedStencil(newStencil);
   };
 
   return (
