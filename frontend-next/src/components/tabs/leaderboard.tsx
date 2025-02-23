@@ -50,6 +50,7 @@ export const LeaderboardTab = (props: any) => {
   ];
   const [selectedOption, setSelectedOption] = useState(leaderboardOptions[0]);
   const [leaderboardStats, setLeaderboardStats] = useState([] as any[]);
+  const [mainWorldStats, setMainWorldStats] = useState({} as any);
   const [keyNameMap, setKeyNameMap] = useState({} as any);
   const [useKeyNames, setUseKeyNames] = useState(false);
   const [leaderboardPagination, setLeaderboardPagination] = useState({ page: 1, pageLength: 16 });
@@ -86,9 +87,21 @@ export const LeaderboardTab = (props: any) => {
         }
         setKeyNameMap(newKeyNameMap);
         if (leaderboardPagination.page === 1) {
-          setLeaderboardStats(res);
+          if (selectedOption.name === "Worlds") {
+            setLeaderboardStats(res.filter((stat: any) => stat.key !== "Art Peace III"));
+            setMainWorldStats(res.find((stat: any) => stat.key === "Art Peace III"));
+          } else {
+            setLeaderboardStats(res);
+            setMainWorldStats({});
+          }
         } else {
-          setLeaderboardStats([...leaderboardStats, ...res]);
+          if (selectedOption.name === "Worlds") {
+            setLeaderboardStats([...leaderboardStats, ...res.filter((stat: any) => stat.key !== "Art Peace III")]);
+            setMainWorldStats(res.find((stat: any) => stat.key === "Art Peace III"));
+          } else {
+            setLeaderboardStats([...leaderboardStats, ...res]);
+            setMainWorldStats({});
+          }
         }
       } catch (e) {
         console.error(e);
@@ -163,9 +176,15 @@ export const LeaderboardTab = (props: any) => {
         ))}
       </div>
       {selectedOption.name === "Worlds" && (
+        <div>
+        <div className="flex flex-row justify-between align-center mx-[2rem] my-[1rem]">
+          <p className="Text__medium">Main Canvas:</p>
+          <p className="Text__medium">{shortFormNumber(mainWorldStats.score)}</p>
+        </div>
         <div className="flex flex-row justify-between align-center mx-[2rem] my-[1rem]">
           <p className="Text__medium">Total Pixels:</p>
-          <p className="Text__medium">{shortFormNumber(leaderboardStats.reduce((acc, stat) => acc + stat.score, 0))}</p>
+          <p className="Text__medium">{shortFormNumber(leaderboardStats.reduce((acc, stat) => acc + stat.score, 0) + mainWorldStats.score)}</p>
+        </div>
         </div>
       )}
       <PaginationView
