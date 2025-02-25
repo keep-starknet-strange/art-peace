@@ -662,10 +662,10 @@ pub mod MultiCanvas {
 
         fn check_timing(self: @ContractState, now: u64) {
             let block_timestamp = starknet::get_block_timestamp();
-            let leanience_margin = 20; // 20 seconds
+            let leanience_margin = 120; // 120 seconds
             let expected_block_time = 30; // 30 seconds
             assert(now >= block_timestamp - leanience_margin, 'Timestamp too far behind');
-            assert(now <= block_timestamp + 2 * expected_block_time, 'Timestamp too far ahead');
+            assert(now <= block_timestamp + 4 * expected_block_time, 'Timestamp too far ahead');
         }
 
         fn place_pixels(
