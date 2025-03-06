@@ -135,7 +135,6 @@ const Canvas = (props: any) => {
     }
     const now = Math.floor(Date.now() / 1000);
     const commitWorldId = openedWorldId;
-    console.log("Committing pixels", stagingPixels);
     await placePixelsCall(account, openedWorldId, stagingPixels, now);
     let stagedPixels = [...stagingPixels];
     while (stagedPixels.length > 0) {
@@ -372,7 +371,6 @@ const Canvas = (props: any) => {
   const [gameUpdates, setGameUpdates] = useState<any[]>([]);
   const [gameUpdate, setGameUpdate] = useState<any>(null);
   const updateGame = (update: any) => {
-    console.log(update, gameUpdate, gameUpdates);
     setGameUpdates([...gameUpdates, update]);
   }
   const updatesGame = (updates: any[]) => {
