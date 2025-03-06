@@ -86,6 +86,10 @@ export const StencilBotController = (props: any) => {
         clearInterval(buildInterval);
         return;
       }
+      if (props.isCommitting) {
+        clearInterval(buildInterval);
+        return;
+      }
       if (props.availablePixelsUsed < props.availablePixels) {
         const randomIdx = Math.floor(Math.random() * remainingTemplatePixels.length);
         let newStaging = props.stagingPixels;

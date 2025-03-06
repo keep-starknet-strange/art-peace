@@ -115,6 +115,7 @@ const Canvas = (props: any) => {
     }
     setAvailablePixels((basePixelUp ? activeWorld.pixelsPerTime : 0));
   }, [basePixelUp, activeWorld]);
+  const [isCommitting, setIsCommitting] = useState<boolean>(false);
   useEffect(() => {
     if (!stagingPixels) {
       return;
@@ -125,6 +126,7 @@ const Canvas = (props: any) => {
     }
   }, [stagingPixels]);
   const commitStagingPixels = async () => {
+    setIsCommitting(true);
     if (stagingPixels.length === 0) {
       return;
     }
@@ -147,13 +149,31 @@ const Canvas = (props: any) => {
       await new Promise((resolve) => setTimeout(resolve, 150));
     }
     setStagingPixels([]);
+    setIsCommitting(false);
   };
   const commitPixels = async (pixels: any[]) => {
+    setIsCommitting(true);
     if (pixels.length === 0) {
       return;
     }
     const now = Math.floor(Date.now() / 1000);
     await placePixelsCall(account, openedWorldId, pixels, now);
+    let stagedPixels = [...pixels];
+    while (stagedPixels.length > 0) {
+      playPixelPlaced2();
+      const stagedPixel = stagedPixels[0];
+      stagedPixels = stagedPixels.slice(1);
+      updateGame({
+        messageType: "pixel",
+        position: stagedPixel.position,
+        colorId: stagedPixel.colorId,
+        worldId: openedWorldId,
+        timestamp: now
+      });
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    setStagingPixels([]);
+    setIsCommitting(false);
   }
 
   // Pixel Selection
@@ -469,6 +489,7 @@ const Canvas = (props: any) => {
         commitStagingPixels={commitStagingPixels}
         gameUpdate={gameUpdate}
         setGameUpdate={setGameUpdate}
+        isCommitting={isCommitting}
       />
       <Footer
         basePixelTimer={basePixelTimer}
@@ -497,6 +518,7 @@ const Canvas = (props: any) => {
         setStagingPixels={setStagingPixels}
         agentTransactions={agentTransactions}
         setAgentTransactions={setAgentTransactions}
+        isCommitting={isCommitting}
       />
     </div>
   );

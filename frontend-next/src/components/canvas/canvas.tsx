@@ -144,7 +144,7 @@ export const Canva = (props: any) => {
     }
 
     if(!props.selectPixel(x, y)) return;
-    if (props.selectedColorId == null || props.selectedColorId === -1 || !props.basePixelUp) {
+    if (props.selectedColorId == null || props.selectedColorId === -1 || !props.basePixelUp || props.isCommitting) {
       playSoftClick();
       return;
     }

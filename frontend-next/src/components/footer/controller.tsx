@@ -207,6 +207,7 @@ export const GameController = (props: any) => {
           setStagingPixels={props.setStagingPixels}
           availablePixelsUsed={props.availablePixelsUsed}
           availablePixels={props.availablePixels}
+          isCommitting={props.isCommitting}
         />
       )}
       {props.botMode && props.selectedBotOption === "AI Agent" && (
@@ -217,6 +218,7 @@ export const GameController = (props: any) => {
           setSelectedBotOption={props.setSelectedBotOption}
           agentTransactions={props.agentTransactions}
           setAgentTransactions={props.setAgentTransactions}
+          isCommitting={props.isCommitting}
         />
       )}
       {address && (
