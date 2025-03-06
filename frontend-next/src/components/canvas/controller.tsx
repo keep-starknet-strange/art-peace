@@ -5,6 +5,7 @@ import { playShutter } from "../utils/sounds";
 import { Canva } from "./canvas";
 
 export const CanvasController = (props: any) => {
+  const baseWorldId = process.env.NEXT_PUBLIC_BASE_WORLD_ID as unknown as number || 13;
   const baseWorldX = process.env.NEXT_PUBLIC_WORLD_X as unknown as number || 528;
   const baseWorldY = process.env.NEXT_PUBLIC_WORLD_Y as unknown as number || 396;
   const surroundingWorldX = process.env.NEXT_PUBLIC_SURROUNDING_WORLD_X as unknown as number || 256;
@@ -25,7 +26,7 @@ export const CanvasController = (props: any) => {
   }
   const [selectedWorldOrigin, setSelectedWorldOrigin] = useState({ x: 0, y: 0 });
   useEffect(() => {
-    if (props.openedWorldId === 0) {
+    if (props.openedWorldId === baseWorldId) {
       setSelectedWorldOrigin({ x: 0, y: 0 });
     } else {
       const position = getWorldPosition(
@@ -562,7 +563,7 @@ export const CanvasController = (props: any) => {
           canvasRef={mainCanvasRef}
           width={baseWorldX}
           height={baseWorldY}
-          worldId={0}
+          worldId={baseWorldId}
           style={{
             width: baseWorldX * canvasScale * artificialZoom,
             height: baseWorldY * canvasScale * artificialZoom,
@@ -573,8 +574,8 @@ export const CanvasController = (props: any) => {
           }}
           basePixelUp={props.basePixelUp}
           selectPixel={(x: number, y: number): boolean => {
-            if (props.openedWorldId !== 0) {
-              openWorld({ worldId: 0, width: baseWorldX, height: baseWorldY });
+            if (props.openedWorldId !== baseWorldId) {
+              openWorld({ worldId: baseWorldId, width: baseWorldX, height: baseWorldY });
               return false;
             } else {
               selectPixel(x, y);
@@ -585,11 +586,11 @@ export const CanvasController = (props: any) => {
           setSelectedColorId={props.setSelectedColorId}
           clearPixelSelection={props.clearPixelSelection}
           setLastPlacedTime={props.setLastPlacedTime}
-          className={`${props.openedWorldId === 0 ? "Canvas__selected" : "Canvas__surrounding"}`}
-          showTitle={props.openedWorldId === 0}
+          className={`${props.openedWorldId === baseWorldId ? "Canvas__selected" : "Canvas__surrounding"}`}
+          showTitle={props.openedWorldId === baseWorldId}
           titleScale={titleScale}
-          title={props.openedWorldId === 0 && props.activeWorld ? props.activeWorld.name : ""}
-          isActive={props.openedWorldId === 0}
+          title={props.openedWorldId === baseWorldId && props.activeWorld ? props.activeWorld.name : ""}
+          isActive={props.openedWorldId === baseWorldId}
           canvasScale={canvasScale}
           artificialZoom={artificialZoom}
           stagingPixels={props.stagingPixels}
