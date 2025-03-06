@@ -359,7 +359,7 @@ export const CanvasController = (props: any) => {
   ]);
   const getCurrentCanvasRef = () => {
     let canvasRef = mainCanvasRef;
-    if (props.openedWorldId !== 0) {
+    if (props.openedWorldId !== baseWorldId) {
       canvasRef = surroundingCanvasRefs[props.surroundingWorlds.findIndex(
         (world: any) => world.worldId === props.openedWorldId
       )];
