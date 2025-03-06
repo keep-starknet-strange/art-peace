@@ -5,7 +5,7 @@ import { playShutter } from "../utils/sounds";
 import { Canva } from "./canvas";
 
 export const CanvasController = (props: any) => {
-  const baseWorldId = process.env.NEXT_PUBLIC_BASE_WORLD_ID as unknown as number || 13;
+  const baseWorldId = parseInt(process.env.NEXT_PUBLIC_BASE_WORLD_ID as string) || 13;
   const baseWorldX = process.env.NEXT_PUBLIC_WORLD_X as unknown as number || 528;
   const baseWorldY = process.env.NEXT_PUBLIC_WORLD_Y as unknown as number || 396;
   const surroundingWorldX = process.env.NEXT_PUBLIC_SURROUNDING_WORLD_X as unknown as number || 256;

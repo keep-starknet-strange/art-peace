@@ -118,7 +118,7 @@ export const Canva = (props: any) => {
       return;
     }
     console.log("Coloring world pixel 2", props.gameUpdate, props.worldId);
-    if (parseInt(props.gameUpdate.worldId) !== props.worldId) return;
+    if (parseInt(props.gameUpdate.worldId) !== props.worldId as number) return;
     console.log("Coloring world pixel 3", props.gameUpdate, props.worldId);
     const update = props.gameUpdate;
     props.setGameUpdate(null);
