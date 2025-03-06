@@ -766,18 +766,30 @@ func getLeaderboardPixels(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
+	minSupportedWorld := r.URL.Query().Get("minSupportedWorld")
+	if minSupportedWorld == "" {
+		minSupportedWorld = "13"
+	}
+	minSupportedWorldInt, err := strconv.Atoi(minSupportedWorld)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid minSupportedWorld")
+		return
+	}
+
 	query := `
     SELECT
       address AS key,
       COUNT(*) AS score
     FROM
       worldspixels
+    WHERE
+      world_id >= $1
     GROUP BY
       address
     ORDER BY
       score DESC
-    LIMIT $1 OFFSET $2`
-	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, pageLength, offset)
+    LIMIT $2 OFFSET $3`
+	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, minSupportedWorldInt, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
 		return
@@ -800,6 +812,16 @@ func getLeaderboardWorlds(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
+	minSupportedWorld := r.URL.Query().Get("minSupportedWorld")
+	if minSupportedWorld == "" {
+		minSupportedWorld = "13"
+	}
+	minSupportedWorldInt, err := strconv.Atoi(minSupportedWorld)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid minSupportedWorld")
+		return
+	}
+
 	query := `
     SELECT
       w.name AS key,
@@ -810,12 +832,14 @@ func getLeaderboardWorlds(w http.ResponseWriter, r *http.Request) {
       worlds w
     ON
       p.world_id = w.world_id
+    WHERE
+      w.world_id >= $1
     GROUP BY
       w.name
     ORDER BY
       score DESC
-    LIMIT $1 OFFSET $2`
-	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, pageLength, offset)
+    LIMIT $2 OFFSET $3`
+	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, minSupportedWorldInt, pageLength, offset)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
 		return
@@ -872,6 +896,15 @@ func getLeaderboardPixelsUser(w http.ResponseWriter, r *http.Request) {
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing address")
 		return
 	}
+	minSupportedWorld := r.URL.Query().Get("minSupportedWorld")
+	if minSupportedWorld == "" {
+		minSupportedWorld = "13"
+	}
+	minSupportedWorldInt, err := strconv.Atoi(minSupportedWorld)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid minSupportedWorld")
+		return
+	}
 
 	query := `
     SELECT
@@ -879,11 +912,11 @@ func getLeaderboardPixelsUser(w http.ResponseWriter, r *http.Request) {
     FROM
       worldspixels
     WHERE
-      address = $1
+      address = $1 and world_id >= $2
     GROUP BY
       address
     LIMIT 1`
-	leaderboard, err := core.PostgresQueryOne[int](query, address)
+	leaderboard, err := core.PostgresQueryOne[int](query, address, minSupportedWorldInt)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
 		return
@@ -984,11 +1017,12 @@ func clearPixelsRedis(w http.ResponseWriter, r *http.Request) {
 	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
 
 	ctx := context.Background()
-	canvasKey := fmt.Sprintf("canvas-%s", strconv.Itoa(int(worldId)))
+	canvasKey := fmt.Sprintf("canvas-%d", worldId)
 	for x := xStart; x <= xEnd; x++ {
 		for y := yStart; y <= yEnd; y++ {
 			pos := y*worldWidth + x
-			err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasKey, "SET", bitfieldType, pos, 0).Err()
+			posBitfield := uint(pos) * core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth
+			err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasKey, "SET", bitfieldType, posBitfield, 0).Err()
 			if err != nil {
 				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error setting pixel on redis")
 				return
