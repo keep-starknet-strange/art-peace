@@ -21,7 +21,7 @@ const Canvas = (props: any) => {
   const secondsBetweenPlacements =
     process.env.REACT_APP_SECONDS_BETWEEN_PLACEMENTS as unknown as number || 5;
   const [timeBetweenPlacements, setTimeBetweenPlacements] = useState(secondsBetweenPlacements * 1000);
-  const baseWorldId = process.env.NEXT_PUBLIC_BASE_WORLD_ID as unknown as number || 13;
+  const baseWorldId = parseInt(process.env.NEXT_PUBLIC_BASE_WORLD_ID as string) || 13;
   const [openedWorldId, setOpenedWorldId] = useState<number>(baseWorldId);
   const [activeWorld, setActiveWorld] = useState<any>(null);
   const baseWorldX = process.env.NEXT_PUBLIC_WORLD_X || 528;
