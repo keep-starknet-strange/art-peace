@@ -160,6 +160,7 @@ services:
       - NEXT_PUBLIC_BACKEND_URL=https://api.art-peace.net
       - NEXT_PUBLIC_HAS_LAUNCHED=true
       - NEXT_PUBLIC_BASE_WORLD_ID=13
+      - NEXT_PUBLIC_UPLOAD_ENABLED=true
     volumes:
       - ./frontend-next/package.json:/app/package.json
       - ./frontend-next/pnpm-lock.yaml:/app/pnpm-lock.yaml
