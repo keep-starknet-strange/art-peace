@@ -106,7 +106,7 @@ export const StencilBotController = (props: any) => {
       }
     }, 150);
     return () => clearInterval(buildInterval);
-  }, [remainingTemplatePixels, props.stagingPixels, props.availablePixelsUsed, props.availablePixels]);
+  }, [remainingTemplatePixels, props.stagingPixels, props.availablePixelsUsed, props.availablePixels, props.isCommitting]);
 
   return (
     <div
