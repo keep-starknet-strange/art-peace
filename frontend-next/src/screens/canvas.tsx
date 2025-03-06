@@ -149,6 +149,7 @@ const Canvas = (props: any) => {
         worldId: commitWorldId,
         timestamp: now
       });
+      setLastPlacedTime(now * 1000);
       setStagingPixels(stagedPixels);
       await new Promise((resolve) => setTimeout(resolve, 150));
     }
@@ -174,6 +175,7 @@ const Canvas = (props: any) => {
         worldId: openedWorldId,
         timestamp: now
       });
+      setLastPlacedTime(now * 1000);
       await new Promise((resolve) => setTimeout(resolve, 150));
     }
     setStagingPixels([]);

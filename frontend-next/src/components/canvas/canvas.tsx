@@ -109,20 +109,25 @@ export const Canva = (props: any) => {
   }, [props.gameUpdate, props.gameUpdates]);
   useEffect(() => {
     if (!props.gameUpdate) return;
+    console.log("Checking colorWorldPixel", props.gameUpdate, props.worldId);
     if (props.gameUpdate.messageType !== "colorWorldPixel") return;
+    console.log("Coloring world pixel", props.gameUpdate, props.worldId);
     // TODO: Check if world is active
     if (parseInt(props.gameUpdate.worldId) < 13) {
       props.setGameUpdate(null);
       return;
     }
+    console.log("Coloring world pixel 2", props.gameUpdate, props.worldId);
     if (parseInt(props.gameUpdate.worldId) !== props.worldId) return;
-    const strPos = props.gameUpdate.position;
+    console.log("Coloring world pixel 3", props.gameUpdate, props.worldId);
+    const update = props.gameUpdate;
+    props.setGameUpdate(null);
+    const strPos = update.position;
     const numPos = parseInt(strPos);
     const x = numPos % props.width;
     const y = Math.floor(numPos / props.width);
-    const colorId = parseInt(props.gameUpdate.color);
+    const colorId = parseInt(update.color);
     colorPixel(x, y, colorId);
-    props.setGameUpdate(null);
   }, [props.gameUpdate, props.gameUpdates]);
 
   const addStagingPixel = (x: number, y: number, colorId: number) => {
