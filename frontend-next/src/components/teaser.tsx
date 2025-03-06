@@ -14,7 +14,7 @@ const Teaser = (props: any) => {
           <div className="absolute top-[50%] left-[50%] transform
             -translate-x-1/2 -translate-y-1/2 h-[60rem] w-[80rem] bg-[rgba(0,0,0,0)]">
               <div className="flex flex-col justify-around items-center h-full w-full">
-                <video autoPlay loop className="mb-[1rem] h-full w-full object-cover" src="/videos/art-peace-round-3-nofade.mp4" />
+                <video autoPlay loop controls className="mb-[1rem] h-full w-full object-cover" src="/videos/art-peace-round-3-nofade.mp4" />
                 <div className="flex flex-col justify-center items-center gap-10">
                   <h1 className="text-black text-8xl font-bold">art/peace</h1>
                   <p className="text-black text-3xl">LFDrawww!!!</p>

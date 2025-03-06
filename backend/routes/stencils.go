@@ -35,6 +35,7 @@ func InitStencilsRoutes() {
 		http.HandleFunc("/favorite-stencil-devnet", favoriteStencilDevnet)
 		http.HandleFunc("/unfavorite-stencil-devnet", unfavoriteStencilDevnet)
 	}
+	http.HandleFunc("/delete-stencil", deleteStencil)
 }
 
 func InitStencilsStaticRoutes() {
@@ -965,4 +966,32 @@ func getStencilPixelData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteDataJson(w, string(jsonResponse))
+}
+
+func deleteStencil(w http.ResponseWriter, r *http.Request) {
+	// Only allow admin to delete stencils
+	if routeutils.AdminMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[map[string]string](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
+
+	hash := (*jsonBody)["hash"]
+	if hash == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing hash")
+		return
+	}
+
+	filename := fmt.Sprintf("stencils/stencil-%s.png", hash)
+	err = os.Remove(filename)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to delete stencil")
+		return
+	}
+
+	routeutils.WriteResultJson(w, "Stencil deleted")
 }

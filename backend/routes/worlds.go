@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -42,6 +43,7 @@ func InitWorldsRoutes() {
 		http.HandleFunc("/unfavorite-world-devnet", unfavoriteWorldDevnet)
 		http.HandleFunc("/place-world-pixel-devnet", placeWorldPixelDevnet)
 	}
+	http.HandleFunc("/clear-pixels", clearPixelsRedis)
 }
 
 func InitWorldsStaticRoutes() {
@@ -928,4 +930,71 @@ func doesWorldNameExist(name string) (bool, error) {
 		return false, err
 	}
 	return *exists, nil
+}
+
+type ClearPixelsRequest struct {
+	XStart  int `json:"xStart"`
+	YStart  int `json:"yStart"`
+	XEnd    int `json:"xEnd"`
+	YEnd    int `json:"yEnd"`
+	WorldId int `json:"worldId"`
+}
+
+func clearPixelsRedis(w http.ResponseWriter, r *http.Request) {
+	// Only allow admin to place pixels on redis
+	if routeutils.AdminMiddleware(w, r) {
+		return
+	}
+
+	jsonBody, err := routeutils.ReadJsonBody[ClearPixelsRequest](r)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON request body")
+		return
+	}
+
+	xStart := (*jsonBody).XStart
+	yStart := (*jsonBody).YStart
+	xEnd := (*jsonBody).XEnd
+	yEnd := (*jsonBody).YEnd
+	worldId := (*jsonBody).WorldId
+
+	world, err := core.PostgresQueryOne[WorldData]("SELECT * FROM worlds WHERE world_id = $1", worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve World")
+		return
+	}
+
+	worldWidth := world.Width
+	worldHeight := world.Height
+
+	// Validate position range
+	if xStart >= worldWidth || yStart >= worldHeight || xEnd >= worldWidth || yEnd >= worldHeight {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Position out of range")
+		return
+	}
+	if xStart > xEnd || yStart > yEnd {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid range")
+		return
+	}
+	if xStart < 0 || yStart < 0 || xEnd < 0 || yEnd < 0 {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid range")
+		return
+	}
+
+	bitfieldType := "u" + strconv.Itoa(int(core.ArtPeaceBackend.CanvasConfig.ColorsBitWidth))
+
+	ctx := context.Background()
+	canvasKey := fmt.Sprintf("canvas-%s", strconv.Itoa(int(worldId)))
+	for x := xStart; x <= xEnd; x++ {
+		for y := yStart; y <= yEnd; y++ {
+			pos := y*worldWidth + x
+			err = core.ArtPeaceBackend.Databases.Redis.BitField(ctx, canvasKey, "SET", bitfieldType, pos, 0).Err()
+			if err != nil {
+				routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Error setting pixel on redis")
+				return
+			}
+		}
+	}
+
+	routeutils.WriteResultJson(w, "Pixel placed on redis")
 }
