@@ -82,7 +82,7 @@ const controllerConnector = new ControllerConnector({
       { rpcUrl: SEPOLIA_RPC_URL },
       { rpcUrl: MAINNET_RPC_URL },
   ],
-  defaultChainId: constants.StarknetChainId.SN_MAIN,
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
 })
 
 // Configure RPC provider
@@ -114,7 +114,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
     options: {
         dappName: "art/peace",
         url: typeof location !== "undefined" ? location.hostname : "localhost",
-        chainId: "SN_MAIN" as any,
+        chainId: "SN_SEPOLIA" as any,
         icons: [],
       },
     });
