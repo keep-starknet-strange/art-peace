@@ -74,6 +74,7 @@ const policies: SessionPolicies = {
 
 const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || 'https://api.cartridge.gg/x/starknet/sepolia'
 const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL || 'https://api.cartridge.gg/x/starknet/mainnet'
+const CURRENT_CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || 'SN_SEPOLIA'
  
 // Initialize the connector
 const controllerConnector = new ControllerConnector({
@@ -82,7 +83,7 @@ const controllerConnector = new ControllerConnector({
       { rpcUrl: SEPOLIA_RPC_URL },
       { rpcUrl: MAINNET_RPC_URL },
   ],
-  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+  defaultChainId: CURRENT_CHAIN_ID === 'SN_SEPOLIA' ? constants.StarknetChainId.SN_SEPOLIA : constants.StarknetChainId.SN_MAIN,
 })
 
 // Configure RPC provider
@@ -114,7 +115,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
     options: {
         dappName: "art/peace",
         url: typeof location !== "undefined" ? location.hostname : "localhost",
-        chainId: "SN_SEPOLIA" as any,
+        chainId: CURRENT_CHAIN_ID as any,
         icons: [],
       },
     });
