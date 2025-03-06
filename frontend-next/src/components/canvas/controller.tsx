@@ -554,6 +554,7 @@ export const CanvasController = (props: any) => {
                 availablePixelsUsed={props.availablePixelsUsed}
                 isActive={props.openedWorldId === world.worldId}
                 gameUpdate={props.gameUpdate}
+                gameUpdates={props.gameUpdates}
                 setGameUpdate={props.setGameUpdate}
                 isCommitting={props.isCommitting}
               />
@@ -599,6 +600,7 @@ export const CanvasController = (props: any) => {
           availablePixels={props.availablePixels}
           availablePixelsUsed={props.availablePixelsUsed}
           gameUpdate={props.gameUpdate}
+          gameUpdates={props.gameUpdates
           setGameUpdate={props.setGameUpdate}
           isCommitting={props.isCommitting}
         />

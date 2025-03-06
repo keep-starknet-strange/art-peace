@@ -460,6 +460,7 @@ const Canvas = (props: any) => {
         stencilPosition={stencilPosition}
         setStencilCreationSelected={setStencilCreationSelected}
         gameUpdate={gameUpdate}
+        gameUpdates={gameUpdates}
         setGameUpdate={setGameUpdate}
         setWorldCanvasRef={setWorldCanvasRef}
       />
@@ -494,6 +495,7 @@ const Canvas = (props: any) => {
         commitStagingPixels={commitStagingPixels}
         gameUpdate={gameUpdate}
         setGameUpdate={setGameUpdate}
+        gameUpdates={gameUpdates}
         isCommitting={isCommitting}
       />
       <Footer

@@ -106,10 +106,15 @@ export const Canva = (props: any) => {
     colorPixel(x, y, props.gameUpdate.colorId);
     props.setLastPlacedTime(props.gameUpdate.timestamp * 1000);
     props.setGameUpdate(null);
-  }, [props.gameUpdate]);
+  }, [props.gameUpdate, props.gameUpdates]);
   useEffect(() => {
     if (!props.gameUpdate) return;
     if (props.gameUpdate.messageType !== "colorWorldPixel") return;
+    // TODO: Check if world is active
+    if (parseInt(props.gameUpdate.worldId) < 13) {
+      props.setGameUpdate(null);
+      return;
+    }
     if (parseInt(props.gameUpdate.worldId) !== props.worldId) return;
     const strPos = props.gameUpdate.position;
     const numPos = parseInt(strPos);
@@ -118,7 +123,7 @@ export const Canva = (props: any) => {
     const colorId = parseInt(props.gameUpdate.color);
     colorPixel(x, y, colorId);
     props.setGameUpdate(null);
-  }, [props.gameUpdate]);
+  }, [props.gameUpdate, props.gameUpdates]);
 
   const addStagingPixel = (x: number, y: number, colorId: number) => {
     let newStaging = props.stagingPixels;
