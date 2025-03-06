@@ -121,7 +121,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   return (
     <StarknetConfig
       autoConnect
-      chains={[mainnet]}
+      chains={[sepolia, mainnet]}
       provider={provider}
       connectors={[controllerConnector, ...connectors, mobileConnector, new WebWalletConnector()]}
       explorer={starkscan}
