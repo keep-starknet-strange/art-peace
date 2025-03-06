@@ -15,6 +15,7 @@ export const WorldCreationTab = (props: any) => {
     playSoftClick2();
     console.log("Submitting world...");
     const hexPalette = palette.map((color) => `0x${color.toLowerCase()}`);
+    return;
     if (!usingCompetitionConfig) {
       await createCanvasCall(account, address as string, toHex(worldName), toHex(worldSlug), worldWidth, worldHeight, pixelsPer, timer, hexPalette, Math.floor(start / 1000), Math.floor(end / 1000));
     } else {

@@ -9,7 +9,7 @@ import { usePreventZoom } from './window';
 import { playSoftClick2, getMusicVolume } from '../components/utils/sounds';
 // TODO: Proper routing here
 import Canvas from "../screens/canvas";
-import Teaser from "../screens/teaser";
+import Teaser from "../components/teaser";
 
 import logo from '../../public/logo/logo.png';
 
@@ -79,6 +79,8 @@ function App() {
   }, [currentBackgroundSongIndex, hasPlayedYet]);
 
   const [homeClicked, setHomeClicked] = useState(false);
+  const [hasLaunched, setHasLaunched] = useState(false);
+  const [clickCounter, setClickCounter] = useState(0);
   return (
     <div className="h-[100vh] w-[100vw] bg-[#fefdfb] flex flex-col align-center">
       <div className="Page__bg">
@@ -91,15 +93,20 @@ function App() {
               onClick={() => {
                 playSoftClick2();
                 setHomeClicked(true);
+                setClickCounter(clickCounter + 1);
+                if (clickCounter + 1 >= 4) {
+                  setHasLaunched(true);
+                }
                 // TODO: window.location.href = '/';
               }}
             />
             <p className="text-md text-black absolute top-[45%] left-[65%]
               transform translate-x-[-50%] translate-y-[-50%] pointer-events-none
-              ">3</p>
+              "></p>
           </div>
         </div>
-        <Canvas setIsMusicMuted={setIsMusicMuted} homeClicked={homeClicked} setHomeClicked={setHomeClicked} />
+        {!hasLaunched && <Teaser />}
+        {hasLaunched && <Canvas setIsMusicMuted={setIsMusicMuted} homeClicked={homeClicked} setHomeClicked={setHomeClicked} />}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { GameController } from "./controller";
 import { playSoftClick2 } from "../utils/sounds";
 
 export const Footer = (props: any) => {
-  const [enableController, setEnableController] = useState(false);
+  const [enableController, setEnableController] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     setIsMobile(window.innerWidth < 600);
