@@ -513,6 +513,11 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		PrintIndexerError("processCanvasPixelPlacedEvent", "Failed to parse canvasIdHex", canvasIdHex, placedBy, posHex, colorHex, err)
 		return
 	}
+	// TODO: Remove this
+	if canvasId < 13 {
+		// Skip old worlds
+		return
+	}
 
 	pos, err := strconv.ParseInt(posHex, 0, 64)
 	if err != nil {
@@ -670,6 +675,11 @@ func revertCanvasPixelPlacedEvent(event IndexerEvent) {
 		PrintIndexerError("revertPixelPlacedEvent", "Failed to parse worldIdHex", worldIdHex, placedBy, posHex, err)
 		return
 	}
+	// TODO: Remove this
+	if worldId < 13 {
+		// Skip old worlds
+		return
+	}
 
 	pos, err := strconv.ParseInt(posHex, 0, 64)
 	if err != nil {
@@ -713,6 +723,11 @@ func processCanvasBasicPixelPlacedEvent(event IndexerEvent) {
 	canvasId, err := strconv.ParseInt(canvasIdHex, 0, 64)
 	if err != nil {
 		PrintIndexerError("processCanvasBasicPixelPlacedEvent", "Failed to parse canvasIdHex", canvasIdHex, placedBy, timestampHex, err)
+		return
+	}
+	// TODO: Remove this
+	if canvasId < 13 {
+		// Skip old worlds
 		return
 	}
 

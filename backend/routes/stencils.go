@@ -29,6 +29,7 @@ func InitStencilsRoutes() {
 	http.HandleFunc("/add-stencil-img", addStencilImg)
 	http.HandleFunc("/add-stencil-data", addStencilData)
 	http.HandleFunc("/get-stencil-pixel-data", getStencilPixelData)
+	http.HandleFunc("/get-stencil-owner", getStencilOwner)
 	if !core.ArtPeaceBackend.BackendConfig.Production {
 		http.HandleFunc("/add-stencil-devnet", addStencilDevnet)
 		http.HandleFunc("/remove-stencil-devnet", removeStencilDevnet)
@@ -994,4 +995,25 @@ func deleteStencil(w http.ResponseWriter, r *http.Request) {
 	}
 
 	routeutils.WriteResultJson(w, "Stencil deleted")
+}
+
+func getStencilOwner(w http.ResponseWriter, r *http.Request) {
+	stencilId := r.URL.Query().Get("stencilId")
+	if stencilId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing stencilId")
+		return
+	}
+	worldId := r.URL.Query().Get("worldId")
+	if worldId == "" {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing worldId")
+		return
+	}
+
+	owner, err := core.PostgresQueryOne[string]("SELECT COALESCE(user_address, '') FROM stencilfavorites WHERE stencil_id = $1 AND world_id = $2 ORDER BY key LIMIT 1", stencilId, worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to get stencil owner")
+		return
+	}
+
+	routeutils.WriteDataJson(w, *owner)
 }

@@ -9,6 +9,7 @@ import { StencilBotController } from "./stencil-bot";
 import { playNotification, playSoftClick2 } from "../utils/sounds";
 
 export const GameController = (props: any) => {
+  const enableAIAgent = false;
   const { address } = useAccount();
   const { connect, connectors } = useConnect();
   const controller = connectors[0] as ControllerConnector;
@@ -210,7 +211,7 @@ export const GameController = (props: any) => {
           isCommitting={props.isCommitting}
         />
       )}
-      {props.botMode && props.selectedBotOption === "AI Agent" && (
+      {props.botMode && props.selectedBotOption === "AI Agent" && enableAIAgent (
         <AIController
           address={address}
           botMode={props.botMode}

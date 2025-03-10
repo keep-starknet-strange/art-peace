@@ -397,3 +397,14 @@ CREATE TABLE WorldsColors (
 );
 CREATE INDEX worldcolors_world_id_index ON WorldsColors (world_id);
 CREATE INDEX worldcolors_color_key_index ON WorldsColors (color_key);
+
+CREATE TABLE CanvasClears (
+  time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  x_start integer NOT NULL,
+  x_end integer NOT NULL,
+  y_start integer NOT NULL,
+  y_end integer NOT NULL
+  world_id integer NOT NULL
+);
+CREATE INDEX canvasClears_time_index ON CanvasClears (time);
+CREATE INDEX canvasClears_world_id_index ON CanvasClears (world_id);

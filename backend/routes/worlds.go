@@ -1030,5 +1030,11 @@ func clearPixelsRedis(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	_, err = core.ArtPeaceBackend.Databases.Postgres.Exec(context.Background(), "INSERT INTO CanvasClears (x_start, x_end, y_start, y_end, world_id) VALUES ($1, $2, $3, $4, $5)", xStart, xEnd, yStart, yEnd, worldId)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to insert into CanvasClears")
+		return
+	}
+
 	routeutils.WriteResultJson(w, "Pixel placed on redis")
 }
