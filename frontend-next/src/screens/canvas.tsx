@@ -322,12 +322,14 @@ const Canvas = (props: any) => {
         setActiveTab("Stencils");
       }
     }
-  }, {
-    name: "AI Agent",
-    selectOption: () => {
-      setSelectedBotOption("AI Agent");
-    }
   }];
+  // TODO: Add AI Agent
+  // , {
+  //   name: "AI Agent",
+  //   selectOption: () => {
+  //     setSelectedBotOption("AI Agent");
+  //   }
+  // }];
   const [botMode, setBotMode] = useState<boolean>(false);
   const [selectedBotOption, setSelectedBotOption] = useState(null as any);
   const toggleBotMode = () => {

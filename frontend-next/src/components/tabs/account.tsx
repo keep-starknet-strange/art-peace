@@ -51,8 +51,6 @@ export const AccountTab = (props: any) => {
 
   const [totalPixelsPlaced, setTotalPixelsPlaced] = useState<number>(0);
   const [pixelsOnWorld, setPixelsOnWorld] = useState<number>(0);
-  const [totalStencilLikes, setTotalStencilLikes] = useState<number>(0);
-  const [stencilLikesOnWorld, setStencilLikesOnWorld] = useState<number>(0);
   useEffect(() => {
     if (!address) return;
     //TODO
@@ -144,12 +142,6 @@ export const AccountTab = (props: any) => {
                   {totalPixelsPlaced}
                 </p>
               </div>
-              <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between mt-[0.5rem]">
-                <p className="Text__medium pr-[1rem]">Stencil Likes&nbsp;:</p>
-                <p className="Text__medium pr-[0.5rem] text-right">
-                  {totalStencilLikes}
-                </p>
-              </div>
               {props.activeWorld && (
                 <>
                 <h3 className="text-black text-xl truncate underline mt-[1rem] mb-[1rem]">
@@ -159,12 +151,6 @@ export const AccountTab = (props: any) => {
                   <p className="Text__medium pr-[1rem]">Pixels Placed&nbsp;:</p>
                   <p className="Text__medium pr-[0.5rem] text-right">
                     {pixelsOnWorld}
-                  </p>
-                </div>
-                <div className="px-[0.5rem] mx-[0.5rem] flex flex-row align-center justify-between mt-[0.5rem]">
-                  <p className="Text__medium pr-[1rem]">Stencil Likes&nbsp;:</p>
-                  <p className="Text__medium pr-[0.5rem] text-right">
-                    {stencilLikesOnWorld}
                   </p>
                 </div>
                 </>

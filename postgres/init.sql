@@ -403,7 +403,7 @@ CREATE TABLE CanvasClears (
   x_start integer NOT NULL,
   x_end integer NOT NULL,
   y_start integer NOT NULL,
-  y_end integer NOT NULL
+  y_end integer NOT NULL,
   world_id integer NOT NULL
 );
 CREATE INDEX canvasClears_time_index ON CanvasClears (time);
