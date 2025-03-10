@@ -211,7 +211,7 @@ export const GameController = (props: any) => {
           isCommitting={props.isCommitting}
         />
       )}
-      {props.botMode && props.selectedBotOption === "AI Agent" && enableAIAgent (
+      {props.botMode && props.selectedBotOption === "AI Agent" && enableAIAgent && (
         <AIController
           address={address}
           botMode={props.botMode}
