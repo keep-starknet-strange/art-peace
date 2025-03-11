@@ -117,3 +117,14 @@ export const getStencilPixelData = async (hash: string, worldId: number): Promis
     return null;
   }
 }
+
+export const getStencilOwner = async (stencilId: number, worldId: number): Promise<any> => {
+  try {
+    const getStencilOwnerEndpoint = `${backendUrl}/get-stencil-owner?stencilId=${stencilId}&worldId=${worldId}`;
+    const owner = await fetchJsonData(getStencilOwnerEndpoint);
+    return owner;
+  } catch (error) {
+    console.error("Error getting stencil owner", error);
+    return null;
+  }
+}

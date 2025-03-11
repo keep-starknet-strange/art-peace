@@ -4,28 +4,36 @@ import { CSSTransition } from "react-transition-group";
 import { useAccount } from '@starknet-react/core';
 import FavoriteIcon from "../../../public/icons/Favorite.png";
 import FavoritedIcon from "../../../public/icons/Favorited.png";
-//import Info from "../../../public/icons/Info.png";
+import Info from "../../../public/icons/Info.png";
 import { playSoftClick2 } from "../utils/sounds";
 import { favoriteStencilCall, unfavoriteStencilCall } from "../../contract/calls";
+import { getStencilOwner } from "../../api/stencils";
+import { lookupAddresses } from '@cartridge/controller';
 
-/* TODO
- <button className="Button__circle h-[3rem] w-[3rem] m-2" onClick={() => {
-   playSoftClick2();
-   setShowInfo(!showInfo);
- }}>
-   <Image
-     src={Info}
-     alt="Info"
-     width={24}
-     height={24}
-     className="p-0 m-0"
-   />
- </button>
-*/
 export const StencilItem = (props: any) => {
   const { account, address } = useAccount();
 
-  const [creatorText, setCreatorText] = useState("");
+  const [showInfo, setShowInfo] = useState(false);
+  const [creatorText, setCreatorText] = useState("...");
+  useEffect(() => {
+    const getCreator = async () => {
+      if (!showInfo) return;
+      if (creatorText !== "...") return;
+      const creator = await getStencilOwner(props.stencil.stencilId, props.activeWorld.worldId);
+      const addressMap = await lookupAddresses([creator]);
+      if (!addressMap || addressMap.size === 0) {
+        setCreatorText(`${creator.slice(0, 6)}...${creator.slice(-4)}`);
+        return;
+      }
+      const value = addressMap.entries().next().value;
+      if (!value) {
+        setCreatorText(`${creator.slice(0, 6)}...${creator.slice(-4)}`);
+        return;
+      }
+      setCreatorText(value[1]);
+    };
+    getCreator();
+  }, [showInfo]);
 
   const selectStencil = (e: any) => {
     e.preventDefault();
@@ -46,8 +54,6 @@ export const StencilItem = (props: any) => {
     }
   }
 
-  const [showInfo, setShowInfo] = useState(false);
-
   return (
     <div
       className="relative w-full h-[20rem] bg-[rgba(255,255,255,0.4)]
@@ -63,6 +69,12 @@ export const StencilItem = (props: any) => {
         className="w-full h-full object-contain m-0 p-0 Pixel__img bg-[#00000040]"
         onClick={selectStencil}
       />
+      {showInfo && (
+        <div className="Buttonlike__primary absolute top-0 left-0 px-[1rem] py-[0.5rem] w-[98%]
+        ">
+          <p className="text-[1rem] text-black p-0 m-0 overflow-x-scroll text-nowrap">by {creatorText}</p>
+        </div>
+      )}
       <div className="FavoriteButton absolute bottom-0 right-0 w-full flex flex-row justify-end items-center pointer-events-none">
         <button
           className={`${address ? "" : "Button--disabled"} Button__primary h-[3rem]`}
@@ -76,6 +88,18 @@ export const StencilItem = (props: any) => {
             className="p-0 m-0"
           />
           <p className="Text__medium p-0 m-0 text-center w-[3.5rem]">{props.stencil.favorites}</p>
+        </button>
+        <button className="Button__circle h-[3rem] w-[3rem] m-2 ml-1" onClick={() => {
+          playSoftClick2();
+          setShowInfo(!showInfo);
+        }}>
+          <Image
+            src={Info}
+            alt="Info"
+            width={24}
+            height={24}
+            className="p-0 m-0"
+          />
         </button>
       </div>
     </div>

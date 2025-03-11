@@ -54,3 +54,14 @@ export const getLeaderboardWorldUser = async (address: string, worldId: number):
     return null;
   }
 }
+
+export const getUserRewards = async (address: string): Promise<any> => {
+  try {
+    const getUserRewardsEndpoint = `${backendUrl}/get-user-rewards?address=${address}`;
+    const userRewards = await fetchJsonData(getUserRewardsEndpoint);
+    return userRewards;
+  } catch (error) {
+    console.error("Error getting user rewards", error);
+    return null;
+  }
+}

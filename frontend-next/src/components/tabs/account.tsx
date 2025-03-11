@@ -4,7 +4,7 @@ import { constants } from "starknet";
 import { useAccount, useConnect, useDisconnect } from '@starknet-react/core';
 import ControllerConnector from "@cartridge/connector/controller";
 import { BasicTab } from "./basic";
-import { getLeaderboardPixelsUser, getLeaderboardWorldUser } from "../../api/stats";
+import { getLeaderboardPixelsUser, getLeaderboardWorldUser, getUserRewards } from "../../api/stats";
 import copyIcon from "../../../public/icons/copy.png";
 import muteIcon from "../../../public/icons/mute.png";
 import unmuteIcon from "../../../public/icons/unmute.png";
@@ -70,6 +70,25 @@ export const AccountTab = (props: any) => {
 
   const [isFXMuted, setIsFXMuted] = useState<boolean>(getSoundEffectVolume() === 0);
   const [isMusicMuted, setIsMusicMuted] = useState<boolean>(getMusicVolume() === 0);
+
+  const mockUserRewards = [
+    { amount: 1000, type: "42nd place artwork!" },
+    { amount: 100, type: "Honorable mention" },
+  ];
+  const [userRewards, setUserRewards] = useState<any>();
+  useEffect(() => {
+    if (!address) return;
+    const fetchUserRewards = async () => {
+      const rewards = await getUserRewards(address.slice(2).toLowerCase());
+      setUserRewards(rewards);
+    }
+    fetchUserRewards();
+  }, [address]);
+  const [showClaim, setShowClaim] = useState<boolean>(false);
+  const claimLink = "https://github.com/keep-starknet-strange/art-peace/issues/283";
+  const openClaimTab = () => {
+    window.open(claimLink, "_blank");
+  }
 
   return (
     <BasicTab title="Account" {...props}>
@@ -154,6 +173,37 @@ export const AccountTab = (props: any) => {
                   </p>
                 </div>
                 </>
+              )}
+              {userRewards && !showClaim && (
+                <div className="mt-[2rem] flex flex-row align-center justify-around">
+                  <div>
+                    <p className="text-[2rem] text-blue-500">Congrats!</p>
+                    <p className="text-[1.2rem] text-green-600">You won an award!</p>
+                  </div>
+                  <div className="Button__primary">
+                    <p className="Text__large" onClick={() => setShowClaim(true)}>Claim</p>
+                  </div>
+                </div>
+              )}
+              {userRewards && showClaim && (
+                <div className="mt-[2rem]">
+                  <h3 className="text-black text-[2rem] text-blue-500">Rewards</h3>
+                  <div className="mb-[1rem]">
+                    {userRewards.map((reward: any, index: number) => (
+                      <div key={index} className="flex flex-row align-center justify-between mx-[1rem]">
+                        <p className="Text__medium pr-[1rem]">{reward.type}</p>
+                        <p className="Text__medium pr-[0.5rem] text-right">{reward.amount} STRK</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-row align-center justify-center mx-[1rem] mb-[1rem]">
+                    <p className="Text__large pr-[1rem]">Total:</p>
+                    <p className="Text__large pr-[0.5rem] text-right">{userRewards.reduce((acc: number, reward: any) => acc + reward.amount, 0)} STRK</p>
+                  </div>
+                  <div className="Button__primary">
+                    <p className="Text__large" onClick={openClaimTab}>Claim</p>
+                  </div>
+                </div>
               )}
             </div>
           </div>

@@ -79,8 +79,10 @@ function App() {
   }, [currentBackgroundSongIndex, hasPlayedYet]);
 
   const [homeClicked, setHomeClicked] = useState(false);
+  // TODO: Countdown to launch
   const launchDate = new Date("2025-03-10T09:00:00Z");
-  const [hasLaunched, setHasLaunched] = useState(new Date() > launchDate);
+  // const [hasLaunched, setHasLaunched] = useState(new Date() > launchDate);
+  const [hasLaunched, setHasLaunched] = useState(true);
   const [clickCounter, setClickCounter] = useState(0);
   return (
     <div className="h-[100vh] w-[100vw] bg-[#fefdfb] flex flex-col align-center">

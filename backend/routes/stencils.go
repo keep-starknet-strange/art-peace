@@ -1015,5 +1015,5 @@ func getStencilOwner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	routeutils.WriteDataJson(w, *owner)
+	routeutils.WriteDataJson(w, "\""+*owner+"\"")
 }
