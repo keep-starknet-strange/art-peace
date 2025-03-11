@@ -20,14 +20,14 @@ export const StencilItem = (props: any) => {
       if (!showInfo) return;
       if (creatorText !== "...") return;
       const creator = await getStencilOwner(props.stencil.stencilId, props.activeWorld.worldId);
-      const addressMap = await lookupAddresses([creator]);
+      const addressMap = await lookupAddresses(["0x" + creator]);
       if (!addressMap || addressMap.size === 0) {
-        setCreatorText(`${creator.slice(0, 6)}...${creator.slice(-4)}`);
+        setCreatorText(`0x${creator.slice(0, 6)}...${creator.slice(-4)}`);
         return;
       }
       const value = addressMap.entries().next().value;
       if (!value) {
-        setCreatorText(`${creator.slice(0, 6)}...${creator.slice(-4)}`);
+        setCreatorText(`0x${creator.slice(0, 6)}...${creator.slice(-4)}`);
         return;
       }
       setCreatorText(value[1]);

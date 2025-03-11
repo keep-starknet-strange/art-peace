@@ -8,6 +8,7 @@ import "./canvas.css";
 export const Canva = (props: any) => {
   const { account } = useAccount();
   const [colors, setColors] = useState([] as string[]);
+  const [canvasUpdater, setCanvasUpdater] = useState(0);
   useEffect(() => {
     const getColors = async (worldId: number) => {
       const canvasColors = await getCanvasColors(worldId);
@@ -83,7 +84,14 @@ export const Canva = (props: any) => {
       props.worldId
     );
   // TODO: Change params to make more efficient
-  }, [props.width, props.height, props.canvasRef, props.worldId, colors]);
+  }, [props.width, props.height, props.canvasRef, props.worldId, colors, canvasUpdater]);
+  useEffect(() => {
+    // Update canvas evry 5 minutes
+    const interval = setInterval(() => {
+      setCanvasUpdater(canvasUpdater + 1);
+    }, 300000);
+    return () => clearInterval(interval);
+  }, [canvasUpdater]);
 
   const colorPixel = (x: number, y: number, colorId: number) => {
     const canvas = props.canvasRef.current;
