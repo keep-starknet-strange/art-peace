@@ -1,8 +1,10 @@
 import { backendUrl, fetchJsonData } from "./api";
 
+const leaderboardCutoff = process.env.NEXT_PUBLIC_LEADERBOARD_CUTOFF || "0";
+
 export const getLeaderboardPixels = async (pageLength: number, page: number): Promise<any> => {
   try {
-    const getLeaderboardPixelsEndpoint = `${backendUrl}/leaderboard-pixels?pageLength=${pageLength}&page=${page}`;
+    const getLeaderboardPixelsEndpoint = `${backendUrl}/leaderboard-pixels?pageLength=${pageLength}&page=${page}&timeCutoff=${leaderboardCutoff}`;
     const pixelLeaderboard = await fetchJsonData(getLeaderboardPixelsEndpoint);
     return pixelLeaderboard;
   } catch (error) {
@@ -13,7 +15,7 @@ export const getLeaderboardPixels = async (pageLength: number, page: number): Pr
 
 export const getLeaderboardWorlds = async (pageLength: number, page: number): Promise<any> => {
   try {
-    const getLeaderboardWorldsEndpoint = `${backendUrl}/leaderboard-worlds?pageLength=${pageLength}&page=${page}`;
+    const getLeaderboardWorldsEndpoint = `${backendUrl}/leaderboard-worlds?pageLength=${pageLength}&page=${page}&timeCutoff=${leaderboardCutoff}`;
     const worldLeaderboard = await fetchJsonData(getLeaderboardWorldsEndpoint);
     return worldLeaderboard;
   } catch (error) {
@@ -24,7 +26,7 @@ export const getLeaderboardWorlds = async (pageLength: number, page: number): Pr
 
 export const getLeaderboardPixelsWorld = async (pageLength: number, page: number, worldId: number): Promise<any> => {
   try {
-    const getLeaderboardPixelsWorldEndpoint = `${backendUrl}/leaderboard-pixels-world?pageLength=${pageLength}&page=${page}&worldId=${worldId}`;
+    const getLeaderboardPixelsWorldEndpoint = `${backendUrl}/leaderboard-pixels-world?pageLength=${pageLength}&page=${page}&worldId=${worldId}&timeCutoff=${leaderboardCutoff}`;
     const pixelLeaderboard = await fetchJsonData(getLeaderboardPixelsWorldEndpoint);
     return pixelLeaderboard;
   } catch (error) {
@@ -35,7 +37,7 @@ export const getLeaderboardPixelsWorld = async (pageLength: number, page: number
 
 export const getLeaderboardPixelsUser = async (address: string): Promise<any> => {
   try {
-    const getLeaderboardPixelsUserEndpoint = `${backendUrl}/leaderboard-pixels-user?address=${address}`;
+    const getLeaderboardPixelsUserEndpoint = `${backendUrl}/leaderboard-pixels-user?address=${address}&timeCutoff=${leaderboardCutoff}`;
     const pixelLeaderboard = await fetchJsonData(getLeaderboardPixelsUserEndpoint);
     return pixelLeaderboard;
   } catch (error) {
@@ -46,7 +48,7 @@ export const getLeaderboardPixelsUser = async (address: string): Promise<any> =>
 
 export const getLeaderboardWorldUser = async (address: string, worldId: number): Promise<any> => {
   try {
-    const getLeaderboardWorldUserEndpoint = `${backendUrl}/leaderboard-pixels-world-user?address=${address}&worldId=${worldId}`;
+    const getLeaderboardWorldUserEndpoint = `${backendUrl}/leaderboard-pixels-world-user?address=${address}&worldId=${worldId}&timeCutoff=${leaderboardCutoff}`;
     const worldLeaderboard = await fetchJsonData(getLeaderboardWorldUserEndpoint);
     return worldLeaderboard;
   } catch (error) {
