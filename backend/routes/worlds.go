@@ -822,6 +822,16 @@ func getLeaderboardWorlds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	timeCutoffStr := r.URL.Query().Get("timeCutoff")
+	if timeCutoffStr == "" {
+		timeCutoffStr = "0"
+	}
+	timeCutoff, err := strconv.Atoi(timeCutoffStr)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid timeCutoff")
+		return
+	}
+
 	query := `
     SELECT
       w.name AS key,
@@ -833,13 +843,13 @@ func getLeaderboardWorlds(w http.ResponseWriter, r *http.Request) {
     ON
       p.world_id = w.world_id
     WHERE
-      w.world_id >= $1
+      w.world_id >= $1 and p.time > TO_TIMESTAMP($4)
     GROUP BY
       w.name
     ORDER BY
       score DESC
     LIMIT $2 OFFSET $3`
-	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, minSupportedWorldInt, pageLength, offset)
+	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, minSupportedWorldInt, pageLength, offset, timeCutoff)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
 		return
@@ -868,6 +878,16 @@ func getLeaderboardPixelsWorld(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * pageLength
 
+	timeCutoffStr := r.URL.Query().Get("timeCutoff")
+	if timeCutoffStr == "" {
+		timeCutoffStr = "0"
+	}
+	timeCutoff, err := strconv.Atoi(timeCutoffStr)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid timeCutoff")
+		return
+	}
+
 	query := `
     SELECT
       address AS key,
@@ -875,13 +895,13 @@ func getLeaderboardPixelsWorld(w http.ResponseWriter, r *http.Request) {
     FROM
       worldspixels
     WHERE
-      world_id = $1
+      world_id = $1 and time > TO_TIMESTAMP($4)
     GROUP BY
       address
     ORDER BY
       score DESC
     LIMIT $2 OFFSET $3`
-	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, worldId, pageLength, offset)
+	leaderboard, err := core.PostgresQueryJson[LeaderboardEntry](query, worldId, pageLength, offset, timeCutoff)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
 		return
@@ -906,17 +926,27 @@ func getLeaderboardPixelsUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	timeCutoffStr := r.URL.Query().Get("timeCutoff")
+	if timeCutoffStr == "" {
+		timeCutoffStr = "0"
+	}
+	timeCutoff, err := strconv.Atoi(timeCutoffStr)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid timeCutoff")
+		return
+	}
+
 	query := `
     SELECT
       COUNT(*) AS score
     FROM
       worldspixels
     WHERE
-      address = $1 and world_id >= $2
+      address = $1 and world_id >= $2 and time > TO_TIMESTAMP($3)
     GROUP BY
       address
     LIMIT 1`
-	leaderboard, err := core.PostgresQueryOne[int](query, address, minSupportedWorldInt)
+	leaderboard, err := core.PostgresQueryOne[int](query, address, minSupportedWorldInt, timeCutoff)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
 		return
@@ -938,17 +968,27 @@ func getLeaderboardPixelsWorldUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	timeCutoffStr := r.URL.Query().Get("timeCutoff")
+	if timeCutoffStr == "" {
+		timeCutoffStr = "0"
+	}
+	timeCutoff, err := strconv.Atoi(timeCutoffStr)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid timeCutoff")
+		return
+	}
+
 	query := `
     SELECT
       COUNT(*) AS score
     FROM
       worldspixels
     WHERE
-      address = $1 AND world_id = $2
+      address = $1 AND world_id = $2 and time > TO_TIMESTAMP($3)
     GROUP BY
       address
     LIMIT 1`
-	leaderboard, err := core.PostgresQueryOne[int](query, address, worldId)
+	leaderboard, err := core.PostgresQueryOne[int](query, address, worldId, timeCutoff)
 	if err != nil {
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, "Failed to retrieve leaderboard")
 		return
