@@ -776,15 +776,15 @@ func getLeaderboardPixels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  timeCutoffStr := r.URL.Query().Get("timeCutoff")
-  if timeCutoffStr == "" {
-    timeCutoffStr = "0"
-  }
-  timeCutoff, err := strconv.Atoi(timeCutoffStr)
-  if err != nil {
-    routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid timeCutoff")
-    return
-  }
+	timeCutoffStr := r.URL.Query().Get("timeCutoff")
+	if timeCutoffStr == "" {
+		timeCutoffStr = "0"
+	}
+	timeCutoff, err := strconv.Atoi(timeCutoffStr)
+	if err != nil {
+		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid timeCutoff")
+		return
+	}
 
 	query := `
     SELECT
