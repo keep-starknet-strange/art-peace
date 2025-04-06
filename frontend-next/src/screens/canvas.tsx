@@ -153,7 +153,7 @@ const Canvas = (props: any) => {
       setRevertCount(revertCount + 1);
       if (revertCount + 1 > revertThreshold) {
         setSelectedBotOption(null);
-        setModalMessage("⚠️Too many reverting transactions⚠️\nMost of your pixel placements are reverting. This is most likely due to running the Stencil Bot on the same world in more than one tab, which is not supported. The Stencil Bot has been disabled here.")
+        setModalMessage("⚠️Too many reverting transactions⚠️\nMost of your pixel placements are reverting.\nThis is most likely due to running the Stencil Bot in more than one tab on the same World, which is not supported.\nThe Stencil Bot has been disabled here.")
       }
       console.log("Transaction reverted", transactionHash);
     }
