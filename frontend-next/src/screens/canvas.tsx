@@ -128,6 +128,37 @@ const Canvas = (props: any) => {
       commitStagingPixels();
     }
   }, [stagingPixels, isCommitting, availablePixels]);
+  const [modalMessage, setModalMessage] = useState<string>("");
+  const checkRevertsEvery = 10;
+  const [callsCounter, setCallsCounter] = useState<number>(0);
+  const revertThreshold = 4;
+  const [revertCount, setRevertCount] = useState<number>(0);
+  const didRevert = async (transactionHash: string) => {
+    let res = null;
+    let attempts = 0;
+    console.log("Checking if tx reverted...");
+    if (!transactionHash || !account) {
+      return;
+    }
+    while (!res && attempts < 5) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      try {
+        res = await account.getTransactionReceipt(transactionHash) as any;
+      } catch (e) {
+        console.log("Error checking tx:", e);
+      }
+      attempts++;
+    }
+    if (!res || res.execution_status === "REVERTED") {
+      setRevertCount(revertCount + 1);
+      if (revertCount + 1 > revertThreshold) {
+        setSelectedBotOption(null);
+        setModalMessage("⚠️Too many reverting transactions⚠️\nMost of your pixel placements are reverting. This is most likely due to running the Stencil Bot on the same world in more than one tab, which is not supported. The Stencil Bot has been disabled here.")
+      }
+      console.log("Transaction reverted", transactionHash);
+    }
+  }
+
   const commitStagingPixels = async () => {
     setIsCommitting(true);
     if (stagingPixels.length === 0) {
@@ -135,7 +166,15 @@ const Canvas = (props: any) => {
     }
     const now = Math.floor(Date.now() / 1000);
     const commitWorldId = openedWorldId;
-    await placePixelsCall(account, openedWorldId, stagingPixels, now);
+    const txHash = await placePixelsCall(account, openedWorldId, stagingPixels, now);
+    if (txHash && (callsCounter % checkRevertsEvery) === 0) {
+      setRevertCount(0)
+      didRevert(txHash);
+    }
+    if (txHash && revertCount > 0) {
+      didRevert(txHash)
+    }
+    setCallsCounter(callsCounter + 1);
     let stagedPixels = [...stagingPixels];
     while (stagedPixels.length > 0) {
       playPixelPlaced2();
@@ -161,7 +200,15 @@ const Canvas = (props: any) => {
       return;
     }
     const now = Math.floor(Date.now() / 1000);
-    await placePixelsCall(account, openedWorldId, pixels, now);
+    const txHash = await placePixelsCall(account, openedWorldId, pixels, now);
+    if (txHash && (callsCounter % checkRevertsEvery) === 0) {
+      setRevertCount(0)
+      didRevert(txHash);
+    }
+    if (txHash && revertCount > 0) {
+      didRevert(txHash)
+    }
+    setCallsCounter(callsCounter + 1);
     let stagedPixels = [...pixels];
     while (stagedPixels.length > 0) {
       playPixelPlaced2();
@@ -499,6 +546,8 @@ const Canvas = (props: any) => {
         setGameUpdate={setGameUpdate}
         gameUpdates={gameUpdates}
         isCommitting={isCommitting}
+        modalMessage={modalMessage}
+        setModalMessage={setModalMessage}
       />
       <Footer
         basePixelTimer={basePixelTimer}

@@ -7,11 +7,13 @@ import { WorldsTab } from './worlds';
 import { StencilCreationTab } from './stencil-creation';
 import { WorldCreationTab } from './world-creation';
 import { PixelInfoTab } from './pixel';
+import { ModalTab } from './modal';
 import { StagingPixelsTab } from './staging';
 
 export const TabPanel = (props: any) => {
   const nodeRef = useRef(null);
   const pixelInfoNodeRef = useRef(null);
+  const modalNodeRef = useRef(null);
   const stagingPixelsNodeRef = useRef(null);
   const stencilCreationNodeRef = useRef(null);
   const worldCreationNodeRef = useRef(null);
@@ -32,6 +34,19 @@ export const TabPanel = (props: any) => {
           worldId={props.worldId}
           worldName={props.activeWorld ? props.activeWorld.name : ""}
           clearPixelSelection={props.clearPixelSelection}
+        />
+      </CSSTransition>
+      <CSSTransition
+        nodeRef={modalNodeRef}
+        in={props.modalMessage !== ""}
+        timeout={150}
+        classNames="list-transition"
+        unmountOnExit
+        appear
+      >
+        <ModalTab
+          modalMessage={props.modalMessage}
+          setModalMessage={props.setModalMessage}
         />
       </CSSTransition>
       <CSSTransition

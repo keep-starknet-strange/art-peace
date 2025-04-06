@@ -153,14 +153,15 @@ services:
     environment:
       - REACT_APP_BASE_PIXEL_TIMER=30000
       - REACT_APP_ROUND_NUMBER=2
-      - NEXT_PUBLIC_CANVAS_CONTRACT_ADDRESS=0x011195b78f3765b1b8cfe841363e60f2335adf67af2443364d4b15cf8dff60ac
-      - NEXT_PUBLIC_BASE_PIXEL_TIMER=30000
+      - NEXT_PUBLIC_CANVAS_CONTRACT_ADDRESS=0x02458a105b42db469fb1f8b35ab3ce126dab5a0881ad3c2bbf36bec0a34168c5
+      - NEXT_PUBLIC_BASE_PIXEL_TIMER=5000
       - NEXT_PUBLIC_ROUND_NUMBER=3
       - NEXT_PUBLIC_WEBSOCKET_URL=wss://api.art-peace.net
       - NEXT_PUBLIC_BACKEND_URL=https://api.art-peace.net
       - NEXT_PUBLIC_HAS_LAUNCHED=true
       - NEXT_PUBLIC_BASE_WORLD_ID=13
       - NEXT_PUBLIC_UPLOAD_ENABLED=true
+      - NEXT_PUBLIC_CHAIN_ID=SN_MAIN
     volumes:
       - ./frontend-next/package.json:/app/package.json
       - ./frontend-next/pnpm-lock.yaml:/app/pnpm-lock.yaml

@@ -17,11 +17,12 @@ const printCalldata = (calldata: any) => {
 
 //export const placePixelCall = useCallback(
 export const placePixelCall =
-  async (account: any, worldId: number, position: number, colorId: number, now: number) => {
+  async (account: any, worldId: number, position: number, colorId: number, now: number): Promise<any> => {
+  let txHash = "";
   try {
     if (!account) {
       console.error("Account not connected");
-      return;
+      return null;
     }
     // setSubmitted(true);
     // setTxHash("");
@@ -35,20 +36,24 @@ export const placePixelCall =
     ]);
     // setTxHash(result.transaction_hash);
     console.log("Tx hash:", result.transaction_hash);
+    txHash = result.transaction_hash;
   } catch (error) {
     console.error(error);
+    return null;
   } finally {
     console.log("Done.");
+    return txHash;
     // setSubmitted(false);
   };
 }
 
 export const placePixelsCall =
-  async (account: any, worldId: number, pixels: any[], now: number) => {
+  async (account: any, worldId: number, pixels: any[], now: number): Promise<any> => {
+  let txHash = "";
   try {
     if (!account) {
       console.error("Account not connected");
-      return;
+      return null;
     }
     const pixel_positions = [];
     const pixel_colors = [];
@@ -66,10 +71,13 @@ export const placePixelsCall =
       },
     ]);
     console.log("Tx hash:", result.transaction_hash);
+    txHash = result.transaction_hash;
   } catch (error) {
     console.error(error);
+    return null;
   } finally {
     console.log("Done.");
+    return txHash;
   };
 }
 
