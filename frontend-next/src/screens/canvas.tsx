@@ -149,7 +149,7 @@ const Canvas = (props: any) => {
       }
       attempts++;
     }
-    if (!res || res.execution_status === "REVERTED") {
+    if (res && res.execution_status === "REVERTED") {
       setRevertCount(revertCount + 1);
       if (revertCount + 1 > revertThreshold) {
         setSelectedBotOption(null);
