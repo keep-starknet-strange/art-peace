@@ -21,7 +21,8 @@ func GenerateImageFromCanvas(orderId int) {
 
 	// TODO: Make generic & initialize only once
 	colorPalette := make([]color.RGBA, 0)
-	colorPaletteHex := []string{"fafafa", "080808", "ba2112", "ff403d", "ff7714", "ffd115", "f5ff05", "199f27", "00ef3f", "152665", "1542ff", "5cfffe", "a13dff", "ff7ad7", "c1d9e6", "ea1608", "1991f4", "3c3c84", "ff5c5d", "fde578", "74401b", "f86949", "46b093", "d4d7d9"}
+	colorPaletteHex := []string{"fafafa", "080808", "ba2112", "ff403d", "ff7714", "ffd115", "f5ff05", "199f27", "00ef3f", "152665", "1542ff", "5cfffe", "a13dff", "ff7ad7", "c1d9e6", "895129"}
+	// 0 colorPaletteHex := []string{"fafafa", "080808", "ba2112", "ff403d", "ff7714", "ffd115", "f5ff05", "199f27", "00ef3f", "152665", "1542ff", "5cfffe", "a13dff", "ff7ad7", "c1d9e6", "ea1608", "1991f4", "3c3c84", "ff5c5d", "fde578", "74401b", "f86949", "46b093", "d4d7d9"}
 	for _, colorHex := range colorPaletteHex {
 		r, err := strconv.ParseInt(colorHex[0:2], 16, 64)
 		if err != nil {

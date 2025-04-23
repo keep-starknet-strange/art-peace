@@ -2,11 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/keep-starknet-strange/art-peace/backend/config"
 	"github.com/keep-starknet-strange/art-peace/backend/core"
 	"github.com/keep-starknet-strange/art-peace/backend/routes"
 	"github.com/keep-starknet-strange/art-peace/backend/routes/indexer"
+	"github.com/keep-starknet-strange/art-peace/backend/video"
 )
 
 func main() {
@@ -14,6 +16,7 @@ func main() {
 	canvasConfigFilename := flag.String("canvas-config", config.DefaultCanvasConfigPath, "Canvas config file")
 	databaseConfigFilename := flag.String("database-config", config.DefaultDatabaseConfigPath, "Database config file")
 	backendConfigFilename := flag.String("backend-config", config.DefaultBackendConfigPath, "Backend config file")
+  initFromFilename := flag.String("init-from", "", "Init from filename")
 
 	flag.Parse()
 
@@ -44,8 +47,10 @@ func main() {
 
 	routes.InitBaseRoutes()
 	routes.InitCanvasRoutes()
+  video.InitGlobalWorldsConfig(*initFromFilename)
 	indexer.InitIndexerRoutes()
-	indexer.StartMessageProcessor()
+	//indexer.StartMessageProcessor()
 
+  fmt.Println("Starting backend on port", core.ArtPeaceBackend.BackendConfig.ConsumerPort)
 	core.ArtPeaceBackend.Start(core.ArtPeaceBackend.BackendConfig.ConsumerPort)
 }

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
+	"github.com/keep-starknet-strange/art-peace/backend/video"
 )
 
 func InitIndexerRoutes() {
@@ -136,7 +137,7 @@ var eventProcessors = map[string](func(IndexerEvent)){
 	canvasStartTimeChangedEvent:      processCanvasStartTimeChangedEvent,
 	canvasEndTimeChangedEvent:        processCanvasEndTimeChangedEvent,
 	canvasColorAddedEvent:            processCanvasColorAddedEvent,
-	canvasPixelPlacedEvent:           processCanvasPixelPlacedEvent,
+	canvasPixelPlacedEvent:           processCanvasPixelPlacedEventVideo,
 	canvasBasicPixelPlacedEvent:      processCanvasBasicPixelPlacedEvent,
 	canvasExtraPixelsPlacedEvent:     processCanvasExtraPixelsPlacedEvent,
 	canvasHostAwardedUserEvent:       processCanvasHostAwardedUserEvent,
@@ -263,6 +264,9 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+  ProcessMessageEvents(*message)
+  video.GenerateImageFromWorlds(message.Data.Cursor.OrderKey)
+  /*
 	if message.Data.Finality == DATA_STATUS_FINALIZED {
 		// TODO: Track diffs with accepted messages? / check if accepted message processed
 		FinalizedMessageLock.Lock()
@@ -283,6 +287,7 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Unknown finality status")
 	}
+  */
 }
 
 func ProcessMessageEvents(message IndexerMessage) {
@@ -414,9 +419,8 @@ func TryProcessFinalizedMessages() bool {
 	if len(FinalizedMessageQueue) > 0 {
 		message = FinalizedMessageQueue[0]
 		FinalizedMessageQueue = FinalizedMessageQueue[1:]
-		FinalizedMessageLock.Unlock()
 	} else {
-		FinalizedMessageLock.Unlock()
+    FinalizedMessageLock.Unlock()
 		return false
 	}
 
@@ -427,6 +431,8 @@ func TryProcessFinalizedMessages() bool {
 	ProcessMessage(message)
 	fmt.Println("Processed finalized message:", message.Data.Cursor.OrderKey)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
+  video.GenerateImageFromWorlds(message.Data.Cursor.OrderKey)
+	FinalizedMessageLock.Unlock()
 	return true
 }
 
@@ -447,6 +453,7 @@ func TryProcessAcceptedMessages() bool {
 	// TODO
 	fmt.Println("Processed accepted message:", message.Data.Cursor.OrderKey)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
+  video.GenerateImageFromWorlds(message.Data.Cursor.OrderKey)
 	return true
 }
 
