@@ -1,14 +1,99 @@
 import 'package:flutter/material.dart';
-import './ui/screens/home.dart';
+import 'dart:typed_data';
 
-void main() {
-  runApp(const MyApp());
+import 'package:image/image.dart' as img;
+import '../../services/canvas.dart';
+
+import './ui/screens/home.dart';
+import './ui/screens/stencils.dart';
+import './ui/footer.dart';
+
+void main() { runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the canvas images
+    for (int i = 0; i < canvasIds.length; i++) {
+      _getCanvas(i);
+    }
+  }
+
+  _getCanvas(int id) async {
+    Uint8List canvasImg = await getCanvasImage(canvasIds[id]);
+    setState(() {
+      canvasImgs[id] = canvasImg;
+    });
+  }
+
+  late List<TabItem> tabs = [
+    TabItem(
+      title: 'Canvas',
+      icon: Image(
+        image: AssetImage('assets/icons/canvas.png'),
+        width: 40,
+        height: 40,
+      ),
+      page: HomePage(title: 'Canvas', canvasImgs: canvasImgs),
+    ),
+    TabItem(
+      title: 'Stencils',
+      icon: Image(
+        image: AssetImage('assets/icons/stencil.png'),
+        width: 40,
+        height: 40,
+      ),
+      page: StencilsPage(title: 'Stencils', canvasImgs: canvasImgs),
+    ),
+    TabItem(
+      title: 'Leaderboard',
+      icon: Image(
+        image: AssetImage('assets/icons/leaderboard.png'),
+        width: 40,
+        height: 40,
+      ),
+      page: Center(child: Text('Leaderboard')),
+    ),
+    TabItem(
+      title: 'Profile',
+      icon: Image(
+        image: AssetImage('assets/icons/user.png'),
+        width: 40,
+        height: 40,
+      ),
+      page: Center(child: Text('Profile')),
+    ),
+    TabItem(
+      title: 'Settings',
+      icon: Image(
+        image: AssetImage('assets/icons/settings.png'),
+        width: 40,
+        height: 40,
+      ),
+      page: Center(child: Text('Settings')),
+    ),
+  ];
+
+  int _currentTab = 0;
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentTab = index;
+    });
+  }
+
+  late List<Uint8List> canvasImgs = canvasIds.map((id) {
+    return img.encodePng(img.Image(height: getCanvasHeight(id), width: getCanvasWidth(id)));
+  }).toList();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -32,7 +117,23 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomePage(title: 'art/peace Canvas'),
+      home: Stack(
+        children: <Widget>[
+          Scaffold(
+            body: tabs[_currentTab].page,
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Footer(
+              tabs: tabs,
+              currentIndex: _currentTab,
+              onTap: _onTabTapped,
+            ),
+          )
+        ],
+      ),
     );
   }
 }
