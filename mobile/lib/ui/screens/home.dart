@@ -5,6 +5,14 @@ import 'package:image/image.dart' as img;
 import '../../services/canvas.dart';
 import '../footer.dart';
 
+class PixelData {
+  final int x;
+  final int y;
+  final int color;
+
+  PixelData(this.x, this.y, this.color);
+}
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title, this.canvasImgs});
 
@@ -58,6 +66,89 @@ class _HomePageState extends State<HomePage> {
     [_outerCanvasWidth + _xGap, 2 * _outerCanvasHeight + 2 * _yGap],
     [2 * _outerCanvasWidth + 2 * _xGap, 2 * _outerCanvasHeight + 2 * _yGap],
   ];
+
+  _submitPixels() async {
+    if (_pendingPixels.isEmpty) {
+      return;
+    }
+    List<PixelData> pixelsToSubmit = _pendingPixels.toList();
+    _pendingPixels.clear();
+    img.Image image = img.decodeImage(canvasImgs[_selectedCanvas])!;
+    for (int i = 0; i < pixelsToSubmit.length; i++) {
+      int x = pixelsToSubmit[i].x;
+      int y = pixelsToSubmit[i].y;
+      int color = pixelsToSubmit[i].color;
+      // TODO: Submit onchain
+      // Add pixel to the canvas image
+      if (x >= 0 && x < getCanvasWidth(_selectedCanvas + canvasOffset) && y >= 0 && y < getCanvasHeight(_selectedCanvas + canvasOffset)) {
+        int colorValue = int.parse('0xff${canvasColors[_selectedCanvas][color]}');
+        img.Color pixelColor = img.ColorUint8.rgb(
+          (colorValue >> 16) & 0xFF,
+          (colorValue >> 8) & 0xFF,
+          colorValue & 0xFF,
+        );
+        image.setPixel(x, y, pixelColor);
+      }
+    }
+    setState(() {
+      canvasImgs[_selectedCanvas] = Uint8List.fromList(img.encodePng(image));
+    });
+  }
+
+  int _selectedCanvas = 0;
+  int _selectedX = -1;
+  int _selectedY = -1;
+  List<PixelData> _pendingPixels = [];
+  final int maxPendingPixels = 5;
+  _getInverseColor(int color) {
+    int r = 255 - ((color >> 16) & 0xFF);
+    int g = 255 - ((color >> 8) & 0xFF);
+    int b = 255 - (color & 0xFF);
+    return Color.fromARGB(255, r, g, b);
+  }
+  _selectCanvas(int index, int xPos, int yPos) {
+    if (index != _selectedCanvas) {
+      setState(() {
+        if (_selectedColor != -1 && _selectedColor > canvasColors[index].length) {
+          _selectedColor = -1;
+        }
+        _selectedCanvas = index;
+        _selectedX = -1;
+        _selectedY = -1;
+        _pendingPixels.clear();
+      });
+      return;
+    } else {
+      if (_selectedColor == -1) {
+        return;
+      }
+      setState(() {
+        _selectedX = xPos;
+        _selectedY = yPos;
+        if (_pendingPixels.length < maxPendingPixels) {
+          _pendingPixels.add(PixelData(xPos, yPos, _selectedColor));
+          if (_pendingPixels.length == maxPendingPixels) {
+            _submitPixels();
+          }
+        }
+      });
+      return;
+    }
+  }
+
+  bool _paletteOpen = false;
+  int _selectedColor = -1;
+  _togglePalette() {
+    setState(() {
+      _paletteOpen = !_paletteOpen;
+    });
+  }
+  _selectColor(int color) {
+    setState(() {
+      _selectedColor = color;
+      _paletteOpen = false;
+    });
+  }
     
   @override
   Widget build(BuildContext context) {
@@ -113,24 +204,48 @@ class _HomePageState extends State<HomePage> {
                       Positioned(
                         left: 0,
                         top: 0,
-                        child: Image.memory(
-                          canvasImgs[0],
-                          width: canvasSizes[0][0].toDouble(),
-                          height: canvasSizes[0][1].toDouble(),
-                          filterQuality: FilterQuality.none,
-                          gaplessPlayback: true,
+                        child: GestureDetector(
+                          onTapUp: (details) {
+                            _selectCanvas(0, details.localPosition.dx.toInt(), details.localPosition.dy.toInt());
+                          },
+                          behavior: HitTestBehavior.translucent,
+                          child: Image.memory(
+                            canvasImgs[0],
+                            width: canvasSizes[0][0].toDouble(),
+                            height: canvasSizes[0][1].toDouble(),
+                            filterQuality: FilterQuality.none,
+                            gaplessPlayback: true,
+                          ),
                         ),
                       ),
                       for (int i = 1; i < canvasImgs.length; i++)
                         Positioned(
                           left: canvasPositions[i][0].toDouble(),
                           top: canvasPositions[i][1].toDouble(),
-                          child: Image.memory(
-                            canvasImgs[i],
-                            width: _outerCanvasWidth.toDouble(),
-                            height: _outerCanvasHeight.toDouble(),
-                            filterQuality: FilterQuality.none,
-                            gaplessPlayback: true,
+                          child: GestureDetector(
+                            onTapUp: (details) {
+                              _selectCanvas(i, details.localPosition.dx.toInt(), details.localPosition.dy.toInt());
+                            },
+                            behavior: HitTestBehavior.translucent,
+                            child: Image.memory(
+                              canvasImgs[i],
+                              width: _outerCanvasWidth.toDouble(),
+                              height: _outerCanvasHeight.toDouble(),
+                              filterQuality: FilterQuality.none,
+                              gaplessPlayback: true,
+                            ),
+                          ),
+                        ),
+                      for (int i = 0; i < _pendingPixels.length; i++)
+                        Positioned(
+                          left: canvasPositions[_selectedCanvas][0].toDouble() + _pendingPixels[i].x.toDouble(),
+                          top: canvasPositions[_selectedCanvas][1].toDouble() + _pendingPixels[i].y.toDouble(),
+                          child: Container(
+                            width: 1,
+                            height: 1,
+                            decoration: BoxDecoration(
+                              color: Color(int.parse('0xff${canvasColors[_selectedCanvas][_pendingPixels[i].color]}')),
+                            ),
                           ),
                         ),
                     ],
@@ -138,6 +253,126 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+            Positioned(
+              right: 10,
+              top: 50,
+              child: InkWell(
+                onTap: () {
+                  _togglePalette();
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _selectedColor == -1
+                        ? Color.fromARGB(205, 255, 255, 255)
+                        : Color(int.parse('0xff${canvasColors[_selectedCanvas][_selectedColor]}')),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.black.withOpacity(0.2),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    _paletteOpen ? Icons.close : Icons.brush,
+                    size: 24,
+                    color: (_selectedColor == -1
+                        ? Color.fromARGB(205, 0, 0, 0)
+                        : _getInverseColor(int.parse('0xff${canvasColors[_selectedCanvas][_selectedColor]}'))),
+                  ),
+                ),
+              ),
+            ),
+            if (_paletteOpen)
+              Positioned(
+                bottom: 80,
+                left: 10,
+                right: 10,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(205, 255, 255, 255),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Color.fromARGB(105, 0, 0, 0),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color.fromARGB(205, 0, 0, 0),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 0,
+                    children: <Widget>[
+                      SizedBox(width: 3),
+                      const Icon(Icons.color_lens, size: 24),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            for (int i = 0; i < canvasColors[_selectedCanvas].length; i++)
+                              IconButton(
+                                padding: const EdgeInsets.all(0),
+                                constraints: const BoxConstraints(),
+                                onPressed: () {
+                                  _selectColor(i);
+                                },
+                                style: IconButton.styleFrom(
+                                  backgroundColor: Color.fromARGB(0, 0, 0, 0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                icon: Container(
+                                  width: 28,
+                                  height: 28,
+                                  margin: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Color(int.parse('0xff${canvasColors[_selectedCanvas][i]}')),
+                                    border: Border.all(
+                                      color: Colors.black.withOpacity(0.2),
+                                      width: 2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  child: const SizedBox(),
+                                ),
+                                iconSize: 24,
+                              ),
+                            ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () {
+                          // Handle undo action
+                          setState(() {
+                            _paletteOpen = false;
+                          });
+                        },
+                      ),
+                      SizedBox(width: 3),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
