@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 
 import '../../services/canvas.dart';
+import '../../services/contract.dart';
 import '../footer.dart';
 
 class PixelData {
@@ -73,12 +74,13 @@ class _HomePageState extends State<HomePage> {
     }
     List<PixelData> pixelsToSubmit = _pendingPixels.toList();
     _pendingPixels.clear();
+    int unixTimeNow = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    placePixels(pixelsToSubmit, getCanvasWidth(_selectedCanvas + canvasOffset), _selectedCanvas + canvasOffset, unixTimeNow);
     img.Image image = img.decodeImage(canvasImgs[_selectedCanvas])!;
     for (int i = 0; i < pixelsToSubmit.length; i++) {
       int x = pixelsToSubmit[i].x;
       int y = pixelsToSubmit[i].y;
       int color = pixelsToSubmit[i].color;
-      // TODO: Submit onchain
       // Add pixel to the canvas image
       if (x >= 0 && x < getCanvasWidth(_selectedCanvas + canvasOffset) && y >= 0 && y < getCanvasHeight(_selectedCanvas + canvasOffset)) {
         int colorValue = int.parse('0xff${canvasColors[_selectedCanvas][color]}');

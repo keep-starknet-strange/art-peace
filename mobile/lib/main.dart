@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image/image.dart' as img;
 import '../../services/canvas.dart';
 
@@ -8,7 +9,14 @@ import './ui/screens/home.dart';
 import './ui/screens/stencils.dart';
 import './ui/footer.dart';
 
-void main() { runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized
+  try {
+    await dotenv.load(fileName: ".env"); // Load environment variables
+  } catch (e) {
+    throw Exception('Error loading .env file: $e'); // Print error if any
+  }
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
