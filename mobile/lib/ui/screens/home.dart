@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:image/image.dart' as img;
+import 'package:starknet/starknet.dart';
 
 import '../../services/canvas.dart';
 import '../../services/contract.dart';
+import '../../services/stencil.dart';
 import '../footer.dart';
 
 class PixelData {
@@ -15,10 +18,14 @@ class PixelData {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.title, this.canvasImgs});
+  HomePage({super.key, required this.title, this.canvasImgs, required this.getStarknetAccount, required this.selectedStencils, required this.playSoundEffect, required this.stencils});
 
   final String title;
   final List<Uint8List>? canvasImgs;
+  final Account? Function() getStarknetAccount;
+  final List<int> selectedStencils;
+  final Function(int) playSoundEffect;
+  List<StencilItem?> stencils;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -69,13 +76,15 @@ class _HomePageState extends State<HomePage> {
   ];
 
   _submitPixels() async {
-    if (_pendingPixels.isEmpty) {
+    Account? starknetAccount = widget.getStarknetAccount();
+    if (_pendingPixels.isEmpty || starknetAccount == null) {
+      print('_pendingPixels is ${_pendingPixels.length} and starknetAccount is ${starknetAccount}');
       return;
     }
     List<PixelData> pixelsToSubmit = _pendingPixels.toList();
     _pendingPixels.clear();
     int unixTimeNow = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    placePixels(pixelsToSubmit, getCanvasWidth(_selectedCanvas + canvasOffset), _selectedCanvas + canvasOffset, unixTimeNow);
+    placePixels(starknetAccount!, pixelsToSubmit, getCanvasWidth(_selectedCanvas + canvasOffset), _selectedCanvas + canvasOffset, unixTimeNow);
     img.Image image = img.decodeImage(canvasImgs[_selectedCanvas])!;
     for (int i = 0; i < pixelsToSubmit.length; i++) {
       int x = pixelsToSubmit[i].x;
@@ -90,6 +99,7 @@ class _HomePageState extends State<HomePage> {
           colorValue & 0xFF,
         );
         image.setPixel(x, y, pixelColor);
+        widget.playSoundEffect(1);
       }
     }
     setState(() {
@@ -119,6 +129,7 @@ class _HomePageState extends State<HomePage> {
         _selectedY = -1;
         _pendingPixels.clear();
       });
+      widget.playSoundEffect(3);
       return;
     } else {
       if (_selectedColor == -1) {
@@ -134,6 +145,7 @@ class _HomePageState extends State<HomePage> {
           }
         }
       });
+      widget.playSoundEffect(5);
       return;
     }
   }
@@ -141,20 +153,35 @@ class _HomePageState extends State<HomePage> {
   bool _paletteOpen = false;
   int _selectedColor = -1;
   _togglePalette() {
+    widget.playSoundEffect(4);
     setState(() {
       _paletteOpen = !_paletteOpen;
     });
   }
   _selectColor(int color) {
+    widget.playSoundEffect(4);
     setState(() {
       _selectedColor = color;
       _paletteOpen = false;
     });
   }
     
+  getStencilX(int canvasIndex, int stencilIndex) {
+    final canvasWidth = getCanvasWidth(canvasIndex + canvasOffset);
+    final stencilX = widget.stencils[stencilIndex]!.position % canvasWidth;
+    return stencilX;
+  }
+
+  getStencilY(int canvasIndex, int stencilIndex) {
+    final canvasWidth = getCanvasWidth(canvasIndex + canvasOffset);
+    final stencilY = widget.stencils[stencilIndex]!.position ~/ canvasWidth;
+    return stencilY;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 205, 205, 205),
       body: Padding(
         padding: EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
         child: Stack(
@@ -238,6 +265,27 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
+                      for (int i = 0; i < widget.stencils.length; i++)
+                        if (widget.stencils[i] != null)
+                          // Compute position based on canvas size
+                          Positioned(
+                            left: canvasPositions[i][0].toDouble() + getStencilX(i, i).toDouble(),
+                            top: canvasPositions[i][1].toDouble() + getStencilY(i, i).toDouble(),
+                            child: GestureDetector(
+                              onTapUp: (details) {
+                                _selectCanvas(i, details.localPosition.dx.toInt(), details.localPosition.dy.toInt());
+                              },
+                              behavior: HitTestBehavior.translucent,
+                              child: Image.memory(
+                                widget.stencils[i]!.image,
+                                width: widget.stencils[i]!.width.toDouble(),
+                                height: widget.stencils[i]!.height.toDouble(),
+                                filterQuality: FilterQuality.none,
+                                gaplessPlayback: true,
+                                opacity: const AlwaysStoppedAnimation(.65),
+                              ),
+                            ),
+                          ),
                       for (int i = 0; i < _pendingPixels.length; i++)
                         Positioned(
                           left: canvasPositions[_selectedCanvas][0].toDouble() + _pendingPixels[i].x.toDouble(),
@@ -256,20 +304,87 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Positioned(
+              right: 70,
+              top: 60,
+              child: InkWell(
+                onTap: () {
+                },
+                child: Container(
+                  width: 90,
+                  height: 50,
+                  padding: const EdgeInsets.only(left: 10, right: 10),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(225, 255, 255, 255),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: Colors.black.withOpacity(0.2),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Icon(
+                        Icons.smart_toy,
+                        size: 34,
+                        color: Color.fromARGB(205, 0, 0, 0),
+                      ),
+                      const SizedBox(width: 5),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            '${widget.selectedStencils.where((stencil) => stencil != -1).length}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color.fromARGB(205, 0, 0, 0),
+                            ),
+                          ),
+                          const SizedBox(height: 2, width: 14, child: Divider(color: Color.fromARGB(205, 0, 0, 0))),
+                          Text(
+                            '${widget.selectedStencils.length}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color.fromARGB(205, 0, 0, 0),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
               right: 10,
-              top: 50,
+              top: 60,
               child: InkWell(
                 onTap: () {
                   _togglePalette();
                 },
                 child: Container(
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     color: _selectedColor == -1
-                        ? Color.fromARGB(205, 255, 255, 255)
+                        ? Color.fromARGB(225, 255, 255, 255)
                         : Color(int.parse('0xff${canvasColors[_selectedCanvas][_selectedColor]}')),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(30),
                     border: Border.all(
                       color: Colors.black.withOpacity(0.2),
                       width: 2,
@@ -284,7 +399,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: Icon(
                     _paletteOpen ? Icons.close : Icons.brush,
-                    size: 24,
+                    size: 34,
                     color: (_selectedColor == -1
                         ? Color.fromARGB(205, 0, 0, 0)
                         : _getInverseColor(int.parse('0xff${canvasColors[_selectedCanvas][_selectedColor]}'))),

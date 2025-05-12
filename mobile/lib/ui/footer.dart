@@ -21,12 +21,12 @@ class Footer extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Color.fromARGB(205, 240, 240, 240),
+        color: Color.fromARGB(225, 240, 240, 240),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 5,
-            offset: Offset(0, 2),
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 10,
+            offset: Offset(0, 4), // changes position of shadow
           ),
         ],
         border: Border.all(

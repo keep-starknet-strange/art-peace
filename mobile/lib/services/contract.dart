@@ -2,18 +2,11 @@ import 'package:starknet/starknet.dart';
 import 'package:starknet_provider/starknet_provider.dart';
 import '../ui/screens/home.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:wallet_kit/wallet_kit.dart' as wallet_kit;
 
-final provider = JsonRpcProvider(nodeUri: Uri.parse('https://starknet-mainnet.public.blastapi.io/rpc/v0_8'));
 final artPeaceContract = '0x02458a105b42db469fb1f8b35ab3ce126dab5a0881ad3c2bbf36bec0a34168c5';
-final secretAccountAddress = dotenv.env['ACCOUNT_ADDRESS'] ?? '0x00';
-final secretAccountPrivKey = dotenv.env['ACCOUNT_KEY'] ?? '0x00';
-final signeraccount = getAccount(
-  accountAddress: Felt.fromHexString(secretAccountAddress),
-  privateKey: Felt.fromHexString(secretAccountPrivKey),
-  nodeUri: Uri.parse('https://starknet-mainnet.public.blastapi.io/rpc/v0_6'),
-);
 
-Future<void> placePixels(List<PixelData> pixels, int canvasWidth, int canvasId, int now) async {
+Future<void> placePixels(Account starknetAccount, List<PixelData> pixels, int canvasWidth, int canvasId, int now) async {
   print('Placing pixels...');
   final pixelPositions = pixels.map((pixel) => Felt.fromInt(pixel.x + pixel.y * canvasWidth)).toList();
   final calldata = [
@@ -25,7 +18,7 @@ Future<void> placePixels(List<PixelData> pixels, int canvasWidth, int canvasId, 
     Felt.fromInt(now),
   ];
   print('Calldata: $calldata');
-  final response = await signeraccount.execute(
+  final response = await starknetAccount.execute(
     functionCalls: [
       FunctionCall(
         contractAddress: Felt.fromHexString(artPeaceContract),
@@ -33,6 +26,7 @@ Future<void> placePixels(List<PixelData> pixels, int canvasWidth, int canvasId, 
         calldata: calldata,
       ),
     ],
+    max_fee: Felt.fromInt((0.0001 * 1e18).toInt()),
   );
   final txHash = response.when(
     result: (result) => result.transaction_hash,
@@ -42,5 +36,5 @@ Future<void> placePixels(List<PixelData> pixels, int canvasWidth, int canvasId, 
     },
   )!;
   print('Transaction hash: $txHash');
-  await waitForAcceptance(transactionHash: txHash, provider: provider);
+  await waitForAcceptance(transactionHash: txHash, provider: wallet_kit.WalletKit().provider);
 }

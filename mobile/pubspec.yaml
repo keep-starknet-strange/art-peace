@@ -35,10 +35,14 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   http: any
-  starknet:
   build_runner: ^2.4.6
-  starknet_provider:
-  flutter_dotenv: ^5.1.0
+  flutter_dotenv: ^5.2.1
+  wallet_kit: ^0.2.0
+  hive_flutter: ^1.1.0
+  hooks_riverpod: ^2.6.1
+  starknet: ^0.1.2+1
+  starknet_provider: ^0.1.1+2
+  audioplayers: ^6.4.0
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +71,8 @@ flutter:
   assets:
     - assets/
     - assets/icons/
+    - assets/music/
+    - assets/sounds/
     - .env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

@@ -4,43 +4,25 @@ import '../../services/canvas.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
+import 'package:starknet/starknet.dart';
 import 'package:http/http.dart' as http;
-
-class StencilItem {
-  StencilItem({
-    required this.stencilId,
-    required this.worldId,
-    required this.name,
-    required this.hash,
-    required this.width,
-    required this.height,
-    required this.position,
-    required this.favorites,
-    required this.favorited,
-    required this.image,
-  });
-
-  final int stencilId;
-  final int worldId;
-  final String name;
-  final String hash;
-  final int width;
-  final int height;
-  final int position;
-  int favorites;
-  bool favorited;
-  final Uint8List image;
-}
+import '../../services/stencil.dart';
 
 class StencilsPage extends StatefulWidget {
   const StencilsPage({
     super.key,
     required this.title,
-    this.canvasImgs
+    this.canvasImgs,
+    required this.getStarknetAccount,
+    required this.selectedStencils,
+    required this.selectStencil,
   });
 
   final String title;
   final List<Uint8List>? canvasImgs;
+  final Account? Function() getStarknetAccount;
+  final List<int> selectedStencils;
+  final Function(int, int, StencilItem?) selectStencil;
 
   @override
   State<StencilsPage> createState() => _StencilsPageState();
@@ -55,7 +37,7 @@ class _StencilsPageState extends State<StencilsPage> {
     } else {
       canvasImgs = [];
     }
-    _getStencils(selectedFilter, selectedCanvas, 0);
+    _getStencils(selectedFilter, selectedCanvas, 1);
   }
   List<Uint8List> canvasImgs = [];
   
@@ -148,7 +130,7 @@ class _StencilsPageState extends State<StencilsPage> {
           position: item['position'],
           favorites: item['favorites'],
           favorited: item['favorited'],
-          image: await _getStencilImage(item['hash']),
+          image: Uint8List(0),
         );
         newStencils.add(stencil);
       }
@@ -162,11 +144,18 @@ class _StencilsPageState extends State<StencilsPage> {
         stencils.addAll(newStencils);
       }
     });
+    for (var i = 0; i < stencils.length; i++) {
+      final newImg = await _getStencilImage(stencils[i].hash);
+      setState(() {
+        stencils[i].image = newImg;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 205, 205, 205), 
       body: Padding(
         padding: EdgeInsets.only(top: 60, left: 10, right: 10),
         child: Column(
@@ -293,6 +282,26 @@ class _StencilsPageState extends State<StencilsPage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              IconButton(
+                                onPressed: () {
+                                  widget.selectStencil(selectedCanvas, index, stencils[index]);
+                                },
+                                icon: const Icon(
+                                  Icons.brush,
+                                  color: Colors.black,
+                                  size: 18,
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.all(5),
+                                  minimumSize: const Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  backgroundColor: index == widget.selectedStencils[selectedCanvas] ? Color.fromARGB(200, 0, 0, 255) : Color.fromARGB(200, 255, 255, 255),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 3),
                               OutlinedButton.icon(
                                 onPressed: () {
                                   _favoriteStencil(index);
@@ -314,9 +323,9 @@ class _StencilsPageState extends State<StencilsPage> {
                                   padding: const EdgeInsets.all(5),
                                   minimumSize: const Size(0, 0),
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  backgroundColor: Color.fromARGB(150, 255, 255, 255),
+                                  backgroundColor: Color.fromARGB(200, 255, 255, 255),
                                   shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(7)),
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
                                   ),
                                 ),
                               ),
