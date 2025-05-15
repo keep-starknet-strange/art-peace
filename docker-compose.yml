@@ -37,6 +37,7 @@ services:
       - ART_PEACE_HOST=0328ced46664355fc4b885ae7011af202313056a7e3d44827fb24c9d3206aaa0
       - ROUND_NUMBER=2
       - CANVAS_FACTORY_CONTRACT_ADDRESS=0x02458a105b42db469fb1f8b35ab3ce126dab5a0881ad3c2bbf36bec0a34168c5
+      - AVAIL_TURBO_API_KEY=${AVAIL_TURBO_API_KEY}
     volumes:
       - nfts:/app/nfts
   consumer:
@@ -53,6 +54,7 @@ services:
       - POSTGRES_PASSWORD=password
       - ROUND_NUMBER=2
       - CANVAS_FACTORY_CONTRACT_ADDRESS=0x02458a105b42db469fb1f8b35ab3ce126dab5a0881ad3c2bbf36bec0a34168c5
+      - AVAIL_TURBO_API_KEY=${AVAIL_TURBO_API_KEY}
     volumes:
       - nfts:/app/nfts
       - worlds:/app/worlds
