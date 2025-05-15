@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
@@ -425,7 +426,6 @@ func TryProcessFinalizedMessages() bool {
 		return true
 	}
 	ProcessMessage(message)
-	fmt.Println("Processed finalized message:", message.Data.Cursor.OrderKey)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
 	return true
 }
@@ -442,9 +442,8 @@ func TryProcessAcceptedMessages() bool {
 		return false
 	}
 
-	// TODO: Check if message is already processed?
 	ProcessMessage(message)
-	// TODO
+
 	fmt.Println("Processed accepted message:", message.Data.Cursor.OrderKey)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
 	return true
@@ -471,6 +470,7 @@ func StartMessageProcessor() {
 		for {
 			// Check Finalized messages ( for initial load )
 			if TryProcessFinalizedMessages() {
+				time.Sleep(3 * time.Second)
 				continue
 			}
 
