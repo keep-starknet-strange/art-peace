@@ -29,3 +29,4 @@ func getRoundsConfig(w http.ResponseWriter, r *http.Request) {
 
 	routeutils.WriteDataJson(w, string(configJson))
 }
+

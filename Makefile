@@ -58,17 +58,17 @@ helm-uninstall:
 helm-install:
 	$(eval COMMIT_SHA := $(shell git rev-parse --short HEAD))
 	@echo "Installing helm chart..."
-	helm install --set postgres.password=$(POSTGRES_PASSWORD) --set deployments.sha=$(COMMIT_SHA) --set apibara.authToken=$(AUTH_TOKEN) art-peace-infra infra/art-peace-infra
+	helm install --set postgres.password=$(POSTGRES_PASSWORD) --set deployments.sha=$(COMMIT_SHA) --set apibara.authToken=$(AUTH_TOKEN) --set turboda.apiKey=$(TURBO_DA_API_KEY) art-peace-infra infra/art-peace-infra
 
 helm-template:
 	$(eval COMMIT_SHA := $(shell git rev-parse --short HEAD))
 	@echo "Rendering helm chart..."
-	helm template --set postgres.password=$(POSTGRES_PASSWORD) --set deployments.sha=$(COMMIT_SHA) --set apibara.authToken=$(AUTH_TOKEN) art-peace-infra infra/art-peace-infra
+	helm template --set postgres.password=$(POSTGRES_PASSWORD) --set deployments.sha=$(COMMIT_SHA) --set apibara.authToken=$(AUTH_TOKEN) --set turboda.apiKey=$(TURBO_DA_API_KEY) art-peace-infra infra/art-peace-infra
 
 helm-upgrade:
 	$(eval COMMIT_SHA := $(shell git rev-parse --short HEAD))
 	@echo "Upgrading helm chart..."
-	helm upgrade --set postgres.password=$(POSTGRES_PASSWORD) --set deployments.sha=$(COMMIT_SHA) --set apibara.authToken=$(AUTH_TOKEN) art-peace-infra infra/art-peace-infra
+	helm upgrade --set postgres.password=$(POSTGRES_PASSWORD) --set deployments.sha=$(COMMIT_SHA) --set apibara.authToken=$(AUTH_TOKEN) --set turboda.apiKey=$(TURBO_DA_API_KEY) art-peace-infra infra/art-peace-infra
 
 init-infra-prod:
 	@echo "Initializing infra..."

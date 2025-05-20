@@ -1,13 +1,8 @@
 package indexer
 
 import (
-	"bytes"
-	"compress/gzip"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
@@ -16,6 +11,8 @@ import (
 
 func InitIndexerRoutes() {
 	http.HandleFunc("/consume-indexer-msg", consumeIndexerMsg)
+  http.HandleFunc("/enable-turboda", enableTurboda)
+  http.HandleFunc("/disable-turboda", disableTurboda)
 }
 
 type IndexerCursor struct {
@@ -415,96 +412,6 @@ func ProcessMessage(message IndexerMessage) {
 	}
 }
 
-func submitToAvailTurboDA(message IndexerMessage) error {
-	apiKey := os.Getenv("AVAIL_TURBO_API_KEY")
-	if apiKey == "" {
-		return fmt.Errorf("AVAIL_TURBO_API_KEY environment variable not set")
-	}
-
-	// Convert message to JSON
-	jsonData, err := json.Marshal(message)
-	if err != nil {
-		return fmt.Errorf("failed to marshal message: %v", err)
-	}
-
-	fmt.Printf("Submitting to Avail Turbo DA - Message OrderKey: %d, Events: %d, Size: %d bytes\n",
-		message.Data.Cursor.OrderKey,
-		len(message.Data.Batch[0].Events),
-		len(jsonData))
-
-	// If data is larger than 1MB, compress it
-	var dataToSend []byte
-	var isCompressed bool
-	if len(jsonData) > 1024*1024 { // 1MB in bytes
-		var compressedData bytes.Buffer
-		writer := gzip.NewWriter(&compressedData)
-		if _, err := writer.Write(jsonData); err != nil {
-			return fmt.Errorf("failed to compress data: %v", err)
-		}
-		if err := writer.Close(); err != nil {
-			return fmt.Errorf("failed to close gzip writer: %v", err)
-		}
-
-		compressedBytes := compressedData.Bytes()
-		fmt.Printf("Data compressed from %d bytes to %d bytes (ratio: %.2f%%)\n",
-			len(jsonData),
-			len(compressedBytes),
-			float64(len(compressedBytes))/float64(len(jsonData))*100)
-
-		dataToSend = compressedBytes
-		isCompressed = true
-	} else {
-		dataToSend = jsonData
-	}
-
-	// Create HTTP request
-	req, err := http.NewRequest("POST", "https://staging.turbo-api.availproject.org/v1/submit_raw_data", bytes.NewBuffer(dataToSend))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %v", err)
-	}
-
-	// Set headers
-	req.Header.Set("x-api-key", apiKey)
-	req.Header.Set("Content-Type", "application/octet-stream")
-	if isCompressed {
-		req.Header.Set("Content-Encoding", "gzip")
-	}
-
-	// Send request
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to send request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// Read response body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %v", err)
-	}
-
-	// Check response
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed with status %d: %s", resp.StatusCode, string(body))
-	}
-
-	// Parse submission ID from response
-	var response struct {
-		SubmissionID string `json:"submission_id"`
-	}
-	if err := json.Unmarshal(body, &response); err != nil {
-		return fmt.Errorf("failed to parse response: %v", err)
-	}
-
-	fmt.Printf("Successfully submitted to Avail Turbo DA - SubmissionID: %s, Size: %d bytes%s\n",
-		response.SubmissionID,
-		len(dataToSend),
-		map[bool]string{true: " (compressed)", false: ""}[isCompressed])
-
-	return nil
-}
-
 func TryProcessFinalizedMessages() bool {
 	FinalizedMessageLock.Lock()
 	var message IndexerMessage
@@ -522,11 +429,12 @@ func TryProcessFinalizedMessages() bool {
 		return true
 	}
 
-	// Submit to Avail Turbo DA
-	if err := submitToAvailTurboDA(message); err != nil {
-		fmt.Printf("Failed to submit to Avail Turbo DA: %v\n", err)
-		// Continue processing even if submission fails
-	}
+  go func() {
+	  if err := submitToAvailTurboDA(message); err != nil {
+	  	fmt.Printf("Failed to submit to Avail Turbo DA: %v\n", err)
+	  	// Continue processing even if submission fails
+	  }
+  }()
 
 	ProcessMessage(message)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
