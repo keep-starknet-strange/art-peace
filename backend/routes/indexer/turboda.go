@@ -67,7 +67,8 @@ func submitToAvailTurboDA(message IndexerMessage) error {
 	}
 
 	// Create HTTP request
-	req, err := http.NewRequest("POST", "https://staging.turbo-api.availproject.org/v1/submit_raw_data", bytes.NewBuffer(dataToSend))
+	// req, err := http.NewRequest("POST", "https://staging.turbo-api.availproject.org/v1/submit_raw_data", bytes.NewBuffer(dataToSend))
+	req, err := http.NewRequest("POST", "https://turbo-api.availproject.org/v1/submit_raw_data", bytes.NewBuffer(dataToSend))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %v", err)
 	}
@@ -106,31 +107,52 @@ func submitToAvailTurboDA(message IndexerMessage) error {
 		return fmt.Errorf("failed to parse response: %v", err)
 	}
 
-	fmt.Printf("Successfully submitted Events to Avail Turbo DA - SubmissionID: %s, Size: %d bytes%s\n",
+	fmt.Printf("Successfully submitted Events to Avail Turbo DA - Block %d, SubmissionID: %s, Size: %d bytes%s\n",
+		message.Data.Cursor.OrderKey,
 		response.SubmissionID,
 		len(dataToSend),
 		map[bool]string{true: " (compressed)", false: ""}[isCompressed])
 
 	// Every 20 blocks, submit a snapshot of the canvas
-	if message.Data.Cursor.OrderKey%20 == 0 {
-		err = submitCanvasSnapshot(13) // TODO: All canvas IDs
-		if err != nil {
-			return fmt.Errorf("failed to submit canvas snapshot: %v", err)
-		}
+	if message.Data.Cursor.OrderKey % 20 == 0 {
+    for canvasId := 13; canvasId <= 25; canvasId++ {
+		  err = submitCanvasSnapshot(canvasId, message.Data.Cursor.OrderKey)
+		  if err != nil {
+        fmt.Printf("Failed to submit canvas snapshot for canvas %d - Block %d: %v\n", canvasId, message.Data.Cursor.OrderKey, err)
+        continue
+		  }
+    }
 	}
 
 	return nil
 }
 
-func submitCanvasSnapshot(canvasId int) error {
+type CanvasSnapshot struct {
+	CanvasID    int    `json:"canvas_id"`
+	BlockNumber int    `json:"block_number"`
+	Blob        []byte `json:"blob"`
+}
+
+func submitCanvasSnapshot(canvasId int, blockNumber int) error {
 	canvasName := fmt.Sprintf("canvas-%d", canvasId)
 	ctx := context.Background()
-	val, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, canvasName).Result()
+	canvasBlob, err := core.ArtPeaceBackend.Databases.Redis.Get(ctx, canvasName).Result()
 	if err != nil {
 		return fmt.Errorf("failed to get canvas data from Redis: %v", err)
 	}
-	if val == "" {
+	if canvasBlob == "" {
 		return fmt.Errorf("no data found for canvas %d", canvasId)
+	}
+
+	// Encode json data
+	canvasSnapshot := CanvasSnapshot{
+		CanvasID:    canvasId,
+		BlockNumber: blockNumber,
+		Blob:        []byte(canvasBlob),
+	}
+	canvasSnapshotJson, err := json.Marshal(canvasSnapshot)
+	if err != nil {
+		return fmt.Errorf("failed to marshal canvas snapshot: %v", err)
 	}
 
 	// Post the data as blob
@@ -138,14 +160,31 @@ func submitCanvasSnapshot(canvasId int) error {
 	if apiKey == "" {
 		return fmt.Errorf("AVAIL_TURBO_API_KEY environment variable not set")
 	}
-	url := "https://staging.turbo-api.availproject.org/v1/submit_raw_data"
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(val)))
+
+  // Compress the canvas
+  var compressedCanvas bytes.Buffer
+  writer := gzip.NewWriter(&compressedCanvas)
+  if _, err := writer.Write(canvasSnapshotJson); err != nil {
+    return fmt.Errorf("failed to compress canvas snapshot: %v", err)
+  }
+  if err := writer.Close(); err != nil {
+    return fmt.Errorf("failed to close gzip writer: %v", err)
+  }
+  compressedCanvasBytes := compressedCanvas.Bytes()
+
+	// TODO: Move urls to config file
+	// url := "https://staging.turbo-api.availproject.org/v1/submit_raw_data"
+	url := "https://turbo-api.availproject.org/v1/submit_raw_data"
+  req, err := http.NewRequest("POST", url, bytes.NewBuffer(compressedCanvasBytes))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %v", err)
 	}
+	// Set headers
 	req.Header.Set("x-api-key", apiKey)
 	req.Header.Set("Content-Type", "application/octet-stream")
-	req.Header.Set("Content-Encoding", "gzip")
+  req.Header.Set("Content-Encoding", "gzip")
+
+	// Send request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -153,7 +192,6 @@ func submitCanvasSnapshot(canvasId int) error {
 	}
 	defer resp.Body.Close()
 
-	// Read response body
 	var response struct {
 		SubmissionID string `json:"submission_id"`
 	}
@@ -163,6 +201,9 @@ func submitCanvasSnapshot(canvasId int) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("request failed with status %d: %s", resp.StatusCode, response.SubmissionID)
 	}
-	fmt.Printf("Successfully submitted canvas snapshot for canvas %d - SubmissionID: %s\n", canvasId, response.SubmissionID)
+	fmt.Printf("Successfully submitted canvas snapshot for canvas %d - Block %d, SubmissionID: %s",
+		canvasId,
+		blockNumber,
+		response.SubmissionID)
 	return nil
 }
