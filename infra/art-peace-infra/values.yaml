@@ -90,6 +90,9 @@ postgres:
   user: art-peace-user
   password: ArtPeacePassword1234
 
+turboda:
+  apiKey: availTurboDaApiKey1234
+
 apibara:
   streamUrl: https://mainnet.starknet.a5a.ch
   #streamUrl: https://sepolia.starknet.a5a.ch

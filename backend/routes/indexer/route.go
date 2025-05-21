@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func InitIndexerRoutes() {
 	http.HandleFunc("/consume-indexer-msg", consumeIndexerMsg)
+	http.HandleFunc("/enable-turboda", enableTurboda)
+	http.HandleFunc("/disable-turboda", disableTurboda)
 }
 
 type IndexerCursor struct {
@@ -263,6 +266,7 @@ func consumeIndexerMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	time.Sleep(1 * time.Second) // TODO: Remove this
 	if message.Data.Finality == DATA_STATUS_FINALIZED {
 		// TODO: Track diffs with accepted messages? / check if accepted message processed
 		FinalizedMessageLock.Lock()
@@ -424,8 +428,17 @@ func TryProcessFinalizedMessages() bool {
 		// Skip message
 		return true
 	}
+
+	/* Submit to Avail Turbo DA on Finalized messages
+	go func() {
+		if err := submitToAvailTurboDA(message); err != nil {
+			fmt.Printf("Failed to submit to Avail Turbo DA: %v\n", err)
+			// Continue processing even if submission fails
+		}
+	}()
+	*/
+
 	ProcessMessage(message)
-	fmt.Println("Processed finalized message:", message.Data.Cursor.OrderKey)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
 	return true
 }
@@ -442,9 +455,15 @@ func TryProcessAcceptedMessages() bool {
 		return false
 	}
 
-	// TODO: Check if message is already processed?
+	go func() {
+		if err := submitToAvailTurboDA(message); err != nil {
+			fmt.Printf("Failed to submit to Avail Turbo DA: %v\n", err)
+			// Continue processing even if submission fails
+		}
+	}()
+
 	ProcessMessage(message)
-	// TODO
+
 	fmt.Println("Processed accepted message:", message.Data.Cursor.OrderKey)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
 	return true
@@ -471,6 +490,7 @@ func StartMessageProcessor() {
 		for {
 			// Check Finalized messages ( for initial load )
 			if TryProcessFinalizedMessages() {
+				time.Sleep(3 * time.Second)
 				continue
 			}
 

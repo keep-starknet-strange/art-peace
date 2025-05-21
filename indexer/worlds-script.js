@@ -1,6 +1,7 @@
 export const config = {
   streamUrl: Deno.env.get("APIBARA_STREAM_URL"),
-  startingBlock: 0,
+  startingBlock: 1212500,
+  //startingBlock: 1205100,
   network: "starknet",
   finality: "DATA_STATUS_PENDING",
   filter: {
@@ -90,86 +91,6 @@ export const config = {
         fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
         keys: [
           "0x03066baa9c37a42082799e6bc6426ff7d4dc8a635ed9dfc444d0d3c51e605a6b"
-        ],
-        includeReverted: false,
-        includeTransaction: false,
-        includeReceipt: false
-      },
-      {
-        // Canvas Extra Pixels Placed Event
-        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
-        keys: [
-          "0x01e42e4d6ca5843bfd4e86e344db6c418b295c23bed38831a7ec9b4a83148830"
-        ],
-        includeReverted: false,
-        includeTransaction: false,
-        includeReceipt: false
-      },
-      {
-        // Canvas Host Awarded User Event
-        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
-        keys: [
-          "0x01bf6ede8c6c232cee1830a5227fd638383f5af669701289d113492b1d41fda5"
-        ],
-        includeReverted: false,
-        includeTransaction: false,
-        includeReceipt: false
-      },
-      {
-        // Canvas Favorited Event
-        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
-        keys: [
-          "0x032105bd4f21a32bc92e45a49b30eab9355f7f89619d87e9801628e3acc5b502"
-        ],
-        includeReverted: false,
-        includeTransaction: false,
-        includeReceipt: false
-      },
-      {
-        // Canvas Unfavorited Event
-        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
-        keys: [
-          "0x014ee6480f95acb4b7286d3a7f95b6033299e66e502cfb4b207ccf088b5f601d"
-        ],
-        includeReverted: false,
-        includeTransaction: false,
-        includeReceipt: false
-      },
-      {
-        // Stencil Added Event
-        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
-        keys: [
-          "0x03384fcf8ff5c539c31feec6626511aa15ae53dba7459fd3a3c67af615ef6b5d"
-        ],
-        includeReverted: false,
-        includeTransaction: false,
-        includeReceipt: false
-      },
-      {
-        // Stencil Removed Event
-        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
-        keys: [
-          "0x023c933ed3ee3f94b5b82f8e2e570c8354e6f5036c3a079092ceeed15979e7fa"
-        ],
-        includeReverted: false,
-        includeTransaction: false,
-        includeReceipt: false
-      },
-      {
-        // Stencil Favorited Event
-        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
-        keys: [
-          "0x007cb4ae927fb597834e194e2c950a2d813461c72f372f78d0610ea246f53017"
-        ],
-        includeReverted: false,
-        includeTransaction: false,
-        includeReceipt: false
-      },
-      {
-        // Stencil Unfavorited Event
-        fromAddress: Deno.env.get("CANVAS_FACTORY_CONTRACT_ADDRESS"),
-        keys: [
-          "0x00a5477c7df6522316b652e56317e69e52429ab43a6772fb6f6c2a574f7e196f"
         ],
         includeReverted: false,
         includeTransaction: false,
