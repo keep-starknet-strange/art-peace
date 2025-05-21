@@ -114,14 +114,14 @@ func submitToAvailTurboDA(message IndexerMessage) error {
 		map[bool]string{true: " (compressed)", false: ""}[isCompressed])
 
 	// Every 20 blocks, submit a snapshot of the canvas
-	if message.Data.Cursor.OrderKey % 20 == 0 {
-    for canvasId := 13; canvasId <= 25; canvasId++ {
-		  err = submitCanvasSnapshot(canvasId, message.Data.Cursor.OrderKey)
-		  if err != nil {
-        fmt.Printf("Failed to submit canvas snapshot for canvas %d - Block %d: %v\n", canvasId, message.Data.Cursor.OrderKey, err)
-        continue
-		  }
-    }
+	if message.Data.Cursor.OrderKey%20 == 0 {
+		for canvasId := 13; canvasId <= 25; canvasId++ {
+			err = submitCanvasSnapshot(canvasId, message.Data.Cursor.OrderKey)
+			if err != nil {
+				fmt.Printf("Failed to submit canvas snapshot for canvas %d - Block %d: %v\n", canvasId, message.Data.Cursor.OrderKey, err)
+				continue
+			}
+		}
 	}
 
 	return nil
@@ -161,28 +161,28 @@ func submitCanvasSnapshot(canvasId int, blockNumber int) error {
 		return fmt.Errorf("AVAIL_TURBO_API_KEY environment variable not set")
 	}
 
-  // Compress the canvas
-  var compressedCanvas bytes.Buffer
-  writer := gzip.NewWriter(&compressedCanvas)
-  if _, err := writer.Write(canvasSnapshotJson); err != nil {
-    return fmt.Errorf("failed to compress canvas snapshot: %v", err)
-  }
-  if err := writer.Close(); err != nil {
-    return fmt.Errorf("failed to close gzip writer: %v", err)
-  }
-  compressedCanvasBytes := compressedCanvas.Bytes()
+	// Compress the canvas
+	var compressedCanvas bytes.Buffer
+	writer := gzip.NewWriter(&compressedCanvas)
+	if _, err := writer.Write(canvasSnapshotJson); err != nil {
+		return fmt.Errorf("failed to compress canvas snapshot: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		return fmt.Errorf("failed to close gzip writer: %v", err)
+	}
+	compressedCanvasBytes := compressedCanvas.Bytes()
 
 	// TODO: Move urls to config file
 	// url := "https://staging.turbo-api.availproject.org/v1/submit_raw_data"
 	url := "https://turbo-api.availproject.org/v1/submit_raw_data"
-  req, err := http.NewRequest("POST", url, bytes.NewBuffer(compressedCanvasBytes))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(compressedCanvasBytes))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %v", err)
 	}
 	// Set headers
 	req.Header.Set("x-api-key", apiKey)
 	req.Header.Set("Content-Type", "application/octet-stream")
-  req.Header.Set("Content-Encoding", "gzip")
+	req.Header.Set("Content-Encoding", "gzip")
 
 	// Send request
 	client := &http.Client{}

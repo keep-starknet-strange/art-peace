@@ -429,14 +429,14 @@ func TryProcessFinalizedMessages() bool {
 		return true
 	}
 
-  /* Submit to Avail Turbo DA on Finalized messages
+	/* Submit to Avail Turbo DA on Finalized messages
 	go func() {
 		if err := submitToAvailTurboDA(message); err != nil {
 			fmt.Printf("Failed to submit to Avail Turbo DA: %v\n", err)
 			// Continue processing even if submission fails
 		}
 	}()
-  */
+	*/
 
 	ProcessMessage(message)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
