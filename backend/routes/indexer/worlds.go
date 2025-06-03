@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/keep-starknet-strange/art-peace/backend/core"
+	routeutils "github.com/keep-starknet-strange/art-peace/backend/routes/utils"
 )
 
 func processCanvasCreatedEvent(event IndexerEvent) {
@@ -189,13 +190,13 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 	}
 
 	// After world creation
-	/*
+	go func() {
 		var message = map[string]string{
 			"messageType": "newWorld",
 			"worldId":     strconv.Itoa(int(canvasId)),
 		}
 		routeutils.SendMessageToWSS(message)
-	*/
+	}()
 }
 
 func revertCanvasCreatedEvent(event IndexerEvent) {
@@ -551,15 +552,13 @@ func processCanvasPixelPlacedEvent(event IndexerEvent) {
 		}
 
 		// TODO: Dont resend on revert & reindex
-		/*
-			var message = map[string]string{
-				"worldId":     strconv.Itoa(int(canvasId)),
-				"position":    strconv.Itoa(int(pos)),
-				"color":       strconv.Itoa(int(colorVal)),
-				"messageType": "colorWorldPixel",
-			}
-			routeutils.SendMessageToWSS(message)
-		*/
+		var message = map[string]string{
+			"worldId":     strconv.Itoa(int(canvasId)),
+			"position":    strconv.Itoa(int(pos)),
+			"color":       strconv.Itoa(int(colorVal)),
+			"messageType": "colorWorldPixel",
+		}
+		routeutils.SendMessageToWSS(message)
 	}()
 
 	// Check # of total pixels placed on this world

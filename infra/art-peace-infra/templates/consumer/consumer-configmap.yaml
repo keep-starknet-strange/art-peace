@@ -11,3 +11,4 @@ data:
   POSTGRES_PASSWORD: {{ .Values.postgres.password }}
   ROUND_NUMBER: {{ .Values.contracts.roundNumber }}
   AVAIL_TURBO_API_KEY: {{ .Values.turboda.apiKey }}
+  ENABLE_TURBODA: false

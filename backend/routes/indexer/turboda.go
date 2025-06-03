@@ -122,6 +122,7 @@ func submitToAvailTurboDA(message IndexerMessage) error {
 				continue
 			}
 		}
+		fmt.Printf("Successfully submitted canvas snapshots for Block %d\n", message.Data.Cursor.OrderKey)
 	}
 
 	return nil
