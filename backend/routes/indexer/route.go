@@ -10,6 +10,8 @@ import (
 
 func InitIndexerRoutes() {
 	http.HandleFunc("/consume-indexer-msg", consumeIndexerMsg)
+	http.HandleFunc("/enable-turboda", enableTurboda)
+	http.HandleFunc("/disable-turboda", disableTurboda)
 }
 
 type IndexerCursor struct {
@@ -424,7 +426,19 @@ func TryProcessFinalizedMessages() bool {
 		// Skip message
 		return true
 	}
+
+	// Submit to Avail Turbo DA on Finalized messages
+	/*
+		go func() {
+			if err := submitToAvailTurboDA(message); err != nil {
+				fmt.Printf("Failed to submit to Avail Turbo DA: %v\n", err)
+				// Continue processing even if submission fails
+			}
+		}()
+	*/
+
 	ProcessMessage(message)
+
 	fmt.Println("Processed finalized message:", message.Data.Cursor.OrderKey)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
 	return true
@@ -442,9 +456,15 @@ func TryProcessAcceptedMessages() bool {
 		return false
 	}
 
-	// TODO: Check if message is already processed?
+	go func() {
+		if err := submitToAvailTurboDA(message); err != nil {
+			fmt.Printf("Failed to submit to Avail Turbo DA: %v\n", err)
+			// Continue processing even if submission fails
+		}
+	}()
+
 	ProcessMessage(message)
-	// TODO
+
 	fmt.Println("Processed accepted message:", message.Data.Cursor.OrderKey)
 	LastFinalizedCursor = message.Data.Cursor.OrderKey
 	return true

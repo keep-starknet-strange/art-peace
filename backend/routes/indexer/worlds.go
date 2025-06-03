@@ -190,11 +190,13 @@ func processCanvasCreatedEvent(event IndexerEvent) {
 	}
 
 	// After world creation
-	var message = map[string]string{
-		"messageType": "newWorld",
-		"worldId":     strconv.Itoa(int(canvasId)),
-	}
-	routeutils.SendMessageToWSS(message)
+	go func() {
+		var message = map[string]string{
+			"messageType": "newWorld",
+			"worldId":     strconv.Itoa(int(canvasId)),
+		}
+		routeutils.SendMessageToWSS(message)
+	}()
 }
 
 func revertCanvasCreatedEvent(event IndexerEvent) {
