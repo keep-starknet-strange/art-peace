@@ -5,8 +5,8 @@
   "dependencies": {
     "@argent/x-sessions": "^6.7.4",
     "@argent/x-shared": "^1.32.1",
-    "@cartridge/connector": "^0.6.0",
-    "@cartridge/controller": "^0.6.0",
+    "@cartridge/connector": "^0.9.0",
+    "@cartridge/controller": "^0.9.0",
     "@starknet-io/types-js": "^0.7.7",
     "@starknet-react/chains": "^3.1.2",
     "@starknet-react/core": "^3.7.2",
