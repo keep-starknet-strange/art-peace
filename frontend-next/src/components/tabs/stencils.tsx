@@ -122,7 +122,7 @@ const StencilsMainSection = (props: any) => {
               }}
             >
               <div className="flex flex-col align-center justify-center">
-                <p className="Text__large p-2 pl-6 text-nowrap">Upload PNG</p>
+                <p className="Text__large p-2 pl-6 text-nowrap">Upload Stencil</p>
                 {isDevMode && !address && (
                   <p className="Text__xsmall pt-0 p-2 text-yellow-500">(Dev Mode)</p>
                 )}
@@ -138,7 +138,7 @@ const StencilsMainSection = (props: any) => {
             <input
               type="file"
               id="file"
-              accept=".png"
+              accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
               ref={props.inputFile}
               style={{ display: "none" }}
               onChange={props.handleFileChange}
@@ -217,6 +217,15 @@ export const StencilsTab = (props: any) => {
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
     if (file === undefined) {
+      return;
+    }
+
+    // Check file type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Unsupported file format. Please upload PNG, JPEG, JPG, or WebP images.");
+      event.target.value = "";
+      event.target.files = null;
       return;
     }
 
