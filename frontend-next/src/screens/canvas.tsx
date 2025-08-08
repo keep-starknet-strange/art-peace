@@ -421,9 +421,9 @@ const Canvas = (props: any) => {
     if (!rawStencilImage) {
       return;
     }
-    // New pipeline: import -> background removal -> effects -> scale -> color convert
+    // New pipeline: import -> effects -> scale -> color convert -> background removal
 
-    // Step 1: Process image at original size
+    // Step 1: Process image at original size (effects only, no background removal yet)
     const effectsCanvas = document.createElement("canvas");
     const effectsCtx = effectsCanvas.getContext("2d");
     if (!effectsCtx) {
@@ -434,10 +434,7 @@ const Canvas = (props: any) => {
     effectsCtx.drawImage(rawStencilImage, 0, 0);
     let imageData = effectsCtx.getImageData(0, 0, rawStencilImage.width, rawStencilImage.height);
     
-    // Apply background removal first
-    imageData = applyBackgroundRemoval(imageData);
-    
-    // Then apply color effects
+    // Apply color effects only (no background removal yet)
     imageData = applyImageEffects(imageData);
     effectsCtx.putImageData(imageData, 0, 0);
 
@@ -454,8 +451,8 @@ const Canvas = (props: any) => {
     scaledCtx.imageSmoothingEnabled = false; // For pixel art style
     scaledCtx.drawImage(effectsCanvas, 0, 0, stencilWidth, stencilHeight);
     
-    // Step 3: Get final image data for color palette conversion
-    const finalImageData = scaledCtx.getImageData(0, 0, stencilWidth, stencilHeight);
+    // Step 3: Get image data for color palette conversion
+    let finalImageData = scaledCtx.getImageData(0, 0, stencilWidth, stencilHeight);
     const data = finalImageData.data;
 
     const imagePalleteIds = [];
@@ -499,10 +496,26 @@ const Canvas = (props: any) => {
       imagePalleteIds.push(minColorIndex);
     }
 
+    // Step 4: Apply background removal AFTER color conversion
+    finalImageData = applyBackgroundRemoval(finalImageData);
+
+    // Step 5: Update color IDs array to reflect background removal changes
+    const finalData = finalImageData.data;
+    const finalColorIds = [];
+    for (let i = 0; i < finalData.length; i += 4) {
+      if (finalData[i + 3] < 128) {
+        // Transparent pixel
+        finalColorIds.push(255);
+      } else {
+        // Use the original color ID from before background removal
+        finalColorIds.push(imagePalleteIds[Math.floor(i / 4)]);
+      }
+    }
+
     // Set final processed image data back to canvas
     scaledCtx.putImageData(finalImageData, 0, 0);
     const paletteImage = scaledCanvas.toDataURL();
-    const colorIds = imagePalleteIds;
+    const colorIds = finalColorIds;
     
     // TODO: Upload to backend and get template hash back
     const stencilImage = {

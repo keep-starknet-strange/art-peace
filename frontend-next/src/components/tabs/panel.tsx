@@ -86,6 +86,7 @@ export const TabPanel = (props: any) => {
           setStencilHeight={props.setStencilHeight}
           aspectRatioLocked={props.aspectRatioLocked}
           setAspectRatioLocked={props.setAspectRatioLocked}
+          originalImageSize={props.originalImageSize}
           handleWidthChange={props.handleWidthChange}
           handleHeightChange={props.handleHeightChange}
         />

@@ -106,18 +106,6 @@ export const StencilCreationTab = (props: any) => {
               </p>
             </div>
             
-            {/* Background Removal Toggle */}
-            <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] border-t pt-[0.75rem]">
-              <div className="flex flex-row justify-between items-center mb-[1rem]">
-                <p className="Text__medium">Background Removal:</p>
-                <div
-                  className={`Button__primary Text__small px-2 py-1 cursor-pointer ${props.removeBackground ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
-                  onClick={() => props.setRemoveBackground(!props.removeBackground)}
-                >
-                  {props.removeBackground ? 'Enabled' : 'Disabled'}
-                </div>
-              </div>
-            </div>
             
             {/* Size Control Sliders */}
             <div className="px-[0.5rem] mx-[0.5rem] mt-[0.25rem] border-t pt-[0.5rem]">
@@ -264,6 +252,28 @@ export const StencilCreationTab = (props: any) => {
                 </div>
               </div>
               
+              {/* Remove Background Checkbox */}
+              <div className="mb-[1.5rem]">
+                <label className="flex items-center justify-between cursor-pointer w-full">
+                  <span className="Text__small">Remove Background</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={props.removeBackground}
+                      onChange={(e) => props.setRemoveBackground(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <div className={`w-5 h-5 border-2 rounded-sm flex items-center justify-center transition-colors ${props.removeBackground ? 'bg-black border-black' : 'bg-white border-gray-400'}`}>
+                      {props.removeBackground && (
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                </label>
+              </div>
+              
               {/* Reset Button */}
               <div className="flex justify-center mt-[0.5rem]">
                 <div className="flex flex-row gap-2">
@@ -275,6 +285,30 @@ export const StencilCreationTab = (props: any) => {
                       props.setStencilSaturation(0);
                       props.setStencilTint(0);
                       props.setRemoveBackground(false);
+                      // Reset size controls to original image size or proportionally scaled dimensions
+                      if (props.originalImageSize) {
+                        // Use the exact same logic as calculateAutoScale function
+                        const calculateAutoScale = (width, height) => {
+                          if (width <= 128 && height <= 128) {
+                            return { width, height };
+                          }
+                          
+                          const aspectRatio = width / height;
+                          if (width > height) {
+                            return { width: 128, height: Math.round(128 / aspectRatio) };
+                          } else {
+                            return { width: Math.round(128 * aspectRatio), height: 128 };
+                          }
+                        };
+                        
+                        const autoScale = calculateAutoScale(props.originalImageSize.width, props.originalImageSize.height);
+                        props.setStencilWidth(autoScale.width);
+                        props.setStencilHeight(autoScale.height);
+                      } else {
+                        props.setStencilWidth(128);
+                        props.setStencilHeight(128);
+                      }
+                      props.setAspectRatioLocked(true);
                     }}
                   >
                     Reset All
