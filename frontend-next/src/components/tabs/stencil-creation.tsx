@@ -160,7 +160,7 @@ export const StencilCreationTab = (props: any) => {
             </div>
             
             {/* Image Processing Sliders */}
-            <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] border-t pt-[0.75rem]">
+            <div className="px-[0.5rem] mx-[0.5rem] mt-[0.25rem] border-t pt-[0.5rem]">
               <p className="Text__medium mb-[1rem]">Image Adjustments:</p>
               
               {/* Saturation Slider */}
