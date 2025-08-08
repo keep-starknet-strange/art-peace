@@ -109,6 +109,90 @@ export const StencilCreationTab = (props: any) => {
                 {Math.floor(props.stencilPosition / props.canvasWidth)})
               </p>
             </div>
+            
+            {/* Image Processing Sliders */}
+            <div className="px-[0.5rem] mx-[0.5rem] mt-[2rem] border-t pt-[1rem]">
+              <p className="Text__medium mb-[1rem]">Image Adjustments:</p>
+              
+              {/* Exposure Slider */}
+              <div className="mb-[1rem]">
+                <div className="flex flex-row justify-between mb-[0.25rem]">
+                  <p className="Text__small">Exposure</p>
+                  <p className="Text__small">{props.stencilExposure}</p>
+                </div>
+                <input
+                  type="range"
+                  min="-100"
+                  max="100"
+                  value={props.stencilExposure}
+                  onChange={(e) => props.setStencilExposure(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                />
+              </div>
+              
+              {/* Contrast Slider */}
+              <div className="mb-[1rem]">
+                <div className="flex flex-row justify-between mb-[0.25rem]">
+                  <p className="Text__small">Contrast</p>
+                  <p className="Text__small">{props.stencilContrast}</p>
+                </div>
+                <input
+                  type="range"
+                  min="-100"
+                  max="100"
+                  value={props.stencilContrast}
+                  onChange={(e) => props.setStencilContrast(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                />
+              </div>
+              
+              {/* Saturation Slider */}
+              <div className="mb-[1rem]">
+                <div className="flex flex-row justify-between mb-[0.25rem]">
+                  <p className="Text__small">Saturation</p>
+                  <p className="Text__small">{props.stencilSaturation}</p>
+                </div>
+                <input
+                  type="range"
+                  min="-100"
+                  max="100"
+                  value={props.stencilSaturation}
+                  onChange={(e) => props.setStencilSaturation(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                />
+              </div>
+              
+              {/* Tint Slider */}
+              <div className="mb-[1rem]">
+                <div className="flex flex-row justify-between mb-[0.25rem]">
+                  <p className="Text__small">Tint (Red/Green)</p>
+                  <p className="Text__small">{props.stencilTint}</p>
+                </div>
+                <input
+                  type="range"
+                  min="-100"
+                  max="100"
+                  value={props.stencilTint}
+                  onChange={(e) => props.setStencilTint(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                />
+              </div>
+              
+              {/* Reset Button */}
+              <div className="flex justify-center mt-[0.5rem]">
+                <div
+                  className="Button__primary Text__small px-4 py-1 cursor-pointer"
+                  onClick={() => {
+                    props.setStencilExposure(0);
+                    props.setStencilContrast(0);
+                    props.setStencilSaturation(0);
+                    props.setStencilTint(0);
+                  }}
+                >
+                  Reset Adjustments
+                </div>
+              </div>
+            </div>
           </div>
           <div className="flex flex-col w-full">
             {props.stencilCreationSelected ? (

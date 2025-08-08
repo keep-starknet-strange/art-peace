@@ -53,6 +53,44 @@ body {
   }
 }
 
+/* Custom slider styles */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: #e5e5e5;
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-moz-range-track {
+  background: #e5e5e5;
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #000000;
+  height: 16px;
+  width: 16px;
+  border-radius: 2px;
+  margin-top: -6px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  border: none;
+  background: #000000;
+  height: 16px;
+  width: 16px;
+  border-radius: 2px;
+}
+
 .Pixel__img {
   image-rendering: pixelated;
 }

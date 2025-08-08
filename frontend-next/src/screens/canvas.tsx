@@ -247,6 +247,71 @@ const Canvas = (props: any) => {
 
   // Stencil Creation
   const [rawStencilImage, setRawStencilImage] = useState<any>(null);
+  
+  // Image processing slider states
+  const [stencilExposure, setStencilExposure] = useState<number>(0); // -100 to 100
+  const [stencilContrast, setStencilContrast] = useState<number>(0); // -100 to 100
+  const [stencilSaturation, setStencilSaturation] = useState<number>(0); // -100 to 100
+  const [stencilTint, setStencilTint] = useState<number>(0); // -100 to 100
+  
+  // Apply image processing effects
+  const applyImageEffects = (imageData: ImageData) => {
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+      // Skip transparent pixels
+      if (data[i + 3] < 128) continue;
+      
+      let r = data[i];
+      let g = data[i + 1];
+      let b = data[i + 2];
+      
+      // Apply exposure (brightness)
+      if (stencilExposure !== 0) {
+        const exposureFactor = stencilExposure * 2.55; // Scale to 0-255 range
+        r = Math.min(255, Math.max(0, r + exposureFactor));
+        g = Math.min(255, Math.max(0, g + exposureFactor));
+        b = Math.min(255, Math.max(0, b + exposureFactor));
+      }
+      
+      // Apply contrast
+      if (stencilContrast !== 0) {
+        const contrastFactor = (259 * (stencilContrast + 255)) / (255 * (259 - stencilContrast));
+        r = Math.min(255, Math.max(0, contrastFactor * (r - 128) + 128));
+        g = Math.min(255, Math.max(0, contrastFactor * (g - 128) + 128));
+        b = Math.min(255, Math.max(0, contrastFactor * (b - 128) + 128));
+      }
+      
+      // Apply saturation
+      if (stencilSaturation !== 0) {
+        const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+        const saturationFactor = (stencilSaturation + 100) / 100;
+        r = Math.min(255, Math.max(0, gray + saturationFactor * (r - gray)));
+        g = Math.min(255, Math.max(0, gray + saturationFactor * (g - gray)));
+        b = Math.min(255, Math.max(0, gray + saturationFactor * (b - gray)));
+      }
+      
+      // Apply tint (shift towards red/green)
+      if (stencilTint !== 0) {
+        if (stencilTint > 0) {
+          // Shift towards red
+          r = Math.min(255, r + (stencilTint * 0.5));
+          g = Math.max(0, g - (stencilTint * 0.25));
+        } else {
+          // Shift towards green
+          g = Math.min(255, g + (Math.abs(stencilTint) * 0.5));
+          r = Math.max(0, r - (Math.abs(stencilTint) * 0.25));
+        }
+      }
+      
+      data[i] = r;
+      data[i + 1] = g;
+      data[i + 2] = b;
+    }
+    
+    return imageData;
+  };
+  
   useEffect(() => {
     if (!rawStencilImage) {
       return;
@@ -262,7 +327,11 @@ const Canvas = (props: any) => {
     canvas.width = rawStencilImage.width;
     canvas.height = rawStencilImage.height;
     ctx.drawImage(rawStencilImage, 0, 0);
-    const imageData = ctx.getImageData(0, 0, rawStencilImage.width, rawStencilImage.height);
+    let imageData = ctx.getImageData(0, 0, rawStencilImage.width, rawStencilImage.height);
+    
+    // Apply image processing effects before color conversion
+    imageData = applyImageEffects(imageData);
+    
     const data = imageData.data;
 
     const imagePalleteIds = [];
@@ -318,7 +387,7 @@ const Canvas = (props: any) => {
       height: rawStencilImage.height
     };
     startStencilCreation(stencilImage, colorIds);
-  }, [rawStencilImage, worldColors]);
+  }, [rawStencilImage, worldColors, stencilExposure, stencilContrast, stencilSaturation, stencilTint]);
 
   const [stencilCreationMode, setStencilCreationMode] = useState<boolean>(false);
   const [stencilCreationSelected, setStencilCreationSelected] = useState<boolean>(false);
@@ -341,6 +410,11 @@ const Canvas = (props: any) => {
     setStencilPosition(0);
     setRawStencilImage(null);
     setActiveTab("Stencils");
+    // Reset image processing sliders
+    setStencilExposure(0);
+    setStencilContrast(0);
+    setStencilSaturation(0);
+    setStencilTint(0);
   }
   const [openedStencil, setOpenedStencil] = useState<any>(null);
   
@@ -536,6 +610,14 @@ const Canvas = (props: any) => {
         stencilCreationSelected={stencilCreationSelected}
         openedStencil={openedStencil}
         setOpenedStencil={setOpenedStencil}
+        stencilExposure={stencilExposure}
+        setStencilExposure={setStencilExposure}
+        stencilContrast={stencilContrast}
+        setStencilContrast={setStencilContrast}
+        stencilSaturation={stencilSaturation}
+        setStencilSaturation={setStencilSaturation}
+        stencilTint={stencilTint}
+        setStencilTint={setStencilTint}
         startWorldCreation={startWorldCreation}
         endWorldCreation={endWorldCreation}
         worldCreationMode={worldCreationMode}
