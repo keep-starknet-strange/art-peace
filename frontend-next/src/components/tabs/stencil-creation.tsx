@@ -106,8 +106,21 @@ export const StencilCreationTab = (props: any) => {
               </p>
             </div>
             
-            {/* Size Control Sliders */}
+            {/* Background Removal Toggle */}
             <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] border-t pt-[0.75rem]">
+              <div className="flex flex-row justify-between items-center mb-[1rem]">
+                <p className="Text__medium">Background Removal:</p>
+                <div
+                  className={`Button__primary Text__small px-2 py-1 cursor-pointer ${props.removeBackground ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
+                  onClick={() => props.setRemoveBackground(!props.removeBackground)}
+                >
+                  {props.removeBackground ? 'Enabled' : 'Disabled'}
+                </div>
+              </div>
+            </div>
+            
+            {/* Size Control Sliders */}
+            <div className="px-[0.5rem] mx-[0.5rem] mt-[0.25rem] border-t pt-[0.5rem]">
               <div className="flex flex-row justify-between items-center mb-[1rem]">
                 <p className="Text__medium">Size Control:</p>
                 <div
@@ -261,9 +274,10 @@ export const StencilCreationTab = (props: any) => {
                       props.setStencilContrast(0);
                       props.setStencilSaturation(0);
                       props.setStencilTint(0);
+                      props.setRemoveBackground(false);
                     }}
                   >
-                    Reset Adjustments
+                    Reset All
                   </div>
                 </div>
               </div>

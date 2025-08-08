@@ -78,6 +78,8 @@ export const TabPanel = (props: any) => {
           setStencilSaturation={props.setStencilSaturation}
           stencilTint={props.stencilTint}
           setStencilTint={props.setStencilTint}
+          removeBackground={props.removeBackground}
+          setRemoveBackground={props.setRemoveBackground}
           stencilWidth={props.stencilWidth}
           setStencilWidth={props.setStencilWidth}
           stencilHeight={props.stencilHeight}
