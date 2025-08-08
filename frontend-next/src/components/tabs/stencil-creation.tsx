@@ -99,10 +99,6 @@ export const StencilCreationTab = (props: any) => {
               <p className="Text__medium pr-[0.5rem] truncate w-[21rem] text-right">{props.worldName}</p>
             </div>
             <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] flex flex-row align-center justify-between">
-              <p className="Text__medium pr-[1rem]">Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</p>
-              <p className="Text__medium pr-[0.5rem] text-right">{props.stencilImage.width} x {props.stencilImage.height}</p>
-            </div>
-            <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] flex flex-row align-center justify-between">
               <p className="Text__medium pr-[1rem]">Position&nbsp;:</p>
               <p className="Text__medium pr-[0.5rem] text-right">
                 ({props.stencilPosition % props.canvasWidth},&nbsp;
@@ -111,14 +107,14 @@ export const StencilCreationTab = (props: any) => {
             </div>
             
             {/* Size Control Sliders */}
-            <div className="px-[0.5rem] mx-[0.5rem] mt-[2rem] border-t pt-[1rem]">
+            <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] border-t pt-[0.75rem]">
               <div className="flex flex-row justify-between items-center mb-[1rem]">
                 <p className="Text__medium">Size Control:</p>
                 <div
                   className={`Button__primary Text__small px-2 py-1 cursor-pointer ${props.aspectRatioLocked ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
                   onClick={() => props.setAspectRatioLocked(!props.aspectRatioLocked)}
                 >
-                  {props.aspectRatioLocked ? '🔒 Locked' : '🔓 Unlocked'}
+                  {props.aspectRatioLocked ? 'Locked' : 'Unlocked'}
                 </div>
               </div>
               
@@ -164,7 +160,7 @@ export const StencilCreationTab = (props: any) => {
             </div>
             
             {/* Image Processing Sliders */}
-            <div className="px-[0.5rem] mx-[0.5rem] mt-[2rem] border-t pt-[1rem]">
+            <div className="px-[0.5rem] mx-[0.5rem] mt-[1rem] border-t pt-[0.75rem]">
               <p className="Text__medium mb-[1rem]">Image Adjustments:</p>
               
               {/* Saturation Slider */}
