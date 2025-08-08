@@ -8,6 +8,7 @@ import { addStencilCall } from "../../contract/calls";
 
 export const StencilCreationTab = (props: any) => {
   const { account } = useAccount();
+  const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === "true";
 
   const hashStencilImage = () => {
     // TODO: Change hash to Poseidon
@@ -18,12 +19,41 @@ export const StencilCreationTab = (props: any) => {
   const submit = async () => {
     playSoftClick2();
     const hash = hashStencilImage();
-    if (!account) return;
+    
+    if (isDevMode) {
+      // In dev mode, skip blockchain interaction if no account
+      if (!account) {
+        console.log("Dev mode: Skipping blockchain call, adding stencil to backend only");
+        const res = await addStencilData(props.worldId, props.stencilImage.width, props.stencilImage.height, props.stencilColorIds.toString());
+        console.log("Stencil added to DB:", res);
+        props.endStencilCreation();
+        props.setActiveTab("Stencils");
+        const imgHash = hash.substr(2).padStart(64, "0");
+        const newStencil = {
+          favorited: true,
+          favorites: 1,
+          hash: imgHash,
+          height: props.stencilImage.height,
+          name: "",
+          position: props.stencilPosition,
+          stencilId: res.stencilId,
+          width: props.stencilImage.width,
+          worldId: props.worldId,
+        };
+        props.setOpenedStencil(newStencil);
+        return;
+      }
+    } else {
+      // Production mode: require account
+      if (!account) return;
+    }
+    
+    // Normal flow with blockchain interaction
     try {
       await addStencilCall(account, props.worldId, hash, props.stencilImage.width, props.stencilImage.height, props.stencilPosition);
     } catch (error) {
       console.error("Error submitting stencil:", error);
-      return;
+      if (!isDevMode) return; // Only return in production mode
     }
     const res = await addStencilData(props.worldId, props.stencilImage.width, props.stencilImage.height, props.stencilColorIds.toString());
     console.log("Stencil added to DB:", res);
@@ -48,6 +78,11 @@ export const StencilCreationTab = (props: any) => {
     <BasicTab title="Create a Stencil" {...props} style={{ marginBottom: "0.5rem" }} onClose={props.endStencilCreation}>
       {props.stencilImage && (
         <div>
+          {isDevMode && !account && (
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-2 rounded mb-2 text-center">
+              <p className="Text__small">Dev Mode: Creating stencil without blockchain interaction</p>
+            </div>
+          )}
           <div className="flex flex-col w-full">
             <div className="pt-[1rem] pb-[2rem] flex flex-col items-center justify-center gap-1">
               <Image

@@ -18,6 +18,7 @@ import uploadIcon from "../../../public/icons/Share.png";
 
 const StencilsMainSection = (props: any) => {
   const [uploadEnabled, _] = useState(process.env.NEXT_PUBLIC_UPLOAD_ENABLED === "true");
+  const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === "true";
   const { address } = useAccount();
 
   return (
@@ -111,7 +112,7 @@ const StencilsMainSection = (props: any) => {
         )}
       </div>
       </div>
-        {address && uploadEnabled && (
+        {((address && uploadEnabled) || (isDevMode && uploadEnabled)) && (
           <div className="flex flex-row justify-center items-center w-full mt-2">
             <div
               className="Button__primary"
@@ -123,6 +124,9 @@ const StencilsMainSection = (props: any) => {
               <div className="flex flex-col align-center justify-center">
                 <p className="Text__large p-2 pl-6 text-nowrap">Upload PNG</p>
                 <p className="Text__xsmall pt-0 p-2">Max 128x128</p>
+                {isDevMode && !address && (
+                  <p className="Text__xsmall pt-0 p-2 text-yellow-500">(Dev Mode)</p>
+                )}
               </div>
               <NextImg
                 src={uploadIcon}
