@@ -1,10 +1,10 @@
 # Release Notes
 
-This directory contains release notes for each version of the Art Peace Frontend application.
+This directory contains release notes for each version of the Art Peace application.
 
 ## Release History
 
-- [Version 1.3.0: Better Stencils](./v1.3.0.md) - January 2025
+- [Version 1.3.0: Better Stencils](./v1.3.0.md) - August 2025
 
 ## Release Naming Convention
 
