@@ -18,6 +18,7 @@ import uploadIcon from "../../../public/icons/Share.png";
 
 const StencilsMainSection = (props: any) => {
   const [uploadEnabled, _] = useState(process.env.NEXT_PUBLIC_UPLOAD_ENABLED === "true");
+  const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === "true";
   const { address } = useAccount();
 
   return (
@@ -55,6 +56,9 @@ const StencilsMainSection = (props: any) => {
               props.openedStencil.hash +
               ".png"
             }
+            toggleBotMode={props.toggleBotMode}
+            botMode={props.botMode}
+            setSelectedBotOption={props.setSelectedBotOption}
             {...props}
           />
           </div>
@@ -72,6 +76,9 @@ const StencilsMainSection = (props: any) => {
                 setStencilFavorited={props.setStencilFavorited}
                 stencil={stencil}
                 image={backendUrl + "/stencils/stencil-" + stencil.hash + ".png"}
+                toggleBotMode={props.toggleBotMode}
+                botMode={props.botMode}
+                setSelectedBotOption={props.setSelectedBotOption}
                 {...props}
               />
             );
@@ -97,6 +104,9 @@ const StencilsMainSection = (props: any) => {
               setStencilFavorited={props.setStencilFavorited}
               stencil={stencil}
               image={backendUrl + "/stencils/stencil-" + stencil.hash + ".png"}
+              toggleBotMode={props.toggleBotMode}
+              botMode={props.botMode}
+              setSelectedBotOption={props.setSelectedBotOption}
               {...props}
             />
           );
@@ -111,7 +121,7 @@ const StencilsMainSection = (props: any) => {
         )}
       </div>
       </div>
-        {address && uploadEnabled && (
+        {((address && uploadEnabled) || (isDevMode && uploadEnabled)) && (
           <div className="flex flex-row justify-center items-center w-full mt-2">
             <div
               className="Button__primary"
@@ -121,8 +131,10 @@ const StencilsMainSection = (props: any) => {
               }}
             >
               <div className="flex flex-col align-center justify-center">
-                <p className="Text__large p-2 pl-6 text-nowrap">Upload PNG</p>
-                <p className="Text__xsmall pt-0 p-2">Max 128x128</p>
+                <p className="Text__large p-2 pl-6 text-nowrap">Upload Stencil</p>
+                {isDevMode && !address && (
+                  <p className="Text__xsmall pt-0 p-2 text-yellow-500">(Dev Mode)</p>
+                )}
               </div>
               <NextImg
                 src={uploadIcon}
@@ -135,7 +147,7 @@ const StencilsMainSection = (props: any) => {
             <input
               type="file"
               id="file"
-              accept=".png"
+              accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
               ref={props.inputFile}
               style={{ display: "none" }}
               onChange={props.handleFileChange}
@@ -180,6 +192,9 @@ const StencilsExpandedSection = (props: any) => {
                 image={
                   backendUrl + "/stencils/stencil-" + stencil.hash + ".png"
                 }
+                toggleBotMode={props.toggleBotMode}
+                botMode={props.botMode}
+                setSelectedBotOption={props.setSelectedBotOption}
                 {...props}
               />
             );
@@ -209,11 +224,20 @@ export const StencilsTab = (props: any) => {
     page: 1
   });
 
-  const maxImageSize = 128;
+  const maxUploadSize = 5000;
 
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
     if (file === undefined) {
+      return;
+    }
+
+    // Check file type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Unsupported file format. Please upload PNG, JPEG, JPG, or WebP images.");
+      event.target.value = "";
+      event.target.files = null;
       return;
     }
 
@@ -239,9 +263,9 @@ export const StencilsTab = (props: any) => {
           event.target.files = null;
           return;
         }
-        if (height > maxImageSize || width > maxImageSize) {
+        if (height > maxUploadSize || width > maxUploadSize) {
           alert(
-            `Image is too large, maximum size is ${maxImageSize}x${maxImageSize}. Given size is ` +
+            `Image is too large, maximum size is ${maxUploadSize}x${maxUploadSize}. Given size is ` +
               width +
               "x" +
               height
@@ -252,6 +276,8 @@ export const StencilsTab = (props: any) => {
         }
 
         props.setRawStencilImage(image);
+        // Store original dimensions for aspect ratio calculations
+        props.setOriginalImageSize({ width, height });
       }
     };
   };

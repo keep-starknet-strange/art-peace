@@ -67,9 +67,29 @@ export const TabPanel = (props: any) => {
           stencilImage={props.stencilImage}
           stencilPosition={props.stencilPosition}
           stencilCreationSelected={props.stencilCreationSelected}
+          setStencilCreationSelected={props.setStencilCreationSelected}
           setActiveTab={props.setActiveTab}
           stencilColorIds={props.stencilColorIds}
           setOpenedStencil={props.setOpenedStencil}
+          stencilExposure={props.stencilExposure}
+          setStencilExposure={props.setStencilExposure}
+          stencilContrast={props.stencilContrast}
+          setStencilContrast={props.setStencilContrast}
+          stencilSaturation={props.stencilSaturation}
+          setStencilSaturation={props.setStencilSaturation}
+          stencilTint={props.stencilTint}
+          setStencilTint={props.setStencilTint}
+          removeBackground={props.removeBackground}
+          setRemoveBackground={props.setRemoveBackground}
+          stencilWidth={props.stencilWidth}
+          setStencilWidth={props.setStencilWidth}
+          stencilHeight={props.stencilHeight}
+          setStencilHeight={props.setStencilHeight}
+          aspectRatioLocked={props.aspectRatioLocked}
+          setAspectRatioLocked={props.setAspectRatioLocked}
+          originalImageSize={props.originalImageSize}
+          handleWidthChange={props.handleWidthChange}
+          handleHeightChange={props.handleHeightChange}
         />
       </CSSTransition>
       <CSSTransition

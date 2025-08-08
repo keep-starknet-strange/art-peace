@@ -5,6 +5,7 @@ import { useAccount } from '@starknet-react/core';
 import FavoriteIcon from "../../../public/icons/Favorite.png";
 import FavoritedIcon from "../../../public/icons/Favorited.png";
 import Info from "../../../public/icons/Info.png";
+import bot from "../../../public/icons/bot.png";
 import { playSoftClick2 } from "../utils/sounds";
 import { favoriteStencilCall, unfavoriteStencilCall } from "../../contract/calls";
 import { getStencilOwner } from "../../api/stencils";
@@ -43,6 +44,34 @@ export const StencilItem = (props: any) => {
     props.setOpenedStencil(props.stencil);
   }
 
+  const handleStencilBot = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    playSoftClick2();
+    
+    // Select the stencil first
+    props.setOpenedStencil(props.stencil);
+    
+    // If bot mode is already active and stencil bot is selected, do nothing
+    if (props.botMode && props.selectedBotOption === "Stencil Bot") {
+      return;
+    }
+    
+    // Enable bot mode if not already enabled, then set the option
+    if (!props.botMode && props.toggleBotMode) {
+      props.toggleBotMode();
+      // Use setTimeout to wait for state update
+      setTimeout(() => {
+        if (props.setSelectedBotOption) {
+          props.setSelectedBotOption("Stencil Bot");
+        }
+      }, 10);
+    } else if (props.botMode && props.setSelectedBotOption) {
+      // Bot mode is already enabled, just set the option
+      props.setSelectedBotOption("Stencil Bot");
+    }
+  }
+
   const handleFavoritePress = async () => {
     playSoftClick2();
     if (props.stencil.favorited) {
@@ -76,6 +105,16 @@ export const StencilItem = (props: any) => {
         </div>
       )}
       <div className="FavoriteButton absolute bottom-0 right-0 w-full flex flex-row justify-end items-center pointer-events-none">
+        <button
+          className={`${address ? "" : "Button--disabled"} Button__circle h-[3rem] w-[3rem] m-2 ml-1`}
+          onClick={handleStencilBot}
+        >
+          <Image
+            src={bot}
+            alt="Stencil Bot"
+            className="h-[2rem]"
+          />
+        </button>
         <button
           className={`${address ? "" : "Button--disabled"} Button__primary h-[3rem]`}
           onClick={handleFavoritePress}

@@ -247,23 +247,213 @@ const Canvas = (props: any) => {
 
   // Stencil Creation
   const [rawStencilImage, setRawStencilImage] = useState<any>(null);
+  const [originalImageSize, setOriginalImageSize] = useState<{width: number, height: number} | null>(null);
+  
+  // Image processing slider states
+  const [stencilExposure, setStencilExposure] = useState<number>(0); // -100 to 100
+  const [stencilContrast, setStencilContrast] = useState<number>(0); // -100 to 100
+  const [stencilSaturation, setStencilSaturation] = useState<number>(0); // -100 to 100
+  const [stencilTint, setStencilTint] = useState<number>(0); // -100 to 100
+  const [removeBackground, setRemoveBackground] = useState<boolean>(false);
+  
+  // Image size states
+  const [stencilWidth, setStencilWidth] = useState<number>(128);
+  const [stencilHeight, setStencilHeight] = useState<number>(128);
+  const [aspectRatioLocked, setAspectRatioLocked] = useState<boolean>(true);
+  const [originalAspectRatio, setOriginalAspectRatio] = useState<number>(1);
+  
+  // Calculate auto-scale dimensions for images larger than 128x128
+  const calculateAutoScale = (width: number, height: number) => {
+    if (width <= 128 && height <= 128) {
+      return { width, height };
+    }
+    
+    const aspectRatio = width / height;
+    if (width > height) {
+      return { width: 128, height: Math.round(128 / aspectRatio) };
+    } else {
+      return { width: Math.round(128 * aspectRatio), height: 128 };
+    }
+  };
+
+  // Handle size changes with aspect ratio locking
+  const handleWidthChange = (newWidth: number) => {
+    setStencilWidth(newWidth);
+    if (aspectRatioLocked) {
+      setStencilHeight(Math.round(newWidth / originalAspectRatio));
+    }
+  };
+
+  const handleHeightChange = (newHeight: number) => {
+    setStencilHeight(newHeight);
+    if (aspectRatioLocked) {
+      setStencilWidth(Math.round(newHeight * originalAspectRatio));
+    }
+  };
+
+  // Initialize size when new image is loaded
+  useEffect(() => {
+    if (originalImageSize) {
+      const autoScale = calculateAutoScale(originalImageSize.width, originalImageSize.height);
+      setStencilWidth(autoScale.width);
+      setStencilHeight(autoScale.height);
+      setOriginalAspectRatio(originalImageSize.width / originalImageSize.height);
+    }
+  }, [originalImageSize]);
+
+  // Remove background by making similar colors transparent
+  const applyBackgroundRemoval = (imageData: ImageData) => {
+    if (!removeBackground) return imageData;
+    
+    const data = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
+    
+    // Sample corner pixels to determine background color
+    const cornerPixels: number[][] = [];
+    const samplePoints = [
+      [0, 0], [width-1, 0], [0, height-1], [width-1, height-1], // corners
+      [Math.floor(width/2), 0], [0, Math.floor(height/2)], // edges
+      [width-1, Math.floor(height/2)], [Math.floor(width/2), height-1]
+    ];
+    
+    samplePoints.forEach(([x, y]) => {
+      const idx = (y * width + x) * 4;
+      if (data[idx + 3] > 128) { // Only consider opaque pixels
+        cornerPixels.push([data[idx], data[idx + 1], data[idx + 2]]);
+      }
+    });
+    
+    if (cornerPixels.length === 0) return imageData;
+    
+    // Calculate average background color
+    const avgBg = [
+      Math.round(cornerPixels.reduce((sum, pixel) => sum + pixel[0], 0) / cornerPixels.length),
+      Math.round(cornerPixels.reduce((sum, pixel) => sum + pixel[1], 0) / cornerPixels.length),
+      Math.round(cornerPixels.reduce((sum, pixel) => sum + pixel[2], 0) / cornerPixels.length)
+    ];
+    
+    // Remove background with tolerance
+    const tolerance = 30; // Adjust this value for sensitivity
+    
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 128) continue; // Skip already transparent pixels
+      
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      
+      // Calculate color distance from background
+      const distance = Math.sqrt(
+        Math.pow(r - avgBg[0], 2) +
+        Math.pow(g - avgBg[1], 2) +
+        Math.pow(b - avgBg[2], 2)
+      );
+      
+      // Make pixel transparent if it's close to background color
+      if (distance <= tolerance) {
+        data[i + 3] = 0; // Set alpha to 0 (transparent)
+      }
+    }
+    
+    return imageData;
+  };
+
+  // Apply image processing effects
+  const applyImageEffects = (imageData: ImageData) => {
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+      // Skip transparent pixels
+      if (data[i + 3] < 128) continue;
+      
+      let r = data[i];
+      let g = data[i + 1];
+      let b = data[i + 2];
+      
+      // Apply exposure (brightness)
+      if (stencilExposure !== 0) {
+        const exposureFactor = stencilExposure * 2.55; // Scale to 0-255 range
+        r = Math.min(255, Math.max(0, r + exposureFactor));
+        g = Math.min(255, Math.max(0, g + exposureFactor));
+        b = Math.min(255, Math.max(0, b + exposureFactor));
+      }
+      
+      // Apply contrast
+      if (stencilContrast !== 0) {
+        const contrastFactor = (259 * (stencilContrast + 255)) / (255 * (259 - stencilContrast));
+        r = Math.min(255, Math.max(0, contrastFactor * (r - 128) + 128));
+        g = Math.min(255, Math.max(0, contrastFactor * (g - 128) + 128));
+        b = Math.min(255, Math.max(0, contrastFactor * (b - 128) + 128));
+      }
+      
+      // Apply saturation
+      if (stencilSaturation !== 0) {
+        const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+        const saturationFactor = (stencilSaturation + 100) / 100;
+        r = Math.min(255, Math.max(0, gray + saturationFactor * (r - gray)));
+        g = Math.min(255, Math.max(0, gray + saturationFactor * (g - gray)));
+        b = Math.min(255, Math.max(0, gray + saturationFactor * (b - gray)));
+      }
+      
+      // Apply tint (shift towards red/green)
+      if (stencilTint !== 0) {
+        if (stencilTint > 0) {
+          // Shift towards red
+          r = Math.min(255, r + (stencilTint * 0.5));
+          g = Math.max(0, g - (stencilTint * 0.25));
+        } else {
+          // Shift towards green
+          g = Math.min(255, g + (Math.abs(stencilTint) * 0.5));
+          r = Math.max(0, r - (Math.abs(stencilTint) * 0.25));
+        }
+      }
+      
+      data[i] = r;
+      data[i + 1] = g;
+      data[i + 2] = b;
+    }
+    
+    return imageData;
+  };
+  
   useEffect(() => {
     if (!rawStencilImage) {
       return;
     }
-    // Convert image pixels to be within the color palette
+    // New pipeline: import -> effects -> scale -> color convert -> background removal
 
-    // Get image data
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
+    // Step 1: Process image at original size (effects only, no background removal yet)
+    const effectsCanvas = document.createElement("canvas");
+    const effectsCtx = effectsCanvas.getContext("2d");
+    if (!effectsCtx) {
       return;
     }
-    canvas.width = rawStencilImage.width;
-    canvas.height = rawStencilImage.height;
-    ctx.drawImage(rawStencilImage, 0, 0);
-    const imageData = ctx.getImageData(0, 0, rawStencilImage.width, rawStencilImage.height);
-    const data = imageData.data;
+    effectsCanvas.width = rawStencilImage.width;
+    effectsCanvas.height = rawStencilImage.height;
+    effectsCtx.drawImage(rawStencilImage, 0, 0);
+    let imageData = effectsCtx.getImageData(0, 0, rawStencilImage.width, rawStencilImage.height);
+    
+    // Apply color effects only (no background removal yet)
+    imageData = applyImageEffects(imageData);
+    effectsCtx.putImageData(imageData, 0, 0);
+
+    // Step 2: Scale the image to desired dimensions
+    const scaledCanvas = document.createElement("canvas");
+    const scaledCtx = scaledCanvas.getContext("2d");
+    if (!scaledCtx) {
+      return;
+    }
+    scaledCanvas.width = stencilWidth;
+    scaledCanvas.height = stencilHeight;
+    
+    // Use high-quality scaling
+    scaledCtx.imageSmoothingEnabled = false; // For pixel art style
+    scaledCtx.drawImage(effectsCanvas, 0, 0, stencilWidth, stencilHeight);
+    
+    // Step 3: Get image data for color palette conversion
+    let finalImageData = scaledCtx.getImageData(0, 0, stencilWidth, stencilHeight);
+    const data = finalImageData.data;
 
     const imagePalleteIds = [];
     // Convert image data to color palette
@@ -306,19 +496,35 @@ const Canvas = (props: any) => {
       imagePalleteIds.push(minColorIndex);
     }
 
-    // Set image data back to canvas
-    ctx.putImageData(imageData, 0, 0);
-    const paletteImage = canvas.toDataURL();
-    const colorIds = imagePalleteIds;
+    // Step 4: Apply background removal AFTER color conversion
+    finalImageData = applyBackgroundRemoval(finalImageData);
+
+    // Step 5: Update color IDs array to reflect background removal changes
+    const finalData = finalImageData.data;
+    const finalColorIds = [];
+    for (let i = 0; i < finalData.length; i += 4) {
+      if (finalData[i + 3] < 128) {
+        // Transparent pixel
+        finalColorIds.push(255);
+      } else {
+        // Use the original color ID from before background removal
+        finalColorIds.push(imagePalleteIds[Math.floor(i / 4)]);
+      }
+    }
+
+    // Set final processed image data back to canvas
+    scaledCtx.putImageData(finalImageData, 0, 0);
+    const paletteImage = scaledCanvas.toDataURL();
+    const colorIds = finalColorIds;
     
     // TODO: Upload to backend and get template hash back
     const stencilImage = {
       image: paletteImage,
-      width: rawStencilImage.width,
-      height: rawStencilImage.height
+      width: stencilWidth,
+      height: stencilHeight
     };
     startStencilCreation(stencilImage, colorIds);
-  }, [rawStencilImage, worldColors]);
+  }, [rawStencilImage, worldColors, stencilExposure, stencilContrast, stencilSaturation, stencilTint, stencilWidth, stencilHeight, removeBackground]);
 
   const [stencilCreationMode, setStencilCreationMode] = useState<boolean>(false);
   const [stencilCreationSelected, setStencilCreationSelected] = useState<boolean>(false);
@@ -341,6 +547,18 @@ const Canvas = (props: any) => {
     setStencilPosition(0);
     setRawStencilImage(null);
     setActiveTab("Stencils");
+    // Reset image processing sliders
+    setStencilExposure(0);
+    setStencilContrast(0);
+    setStencilSaturation(0);
+    setStencilTint(0);
+    setRemoveBackground(false);
+    // Reset size and aspect ratio states
+    setStencilWidth(128);
+    setStencilHeight(128);
+    setAspectRatioLocked(true);
+    setOriginalImageSize(null);
+    setOriginalAspectRatio(1);
   }
   const [openedStencil, setOpenedStencil] = useState<any>(null);
   
@@ -529,13 +747,34 @@ const Canvas = (props: any) => {
         startStencilCreation={startStencilCreation}
         endStencilCreation={endStencilCreation}
         stencilCreationMode={stencilCreationMode}
+        setOriginalImageSize={setOriginalImageSize}
         stencilImage={stencilImage}
         stencilPosition={stencilPosition}
         stencilColorIds={stencilColorIds}
         setRawStencilImage={setRawStencilImage}
         stencilCreationSelected={stencilCreationSelected}
+        setStencilCreationSelected={setStencilCreationSelected}
         openedStencil={openedStencil}
         setOpenedStencil={setOpenedStencil}
+        stencilExposure={stencilExposure}
+        setStencilExposure={setStencilExposure}
+        stencilContrast={stencilContrast}
+        setStencilContrast={setStencilContrast}
+        stencilSaturation={stencilSaturation}
+        setStencilSaturation={setStencilSaturation}
+        stencilTint={stencilTint}
+        setStencilTint={setStencilTint}
+        removeBackground={removeBackground}
+        setRemoveBackground={setRemoveBackground}
+        stencilWidth={stencilWidth}
+        setStencilWidth={setStencilWidth}
+        stencilHeight={stencilHeight}
+        setStencilHeight={setStencilHeight}
+        aspectRatioLocked={aspectRatioLocked}
+        setAspectRatioLocked={setAspectRatioLocked}
+        originalImageSize={originalImageSize}
+        handleWidthChange={handleWidthChange}
+        handleHeightChange={handleHeightChange}
         startWorldCreation={startWorldCreation}
         endWorldCreation={endWorldCreation}
         worldCreationMode={worldCreationMode}
@@ -548,6 +787,11 @@ const Canvas = (props: any) => {
         isCommitting={isCommitting}
         modalMessage={modalMessage}
         setModalMessage={setModalMessage}
+        toggleBotMode={toggleBotMode}
+        botMode={botMode}
+        botOptions={botOptions}
+        selectedBotOption={selectedBotOption}
+        setSelectedBotOption={setSelectedBotOption}
       />
       <Footer
         basePixelTimer={basePixelTimer}
