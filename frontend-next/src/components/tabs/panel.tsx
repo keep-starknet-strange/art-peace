@@ -67,6 +67,7 @@ export const TabPanel = (props: any) => {
           stencilImage={props.stencilImage}
           stencilPosition={props.stencilPosition}
           stencilCreationSelected={props.stencilCreationSelected}
+          setStencilCreationSelected={props.setStencilCreationSelected}
           setActiveTab={props.setActiveTab}
           stencilColorIds={props.stencilColorIds}
           setOpenedStencil={props.setOpenedStencil}

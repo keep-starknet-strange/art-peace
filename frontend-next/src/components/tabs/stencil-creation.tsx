@@ -106,10 +106,23 @@ export const StencilCreationTab = (props: any) => {
                   </div>
                   <div className="flex flex-col align-center justify-between">
                     <p className="Text__medium pr-[1rem] pb-[1rem]">Position :</p>
-                    <p className="Text__medium pr-[0.5rem] text-right">
-                      ({props.stencilPosition % props.canvasWidth},&nbsp;
-                      {Math.floor(props.stencilPosition / props.canvasWidth)})
-                    </p>
+                    <div className="flex flex-row items-center justify-between w-full">
+                      <p className="Text__medium text-right">
+                        ({props.stencilPosition % props.canvasWidth},&nbsp;
+                        {Math.floor(props.stencilPosition / props.canvasWidth)})
+                      </p>
+                      {props.stencilCreationSelected && (
+                        <div
+                          className="Button__primary Text__small px-2 py-1 cursor-pointer ml-2"
+                          onClick={() => {
+                            playSoftClick2();
+                            props.setStencilCreationSelected(false);
+                          }}
+                        >
+                          Move
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

@@ -753,6 +753,7 @@ const Canvas = (props: any) => {
         stencilColorIds={stencilColorIds}
         setRawStencilImage={setRawStencilImage}
         stencilCreationSelected={stencilCreationSelected}
+        setStencilCreationSelected={setStencilCreationSelected}
         openedStencil={openedStencil}
         setOpenedStencil={setOpenedStencil}
         stencilExposure={stencilExposure}
