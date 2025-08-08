@@ -114,68 +114,92 @@ export const StencilCreationTab = (props: any) => {
             <div className="px-[0.5rem] mx-[0.5rem] mt-[2rem] border-t pt-[1rem]">
               <p className="Text__medium mb-[1rem]">Image Adjustments:</p>
               
-              {/* Exposure Slider */}
-              <div className="mb-[1rem]">
-                <div className="flex flex-row justify-between mb-[0.25rem]">
-                  <p className="Text__small">Exposure</p>
-                  <p className="Text__small">{props.stencilExposure}</p>
-                </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  value={props.stencilExposure}
-                  onChange={(e) => props.setStencilExposure(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
-                />
-              </div>
-              
-              {/* Contrast Slider */}
-              <div className="mb-[1rem]">
-                <div className="flex flex-row justify-between mb-[0.25rem]">
-                  <p className="Text__small">Contrast</p>
-                  <p className="Text__small">{props.stencilContrast}</p>
-                </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  value={props.stencilContrast}
-                  onChange={(e) => props.setStencilContrast(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
-                />
-              </div>
-              
               {/* Saturation Slider */}
-              <div className="mb-[1rem]">
+              <div className="mb-[1.5rem]">
                 <div className="flex flex-row justify-between mb-[0.25rem]">
                   <p className="Text__small">Saturation</p>
                   <p className="Text__small">{props.stencilSaturation}</p>
                 </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  value={props.stencilSaturation}
-                  onChange={(e) => props.setStencilSaturation(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
-                />
+                <div className="relative">
+                  {/* Center indicator */}
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
+                  {/* Slider track background with visible bounds */}
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
+                  <input
+                    type="range"
+                    min="-100"
+                    max="100"
+                    value={props.stencilSaturation}
+                    onChange={(e) => props.setStencilSaturation(Number(e.target.value))}
+                    className="relative w-full h-[16px] bg-transparent appearance-none cursor-pointer z-20"
+                  />
+                </div>
+              </div>
+              
+              {/* Contrast Slider */}
+              <div className="mb-[1.5rem]">
+                <div className="flex flex-row justify-between mb-[0.25rem]">
+                  <p className="Text__small">Contrast</p>
+                  <p className="Text__small">{props.stencilContrast}</p>
+                </div>
+                <div className="relative">
+                  {/* Center indicator */}
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
+                  {/* Slider track background with visible bounds */}
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
+                  <input
+                    type="range"
+                    min="-100"
+                    max="100"
+                    value={props.stencilContrast}
+                    onChange={(e) => props.setStencilContrast(Number(e.target.value))}
+                    className="relative w-full h-[16px] bg-transparent appearance-none cursor-pointer z-20"
+                  />
+                </div>
+              </div>
+              
+              {/* Exposure Slider */}
+              <div className="mb-[1.5rem]">
+                <div className="flex flex-row justify-between mb-[0.25rem]">
+                  <p className="Text__small">Exposure</p>
+                  <p className="Text__small">{props.stencilExposure}</p>
+                </div>
+                <div className="relative">
+                  {/* Center indicator */}
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
+                  {/* Slider track background with visible bounds */}
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
+                  <input
+                    type="range"
+                    min="-100"
+                    max="100"
+                    value={props.stencilExposure}
+                    onChange={(e) => props.setStencilExposure(Number(e.target.value))}
+                    className="relative w-full h-[16px] bg-transparent appearance-none cursor-pointer z-20"
+                  />
+                </div>
               </div>
               
               {/* Tint Slider */}
-              <div className="mb-[1rem]">
+              <div className="mb-[1.5rem]">
                 <div className="flex flex-row justify-between mb-[0.25rem]">
                   <p className="Text__small">Tint (Red/Green)</p>
                   <p className="Text__small">{props.stencilTint}</p>
                 </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  value={props.stencilTint}
-                  onChange={(e) => props.setStencilTint(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
-                />
+                <div className="relative">
+                  {/* Center indicator */}
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
+                  {/* Slider track background with visible bounds */}
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
+                  <input
+                    type="range"
+                    min="-100"
+                    max="100"
+                    value={props.stencilTint}
+                    onChange={(e) => props.setStencilTint(Number(e.target.value))}
+                    className="relative w-full h-[16px] bg-transparent appearance-none cursor-pointer z-20"
+                  />
+                </div>
               </div>
               
               {/* Reset Button */}
