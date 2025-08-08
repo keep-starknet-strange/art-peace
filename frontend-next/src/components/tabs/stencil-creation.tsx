@@ -110,6 +110,59 @@ export const StencilCreationTab = (props: any) => {
               </p>
             </div>
             
+            {/* Size Control Sliders */}
+            <div className="px-[0.5rem] mx-[0.5rem] mt-[2rem] border-t pt-[1rem]">
+              <div className="flex flex-row justify-between items-center mb-[1rem]">
+                <p className="Text__medium">Size Control:</p>
+                <div
+                  className={`Button__primary Text__small px-2 py-1 cursor-pointer ${props.aspectRatioLocked ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
+                  onClick={() => props.setAspectRatioLocked(!props.aspectRatioLocked)}
+                >
+                  {props.aspectRatioLocked ? '🔒 Locked' : '🔓 Unlocked'}
+                </div>
+              </div>
+              
+              {/* Width Slider */}
+              <div className="mb-[1.5rem]">
+                <div className="flex flex-row justify-between mb-[0.25rem]">
+                  <p className="Text__small">Width</p>
+                  <p className="Text__small">{props.stencilWidth}px</p>
+                </div>
+                <div className="relative">
+                  {/* Slider track background with visible bounds */}
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
+                  <input
+                    type="range"
+                    min="5"
+                    max="128"
+                    value={props.stencilWidth}
+                    onChange={(e) => props.handleWidthChange(Number(e.target.value))}
+                    className="relative w-full h-[16px] bg-transparent appearance-none cursor-pointer z-20"
+                  />
+                </div>
+              </div>
+              
+              {/* Height Slider */}
+              <div className="mb-[1.5rem]">
+                <div className="flex flex-row justify-between mb-[0.25rem]">
+                  <p className="Text__small">Height</p>
+                  <p className="Text__small">{props.stencilHeight}px</p>
+                </div>
+                <div className="relative">
+                  {/* Slider track background with visible bounds */}
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
+                  <input
+                    type="range"
+                    min="5"
+                    max="128"
+                    value={props.stencilHeight}
+                    onChange={(e) => props.handleHeightChange(Number(e.target.value))}
+                    className="relative w-full h-[16px] bg-transparent appearance-none cursor-pointer z-20"
+                  />
+                </div>
+              </div>
+            </div>
+            
             {/* Image Processing Sliders */}
             <div className="px-[0.5rem] mx-[0.5rem] mt-[2rem] border-t pt-[1rem]">
               <p className="Text__medium mb-[1rem]">Image Adjustments:</p>
@@ -204,16 +257,18 @@ export const StencilCreationTab = (props: any) => {
               
               {/* Reset Button */}
               <div className="flex justify-center mt-[0.5rem]">
-                <div
-                  className="Button__primary Text__small px-4 py-1 cursor-pointer"
-                  onClick={() => {
-                    props.setStencilExposure(0);
-                    props.setStencilContrast(0);
-                    props.setStencilSaturation(0);
-                    props.setStencilTint(0);
-                  }}
-                >
-                  Reset Adjustments
+                <div className="flex flex-row gap-2">
+                  <div
+                    className="Button__primary Text__small px-4 py-1 cursor-pointer"
+                    onClick={() => {
+                      props.setStencilExposure(0);
+                      props.setStencilContrast(0);
+                      props.setStencilSaturation(0);
+                      props.setStencilTint(0);
+                    }}
+                  >
+                    Reset Adjustments
+                  </div>
                 </div>
               </div>
             </div>

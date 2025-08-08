@@ -78,6 +78,14 @@ export const TabPanel = (props: any) => {
           setStencilSaturation={props.setStencilSaturation}
           stencilTint={props.stencilTint}
           setStencilTint={props.setStencilTint}
+          stencilWidth={props.stencilWidth}
+          setStencilWidth={props.setStencilWidth}
+          stencilHeight={props.stencilHeight}
+          setStencilHeight={props.setStencilHeight}
+          aspectRatioLocked={props.aspectRatioLocked}
+          setAspectRatioLocked={props.setAspectRatioLocked}
+          handleWidthChange={props.handleWidthChange}
+          handleHeightChange={props.handleHeightChange}
         />
       </CSSTransition>
       <CSSTransition

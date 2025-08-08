@@ -123,7 +123,8 @@ const StencilsMainSection = (props: any) => {
             >
               <div className="flex flex-col align-center justify-center">
                 <p className="Text__large p-2 pl-6 text-nowrap">Upload PNG</p>
-                <p className="Text__xsmall pt-0 p-2">Max 128x128</p>
+                <p className="Text__xsmall pt-0 p-2">Max 5000x5000</p>
+                <p className="Text__xsmall pt-0 p-2">(Auto-scaled to 128x128)</p>
                 {isDevMode && !address && (
                   <p className="Text__xsmall pt-0 p-2 text-yellow-500">(Dev Mode)</p>
                 )}
@@ -213,7 +214,7 @@ export const StencilsTab = (props: any) => {
     page: 1
   });
 
-  const maxImageSize = 128;
+  const maxUploadSize = 5000;
 
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
@@ -243,9 +244,9 @@ export const StencilsTab = (props: any) => {
           event.target.files = null;
           return;
         }
-        if (height > maxImageSize || width > maxImageSize) {
+        if (height > maxUploadSize || width > maxUploadSize) {
           alert(
-            `Image is too large, maximum size is ${maxImageSize}x${maxImageSize}. Given size is ` +
+            `Image is too large, maximum size is ${maxUploadSize}x${maxUploadSize}. Given size is ` +
               width +
               "x" +
               height
@@ -256,6 +257,8 @@ export const StencilsTab = (props: any) => {
         }
 
         props.setRawStencilImage(image);
+        // Store original dimensions for aspect ratio calculations
+        props.setOriginalImageSize({ width, height });
       }
     };
   };
