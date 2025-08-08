@@ -123,8 +123,6 @@ const StencilsMainSection = (props: any) => {
             >
               <div className="flex flex-col align-center justify-center">
                 <p className="Text__large p-2 pl-6 text-nowrap">Upload PNG</p>
-                <p className="Text__xsmall pt-0 p-2">Max 5000x5000</p>
-                <p className="Text__xsmall pt-0 p-2">(Auto-scaled to 128x128)</p>
                 {isDevMode && !address && (
                   <p className="Text__xsmall pt-0 p-2 text-yellow-500">(Dev Mode)</p>
                 )}
