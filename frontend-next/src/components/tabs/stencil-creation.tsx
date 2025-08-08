@@ -122,7 +122,7 @@ export const StencilCreationTab = (props: any) => {
                 </div>
                 <div className="relative">
                   {/* Center indicator */}
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
                   {/* Slider track background with visible bounds */}
                   <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
                   <input
@@ -144,7 +144,7 @@ export const StencilCreationTab = (props: any) => {
                 </div>
                 <div className="relative">
                   {/* Center indicator */}
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
                   {/* Slider track background with visible bounds */}
                   <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
                   <input
@@ -166,7 +166,7 @@ export const StencilCreationTab = (props: any) => {
                 </div>
                 <div className="relative">
                   {/* Center indicator */}
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
                   {/* Slider track background with visible bounds */}
                   <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
                   <input
@@ -188,7 +188,7 @@ export const StencilCreationTab = (props: any) => {
                 </div>
                 <div className="relative">
                   {/* Center indicator */}
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-gray-400 pointer-events-none z-10"></div>
                   {/* Slider track background with visible bounds */}
                   <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-[6px] bg-gray-300 rounded-[3px] pointer-events-none"></div>
                   <input
