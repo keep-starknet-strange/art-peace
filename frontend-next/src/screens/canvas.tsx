@@ -787,6 +787,11 @@ const Canvas = (props: any) => {
         isCommitting={isCommitting}
         modalMessage={modalMessage}
         setModalMessage={setModalMessage}
+        toggleBotMode={toggleBotMode}
+        botMode={botMode}
+        botOptions={botOptions}
+        selectedBotOption={selectedBotOption}
+        setSelectedBotOption={setSelectedBotOption}
       />
       <Footer
         basePixelTimer={basePixelTimer}

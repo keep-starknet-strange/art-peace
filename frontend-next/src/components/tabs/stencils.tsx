@@ -56,6 +56,9 @@ const StencilsMainSection = (props: any) => {
               props.openedStencil.hash +
               ".png"
             }
+            toggleBotMode={props.toggleBotMode}
+            botMode={props.botMode}
+            setSelectedBotOption={props.setSelectedBotOption}
             {...props}
           />
           </div>
@@ -73,6 +76,9 @@ const StencilsMainSection = (props: any) => {
                 setStencilFavorited={props.setStencilFavorited}
                 stencil={stencil}
                 image={backendUrl + "/stencils/stencil-" + stencil.hash + ".png"}
+                toggleBotMode={props.toggleBotMode}
+                botMode={props.botMode}
+                setSelectedBotOption={props.setSelectedBotOption}
                 {...props}
               />
             );
@@ -98,6 +104,9 @@ const StencilsMainSection = (props: any) => {
               setStencilFavorited={props.setStencilFavorited}
               stencil={stencil}
               image={backendUrl + "/stencils/stencil-" + stencil.hash + ".png"}
+              toggleBotMode={props.toggleBotMode}
+              botMode={props.botMode}
+              setSelectedBotOption={props.setSelectedBotOption}
               {...props}
             />
           );
@@ -183,6 +192,9 @@ const StencilsExpandedSection = (props: any) => {
                 image={
                   backendUrl + "/stencils/stencil-" + stencil.hash + ".png"
                 }
+                toggleBotMode={props.toggleBotMode}
+                botMode={props.botMode}
+                setSelectedBotOption={props.setSelectedBotOption}
                 {...props}
               />
             );

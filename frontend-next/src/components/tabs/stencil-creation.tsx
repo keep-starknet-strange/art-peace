@@ -301,7 +301,7 @@ export const StencilCreationTab = (props: any) => {
                   // Reset size controls to original image size or proportionally scaled dimensions
                   if (props.originalImageSize) {
                     // Use the exact same logic as calculateAutoScale function
-                    const calculateAutoScale = (width, height) => {
+                    const calculateAutoScale = (width: number, height: number) => {
                       if (width <= 128 && height <= 128) {
                         return { width, height };
                       }
