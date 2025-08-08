@@ -95,7 +95,7 @@ export const StencilCreationTab = (props: any) => {
               <p className="Text__xsmall text-center">(colors converted to world&lsquo;s palette)</p>
             </div>
             {/* Two-column layout for stencil configuration */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-[0.5rem] mx-[0.5rem]">
+            <div className="grid grid-cols-2 gap-4 px-[0.5rem] mx-[0.5rem]">
               {/* Column 1: World, Position, Size Control */}
               <div className="space-y-4">
                 {/* World and Position Info */}
@@ -167,7 +167,7 @@ export const StencilCreationTab = (props: any) => {
 
               {/* Column 2: Image Adjustments */}
               <div className="space-y-4">
-                <div className="border-t md:border-t-0 pt-[0.5rem] md:pt-0">
+                <div className="pt-[0.5rem]">
                   <p className="Text__medium mb-[1rem]">Adjustments:</p>
                   
                   {/* Saturation Slider */}
@@ -261,9 +261,9 @@ export const StencilCreationTab = (props: any) => {
                           onChange={(e) => props.setRemoveBackground(e.target.checked)}
                           className="sr-only"
                         />
-                        <div className={`w-5 h-5 border-2 rounded-sm flex items-center justify-center transition-colors ${props.removeBackground ? 'bg-black border-black' : 'bg-white border-gray-400'}`}>
+                        <div className={`w-7 h-7 border-2 rounded-sm flex items-center justify-center transition-colors ${props.removeBackground ? 'bg-black border-black' : 'bg-white border-gray-400'}`}>
                           {props.removeBackground && (
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           )}
