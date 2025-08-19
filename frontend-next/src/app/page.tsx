@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { StrictMode, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
-
+import { SolanaSDKProvider } from '../solana-remote-wallet/SolanaProvider';
 import { StarknetProvider } from "../components/StarknetProvider";
 import { usePreventZoom } from './window';
 import { playSoftClick2, getMusicVolume } from '../components/utils/sounds';
@@ -44,7 +44,7 @@ function App() {
 
     // Play the song
     try {
-      playSong();
+      // playSong();
     } catch (e) {
       console.log("Failed to play audio", e);
     }
@@ -124,9 +124,11 @@ function App() {
 export default function Home() {
   return (
     <StrictMode>
-      <StarknetProvider>
-        <App />
-      </StarknetProvider>
+      <SolanaSDKProvider>
+        <StarknetProvider>
+          <App />
+        </StarknetProvider>
+      </SolanaSDKProvider>
     </StrictMode>
   );
 }
