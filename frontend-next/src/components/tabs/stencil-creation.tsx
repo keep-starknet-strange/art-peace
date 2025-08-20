@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useAccount } from "../../solana-remote-wallet/hooks";
+import { useAccount } from "@/solana-remote-wallet/hooks";
 import { BasicTab } from "./basic";
 import { sha256 } from "js-sha256";
 import { playSoftClick2 } from "../utils/sounds";

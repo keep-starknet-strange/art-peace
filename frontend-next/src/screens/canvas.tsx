@@ -135,7 +135,6 @@ const Canvas = (props: any) => {
   const [revertCount, setRevertCount] = useState<number>(0);
   const didRevert = async (transactionHash: string) => {
     if (chain === 'Solana') {
-      console.log("we currently not check reverts on.");
       return;
     }
 

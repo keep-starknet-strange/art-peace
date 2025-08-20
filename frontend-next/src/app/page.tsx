@@ -44,7 +44,7 @@ function App() {
 
     // Play the song
     try {
-      // playSong();
+      playSong();
     } catch (e) {
       console.log("Failed to play audio", e);
     }

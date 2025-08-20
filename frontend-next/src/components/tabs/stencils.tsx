@@ -1,6 +1,6 @@
 import NextImg from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { useAccount } from "../../solana-remote-wallet/hooks";
+import { useAccount } from "@/solana-remote-wallet/hooks";
 import { ExpandableTab } from "./expandable";
 import { StencilItem } from "../stencils/item";
 import { backendUrl } from "../../api/api";

@@ -66,7 +66,6 @@ export const useDisconnect = () => {
 
   return {
     disconnect: async () => {
-      console.log("disconnecting...");
       snDisconnect();
       await solDisconnect();
     },
