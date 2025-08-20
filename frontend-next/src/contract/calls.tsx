@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from "react";
-import { useAccount } from '@starknet-react/core'
 import { CANVAS_CONTRACT_ADDRESS } from "../components/StarknetProvider";
 
 /*
@@ -30,7 +29,7 @@ export const placePixelCall =
     const result = await account.execute([
       {
         contractAddress: CANVAS_CONTRACT_ADDRESS,
-        entrypoint: "place_pixel",
+        entrypoint: "0x4cde3e7cce0b9bbcf08d8b891f1b35302858ffd1251226afe10443e3482114", // place_pixel
         calldata,
       },
     ]);
@@ -66,7 +65,7 @@ export const placePixelsCall =
     const result = await account.execute([
       {
         contractAddress: CANVAS_CONTRACT_ADDRESS,
-        entrypoint: "place_pixels",
+        entrypoint: "0x349d91d0c45d220dfd1b14c43caa2f54408ef08d0e0458700fb3b15d51e0173", // place_pixels
         calldata,
       },
     ]);
@@ -96,7 +95,7 @@ export const createCanvasCall =
     const result = await account.execute([
       {
         contractAddress: CANVAS_CONTRACT_ADDRESS,
-        entrypoint: "create_canvas",
+        entrypoint: "0x1aabaa11b54a06844d75d9e308d96a31f8622c675bec90b7048e6fac0d13326", // create_canvas
         calldata,
       },
     ]);
@@ -121,7 +120,7 @@ export const addStencilCall =
     const result = await account.execute([
       {
         contractAddress: CANVAS_CONTRACT_ADDRESS,
-        entrypoint: "add_stencil",
+        entrypoint: "0x280406faa355e710f583d01a21d3b1733f5b03e50693052a70121ecc4c86de6", // add_stencil
         calldata,
       },
     ]);
@@ -146,7 +145,7 @@ export const favoriteStencilCall =
     const result = await account.execute([
       {
         contractAddress: CANVAS_CONTRACT_ADDRESS,
-        entrypoint: "favorite_stencil",
+        entrypoint: "0x1ef4e50dbc45a8a37b18f14db84f51d9837fe10ff6e57b226f470c242a543e1", // favorite_stencil
         calldata,
       },
     ]);
@@ -171,7 +170,7 @@ export const unfavoriteStencilCall =
     const result = await account.execute([
       {
         contractAddress: CANVAS_CONTRACT_ADDRESS,
-        entrypoint: "unfavorite_stencil",
+        entrypoint: "0x2d6aee5967300c480128cada5d3d915945583f25faf54499c0ca9309aef5780", //unfavorite_stencil
         calldata,
       },
     ]);

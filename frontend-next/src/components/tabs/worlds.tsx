@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAccount } from "@starknet-react/core";
+import { useAccount } from "../../solana-remote-wallet/hooks";
 import { ExpandableTab } from "./expandable";
 import { backendUrl } from "../../api/api";
 import { PaginationView } from "../utils/pagination";
