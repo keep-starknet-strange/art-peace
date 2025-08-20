@@ -172,7 +172,7 @@ const Canvas = (props: any) => {
     }
     const now = Math.floor(Date.now() / 1000);
     const commitWorldId = openedWorldId;
-    const txHash = await placePixelsCall(account, openedWorldId, stagingPixels, now + 30);
+    const txHash = await placePixelsCall(account, openedWorldId, stagingPixels, now + 60);
     if (txHash && (callsCounter % checkRevertsEvery) === 0) {
       setRevertCount(0)
       didRevert(txHash);
@@ -206,7 +206,7 @@ const Canvas = (props: any) => {
       return;
     }
     const now = Math.floor(Date.now() / 1000);
-    const txHash = await placePixelsCall(account, openedWorldId, pixels, now + 30);
+    const txHash = await placePixelsCall(account, openedWorldId, pixels, now + 60);
     if (txHash && (callsCounter % checkRevertsEvery) === 0) {
       setRevertCount(0)
       didRevert(txHash);

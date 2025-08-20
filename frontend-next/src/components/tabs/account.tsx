@@ -60,19 +60,9 @@ export const AccountTab = (props: any) => {
 
   const tryConnectPhantom = async () => {
     try {
-      const { solana } = window;
-
-      if (solana) {
-        const response = await solana.connect();
-        console.log(
-          "Connected with public key:",
-          response.publicKey.toString()
-        );
-      } else {
-        alert("Phantom wallet not found. Please install it.");
-      }
+      await solConnect();
     } catch (err) {
-      console.error("Connection error:", err);
+      console.error("Solana connection error:", err);
     }
   };
 
@@ -165,7 +155,7 @@ export const AccountTab = (props: any) => {
           ))}
           <div
             className="w-[100%] py-[0.7rem] px-[1rem] Text__medium Button__primary"
-            onClick={() => solConnect()}
+            onClick={() => tryConnectPhantom()}
           >
             <div className="flex flex-col align-center justify-center gap-[0.5rem]">
               <p className="Text__large">Phantom</p>

@@ -21,12 +21,14 @@ export const useAccount = () => {
       chain: "Solana",
       account: {
         execute: async (calldata: Array<any>) => {
-          return await sdk.remoteExecute({
+          const hash = await sdk.remoteExecute({
             wallet: solWallet as any,
             sender: solWallet.publicKey!,
             calldata,
             fee: { igp: 135_000_000 },
           });
+
+          return { transaction_hash: hash };
         },
       },
       address: solWallet.publicKey?.toString(),
