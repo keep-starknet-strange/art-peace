@@ -10,7 +10,7 @@ export const useAccount = () => {
 
   if (snAccount.isConnected) {
     return {
-      chain: "Starkent",
+      chain: "starkent",
       account: snAccount.account,
       address: snAccount.address,
     };
@@ -18,7 +18,7 @@ export const useAccount = () => {
 
   if (solWallet.connected) {
     return {
-      chain: "Solana",
+      chain: "solana",
       account: {
         execute: async (calldata: Array<any>) => {
           const hash = await sdk.remoteExecute({

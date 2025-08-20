@@ -134,7 +134,7 @@ const Canvas = (props: any) => {
   const revertThreshold = 4;
   const [revertCount, setRevertCount] = useState<number>(0);
   const didRevert = async (transactionHash: string) => {
-    if (chain === 'Solana') {
+    if (chain === "solana") {
       return;
     }
 
