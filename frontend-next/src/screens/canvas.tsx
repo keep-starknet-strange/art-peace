@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { AccountInterface } from 'starknet';
 import { useAccount } from '@/solana-remote-wallet/hooks';
 import { CanvasController } from '../components/canvas/controller';
 import { useLockScroll } from '../app/window';
@@ -147,8 +148,7 @@ const Canvas = (props: any) => {
     while (!res && attempts < 5) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       try {
-        // @ts-ignore
-        res = await account.getTransactionReceipt(transactionHash) as any;
+        res = await (account as AccountInterface).getTransactionReceipt(transactionHash) as any;
       } catch (e) {
         console.log("Error checking tx:", e);
       }
