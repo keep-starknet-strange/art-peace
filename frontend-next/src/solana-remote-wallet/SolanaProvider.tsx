@@ -8,7 +8,7 @@ import { clusterApiUrl } from "@solana/web3.js";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
-import { RemoteWallet, VALUES } from "@starknet/solana-remote-wallet-sdk";
+import { RemoteWallet, VALUES } from "@danielgluskinstark/solana-remote-wallet";
 import { createContext, useContext, useMemo } from "react";
 
 type SDKContextType = {
