@@ -23,7 +23,6 @@ export const useAccount = () => {
         execute: async (calldata: Array<any>) => {
           const hash = await sdk.remoteExecute({
             wallet: solWallet as any,
-            sender: solWallet.publicKey!,
             calldata,
             fee: { igp: 135_000_000 },
           });
