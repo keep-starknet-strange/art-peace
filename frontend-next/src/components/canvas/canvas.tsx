@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAccount } from "@/solana-remote-wallet/hooks";
+import { useAccount } from "@/contract/WalletConnector";
 import { getCanvas, getCanvasColors } from "../../api/canvas";
 import { placePixelCall } from "../../contract/calls";
 import { playSoftClick, playPixelPlaced2 } from "../utils/sounds";

@@ -1,7 +1,7 @@
 import * as sn from "@starknet-react/core";
 import * as sol from "@solana/wallet-adapter-react";
-import { useRemoteSDK } from "./SolanaProvider";
 import { PhantomWalletName } from "@solana/wallet-adapter-wallets";
+import { useRemoteSDK } from "../solana-remote-wallet/SolanaProvider";
 
 export const useAccount = () => {
   const snAccount = sn.useAccount();
@@ -11,7 +11,7 @@ export const useAccount = () => {
 
   if (snAccount.isConnected) {
     return {
-      chain: "starkent",
+      chain: "starknet",
       account: snAccount.account,
       address: snAccount.address,
     };

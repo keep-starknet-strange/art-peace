@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { AccountInterface } from 'starknet';
-import { useAccount } from '@/solana-remote-wallet/hooks';
+import { useAccount } from '@/contract/WalletConnector';
 import { CanvasController } from '../components/canvas/controller';
 import { useLockScroll } from '../app/window';
 import { TabPanel } from "../components/tabs/panel";

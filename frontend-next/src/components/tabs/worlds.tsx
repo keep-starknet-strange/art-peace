@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAccount } from "@/solana-remote-wallet/hooks";
+import { useAccount } from "@/contract/WalletConnector";
 import { ExpandableTab } from "./expandable";
 import { backendUrl } from "../../api/api";
 import { PaginationView } from "../utils/pagination";

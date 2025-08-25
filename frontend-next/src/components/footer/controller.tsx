@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useEffect, useState } from "react";
-import { useAccount, useSnConnect } from "../../solana-remote-wallet/hooks";
+import { useAccount, useSnConnect } from "@/contract/WalletConnector";
 import ControllerConnector from "@cartridge/connector/controller";
 import { getCanvasColors } from "../../api/canvas";
 import bot from "../../../public/icons/bot.png";

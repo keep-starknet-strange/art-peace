@@ -6,7 +6,7 @@ import {
   useSnConnect,
   useDisconnect,
   useSolConnect,
-} from "@/solana-remote-wallet/hooks";
+} from "@/contract/WalletConnector";
 import ControllerConnector from "@cartridge/connector/controller";
 import { BasicTab } from "./basic";
 import {
