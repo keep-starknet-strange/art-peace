@@ -1,24 +1,23 @@
-import { constants } from "starknet";
-import { sepolia, mainnet, Chain } from "@starknet-react/chains";
+import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import {
-  StarknetConfig,
-  jsonRpcProvider,
-  starkscan,
-  useInjectedConnectors,
-  argent,
-  braavos,
+	StarknetConfig,
+	argent,
+	braavos,
+	jsonRpcProvider,
+	starkscan,
+	useInjectedConnectors,
 } from "@starknet-react/core";
-import { ArgentMobileConnector } from "starknetkit/argentMobile"
-import { WebWalletConnector } from "starknetkit/webwallet"
+import { constants } from "starknet";
+import { ArgentMobileConnector } from "starknetkit/argentMobile";
+import { WebWalletConnector } from "starknetkit/webwallet";
 
 import ControllerConnector from "@cartridge/connector/controller";
-import { SessionPolicies } from "@cartridge/controller";
 
 export const CANVAS_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CANVAS_CONTRACT_ADDRESS || 
 "0x011195b78f3765b1b8cfe841363e60f2335adf67af2443364d4b15cf8dff60ac"
 
 // Define session policies
-const policies: SessionPolicies = {
+const policies = {
   contracts: {
     [CANVAS_CONTRACT_ADDRESS]: {
       methods: [
