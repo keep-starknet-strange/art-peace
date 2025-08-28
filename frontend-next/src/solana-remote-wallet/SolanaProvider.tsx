@@ -15,6 +15,8 @@ type SDKContextType = {
   sdk: RemoteWallet;
 };
 
+const wallets = [new PhantomWalletAdapter()];
+
 const SolanaSDKContext = createContext<SDKContextType | undefined>(undefined);
 
 export const SolanaSDKProvider = ({
@@ -29,7 +31,6 @@ export const SolanaSDKProvider = ({
     return RemoteWallet.create(isMainnet ? VALUES.MAINNET : VALUES.SEPOLIA);
   }, []);
 
-  const wallets = [new PhantomWalletAdapter()];
   const network = clusterApiUrl(isMainnet ? "mainnet-beta" : "testnet");
 
   return (

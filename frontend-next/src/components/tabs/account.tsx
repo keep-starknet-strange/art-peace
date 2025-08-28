@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { constants } from "starknet";
 import {
   useAccount,
@@ -30,7 +30,6 @@ export const AccountTab = (props: any) => {
   const { connect, connector, connectors } = useSnConnect();
   const controller = connectors[0] as ControllerConnector;
   const { disconnect } = useDisconnect();
-
   const { solConnect } = useSolConnect();
 
   const [username, setUsername] = useState<string>("");

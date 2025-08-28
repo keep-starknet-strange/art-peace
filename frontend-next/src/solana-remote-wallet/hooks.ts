@@ -1,6 +1,7 @@
 import * as sn from "@starknet-react/core";
 import * as sol from "@solana/wallet-adapter-react";
 import { useRemoteSDK } from "./SolanaProvider";
+import { PhantomWalletName } from "@solana/wallet-adapter-wallets";
 
 export const useAccount = () => {
   const snAccount = sn.useAccount();
@@ -48,13 +49,11 @@ export const useSnConnect = () => {
 };
 
 export const useSolConnect = () => {
-  const { connect, select, wallets } = sol.useWallet();
+  const { select } = sol.useWallet();
 
   return {
     solConnect: async () => {
-      console.log(`connecting to Solana wallet: ${wallets[0].adapter.name}`);
-      select(wallets[0].adapter.name);
-      await connect();
+      select(PhantomWalletName);
     },
   };
 };
