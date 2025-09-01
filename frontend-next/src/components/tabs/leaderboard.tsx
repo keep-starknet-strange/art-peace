@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { lookupAddresses } from '@cartridge/controller';
-import { useAccount } from '@starknet-react/core';
 import { BasicTab } from "./basic";
 import { getLeaderboardPixels, getLeaderboardWorlds, getLeaderboardPixelsWorld } from "../../api/stats";
 import copyIcon from "../../../public/icons/copy.png";
@@ -9,8 +8,6 @@ import { PaginationView } from "../utils/pagination";
 import { playSoftClick2 } from "../utils/sounds";
 
 export const LeaderboardTab = (props: any) => {
-  const { address } = useAccount();
-
   const shortFormNumber = (num: number) => {
     if (num < 10000) {
       return num;

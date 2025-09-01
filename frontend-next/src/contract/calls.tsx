@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from "react";
-import { useAccount } from '@starknet-react/core'
 import { CANVAS_CONTRACT_ADDRESS } from "../components/StarknetProvider";
 
 /*

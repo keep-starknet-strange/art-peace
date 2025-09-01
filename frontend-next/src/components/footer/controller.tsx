@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useEffect, useState } from "react";
-import { useConnect, useAccount } from '@starknet-react/core'
+import { useAccount, useSnConnect } from "../../solana-remote-wallet/hooks";
 import ControllerConnector from "@cartridge/connector/controller";
 import { getCanvasColors } from "../../api/canvas";
 import bot from "../../../public/icons/bot.png";
@@ -11,7 +11,7 @@ import { playNotification, playSoftClick2 } from "../utils/sounds";
 export const GameController = (props: any) => {
   const enableAIAgent = false;
   const { address } = useAccount();
-  const { connect, connectors } = useConnect();
+  const { connect, connectors } = useSnConnect();
   const controller = connectors[0] as ControllerConnector;
 
   const [controllerText, setControllerText] = useState("XX:XX");
