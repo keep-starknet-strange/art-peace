@@ -2,7 +2,9 @@ import { backendUrl, fetchJsonData } from "./api";
 
 // const leaderboardCutoff = process.env.NEXT_PUBLIC_LEADERBOARD_CUTOFF || "0";
 // Make leaderboard cutoff UNIX timestamp of the start of today ( IE 00:00 UTC )
-const leaderboardCutoff = Math.floor(Date.now() / 1000) - (new Date().getUTCHours() * 3600 + new Date().getUTCMinutes() * 60 + new Date().getUTCSeconds());
+const leaderboardCutoff = process.env.NEXT_PUBLIC_LEADERBOARD_CUTOFF
+    ? parseInt(process.env.NEXT_PUBLIC_LEADERBOARD_CUTOFF, 10)
+    : Math.floor(Date.now() / 1000) - (new Date().getUTCHours() * 3600 + new Date().getUTCMinutes() * 60 + new Date().getUTCSeconds());
 
 export const getLeaderboardPixels = async (pageLength: number, page: number): Promise<any> => {
   try {
