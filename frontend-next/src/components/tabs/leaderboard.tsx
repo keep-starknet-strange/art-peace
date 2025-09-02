@@ -8,6 +8,10 @@ import { PaginationView } from "../utils/pagination";
 import { playSoftClick2 } from "../utils/sounds";
 
 export const LeaderboardTab = (props: any) => {
+  const getLeaderboardTitle = () => {
+    const hasCustomCutoff = process.env.NEXT_PUBLIC_LEADERBOARD_CUTOFF;
+    return hasCustomCutoff ? "Leaderboard" : "Today's Leaderboard";
+  };
   const shortFormNumber = (num: number) => {
     if (num < 10000) {
       return num;
@@ -111,7 +115,7 @@ export const LeaderboardTab = (props: any) => {
   }, [selectedOption, props.activeWorld]);
 
   return (
-    <BasicTab title="Today's Leaderboard" {...props}>
+    <BasicTab title={getLeaderboardTitle()} {...props}>
       <div className="flex flex-row justify-around align-center mt-[1rem] mb-[0.5rem] w-[90%] mx-auto bg-[#00000020] p-[3px] rounded-2xl outline outline-[rgba(0,0,0,0.15)] text-nowrap">
         <p
           className={`Text__small rounded-2xl py-[0.5rem] flex-1 text-center ${selectedOption.name === "Players" ? "outline outline-[rgba(0,0,0,0.4)] bg-[rgba(255,255,255,0.8)]" : ""} cursor-pointer`}

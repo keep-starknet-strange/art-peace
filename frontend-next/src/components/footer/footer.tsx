@@ -12,27 +12,29 @@ export const Footer = (props: any) => {
     });
   }, []);
   return (
-    <div className="absolute bottom-0 left-0 flex flex-col align-center justify-center w-full pointer-events-none">
+    <div className="fixed bottom-0 left-0 flex flex-col align-center justify-center w-full pointer-events-none">
       {enableController && (
       <GameController {...props} />
       )}
         {isMobile ? (
-          <div className="flex justify-around align-center w-[min(100rem,100vw)] mx-auto my-[1rem] mt-0">
-          {props.tabs.slice(1).map((name: string, index: number) => (
-            <button
-              key={index}
-              className={
-                `Button__primary Text__large py-[0.7rem] px-[1.5rem]` +
-                (props.activeTab === name ? "TabsFooter__tab--active " : " ")
-              }
-              onClick={() => {
-                props.setActiveTab(name);
-                playSoftClick2();
-              }}
-            >
-              {name}
-            </button>
-          ))}
+          <div className="flex justify-center items-center w-full px-2 pb-2 sm:pb-4 Footer__mobile">
+            <div className="flex justify-around items-center w-full max-w-lg gap-1">
+              {props.tabs.slice(1).map((name: string, index: number) => (
+                <button
+                  key={index}
+                  className={
+                    `Button__primary Text__small sm:Text__large flex-1 min-w-0` +
+                    (props.activeTab === name ? " TabsFooter__tab--active" : "")
+                  }
+                  onClick={() => {
+                    props.setActiveTab(name);
+                    playSoftClick2();
+                  }}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex justify-around align-center w-[min(100rem,100vw)] mx-auto my-[1rem] mt-0">
@@ -40,8 +42,8 @@ export const Footer = (props: any) => {
             <button
               key={index}
               className={
-                `Button__primary Text__large py-[0.7rem] px-[1.5rem]` +
-                (props.activeTab === name ? "TabsFooter__tab--active " : " ")
+                `Button__primary Text__large` +
+                (props.activeTab === name ? " TabsFooter__tab--active" : "")
               }
               onClick={() => {
                 props.setActiveTab(name);

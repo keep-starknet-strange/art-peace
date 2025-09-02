@@ -458,3 +458,10 @@ input[type="range"]:hover::-moz-range-thumb {
 .Text__shadow--lg {
   text-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.6);
 }
+
+/* Mobile footer safe area padding */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .Footer__mobile {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
