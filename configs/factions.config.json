@@ -111,6 +111,21 @@
       },
       "members": [
       ]
+    },
+    {
+      "id": 8,
+      "name": "CarmineOptions",
+      "icon": "$BACKEND_URL/faction-images/carmine-options.png",
+      "leader": "0x03d1525605db970fa1724693404f5f64cba8af82ec4aab514e6ebd3dec4838ad",
+      "joinable": true,
+      "allocation": 1,
+      "links": {
+        "twitter": "https://x.com/CarmineOptions",
+        "github": "https://github.com/CarmineOptions",
+        "site": "https://www.carmine.finance/"
+      },
+      "members": [
+      ]
     }
   ],
   "chain_factions": [
